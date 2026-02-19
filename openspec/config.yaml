@@ -4,17 +4,28 @@ schema: spec-driven
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
 # Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Tech stack: use described in the projectspec/01-project-tech-stack.md
+  Specification file: The specification file located in projectspec/03-project-structure.md is a markdown file that describes the application, its architecture, and the tasks to be implemented. It includes sections such as "Tech Stack", "Conventions", "Style Guides", and "Scaffold". The specification file is the source of truth for all development work.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
 # Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Always use following metodology when creating a proposal(page -> component -> hook -> service -> types)
+    - To create a page or component, always ask for the design first (can be a sketch, pen or html).
+    - Always refer to the specification file projectspec/03-project-structure.md for task details and requirements
+    - Keep proposals under 500 words
+    - Always include a "Non-goals" section
+    - Always include files to be modified or created
+    - Always include a step-by-step implementation plan
+  design:
+    - Always use following metodology when creating a design(page -> component -> hook -> service -> types)
+    - Always refer to the specification file projectspec/03-project-structure.md for task details and requirements
+    - Include architecture diagrams if applicable
+  tasks:
+    - Always use following metodology when creating a task(page -> component -> hook -> service -> types)
+    - Always the first task must be to create a new branch with name format feat/description or fix/description
+    - Second task must be valiadate that working brach are not main, master, or develop 
+    - Always refer to the specification file projectspec/03-project-structure.md for task details and requirements

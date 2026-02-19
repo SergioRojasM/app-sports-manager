@@ -1,94 +1,86 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
 
-export function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") ?? "/dashboard";
-  const { signIn, signUp, errorMessage } = useAuth();
+type LoginFormProps = {
+  nextPath: string;
+};
 
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+export function LoginForm({ nextPath }: LoginFormProps) {
+  const router = useRouter();
+  const { signIn, errorMessage } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    setSuccessMessage(null);
+    const result = await signIn({ email, password });
 
-    const action = mode === "signup" ? signUp : signIn;
-    const result = await action({ email, password });
-
-    if (!result.errorMessage) {
-      if (result.session || result.user) {
-        router.push(nextPath);
-        router.refresh();
-      } else if (mode === "signup") {
-        setSuccessMessage("Check your email to confirm your account.");
-      }
+    if (!result.errorMessage && (result.session || result.user)) {
+      router.push(nextPath);
+      router.refresh();
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="flex flex-col items-center mb-10">
-        <div className="w-12 h-12 bg-[#ea2a33] flex items-center justify-center rounded-xl shadow-lg mb-4">
-          <span className="text-white text-2xl font-bold">A</span>
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-        <p className="text-gray-500 mt-2">
-          Please enter your details to sign in.
-        </p>
+    <div>
+      <div className="mb-6 text-center md:text-left">
+        <h2 className="mb-2 text-3xl font-bold text-slate-100">
+          Login to your <span className="text-turquoise">account</span>
+        </h2>
+        <p className="text-sm text-slate-400">Welcome back! Please enter your details.</p>
       </div>
 
-      <div className="bg-white p-8 rounded-xl shadow-xl border border-gray-100">
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          {errorMessage && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {errorMessage}
-            </div>
-          )}
-          {successMessage && (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              {successMessage}
-            </div>
-          )}
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {errorMessage && (
+          <div
+            className="rounded-lg border border-red-500/60 bg-red-950/40 px-4 py-3 text-sm text-red-200"
+            role="alert"
+          >
+            {errorMessage}
+          </div>
+        )}
 
-          <div className="space-y-2">
-            <label
-              className="text-sm font-medium text-gray-700"
-              htmlFor="email"
-            >
-              Email Address
-            </label>
+        <div className="space-y-2">
+          <label className="ml-1 text-sm font-medium text-slate-300" htmlFor="email">
+            Email Address
+          </label>
+          <div className="relative">
+            <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">
+              mail
+            </span>
             <input
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ea2a33]/20 focus:border-[#ea2a33] outline-none transition-all"
+              className="w-full rounded-xl border border-slate-700 bg-navy-deep py-3 pr-4 pl-12 text-slate-200 outline-none transition-all placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/40"
               id="email"
               name="email"
-              placeholder="name@company.com"
+              placeholder="coach@qboptraining.com"
               required
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <label
-              className="text-sm font-medium text-gray-700"
-              htmlFor="password"
-            >
-              Password
-            </label>
+        <div className="space-y-2">
+          <label className="ml-1 text-sm font-medium text-slate-300" htmlFor="password">
+            Password
+          </label>
+          <div className="relative">
+            <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">
+              lock
+            </span>
             <input
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#ea2a33]/20 focus:border-[#ea2a33] outline-none transition-all"
+              className="w-full rounded-xl border border-slate-700 bg-navy-deep py-3 pr-4 pl-12 text-slate-200 outline-none transition-all placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/40"
               id="password"
               name="password"
               placeholder="••••••••"
@@ -98,34 +90,56 @@ export function LoginForm() {
               onChange={(event) => setPassword(event.target.value)}
             />
           </div>
+        </div>
 
-          <button
-            className="w-full bg-[#ea2a33] hover:bg-[#d9252e] text-white font-semibold py-3 rounded-lg shadow-md shadow-[#ea2a33]/20 transition-all active:scale-[0.98]"
-            type="submit"
-            disabled={loading}
+        <div className="flex items-center justify-between py-1">
+          <label className="group flex cursor-pointer items-center gap-2">
+            <input
+              checked={rememberMe}
+              type="checkbox"
+              className="rounded border-slate-700 bg-navy-deep text-turquoise focus:ring-turquoise"
+              onChange={(event) => setRememberMe(event.target.checked)}
+            />
+            <span className="text-sm text-slate-300 transition-colors group-hover:text-turquoise">
+              Remember me
+            </span>
+          </label>
+
+          <Link
+            className="text-sm font-medium text-turquoise transition-colors hover:text-turquoise/80"
+            href="/auth/forgot-password"
           >
-            {loading
-              ? mode === "signup"
-                ? "Creating account..."
-                : "Signing in..."
-              : mode === "signup"
-              ? "Create account"
-              : "Log in"}
-          </button>
-        </form>
+            Forgot password?
+          </Link>
+        </div>
+
+        <button
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-turquoise py-3.5 font-bold text-navy-deep shadow-lg shadow-turquoise/10 transition-all hover:bg-turquoise/90 disabled:cursor-not-allowed disabled:opacity-70"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Signing in..." : "Sign In"}
+          <span className="material-symbols-outlined text-xl">arrow_forward</span>
+        </button>
+      </form>
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-slate-800" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-navy-soft px-4 text-turquoise">Or continue with</span>
+        </div>
       </div>
 
-      <p className="text-center mt-8 text-sm text-gray-600">
-        {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-        <button
-          type="button"
-          className="font-semibold text-[#ea2a33] hover:underline underline-offset-4 decoration-2"
-          onClick={() =>
-            setMode((current) => (current === "signup" ? "signin" : "signup"))
-          }
+      <p className="text-center text-sm text-slate-400">
+        Don&apos;t have an account?
+        <Link
+          className="ml-1 font-semibold text-turquoise decoration-2 underline-offset-4 hover:underline"
+          href="/auth/signup"
         >
-          {mode === "signup" ? "Sign in" : "Sign up for free"}
-        </button>
+          Sign up
+        </Link>
       </p>
     </div>
   );

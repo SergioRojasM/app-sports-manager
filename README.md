@@ -110,26 +110,19 @@ Open [http://localhost:3000](http://localhost:3000)
 ### Login Page
 
 Navigate to `/auth/login` to access the authentication page which includes:
-- Sign in form
-- Sign up form (toggle with "Don't have an account?")
-- Email confirmation flow
-- Automatic redirect after login
+- Redesigned responsive two-panel layout (benefits panel + login card)
+- Email/password sign in form with loading and error feedback
+- Visual links for forgot password and sign up routes
+- Redirect behavior using `next` query param fallback to `/dashboard`
 
-### Sign Up Flow
-
-1. User enters email and password
-2. Click "Sign Up" (or toggle from Sign In)
-3. Supabase sends confirmation email
-4. User clicks confirmation link
-5. Redirected to `/auth/callback`
-6. Redirected to `/dashboard`
+Design reference: `projectspec/designs/login.html`
 
 ### Sign In Flow
 
 1. User enters email and password
 2. Click "Sign In"
 3. Authenticated immediately
-4. Redirected to `/dashboard`
+4. Redirected to `next` path when provided, otherwise `/dashboard`
 
 ### Protected Routes
 

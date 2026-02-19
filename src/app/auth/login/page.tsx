@@ -1,12 +1,24 @@
-import { Suspense } from "react";
+import { LoginBenefitsPanel } from "@/components/auth/LoginBenefitsPanel";
+import { LoginCard } from "@/components/auth/LoginCard";
 import { LoginForm } from "@/components/auth/LoginForm";
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams?: Promise<{
+    next?: string;
+  }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const rawNext = resolvedSearchParams?.next;
+  const nextPath = rawNext && rawNext.startsWith("/") ? rawNext : "/dashboard";
+
   return (
-    <div className="min-h-screen bg-[#f8f6f6] flex items-center justify-center p-6">
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-navy-deep md:flex-row">
+      <LoginBenefitsPanel />
+      <LoginCard>
+        <LoginForm nextPath={nextPath} />
+      </LoginCard>
     </div>
   );
 }
