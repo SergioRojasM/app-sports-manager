@@ -68,7 +68,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
               className="w-full rounded-xl border border-slate-700 bg-navy-deep py-3 pr-4 pl-12 text-slate-200 outline-none transition-all placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/40"
               id="email"
               name="email"
-              placeholder="coach@qboptraining.com"
+              placeholder="coach@gmail.com"
               required
               type="email"
               value={email}
