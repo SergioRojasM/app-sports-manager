@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign Up | qbop training</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#256af4",
+                        "turquoise": "#2dd4bf",
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#101622",
+                        "navy-deep": "#0b0f1a",
+                        "navy-card": "#182234",
+                        "navy-border": "#314368"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .turquoise-glow:focus {
+            box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.2);
+            border-color: #2dd4bf !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #314368;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 overflow-hidden">
+<div class="flex min-h-screen w-full flex-col lg:flex-row">
+<!-- Left Panel: Brand & Benefits -->
+<div class="relative hidden w-full flex-col justify-between bg-navy-deep p-12 lg:flex lg:w-1/2 overflow-y-auto custom-scrollbar">
+<!-- Background Decoration -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+<div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-primary/20 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-turquoise/10 blur-[120px] rounded-full"></div>
+</div>
+<div class="relative z-10">
+<!-- Logo -->
+<div class="flex items-center gap-3 mb-16">
+<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
+<span class="material-symbols-outlined text-2xl">rocket_launch</span>
+</div>
+<h2 class="text-2xl font-bold tracking-tight text-white">qbop training</h2>
+</div>
+<!-- Headline -->
+<h1 class="max-w-md text-5xl font-bold leading-tight text-white mb-12">
+                    Optimize Your <span class="text-turquoise">Team</span> Performance
+                </h1>
+<!-- Benefits List -->
+<div class="space-y-8 max-w-sm">
+<div class="flex items-start gap-5">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-turquoise/10 text-turquoise">
+<span class="material-symbols-outlined text-3xl">bar_chart</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-white">Analytics</h3>
+<p class="text-slate-400">Track progress in real-time with granular dashboard views.</p>
+</div>
+</div>
+<div class="flex items-start gap-5">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-turquoise/10 text-turquoise">
+<span class="material-symbols-outlined text-3xl">school</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-white">Training</h3>
+<p class="text-slate-400">Personalized learning paths tailored to individual skill gaps.</p>
+</div>
+</div>
+<div class="flex items-start gap-5">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-turquoise/10 text-turquoise">
+<span class="material-symbols-outlined text-3xl">lightbulb</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-white">Insights</h3>
+<p class="text-slate-400">Data-driven decision making powered by machine learning.</p>
+</div>
+</div>
+<div class="flex items-start gap-5">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-turquoise/10 text-turquoise">
+<span class="material-symbols-outlined text-3xl">description</span>
+</div>
+<div>
+<h3 class="text-lg font-bold text-white">Reports</h3>
+<p class="text-slate-400">Comprehensive performance audits generated automatically.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Quote or Info -->
+<div class="relative z-10 pt-12">
+<p class="text-sm text-slate-500">© 2024 qbop training. All rights reserved.</p>
+</div>
+</div>
+<!-- Right Panel: Signup Form -->
+<div class="flex w-full flex-col items-center justify-center bg-background-light p-6 dark:bg-background-dark lg:w-1/2 lg:p-12 overflow-y-auto">
+<!-- Mobile Logo -->
+<div class="mb-8 flex items-center gap-2 lg:hidden">
+<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-xl">rocket_launch</span>
+</div>
+<h2 class="text-xl font-bold dark:text-white">qbop training</h2>
+</div>
+<div class="w-full max-w-md">
+<div class="mb-10 text-center lg:text-left">
+<h2 class="text-3xl font-bold tracking-tight dark:text-white">Create Your Account</h2>
+<p class="mt-2 text-slate-600 dark:text-slate-400">Join the next generation of team optimization.</p>
+</div>
+<form class="space-y-5">
+<!-- Full Name -->
+<div class="space-y-2">
+<label class="text-sm font-medium dark:text-slate-200" for="name">Full Name</label>
+<div class="relative">
+<input class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-slate-900 focus:outline-none dark:border-navy-border dark:bg-navy-card dark:text-white turquoise-glow transition-all" id="name" placeholder="John Doe" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="text-sm font-medium dark:text-slate-200" for="email">Email Address</label>
+<div class="relative">
+<input class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-slate-900 focus:outline-none dark:border-navy-border dark:bg-navy-card dark:text-white turquoise-glow transition-all" id="email" placeholder="john@company.com" type="email"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-2">
+<label class="text-sm font-medium dark:text-slate-200" for="password">Password</label>
+<div class="relative">
+<input class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-slate-900 focus:outline-none dark:border-navy-border dark:bg-navy-card dark:text-white turquoise-glow transition-all" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-turquoise transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-2">
+<label class="text-sm font-medium dark:text-slate-200" for="confirm-password">Confirm Password</label>
+<div class="relative">
+<input class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-slate-900 focus:outline-none dark:border-navy-border dark:bg-navy-card dark:text-white turquoise-glow transition-all" id="confirm-password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Terms Checkbox -->
+<div class="flex items-center gap-3 py-2">
+<input class="h-5 w-5 rounded border-slate-300 bg-white text-turquoise focus:ring-turquoise/30 dark:border-navy-border dark:bg-navy-card" id="terms" type="checkbox"/>
+<label class="text-sm text-slate-600 dark:text-slate-400" for="terms">
+                            I agree to the <a class="text-primary hover:text-turquoise underline transition-colors" href="#">Terms of Service</a> and <a class="text-primary hover:text-turquoise underline transition-colors" href="#">Privacy Policy</a>.
+                        </label>
+</div>
+<!-- CTA Button -->
+<button class="group relative w-full overflow-hidden rounded-full bg-turquoise py-4 text-center font-bold text-navy-deep transition-all hover:scale-[1.02] active:scale-[0.98] focus:outline-none" type="submit">
+<span class="relative z-10 flex items-center justify-center gap-2">
+                            Create Account
+                            <span class="material-symbols-outlined text-xl">arrow_forward</span>
+</span>
+<div class="absolute inset-0 z-0 bg-white/10 opacity-0 transition-opacity group-hover:opacity-100"></div>
+</button>
+<!-- Login Link -->
+<p class="text-center text-slate-600 dark:text-slate-400 mt-6">
+                        Already have an account? 
+                        <a class="font-bold text-primary hover:text-turquoise transition-colors" href="#">Login</a>
+</p>
+</form>
+<!-- Social Signup Divider -->
+<div class="relative my-10">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-slate-200 dark:border-navy-border"></div>
+</div>
+<div class="relative flex justify-center text-sm">
+<span class="bg-background-light px-4 text-slate-500 dark:bg-background-dark dark:text-slate-400 uppercase tracking-widest font-semibold text-[10px]">Or continue with</span>
+</div>
+</div>
+<!-- Social Buttons -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 transition-all hover:bg-slate-50 dark:border-navy-border dark:bg-navy-card dark:hover:bg-navy-border/50">
+<img alt="" class="h-5 w-5" data-alt="Google colorful logo icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvWcHrJmC78ZV_o7_ziEAG4NiXxyNzXv4Vap6Il-ki1jBtsm3jihvXkucfG9tvEfyE_5TnaQVAL--tbo5evWPFEQd2UAAmMCFtPxd-IL8a3hO78XbsCw1x4Vrc6UHIx3-I26EyJ8IAtRn9F0ArRgrROKAKNbQVCs2oj7CK8N4yyVtkUAQWdQnyrd-61gNd-oNemnJPfxQddxI4v_T8t4hd6a9rN2FSashtbJAOXfSTF_JZr-iB2Zo7CorruTHR2RqBSr-sbXZWL3U"/>
+<span class="text-sm font-medium dark:text-white">Google</span>
+</button>
+<button class="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 transition-all hover:bg-slate-50 dark:border-navy-border dark:bg-navy-card dark:hover:bg-navy-border/50">
+<span class="material-symbols-outlined dark:text-white">account_circle</span>
+<span class="text-sm font-medium dark:text-white">SSO</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

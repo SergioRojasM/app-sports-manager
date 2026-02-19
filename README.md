@@ -30,6 +30,7 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── auth/              # Authentication pages
 │   │   ├── login/         # Login page
+│   │   ├── signup/        # Signup page
 │   │   └── callback/      # Auth callback handler
 │   └── dashboard/         # Protected dashboard
 ├── components/            # React components
@@ -116,6 +117,17 @@ Navigate to `/auth/login` to access the authentication page which includes:
 - Redirect behavior using `next` query param fallback to `/dashboard`
 
 Design reference: `projectspec/designs/login.html`
+
+### Signup Page
+
+Navigate to `/auth/signup` to create a new account with:
+- Responsive two-panel layout reusing the same left benefits panel as login
+- Email/password/confirm-password form with client-side validation
+- Supabase-backed signup via existing auth hook/service flow
+- Success handling for both email-confirmation and immediate-session modes
+- Link back to `/auth/login` for existing users
+
+Design reference: `projectspec/designs/signup.html`
 
 ### Sign In Flow
 

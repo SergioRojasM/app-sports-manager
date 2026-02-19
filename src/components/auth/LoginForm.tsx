@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
 
@@ -34,10 +35,15 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   return (
     <div>
       <div className="mb-6 text-center md:text-left">
+        <div className="mb-4 flex justify-center md:justify-start">
+          <div className="relative h-14 w-14">
+            <Image src="/logo2.png" alt="Logo de Qbop Sports Manager" fill className="object-contain" />
+          </div>
+        </div>
         <h2 className="mb-2 text-3xl font-bold text-slate-100">
-          Login to your <span className="text-turquoise">account</span>
+          Inicia sesión en tu <span className="text-turquoise">cuenta</span>
         </h2>
-        <p className="text-sm text-slate-400">Welcome back! Please enter your details.</p>
+        <p className="text-sm text-slate-400">¡Bienvenido de nuevo! Ingresa tus datos.</p>
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
@@ -52,7 +58,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
         <div className="space-y-2">
           <label className="ml-1 text-sm font-medium text-slate-300" htmlFor="email">
-            Email Address
+            Correo electrónico
           </label>
           <div className="relative">
             <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">
@@ -73,7 +79,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
         <div className="space-y-2">
           <label className="ml-1 text-sm font-medium text-slate-300" htmlFor="password">
-            Password
+            Contraseña
           </label>
           <div className="relative">
             <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-xl text-slate-500">
@@ -101,7 +107,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
               onChange={(event) => setRememberMe(event.target.checked)}
             />
             <span className="text-sm text-slate-300 transition-colors group-hover:text-turquoise">
-              Remember me
+              Recuérdame
             </span>
           </label>
 
@@ -109,7 +115,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             className="text-sm font-medium text-turquoise transition-colors hover:text-turquoise/80"
             href="/auth/forgot-password"
           >
-            Forgot password?
+            ¿Olvidaste tu contraseña?
           </Link>
         </div>
 
@@ -118,7 +124,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           type="submit"
           disabled={loading}
         >
-          {loading ? "Signing in..." : "Sign In"}
+          {loading ? "Iniciando sesión..." : "Iniciar sesión"}
           <span className="material-symbols-outlined text-xl">arrow_forward</span>
         </button>
       </form>
@@ -128,17 +134,17 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           <div className="w-full border-t border-slate-800" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-navy-soft px-4 text-turquoise">Or continue with</span>
+          <span className="bg-navy-soft px-4 text-turquoise">O continúa con</span>
         </div>
       </div>
 
       <p className="text-center text-sm text-slate-400">
-        Don&apos;t have an account?
+        ¿No tienes una cuenta?
         <Link
           className="ml-1 font-semibold text-turquoise decoration-2 underline-offset-4 hover:underline"
           href="/auth/signup"
         >
-          Sign up
+          Regístrate
         </Link>
       </p>
     </div>
