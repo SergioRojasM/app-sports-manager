@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#04888b",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f2223",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Wolfpack Hero Component</title>
+</head>
+<body class="bg-background-dark font-display antialiased text-slate-100 overflow-x-hidden">
+<section class="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/80 to-transparent z-10"></div>
+<img alt="Triathletes competing in a race" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh8IJ6UfChIFf2Ff8j-RvSCbwoL5DSDNf6n-2oPtI5588WHhrL4rvTvq3LurZQ72n_Lgjf6NSnvlY-D1XupeUudkKA47SVYnoXXwSmvAT5WxY4Mng3_NZapBNdkrsyIKUTie9y_uhwX_lUDrnid_qYYJuQy0ROpt9OG6jIiSbMZCA0C9Os45c3naiqYWLudMwvUjMF3Qgb8cZq-4lCBB5o4hOabqpKdJ3sygCYZlU38uGFXl1cmyRCgEB1DyU2djtQEBuFzI7byYWn"/>
+</div>
+<div class="relative z-20 w-full max-w-7xl mx-auto px-6 md:px-20 grid lg:grid-cols-2 gap-12 items-center">
+<div class="flex flex-col gap-8 max-w-2xl">
+<div class="flex flex-col gap-4">
+<span class="text-primary font-bold tracking-[0.2em] uppercase text-sm">Comunidad de Alto Rendimiento</span>
+<h1 class="text-white text-5xl md:text-7xl font-black leading-[1.1] tracking-tight">
+                        Entrena con la <span class="text-primary">Manada</span>
+</h1>
+<p class="text-slate-300 text-lg md:text-xl font-normal leading-relaxed max-w-lg">
+                        Únete a un equipo apasionado por el triatlón. Supera tus límites con entrenamientos personalizados, soporte técnico de élite y el apoyo incondicional de nuestra comunidad.
+                    </p>
+</div>
+<div class="flex flex-wrap gap-4">
+<button class="flex min-w-[200px] cursor-pointer items-center justify-center rounded-lg h-14 px-8 bg-primary text-white text-lg font-bold transition-all hover:scale-[1.02] hover:shadow-lg shadow-primary/20">
+                        Empieza Ahora
+                    </button>
+<button class="flex min-w-[200px] cursor-pointer items-center justify-center rounded-lg h-14 px-8 border-2 border-white/20 hover:border-white/40 text-white text-lg font-bold transition-all backdrop-blur-sm">
+                        Ver Planes
+                    </button>
+</div>
+<div class="flex items-center gap-6 pt-4">
+<div class="flex -space-x-3">
+<img alt="Member" class="w-10 h-10 rounded-full border-2 border-background-dark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCE2BBs17PbL_6Kqiqs0FXtxuFiEYeaNmQWnfWwE8B__WxK-KlWrKujzlY8xj_4F5lr8F7UlVt8VXKCaIIzTbWLY3fvxW47vZpMaGjzwgHhUP5SIVLvl1lfQLeMkoKsQHwoNA-l7r7fukDMioG560zl7trWSdejoT-SplMEbnUCCty850AbJTzR-aIE-qlJ-fvW93A-xnFMg-gRUCa7kJd1Pzb-u6jUemo2ZaFgA5slF4fcQwep0TMIt1GjFjokV7IwMTKQXz8EAqgd"/>
+<img alt="Member" class="w-10 h-10 rounded-full border-2 border-background-dark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAymzIj5YPHQ5TTlyTHwNLZhvk5njLVzjzDa1YEme9mRT5oRsG5YVDre6CYS4OmodR2kj01NTZ_Ok3hbxkbvi9mULA6t00LcO-DeNyw8F2qTm1VsR4UO68469QqbSxJGrLy5pDso7hxK6C1N2hyC-Kh7z2QosgxIcLlJnqFxh1KsYkdzYG8nJeRqVATIb0VfM0zFE39CNO-UCc_8c0s7W_Rig0hEXM0QLA6N1LZUHmIrjUU7DF9LzLrLhR2AZY7t08EwvZcVS8lWyZ"/>
+<img alt="Member" class="w-10 h-10 rounded-full border-2 border-background-dark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQLC5YxslE-GhBxXUj5unAJQox6KMHRXj2UZ-lpE-J5XxE3FMJlSdrx6YDONXHnjHQTEm6IhjVAQ5a4-WuQGOzPzyQ7SBFNKq8l5gO0u2pD-Ynt-iBDhqFMtkm9pxovPLnqkP0WNR53kurm11DqWfH8PMTnhBtqbumpxJyKk4YF3Cw8e1uzNgWJh-2W3rGormBwpBciTt_JeCQFJvmCythpTXH2fxL3w6WfeETLOMSMgxBtudbaZVrnD0qPAbF0Tqm5oCzXB46r6Hm"/>
+<div class="w-10 h-10 rounded-full border-2 border-background-dark bg-primary flex items-center justify-center text-[10px] font-bold text-white">
+                            +500
+                        </div>
+</div>
+<div class="text-slate-400 text-sm">
+<span class="text-white font-bold">+500 atletas</span> ya entrenan con nosotros
+                    </div>
+</div>
+</div>
+<div class="hidden lg:flex justify-center items-center relative">
+<div class="absolute w-[120%] h-[120%] bg-primary/10 rounded-full blur-[100px]"></div>
+<div class="relative p-12 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl">
+<div class="w-64 h-64 text-primary">
+<svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z"></path>
+</svg>
+</div>
+<div class="absolute -bottom-4 -right-4 bg-primary px-6 py-3 rounded-xl shadow-xl">
+<p class="text-white font-bold text-center leading-tight">WOLFPACK<br/><span class="text-[10px] tracking-[0.3em] font-light">EST. 2018</span></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</body></html>

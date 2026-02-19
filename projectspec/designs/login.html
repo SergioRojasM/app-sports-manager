@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>qbop training - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#256af4", // Corporate Blue
+                        "turquoise": "#00E5C4", // Requested Brand Accent
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#101622",
+                        "navy-deep": "#080c14",
+                        "navy-medium": "#161e2e",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .radial-glow {
+            background: radial-gradient(circle at center, rgba(0, 229, 196, 0.15) 0%, rgba(16, 22, 34, 0) 70%);
+        }
+        .turquoise-shadow:focus {
+            box-shadow: 0 0 15px rgba(0, 229, 196, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased min-h-screen">
+<div class="flex flex-col md:flex-row min-h-screen w-full overflow-hidden">
+<!-- Left Panel: Brand & Benefits (50%) -->
+<div class="relative w-full md:w-1/2 bg-navy-deep p-8 md:p-16 flex flex-col justify-between overflow-hidden">
+<!-- Background Radial Glow -->
+<div class="absolute inset-0 radial-glow pointer-events-none"></div>
+<!-- Content Wrapper -->
+<div class="relative z-10 flex flex-col h-full">
+<!-- Logo Section -->
+<div class="flex items-center gap-3 mb-12">
+<div class="size-10 flex items-center justify-center rounded-lg bg-turquoise/10 text-turquoise">
+<span class="material-symbols-outlined text-3xl">sports_football</span>
+</div>
+<h2 class="text-2xl font-bold tracking-tight text-slate-100">qbop training</h2>
+</div>
+<!-- Hero Text -->
+<div class="max-w-lg">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-slate-100">
+                        Optimize Your <span class="text-turquoise">Team Performance</span>
+</h1>
+<p class="text-lg text-slate-400 font-normal leading-relaxed mb-12">
+                        Streamline athlete management and unlock data-driven insights to elevate your squad's potential with our professional SaaS platform.
+                    </p>
+</div>
+<!-- Benefits List -->
+<div class="grid grid-cols-1 gap-8 max-w-md">
+<div class="flex items-start gap-4 group">
+<div class="flex-shrink-0 size-12 rounded-xl bg-slate-800/50 border border-slate-700 flex items-center justify-center text-turquoise group-hover:bg-turquoise/20 transition-colors">
+<span class="material-symbols-outlined text-2xl">monitoring</span>
+</div>
+<div>
+<h3 class="text-slate-100 font-semibold text-lg">Advanced Performance Analytics</h3>
+<p class="text-slate-500 text-sm">Deep dive into individual and team metrics.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 group">
+<div class="flex-shrink-0 size-12 rounded-xl bg-slate-800/50 border border-slate-700 flex items-center justify-center text-turquoise group-hover:bg-turquoise/20 transition-colors">
+<span class="material-symbols-outlined text-2xl">event_available</span>
+</div>
+<div>
+<h3 class="text-slate-100 font-semibold text-lg">Training Session Management</h3>
+<p class="text-slate-500 text-sm">Schedule drills and track player availability.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 group">
+<div class="flex-shrink-0 size-12 rounded-xl bg-slate-800/50 border border-slate-700 flex items-center justify-center text-turquoise group-hover:bg-turquoise/20 transition-colors">
+<span class="material-symbols-outlined text-2xl">bolt</span>
+</div>
+<div>
+<h3 class="text-slate-100 font-semibold text-lg">Real-Time Team Insights</h3>
+<p class="text-slate-500 text-sm">Instant feedback loops during active sessions.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 group">
+<div class="flex-shrink-0 size-12 rounded-xl bg-slate-800/50 border border-slate-700 flex items-center justify-center text-turquoise group-hover:bg-turquoise/20 transition-colors">
+<span class="material-symbols-outlined text-2xl">description</span>
+</div>
+<div>
+<h3 class="text-slate-100 font-semibold text-lg">Centralized Reports</h3>
+<p class="text-slate-500 text-sm">Comprehensive dashboards for every coach.</p>
+</div>
+</div>
+</div>
+<!-- Footer Info -->
+<div class="mt-auto pt-12 text-slate-600 text-xs">
+                    © 2024 qbop training Inc. All rights reserved.
+                </div>
+</div>
+</div>
+<!-- Right Panel: Login Form (50%) -->
+<div class="w-full md:w-1/2 bg-navy-medium flex items-center justify-center p-6 md:p-12">
+<div class="w-full max-w-md bg-navy-deep/40 backdrop-blur-sm border border-slate-800 p-8 md:p-10 rounded-xl shadow-2xl">
+<div class="mb-10 text-center md:text-left">
+<h2 class="text-3xl font-bold text-slate-100 mb-2">Login to your account</h2>
+<p class="text-slate-400 text-sm">Welcome back! Please enter your details.</p>
+</div>
+<form class="space-y-6">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300 ml-1" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xl">mail</span>
+<input class="w-full bg-navy-deep border-slate-700 text-slate-200 pl-12 pr-4 py-3.5 rounded-xl focus:ring-turquoise focus:border-turquoise turquoise-shadow transition-all outline-none" id="email" placeholder="coach@qboptraining.com" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300 ml-1" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xl">lock</span>
+<input class="w-full bg-navy-deep border-slate-700 text-slate-200 pl-12 pr-4 py-3.5 rounded-xl focus:ring-turquoise focus:border-turquoise turquoise-shadow transition-all outline-none" id="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Options Row -->
+<div class="flex items-center justify-between py-2">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="rounded border-slate-700 bg-navy-deep text-turquoise focus:ring-turquoise focus:ring-offset-navy-deep" type="checkbox"/>
+<span class="text-sm text-slate-400 group-hover:text-slate-200 transition-colors">Remember me</span>
+</label>
+<a class="text-sm text-turquoise hover:text-turquoise/80 font-medium transition-colors" href="#">Forgot password?</a>
+</div>
+<!-- Login Button -->
+<button class="w-full bg-turquoise hover:bg-turquoise/90 text-navy-deep font-bold py-4 rounded-xl transition-all transform active:scale-[0.98] shadow-lg shadow-turquoise/10 flex items-center justify-center gap-2" type="submit">
+                        Sign In
+                        <span class="material-symbols-outlined text-xl">arrow_forward</span>
+</button>
+</form>
+<!-- Divider -->
+<div class="relative my-10">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-slate-800"></div>
+</div>
+<div class="relative flex justify-center text-xs uppercase">
+<span class="bg-navy-medium px-4 text-slate-500">Or continue with</span>
+</div>
+</div>
+<!-- Secondary Sign Up Link -->
+<div class="text-center">
+<p class="text-slate-400 text-sm">
+                        Don't have an account? 
+                        <a class="text-turquoise font-semibold hover:underline decoration-2 underline-offset-4 ml-1" href="#">Sign up</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+</body></html>

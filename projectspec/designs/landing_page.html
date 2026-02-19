@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>qbop training | Elevando el Rendimiento Deportivo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#45AAF2",
+                        "accent-teal": "#00D2D3",
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#050d1a",
+                        "card-dark": "#0c1829",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .bg-brand-gradient {
+                background: linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%);
+            }
+            .text-brand-gradient {
+                background: linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .border-brand-gradient {
+                border-image: linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%) 1;
+            }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .brand-glow:hover {
+            box-shadow: 0 0 20px rgba(0, 210, 211, 0.4);
+        }
+        .ticker {
+            display: flex;
+            width: fit-content;
+            animation: scroll 30s linear infinite;
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 selection:bg-accent-teal selection:text-white">
+<nav class="sticky top-0 z-50 w-full glass border-b border-white/10 px-6 py-4">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="size-8 bg-brand-gradient flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-white font-bold">exercise</span>
+</div>
+<h2 class="text-white text-xl font-black tracking-tighter italic">qbop training</h2>
+</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="text-white/70 hover:text-accent-teal text-sm font-medium transition-colors" href="#">Funciones</a>
+<a class="text-white/70 hover:text-accent-teal text-sm font-medium transition-colors" href="#">Planes</a>
+<a class="text-white/70 hover:text-accent-teal text-sm font-medium transition-colors" href="#">Comunidad</a>
+<a class="text-white/70 hover:text-accent-teal text-sm font-medium transition-colors" href="#">Empresa</a>
+</div>
+<button class="bg-brand-gradient text-white px-6 py-2.5 rounded-full text-sm font-bold tracking-tight hover:scale-105 transition-transform">
+            Comenzar ahora
+        </button>
+</div>
+</nav>
+<section class="relative overflow-hidden pt-20 pb-32">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/10 blur-[120px] rounded-full -z-10"></div>
+<div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+<div class="flex flex-col gap-8">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 w-fit">
+<span class="flex h-2 w-2 rounded-full bg-accent-teal"></span>
+<span class="text-xs font-medium text-white/80 uppercase tracking-widest">Novedad: Modo Táctico 2.0</span>
+</div>
+<h1 class="text-white text-5xl md:text-7xl font-black leading-[1.1] tracking-tight">
+                Eleva el <span class="text-brand-gradient italic">rendimiento</span> de tu equipo
+            </h1>
+<p class="text-slate-400 text-lg md:text-xl leading-relaxed max-w-lg">
+                La plataforma definitiva para la gestión profesional de equipos deportivos. Centraliza entrenamientos, comunicación y estadísticas en un solo lugar.
+            </p>
+<div class="flex flex-wrap gap-4">
+<button class="bg-brand-gradient text-white px-8 py-4 rounded-full text-lg font-bold brand-glow transition-all flex items-center gap-2">
+                    Comenzar ahora
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<button class="glass text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-white/10 transition-all">
+                    Ver Demo
+                </button>
+</div>
+</div>
+<div class="relative flex justify-center lg:justify-end">
+<div class="rounded-2xl border border-white/10 bg-slate-900/50 p-2 shadow-2xl overflow-hidden glass max-w-2xl w-full">
+<div class="w-full bg-center bg-no-repeat aspect-[16/10] bg-cover rounded-xl" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDEKqO66Ce9oKr8Xm0wM_K9AJEa5jfIpjZW-ymimzk1Q_S81UJYPs1pfmZHzVU3h70NygkRPWe00iYkIRgPxXKcNDyHQ0npz08o8azF2TzrSenoJY3J1w9BoEB_iqBSmkBvLtqYi7lCABIm6q_NA_qvhm8X4SyJINhH37VNVfYaavCCT9QzO87BSkztHDLo81wf7iMAxisTA-qYYS0AISxoXOLqW7l3RlIoTvGE-GsgaVLReHK0tiHq-s_D2TXP4HZ-SYYkES_sI6s");'>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-12 border-y border-white/5 bg-white/[0.02]">
+<p class="text-center text-slate-500 text-xs font-bold uppercase tracking-[0.3em] mb-10">Confían en nuestra tecnología</p>
+<div class="overflow-hidden whitespace-nowrap relative">
+<div class="ticker gap-16 md:gap-32 items-center opacity-30 grayscale contrast-125">
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">Manchester City</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">L.A. Lakers</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">Bulls</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">F.C. Barcelona</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">Real Madrid</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">All Blacks</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">Manchester City</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">L.A. Lakers</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">Bulls</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">F.C. Barcelona</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">Real Madrid</h3>
+<h3 class="text-3xl font-black text-white px-4 italic uppercase">All Blacks</h3>
+</div>
+</div>
+</section>
+<section class="py-24 max-w-7xl mx-auto px-6">
+<div class="mb-16">
+<h2 class="text-white text-4xl font-black tracking-tight mb-4">Gestión de alto rendimiento</h2>
+<div class="h-1 w-20 bg-brand-gradient rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="p-8 rounded-2xl bg-card-dark border border-white/5 hover:border-accent-teal/30 transition-all group">
+<div class="size-12 rounded-xl bg-accent-teal/10 flex items-center justify-center text-accent-teal mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">sports_score</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">Training Management</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Planificación de sesiones y ejercicios tácticos avanzados con visualización 3D.</p>
+</div>
+<div class="p-8 rounded-2xl bg-card-dark border border-white/5 hover:border-accent-teal/30 transition-all group">
+<div class="size-12 rounded-xl bg-accent-teal/10 flex items-center justify-center text-accent-teal mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">chat_bubble</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">Player Communication</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Canales directos encriptados para feedback instantáneo entre staff y jugadores.</p>
+</div>
+<div class="p-8 rounded-2xl bg-card-dark border border-white/5 hover:border-accent-teal/30 transition-all group">
+<div class="size-12 rounded-xl bg-accent-teal/10 flex items-center justify-center text-accent-teal mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">monitoring</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">Real-time Stats</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Captura de datos biométricos y rendimiento técnico durante cada sesión de juego.</p>
+</div>
+<div class="p-8 rounded-2xl bg-card-dark border border-white/5 hover:border-accent-teal/30 transition-all group">
+<div class="size-12 rounded-xl bg-accent-teal/10 flex items-center justify-center text-accent-teal mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">payments</span>
+</div>
+<h3 class="text-white text-xl font-bold mb-3">Payment Calendar</h3>
+<p class="text-slate-400 text-sm leading-relaxed">Automatización de cuotas, membresías y finanzas del club integradas en la nube.</p>
+</div>
+</div>
+</section>
+<section class="py-24 bg-white/[0.02]">
+<div class="max-w-7xl mx-auto px-6">
+<div class="grid grid-cols-12 gap-6">
+<div class="col-span-12 lg:col-span-8 h-[400px] glass rounded-3xl p-8 relative overflow-hidden group">
+<div class="relative z-10 max-w-sm">
+<h4 class="text-white text-2xl font-black mb-2">Análisis Predictivo</h4>
+<p class="text-slate-400">Algoritmos de IA que predicen la fatiga y el riesgo de lesiones de tus atletas.</p>
+</div>
+<div class="absolute bottom-0 right-0 w-[60%] h-[80%] bg-center bg-cover rounded-tl-3xl border-t border-l border-white/10" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDoMqpjYhE0EKIGJudqHdLJbij6Ja8t0qdXyWPTBPGaRZyIUMmMHjAG-yOWq0A9hg4ukAvXNqlRQgkz8qG0DKnj7KrZrIvZ7aENMjN4TmcQWMxfZvUD5whpTneOTJXkZsRSdgD6Tv-y8wHapQWTb5jhBnP7dOX5lWCyY4XMpwvJ7N71PkXtc7NNwqmlABm-7GI29k498S3jeXZOdIQhve5eF0rAe70g04g-Vzy6yw9bgHRyZ_vvLSBzsRk7RcJ6e_Xxbck9r12ohmc");'>
+</div>
+</div>
+<div class="col-span-12 md:col-span-6 lg:col-span-4 h-[400px] bg-brand-gradient rounded-3xl p-8 relative overflow-hidden">
+<h4 class="text-white text-2xl font-black mb-2 italic">Perfiles Pro</h4>
+<p class="text-white/80 mb-8">Fichas técnicas completas por cada jugador.</p>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-4 bg-white/20 p-3 rounded-2xl backdrop-blur-md">
+<div class="size-10 rounded-full bg-slate-300"></div>
+<div>
+<p class="text-white font-bold text-sm">Marc Stephens</p>
+<p class="text-white/60 text-xs">Delantero • Nivel 92</p>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-white/20 p-3 rounded-2xl backdrop-blur-md opacity-60 scale-95 translate-x-4">
+<div class="size-10 rounded-full bg-slate-300"></div>
+<div>
+<p class="text-white font-bold text-sm">Elena Rodriguez</p>
+<p class="text-white/60 text-xs">Defensa • Nivel 88</p>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined absolute bottom-[-40px] right-[-20px] text-[180px] text-white/10 select-none">person</span>
+</div>
+<div class="col-span-12 md:col-span-6 lg:col-span-4 h-[300px] glass rounded-3xl p-8 overflow-hidden group">
+<div class="size-10 rounded-full bg-accent-teal/20 flex items-center justify-center text-accent-teal mb-4">
+<span class="material-symbols-outlined">tactic</span>
+</div>
+<h4 class="text-white text-xl font-bold mb-2">Pizarra Táctica</h4>
+<p class="text-slate-400 text-sm">Diseña jugadas en tiempo real y compártelas con el equipo.</p>
+<div class="mt-6 border-2 border-white/5 rounded-xl h-24 bg-blue-900/30 flex items-center justify-center">
+<div class="w-full h-full opacity-20 bg-[radial-gradient(circle,white_1px,transparent_1px)] bg-[size:10px_10px]"></div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-8 h-[300px] bg-card-dark rounded-3xl p-8 flex items-center gap-10 overflow-hidden relative border border-white/5">
+<div class="flex-1">
+<h4 class="text-white text-2xl font-black mb-2">Red Global de Scouting</h4>
+<p class="text-slate-400">Conecta con ojeadores internacionales y exporta reportes de rendimiento certificados.</p>
+<div class="mt-6 flex gap-2">
+<div class="size-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px]">US</div>
+<div class="size-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px]">ES</div>
+<div class="size-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-[10px]">UK</div>
+<div class="size-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px]">+40</div>
+</div>
+</div>
+<div class="hidden md:block w-1/2 h-full bg-center bg-cover opacity-50 absolute right-0 top-0" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBgzrf10DRV4U-CFa81O9T96ugy5_hAILdHxAmTL6cSOqs34kj10eFT5tOTy13tlnRiDhO0lcDH-bm_RopNSMoGjtymZ2OFFkH_eyE4PJY76VxzhJHHX78Q6twQKTAce1mOJ5Z0vqFbEnQauWh8DCtd1PeL-W0QTxIzSYsYRhjBESnFrQMJQ4kzNrL_N6fg92TVpqHV0iCbx7At08aHtCxA42XsSk4jL8WpOcF6hhJsU__dvmhpplhU4CKoDejA4FHYhKvWZBFvSIc");'>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-32 max-w-7xl mx-auto px-6">
+<div class="text-center mb-20">
+<h2 class="text-white text-4xl md:text-5xl font-black tracking-tight mb-4 uppercase">Planes para cada nivel</h2>
+<p class="text-slate-400">Escala tus herramientas según el crecimiento de tu club.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+<div class="p-10 rounded-3xl bg-card-dark border border-white/5 flex flex-col h-full">
+<h3 class="text-white text-xl font-bold mb-2">Básico</h3>
+<p class="text-slate-500 text-sm mb-8">Ideal para equipos locales y startups deportivas.</p>
+<div class="mb-8">
+<span class="text-white text-4xl font-black">$29</span>
+<span class="text-slate-500">/mes</span>
+</div>
+<ul class="flex flex-col gap-4 mb-10 flex-grow">
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Gestión de hasta 20 jugadores
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Calendario básico
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Chat de equipo
+                </li>
+</ul>
+<button class="w-full py-4 rounded-full border border-white/10 text-white font-bold hover:bg-white/5 transition-all">Seleccionar</button>
+</div>
+<div class="p-10 rounded-3xl bg-slate-900 border-2 border-transparent bg-clip-border flex flex-col relative scale-105 shadow-[0_0_40px_rgba(0,210,211,0.15)] h-full" style="border-image: linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%) 1;">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-gradient text-white text-[10px] font-black uppercase tracking-tighter px-4 py-1 rounded-full">Más popular</div>
+<h3 class="text-white text-xl font-bold mb-2">Pro</h3>
+<p class="text-slate-500 text-sm mb-8">Gestión avanzada para clubes profesionales.</p>
+<div class="mb-8">
+<span class="text-white text-4xl font-black">$79</span>
+<span class="text-slate-500">/mes</span>
+</div>
+<ul class="flex flex-col gap-4 mb-10 flex-grow">
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Jugadores ilimitados
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Estadísticas en tiempo real
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Módulo de prevención de lesiones
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Video análisis integrado
+                </li>
+</ul>
+<button class="w-full py-4 rounded-full bg-brand-gradient text-white font-bold hover:scale-[1.02] transition-all">Seleccionar Pro</button>
+</div>
+<div class="p-10 rounded-3xl bg-card-dark border border-white/5 flex flex-col h-full">
+<h3 class="text-white text-xl font-bold mb-2">Elite</h3>
+<p class="text-slate-500 text-sm mb-8">Para federaciones y organizaciones nacionales.</p>
+<div class="mb-8">
+<span class="text-white text-4xl font-black">$199</span>
+<span class="text-slate-500">/mes</span>
+</div>
+<ul class="flex flex-col gap-4 mb-10 flex-grow">
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Todo lo de Pro
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Marca blanca (Custom App)
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    API y Webhooks
+                </li>
+<li class="flex items-center gap-3 text-slate-300 text-sm">
+<span class="material-symbols-outlined text-accent-teal text-sm">check_circle</span>
+                    Soporte 24/7 dedicado
+                </li>
+</ul>
+<button class="w-full py-4 rounded-full border border-white/10 text-white font-bold hover:bg-white/5 transition-all">Contactar</button>
+</div>
+</div>
+</section>
+<footer class="bg-black py-20 border-t border-white/5">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+<div class="col-span-1 md:col-span-1 flex flex-col gap-6">
+<div class="flex items-center gap-2">
+<div class="size-6 bg-brand-gradient flex items-center justify-center rounded-sm">
+<span class="material-symbols-outlined text-white text-xs font-bold">exercise</span>
+</div>
+<h2 class="text-white text-lg font-black italic">qbop training</h2>
+</div>
+<p class="text-slate-500 text-sm leading-relaxed">
+                Transformando el ADN de los equipos deportivos a través de datos y tecnología de élite.
+            </p>
+<div class="flex gap-4">
+<a class="size-10 rounded-full glass flex items-center justify-center text-white/60 hover:text-accent-teal transition-colors" href="#">
+<span class="material-symbols-outlined">public</span>
+</a>
+<a class="size-10 rounded-full glass flex items-center justify-center text-white/60 hover:text-accent-teal transition-colors" href="#">
+<span class="material-symbols-outlined">video_library</span>
+</a>
+<a class="size-10 rounded-full glass flex items-center justify-center text-white/60 hover:text-accent-teal transition-colors" href="#">
+<span class="material-symbols-outlined">alternate_email</span>
+</a>
+</div>
+</div>
+<div>
+<h4 class="text-white font-bold mb-6">Producto</h4>
+<ul class="flex flex-col gap-4 text-slate-500 text-sm">
+<li><a class="hover:text-white transition-colors" href="#">Funcionalidades</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Casos de éxito</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Precios</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Seguridad</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-white font-bold mb-6">Compañía</h4>
+<ul class="flex flex-col gap-4 text-slate-500 text-sm">
+<li><a class="hover:text-white transition-colors" href="#">Sobre nosotros</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Carreras</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Prensa</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Contacto</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-white font-bold mb-6">Suscríbete al Newsletter</h4>
+<p class="text-slate-500 text-sm mb-4">Recibe consejos tácticos y actualizaciones de producto.</p>
+<form class="flex flex-col gap-3">
+<input class="bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-sm text-white focus:border-accent-teal focus:ring-0" placeholder="tu@email.com" type="email"/>
+<button class="bg-brand-gradient text-white font-bold py-2.5 rounded-full text-sm brand-glow transition-colors">Suscribirse</button>
+</form>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="text-slate-600 text-xs">© 2024 qbop training Inc. Todos los derechos reservados.</p>
+<div class="flex gap-6 text-slate-600 text-xs">
+<a class="hover:text-white" href="#">Privacidad</a>
+<a class="hover:text-white" href="#">Términos</a>
+<a class="hover:text-white" href="#">Cookies</a>
+</div>
+</div>
+</footer>
+
+</body></html>
