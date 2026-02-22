@@ -24,6 +24,47 @@ Production-ready Next.js boilerplate with authentication, TypeScript, Tailwind C
 - ✅ Custom `useAuth` hook
 - ✅ Server & client-side auth utilities
 
+### Portal Dashboard
+- ✅ Shared layout under `/portal` — sidebar + fixed header + content area
+- ✅ Role-based sidebar navigation (admin / athlete / coach)
+- ✅ Fixed header with notifications icon and avatar dropdown (Profile / Logout)
+- ✅ Route protection — unauthenticated requests redirect to `/auth/login?next=...`
+- ✅ Role cached in httpOnly cookie (`portal_role`) after login — no DB query per navigation
+
+#### Portal Routes
+
+| Route | Access |
+|---|---|
+| `/portal` | All authenticated users |
+| `/portal/gestion-organizacion` | admin |
+| `/portal/gestion-escenarios` | admin |
+| `/portal/gestion-entrenamientos` | admin, coach |
+| `/portal/perfil` | athlete, coach |
+| `/portal/entrenamientos-disponibles` | athlete |
+| `/portal/atletas` | coach |
+
+#### Role-Based Menu Matrix
+
+| Menu item | admin | athlete | coach |
+|---|:---:|:---:|:---:|
+| Gestión de Organización | ✅ | — | — |
+| Gestión de Escenarios | ✅ | — | — |
+| Gestión de Entrenamientos | ✅ | — | ✅ |
+| Perfil | — | ✅ | ✅ |
+| Entrenamientos Disponibles | — | ✅ | — |
+| Atletas | — | — | ✅ |
+
+#### Cookie Lifecycle (`portal_role` + `portal_profile`)
+
+| Event | Action |
+|---|---|
+| Successful login | Cookies written by `setPortalCookies()` Server Action |
+| Portal navigation | Layout reads from cookie — **no DB query** |
+| Cookie missing / invalid | Layout falls back to DB query and restores cookie |
+| Logout | Cookies cleared with `maxAge: 0` |
+
+Both cookies: `httpOnly`, `sameSite: lax`, `secure` in production, `path: /portal`, TTL 24 h.
+
 ### Project Structure
 ```
 src/

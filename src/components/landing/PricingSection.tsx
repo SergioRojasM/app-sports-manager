@@ -58,12 +58,12 @@ export default function PricingSection() {
             key={index}
             className={`p-10 rounded-3xl flex flex-col h-full ${
               plan.popular
-                ? 'bg-slate-900 border-2 border-transparent bg-clip-border relative scale-105 shadow-[0_0_40px_rgba(0,210,211,0.15)]'
+                ? 'bg-navy-medium border-2 border-transparent bg-clip-border relative scale-105 shadow-[0_0_40px_rgba(0,229,196,0.15)]'
                 : 'bg-card-dark border border-white/5'
             }`}
             style={
               plan.popular
-                ? { borderImage: 'linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%) 1' }
+                ? { borderImage: 'linear-gradient(135deg, #00e5c4 0%, #00b8a9 100%) 1' }
                 : undefined
             }
           >

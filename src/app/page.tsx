@@ -8,7 +8,7 @@ import Footer from '@/components/landing/Footer';
 
 export default function Home() {
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 selection:bg-accent-teal selection:text-white">
+    <div className="bg-navy-deep font-display text-slate-100 selection:bg-turquoise selection:text-navy-deep">
       <Header />
       <HeroSection />
       <TrustedBySection />

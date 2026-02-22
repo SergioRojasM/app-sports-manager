@@ -11,7 +11,7 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resolvedSearchParams = await searchParams;
   const rawNext = resolvedSearchParams?.next;
-  const nextPath = rawNext && rawNext.startsWith("/") ? rawNext : "/dashboard";
+  const nextPath = rawNext && rawNext.startsWith("/") ? rawNext : "/portal";
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-navy-deep md:flex-row">

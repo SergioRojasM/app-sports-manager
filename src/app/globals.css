@@ -29,6 +29,12 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Portal sidebar active nav item */
+.sidebar-item-active {
+  background: linear-gradient(90deg, rgba(0, 229, 196, 0.15) 0%, rgba(22, 30, 46, 0) 100%);
+  border-left: 3px solid #00e5c4;
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-style: normal;
@@ -47,18 +53,18 @@ body {
 /* Custom Tailwind Utilities for Landing Page */
 @layer utilities {
   .bg-brand-gradient {
-    background: linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%);
+    background: linear-gradient(135deg, #00e5c4 0%, #00b8a9 100%);
   }
 
   .text-brand-gradient {
-    background: linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%);
+    background: linear-gradient(135deg, #00e5c4 0%, #00b8a9 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .border-brand-gradient {
-    border-image: linear-gradient(135deg, #00D2D3 0%, #45AAF2 100%) 1;
+    border-image: linear-gradient(135deg, #00e5c4 0%, #00b8a9 100%) 1;
   }
 }
 
@@ -69,7 +75,7 @@ body {
 }
 
 .brand-glow:hover {
-  box-shadow: 0 0 20px rgba(0, 210, 211, 0.4);
+  box-shadow: 0 0 20px rgba(0, 229, 196, 0.4);
 }
 
 /* Ticker Animation */
