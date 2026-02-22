@@ -43,3 +43,12 @@ next-env.d.ts
 
 .DS_Store
 *.log
+
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
