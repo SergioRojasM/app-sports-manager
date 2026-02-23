@@ -1,11 +1,9 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/services/supabase/server';
-import { portalService } from '@/services/supabase/portal';
 import { PortalHeader } from '@/components/portal/PortalHeader';
 import type { UserRole, PortalDisplayProfile } from '@/types/portal.types';
 import { VALID_ROLES } from '@/types/portal.types';
-import { setPortalCookies } from '@/app/actions/portal.actions';
 
 export default async function PortalLayout({
   children,
@@ -38,27 +36,10 @@ export default async function PortalLayout({
         Buffer.from(profileCookie, 'base64').toString('utf-8'),
       ) as PortalDisplayProfile;
     } catch {
-      // Malformed profile cookie — fall back via service
-      role = await portalService.fetchUserRole(supabase, user.id);
-      displayProfile = await portalService.fetchDisplayProfile(supabase, user.id);
-      await setPortalCookies(role, displayProfile);
+      redirect('/portal/bootstrap?next=/portal');
     }
   } else {
-    // Fallback: fetch full profile via service and restore cookies
-    let profile;
-    try {
-      profile = await portalService.fetchFullProfile(supabase, user.id);
-    } catch {
-      redirect('/auth/login');
-    }
-    role = profile.role;
-    displayProfile = {
-      nombre: profile.nombre,
-      apellido: profile.apellido,
-      email: profile.email,
-      foto_url: profile.foto_url,
-    };
-    await setPortalCookies(role, displayProfile);
+    redirect('/portal/bootstrap?next=/portal');
   }
 
   return (

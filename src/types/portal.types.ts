@@ -27,9 +27,9 @@ export type UserProfile = PortalDisplayProfile & {
 
 export const ROLE_MENU_CONFIG: Record<UserRole, MenuItem[]> = {
   administrador: [
-    { label: 'Gestión de Organización', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
-    { label: 'Gestión de Escenarios', href: '/portal/gestion-escenarios', icon: 'stadium' },
-    { label: 'Gestión de Entrenamientos', href: '/portal/gestion-entrenamientos', icon: 'fitness_center' },
+    { label: 'Organización', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
+    { label: 'Escenarios', href: '/portal/gestion-escenarios', icon: 'stadium' },
+    { label: 'Entrenamientos', href: '/portal/gestion-entrenamientos', icon: 'fitness_center' },
   ],
   atleta: [
     { label: 'Perfil', href: '/portal/perfil', icon: 'person' },
@@ -37,7 +37,7 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItem[]> = {
   ],
   entrenador: [
     { label: 'Perfil', href: '/portal/perfil', icon: 'person' },
-    { label: 'Gestión de Entrenamientos', href: '/portal/gestion-entrenamientos', icon: 'fitness_center' },
+    { label: 'Entrenamientos', href: '/portal/gestion-entrenamientos', icon: 'fitness_center' },
     { label: 'Atletas', href: '/portal/atletas', icon: 'groups' },
   ],
 };

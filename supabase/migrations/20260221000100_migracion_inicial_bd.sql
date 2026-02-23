@@ -14,18 +14,24 @@ create extension if not exists pgcrypto;
 create table if not exists public.tenants (
   id uuid primary key default gen_random_uuid(),
   nombre varchar(50) not null unique,
-  descripcion text
+  fecha_creacion date,
+  email varchar(255) unique,
+  telefono varchar(20),
+  instagram_url varchar(500),
+  facebook_url varchar(500),
+  x_url varchar(500),
+  web_url varchar(500),
+  logo_url varchar(500),
+  descripcion text,
+  created_at timestamptz not null default timezone('utc', now())
 );
 
 create table if not exists public.roles (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null,
   nombre varchar(50) not null,
   descripcion text,
   created_at timestamptz not null default timezone('utc', now()),
-  constraint roles_tenant_id_fkey
-    foreign key (tenant_id) references public.tenants(id) on delete cascade,
-  constraint roles_tenant_nombre_uk unique (tenant_id, nombre)
+  constraint roles_nombre_uk unique (nombre)
 );
 
 create table if not exists public.usuarios (
@@ -35,6 +41,7 @@ create table if not exists public.usuarios (
   nombre varchar(100),
   apellido varchar(100),
   telefono varchar(20),
+  fecha_nacimiento date,
   foto_url varchar(500),
   rol_id uuid,
   activo boolean not null default true,
@@ -53,7 +60,6 @@ create table if not exists public.miembros_tenant (
   usuario_id uuid not null,
   nombre varchar(50) unique,
   descripcion text,
-  created_at timestamptz not null default timezone('utc', now()),
   constraint miembros_tenant_tenant_id_fkey
     foreign key (tenant_id) references public.tenants(id) on delete cascade,
   constraint miembros_tenant_usuario_id_fkey
@@ -61,94 +67,19 @@ create table if not exists public.miembros_tenant (
   constraint miembros_tenant_tenant_usuario_uk unique (tenant_id, usuario_id)
 );
 
-create table if not exists public.sport_profile (
+create table if not exists public.perfil_deportivo (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null,
   peso_kg numeric(3,2),
   altura_cm numeric(3,1),
   created_at timestamptz not null default timezone('utc', now()),
-  constraint sport_profile_user_id_fkey
+  constraint perfil_deportivo_user_id_fkey
     foreign key (user_id) references public.usuarios(id) on delete cascade,
-  constraint sport_profile_user_id_uk unique (user_id)
+  constraint perfil_deportivo_user_id_uk unique (user_id)
 );
 
-create or replace function public.handle_new_auth_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_tenant_id uuid;
-  v_rol_id uuid;
-begin
-  v_tenant_id := nullif(new.raw_user_meta_data ->> 'tenant_id', '')::uuid;
-  v_rol_id := nullif(new.raw_user_meta_data ->> 'rol_id', '')::uuid;
 
-  if v_tenant_id is null then
-    select t.id
-      into v_tenant_id
-    from public.tenants t
-    where lower(t.nombre) = 'public'
-    limit 1;
-  end if;
 
-  if v_tenant_id is null then
-    raise exception 'No existe tenant por defecto con nombre public para el usuario auth %', new.id;
-  end if;
-
-  if v_rol_id is null then
-    select r.id
-      into v_rol_id
-    from public.roles r
-    where r.tenant_id = v_tenant_id
-      and lower(r.nombre) = 'atleta'
-    limit 1;
-  end if;
-
-  insert into public.usuarios (
-    id,
-    tenant_id,
-    email,
-    nombre,
-    apellido,
-    telefono,
-    foto_url,
-    rol_id,
-    activo,
-    created_at
-  )
-  values (
-    new.id,
-    v_tenant_id,
-    new.email,
-    nullif(new.raw_user_meta_data ->> 'nombre', ''),
-    nullif(new.raw_user_meta_data ->> 'apellido', ''),
-    nullif(new.raw_user_meta_data ->> 'telefono', ''),
-    nullif(new.raw_user_meta_data ->> 'foto_url', ''),
-    v_rol_id,
-    true,
-    coalesce(new.created_at, timezone('utc', now()))
-  )
-  on conflict (id) do update
-  set
-    tenant_id = excluded.tenant_id,
-    email = excluded.email,
-    nombre = coalesce(excluded.nombre, public.usuarios.nombre),
-    apellido = coalesce(excluded.apellido, public.usuarios.apellido),
-    telefono = coalesce(excluded.telefono, public.usuarios.telefono),
-    foto_url = coalesce(excluded.foto_url, public.usuarios.foto_url),
-    rol_id = coalesce(excluded.rol_id, public.usuarios.rol_id),
-    activo = true;
-
-  return new;
-end;
-$$;
-
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute function public.handle_new_auth_user();
 
 -- =========================
 -- INFRAESTRUCTURA / CATÁLOGOS
@@ -383,7 +314,7 @@ create table if not exists public.notificaciones (
 
 create index if not exists idx_usuarios_tenant_id on public.usuarios (tenant_id);
 create index if not exists idx_usuarios_rol_id on public.usuarios (rol_id);
-create index if not exists idx_sport_profile_user_id on public.sport_profile (user_id);
+create index if not exists idx_perfil_deportivo_user_id on public.perfil_deportivo (user_id);
 create index if not exists idx_escenarios_tenant_id on public.escenarios (tenant_id);
 create index if not exists idx_disciplinas_tenant_id on public.disciplinas (tenant_id);
 create index if not exists idx_horarios_escenarios_escenario_id on public.horarios_escenarios (escenario_id);
@@ -420,7 +351,7 @@ alter table public.tenants enable row level security;
 alter table public.roles enable row level security;
 alter table public.usuarios enable row level security;
 alter table public.miembros_tenant enable row level security;
-alter table public.sport_profile enable row level security;
+alter table public.perfil_deportivo enable row level security;
 alter table public.escenarios enable row level security;
 alter table public.horarios_escenarios enable row level security;
 alter table public.disciplinas enable row level security;
@@ -439,7 +370,7 @@ grant select on table
   public.roles,
   public.usuarios,
   public.miembros_tenant,
-  public.sport_profile,
+  public.perfil_deportivo,
   public.escenarios,
   public.horarios_escenarios,
   public.disciplinas,
@@ -474,8 +405,8 @@ create policy miembros_tenant_select_authenticated on public.miembros_tenant
   for select to authenticated
   using (true);
 
-drop policy if exists sport_profile_select_authenticated on public.sport_profile;
-create policy sport_profile_select_authenticated on public.sport_profile
+drop policy if exists perfil_deportivo_select_authenticated on public.perfil_deportivo;
+create policy perfil_deportivo_select_authenticated on public.perfil_deportivo
   for select to authenticated
   using (true);
 
@@ -562,7 +493,7 @@ drop policy if exists entrenamientos_select_authenticated on public.entrenamient
 drop policy if exists disciplinas_select_authenticated on public.disciplinas;
 drop policy if exists horarios_escenarios_select_authenticated on public.horarios_escenarios;
 drop policy if exists escenarios_select_authenticated on public.escenarios;
-drop policy if exists sport_profile_select_authenticated on public.sport_profile;
+drop policy if exists perfil_deportivo_select_authenticated on public.perfil_deportivo;
 drop policy if exists miembros_tenant_select_authenticated on public.miembros_tenant;
 drop policy if exists usuarios_select_authenticated on public.usuarios;
 drop policy if exists roles_select_authenticated on public.roles;
@@ -584,7 +515,7 @@ drop table if exists public.entrenamientos;
 drop table if exists public.horarios_escenarios;
 drop table if exists public.escenarios;
 drop table if exists public.disciplinas;
-drop table if exists public.sport_profile;
+drop table if exists public.perfil_deportivo;
 drop table if exists public.miembros_tenant;
 drop table if exists public.usuarios;
 drop table if exists public.roles;

@@ -6,6 +6,10 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard";
 
+  const destination = next.startsWith("/portal")
+    ? `/portal/bootstrap?next=${encodeURIComponent(next)}`
+    : next;
+
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -15,14 +19,14 @@ export async function GET(request: NextRequest) {
       const isLocalEnv = process.env.NODE_ENV === "development";
 
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${destination}`);
       }
 
       if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(`https://${forwardedHost}${destination}`);
       }
 
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${origin}${destination}`);
     }
   }
 
