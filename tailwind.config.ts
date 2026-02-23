@@ -19,7 +19,7 @@ const config: Config = {
         "card-dark": "#161e2e",
         "background-light": "#f5f6f8",
         "background-dark": "#080c14",
-        "navy-deep": "#080c14",
+        "navy-deep": "#0f172a",
         "navy-medium": "#161e2e",
         "navy-soft": "#1d2638",
         // Portal / dashboard design tokens — aligned with LoginBenefitsPanel palette
