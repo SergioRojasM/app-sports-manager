@@ -1,6 +1,6 @@
 # Project Structure
 
-Following structure shows scaffolding for the project based on hexagonal architecture.
+Following structure reflects the current implementation and the target scalable pattern based on hexagonal architecture + feature slices.
 
 ## Directory Structure
 
@@ -9,58 +9,68 @@ Following structure shows scaffolding for the project based on hexagonal archite
 
 │
 ├── src/
-│   ├── app/                         # Inbound adapters (routing / delivery)
-│   │   ├── layout.tsx               # Root layout with providers
-│   │   ├── page.tsx                 # Home page
-│   │   ├── globals.css              # Global styles & Tailwind imports
-│   │   ├── auth/                    # Authentication routes
+│   ├── app/                              # Inbound adapters (routing / delivery)
+│   │   ├── layout.tsx                    # Root layout with providers
+│   │   ├── page.tsx                      # Landing/home
+│   │   ├── globals.css                   # Global styles & Tailwind imports
+│   │   ├── auth/                         # Authentication routes
+│   │   │   ├── login/
+│   │   │   ├── signup/
 │   │   │   └── callback/
-│   │   │       └── route.ts         # OAuth callback handler
-│   │   └── {feature}/
-│   │       ├── page.tsx             # Feature route
-│   │       ├── [id]/page.tsx        # Dynamic route
-│   │       ├── loading.tsx          # Loading UI
-│   │       ├── error.tsx            # Error boundary
-│   │       └── layout.tsx           # Feature-specific layout
-│   ├── components/              # UI adapters (presentation)
-│   │   ├── common/              # Shared UI components ()
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── Modal.tsx
-│   │   │   ├── Input.tsx
-│   │   │   └── Loading.tsx
-│   │   └── {feature}/           # Feature-specific components
-│   │       ├── {Feature}List.tsx
-│   │       ├── {Feature}Form.tsx
-│   │       ├── {Feature}Card.tsx
-│   │       └── {Feature}Detail.tsx
+│   │   ├── dashboard/                    # Legacy redirect entry
+│   │   └── portal/                       # Main post-login bounded context
+│   │       ├── layout.tsx                # Shared portal shell (header + nav)
+│   │       ├── loading.tsx
+│   │       ├── page.tsx
+│   │       ├── bootstrap/route.ts
+│   │       ├── (administrador)/
+│   │       │   └── gestion-organizacion/page.tsx
+│   │       ├── (atleta)/
+│   │       ├── (entrenador)/
+│   │       └── (shared)/
 │   │
-│   ├── hooks/                   # Application core (use cases)
-│   │   ├── common/              # Shared hooks
-│   │   │   ├── useAuth.ts
-│   │   │   └── useToast.ts
-│   │   └── {feature}/
-│   │       ├── use{Feature}.ts      # Main feature hook
-│   │       ├── use{Feature}Form.ts  # Form-specific logic
-│   │       └── use{Feature}Query.ts # Data fetching
+│   ├── components/                       # Presentation layer
+│   │   ├── auth/
+│   │   ├── landing/
+│   │   ├── portal/
+│   │   │   ├── PortalHeader.tsx          # Shared portal shell components
+│   │   │   ├── PortalNavMenu.tsx
+│   │   │   ├── PortalSidebar.tsx
+│   │   │   ├── RoleBasedMenu.tsx
+│   │   │   ├── UserAvatarMenu.tsx
+│   │   │   └── organization-view/        # Feature slice (portal/organization-view)
+│   │   │       ├── OrganizationIdentityCard.tsx
+│   │   │       └── OrganizationContactCard.tsx
+│   │   └── ui/
 │   │
-│   ├── services/                # Outbound adapters (API)
-│   │   ├── supabase/
-│   │   │   ├── client.ts        # Browser client (see supabase-setup.md)
-│   │   │   ├── server.ts        # Server client (see supabase-setup.md)
-│   │   │   ├── middleware.ts    # Auth middleware (see supabase-setup.md)
-│   │   │   └── auth.ts          # Auth service
-│   │   └── {feature}Service.ts  # Feature-specific API calls
+│   ├── hooks/                            # Application core (use cases)
+│   │   ├── auth/
+│   │   └── portal/
+│   │       ├── usePortalNavigation.ts    # Shared portal logic
+│   │       └── organization-view/
+│   │           └── useOrganizationView.ts
 │   │
-│   ├── types/                   # Domain & contracts
-│   │   ├── database.types.ts    # Supabase generated types
-│   │   ├── {feature}.types.ts   # Feature domain types
-│   │   └── common.types.ts      # Shared types
+│   ├── services/                         # Outbound adapters (API)
+│   │   └── supabase/
+│   │       ├── client.ts                 # Browser client
+│   │       ├── server.ts                 # Server client
+│   │       ├── middleware.ts             # Auth middleware helpers
+│   │       ├── auth.ts
+│   │       ├── portal/                   # Portal bounded-context services
+│   │       │   ├── index.ts
+│   │       │   └── organization-view.service.ts
+│   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
-│   └── lib/                     # Pure utilities
-│       ├── utils.ts             # Helper functions
-│       ├── constants.ts         # App constants
-│       └── validators.ts        # Data validation functions
+│   ├── types/                            # Domain & contracts
+│   │   ├── auth.types.ts
+│   │   ├── portal.types.ts               # Shared portal contracts
+│   │   └── portal/
+│   │       └── organization-view.types.ts
+│   │
+│   └── lib/                              # Pure utilities
+│       ├── utils.ts
+│       ├── constants.ts
+│       └── validators.ts
 │
 ├── public/                      # Static assets
 │   ├── images/
@@ -100,6 +110,23 @@ Following structure shows scaffolding for the project based on hexagonal archite
 | **Infrastructure** | `services/` | External API & database access | Outbound adapters | Supabase clients |
 | **Domain** | `types/` | Data contracts & interfaces | Ports | TypeScript types |
 | **Utilities** | `lib/` | Pure helper functions | Support | Utils, constants |
+
+## Feature Slice Convention (Current Standard)
+
+For all new portal features, use this structure consistently:
+
+```text
+app/portal/(role)/<route>/page.tsx              # Route entrypoint
+components/portal/<feature-name>/*              # UI/presentation
+hooks/portal/<feature-name>/*                   # Use-case orchestration
+services/supabase/portal/<feature-name>.service.ts # Data access
+types/portal/<feature-name>.types.ts            # Contracts and view models
+```
+
+Rules:
+- Keep shell/shared portal components outside feature folders (`PortalHeader`, `PortalNavMenu`, etc.).
+- Never call Supabase directly from page/components.
+- Feature folder names use kebab-case (e.g., `organization-view`, `training-management`).
 
 ### Data Flow
 
@@ -188,9 +215,9 @@ Examples:
 
 ### Best Practices
 
-1. **Co-location**
-   - Keep feature-specific code together
-   - Example: `hooks/events/`, `components/events/`, `services/eventsService.ts`
+1. **Co-location by feature slice**
+  - Keep each feature grouped across layers using the same feature name.
+  - Example: `components/portal/organization-view/`, `hooks/portal/organization-view/`, `services/supabase/portal/organization-view.service.ts`, `types/portal/organization-view.types.ts`
 
 2. **Single Responsibility**
    - One component = one responsibility
@@ -208,122 +235,120 @@ Examples:
 
 ## Example Implementation
 
-### Feature: Events
+### Feature: Portal Organization View
 
 ```
 src/
-├── components/events/
-│   ├── EventList.tsx          # Displays list of events
-│   ├── EventCard.tsx          # Individual event card
-│   └── EventForm.tsx          # Create/edit form
-│
-├── hooks/events/
-│   ├── useEvents.ts           # Fetch and manage events
-│   ├── useEventForm.ts        # Form state and validation
-│   └── useEventSubscription.ts # Real-time updates
-│
-├── services/
-│   └── eventsService.ts       # Supabase CRUD operations
-│
-└── types/
-    └── events.types.ts        # Event interfaces
+├── app/portal/(administrador)/gestion-organizacion/page.tsx
+├── components/portal/organization-view/
+│   ├── OrganizationIdentityCard.tsx
+│   └── OrganizationContactCard.tsx
+├── hooks/portal/organization-view/
+│   └── useOrganizationView.ts
+├── services/supabase/portal/
+│   └── organization-view.service.ts
+└── types/portal/
+  └── organization-view.types.ts
 ```
 
 ### Code Flow Example
 
 ```typescript
 // 1. Component (presentation)
-// components/events/EventList.tsx
+// components/portal/organization-view/OrganizationInfoCards.tsx
 'use client'
 
-import { useEvents } from '@/hooks/events/useEvents'
-import { EventCard } from './EventCard'
+import { useOrganizationView } from '@/hooks/portal/organization-view/useOrganizationView'
+import { OrganizationIdentityCard } from './OrganizationIdentityCard'
+import { OrganizationContactCard } from './OrganizationContactCard'
 
-export function EventList() {
-  const { events, loading, error } = useEvents()
+export function OrganizationInfoCards() {
+  const { data, loading, error } = useOrganizationView()
   
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error: {error}</div>
+  if (!data) return <div>Empty state</div>
   
   return (
-    <div>
-      {events.map(event => (
-        <EventCard key={event.id} event={event} />
-      ))}
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <OrganizationIdentityCard identity={data.identity} context={data.context} />
+      <div className="lg:col-span-2">
+        <OrganizationContactCard contact={data.contact} social={data.social} />
+      </div>
     </div>
   )
 }
 
 // 2. Hook (business logic)
-// hooks/events/useEvents.ts
+// hooks/portal/organization-view/useOrganizationView.ts
 import { useState, useEffect } from 'react'
-import { eventsService } from '@/services/eventsService'
-import { Event } from '@/types/events.types'
+import { createClient } from '@/services/supabase/client'
+import { organizationViewService } from '@/services/supabase/portal/organization-view.service'
+import { OrganizationViewData } from '@/types/portal/organization-view.types'
 
-export function useEvents() {
-  const [events, setEvents] = useState<Event[]>([])
+export function useOrganizationView() {
+  const [data, setData] = useState<OrganizationViewData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const supabase = createClient()
 
   useEffect(() => {
-    async function fetchEvents() {
+    async function load() {
       try {
-        const data = await eventsService.getAll()
-        setEvents(data)
+        const { data: auth } = await supabase.auth.getUser()
+        if (!auth.user) throw new Error('No active session')
+        const payload = await organizationViewService.fetchOrganizationViewData(supabase, auth.user.id)
+        setData(payload)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
       } finally {
         setLoading(false)
       }
     }
-    fetchEvents()
-  }, [])
+    load()
+  }, [supabase])
 
-  return { events, loading, error }
+  return { data, loading, error }
 }
 
 // 3. Service (data access)
-// services/eventsService.ts
-import { createClient } from '@/services/supabase/client'
-import { Event } from '@/types/events.types'
+// services/supabase/portal/organization-view.service.ts
+import { SupabaseClient } from '@supabase/supabase-js'
+import { OrganizationViewData } from '@/types/portal/organization-view.types'
 
-export const eventsService = {
-  async getAll(): Promise<Event[]> {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('events')
-      .select('*')
-      .order('date', { ascending: true })
-
-    if (error) throw error
-    return data
-  },
-
-  async create(event: Omit<Event, 'id'>): Promise<Event> {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('events')
-      .insert(event)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
+export const organizationViewService = {
+  async fetchOrganizationViewData(
+    supabase: SupabaseClient,
+    userId: string,
+  ): Promise<OrganizationViewData> {
+    // Query tenant + coach + location and map to view model
+    return {} as OrganizationViewData
   }
 }
 
 // 4. Types (contracts)
-// types/events.types.ts
-export interface Event {
-  id: string
-  name: string
-  date: string
-  description: string | null
-  user_id: string
-  created_at: string
+// types/portal/organization-view.types.ts
+export type OrganizationViewData = {
+  identity: {
+    name: string
+    description: string | null
+    foundedAt: string | null
+  }
+  context: {
+    headCoachName: string | null
+    location: string | null
+  }
+  contact: {
+    email: string | null
+    phone: string | null
+    websiteUrl: string | null
+  }
+  social: {
+    instagramUrl: string | null
+    facebookUrl: string | null
+    xUrl: string | null
+  }
 }
-
-export type CreateEventInput = Omit<Event, 'id' | 'created_at'>
 ```
 
 ## Environment Variables
@@ -464,11 +489,11 @@ const doSomething = async () => {
 
 | Task | Location | Example |
 |------|----------|---------|
-| Add new page | `app/{feature}/page.tsx` | `app/events/page.tsx` |
-| Add UI component | `src/components/{feature}/` | `src/components/events/EventCard.tsx` |
-| Add business logic | `src/hooks/{feature}/` | `src/hooks/events/useEvents.ts` |
-| Add API call | `src/services/` | `src/services/eventsService.ts` |
-| Add type | `src/types/` | `src/types/events.types.ts` |
+| Add route entry | `src/app/portal/(role)/{route}/page.tsx` | `src/app/portal/(administrador)/gestion-organizacion/page.tsx` |
+| Add UI component | `src/components/portal/{feature-name}/` | `src/components/portal/organization-view/OrganizationIdentityCard.tsx` |
+| Add business logic | `src/hooks/portal/{feature-name}/` | `src/hooks/portal/organization-view/useOrganizationView.ts` |
+| Add data access | `src/services/supabase/portal/{feature-name}.service.ts` | `src/services/supabase/portal/organization-view.service.ts` |
+| Add contracts | `src/types/portal/{feature-name}.types.ts` | `src/types/portal/organization-view.types.ts` |
 
 ---
 

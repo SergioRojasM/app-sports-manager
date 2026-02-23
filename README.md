@@ -36,12 +36,24 @@ Production-ready Next.js boilerplate with authentication, TypeScript, Tailwind C
 | Route | Access |
 |---|---|
 | `/portal` | All authenticated users |
-| `/portal/gestion-organizacion` | admin |
+| `/portal/gestion-organizacion` | admin (organization cards view, read-only in this iteration) |
 | `/portal/gestion-escenarios` | admin |
 | `/portal/gestion-entrenamientos` | admin, coach |
 | `/portal/perfil` | athlete, coach |
 | `/portal/entrenamientos-disponibles` | athlete |
 | `/portal/atletas` | coach |
+
+#### Portal Feature Folder Convention
+
+Portal modules follow feature-first slices:
+
+- `src/app/portal/...` → route entrypoints
+- `src/components/portal/<feature-name>/...` → feature UI components
+- `src/hooks/portal/<feature-name>/...` → feature orchestration hooks
+- `src/services/supabase/portal/<feature-name>.service.ts` → feature data access
+- `src/types/portal/<feature-name>.types.ts` → feature contracts
+
+Current example: `organization-view` for `/portal/gestion-organizacion`.
 
 #### Role-Based Menu Matrix
 
