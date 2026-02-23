@@ -1,9 +1,7 @@
 import type { OrganizationIdentityPayload } from '@/types/portal/organization-view.types';
-import type { OrganizationContextPayload } from '@/types/portal/organization-view.types';
 
 type OrganizationIdentityCardProps = {
   identity: OrganizationIdentityPayload;
-  context: OrganizationContextPayload;
 };
 
 function formatDate(dateValue: string | null): string {
@@ -22,7 +20,7 @@ function display(value: string | null): string {
   return value && value.trim().length > 0 ? value : '—';
 }
 
-export function OrganizationIdentityCard({ identity, context }: OrganizationIdentityCardProps) {
+export function OrganizationIdentityCard({ identity }: OrganizationIdentityCardProps) {
   return (
     <article className="overflow-hidden rounded-lg border border-portal-border bg-navy-medium/95 shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
       <div className="relative h-24 bg-gradient-to-r from-primary/45 to-turquoise/35">
@@ -75,25 +73,6 @@ export function OrganizationIdentityCard({ identity, context }: OrganizationIden
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-lg bg-navy-deep/55 px-3 py-2.5">
-            <span className="material-symbols-outlined rounded-full bg-primary/20 p-2 text-[18px] text-primary" aria-hidden="true">
-              person
-            </span>
-            <div>
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Head Coach</dt>
-              <dd className="text-sm font-medium text-slate-200">{display(context.headCoachName)}</dd>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-lg bg-navy-deep/55 px-3 py-2.5">
-            <span className="material-symbols-outlined rounded-full bg-primary/20 p-2 text-[18px] text-primary" aria-hidden="true">
-              location_on
-            </span>
-            <div>
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Location</dt>
-              <dd className="text-sm font-medium text-slate-200">{display(context.location)}</dd>
-            </div>
-          </div>
         </dl>
       </div>
     </article>

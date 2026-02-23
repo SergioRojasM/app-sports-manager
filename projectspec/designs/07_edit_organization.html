@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestión de Escenarios - qbop training</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#256af4",
+              "turquoise": "#2dd4bf",
+              "background-light": "#f5f6f8",
+              "background-dark": "#0a0e17",
+              "surface-dark": "#161d2c",
+              "surface-accent": "#222f49",
+            },
+            fontFamily: {
+              "display": ["Lexend", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Lexend', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-background-dark/80 backdrop-blur-md border-b border-surface-accent">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-8 bg-primary/20 flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary">sports_kabaddi</span>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-tight">qbop training</h2>
+</div>
+<div class="hidden md:flex items-center bg-surface-accent rounded-full px-4 py-2 w-80">
+<span class="material-symbols-outlined text-slate-400 mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm text-slate-200 w-full placeholder:text-slate-500" placeholder="Buscar escenarios..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="size-10 flex items-center justify-center rounded-full bg-surface-accent text-slate-300 hover:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-full bg-surface-accent text-slate-300 hover:text-white transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary/30 cursor-pointer">
+<img class="h-full w-full object-cover" data-alt="User profile avatar male professional" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn_i8p5-nwcWOZ6hm7xW7bZLSd_kRmVXuUcdUyvm5etz-MR6MAj-KzhBJEQWx9IV-nL7kgvq3PP6i1KGMcMJ1VkFPa7GTdWamVagPzNiSN9UhxPRY5msXSA6xw7Sp_uWqDZ4We-YymfMmR6y9GCnZnoGqJ4cdTIOpdg8eLSnHRIQ8J1jB-khV-IZCEX5cmJ1YpFEB14HIDorNM-vSBBfEfwGgQy_SUtx4rpLmoIOHfC_aeyGPi0tx20eZ2HcOdvOCoeyltKhNAfts"/>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col md:flex-row max-w-[1600px] mx-auto w-full px-4 md:px-8 py-8 gap-8 relative">
+<!-- Left Sidebar (Floating Style) -->
+<aside class="hidden lg:flex flex-col gap-2 w-64 shrink-0">
+<nav class="flex flex-col gap-1 p-2 bg-surface-dark rounded-xl border border-surface-accent">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-surface-accent rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white bg-primary/20 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined text-primary">sports_soccer</span>
+<span class="font-medium text-sm">Escenarios</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-surface-accent rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-medium text-sm">Entrenamientos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-surface-accent rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium text-sm">Usuarios</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-surface-accent rounded-full transition-all" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-medium text-sm">Reportes</span>
+</a>
+</nav>
+<div class="mt-4 p-4 bg-primary/10 rounded-xl border border-primary/20">
+<p class="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Estado del Servidor</p>
+<div class="flex items-center gap-2">
+<span class="flex h-2 w-2 rounded-full bg-turquoise animate-pulse"></span>
+<span class="text-xs text-slate-300 italic">Operativo</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<section class="flex-1">
+<div class="flex flex-wrap items-center justify-between mb-8 gap-4">
+<div>
+<h1 class="text-3xl font-extrabold text-white tracking-tight">Gestión de Escenarios</h1>
+<p class="text-slate-400 text-sm mt-1">Administra las instalaciones y campos deportivos de tu sede.</p>
+</div>
+<button class="flex items-center gap-2 px-6 py-3 bg-turquoise hover:bg-turquoise/90 text-background-dark font-bold rounded-full transition-all shadow-lg shadow-turquoise/20">
+<span class="material-symbols-outlined font-bold">add</span>
+<span>Nuevo Escenario</span>
+</button>
+</div>
+<!-- Tabs -->
+<div class="flex border-b border-surface-accent mb-8 overflow-x-auto no-scrollbar">
+<button class="px-6 py-3 text-turquoise border-b-2 border-turquoise font-semibold text-sm whitespace-nowrap">Todos los Escenarios</button>
+<button class="px-6 py-3 text-slate-400 hover:text-slate-200 font-semibold text-sm whitespace-nowrap">Disponibles</button>
+<button class="px-6 py-3 text-slate-400 hover:text-slate-200 font-semibold text-sm whitespace-nowrap">En Mantenimiento</button>
+<button class="px-6 py-3 text-slate-400 hover:text-slate-200 font-semibold text-sm whitespace-nowrap">Reservados</button>
+</div>
+<!-- Facilities Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Facility Card 1 -->
+<div class="bg-surface-dark border border-surface-accent rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-48 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Green grass soccer field with white lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZXftW7CNlQxP5AGAXWtd_Gq_w0hA5zw0YsUn-uBFDWrtKPZihjq_AUxmmaxUwQvG3g66NuEJ1_A6O7tzJDE_2mDI0tMdk99EUmiJm5rGdKMzu9NSpgrofypO8DX6A1fzjs65zdcnQedvDtOgFx9fuNAsdcAGPrTtt7Nn7ZGlx3oDjjjXeTekltG_eM0vJwSCiT95vPS_gGppcfZQTocZP-b_YQgKHaaX4TpI94Rb0JE66mdODMCzdygb6e0fXYaCH4PMv0hs4gyM"/>
+<div class="absolute top-4 right-4 px-3 py-1 bg-green-500/20 backdrop-blur-md border border-green-500/30 text-green-400 text-xs font-bold rounded-full">
+                            Disponible
+                        </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="text-lg font-bold text-white">Cancha Principal</h3>
+<p class="text-slate-400 text-xs uppercase tracking-widest font-medium">Césped Natural</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 bg-surface-accent hover:bg-primary/20 text-slate-400 hover:text-primary rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="p-2 bg-surface-accent hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-4 pt-4 border-t border-surface-accent">
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">groups</span>
+<span class="text-xs">22 Pax</span>
+</div>
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs">Zona Norte</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Facility Card 2 -->
+<div class="bg-surface-dark border border-surface-accent rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-48 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Modern blue padel court with glass walls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCve31_Hwd-gWQuOCxQV4DVoUsBGNi-rw09u34KW1R9tIEBYRJGULcCBSTg5_SZayW2vkTNfOf_9yuLVnZmbSbTXmZ3cPIZKj9BBh3jt88SNXGlINwTIngeyxwAyH-uJ3aMza6sKDVJAYRNXY6nwWpARB8yX1xoDtJYlNH_LbGrcqd8BJFJ5ZMT-9WKIwxyQhEaX_bTvPtbBjkj8hpmnlDI_LJ-7C_E1L-FxNWEFbrhF9u71Ey_ro8iTQwkymZ4iHpdM3aMyuq_Jj4"/>
+<div class="absolute top-4 right-4 px-3 py-1 bg-green-500/20 backdrop-blur-md border border-green-500/30 text-green-400 text-xs font-bold rounded-full">
+                            Disponible
+                        </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="text-lg font-bold text-white">Pista de Pádel 1</h3>
+<p class="text-slate-400 text-xs uppercase tracking-widest font-medium">Cristal / Sintético</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 bg-surface-accent hover:bg-primary/20 text-slate-400 hover:text-primary rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="p-2 bg-surface-accent hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-4 pt-4 border-t border-surface-accent">
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">groups</span>
+<span class="text-xs">4 Pax</span>
+</div>
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs">Zona Sur</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Facility Card 3 -->
+<div class="bg-surface-dark border border-surface-accent rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-48 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Red synthetic running track outdoors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl2yQuYbZo7DCusAkmK1xth7g3E-9z8psD63lJ8hAsGAhjEdZ3EPn8ZbL0RJm_aNiRBjXb7GWDuCidjMJGpnY7bjxQiLyRsSX0oYUm7nBQvngjZFcZN62VKAs6Lo16o1EXmbvwRw8TPj9-n-yutCsWttm-XjGvKi_b7YkgjfsiC3AO7fnjKC_cCEIqvXlWi0tMJsJsShnFUCCMBghV0URIMT1MPyvumpdXiyNXfLonfTKk7DNOkWnj2gVclRCM8FXH9zZa8Iiuh70"/>
+<div class="absolute top-4 right-4 px-3 py-1 bg-orange-500/20 backdrop-blur-md border border-orange-500/30 text-orange-400 text-xs font-bold rounded-full">
+                            En Mantenimiento
+                        </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="text-lg font-bold text-white">Pista de Atletismo</h3>
+<p class="text-slate-400 text-xs uppercase tracking-widest font-medium">Sintético Pro</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 bg-surface-accent hover:bg-primary/20 text-slate-400 hover:text-primary rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="p-2 bg-surface-accent hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-4 pt-4 border-t border-surface-accent">
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">groups</span>
+<span class="text-xs">50 Pax</span>
+</div>
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs">Exterior</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Facility Card 4 -->
+<div class="bg-surface-dark border border-surface-accent rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-48 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Indoor gym area with dumbbells and benches" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAV6PmSlQaVZPb17-ZlJYvcB0agwuo1cWajslY9Q70sDve3GyJiZ90r5BlwDkM5Q1v5C2mmRhjedy7kmBB0xnMwT2U10XOs5YMp-2asYUelNan43dVY_5A7bSQsQtVTBqUxl3PG7Dm1mHiwsgR0iQYOjfmdHc2gtPF4SNWqwBQEO3G2oz_D6a0J-cWFaJB2cqlF6NYdshvcJWawieeFzbR3J9xXY7OXQrR4656-6Xl2Cm0-9Y3oJwu7ZFwHkQbyNGIruKipFSdeyM"/>
+<div class="absolute top-4 right-4 px-3 py-1 bg-green-500/20 backdrop-blur-md border border-green-500/30 text-green-400 text-xs font-bold rounded-full">
+                            Disponible
+                        </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="text-lg font-bold text-white">Zona de Pesas</h3>
+<p class="text-slate-400 text-xs uppercase tracking-widest font-medium">Piso Funcional</p>
+</div>
+<div class="flex gap-1">
+<button class="p-2 bg-surface-accent hover:bg-primary/20 text-slate-400 hover:text-primary rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+<button class="p-2 bg-surface-accent hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-full transition-colors">
+<span class="material-symbols-outlined text-sm">delete</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-4 pt-4 border-t border-surface-accent">
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">groups</span>
+<span class="text-xs">15 Pax</span>
+</div>
+<div class="flex items-center gap-1.5 text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-xs">Nivel 2</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Overlay Side Panel (Add New Facility Form) -->
+<!-- In a real app, toggle visibility with hidden/flex -->
+<div class="fixed inset-0 z-[60] bg-background-dark/80 backdrop-blur-sm flex justify-end">
+<!-- Modal Content -->
+<div class="w-full max-w-lg bg-surface-dark border-l border-surface-accent h-full shadow-2xl flex flex-col">
+<div class="p-8 border-b border-surface-accent flex justify-between items-center">
+<div>
+<h2 class="text-2xl font-bold text-white">Añadir Nuevo Escenario</h2>
+<p class="text-slate-400 text-sm">Completa la información técnica del escenario.</p>
+</div>
+<button class="text-slate-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-8 space-y-6">
+<!-- Image Upload -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-300">Imagen del Escenario</label>
+<div class="w-full h-40 border-2 border-dashed border-surface-accent rounded-xl flex flex-col items-center justify-center gap-3 bg-background-dark/50 hover:border-turquoise/50 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-3xl text-slate-500">cloud_upload</span>
+<div class="text-center">
+<p class="text-xs font-medium text-slate-300">Arrastra una imagen o haz clic para subir</p>
+<p class="text-[10px] text-slate-500 mt-1">PNG, JPG hasta 10MB</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-300" for="name">Nombre del Escenario</label>
+<input class="w-full bg-background-dark border-surface-accent rounded-full focus:ring-primary focus:border-primary text-slate-100 px-6 py-3" id="name" placeholder="Ej: Cancha Centenario" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-300" for="surface">Tipo de Superficie</label>
+<select class="w-full bg-background-dark border-surface-accent rounded-full focus:ring-primary focus:border-primary text-slate-100 px-6 py-3 appearance-none" id="surface">
+<option>Césped Natural</option>
+<option>Césped Sintético</option>
+<option>Hormigón / Cemento</option>
+<option>Madera / Parquet</option>
+<option>Arcilla</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-300" for="location">Ubicación</label>
+<input class="w-full bg-background-dark border-surface-accent rounded-full focus:ring-primary focus:border-primary text-slate-100 px-6 py-3" id="location" placeholder="Ej: Zona Norte" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-300" for="capacity">Capacidad (Pax)</label>
+<input class="w-full bg-background-dark border-surface-accent rounded-full focus:ring-primary focus:border-primary text-slate-100 px-6 py-3" id="capacity" placeholder="0" type="number"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-300">Equipamiento Disponible</label>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-surface-accent rounded-full text-xs text-slate-300 flex items-center gap-1 cursor-pointer hover:bg-primary/20 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm">check_circle</span> Iluminación
+                                </span>
+<span class="px-3 py-1 bg-surface-accent rounded-full text-xs text-slate-300 flex items-center gap-1 cursor-pointer hover:bg-primary/20 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm">check_circle</span> Graderías
+                                </span>
+<span class="px-3 py-1 bg-surface-accent rounded-full text-xs text-slate-300 flex items-center gap-1 cursor-pointer hover:bg-primary/20 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm">check_circle</span> Marcador
+                                </span>
+</div>
+</div>
+</div>
+</div>
+<div class="p-8 border-t border-surface-accent bg-background-dark/30 flex gap-4">
+<button class="flex-1 px-6 py-3 border border-surface-accent hover:bg-surface-accent text-slate-300 font-bold rounded-full transition-all">
+                        Cancelar
+                    </button>
+<button class="flex-1 px-6 py-3 bg-turquoise hover:bg-turquoise/90 text-background-dark font-bold rounded-full transition-all shadow-lg shadow-turquoise/20">
+                        Guardar Escenario
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Left Menu Button (Floating) -->
+<div class="fixed bottom-6 left-6 z-[70] lg:hidden">
+<button class="size-14 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl shadow-primary/40">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</button>
+</div>
+</body></html>

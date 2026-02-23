@@ -20,32 +20,6 @@ type TenantRow = {
   x_url: string | null;
 };
 
-type CoachRow = {
-  nombre: string | null;
-  apellido: string | null;
-  created_at: string;
-  roles: { nombre: string } | { nombre: string }[] | null;
-};
-
-type LocationRow = {
-  ubicacion: string | null;
-  activo: boolean | null;
-  created_at: string;
-};
-
-function parseRoleName(value: CoachRow['roles']): string | null {
-  if (!value) return null;
-  if (Array.isArray(value)) {
-    return value[0]?.nombre ?? null;
-  }
-  return value.nombre ?? null;
-}
-
-function joinPersonName(nombre: string | null, apellido: string | null): string | null {
-  const fullName = [nombre ?? '', apellido ?? ''].join(' ').trim();
-  return fullName.length ? fullName : null;
-}
-
 function mapCodeToMessage(code: OrganizationViewErrorCode): string {
   switch (code) {
     case 'UNAUTHENTICATED':
@@ -107,54 +81,12 @@ export const organizationViewService = {
     return data as TenantRow;
   },
 
-  async fetchHeadCoachByTenantId(supabase: SupabaseClient, tenantId: string): Promise<string | null> {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('nombre, apellido, created_at, roles(nombre)')
-      .eq('tenant_id', tenantId)
-      .eq('activo', true)
-      .order('created_at', { ascending: true });
-
-    if (error || !data?.length) {
-      return null;
-    }
-
-    const rows = data as CoachRow[];
-    const coach = rows.find((row) => parseRoleName(row.roles) === 'entrenador');
-
-    return coach ? joinPersonName(coach.nombre, coach.apellido) : null;
-  },
-
-  async fetchRepresentativeLocationByTenantId(
-    supabase: SupabaseClient,
-    tenantId: string,
-  ): Promise<string | null> {
-    const { data, error } = await supabase
-      .from('escenarios')
-      .select('ubicacion, activo, created_at')
-      .eq('tenant_id', tenantId)
-      .order('activo', { ascending: false })
-      .order('created_at', { ascending: true });
-
-    if (error || !data?.length) {
-      return null;
-    }
-
-    const rows = data as LocationRow[];
-    const firstLocation = rows.find((row) => (row.ubicacion ?? '').trim().length > 0);
-    return firstLocation?.ubicacion ?? null;
-  },
-
   async fetchOrganizationViewData(
     supabase: SupabaseClient,
     userId: string,
   ): Promise<OrganizationViewData> {
     const tenantId = await this.getCurrentUserTenantId(supabase, userId);
-    const [tenant, headCoachName, location] = await Promise.all([
-      this.fetchTenantById(supabase, tenantId),
-      this.fetchHeadCoachByTenantId(supabase, tenantId),
-      this.fetchRepresentativeLocationByTenantId(supabase, tenantId),
-    ]);
+    const tenant = await this.fetchTenantById(supabase, tenantId);
 
     return {
       identity: {
@@ -173,10 +105,6 @@ export const organizationViewService = {
         instagramUrl: tenant.instagram_url,
         facebookUrl: tenant.facebook_url,
         xUrl: tenant.x_url,
-      },
-      context: {
-        headCoachName,
-        location,
       },
     };
   },

@@ -63,7 +63,7 @@ export function OrganizationInfoCards() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <OrganizationIdentityCard identity={data.identity} context={data.context} />
+        <OrganizationIdentityCard identity={data.identity} />
         <div className="lg:col-span-2">
           <OrganizationContactCard contact={data.contact} social={data.social} />
         </div>

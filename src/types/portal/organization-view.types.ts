@@ -18,16 +18,10 @@ export type OrganizationSocialPayload = {
   xUrl: string | null;
 };
 
-export type OrganizationContextPayload = {
-  headCoachName: string | null;
-  location: string | null;
-};
-
 export type OrganizationViewData = {
   identity: OrganizationIdentityPayload;
   contact: OrganizationContactPayload;
   social: OrganizationSocialPayload;
-  context: OrganizationContextPayload;
 };
 
 export type OrganizationViewErrorCode =
