@@ -1,6 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/services/supabase/client';
 import type {
+  OrganizationEditFormValues,
+  OrganizationEditPayload,
+  OrganizationEditResult,
   OrganizationViewData,
   OrganizationViewError,
   OrganizationViewErrorCode,
@@ -18,7 +21,26 @@ type TenantRow = {
   instagram_url: string | null;
   facebook_url: string | null;
   x_url: string | null;
+  updated_at?: string | null;
 };
+
+function toEditableString(value: string | null): string {
+  return value ?? '';
+}
+
+function mapTenantToEditFormValues(tenant: TenantRow): OrganizationEditFormValues {
+  return {
+    nombre: toEditableString(tenant.nombre),
+    descripcion: toEditableString(tenant.descripcion),
+    logo_url: toEditableString(tenant.logo_url),
+    email: toEditableString(tenant.email),
+    telefono: toEditableString(tenant.telefono),
+    web_url: toEditableString(tenant.web_url),
+    instagram_url: toEditableString(tenant.instagram_url),
+    facebook_url: toEditableString(tenant.facebook_url),
+    x_url: toEditableString(tenant.x_url),
+  };
+}
 
 function mapCodeToMessage(code: OrganizationViewErrorCode): string {
   switch (code) {
@@ -79,6 +101,37 @@ export const organizationViewService = {
     }
 
     return data as TenantRow;
+  },
+
+  async fetchOrganizationEditData(
+    supabase: SupabaseClient,
+    userId: string,
+  ): Promise<OrganizationEditFormValues> {
+    const tenantId = await this.getCurrentUserTenantId(supabase, userId);
+    const tenant = await this.fetchTenantById(supabase, tenantId);
+    return mapTenantToEditFormValues(tenant);
+  },
+
+  async updateOrganizationTenant(
+    supabase: SupabaseClient,
+    userId: string,
+    payload: OrganizationEditPayload,
+  ): Promise<OrganizationEditResult> {
+    const tenantId = await this.getCurrentUserTenantId(supabase, userId);
+    const { data, error } = await supabase
+      .from('tenants')
+      .update(payload)
+      .eq('id', tenantId)
+      .select('updated_at')
+      .single();
+
+    if (error) {
+      throw new Error('Tenant update failed');
+    }
+
+    return {
+      updatedAt: data?.updated_at ?? new Date().toISOString(),
+    };
   },
 
   async fetchOrganizationViewData(

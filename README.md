@@ -36,12 +36,17 @@ Production-ready Next.js boilerplate with authentication, TypeScript, Tailwind C
 | Route | Access |
 |---|---|
 | `/portal` | All authenticated users |
-| `/portal/gestion-organizacion` | admin (organization cards view, read-only in this iteration) |
+| `/portal/gestion-organizacion` | admin (organization cards view + right-side edit drawer persisted to `public.tenants`) |
 | `/portal/gestion-escenarios` | admin |
 | `/portal/gestion-entrenamientos` | admin, coach |
 | `/portal/perfil` | athlete, coach |
 | `/portal/entrenamientos-disponibles` | athlete |
 | `/portal/atletas` | coach |
+
+Organization management edit scope:
+- Edit flow is available only for `admin` users inside `/portal/gestion-organizacion`.
+- Drawer saves updates only to `public.tenants` for the authenticated user tenant.
+- UI closes and refreshes organization cards in place after successful save.
 
 #### Portal Feature Folder Convention
 

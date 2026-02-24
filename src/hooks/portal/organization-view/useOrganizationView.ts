@@ -10,6 +10,7 @@ import type {
 
 type UseOrganizationViewResult = OrganizationViewState & {
   retry: () => Promise<void>;
+  refresh: () => Promise<void>;
 };
 
 export function useOrganizationView(): UseOrganizationViewResult {
@@ -66,5 +67,6 @@ export function useOrganizationView(): UseOrganizationViewResult {
     loading,
     error,
     retry: load,
+    refresh: load,
   };
 }
