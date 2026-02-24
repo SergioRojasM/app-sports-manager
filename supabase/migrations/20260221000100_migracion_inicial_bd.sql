@@ -36,34 +36,32 @@ create table if not exists public.roles (
 
 create table if not exists public.usuarios (
   id uuid primary key,
-  tenant_id uuid not null,
   email varchar(255) not null unique,
   nombre varchar(100),
   apellido varchar(100),
   telefono varchar(20),
   fecha_nacimiento date,
   foto_url varchar(500),
-  rol_id uuid,
   activo boolean not null default true,
   created_at timestamptz not null default timezone('utc', now()),
   constraint usuarios_auth_user_id_fkey
-    foreign key (id) references auth.users(id) on delete cascade,
-  constraint usuarios_tenant_id_fkey
-    foreign key (tenant_id) references public.tenants(id) on delete cascade,
-  constraint usuarios_rol_id_fkey
-    foreign key (rol_id) references public.roles(id) on delete set null
+    foreign key (id) references auth.users(id) on delete cascade
 );
 
 create table if not exists public.miembros_tenant (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null,
   usuario_id uuid not null,
+  rol_id uuid not null,
   nombre varchar(50) unique,
   descripcion text,
+  created_at timestamptz not null default timezone('utc', now()),
   constraint miembros_tenant_tenant_id_fkey
     foreign key (tenant_id) references public.tenants(id) on delete cascade,
   constraint miembros_tenant_usuario_id_fkey
     foreign key (usuario_id) references public.usuarios(id) on delete cascade,
+  constraint miembros_tenant_rol_id_fkey
+    foreign key (rol_id) references public.roles(id) on delete restrict,
   constraint miembros_tenant_tenant_usuario_uk unique (tenant_id, usuario_id)
 );
 
@@ -312,8 +310,6 @@ create table if not exists public.notificaciones (
 -- ÍNDICES
 -- =========================
 
-create index if not exists idx_usuarios_tenant_id on public.usuarios (tenant_id);
-create index if not exists idx_usuarios_rol_id on public.usuarios (rol_id);
 create index if not exists idx_perfil_deportivo_user_id on public.perfil_deportivo (user_id);
 create index if not exists idx_escenarios_tenant_id on public.escenarios (tenant_id);
 create index if not exists idx_disciplinas_tenant_id on public.disciplinas (tenant_id);
@@ -342,6 +338,7 @@ create index if not exists idx_responsables_usuario_id on public.responsables (u
 create index if not exists idx_responsables_responsabilidad_id on public.responsables (responsabilidad_id);
 create index if not exists idx_miembros_tenant_tenant_id on public.miembros_tenant (tenant_id);
 create index if not exists idx_miembros_tenant_usuario_id on public.miembros_tenant (usuario_id);
+create index if not exists idx_miembros_tenant_rol_id on public.miembros_tenant (rol_id);
 
 -- =========================
 -- RLS + POLICIES (SELECT autenticado)

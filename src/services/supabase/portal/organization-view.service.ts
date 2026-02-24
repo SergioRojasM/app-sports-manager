@@ -77,10 +77,13 @@ export const organizationViewService = {
 
   async getCurrentUserTenantId(supabase: SupabaseClient, userId: string): Promise<string> {
     const { data, error } = await supabase
-      .from('usuarios')
+      .from('miembros_tenant')
       .select('tenant_id')
-      .eq('id', userId)
-      .single();
+      .eq('usuario_id', userId)
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
+      .limit(1)
+      .maybeSingle();
 
     if (error || !data?.tenant_id) {
       throw new Error('User profile not found');
