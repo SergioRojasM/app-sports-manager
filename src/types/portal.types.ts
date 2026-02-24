@@ -1,6 +1,6 @@
-export type UserRole = 'administrador' | 'atleta' | 'entrenador';
+export type UserRole = 'administrador' | 'usuario' | 'entrenador';
 
-export const VALID_ROLES: readonly UserRole[] = ['administrador', 'atleta', 'entrenador'] as const;
+export const VALID_ROLES: readonly UserRole[] = ['administrador', 'usuario', 'entrenador'] as const;
 
 export type MenuItem = {
   label: string;
@@ -16,28 +16,30 @@ export type PortalDisplayProfile = {
   email: string;
 };
 
-/** Full profile fetched from public.usuarios joined with public.roles. */
+export type UserMembershipContext = {
+  tenant_id: string;
+  rol_id: string;
+  tenant_nombre: string | null;
+};
+
+/** Full profile fetched from public.usuarios + active membership in public.miembros_tenant. */
 export type UserProfile = PortalDisplayProfile & {
   id: string;
   activo: boolean;
   tenant_id: string;
   rol_id: string;
   role: UserRole;
+  membership: UserMembershipContext;
 };
 
 export const ROLE_MENU_CONFIG: Record<UserRole, MenuItem[]> = {
   administrador: [
-    { label: 'Organización', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
-    { label: 'Escenarios', href: '/portal/gestion-escenarios', icon: 'stadium' },
-    { label: 'Entrenamientos', href: '/portal/gestion-entrenamientos', icon: 'fitness_center' },
+    { label: 'Organizaciones Disponibles', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
   ],
-  atleta: [
-    { label: 'Perfil', href: '/portal/perfil', icon: 'person' },
-    { label: 'Entrenamientos Disponibles', href: '/portal/entrenamientos-disponibles', icon: 'directions_run' },
+  usuario: [
+    { label: 'Organizaciones Disponibles', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
   ],
   entrenador: [
-    { label: 'Perfil', href: '/portal/perfil', icon: 'person' },
-    { label: 'Entrenamientos', href: '/portal/gestion-entrenamientos', icon: 'fitness_center' },
-    { label: 'Atletas', href: '/portal/atletas', icon: 'groups' },
+    { label: 'Organizaciones Disponibles', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
   ],
 };
