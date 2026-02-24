@@ -31,7 +31,7 @@ Visual behavior must follow the interaction style from `projectspec/designs/07_e
 - primary save action + secondary cancel action.
 
 Important scope rule for this user story:
-- **No trainer/coach update is required**. Any coach information shown in the organization view remains read-only and is out of scope for update logic.
+- **Only the `public.tenants` table is used in this feature**. No data from trainers/coaches or scenarios is part of read/update logic.
 
 The implementation must follow the current architecture standard from `projectspec/03-project-structure.md`:
 - Delivery: `src/app/portal/(administrador)/gestion-organizacion/page.tsx`
@@ -78,12 +78,8 @@ The implementation must follow the current architecture standard from `projectsp
     - `facebook_url`
     - `x_url`
 
-13. Optional editable context field:
-    - `ubicacion` from `public.escenarios` (tenant representative location) can be edited only if a deterministic target record exists (see data rules).
-
 ### 5) Fields explicitly not editable
-14. Non-editable fields in this story:
-    - trainer/coach data (`public.usuarios` / role `entrenador`),
+13. Non-editable fields in this story:
     - role/system metadata and IDs.
 
 ## Data Rules and Mapping
@@ -91,15 +87,7 @@ The implementation must follow the current architecture standard from `projectsp
 ### Tenant update target
 1. Resolve current tenant from authenticated user profile (`usuarios.tenant_id`).
 2. Update exactly one record in `public.tenants` where `id = tenant_id`.
-
-### Representative location update target (`public.escenarios`)
-3. If implementing location editing:
-   - select first scenario for tenant ordered by `activo DESC, created_at ASC`.
-   - update only that single target record’s `ubicacion`.
-4. If no scenario exists, keep location input disabled with helper text (or omit the field entirely).
-
-### Coach/trainer data
-5. Coach data remains read-only and must not be updated by this feature.
+3. All reads and writes in this user story must target only `public.tenants`.
 
 ## Validation Rules
 
@@ -128,7 +116,6 @@ No new REST API endpoint is required. Use service methods:
 
 1. Fetch editable payload:
 - `tenants` by `tenant_id`.
-- optional representative scenario by tenant.
 
 2. Update tenant:
 - `from('tenants').update({...}).eq('id', tenantId).select().single()`
@@ -180,7 +167,7 @@ No new REST API endpoint is required. Use service methods:
 4. Build right-side drawer and form components with current portal style tokens/components.
 5. Integrate drawer trigger into organization management page/cards.
 6. Refresh read model (`useOrganizationView`) after successful update.
-7. Ensure coach data remains read-only and untouched in persistence.
+7. Ensure persistence logic updates only `public.tenants`.
 8. Add/update tests and docs.
 
 ## Definition of Done
@@ -188,7 +175,7 @@ No new REST API endpoint is required. Use service methods:
 2. Drawer is prefilled with current tenant organization data.
 3. Save action updates tenant fields in Supabase and reflects changes in the view.
 4. Validation, loading state, success feedback, and error feedback are implemented.
-5. Coach/trainer information is not modified by this feature.
+5. Only `public.tenants` is read/updated by this feature.
 6. No direct Supabase calls from page/components (must use hooks/services).
 7. No `any` types introduced in touched files.
 8. Lint/typecheck pass for touched files.
@@ -202,7 +189,7 @@ No new REST API endpoint is required. Use service methods:
 - Validate required fields and invalid URL/email behavior.
 - Save valid changes and verify data refresh in cards.
 - Confirm cancel/close/overlay/Esc close interactions.
-- Confirm coach display remains unchanged after save.
+- Confirm only tenant organization fields are persisted.
 
 ### Unit/Component test guidance
 If testing harness exists, add:
@@ -215,7 +202,7 @@ If no test harness exists in this module, document tests as pending without expa
 
 ## Documentation Updates
 1. Update `README.md` portal section to indicate organization data is editable from `/portal/gestion-organizacion`.
-2. Document that coach/trainer values remain read-only in `US-0007`.
+2. Document that `US-0007` only uses `public.tenants` for read/update operations.
 3. Keep feature slice mapping (`organization-view`) documented for consistency.
 4. Reference visual pattern source: `projectspec/designs/07_edit_organization.html`.
 
@@ -244,4 +231,4 @@ If no test harness exists in this module, document tests as pending without expa
 ## Expected Results
 - The portal organization screen supports in-place editing through a right-side drawer modal.
 - Admin users can update tenant organization profile fields safely and consistently.
-- The feature is implemented with clean architecture boundaries and is ready for future iteration (e.g., image upload workflow, advanced location management).
+- The feature is implemented with clean architecture boundaries and persistence scoped to `public.tenants` only.

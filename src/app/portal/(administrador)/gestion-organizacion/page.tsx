@@ -6,7 +6,7 @@ export default function GestionOrganizacionPage() {
       <header>
         <h1 className="text-3xl font-semibold text-slate-100">Organization Management</h1>
         <p className="mt-2 text-sm text-slate-400">
-          Review your organization identity, contact channels, and context information.
+          Review and update your organization identity, contact channels, and context information.
         </p>
       </header>
 

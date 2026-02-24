@@ -1,15 +1,4 @@
-## ADDED Requirements
-
-### Requirement: Admin can view organization information cards
-The system SHALL render an `OrganizationView` screen at `/portal/gestion-organizacion` for authenticated users with role `administrador`. The screen MUST present organization information in cards aligned with `projectspec/designs/06_view_tenant_information.html` while preserving the existing portal shell.
-
-#### Scenario: Admin opens organization view
-- **WHEN** an authenticated `administrador` navigates to `/portal/gestion-organizacion`
-- **THEN** the page SHALL display organization information cards within the shared portal layout
-
-#### Scenario: Page content is not placeholder text
-- **WHEN** `/portal/gestion-organizacion` is rendered
-- **THEN** the system SHALL show structured organization cards and MUST NOT show a generic “module under construction” placeholder
+## MODIFIED Requirements
 
 ### Requirement: Organization data is tenant-scoped and read-only
 The system SHALL resolve organization data using the authenticated user tenant context and SHALL support updating editable organization fields for that same tenant. All read and write operations in this scope MUST target `public.tenants` for `id = tenant_id` and MUST NOT persist data to other domain tables.
@@ -25,6 +14,8 @@ The system SHALL resolve organization data using the authenticated user tenant c
 #### Scenario: Non-tenant entities are not persisted
 - **WHEN** the edit flow executes read/write operations
 - **THEN** the system MUST NOT persist changes to `usuarios`, `roles`, or `escenarios`
+
+## ADDED Requirements
 
 ### Requirement: Admin can edit organization data through a right-side drawer
 The system SHALL provide an `Edit organization` interaction in organization management that opens a right-side drawer overlay aligned with `projectspec/designs/07_edit_organization.html` while keeping the current page context.
@@ -66,29 +57,3 @@ The system SHALL expose deterministic loading, success, and error behavior for s
 #### Scenario: Save error is non-blocking
 - **WHEN** tenant update fails
 - **THEN** the system SHALL keep the portal shell visible and display a non-blocking save error message
-
-### Requirement: Organization view handles loading, empty, and error states
-The organization view SHALL expose deterministic UI states for asynchronous data retrieval. Missing values MUST render safe placeholders, and data retrieval errors MUST show a non-blocking error message.
-
-#### Scenario: Loading state before data resolution
-- **WHEN** organization queries are still in progress
-- **THEN** the page SHALL render a visible loading state
-
-#### Scenario: Empty values are rendered safely
-- **WHEN** one or more organization fields are null or empty
-- **THEN** the corresponding card fields SHALL render placeholders without runtime failures
-
-#### Scenario: Data fetch error is non-blocking
-- **WHEN** one or more organization queries fail
-- **THEN** the page SHALL display a non-blocking error message and keep the portal shell visible
-
-### Requirement: OrganizationView follows feature-first hexagonal slices
-Implementation for this capability MUST follow page → component → hook → service → types boundaries and MUST be organized under `organization-view` feature folders inside portal layers.
-
-#### Scenario: Layer boundaries are respected
-- **WHEN** reviewing implementation files
-- **THEN** page/components SHALL NOT call Supabase directly and data access SHALL occur through feature service methods
-
-#### Scenario: Feature slice folder convention
-- **WHEN** implementation files are created
-- **THEN** they SHALL be organized under `components/portal/organization-view`, `hooks/portal/organization-view`, `services/supabase/portal`, and `types/portal/organization-view.types.ts`

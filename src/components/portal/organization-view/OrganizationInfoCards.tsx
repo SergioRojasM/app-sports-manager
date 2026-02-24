@@ -1,8 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useEditOrganization } from '@/hooks/portal/organization-view/useEditOrganization';
 import { useOrganizationView } from '@/hooks/portal/organization-view/useOrganizationView';
 import { OrganizationIdentityCard } from './OrganizationIdentityCard';
 import { OrganizationContactCard } from './OrganizationContactCard';
+import { EditOrganizationDrawer } from './EditOrganizationDrawer';
 
 function EmptyState() {
   return (
@@ -21,7 +24,26 @@ function LoadingState() {
 }
 
 export function OrganizationInfoCards() {
-  const { data, loading, error, retry } = useOrganizationView();
+  const { data, loading, error, retry, refresh } = useOrganizationView();
+  const {
+    isDrawerOpen,
+    isInitialLoading,
+    isSubmitting,
+    values,
+    fieldErrors,
+    submitError,
+    successMessage,
+    openDrawer,
+    closeDrawer,
+    updateField,
+    submit,
+  } = useEditOrganization({ onSaved: refresh });
+
+  useEffect(() => {
+    if (!data && isDrawerOpen) {
+      closeDrawer();
+    }
+  }, [closeDrawer, data, isDrawerOpen]);
 
   if (loading) {
     return <LoadingState />;
@@ -48,17 +70,23 @@ export function OrganizationInfoCards() {
 
   return (
     <div className="space-y-4">
+      {successMessage ? (
+        <div className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
+          {successMessage}
+        </div>
+      ) : null}
+
       <div className="flex justify-end">
         <button
           type="button"
-          disabled
-          aria-disabled="true"
-          className="inline-flex items-center gap-2 rounded-lg border border-portal-border bg-navy-medium/80 px-4 py-2 text-sm font-semibold text-slate-300 opacity-80"
+          onClick={() => void openDrawer()}
+          disabled={isSubmitting}
+          className="inline-flex items-center gap-2 rounded-lg border border-portal-border bg-navy-medium/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-navy-medium disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">
             edit
           </span>
-          Editar información
+          Editar organización
         </button>
       </div>
 
@@ -68,6 +96,18 @@ export function OrganizationInfoCards() {
           <OrganizationContactCard contact={data.contact} social={data.social} />
         </div>
       </div>
+
+      <EditOrganizationDrawer
+        isOpen={isDrawerOpen}
+        isLoading={isInitialLoading}
+        isSubmitting={isSubmitting}
+        values={values}
+        errors={fieldErrors}
+        submitError={submitError}
+        onClose={closeDrawer}
+        onSubmit={submit}
+        onChangeField={updateField}
+      />
     </div>
   );
 }
