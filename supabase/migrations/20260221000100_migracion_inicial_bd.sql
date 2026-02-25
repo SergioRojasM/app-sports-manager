@@ -23,7 +23,8 @@ create table if not exists public.tenants (
   web_url varchar(500),
   logo_url varchar(500),
   descripcion text,
-  created_at timestamptz not null default timezone('utc', now())
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
 );
 
 create table if not exists public.roles (
