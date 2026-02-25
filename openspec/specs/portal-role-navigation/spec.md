@@ -1,27 +1,31 @@
 ## MODIFIED Requirements
 
 ### Requirement: User profile and role fetched once at login
-Immediately after a successful `signInWithPassword`, `useAuth` SHALL call `portalService.getUserProfile(userId)` to fetch the user's profile and tenant-scoped role context from membership relations (`public.miembros_tenant`) joined with `public.roles` and `public.tenants`. This query MUST run exactly once per login event and SHALL NOT be repeated on subsequent portal navigations.
+Immediately after successful `signInWithPassword`, `useAuth` SHALL call `portalService.getUserProfile(userId)` exactly once per login event to fetch identity and membership context. This fetch MUST include tenant memberships from `public.miembros_tenant` and related role data from `public.roles`, and tenant-specific role resolution for protected tenant routes SHALL occur against the requested `tenant_id` at tenant entry time.
 
-#### Scenario: Profile and membership context are fetched after login
+#### Scenario: Login fetch returns membership context once
 - **WHEN** a user successfully authenticates
-- **THEN** `useAuth` SHALL call `portalService.getUserProfile` and obtain `UserProfile` including resolved membership-backed `role` and tenant context
+- **THEN** `useAuth` SHALL fetch profile and membership context exactly once for that login event
 
-#### Scenario: Profile fetch failure is handled
-- **WHEN** `portalService.getUserProfile` returns an error
-- **THEN** `useAuth` SHALL expose a `profileError` string and SHALL NOT redirect to `/portal`
+#### Scenario: Tenant entry resolves role against target tenant
+- **WHEN** an authenticated user navigates to `/portal/orgs/[tenant_id]/*`
+- **THEN** the system SHALL resolve role context for the requested `tenant_id` before rendering tenant-scoped protected content
+
+#### Scenario: Profile fetch failure blocks portal redirect
+- **WHEN** profile and membership fetch fails after authentication
+- **THEN** the system SHALL expose a profile error state and SHALL NOT redirect to protected portal routes
 
 ### Requirement: Role-based sidebar menu
-`PortalSidebar` SHALL receive the resolved role context and render only one navigation option for this change scope: `Organizaciones Disponibles` (`/portal/gestion-organizacion`) for `administrador`, `entrenador`, and `usuario`. Additional menu items for role-specific modules MUST NOT appear until tenant-selection UX is introduced.
+`PortalSidebar` SHALL display a tenant-discovery entry for authenticated users and SHALL adapt tenant-scoped menu items according to the resolved role for the active tenant context. Role-specific tenant items MUST only appear after tenant access is validated.
 
-#### Scenario: Administrador sees only one navigation option
-- **WHEN** the authenticated user role is `administrador`
-- **THEN** the sidebar SHALL display exactly one item labeled `Organizaciones Disponibles`
+#### Scenario: Sidebar shows organizations discovery entry
+- **WHEN** an authenticated user enters the portal shell
+- **THEN** the sidebar SHALL include `Organizaciones Disponibles` linking to `/portal/orgs`
 
-#### Scenario: Entrenador sees only one navigation option
-- **WHEN** the authenticated user role is `entrenador`
-- **THEN** the sidebar SHALL display exactly one item labeled `Organizaciones Disponibles`
+#### Scenario: Tenant-scoped menu is role-aware
+- **WHEN** a user has validated access to a tenant route
+- **THEN** the sidebar SHALL render only items permitted for the resolved tenant role
 
-#### Scenario: Usuario sees only one navigation option
-- **WHEN** the authenticated user role is `usuario`
-- **THEN** the sidebar SHALL display exactly one item labeled `Organizaciones Disponibles`
+#### Scenario: Unauthorized tenant context shows no tenant menu
+- **WHEN** tenant membership validation fails for requested tenant
+- **THEN** tenant-scoped menu items SHALL NOT be rendered and user SHALL be redirected to `/portal/orgs`
