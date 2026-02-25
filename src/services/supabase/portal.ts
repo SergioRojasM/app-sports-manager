@@ -23,13 +23,13 @@ function toSingle<T>(value: T | T[] | null | undefined): T | null {
 async function getActiveMembership(
   supabase: SupabaseClient,
   userId: string,
+  tenantId: string,
 ): Promise<MembershipRow> {
   const { data, error } = await supabase
     .from('miembros_tenant')
     .select('tenant_id, rol_id, roles(nombre), tenants(id, nombre)')
     .eq('usuario_id', userId)
-    .order('created_at', { ascending: true })
-    .order('id', { ascending: true })
+    .eq('tenant_id', tenantId)
     .limit(1)
     .maybeSingle();
 
@@ -44,17 +44,21 @@ export const portalService = {
    * Fetches the full user profile + role using the browser Supabase client.
    * Call from client hooks (e.g. useAuth) immediately after login.
    */
-  async getUserProfile(userId: string): Promise<UserProfile> {
+  async getUserProfile(userId: string, tenantId: string): Promise<UserProfile> {
     const supabase = createClient();
-    return portalService.fetchFullProfile(supabase, userId);
+    return portalService.fetchFullProfile(supabase, userId, tenantId);
   },
 
   /**
    * Fetches the full user profile + role using any Supabase client.
    * Use from Server Components / server-side code by passing the server client.
    */
-  async fetchFullProfile(supabase: SupabaseClient, userId: string): Promise<UserProfile> {
-    const membership = await getActiveMembership(supabase, userId);
+  async fetchFullProfile(
+    supabase: SupabaseClient,
+    userId: string,
+    tenantId: string,
+  ): Promise<UserProfile> {
+    const membership = await getActiveMembership(supabase, userId, tenantId);
 
     const { data, error } = await supabase
       .from('usuarios')
@@ -113,8 +117,12 @@ export const portalService = {
    * Fetches only the user role from the DB.
    * Use as fallback when the role cookie is missing but profile cookie is still valid.
    */
-  async fetchUserRole(supabase: SupabaseClient, userId: string): Promise<UserRole> {
-    const membership = await getActiveMembership(supabase, userId);
+  async fetchUserRole(
+    supabase: SupabaseClient,
+    userId: string,
+    tenantId: string,
+  ): Promise<UserRole> {
+    const membership = await getActiveMembership(supabase, userId, tenantId);
     return (toSingle(membership.roles)?.nombre as UserRole | undefined) ?? 'usuario';
   },
 };

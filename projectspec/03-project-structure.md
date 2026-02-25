@@ -23,11 +23,21 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── loading.tsx
 │   │       ├── page.tsx
 │   │       ├── bootstrap/route.ts
-│   │       ├── (administrador)/
-│   │       │   └── gestion-organizacion/page.tsx
-│   │       ├── (atleta)/
-│   │       ├── (entrenador)/
-│   │       └── (shared)/
+│   │       └── orgs/
+│   │           ├── page.tsx              # Organizations discovery (all authenticated users)
+│   │           └── [tenant_id]/
+│   │               ├── layout.tsx        # Membership + role gate for tenant entry
+│   │               ├── page.tsx          # Redirect to tenant role landing
+│   │               ├── (administrador)/
+│   │               │   ├── gestion-escenarios/page.tsx
+│   │               │   └── gestion-organizacion/page.tsx
+│   │               ├── (atleta)/
+│   │               │   └── entrenamientos-disponibles/page.tsx
+│   │               ├── (entrenador)/
+│   │               │   └── atletas/page.tsx
+│   │               └── (shared)/
+│   │                   ├── gestion-entrenamientos/page.tsx
+│   │                   └── perfil/page.tsx
 │   │
 │   ├── components/                       # Presentation layer
 │   │   ├── auth/
@@ -116,7 +126,7 @@ Following structure reflects the current implementation and the target scalable 
 For all new portal features, use this structure consistently:
 
 ```text
-app/portal/(role)/<route>/page.tsx              # Route entrypoint
+app/portal/orgs/[tenant_id]/(role)/<route>/page.tsx # Tenant-scoped route entrypoint
 components/portal/<feature-name>/*              # UI/presentation
 hooks/portal/<feature-name>/*                   # Use-case orchestration
 services/supabase/portal/<feature-name>.service.ts # Data access
@@ -239,7 +249,8 @@ Examples:
 
 ```
 src/
-├── app/portal/(administrador)/gestion-organizacion/page.tsx
+├── app/portal/orgs/page.tsx
+├── app/portal/orgs/[tenant_id]/(administrador)/gestion-organizacion/page.tsx
 ├── components/portal/organization-view/
 │   ├── OrganizationIdentityCard.tsx
 │   └── OrganizationContactCard.tsx

@@ -1,2 +1,2 @@
 export { portalService } from '../portal';
-export { organizationViewService } from './organization-view.service';
+export { tenantService } from './tenant.service';

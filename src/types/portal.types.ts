@@ -32,14 +32,51 @@ export type UserProfile = PortalDisplayProfile & {
   membership: UserMembershipContext;
 };
 
-export const ROLE_MENU_CONFIG: Record<UserRole, MenuItem[]> = {
+const BASE_MENU_ITEM: MenuItem = {
+  label: 'Organizaciones Disponibles',
+  href: '/portal/orgs',
+  icon: 'corporate_fare',
+};
+
+const SHARED_TENANT_ITEMS = [
+  
+  // { label: 'Perfil', path: 'perfil', icon: 'person' },
+] as const;
+
+const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; icon: string }>> = {
   administrador: [
-    { label: 'Organizaciones Disponibles', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
+    { label: 'Organización', path: 'gestion-organizacion', icon: 'business_center' },
+    { label: 'Escenarios', path: 'gestion-escenarios', icon: 'stadium' },
+    { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
   ],
   usuario: [
-    { label: 'Organizaciones Disponibles', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
+    { label: 'Entrenamientos Disponibles', path: 'entrenamientos-disponibles', icon: 'directions_run' },
   ],
   entrenador: [
-    { label: 'Organizaciones Disponibles', href: '/portal/gestion-organizacion', icon: 'corporate_fare' },
+    { label: 'Atletas', path: 'atletas', icon: 'groups' },
+    { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
+
   ],
+};
+
+export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[] {
+  if (!tenantId) {
+    return [BASE_MENU_ITEM];
+  }
+
+  const tenantPrefix = `/portal/orgs/${tenantId}`;
+
+  const roleItems = ROLE_TENANT_ITEMS[role].map((item) => ({
+    label: item.label,
+    href: `${tenantPrefix}/${item.path}`,
+    icon: item.icon,
+  }));
+
+  const sharedItems = SHARED_TENANT_ITEMS.map((item) => ({
+    label: item.label,
+    href: `${tenantPrefix}/${item.path}`,
+    icon: item.icon,
+  }));
+
+  return [BASE_MENU_ITEM, ...roleItems, ...sharedItems];
 };
