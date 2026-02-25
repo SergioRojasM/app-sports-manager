@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QBOP Training Venues</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00E5C4", // Turquoise accent
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#0d121f", // Deep Navy
+                        "navy-700": "#1a2235",
+                        "navy-800": "#151b2b",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(26, 34, 53, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glass-input {
+            background: rgba(21, 27, 43, 0.8);
+            border: 1px solid rgba(0, 229, 196, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen p-4 md:p-8">
+<div class="max-w-7xl mx-auto space-y-8">
+<!-- Search and Filter Section -->
+<div class="glass-card p-6 rounded-xl flex flex-col gap-6">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex-1">
+<label class="relative block">
+<span class="absolute inset-y-0 left-0 flex items-center pl-4 text-primary">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="glass-input block w-full rounded-xl py-3 pl-12 pr-4 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all" name="search" placeholder="Search for training scenarios or venues..." type="text"/>
+</label>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-background-dark font-semibold rounded-full hover:brightness-110 transition-all">
+<span class="material-symbols-outlined text-sm">grid_view</span>
+                        All Venues
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-navy-700 text-slate-300 border border-slate-700 hover:border-primary/50 rounded-full transition-all">
+<span class="material-symbols-outlined text-sm">sports_soccer</span>
+                        Soccer
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-navy-700 text-slate-300 border border-slate-700 hover:border-primary/50 rounded-full transition-all">
+<span class="material-symbols-outlined text-sm">sports_basketball</span>
+                        Basketball
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-navy-700 text-slate-300 border border-slate-700 hover:border-primary/50 rounded-full transition-all">
+<span class="material-symbols-outlined text-sm">sports_tennis</span>
+                        Tennis
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-navy-700 text-slate-300 border border-slate-700 hover:border-primary/50 rounded-full transition-all">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                        More Filters
+                    </button>
+</div>
+</div>
+</div>
+<!-- Venue Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="glass-card overflow-hidden group hover:border-primary/40 transition-all duration-300">
+<div class="relative h-56 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Professional floodlit green soccer stadium field" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD2dcE5N3u0DZpzfdMB9DSr3X1nbwCmlD_GkuBzqKMh3eIvO3J6uVAptTGCTqlpgjYyYgrB6WjwbepRmiHunaaAi0_yY-f7JgPXyhLRVqt05EYkK-wctHbyiNo3SKb4mrOyaxB8s188j19__VVCozJcPprzYgvs68HKoDF5in_xv0eJt2Mmr47avSnr5d8JSH5PbqYFj6adWaLqSQVOd2r5M_ZQkH2gggw_5nH0RrH00Kg994iHdFxdGi7urCzBDP45zCYPc18yNF4");'></div>
+<div class="absolute top-4 left-4">
+<span class="inline-flex items-center rounded-full bg-primary/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-primary border border-primary/30 uppercase tracking-wider">
+                            Available
+                        </span>
+</div>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<h3 class="text-xl font-bold text-slate-100 group-hover:text-primary transition-colors">Elite Performance Arena</h3>
+<p class="text-slate-400 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                            Downtown District, Sector 7
+                        </p>
+</div>
+<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">groups</span>
+<span class="text-xs text-slate-300">22 Players</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">layers</span>
+<span class="text-xs text-slate-300">Hybrid Turf</span>
+</div>
+</div>
+<div class="flex gap-3 pt-2">
+<button class="flex-1 py-2.5 rounded-lg border border-slate-700 text-slate-300 font-medium hover:bg-slate-700/50 transition-all">Details</button>
+<button class="flex-1 py-2.5 rounded-lg bg-primary text-background-dark font-bold hover:shadow-[0_0_20px_rgba(0,229,196,0.4)] transition-all">Book Now</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="glass-card overflow-hidden group hover:border-primary/40 transition-all duration-300">
+<div class="relative h-56 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Indoor blue tennis court with bright lighting" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD4YkSE5QLK81CvuaDNhowV7cbhTs7d0FddWUevULEGoK5YGGJ5V16QFxX1-PrFeZIXr_OkH_P59W5Hlf_x-Mi4SjKDvrMju80wzpSKyXjUuydQBy14Zs_BJ0CdSWKji7cNFjMupFrzXfBDFm5k8NKsyoW6OaNpqR9MPIYOh49tWxvmZX1l3w04THqCl5OILuba-sP8Y6Wjt9getyjno8Y6BzMdLbhgzsqO8bdy-9RSL6iaSUT8BNITzn9ggP91Bn6-6JqwLFLZrlU");'></div>
+<div class="absolute top-4 left-4">
+<span class="inline-flex items-center rounded-full bg-amber-500/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-amber-500 border border-amber-500/30 uppercase tracking-wider">
+                            Reserved
+                        </span>
+</div>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<h3 class="text-xl font-bold text-slate-100 group-hover:text-primary transition-colors">Grand Slam Indoor</h3>
+<p class="text-slate-400 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                            Westside Sports Hub
+                        </p>
+</div>
+<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">groups</span>
+<span class="text-xs text-slate-300">4 Players</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">stadium</span>
+<span class="text-xs text-slate-300">Hard Court</span>
+</div>
+</div>
+<div class="flex gap-3 pt-2">
+<button class="flex-1 py-2.5 rounded-lg border border-slate-700 text-slate-300 font-medium hover:bg-slate-700/50 transition-all">Details</button>
+<button class="flex-1 py-2.5 rounded-lg bg-primary/20 text-primary border border-primary/30 font-bold cursor-not-allowed opacity-80">Next Slot</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="glass-card overflow-hidden group hover:border-primary/40 transition-all duration-300">
+<div class="relative h-56 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Polished indoor basketball court hardwood floor" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBj6rUaUISbOS0woy85Wc7MNkJPDb4yuV5T-oCSZ0PMUecqRbrCSlx-JiO9zkLLu0v9makAv0GqJ93ZJW9Xu61zrldsP3RGOTIu5_wxNRw2XCiQe_jeA5xBOE0u-s9kJC15immzHUE4XDf6AhC0bpreG14MRByNRz3fDIYWj9syPUXKYEYbRW0aSSX_Psi9t-oTPJPJ1LoNKJdhM3hLwMUmU_TMiitICTsH-WzPz0D2j6MJojrYSmDcDGQasVH-roSzRq4ftpSZ8nA");'></div>
+<div class="absolute top-4 left-4">
+<span class="inline-flex items-center rounded-full bg-primary/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-primary border border-primary/30 uppercase tracking-wider">
+                            Available
+                        </span>
+</div>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<h3 class="text-xl font-bold text-slate-100 group-hover:text-primary transition-colors">Hoops Central Pavilion</h3>
+<p class="text-slate-400 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                            North Ridge Plaza
+                        </p>
+</div>
+<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">groups</span>
+<span class="text-xs text-slate-300">10 Players</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">texture</span>
+<span class="text-xs text-slate-300">Maple Wood</span>
+</div>
+</div>
+<div class="flex gap-3 pt-2">
+<button class="flex-1 py-2.5 rounded-lg border border-slate-700 text-slate-300 font-medium hover:bg-slate-700/50 transition-all">Details</button>
+<button class="flex-1 py-2.5 rounded-lg bg-primary text-background-dark font-bold hover:shadow-[0_0_20px_rgba(0,229,196,0.4)] transition-all">Book Now</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="glass-card overflow-hidden group hover:border-primary/40 transition-all duration-300">
+<div class="relative h-56 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Modern athletics track with blue surface" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBBVJz7RDuW4l_82ekvxgzXyTgYHUCywpNVfNTskGcQcz1WpLK9VlJbGw3LZ8uuC-ztuYvC7mXjo6tuM9HR6bMUM6k2jx3pD5F160uZewns8TSJnlHwAZebvZUn6Bg_5-ytkLIg0koE6d5aF60Z730-YP5SIORzglAH3m9jVPV7cea6EoE_gLxHf2RCAri4hkmG30reJ4TE-cbmsOy6vvfi8K49HcRWgPQ8T-nOHR5XGGv_i5c3W67FqhhzLTEmU7dnfNMDHSXV5vc");'></div>
+<div class="absolute top-4 left-4">
+<span class="inline-flex items-center rounded-full bg-primary/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-primary border border-primary/30 uppercase tracking-wider">
+                            Available
+                        </span>
+</div>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<h3 class="text-xl font-bold text-slate-100 group-hover:text-primary transition-colors">Olympia Sprint Track</h3>
+<p class="text-slate-400 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                            South Campus Complex
+                        </p>
+</div>
+<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">timer</span>
+<span class="text-xs text-slate-300">8 Lanes</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">bolt</span>
+<span class="text-xs text-slate-300">Synthetic</span>
+</div>
+</div>
+<div class="flex gap-3 pt-2">
+<button class="flex-1 py-2.5 rounded-lg border border-slate-700 text-slate-300 font-medium hover:bg-slate-700/50 transition-all">Details</button>
+<button class="flex-1 py-2.5 rounded-lg bg-primary text-background-dark font-bold hover:shadow-[0_0_20px_rgba(0,229,196,0.4)] transition-all">Book Now</button>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="glass-card overflow-hidden group hover:border-primary/40 transition-all duration-300">
+<div class="relative h-56 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="High tech indoor padel court glass walls" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCSRS9QL2-j81HNoXGPtNan0U6EgZOvW5fR9OdHXzYML4NaAIB2IzUD7rSSR6dtkzJuRB5QwLKq3KWNrSeujJI-__Zmcx_6J4YGPWzO1iK-LWLPOnS0vIj5p_7CH06UiL_rDRP7yn7cBBgO-zzdAyNL1dzgKVU9LR4zg27_9CCCeXrpoxSCdzfvwleV-qu1aBJblnt_QlMMaehlwBcWKX0jD0d9lLimqod_fMruZCmienWwGMN2zCRswyTqiD5p4OEZdfMUJiaoK6s");'></div>
+<div class="absolute top-4 left-4">
+<span class="inline-flex items-center rounded-full bg-amber-500/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-amber-500 border border-amber-500/30 uppercase tracking-wider">
+                            Reserved
+                        </span>
+</div>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<h3 class="text-xl font-bold text-slate-100 group-hover:text-primary transition-colors">Padel Pro Nexus</h3>
+<p class="text-slate-400 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                            Tech City Arena
+                        </p>
+</div>
+<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">groups</span>
+<span class="text-xs text-slate-300">4 Players</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">grid_on</span>
+<span class="text-xs text-slate-300">Glass Walled</span>
+</div>
+</div>
+<div class="flex gap-3 pt-2">
+<button class="flex-1 py-2.5 rounded-lg border border-slate-700 text-slate-300 font-medium hover:bg-slate-700/50 transition-all">Details</button>
+<button class="flex-1 py-2.5 rounded-lg bg-primary/20 text-primary border border-primary/30 font-bold cursor-not-allowed opacity-80">Next Slot</button>
+</div>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="glass-card overflow-hidden group hover:border-primary/40 transition-all duration-300">
+<div class="relative h-56 w-full overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Professional swimming pool with marked lanes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCK3bnOMVAD6r9WfELLYlBNWRBAGHMeCHL4iXzTrg3dyIq8eGKrgb7O5FZ9F7I9maGTcIaYxsAJY8Ylm3O2ILzYpuez9eUWqRXawG9icRX14s5NOhl5Ng4Uz9FJ0aY3QRCJHXxYgxvhN4HAWIQy2tsFjiDFPLzVJPOnQHnobBfN2DUlL_bjbH79VDinCA5tszUutxcBUFrgsl-Mxj1cZ8XFni0ZNQcYNjyK94vLhKNhJ_FTHNoUw0BdqXDZOSwNweoGyIk4zThVtE8");'></div>
+<div class="absolute top-4 left-4">
+<span class="inline-flex items-center rounded-full bg-primary/20 backdrop-blur-md px-3 py-1 text-xs font-bold text-primary border border-primary/30 uppercase tracking-wider">
+                            Available
+                        </span>
+</div>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<h3 class="text-xl font-bold text-slate-100 group-hover:text-primary transition-colors">Hydro Aquatic Center</h3>
+<p class="text-slate-400 text-sm flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                            Central Park South
+                        </p>
+</div>
+<div class="grid grid-cols-2 gap-4 py-2 border-y border-slate-700/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">waves</span>
+<span class="text-xs text-slate-300">Olympic Size</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">device_thermostat</span>
+<span class="text-xs text-slate-300">Temp Control</span>
+</div>
+</div>
+<div class="flex gap-3 pt-2">
+<button class="flex-1 py-2.5 rounded-lg border border-slate-700 text-slate-300 font-medium hover:bg-slate-700/50 transition-all">Details</button>
+<button class="flex-1 py-2.5 rounded-lg bg-primary text-background-dark font-bold hover:shadow-[0_0_20px_rgba(0,229,196,0.4)] transition-all">Book Now</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer / Pagination (Optional Context) -->
+<div class="flex justify-center pt-8">
+<nav class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-navy-700 text-slate-400 hover:text-primary border border-slate-700 hover:border-primary/50 transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-background-dark font-bold">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-navy-700 text-slate-400 hover:text-primary border border-slate-700 transition-all">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-navy-700 text-slate-400 hover:text-primary border border-slate-700 transition-all">3</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-navy-700 text-slate-400 hover:text-primary border border-slate-700 hover:border-primary/50 transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</nav>
+</div>
+</div>
+</body></html>

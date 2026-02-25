@@ -86,15 +86,18 @@ create table if not exists public.perfil_deportivo (
 
 create table if not exists public.escenarios (
   id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null,
-  nombre varchar(100),
-  descripcion text,
-  ubicacion varchar(255),
-  direccion varchar(255),
-  capacidad integer,
-  tipo varchar(50),
-  activo boolean not null default true,
+  tenant_id uuid not null, 
+  nombre varchar(100), -- Ej: "Gimnasio Principal", "Cancha de Fútbol", etc.
+  descripcion text, -- Detalles adicionales sobre el escenario
+  ubicacion varchar(255), -- "Parque Lagos de Córdoba", "Sector Norte", etc.
+  direccion varchar(255), -- Dirección física completa para geolocalización o visitas
+  coordenadas varchar(50), -- Formato "latitud,longitud"
+  capacidad integer,  -- Número máximo de personas que el escenario puede albergar
+  tipo varchar(50), -- Ej: "gimnasio", "cancha", "piscina", "estadio", etc.
+  activo boolean not null default true, -- Indica si el escenario está disponible para crear entrenamientos
+  image_url varchar(500), -- URL de una imagen representativa del escenario
   created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
   constraint escenarios_tenant_id_fkey
     foreign key (tenant_id) references public.tenants(id) on delete cascade
 );
