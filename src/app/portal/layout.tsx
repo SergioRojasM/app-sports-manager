@@ -16,7 +16,7 @@ export default async function PortalLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/auth/login?next=/portal');
+    redirect('/auth/login?next=/portal/orgs');
   }
 
   const cookieStore = await cookies();
@@ -36,10 +36,10 @@ export default async function PortalLayout({
         Buffer.from(profileCookie, 'base64').toString('utf-8'),
       ) as PortalDisplayProfile;
     } catch {
-      redirect('/portal/bootstrap?next=/portal');
+      redirect('/portal/bootstrap?next=/portal/orgs');
     }
   } else {
-    redirect('/portal/bootstrap?next=/portal');
+    redirect('/portal/bootstrap?next=/portal/orgs');
   }
 
   return (

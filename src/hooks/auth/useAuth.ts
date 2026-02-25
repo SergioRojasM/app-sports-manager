@@ -62,8 +62,8 @@ export function useAuth() {
       setErrorMessage(result.errorMessage);
       if (!result.errorMessage && result.user?.id) {
         try {
-          const profile = await portalService.getUserProfile(result.user.id);
-          await setPortalCookies(profile.role, {
+          const profile = await portalService.fetchDisplayProfile(supabase, result.user.id);
+          await setPortalCookies('usuario', {
             nombre: profile.nombre,
             apellido: profile.apellido,
             foto_url: profile.foto_url,
@@ -75,7 +75,7 @@ export function useAuth() {
       }
       return result;
     },
-    []
+    [supabase]
   );
 
   const signUp = useCallback(

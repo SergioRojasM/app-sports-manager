@@ -13,6 +13,7 @@ context: |
 # Example:
 rules:
   proposal:
+    - always use de User story input for creating a proposal, if you don't have it, ask for it first
     - Always use following metodology when creating a proposal(page -> component -> hook -> service -> types)
     - To create a page or component, always ask for the design first (can be a sketch, pen or html).
     - Always refer to the specification file projectspec/03-project-structure.md for task details and requirements

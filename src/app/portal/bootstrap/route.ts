@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/services/supabase/server';
 import { portalService } from '@/services/supabase/portal';
-import { VALID_ROLES, type PortalDisplayProfile } from '@/types/portal.types';
+import type { PortalDisplayProfile } from '@/types/portal.types';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -14,7 +14,7 @@ const COOKIE_OPTIONS = {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const nextParam = searchParams.get('next');
-  const nextPath = nextParam?.startsWith('/') ? nextParam : '/portal';
+  const nextPath = nextParam?.startsWith('/') ? nextParam : '/portal/orgs';
 
   const supabase = await createClient();
   const {
@@ -22,15 +22,13 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL('/auth/login?next=/portal', request.url));
+    return NextResponse.redirect(
+      new URL(`/auth/login?next=${encodeURIComponent(nextPath)}`, request.url),
+    );
   }
 
   try {
-    const profile = await portalService.fetchFullProfile(supabase, user.id);
-
-    if (!VALID_ROLES.includes(profile.role)) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
+    const profile = await portalService.fetchDisplayProfile(supabase, user.id);
 
     const displayProfile: PortalDisplayProfile = {
       nombre: profile.nombre,
@@ -40,7 +38,7 @@ export async function GET(request: NextRequest) {
     };
 
     const response = NextResponse.redirect(new URL(nextPath, request.url));
-    response.cookies.set('portal_role', profile.role, COOKIE_OPTIONS);
+    response.cookies.set('portal_role', 'usuario', COOKIE_OPTIONS);
     response.cookies.set(
       'portal_profile',
       Buffer.from(JSON.stringify(displayProfile)).toString('base64'),

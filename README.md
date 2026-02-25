@@ -36,17 +36,19 @@ Production-ready Next.js boilerplate with authentication, TypeScript, Tailwind C
 | Route | Access |
 |---|---|
 | `/portal` | All authenticated users |
-| `/portal/gestion-organizacion` | admin (organization cards view + right-side edit drawer persisted to `public.tenants`) |
-| `/portal/gestion-escenarios` | admin |
-| `/portal/gestion-entrenamientos` | admin, coach |
-| `/portal/perfil` | athlete, coach |
-| `/portal/entrenamientos-disponibles` | athlete |
-| `/portal/atletas` | coach |
+| `/portal/orgs` | All authenticated users (tenant discovery; excludes `public`) |
+| `/portal/orgs/[tenant_id]/gestion-organizacion` | `administrador` with membership in `tenant_id` |
+| `/portal/orgs/[tenant_id]/gestion-escenarios` | `administrador` with membership in `tenant_id` |
+| `/portal/orgs/[tenant_id]/gestion-entrenamientos` | `administrador`, `entrenador`, `usuario` with membership |
+| `/portal/orgs/[tenant_id]/perfil` | `administrador`, `entrenador`, `usuario` with membership |
+| `/portal/orgs/[tenant_id]/entrenamientos-disponibles` | `usuario` with membership in `tenant_id` |
+| `/portal/orgs/[tenant_id]/atletas` | `entrenador` with membership in `tenant_id` |
 
 Organization management edit scope:
-- Edit flow is available only for `admin` users inside `/portal/gestion-organizacion`.
+- Edit flow is available only for `administrador` users inside `/portal/orgs/[tenant_id]/gestion-organizacion`.
 - Drawer saves updates only to `public.tenants` for the authenticated user tenant.
 - UI closes and refreshes organization cards in place after successful save.
+- `Suscribirse` action is available for non-members in `/portal/orgs` as a non-persistent placeholder.
 
 #### Portal Feature Folder Convention
 
@@ -58,18 +60,19 @@ Portal modules follow feature-first slices:
 - `src/services/supabase/portal/<feature-name>.service.ts` → feature data access
 - `src/types/portal/<feature-name>.types.ts` → feature contracts
 
-Current example: `organization-view` for `/portal/gestion-organizacion`.
+Current example: `organization-view` for `/portal/orgs/[tenant_id]/gestion-organizacion` and `/portal/orgs`.
 
 #### Role-Based Menu Matrix
 
 | Menu item | admin | athlete | coach |
 |---|:---:|:---:|:---:|
-| Gestión de Organización | ✅ | — | — |
-| Gestión de Escenarios | ✅ | — | — |
-| Gestión de Entrenamientos | ✅ | — | ✅ |
-| Perfil | — | ✅ | ✅ |
-| Entrenamientos Disponibles | — | ✅ | — |
-| Atletas | — | — | ✅ |
+| Organizaciones Disponibles (`/portal/orgs`) | ✅ | ✅ | ✅ |
+| Gestión de Organización (`/portal/orgs/[tenant_id]/gestion-organizacion`) | ✅ | — | — |
+| Gestión de Escenarios (`/portal/orgs/[tenant_id]/gestion-escenarios`) | ✅ | — | — |
+| Gestión de Entrenamientos (`/portal/orgs/[tenant_id]/gestion-entrenamientos`) | ✅ | ✅ | ✅ |
+| Perfil (`/portal/orgs/[tenant_id]/perfil`) | ✅ | ✅ | ✅ |
+| Entrenamientos Disponibles (`/portal/orgs/[tenant_id]/entrenamientos-disponibles`) | — | ✅ | — |
+| Atletas (`/portal/orgs/[tenant_id]/atletas`) | — | — | ✅ |
 
 #### Cookie Lifecycle (`portal_role` + `portal_profile`)
 
