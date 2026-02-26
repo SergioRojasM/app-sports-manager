@@ -1,0 +1,7 @@
+feat(portal): implement tenant scenario management with create/edit modal
+
+- add scenarios feature slice (types, service, hook, components)
+- wire gestion-escenarios tenant admin page to ScenariosPage
+- enforce tenant-aware sidebar behavior for unresolved/unauthorized tenant contexts
+- add scenario validation rules and schedule upsert flow
+- update README and project structure documentation for scenarios module

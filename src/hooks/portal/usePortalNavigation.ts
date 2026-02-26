@@ -17,12 +17,22 @@ export function usePortalNavigation(role: UserRole): UsePortalNavigationResult {
     const match = activePath.match(/^\/portal\/orgs\/([^/]+)/);
     return match?.[1];
   }, [activePath]);
-  const { role: tenantRole } = useTenantAccess(tenantId);
+  const { loading: tenantAccessLoading, allowed: tenantAllowed, role: tenantRole } = useTenantAccess(tenantId);
   const effectiveRole = tenantRole ?? role;
 
   const menuItems = useMemo(
-    () => resolvePortalMenu(effectiveRole, tenantId),
-    [effectiveRole, tenantId],
+    () => {
+      if (!tenantId) {
+        return resolvePortalMenu(effectiveRole, undefined);
+      }
+
+      if (tenantAccessLoading || !tenantAllowed || !tenantRole) {
+        return resolvePortalMenu(effectiveRole, undefined);
+      }
+
+      return resolvePortalMenu(tenantRole, tenantId);
+    },
+    [effectiveRole, tenantAccessLoading, tenantAllowed, tenantId, tenantRole],
   );
 
   return { activePath, menuItems };

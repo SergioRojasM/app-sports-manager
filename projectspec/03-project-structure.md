@@ -48,17 +48,23 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   ├── PortalSidebar.tsx
 │   │   │   ├── RoleBasedMenu.tsx
 │   │   │   ├── UserAvatarMenu.tsx
-│   │   │   └── organization-view/        # Feature slice (portal/organization-view)
-│   │   │       ├── OrganizationIdentityCard.tsx
-│   │   │       └── OrganizationContactCard.tsx
+│   │   │   ├── tenant/                   # Feature slice (portal/tenant)
+│   │   │   │   ├── TenantIdentityCard.tsx
+│   │   │   │   └── TenantContactCard.tsx
+│   │   │   └── scenarios/                # Feature slice (portal/scenarios)
+│   │   │       ├── ScenariosPage.tsx
+│   │   │       ├── ScenarioCard.tsx
+│   │   │       └── ScenarioFormModal.tsx
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
 │   │   ├── auth/
 │   │   └── portal/
 │   │       ├── usePortalNavigation.ts    # Shared portal logic
-│   │       └── organization-view/
-│   │           └── useOrganizationView.ts
+│   │       ├── tenant/
+│   │       │   └── useTenantView.ts
+│   │       └── scenarios/
+│   │           └── useScenarios.ts
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -68,14 +74,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── auth.ts
 │   │       ├── portal/                   # Portal bounded-context services
 │   │       │   ├── index.ts
-│   │       │   └── organization-view.service.ts
+│   │       │   ├── tenant.service.ts
+│   │       │   └── scenarios.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
 │   │   ├── auth.types.ts
 │   │   ├── portal.types.ts               # Shared portal contracts
 │   │   └── portal/
-│   │       └── organization-view.types.ts
+│   │       ├── tenant.types.ts
+│   │       └── scenarios.types.ts
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
@@ -227,7 +235,7 @@ Examples:
 
 1. **Co-location by feature slice**
   - Keep each feature grouped across layers using the same feature name.
-  - Example: `components/portal/organization-view/`, `hooks/portal/organization-view/`, `services/supabase/portal/organization-view.service.ts`, `types/portal/organization-view.types.ts`
+  - Example: `components/portal/scenarios/`, `hooks/portal/scenarios/`, `services/supabase/portal/scenarios.service.ts`, `types/portal/scenarios.types.ts`
 
 2. **Single Responsibility**
    - One component = one responsibility
@@ -245,21 +253,30 @@ Examples:
 
 ## Example Implementation
 
-### Feature: Portal Organization View
+### Feature: Portal Tenant + Scenarios
 
 ```
 src/
 ├── app/portal/orgs/page.tsx
+├── app/portal/orgs/[tenant_id]/(administrador)/gestion-escenarios/page.tsx
 ├── app/portal/orgs/[tenant_id]/(administrador)/gestion-organizacion/page.tsx
-├── components/portal/organization-view/
-│   ├── OrganizationIdentityCard.tsx
-│   └── OrganizationContactCard.tsx
-├── hooks/portal/organization-view/
-│   └── useOrganizationView.ts
+├── components/portal/tenant/
+│   ├── TenantIdentityCard.tsx
+│   └── TenantContactCard.tsx
+├── components/portal/scenarios/
+│   ├── ScenariosPage.tsx
+│   ├── ScenarioCard.tsx
+│   └── ScenarioFormModal.tsx
+├── hooks/portal/tenant/
+│   └── useTenantView.ts
+├── hooks/portal/scenarios/
+│   └── useScenarios.ts
 ├── services/supabase/portal/
-│   └── organization-view.service.ts
+│   ├── tenant.service.ts
+│   └── scenarios.service.ts
 └── types/portal/
-  └── organization-view.types.ts
+  ├── tenant.types.ts
+  └── scenarios.types.ts
 ```
 
 ### Code Flow Example

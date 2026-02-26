@@ -1,8 +1,15 @@
-export default function GestionEscenariosTenantPage() {
+import { ScenariosPage } from '@/components/portal/scenarios';
+
+type GestionEscenariosTenantPageProps = {
+  params: Promise<{ tenant_id: string }>;
+};
+
+export default async function GestionEscenariosTenantPage({
+  params,
+}: GestionEscenariosTenantPageProps) {
+  const { tenant_id: tenantId } = await params;
+
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-slate-100">Gestión de Escenarios</h1>
-      <p className="mt-2 text-slate-400">Módulo en construcción.</p>
-    </div>
+    <ScenariosPage tenantId={tenantId} />
   );
 }
