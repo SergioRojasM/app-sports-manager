@@ -39,6 +39,7 @@ Production-ready Next.js boilerplate with authentication, TypeScript, Tailwind C
 | `/portal/orgs` | All authenticated users (tenant discovery; excludes `public`) |
 | `/portal/orgs/[tenant_id]/gestion-organizacion` | `administrador` with membership in `tenant_id` |
 | `/portal/orgs/[tenant_id]/gestion-escenarios` | `administrador` with membership in `tenant_id` |
+| `/portal/orgs/[tenant_id]/gestion-disciplinas` | `administrador` with membership in `tenant_id` |
 | `/portal/orgs/[tenant_id]/gestion-entrenamientos` | `administrador`, `entrenador`, `usuario` with membership |
 | `/portal/orgs/[tenant_id]/perfil` | `administrador`, `entrenador`, `usuario` with membership |
 | `/portal/orgs/[tenant_id]/entrenamientos-disponibles` | `usuario` with membership in `tenant_id` |
@@ -56,6 +57,12 @@ Scenario management scope:
 - Persistence is tenant-scoped and limited to `public.escenarios` and `public.horarios_escenarios`.
 - Create/edit uses a shared right-side modal with validation for required fields and schedule time constraints.
 
+Discipline management scope:
+- Discipline feature is available only for `administrador` users inside `/portal/orgs/[tenant_id]/gestion-disciplinas`.
+- Route page delegates orchestration to `hooks/portal/disciplines/useDisciplines` and data access to `services/supabase/portal/disciplines.service.ts`.
+- Persistence is tenant-scoped to `public.disciplinas`, with duplicate-name and FK-dependency error handling.
+- Create/edit uses a shared right-side modal and table actions include edit/delete with confirmation.
+
 #### Portal Feature Folder Convention
 
 Portal modules follow feature-first slices:
@@ -66,7 +73,7 @@ Portal modules follow feature-first slices:
 - `src/services/supabase/portal/<feature-name>.service.ts` → feature data access
 - `src/types/portal/<feature-name>.types.ts` → feature contracts
 
-Current examples: `tenant` for `/portal/orgs` + `/portal/orgs/[tenant_id]/gestion-organizacion`, and `scenarios` for `/portal/orgs/[tenant_id]/gestion-escenarios`.
+Current examples: `tenant` for `/portal/orgs` + `/portal/orgs/[tenant_id]/gestion-organizacion`, `scenarios` for `/portal/orgs/[tenant_id]/gestion-escenarios`, and `disciplines` for `/portal/orgs/[tenant_id]/gestion-disciplinas`.
 
 #### Role-Based Menu Matrix
 
@@ -75,6 +82,7 @@ Current examples: `tenant` for `/portal/orgs` + `/portal/orgs/[tenant_id]/gestio
 | Organizaciones Disponibles (`/portal/orgs`) | ✅ | ✅ | ✅ |
 | Gestión de Organización (`/portal/orgs/[tenant_id]/gestion-organizacion`) | ✅ | — | — |
 | Gestión de Escenarios (`/portal/orgs/[tenant_id]/gestion-escenarios`) | ✅ | — | — |
+| Gestión de Disciplinas (`/portal/orgs/[tenant_id]/gestion-disciplinas`) | ✅ | — | — |
 | Gestión de Entrenamientos (`/portal/orgs/[tenant_id]/gestion-entrenamientos`) | ✅ | ✅ | ✅ |
 | Perfil (`/portal/orgs/[tenant_id]/perfil`) | ✅ | ✅ | ✅ |
 | Entrenamientos Disponibles (`/portal/orgs/[tenant_id]/entrenamientos-disponibles`) | — | ✅ | — |

@@ -1,0 +1,8 @@
+feat(portal): implement tenant discipline management with admin-only policies
+
+- add disciplines feature slice (types, service, hooks, components)
+- wire gestion-disciplinas admin tenant route to DisciplinesPage
+- add admin-only sidebar entry for gestion-disciplinas in tenant context
+- add Supabase migration for disciplinas insert/update/delete admin policies
+- map duplicate-name and FK dependency errors to deterministic user messages
+- update README and project structure docs for disciplines module

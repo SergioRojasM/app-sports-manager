@@ -46,6 +46,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
   administrador: [
     { label: 'Organización', path: 'gestion-organizacion', icon: 'business_center' },
     { label: 'Escenarios', path: 'gestion-escenarios', icon: 'stadium' },
+    { label: 'Disciplinas', path: 'gestion-disciplinas', icon: 'sports' },
     { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
   ],
   usuario: [
