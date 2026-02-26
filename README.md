@@ -50,6 +50,12 @@ Organization management edit scope:
 - UI closes and refreshes organization cards in place after successful save.
 - `Suscribirse` action is available for non-members in `/portal/orgs` as a non-persistent placeholder.
 
+Scenario management scope:
+- Scenario feature is available only for `administrador` users inside `/portal/orgs/[tenant_id]/gestion-escenarios`.
+- Route page delegates orchestration to `hooks/portal/scenarios/useScenarios` and data access to `services/supabase/portal/scenarios.service.ts`.
+- Persistence is tenant-scoped and limited to `public.escenarios` and `public.horarios_escenarios`.
+- Create/edit uses a shared right-side modal with validation for required fields and schedule time constraints.
+
 #### Portal Feature Folder Convention
 
 Portal modules follow feature-first slices:
@@ -60,7 +66,7 @@ Portal modules follow feature-first slices:
 - `src/services/supabase/portal/<feature-name>.service.ts` → feature data access
 - `src/types/portal/<feature-name>.types.ts` → feature contracts
 
-Current example: `organization-view` for `/portal/orgs/[tenant_id]/gestion-organizacion` and `/portal/orgs`.
+Current examples: `tenant` for `/portal/orgs` + `/portal/orgs/[tenant_id]/gestion-organizacion`, and `scenarios` for `/portal/orgs/[tenant_id]/gestion-escenarios`.
 
 #### Role-Based Menu Matrix
 

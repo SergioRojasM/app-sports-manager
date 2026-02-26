@@ -38,10 +38,9 @@ const BASE_MENU_ITEM: MenuItem = {
   icon: 'corporate_fare',
 };
 
-const SHARED_TENANT_ITEMS = [
-  
+const SHARED_TENANT_ITEMS: Array<{ label: string; path: string; icon: string }> = [
   // { label: 'Perfil', path: 'perfil', icon: 'person' },
-] as const;
+];
 
 const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; icon: string }>> = {
   administrador: [

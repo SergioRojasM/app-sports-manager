@@ -29,3 +29,5 @@ rules:
     - Always the first task must be to create a new branch with name format feat/description or fix/description
     - Second task must be valiadate that working brach are not main, master, or develop 
     - Always refer to the specification file projectspec/03-project-structure.md for task details and requirements
+    - Always create a update documentation task on projectspec/03-project-structure.md if the implementation affects the documentation
+    - always create a task with the creation of a commit message and pull request description for the implementation
