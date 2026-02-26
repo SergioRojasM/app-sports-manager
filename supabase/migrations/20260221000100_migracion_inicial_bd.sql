@@ -124,9 +124,9 @@ create table if not exists public.disciplinas (
   tenant_id uuid not null,
   nombre varchar(100) not null,
   descripcion text,
-  icono_url varchar(500),
   activo boolean not null default true,
   created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
   constraint disciplinas_tenant_id_fkey
     foreign key (tenant_id) references public.tenants(id) on delete cascade,
   constraint disciplinas_tenant_nombre_uk unique (tenant_id, nombre)
@@ -149,6 +149,7 @@ create table if not exists public.entrenamientos (
   cupo_maximo integer,
   estado varchar(30) not null default 'pendiente',
   created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
   constraint entrenamientos_tenant_id_fkey
     foreign key (tenant_id) references public.tenants(id) on delete cascade,
   constraint entrenamientos_disciplina_id_fkey
