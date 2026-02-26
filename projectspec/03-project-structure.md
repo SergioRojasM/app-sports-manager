@@ -29,6 +29,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               ├── layout.tsx        # Membership + role gate for tenant entry
 │   │               ├── page.tsx          # Redirect to tenant role landing
 │   │               ├── (administrador)/
+│   │               │   ├── gestion-disciplinas/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
 │   │               │   └── gestion-organizacion/page.tsx
 │   │               ├── (atleta)/
@@ -55,6 +56,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── ScenariosPage.tsx
 │   │   │       ├── ScenarioCard.tsx
 │   │   │       └── ScenarioFormModal.tsx
+│   │   │   └── disciplines/              # Feature slice (portal/disciplines)
+│   │   │       ├── DisciplinesPage.tsx
+│   │   │       ├── DisciplinesTable.tsx
+│   │   │       └── DisciplineFormModal.tsx
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -65,6 +70,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── useTenantView.ts
 │   │       └── scenarios/
 │   │           └── useScenarios.ts
+│   │       └── disciplines/
+│   │           ├── useDisciplines.ts
+│   │           └── useDisciplineForm.ts
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -76,6 +84,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── index.ts
 │   │       │   ├── tenant.service.ts
 │   │       │   └── scenarios.service.ts
+│   │       │   └── disciplines.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
@@ -84,6 +93,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   └── portal/
 │   │       ├── tenant.types.ts
 │   │       └── scenarios.types.ts
+│   │       └── disciplines.types.ts
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
@@ -253,12 +263,13 @@ Examples:
 
 ## Example Implementation
 
-### Feature: Portal Tenant + Scenarios
+### Feature: Portal Tenant + Scenarios + Disciplines
 
 ```
 src/
 ├── app/portal/orgs/page.tsx
 ├── app/portal/orgs/[tenant_id]/(administrador)/gestion-escenarios/page.tsx
+├── app/portal/orgs/[tenant_id]/(administrador)/gestion-disciplinas/page.tsx
 ├── app/portal/orgs/[tenant_id]/(administrador)/gestion-organizacion/page.tsx
 ├── components/portal/tenant/
 │   ├── TenantIdentityCard.tsx
@@ -267,16 +278,25 @@ src/
 │   ├── ScenariosPage.tsx
 │   ├── ScenarioCard.tsx
 │   └── ScenarioFormModal.tsx
+├── components/portal/disciplines/
+│   ├── DisciplinesPage.tsx
+│   ├── DisciplinesTable.tsx
+│   └── DisciplineFormModal.tsx
 ├── hooks/portal/tenant/
 │   └── useTenantView.ts
 ├── hooks/portal/scenarios/
 │   └── useScenarios.ts
+├── hooks/portal/disciplines/
+│   ├── useDisciplines.ts
+│   └── useDisciplineForm.ts
 ├── services/supabase/portal/
 │   ├── tenant.service.ts
 │   └── scenarios.service.ts
+│   └── disciplines.service.ts
 └── types/portal/
   ├── tenant.types.ts
   └── scenarios.types.ts
+  └── disciplines.types.ts
 ```
 
 ### Code Flow Example
