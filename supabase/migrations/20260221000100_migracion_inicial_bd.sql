@@ -136,9 +136,79 @@ create table if not exists public.disciplinas (
 -- ENTRENAMIENTOS / PLANES
 -- =========================
 
+create table if not exists public.entrenamientos_grupo (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null,
+  tipo varchar(20) not null default 'recurrente',
+  nombre varchar(150),
+  descripcion text,
+  disciplina_id uuid not null,
+  escenario_id uuid not null,
+  entrenador_id uuid,
+  duracion_minutos integer,
+  cupo_maximo integer,
+  timezone text not null default 'UTC',
+  fecha_inicio date not null,
+  fecha_fin date,
+  estado varchar(30) not null default 'activo',
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  constraint entrenamientos_grupo_tenant_id_fkey
+    foreign key (tenant_id) references public.tenants(id) on delete cascade,
+  constraint entrenamientos_grupo_disciplina_id_fkey
+    foreign key (disciplina_id) references public.disciplinas(id) on delete restrict,
+  constraint entrenamientos_grupo_escenario_id_fkey
+    foreign key (escenario_id) references public.escenarios(id) on delete restrict,
+  constraint entrenamientos_grupo_entrenador_id_fkey
+    foreign key (entrenador_id) references public.usuarios(id) on delete set null,
+  constraint entrenamientos_grupo_duracion_ck check (duracion_minutos is null or duracion_minutos > 0),
+  constraint entrenamientos_grupo_cupo_ck check (cupo_maximo is null or cupo_maximo > 0),
+  constraint entrenamientos_grupo_tipo_ck check (tipo in ('unico', 'recurrente')),
+  constraint entrenamientos_grupo_estado_ck check (estado in ('activo', 'cancelado', 'finalizado')),
+  constraint entrenamientos_grupo_fechas_ck check (fecha_fin is null or fecha_fin >= fecha_inicio),
+  constraint entrenamientos_grupo_fecha_fin_max_6_meses_ck check (
+    fecha_fin is null or fecha_fin <= (fecha_inicio + interval '6 months')::date
+  ),
+  constraint entrenamientos_grupo_unico_fechas_ck check (
+    (tipo = 'unico' and (fecha_fin is null or fecha_fin = fecha_inicio))
+    or tipo = 'recurrente'
+  ),
+  constraint entrenamientos_grupo_tenant_id_id_uk unique (tenant_id, id)
+);
+
+create table if not exists public.entrenamientos_grupo_reglas (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null,
+  entrenamiento_grupo_id uuid not null,
+  dia_semana integer,
+  todo_el_dia boolean not null default false,
+  hora_inicio time,
+  hora_fin time,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  constraint entrenamientos_grupo_reglas_tenant_grupo_fkey
+    foreign key (tenant_id, entrenamiento_grupo_id)
+    references public.entrenamientos_grupo(tenant_id, id)
+    on delete cascade,
+  constraint entrenamientos_grupo_reglas_dia_semana_ck
+    check (dia_semana is null or dia_semana between 0 and 6),
+  constraint entrenamientos_grupo_reglas_horas_ck
+    check (
+      (todo_el_dia = true and hora_inicio is null and hora_fin is null)
+      or
+      (todo_el_dia = false and hora_inicio is not null and hora_fin is not null and hora_fin > hora_inicio)
+    ),
+  constraint entrenamientos_grupo_reglas_tenant_id_id_uk unique (tenant_id, id)
+);
+
 create table if not exists public.entrenamientos (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null,
+  entrenamiento_grupo_id uuid,
+  entrenamiento_grupo_regla_id uuid,
+  origen_creacion varchar(20) not null default 'manual',
+  es_excepcion_serie boolean not null default false,
+  bloquear_sync_grupo boolean not null default false,
   nombre varchar(150),
   descripcion text,
   disciplina_id uuid not null,
@@ -158,8 +228,17 @@ create table if not exists public.entrenamientos (
     foreign key (escenario_id) references public.escenarios(id) on delete restrict,
   constraint entrenamientos_entrenador_id_fkey
     foreign key (entrenador_id) references public.usuarios(id) on delete set null,
+  constraint entrenamientos_entrenamiento_grupo_fkey
+    foreign key (tenant_id, entrenamiento_grupo_id)
+    references public.entrenamientos_grupo(tenant_id, id)
+    on delete set null,
+  constraint entrenamientos_entrenamiento_grupo_regla_fkey
+    foreign key (tenant_id, entrenamiento_grupo_regla_id)
+    references public.entrenamientos_grupo_reglas(tenant_id, id)
+    on delete set null,
   constraint entrenamientos_duracion_ck check (duracion_minutos is null or duracion_minutos > 0),
-  constraint entrenamientos_cupo_ck check (cupo_maximo is null or cupo_maximo > 0)
+  constraint entrenamientos_cupo_ck check (cupo_maximo is null or cupo_maximo > 0),
+  constraint entrenamientos_origen_creacion_ck check (origen_creacion in ('manual', 'generado'))
 );
 
 create table if not exists public.planes (

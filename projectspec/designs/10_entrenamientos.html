@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QBOP Training Calendar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#256af4",
+                        "accent": "#2dd4bf", // Turquoise accent requested
+                        "background-light": "#f5f6f8",
+                        "background-dark": "#0d121f", // Specific deep navy requested
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center p-4">
+<!-- Calendar Module Container -->
+<div class="w-full max-w-[960px] bg-slate-800/20 dark:bg-slate-900/40 backdrop-blur-md rounded-xl border border-slate-200/10 shadow-2xl overflow-hidden">
+<!-- Header Section -->
+<div class="flex items-center justify-between p-8 border-b border-slate-200/10">
+<div>
+<h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-accent">school</span>
+                    QBOP Training Hub
+                </h1>
+<p class="text-slate-400 text-sm mt-1">Manage your certification and workflow sessions</p>
+</div>
+<div class="flex items-center gap-4 bg-background-dark/50 p-1.5 rounded-lg border border-slate-700/50">
+<button class="p-2 hover:bg-slate-800 rounded transition-colors text-slate-300">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<span class="text-lg font-semibold px-4 min-w-[140px] text-center">October 2023</span>
+<button class="p-2 hover:bg-slate-800 rounded transition-colors text-slate-300">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3">
+<!-- Main Calendar Grid -->
+<div class="lg:col-span-2 p-6 border-r border-slate-200/10">
+<!-- Days of Week -->
+<div class="grid grid-cols-7 mb-4">
+<div class="text-center text-xs font-bold text-slate-500 uppercase tracking-widest py-2">Sun</div>
+<div class="text-center text-xs font-bold text-slate-500 uppercase tracking-widest py-2">Mon</div>
+<div class="text-center text-xs font-bold text-slate-500 uppercase tracking-widest py-2">Tue</div>
+<div class="text-center text-xs font-bold text-slate-500 uppercase tracking-widest py-2">Wed</div>
+<div class="text-center text-xs font-bold text-slate-500 uppercase tracking-widest py-2">Thu</div>
+<div class="text-center text-xs font-bold text-slate-500 uppercase tracking-widest py-2">Fri</div>
+<div class="text-center text-xs font-bold text-slate-500 uppercase tracking-widest py-2">Sat</div>
+</div>
+<!-- Calendar Days -->
+<div class="grid grid-cols-7 gap-px bg-slate-800/30 rounded-lg overflow-hidden border border-slate-800/50">
+<!-- Empty slots for previous month -->
+<div class="aspect-square bg-background-dark/40 flex flex-col p-2 text-slate-600 opacity-30">
+<span class="text-sm">28</span>
+</div>
+<div class="aspect-square bg-background-dark/40 flex flex-col p-2 text-slate-600 opacity-30">
+<span class="text-sm">29</span>
+</div>
+<div class="aspect-square bg-background-dark/40 flex flex-col p-2 text-slate-600 opacity-30">
+<span class="text-sm">30</span>
+</div>
+<!-- Current Month Days -->
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer group">
+<span class="text-sm font-medium">1</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer group">
+<span class="text-sm font-medium">2</span>
+<div class="mt-auto flex gap-1">
+<div class="size-1.5 rounded-full bg-accent"></div>
+</div>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer group">
+<span class="text-sm font-medium">3</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer group">
+<span class="text-sm font-medium">4</span>
+<div class="mt-auto flex gap-1">
+<div class="size-1.5 rounded-full bg-primary"></div>
+<div class="size-1.5 rounded-full bg-accent"></div>
+</div>
+</div>
+<!-- Today/Selected Day -->
+<div class="aspect-square bg-accent/10 border-2 border-accent/50 flex flex-col p-2 cursor-pointer relative">
+<span class="text-sm font-bold text-accent">5</span>
+<span class="absolute top-2 right-2 flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+</span>
+<div class="mt-auto flex gap-1">
+<div class="size-1.5 rounded-full bg-accent"></div>
+</div>
+</div>
+<!-- Continuation of days -->
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">6</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">7</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">8</span>
+<div class="mt-auto flex gap-1">
+<div class="size-1.5 rounded-full bg-primary"></div>
+</div>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">9</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">10</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">11</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">12</span>
+<div class="mt-auto flex gap-1">
+<div class="size-1.5 rounded-full bg-accent"></div>
+</div>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">13</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">14</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">15</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">16</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">17</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">18</span>
+<div class="mt-auto flex gap-1">
+<div class="size-1.5 rounded-full bg-accent"></div>
+</div>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">19</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">20</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">21</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">22</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">23</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">24</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">25</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">26</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">27</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">28</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">29</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">30</span>
+</div>
+<div class="aspect-square bg-background-dark/80 hover:bg-slate-800/50 transition-colors flex flex-col p-2 cursor-pointer">
+<span class="text-sm font-medium">31</span>
+</div>
+</div>
+</div>
+<!-- Side Panel: Schedule Details -->
+<div class="p-6 bg-slate-900/50 lg:rounded-r-xl">
+<h3 class="text-lg font-semibold mb-6 text-white flex items-center justify-between">
+                    Training Events
+                    <span class="bg-accent/20 text-accent text-xs px-2 py-1 rounded font-bold uppercase tracking-wider">Today</span>
+</h3>
+<div class="space-y-4">
+<!-- Event Card 1 -->
+<div class="group relative bg-slate-800/40 p-4 rounded border border-slate-700/50 hover:border-accent/50 transition-all cursor-pointer">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-accent uppercase tracking-tighter mb-1">Fundamentals</span>
+<h4 class="text-sm font-bold text-slate-100 group-hover:text-accent transition-colors">Advanced QBOP Masterclass</h4>
+<p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                    10:00 AM - 11:30 AM
+                                </p>
+</div>
+<div class="bg-accent/20 text-accent p-2 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+</div>
+</div>
+<!-- Event Card 2 -->
+<div class="group relative bg-slate-800/40 p-4 rounded border border-slate-700/50 hover:border-primary/50 transition-all cursor-pointer">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-primary uppercase tracking-tighter mb-1">Integration</span>
+<h4 class="text-sm font-bold text-slate-100 group-hover:text-primary transition-colors">Turquoise API Integration</h4>
+<p class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+                                    02:30 PM - 04:00 PM
+                                </p>
+</div>
+<div class="bg-primary/20 text-primary p-2 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">hub</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-700/50">
+<button class="w-full bg-accent hover:bg-accent/90 text-background-dark font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+                        Schedule New Session
+                    </button>
+<div class="mt-6 flex flex-col gap-3">
+<div class="flex items-center gap-3 text-xs text-slate-400">
+<span class="size-2 rounded-full bg-accent"></span>
+<span>Mandatory Certification Training</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-slate-400">
+<span class="size-2 rounded-full bg-primary"></span>
+<span>Optional Workshop Session</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
