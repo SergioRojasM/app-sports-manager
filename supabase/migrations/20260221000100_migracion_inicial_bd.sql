@@ -205,7 +205,6 @@ create table if not exists public.entrenamientos (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null,
   entrenamiento_grupo_id uuid,
-  entrenamiento_grupo_regla_id uuid,
   origen_creacion varchar(20) not null default 'manual',
   es_excepcion_serie boolean not null default false,
   bloquear_sync_grupo boolean not null default false,
@@ -231,10 +230,6 @@ create table if not exists public.entrenamientos (
   constraint entrenamientos_entrenamiento_grupo_fkey
     foreign key (tenant_id, entrenamiento_grupo_id)
     references public.entrenamientos_grupo(tenant_id, id)
-    on delete set null,
-  constraint entrenamientos_entrenamiento_grupo_regla_fkey
-    foreign key (tenant_id, entrenamiento_grupo_regla_id)
-    references public.entrenamientos_grupo_reglas(tenant_id, id)
     on delete set null,
   constraint entrenamientos_duracion_ck check (duracion_minutos is null or duracion_minutos > 0),
   constraint entrenamientos_cupo_ck check (cupo_maximo is null or cupo_maximo > 0),
