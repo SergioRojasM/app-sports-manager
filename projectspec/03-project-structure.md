@@ -60,6 +60,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── DisciplinesPage.tsx
 │   │   │       ├── DisciplinesTable.tsx
 │   │   │       └── DisciplineFormModal.tsx
+│   │   │   └── entrenamientos/           # Feature slice (portal/entrenamientos)
+│   │   │       ├── EntrenamientosPage.tsx
+│   │   │       ├── EntrenamientosCalendar.tsx
+│   │   │       └── EntrenamientoFormModal.tsx
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -73,6 +77,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── disciplines/
 │   │           ├── useDisciplines.ts
 │   │           └── useDisciplineForm.ts
+│   │       └── entrenamientos/
+│   │           ├── useEntrenamientos.ts
+│   │           ├── useEntrenamientoForm.ts
+│   │           └── useEntrenamientoScope.ts
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -85,6 +93,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── tenant.service.ts
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
+│   │       │   └── entrenamientos.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
@@ -94,6 +103,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── tenant.types.ts
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
+│   │       └── entrenamientos.types.ts
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts

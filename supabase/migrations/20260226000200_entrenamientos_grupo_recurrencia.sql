@@ -18,8 +18,6 @@ create index if not exists idx_entrenamientos_grupo_reglas_dia_semana
 create index if not exists idx_entrenamientos_entrenamiento_grupo_id
   on public.entrenamientos (entrenamiento_grupo_id);
 
-create index if not exists idx_entrenamientos_entrenamiento_grupo_regla_id
-  on public.entrenamientos (entrenamiento_grupo_regla_id);
 
 create index if not exists idx_entrenamientos_fecha_hora
   on public.entrenamientos (fecha_hora);
@@ -51,18 +49,18 @@ end;
 $$;
 
 drop trigger if exists entrenamientos_grupo_sync_entrenamientos on public.entrenamientos_grupo;
-create trigger entrenamientos_grupo_sync_entrenamientos
-after update of
-  nombre,
-  descripcion,
-  disciplina_id,
-  escenario_id,
-  entrenador_id,
-  duracion_minutos,
-  cupo_maximo
-on public.entrenamientos_grupo
-for each row
-execute function public.sync_entrenamientos_from_grupo();
+-- create trigger entrenamientos_grupo_sync_entrenamientos
+-- after update of
+--   nombre,
+--   descripcion,
+--   disciplina_id,
+--   escenario_id,
+--   entrenador_id,
+--   duracion_minutos,
+--   cupo_maximo
+-- on public.entrenamientos_grupo
+-- for each row
+-- execute function public.sync_entrenamientos_from_grupo();
 
 alter table public.entrenamientos_grupo enable row level security;
 alter table public.entrenamientos_grupo_reglas enable row level security;

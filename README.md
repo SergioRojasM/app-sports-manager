@@ -63,6 +63,12 @@ Discipline management scope:
 - Persistence is tenant-scoped to `public.disciplinas`, with duplicate-name and FK-dependency error handling.
 - Create/edit uses a shared right-side modal and table actions include edit/delete with confirmation.
 
+Training management scope:
+- Training feature is available on shared tenant route `/portal/orgs/[tenant_id]/gestion-entrenamientos` for users with tenant membership.
+- Route page delegates orchestration to `hooks/portal/entrenamientos/useEntrenamientos` and data access to `services/supabase/portal/entrenamientos.service.ts`.
+- Persistence is tenant-scoped to `public.entrenamientos_grupo`, `public.entrenamientos_grupo_reglas`, and `public.entrenamientos`.
+- Create/edit uses a right-side modal wizard (`unico|recurrente`) and scoped mutations use selector options `single|future|series`.
+
 #### Portal Feature Folder Convention
 
 Portal modules follow feature-first slices:
@@ -73,7 +79,7 @@ Portal modules follow feature-first slices:
 - `src/services/supabase/portal/<feature-name>.service.ts` → feature data access
 - `src/types/portal/<feature-name>.types.ts` → feature contracts
 
-Current examples: `tenant` for `/portal/orgs` + `/portal/orgs/[tenant_id]/gestion-organizacion`, `scenarios` for `/portal/orgs/[tenant_id]/gestion-escenarios`, and `disciplines` for `/portal/orgs/[tenant_id]/gestion-disciplinas`.
+Current examples: `tenant` for `/portal/orgs` + `/portal/orgs/[tenant_id]/gestion-organizacion`, `scenarios` for `/portal/orgs/[tenant_id]/gestion-escenarios`, `disciplines` for `/portal/orgs/[tenant_id]/gestion-disciplinas`, and `entrenamientos` for `/portal/orgs/[tenant_id]/gestion-entrenamientos`.
 
 #### Role-Based Menu Matrix
 
