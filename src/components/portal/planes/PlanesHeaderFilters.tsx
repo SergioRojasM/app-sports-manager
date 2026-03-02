@@ -35,7 +35,7 @@ export function PlanesHeaderFilters({
           <span className="material-symbols-outlined text-base" aria-hidden="true">
             add
           </span>
-          New Plan
+          Nuevo Plan
         </button>
       </div>
     </div>

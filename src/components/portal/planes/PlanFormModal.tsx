@@ -104,10 +104,10 @@ export function PlanFormModal({
         <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-100">
-              {mode === 'create' ? 'Create plan' : 'Edit plan'}
+              {mode === 'create' ? 'Crear plan' : 'Editar plan'}
             </h2>
             <p className="mt-1 text-xs text-slate-400">
-              Configure plan data for this organization.
+              Configura los datos del plan para esta organización.
             </p>
           </div>
           <button
@@ -126,7 +126,7 @@ export function PlanFormModal({
           {/* Name */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-nombre">
-              Name
+              Nombre
             </label>
             <input
               id="plan-nombre"
@@ -134,7 +134,7 @@ export function PlanFormModal({
               value={values.nombre}
               onChange={(event) => onChangeField('nombre', event.target.value)}
               disabled={isSubmitting}
-              placeholder="Monthly Basic Plan"
+              placeholder="Plan Básico Mensual"
               className={[
                 'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
                 fieldErrors.nombre
@@ -152,7 +152,7 @@ export function PlanFormModal({
           {/* Description */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-descripcion">
-              Description
+              Descripción
             </label>
             <textarea
               id="plan-descripcion"
@@ -160,7 +160,7 @@ export function PlanFormModal({
               value={values.descripcion}
               onChange={(event) => onChangeField('descripcion', event.target.value)}
               disabled={isSubmitting}
-              placeholder="Optional plan description"
+              placeholder="Descripción opcional del plan"
               className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
             />
           </div>
@@ -168,7 +168,7 @@ export function PlanFormModal({
           {/* Price */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-precio">
-              Price
+              Precio
             </label>
             <input
               id="plan-precio"
@@ -196,7 +196,7 @@ export function PlanFormModal({
           {/* Validity (months) */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-vigencia">
-              Validity (months)
+              Vigencia (meses)
             </label>
             <input
               id="plan-vigencia"
@@ -224,7 +224,7 @@ export function PlanFormModal({
           {/* Classes included */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-clases">
-              Classes included
+              Clases incluidas
             </label>
             <input
               id="plan-clases"
@@ -234,7 +234,7 @@ export function PlanFormModal({
               value={values.clases_incluidas}
               onChange={(event) => onChangeField('clases_incluidas', event.target.value)}
               disabled={isSubmitting}
-              placeholder="Optional"
+              placeholder="Opcional"
               className={[
                 'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
                 fieldErrors.clases_incluidas
@@ -252,7 +252,7 @@ export function PlanFormModal({
           {/* Type (virtual / presencial) */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-tipo">
-              Type
+              Tipo
             </label>
             <select
               id="plan-tipo"
@@ -261,16 +261,17 @@ export function PlanFormModal({
               disabled={isSubmitting}
               className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
             >
-              <option value="">— Select type —</option>
+              <option value="">— Seleccionar tipo —</option>
               <option value="presencial">Presencial</option>
               <option value="virtual">Virtual</option>
+              <option value="mixto">Mixto</option>
             </select>
           </div>
 
           {/* Benefits (tag input) */}
           <div>
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-              Benefits
+              Beneficios
             </span>
             <div className="flex gap-2">
               <input
@@ -279,7 +280,7 @@ export function PlanFormModal({
                 onChange={(event) => setBeneficioInput(event.target.value)}
                 onKeyDown={handleBeneficioKeyDown}
                 disabled={isSubmitting}
-                placeholder="Add a benefit and press Enter"
+                placeholder="Escribe un beneficio y presiona Enter"
                 className="flex-1 rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
               />
               <button
@@ -307,7 +308,7 @@ export function PlanFormModal({
                       onClick={() => removeBeneficio(index)}
                       disabled={isSubmitting}
                       className="rounded p-0.5 text-slate-400 transition hover:text-rose-300 disabled:cursor-not-allowed"
-                      aria-label={`Remove benefit: ${beneficio}`}
+                      aria-label={`Eliminar beneficio: ${beneficio}`}
                     >
                       <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
                     </button>
@@ -328,18 +329,18 @@ export function PlanFormModal({
               className="rounded border-slate-600 bg-navy-deep"
             />
             <label htmlFor="plan-active" className="text-sm text-slate-200">
-              Plan active
+              Plan activo
             </label>
           </div>
 
           {/* Disciplines multi-select */}
           <div>
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-              Disciplines
+              Disciplinas
             </span>
             {activeDisciplines.length === 0 ? (
               <p className="rounded-lg border border-amber-400/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
-                No active disciplines available for this organization. Create disciplines first.
+                No hay disciplinas activas disponibles. Crea disciplinas primero.
               </p>
             ) : (
               <div className="max-h-48 space-y-2 overflow-y-auto rounded-xl border border-slate-700 bg-navy-deep p-3">
@@ -381,7 +382,7 @@ export function PlanFormModal({
             disabled={isSubmitting}
             className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
           >
-            Cancel
+            Cancelar
           </button>
           <button
             type="button"
@@ -389,7 +390,7 @@ export function PlanFormModal({
             disabled={isSubmitting || activeDisciplines.length === 0}
             className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create plan' : 'Save changes'}
+            {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear plan' : 'Guardar cambios'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               save
             </span>

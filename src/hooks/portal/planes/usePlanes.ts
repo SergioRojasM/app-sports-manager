@@ -36,7 +36,7 @@ type UsePlanesResult = PlanesViewModel & {
 };
 
 function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): PlanTableItem {
-  const status = plan.activo ? 'Active' : 'Inactive';
+  const status = plan.activo ? 'Activo' : 'Inactivo';
   const vigencia = plan.vigencia_meses === 1 ? '1 mes' : `${plan.vigencia_meses} meses`;
 
   const disciplinaNames = plan.disciplinas

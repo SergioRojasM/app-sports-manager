@@ -22,15 +22,15 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
         <table className="min-w-full divide-y divide-portal-border text-left">
           <thead className="bg-navy-medium/80">
             <tr>
-              <th className="pl-8 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Name</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Price</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Validity</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Classes</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Type</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Disciplines</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Benefits</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Status</th>
-              <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Actions</th>
+              <th className="pl-8 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Nombre</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Precio</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Vigencia</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Clases</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Tipo</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Disciplinas</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Beneficios</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Estado</th>
+              <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-portal-border bg-navy-deep/50">
@@ -59,9 +59,11 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
                       'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
                       row.tipo === 'presencial'
                         ? 'border border-sky-400/30 bg-sky-900/20 text-sky-200'
-                        : 'border border-violet-400/30 bg-violet-900/20 text-violet-200',
+                        : row.tipo === 'mixto'
+                          ? 'border border-amber-400/30 bg-amber-900/20 text-amber-200'
+                          : 'border border-violet-400/30 bg-violet-900/20 text-violet-200',
                     ].join(' ')}>
-                      {row.tipo === 'presencial' ? 'Presencial' : 'Virtual'}
+                      {row.tipo === 'presencial' ? 'Presencial' : row.tipo === 'mixto' ? 'Mixto' : 'Virtual'}
                     </span>
                   ) : (
                     <span className="text-xs text-slate-500">—</span>
@@ -122,14 +124,14 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
                       onClick={() => onEdit(row)}
                       className="rounded-lg border border-portal-border bg-navy-medium px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
                     >
-                      Edit
+                      Editar
                     </button>
                     <button
                       type="button"
                       onClick={() => onDelete(row)}
                       className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
                     >
-                      Delete
+                      Eliminar
                     </button>
                   </div>
                 </td>

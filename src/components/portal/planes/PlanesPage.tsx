@@ -52,9 +52,9 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
   return (
     <section className="space-y-6">
       <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Membership Plans</h1>
+        <h1 className="text-3xl font-semibold text-slate-100">Planes de Membresía</h1>
         <p className="mt-2 text-sm text-slate-400">
-          Create and manage membership plans for your organization.
+          Crea y administra los planes de membresía de tu organización.
         </p>
       </header>
 

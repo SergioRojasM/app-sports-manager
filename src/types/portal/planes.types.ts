@@ -1,4 +1,4 @@
-export type PlanTipo = 'virtual' | 'presencial';
+export type PlanTipo = 'virtual' | 'presencial' | 'mixto';
 
 export type Plan = {
   id: string;
