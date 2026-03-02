@@ -1,3 +1,5 @@
+export type PlanTipo = 'virtual' | 'presencial';
+
 export type Plan = {
   id: string;
   tenant_id: string;
@@ -5,6 +7,9 @@ export type Plan = {
   descripcion: string | null;
   precio: number;
   vigencia_meses: number;
+  clases_incluidas: number | null;
+  tipo: PlanTipo | null;
+  beneficios: string | null;
   activo: boolean;
   created_at: string;
   updated_at: string;
@@ -33,6 +38,9 @@ export type CreatePlanInput = {
   descripcion?: string | null;
   precio: number;
   vigencia_meses: number;
+  clases_incluidas?: number | null;
+  tipo?: PlanTipo | null;
+  beneficios?: string | null;
   activo?: boolean;
   disciplinaIds: string[];
 };
@@ -44,13 +52,16 @@ export type UpdatePlanInput = CreatePlanInput & {
 export type PlanFormValues = {
   nombre: string;
   descripcion: string;
-  precio: string;         // string for controlled input, parsed on submit
-  vigencia_meses: string; // string for controlled input
+  precio: string;           // string for controlled input, parsed on submit
+  vigencia_meses: string;   // string for controlled input
+  clases_incluidas: string; // string for controlled input
+  tipo: PlanTipo | '';       // '' = not selected
+  beneficios: string[];     // each item is one benefit text; stored concatenated with '|'
   activo: boolean;
   disciplinaIds: string[];
 };
 
-export type PlanFormField = 'nombre' | 'descripcion' | 'precio' | 'vigencia_meses' | 'disciplinaIds';
+export type PlanFormField = 'nombre' | 'descripcion' | 'precio' | 'vigencia_meses' | 'clases_incluidas' | 'tipo' | 'beneficios' | 'disciplinaIds';
 export type PlanFieldErrors = Partial<Record<PlanFormField, string>>;
 
 export type PlanesViewModel = {

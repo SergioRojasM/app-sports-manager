@@ -25,7 +25,10 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
               <th className="pl-8 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Name</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Price</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Validity</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Classes</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Type</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Disciplines</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Benefits</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Status</th>
               <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Actions</th>
             </tr>
@@ -46,6 +49,25 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
                   <span className="text-sm text-slate-200">{row.vigenciaLabel}</span>
                 </td>
                 <td className="px-6 py-4">
+                  <span className="text-sm text-slate-200">
+                    {row.clases_incluidas != null ? row.clases_incluidas : '—'}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  {row.tipo ? (
+                    <span className={[
+                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                      row.tipo === 'presencial'
+                        ? 'border border-sky-400/30 bg-sky-900/20 text-sky-200'
+                        : 'border border-violet-400/30 bg-violet-900/20 text-violet-200',
+                    ].join(' ')}>
+                      {row.tipo === 'presencial' ? 'Presencial' : 'Virtual'}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-500">—</span>
+                  )}
+                </td>
+                <td className="px-6 py-4">
                   <div className="flex flex-wrap gap-1.5">
                     {row.disciplinaNames.length > 0 ? (
                       row.disciplinaNames.map((name) => (
@@ -60,6 +82,20 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
                       <span className="text-xs text-slate-500">—</span>
                     )}
                   </div>
+                </td>
+                <td className="px-6 py-4">
+                  {row.beneficios ? (
+                    <ul className="space-y-0.5">
+                      {row.beneficios.split('|').filter(Boolean).map((b, i) => (
+                        <li key={i} className="flex items-center gap-1 text-xs text-slate-300">
+                          <span className="material-symbols-outlined text-xs text-turquoise" aria-hidden="true">check</span>
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-xs text-slate-500">—</span>
+                  )}
                 </td>
                 <td className="px-6 py-4">
                   <span

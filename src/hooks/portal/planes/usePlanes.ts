@@ -212,6 +212,9 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           descripcion: form.formValues.descripcion.trim(),
           precio: parseFloat(form.formValues.precio),
           vigencia_meses: parseInt(form.formValues.vigencia_meses, 10),
+          clases_incluidas: form.formValues.clases_incluidas.trim() !== '' ? parseInt(form.formValues.clases_incluidas, 10) : null,
+          tipo: form.formValues.tipo || null,
+          beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
           disciplinaIds: form.formValues.disciplinaIds,
         };
@@ -227,6 +230,9 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           descripcion: form.formValues.descripcion.trim(),
           precio: parseFloat(form.formValues.precio),
           vigencia_meses: parseInt(form.formValues.vigencia_meses, 10),
+          clases_incluidas: form.formValues.clases_incluidas.trim() !== '' ? parseInt(form.formValues.clases_incluidas, 10) : null,
+          tipo: form.formValues.tipo || null,
+          beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
           disciplinaIds: form.formValues.disciplinaIds,
         };

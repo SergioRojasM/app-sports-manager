@@ -13,6 +13,9 @@ const EMPTY_FORM: PlanFormValues = {
   descripcion: '',
   precio: '',
   vigencia_meses: '1',
+  clases_incluidas: '',
+  tipo: '',
+  beneficios: [],
   activo: true,
   disciplinaIds: [],
 };
@@ -23,6 +26,9 @@ function toFormValues(plan: PlanWithDisciplinas): PlanFormValues {
     descripcion: plan.descripcion ?? '',
     precio: String(plan.precio),
     vigencia_meses: String(plan.vigencia_meses),
+    clases_incluidas: plan.clases_incluidas != null ? String(plan.clases_incluidas) : '',
+    tipo: plan.tipo ?? '',
+    beneficios: plan.beneficios ? plan.beneficios.split('|').filter(Boolean) : [],
     activo: plan.activo,
     disciplinaIds: [...plan.disciplinas],
   };
@@ -74,6 +80,13 @@ export function usePlanForm() {
       errors.vigencia_meses = 'La vigencia es obligatoria.';
     } else if (vigencia < 1 || !Number.isInteger(vigencia)) {
       errors.vigencia_meses = 'La vigencia debe ser un número entero mayor o igual a 1.';
+    }
+
+    if (values.clases_incluidas.trim() !== '') {
+      const clases = parseInt(values.clases_incluidas, 10);
+      if (isNaN(clases) || clases < 0 || !Number.isInteger(clases)) {
+        errors.clases_incluidas = 'Las clases incluidas deben ser un número entero mayor o igual a 0.';
+      }
     }
 
     if (values.disciplinaIds.length === 0) {

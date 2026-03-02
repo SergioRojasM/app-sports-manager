@@ -3,6 +3,7 @@ import {
   PlanServiceError,
   type CreatePlanInput,
   type Plan,
+  type PlanTipo,
   type PlanWithDisciplinas,
   type UpdatePlanInput,
 } from '@/types/portal/planes.types';
@@ -14,6 +15,9 @@ type PlanRow = {
   descripcion: string | null;
   precio: number;
   vigencia_meses: number;
+  clases_incluidas: number | null;
+  tipo: string | null;
+  beneficios: string | null;
   activo: boolean;
   created_at: string;
   updated_at: string;
@@ -33,6 +37,9 @@ function mapPlanRow(row: PlanRow): PlanWithDisciplinas {
     descripcion: row.descripcion,
     precio: row.precio,
     vigencia_meses: row.vigencia_meses,
+    clases_incluidas: row.clases_incluidas,
+    tipo: (row.tipo as PlanTipo) ?? null,
+    beneficios: row.beneficios,
     activo: row.activo,
     created_at: row.created_at,
     updated_at: row.updated_at,
@@ -66,7 +73,7 @@ export const planesService = {
 
     const { data, error } = await supabase
       .from('planes')
-      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, activo, created_at, updated_at, planes_disciplina(disciplina_id)')
+      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id)')
       .eq('tenant_id', tenantId)
       .order('nombre');
 
@@ -88,9 +95,12 @@ export const planesService = {
         descripcion: toNullable(input.descripcion),
         precio: input.precio,
         vigencia_meses: input.vigencia_meses,
+        clases_incluidas: input.clases_incluidas ?? null,
+        tipo: input.tipo ?? null,
+        beneficios: input.beneficios ?? null,
         activo: input.activo ?? true,
       })
-      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, activo, created_at, updated_at')
+      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at')
       .single();
 
     if (error || !data) {
@@ -126,11 +136,14 @@ export const planesService = {
         descripcion: toNullable(input.descripcion),
         precio: input.precio,
         vigencia_meses: input.vigencia_meses,
+        clases_incluidas: input.clases_incluidas ?? null,
+        tipo: input.tipo ?? null,
+        beneficios: input.beneficios ?? null,
         activo: input.activo ?? true,
       })
       .eq('id', input.planId)
       .eq('tenant_id', input.tenantId)
-      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, activo, created_at, updated_at')
+      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at')
       .single();
 
     if (error || !data) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { Discipline } from '@/types/portal/disciplines.types';
 import type {
   PlanFieldErrors,
@@ -58,6 +58,31 @@ export function PlanFormModal({
       ? current.filter((id) => id !== disciplinaId)
       : [...current, disciplinaId];
     onChangeField('disciplinaIds', next);
+  };
+
+  // Beneficios tag input state
+  const [beneficioInput, setBeneficioInput] = useState('');
+
+  const addBeneficio = () => {
+    const text = beneficioInput.trim();
+    if (!text) return;
+    if (values.beneficios.includes(text)) {
+      setBeneficioInput('');
+      return;
+    }
+    onChangeField('beneficios', [...values.beneficios, text]);
+    setBeneficioInput('');
+  };
+
+  const removeBeneficio = (index: number) => {
+    onChangeField('beneficios', values.beneficios.filter((_, i) => i !== index));
+  };
+
+  const handleBeneficioKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addBeneficio();
+    }
   };
 
   return (
@@ -193,6 +218,102 @@ export function PlanFormModal({
               <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
                 {fieldErrors.vigencia_meses}
               </p>
+            ) : null}
+          </div>
+
+          {/* Classes included */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-clases">
+              Classes included
+            </label>
+            <input
+              id="plan-clases"
+              type="number"
+              min="0"
+              step="1"
+              value={values.clases_incluidas}
+              onChange={(event) => onChangeField('clases_incluidas', event.target.value)}
+              disabled={isSubmitting}
+              placeholder="Optional"
+              className={[
+                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                fieldErrors.clases_incluidas
+                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
+                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+              ].join(' ')}
+            />
+            {fieldErrors.clases_incluidas ? (
+              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+                {fieldErrors.clases_incluidas}
+              </p>
+            ) : null}
+          </div>
+
+          {/* Type (virtual / presencial) */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-tipo">
+              Type
+            </label>
+            <select
+              id="plan-tipo"
+              value={values.tipo}
+              onChange={(event) => onChangeField('tipo', event.target.value)}
+              disabled={isSubmitting}
+              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+            >
+              <option value="">— Select type —</option>
+              <option value="presencial">Presencial</option>
+              <option value="virtual">Virtual</option>
+            </select>
+          </div>
+
+          {/* Benefits (tag input) */}
+          <div>
+            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+              Benefits
+            </span>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={beneficioInput}
+                onChange={(event) => setBeneficioInput(event.target.value)}
+                onKeyDown={handleBeneficioKeyDown}
+                disabled={isSubmitting}
+                placeholder="Add a benefit and press Enter"
+                className="flex-1 rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+              />
+              <button
+                type="button"
+                onClick={addBeneficio}
+                disabled={isSubmitting || !beneficioInput.trim()}
+                className="rounded-lg border border-turquoise/40 bg-turquoise/10 px-3 py-2 text-sm font-semibold text-turquoise transition hover:bg-turquoise/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
+              </button>
+            </div>
+            {values.beneficios.length > 0 ? (
+              <ul className="mt-2 space-y-1.5">
+                {values.beneficios.map((beneficio, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-slate-700 bg-navy-deep/60 px-3 py-2 text-sm text-slate-200"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-sm text-turquoise" aria-hidden="true">check_circle</span>
+                      {beneficio}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeBeneficio(index)}
+                      disabled={isSubmitting}
+                      className="rounded p-0.5 text-slate-400 transition hover:text-rose-300 disabled:cursor-not-allowed"
+                      aria-label={`Remove benefit: ${beneficio}`}
+                    >
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             ) : null}
           </div>
 
