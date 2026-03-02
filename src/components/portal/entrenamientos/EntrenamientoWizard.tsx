@@ -156,6 +156,40 @@ export function EntrenamientoWizard({
               className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
             />
           </div>
+
+          <div className="md:col-span-2">
+            <label className="mb-1 block text-xs text-slate-300">Visibilidad</label>
+            <div className="flex items-center gap-4">
+              <label className="inline-flex items-center gap-2 text-sm text-slate-200">
+                <input
+                  type="radio"
+                  name="visibilidad"
+                  value="privado"
+                  checked={values.visibilidad === 'privado'}
+                  onChange={() => onChangeField('visibilidad', 'privado')}
+                  className="accent-turquoise"
+                />
+                Privado
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-200">
+                <input
+                  type="radio"
+                  name="visibilidad"
+                  value="publico"
+                  checked={values.visibilidad === 'publico'}
+                  onChange={() => onChangeField('visibilidad', 'publico')}
+                  className="accent-turquoise"
+                />
+                Público
+              </label>
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              {values.visibilidad === 'publico'
+                ? 'Este entrenamiento será visible públicamente y podrá ser descubierto por atletas fuera de tu organización.'
+                : 'Este entrenamiento solo será visible para los miembros de tu organización.'}
+            </p>
+            <InputError message={fieldErrors.visibilidad} />
+          </div>
         </div>
       </section>
 

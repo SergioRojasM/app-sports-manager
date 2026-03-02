@@ -30,6 +30,9 @@ const DISCIPLINE_COLOR_PALETTE = [
   'bg-fuchsia-400',
 ];
 
+/** CSS clip-path for a 5-pointed star used on público dots. */
+const STAR_CLIP_PATH = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+
 function toDateKeyInBogota(value: string): string {
   const date = new Date(value);
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -152,6 +155,21 @@ export function EntrenamientosCalendar({
         ) : null}
       </header>
 
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg border border-portal-border bg-navy-deep/40 px-3 py-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Visibilidad</p>
+        <div className="inline-flex items-center gap-2 text-xs text-slate-300">
+          <span
+            className="h-3 w-3 bg-slate-300"
+            style={{ clipPath: STAR_CLIP_PATH }}
+          />
+          <span>Público – visible para todos</span>
+        </div>
+        <div className="inline-flex items-center gap-2 text-xs text-slate-300">
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-300 ring-1 ring-white/20" />
+          <span>Privado – solo tu organización</span>
+        </div>
+      </div>
+
       <div className="grid grid-cols-7 gap-2 border-b border-portal-border pb-2">
         {WEEKDAY_HEADERS.map((label) => (
           <p key={label} className="text-center text-[11px] font-semibold uppercase tracking-wider text-slate-400">
@@ -189,7 +207,8 @@ export function EntrenamientosCalendar({
                   {dayItems.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {dayItems.map((item) => {
-                        const colorClass = colorByDisciplineId[item.instance.disciplina_id] ?? 'bg-slate-400';
+                        const disciplineColor = colorByDisciplineId[item.instance.disciplina_id] ?? 'bg-slate-400';
+                        const isPublic = item.instance.visibilidad === 'publico';
                         const timeLabel = item.instance.fecha_hora
                           ? toTimeLabelInBogota(item.instance.fecha_hora)
                           : 'Sin hora';
@@ -203,7 +222,12 @@ export function EntrenamientosCalendar({
                             }}
                             title={`${item.instance.nombre} · ${timeLabel} (click: opciones)`}
                             aria-label={`${item.instance.nombre} ${timeLabel}`}
-                            className={`h-2.5 w-2.5 rounded-full ${colorClass} ring-1 ring-white/20 transition hover:scale-110`}
+                            className={`transition hover:scale-110 ${disciplineColor} ${
+                              isPublic
+                                ? 'h-3 w-3'
+                                : 'h-2.5 w-2.5 rounded-full ring-1 ring-white/20'
+                            }`}
+                            style={isPublic ? { clipPath: STAR_CLIP_PATH } : undefined}
                           />
                         );
                       })}

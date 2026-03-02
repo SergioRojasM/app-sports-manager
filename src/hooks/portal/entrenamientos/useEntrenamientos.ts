@@ -198,6 +198,7 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
 
     return {
       tenantId,
+      visibilidad: values.visibilidad,
       group: {
         tipo: 'unico' as const,
         nombre: values.nombre.trim() || 'Entrenamiento único',
@@ -236,6 +237,7 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
 
   return {
     tenantId,
+    visibilidad: values.visibilidad,
     group: {
       tipo: 'recurrente' as const,
       nombre: values.nombre.trim() || 'Serie de entrenamiento',
@@ -452,6 +454,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const prepareEditFromGroup = useCallback(
     (group: TrainingGroupWithDetails, selectedScope: TrainingScope) => {
       const recurringDefaults = getRecurringDefaultsFromRules(group.reglas);
+      const firstGroupInstance = instances.find((inst) => inst.entrenamiento_grupo_id === group.id);
 
       const values: TrainingWizardValues = {
         nombre: group.nombre,
@@ -461,6 +464,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenador_id: group.entrenador_id ?? '',
         duracion_minutos: group.duracion_minutos != null ? String(group.duracion_minutos) : '',
         cupo_maximo: group.cupo_maximo != null ? String(group.cupo_maximo) : '',
+        visibilidad: firstGroupInstance?.visibilidad ?? 'privado',
         tipo: group.tipo,
         fecha_inicio: group.fecha_inicio,
         fecha_fin: group.fecha_fin ?? '',
@@ -486,7 +490,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       setSuccessMessage(null);
       setFormOpen(true);
     },
-    [form],
+    [form, instances],
   );
 
   const prepareEditFromInstance = useCallback(
@@ -506,6 +510,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           entrenador_id: instance.entrenador_id ?? '',
           duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
           cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
+          visibilidad: instance.visibilidad ?? 'privado',
           tipo: 'unico',
           fecha_inicio: dateOnly,
           fecha_fin: '',
@@ -539,6 +544,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenador_id: instance.entrenador_id ?? '',
         duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
         cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
+        visibilidad: instance.visibilidad ?? 'privado',
         tipo: relatedGroup?.tipo ?? 'unico',
         fecha_inicio: relatedGroup?.fecha_inicio ?? (instance.fecha_hora ? toDateOnlyFromIso(instance.fecha_hora) : ''),
         fecha_fin: relatedGroup?.fecha_fin ?? '',
@@ -671,6 +677,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           tenantId,
           trainingGroupId: editTarget.trainingGroupId,
           scope: editTarget.scope === 'single' ? 'future' : editTarget.scope,
+          visibilidad: form.formValues.visibilidad,
           effectiveFrom: editTarget.effectiveFrom,
           groupPatch: {
             ...toUpdatePatch(form.formValues),
@@ -689,6 +696,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             trainingGroupId: editTarget.trainingGroupId,
             effectiveFrom: editTarget.effectiveFrom,
             scope: 'single',
+            visibilidad: form.formValues.visibilidad,
             patch: {
               ...toUpdatePatch(form.formValues),
               fecha_hora: form.formValues.fecha_hora_unico ? toBogotaIsoFromLocalInput(form.formValues.fecha_hora_unico) : null,
@@ -699,6 +707,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             tenantId,
             trainingGroupId: editTarget.trainingGroupId,
             scope: editTarget.scope,
+            visibilidad: form.formValues.visibilidad,
             effectiveFrom: editTarget.effectiveFrom,
             groupPatch: {
               ...toUpdatePatch(form.formValues),

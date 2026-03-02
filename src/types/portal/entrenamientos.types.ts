@@ -1,5 +1,6 @@
 export type TrainingType = 'unico' | 'recurrente';
 export type TrainingScope = 'single' | 'future' | 'series';
+export type TrainingVisibility = 'publico' | 'privado';
 
 export type TrainingGroupStatus = 'activo' | 'cancelado' | 'finalizado';
 export type TrainingInstanceStatus = 'pendiente' | 'confirmado' | 'cancelado' | string;
@@ -52,6 +53,8 @@ export type TrainingInstance = {
   fecha_hora: string | null;
   duracion_minutos: number | null;
   cupo_maximo: number | null;
+  visibilidad: TrainingVisibility;
+  visible_para: string | null;
   estado: TrainingInstanceStatus;
   created_at: string;
   updated_at: string;
@@ -89,6 +92,7 @@ export type TrainingWizardValues = {
   entrenador_id: string;
   duracion_minutos: string;
   cupo_maximo: string;
+  visibilidad: TrainingVisibility;
   tipo: TrainingType;
   fecha_inicio: string;
   fecha_fin: string;
@@ -105,6 +109,7 @@ export type TrainingField =
   | 'entrenador_id'
   | 'duracion_minutos'
   | 'cupo_maximo'
+  | 'visibilidad'
   | 'tipo'
   | 'fecha_inicio'
   | 'fecha_fin'
@@ -134,6 +139,7 @@ export type TrainingScopeSelection = {
 
 export type CreateTrainingSeriesInput = {
   tenantId: string;
+  visibilidad: TrainingVisibility;
   uniqueDateTime?: string | null;
   group: {
     tipo: TrainingType;
@@ -175,6 +181,7 @@ export type UpsertTrainingGroupRulesInput = {
 
 export type GenerateSeriesInstancesInput = {
   tenantId: string;
+  visibilidad?: TrainingVisibility;
   trainingGroup: TrainingGroup;
   rules: TrainingGroupRule[];
   fromDate?: string;
@@ -186,6 +193,7 @@ export type UpdateTrainingSeriesInput = {
   tenantId: string;
   trainingGroupId: string;
   scope: Extract<TrainingScope, 'future' | 'series'>;
+  visibilidad?: TrainingVisibility;
   effectiveFrom?: string;
   groupPatch: Partial<{
     nombre: string;
@@ -206,6 +214,7 @@ export type UpdateTrainingInstanceInput = {
   tenantId: string;
   trainingId: string;
   scope: TrainingScope;
+  visibilidad?: TrainingVisibility;
   trainingGroupId?: string;
   effectiveFrom?: string;
   patch: Partial<{

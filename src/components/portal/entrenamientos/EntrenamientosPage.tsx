@@ -22,14 +22,6 @@ function LoadingState() {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-      No hay entrenamientos registrados para esta organización.
-    </div>
-  );
-}
-
 function toDateKeyInBogota(value: string): string {
   const date = new Date(value);
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -62,7 +54,6 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     submitError,
     successMessage,
     isSubmitting,
-    groups,
     instances,
     calendarItems,
     disciplinas,
@@ -232,9 +223,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         </div>
       ) : null}
 
-      {!loading && !error && groups.length === 0 && instances.length === 0 ? <EmptyState /> : null}
-
-      {!loading && !error && (groups.length > 0 || instances.length > 0) ? (
+      {!loading && !error ? (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-3 xl:items-stretch">
           <div className="xl:col-span-2 xl:min-h-0">
             <EntrenamientosCalendar

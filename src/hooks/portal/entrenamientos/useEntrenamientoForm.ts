@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import type {
   TrainingFieldErrors,
   TrainingRuleErrors,
+  TrainingVisibility,
   TrainingWizardRuleFormValue,
   TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
@@ -23,6 +24,7 @@ const EMPTY_FORM: TrainingWizardValues = {
   entrenador_id: '',
   duracion_minutos: '',
   cupo_maximo: '',
+  visibilidad: 'privado' as TrainingVisibility,
   tipo: 'unico',
   fecha_inicio: '',
   fecha_fin: '',
@@ -195,6 +197,10 @@ export function useEntrenamientoForm() {
 
     if (!values.tipo.trim()) {
       nextFieldErrors.tipo = 'Debes seleccionar el tipo de entrenamiento.';
+    }
+
+    if (values.visibilidad !== 'publico' && values.visibilidad !== 'privado') {
+      nextFieldErrors.visibilidad = 'La visibilidad debe ser "publico" o "privado".';
     }
 
     if (values.duracion_minutos.trim()) {

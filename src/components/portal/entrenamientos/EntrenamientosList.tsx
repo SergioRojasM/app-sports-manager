@@ -1,4 +1,20 @@
-import type { TrainingCalendarItem } from '@/types/portal/entrenamientos.types';
+import type { TrainingCalendarItem, TrainingVisibility } from '@/types/portal/entrenamientos.types';
+
+function VisibilidadBadge({ visibilidad }: { visibilidad: TrainingVisibility }) {
+  if (visibilidad === 'publico') {
+    return (
+      <span className="rounded-md border border-turquoise/40 bg-turquoise/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-turquoise">
+        Público
+      </span>
+    );
+  }
+
+  return (
+    <span className="rounded-md border border-slate-500/40 bg-slate-700/25 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+      Privado
+    </span>
+  );
+}
 
 type EntrenamientosListProps = {
   items: TrainingCalendarItem[];
@@ -59,6 +75,7 @@ export function EntrenamientosList({
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-slate-100">{item.instance.nombre}</p>
+                    <VisibilidadBadge visibilidad={item.instance.visibilidad} />
                     {isHistorical ? (
                       <span className="rounded-md border border-slate-500/60 bg-slate-700/35 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-300">
                         Histórico
