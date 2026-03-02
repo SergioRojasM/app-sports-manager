@@ -158,6 +158,19 @@ export function EntrenamientoWizard({
           </div>
 
           <div className="md:col-span-2">
+            <label htmlFor="punto_encuentro" className="mb-1 block text-xs text-slate-300">Punto de encuentro</label>
+            <input
+              id="punto_encuentro"
+              type="text"
+              maxLength={200}
+              value={values.punto_encuentro}
+              onChange={(event) => onChangeField('punto_encuentro', event.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
+              placeholder="Ej. Entrada principal del estadio, puerta norte..."
+            />
+          </div>
+
+          <div className="md:col-span-2">
             <label className="mb-1 block text-xs text-slate-300">Visibilidad</label>
             <div className="flex items-center gap-4">
               <label className="inline-flex items-center gap-2 text-sm text-slate-200">

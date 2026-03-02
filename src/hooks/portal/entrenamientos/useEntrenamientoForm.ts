@@ -19,6 +19,7 @@ const EMPTY_RULE: TrainingWizardRuleFormValue = {
 const EMPTY_FORM: TrainingWizardValues = {
   nombre: '',
   descripcion: '',
+  punto_encuentro: '',
   disciplina_id: '',
   escenario_id: '',
   entrenador_id: '',

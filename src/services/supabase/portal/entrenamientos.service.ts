@@ -76,6 +76,7 @@ function mapTrainingGroup(row: TrainingGroupRow): TrainingGroup {
     tipo: row.tipo === 'unico' ? 'unico' : 'recurrente',
     nombre: row.nombre ?? 'Entrenamiento',
     descripcion: row.descripcion,
+    punto_encuentro: row.punto_encuentro ?? null,
     disciplina_id: row.disciplina_id,
     escenario_id: row.escenario_id,
     entrenador_id: row.entrenador_id,
@@ -100,6 +101,7 @@ function mapTrainingInstance(row: TrainingInstanceRow): TrainingInstance {
     bloquear_sync_grupo: row.bloquear_sync_grupo,
     nombre: row.nombre ?? 'Entrenamiento',
     descripcion: row.descripcion,
+    punto_encuentro: row.punto_encuentro ?? null,
     disciplina_id: row.disciplina_id,
     escenario_id: row.escenario_id,
     entrenador_id: row.entrenador_id,
@@ -303,7 +305,7 @@ export const entrenamientosService = {
       supabase
         .from('entrenamientos_grupo')
         .select(
-          'id, tenant_id, tipo, nombre, descripcion, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+          'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
         )
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false }),
@@ -314,7 +316,7 @@ export const entrenamientosService = {
         .order('created_at', { ascending: true }),
       supabase
         .from('entrenamientos')
-        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
+        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
         .eq('tenant_id', tenantId),
     ]);
 
@@ -343,7 +345,7 @@ export const entrenamientosService = {
 
     let query = supabase
       .from('entrenamientos')
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
       .eq('tenant_id', tenantId)
       .order('fecha_hora', { ascending: true, nullsFirst: false });
 
@@ -379,6 +381,7 @@ export const entrenamientosService = {
           origen_creacion: 'manual',
           nombre: toNullable(input.group.nombre),
           descripcion: toNullable(input.group.descripcion),
+          punto_encuentro: toNullable(input.group.punto_encuentro),
           disciplina_id: input.group.disciplina_id,
           escenario_id: input.group.escenario_id,
           entrenador_id: input.group.entrenador_id ?? null,
@@ -403,6 +406,7 @@ export const entrenamientosService = {
         tipo: input.group.tipo,
         nombre: toNullable(input.group.nombre),
         descripcion: toNullable(input.group.descripcion),
+        punto_encuentro: toNullable(input.group.punto_encuentro),
         disciplina_id: input.group.disciplina_id,
         escenario_id: input.group.escenario_id,
         entrenador_id: input.group.entrenador_id ?? null,
@@ -414,7 +418,7 @@ export const entrenamientosService = {
         estado: input.group.estado ?? 'activo',
       })
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
       )
       .single();
 
@@ -504,6 +508,7 @@ export const entrenamientosService = {
         origen_creacion: 'manual',
         nombre: input.trainingGroup.nombre,
         descripcion: input.trainingGroup.descripcion,
+        punto_encuentro: input.trainingGroup.punto_encuentro ?? null,
         disciplina_id: input.trainingGroup.disciplina_id,
         escenario_id: input.trainingGroup.escenario_id,
         entrenador_id: input.trainingGroup.entrenador_id,
@@ -541,6 +546,7 @@ export const entrenamientosService = {
               origen_creacion: 'generado',
               nombre: input.trainingGroup.nombre,
               descripcion: input.trainingGroup.descripcion,
+              punto_encuentro: input.trainingGroup.punto_encuentro ?? null,
               disciplina_id: input.trainingGroup.disciplina_id,
               escenario_id: input.trainingGroup.escenario_id,
               entrenador_id: input.trainingGroup.entrenador_id,
@@ -564,7 +570,7 @@ export const entrenamientosService = {
     const { data, error } = await supabase
       .from('entrenamientos')
       .insert(rows)
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at');
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at');
 
     if (error) {
       throw mapServiceError(error);
@@ -581,6 +587,7 @@ export const entrenamientosService = {
       .update({
         nombre: input.groupPatch.nombre,
         descripcion: input.groupPatch.descripcion,
+        punto_encuentro: input.groupPatch.punto_encuentro,
         disciplina_id: input.groupPatch.disciplina_id,
         escenario_id: input.groupPatch.escenario_id,
         entrenador_id: input.groupPatch.entrenador_id,
@@ -593,7 +600,7 @@ export const entrenamientosService = {
       .eq('id', input.trainingGroupId)
       .eq('tenant_id', input.tenantId)
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
       )
       .single();
 
@@ -608,6 +615,7 @@ export const entrenamientosService = {
       const instancePatch: Record<string, unknown> = {
         nombre: group.nombre,
         descripcion: group.descripcion,
+        punto_encuentro: group.punto_encuentro,
         disciplina_id: group.disciplina_id,
         escenario_id: group.escenario_id,
         entrenador_id: group.entrenador_id,

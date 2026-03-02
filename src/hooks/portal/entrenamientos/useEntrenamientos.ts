@@ -203,6 +203,7 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
         tipo: 'unico' as const,
         nombre: values.nombre.trim() || 'Entrenamiento único',
         descripcion: toNullable(values.descripcion),
+        punto_encuentro: toNullable(values.punto_encuentro),
         disciplina_id: values.disciplina_id,
         escenario_id: values.escenario_id,
         entrenador_id: toNullable(values.entrenador_id),
@@ -241,8 +242,7 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
     group: {
       tipo: 'recurrente' as const,
       nombre: values.nombre.trim() || 'Serie de entrenamiento',
-      descripcion: toNullable(values.descripcion),
-      disciplina_id: values.disciplina_id,
+      descripcion: toNullable(values.descripcion),        punto_encuentro: toNullable(values.punto_encuentro),      disciplina_id: values.disciplina_id,
       escenario_id: values.escenario_id,
       entrenador_id: toNullable(values.entrenador_id),
       duracion_minutos: duration,
@@ -258,6 +258,7 @@ function toUpdatePatch(values: TrainingWizardValues) {
   return {
     nombre: values.nombre.trim(),
     descripcion: toNullable(values.descripcion),
+    punto_encuentro: toNullable(values.punto_encuentro),
     disciplina_id: values.disciplina_id,
     escenario_id: values.escenario_id,
     entrenador_id: toNullable(values.entrenador_id),
@@ -459,6 +460,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       const values: TrainingWizardValues = {
         nombre: group.nombre,
         descripcion: group.descripcion ?? '',
+        punto_encuentro: group.punto_encuentro ?? '',
         disciplina_id: group.disciplina_id,
         escenario_id: group.escenario_id,
         entrenador_id: group.entrenador_id ?? '',
@@ -505,6 +507,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         const values: TrainingWizardValues = {
           nombre: instance.nombre,
           descripcion: instance.descripcion ?? '',
+          punto_encuentro: instance.punto_encuentro ?? '',
           disciplina_id: instance.disciplina_id,
           escenario_id: instance.escenario_id,
           entrenador_id: instance.entrenador_id ?? '',
@@ -539,6 +542,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       const values: TrainingWizardValues = {
         nombre: instance.nombre,
         descripcion: instance.descripcion ?? '',
+        punto_encuentro: instance.punto_encuentro ?? '',
         disciplina_id: instance.disciplina_id,
         escenario_id: instance.escenario_id,
         entrenador_id: instance.entrenador_id ?? '',

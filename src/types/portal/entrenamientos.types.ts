@@ -11,6 +11,7 @@ export type TrainingGroup = {
   tipo: TrainingType;
   nombre: string;
   descripcion: string | null;
+  punto_encuentro: string | null;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string | null;
@@ -47,6 +48,7 @@ export type TrainingInstance = {
   bloquear_sync_grupo: boolean;
   nombre: string;
   descripcion: string | null;
+  punto_encuentro: string | null;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string | null;
@@ -87,6 +89,7 @@ export type TrainingWizardRuleFormValue = {
 export type TrainingWizardValues = {
   nombre: string;
   descripcion: string;
+  punto_encuentro: string;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string;
@@ -116,7 +119,8 @@ export type TrainingField =
   | 'fecha_hora_unico'
   | 'dias_semana'
   | 'repetir_cada_semanas'
-  | 'descripcion';
+  | 'descripcion'
+  | 'punto_encuentro';
 
 export type TrainingRuleField = 'tipo_bloque' | 'hora_inicio' | 'hora_fin' | 'horas_especificas';
 
@@ -145,6 +149,7 @@ export type CreateTrainingSeriesInput = {
     tipo: TrainingType;
     nombre: string;
     descripcion?: string | null;
+    punto_encuentro?: string | null;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id?: string | null;
@@ -198,6 +203,7 @@ export type UpdateTrainingSeriesInput = {
   groupPatch: Partial<{
     nombre: string;
     descripcion: string | null;
+    punto_encuentro: string | null;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id: string | null;
@@ -220,6 +226,7 @@ export type UpdateTrainingInstanceInput = {
   patch: Partial<{
     nombre: string;
     descripcion: string | null;
+    punto_encuentro: string | null;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id: string | null;

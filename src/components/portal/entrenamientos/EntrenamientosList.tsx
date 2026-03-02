@@ -132,6 +132,19 @@ export function EntrenamientosList({
                       <span>{item.durationLabel}</span>
                     </span>
                   </p>
+                  {item.instance.punto_encuentro ? (
+                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
+                      <span
+                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
+                        style={{ fontSize: '14px' }}
+                        aria-hidden="true"
+                      >
+                        pin_drop
+                      </span>
+                      <span className="font-medium text-slate-300">Punto de encuentro:</span>{' '}
+                      {item.instance.punto_encuentro}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <button
