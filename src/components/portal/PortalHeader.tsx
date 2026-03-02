@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { UserAvatarMenu } from '@/components/portal/UserAvatarMenu';
 import { PortalNavMenu } from '@/components/portal/PortalNavMenu';
 import type { PortalDisplayProfile, UserRole } from '@/types/portal.types';
+import { PortalBreadcrumb } from '@/components/portal/PortalBreadcrumb';
 
 type PortalHeaderProps = {
   profile: PortalDisplayProfile;
@@ -13,7 +14,7 @@ type PortalHeaderProps = {
 
 export function PortalHeader({ profile, role }: PortalHeaderProps) {
   return (
-    <header className="flex h-16 flex-shrink-0 items-center justify-between border-b border-portal-border bg-navy-deep/95 px-6 backdrop-blur-md">
+    <header className="relative z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-portal-border bg-navy-deep/95 px-6 backdrop-blur-md">
       {/* Left: logo + nav menu */}
       <div className="flex items-center gap-4">
         <Link href="/portal" className="flex items-center gap-2.5">
@@ -26,6 +27,8 @@ export function PortalHeader({ profile, role }: PortalHeaderProps) {
         </Link>
         <div className="h-5 w-px bg-portal-border" />
         <PortalNavMenu role={role} />
+        <div className="h-5 w-px bg-portal-border" />
+        <PortalBreadcrumb />
       </div>
 
       {/* Right: actions */}

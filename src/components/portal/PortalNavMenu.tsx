@@ -38,10 +38,6 @@ export function PortalNavMenu({ role }: PortalNavMenuProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [open]);
 
-  const activeItem = menuItems.find(
-    (item) => activePath === item.href || activePath.startsWith(item.href + '/'),
-  );
-
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -55,9 +51,7 @@ export function PortalNavMenu({ role }: PortalNavMenuProps) {
         <span className="material-symbols-outlined text-[20px] text-turquoise" aria-hidden="true">
           grid_view
         </span>
-        <span className="hidden sm:inline max-w-[120px] truncate">
-          {activeItem?.label ?? 'Menú'}
-        </span>
+        <span className="hidden sm:inline">Menú</span>
         <span
           className={`material-symbols-outlined text-[16px] text-slate-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           aria-hidden="true"
