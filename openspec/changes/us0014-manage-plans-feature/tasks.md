@@ -78,9 +78,4 @@
 ## 11. Commit & Pull Request
 
 - [x] 11.1 Stage all changed files and create a commit with message: `feat(planes): add membership plan management (US-0014)` — include migration, types, service, hooks, components, route, nav, and docs
-- [x] 11.2 Open a Pull Request with description:
-  - **Summary:** Full CRUD for tenant-scoped membership plans with multi-discipline associations.
-  - **Migration:** `20260301000200_planes_gestion.sql` — evolves `planes` table (replaces `duracion_dias` → `vigencia_meses`), adds `updated_at`, unique constraint, creates `planes_disciplina` join table with RLS.
-  - **Breaking change:** `duracion_dias` column removed; values backfilled to `vigencia_meses`.
-  - **Files changed:** migration, `planes.types.ts`, `planes.service.ts`, `usePlanes.ts`, `usePlanForm.ts`, `PlanesPage`, `PlanesTable`, `PlanFormModal`, `PlanesHeaderFilters`, route page, `RoleBasedMenu`, `constants.ts`, `03-project-structure.md`.
-  - **Testing:** Manual QA checklist passed (tasks 10.1–10.7).
+- [x] 11.2 Merge feature branch into `develop` (squash not required — incremental commits preserved)
