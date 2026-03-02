@@ -1,5 +1,8 @@
 begin;
 
+-- =========================
+-- REGULAR TEST TENANTS
+-- =========================
 with seed_tenants(nombre, email, telefono, descripcion) as (
 	values
 		('qbop Alpha Club', 'alpha@qbop.test', '+57 300 000 0001', 'Tenant de pruebas Alpha'),

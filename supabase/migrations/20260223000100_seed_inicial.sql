@@ -1,7 +1,18 @@
 begin;
 
-insert into public.tenants (nombre, fecha_creacion, descripcion)
-values ('public', current_date, 'Tenant por defecto para asignación automática de usuarios')
+-- insert into public.tenants (nombre, fecha_creacion, descripcion)
+-- values ('public', current_date, 'Tenant por defecto para asignación automática de usuarios')
+-- on conflict (nombre) do nothing;
+
+insert into public.tenants (id, nombre, email, telefono, descripcion, fecha_creacion)
+values (
+	'2a089688-3cfc-4216-9372-33f50079fbd1',
+	'public',
+	'public@qbop.test',
+	null,
+	'Tenant público del sistema. Agrupa entrenamientos con visibilidad pública visibles para todos los usuarios autenticados.',
+	current_date
+)
 on conflict (nombre) do nothing;
 
 insert into public.roles (nombre, descripcion)
