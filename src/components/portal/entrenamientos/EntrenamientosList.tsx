@@ -16,6 +16,22 @@ function VisibilidadBadge({ visibilidad }: { visibilidad: TrainingVisibility }) 
   );
 }
 
+function CapacityPill({ reservasActivas, cupoMaximo }: { reservasActivas: number; cupoMaximo: number }) {
+  const ratio = cupoMaximo > 0 ? reservasActivas / cupoMaximo : 0;
+  const colorClass =
+    ratio >= 1
+      ? 'border-rose-400/40 bg-rose-500/15 text-rose-200'
+      : ratio >= 0.7
+        ? 'border-amber-400/40 bg-amber-900/25 text-amber-200'
+        : 'border-emerald-400/40 bg-emerald-900/25 text-emerald-200';
+
+  return (
+    <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide ${colorClass}`}>
+      {reservasActivas}/{cupoMaximo}
+    </span>
+  );
+}
+
 type EntrenamientosListProps = {
   items: TrainingCalendarItem[];
   selectedDateLabel: string | null;
@@ -81,6 +97,12 @@ export function EntrenamientosList({
                         Histórico
                       </span>
                     ) : null}
+                    {item.instance.cupo_maximo != null && (
+                      <CapacityPill
+                        reservasActivas={item.instance.reservas_activas ?? 0}
+                        cupoMaximo={item.instance.cupo_maximo}
+                      />
+                    )}
                   </div>
                   <p className="max-w-[320px] truncate text-xs text-slate-400">
                     <span className="inline-flex items-center gap-1">

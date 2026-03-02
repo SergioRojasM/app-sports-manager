@@ -58,6 +58,7 @@ export type TrainingInstance = {
   visibilidad: TrainingVisibility;
   visible_para: string | null;
   estado: TrainingInstanceStatus;
+  reservas_activas?: number;
   created_at: string;
   updated_at: string;
 };

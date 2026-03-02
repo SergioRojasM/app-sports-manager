@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useEntrenamientos } from '@/hooks/portal/entrenamientos/useEntrenamientos';
+import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { useState } from 'react';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
 import { EntrenamientoFormModal } from './EntrenamientoFormModal';
@@ -9,6 +10,7 @@ import { EntrenamientoScopeModal } from './EntrenamientoScopeModal';
 import { EntrenamientoActionModal } from './EntrenamientoActionModal';
 import { EntrenamientosCalendar } from './EntrenamientosCalendar';
 import { EntrenamientosList } from './EntrenamientosList';
+import { ReservasPanel } from './reservas';
 
 type EntrenamientosPageProps = {
   tenantId: string;
@@ -47,6 +49,9 @@ function toSelectedDateLabel(dateKey: string): string {
 
 export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
   const currentTimestamp = new Date().getTime();
+  const { role } = useTenantAccess(tenantId);
+  const [reservasPanelOpen, setReservasPanelOpen] = useState(false);
+  const [reservasPanelInstance, setReservasPanelInstance] = useState<TrainingInstance | null>(null);
 
   const {
     loading,
@@ -175,6 +180,17 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     goToNextMonth();
   };
 
+  const openReservasPanel = (instance: TrainingInstance) => {
+    setReservasPanelInstance(instance);
+    setReservasPanelOpen(true);
+    closeActionModal();
+  };
+
+  const closeReservasPanel = () => {
+    setReservasPanelOpen(false);
+    setReservasPanelInstance(null);
+  };
+
   return (
     <section className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
@@ -274,6 +290,20 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
           requestDeleteInstance(selectedInstanceForAction);
           closeActionModal();
         }}
+        onViewReservas={
+          selectedInstanceForAction
+            ? () => openReservasPanel(selectedInstanceForAction)
+            : undefined
+        }
+      />
+
+      <ReservasPanel
+        open={reservasPanelOpen}
+        tenantId={tenantId}
+        instance={reservasPanelInstance}
+        role={role}
+        onClose={closeReservasPanel}
+        onMutationComplete={() => void refresh()}
       />
 
       <EntrenamientoFormModal

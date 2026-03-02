@@ -8,6 +8,7 @@ type EntrenamientoActionModalProps = {
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onViewReservas?: () => void;
 };
 
 export function EntrenamientoActionModal({
@@ -20,6 +21,7 @@ export function EntrenamientoActionModal({
   onClose,
   onEdit,
   onDelete,
+  onViewReservas,
 }: EntrenamientoActionModalProps) {
   if (!open) {
     return null;
@@ -40,6 +42,17 @@ export function EntrenamientoActionModal({
         <p className="mt-2 text-sm font-semibold text-slate-200">{trainingName}</p>
 
         <div className="mt-5 space-y-2">
+          {onViewReservas && (
+            <button
+              type="button"
+              onClick={onViewReservas}
+              className="w-full rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-3 text-left transition hover:border-turquoise/70"
+            >
+              <p className="text-sm font-semibold text-slate-100">Ver reservas</p>
+              <p className="mt-0.5 text-xs text-slate-400">Consulta las reservas de este entrenamiento.</p>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onEdit}
