@@ -31,7 +31,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │               ├── (administrador)/
 │   │               │   ├── gestion-disciplinas/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
-│   │               │   └── gestion-organizacion/page.tsx
+│   │               │   ├── gestion-organizacion/page.tsx
+│   │               │   └── gestion-planes/page.tsx
 │   │               ├── (atleta)/
 │   │               │   └── entrenamientos-disponibles/page.tsx
 │   │               ├── (entrenador)/
@@ -64,6 +65,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EntrenamientosPage.tsx
 │   │   │       ├── EntrenamientosCalendar.tsx
 │   │   │       └── EntrenamientoFormModal.tsx
+│   │   │   └── planes/                   # Feature slice (portal/planes)
+│   │   │       ├── PlanesPage.tsx
+│   │   │       ├── PlanesTable.tsx
+│   │   │       ├── PlanesHeaderFilters.tsx
+│   │   │       └── PlanFormModal.tsx
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -81,6 +87,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useEntrenamientos.ts
 │   │           ├── useEntrenamientoForm.ts
 │   │           └── useEntrenamientoScope.ts
+│   │       └── planes/
+│   │           ├── usePlanes.ts
+│   │           └── usePlanForm.ts
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -94,6 +103,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
+│   │       │   └── planes.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
@@ -104,6 +114,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts
+│   │       └── planes.types.ts
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
