@@ -46,6 +46,9 @@ export function PlanFormModal({
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isSubmitting, onClose, open]);
 
+  // Beneficios tag input state (must be before early return)
+  const [beneficioInput, setBeneficioInput] = useState('');
+
   if (!open) {
     return null;
   }
@@ -59,9 +62,6 @@ export function PlanFormModal({
       : [...current, disciplinaId];
     onChangeField('disciplinaIds', next);
   };
-
-  // Beneficios tag input state
-  const [beneficioInput, setBeneficioInput] = useState('');
 
   const addBeneficio = () => {
     const text = beneficioInput.trim();
