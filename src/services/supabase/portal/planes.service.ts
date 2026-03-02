@@ -29,6 +29,11 @@ function toNullable(value: string | null | undefined): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function toNullableInt(value: number | null | undefined): number | null {
+  if (value == null || isNaN(value)) return null;
+  return value;
+}
+
 function mapPlanRow(row: PlanRow): PlanWithDisciplinas {
   return {
     id: row.id,
@@ -95,9 +100,9 @@ export const planesService = {
         descripcion: toNullable(input.descripcion),
         precio: input.precio,
         vigencia_meses: input.vigencia_meses,
-        clases_incluidas: input.clases_incluidas ?? null,
-        tipo: input.tipo ?? null,
-        beneficios: input.beneficios ?? null,
+        clases_incluidas: toNullableInt(input.clases_incluidas),
+        tipo: toNullable(input.tipo),
+        beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
       })
       .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at')
@@ -136,9 +141,9 @@ export const planesService = {
         descripcion: toNullable(input.descripcion),
         precio: input.precio,
         vigencia_meses: input.vigencia_meses,
-        clases_incluidas: input.clases_incluidas ?? null,
-        tipo: input.tipo ?? null,
-        beneficios: input.beneficios ?? null,
+        clases_incluidas: toNullableInt(input.clases_incluidas),
+        tipo: toNullable(input.tipo),
+        beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
       })
       .eq('id', input.planId)
