@@ -64,7 +64,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── entrenamientos/           # Feature slice (portal/entrenamientos)
 │   │   │       ├── EntrenamientosPage.tsx
 │   │   │       ├── EntrenamientosCalendar.tsx
-│   │   │       └── EntrenamientoFormModal.tsx
+│   │   │       ├── EntrenamientoFormModal.tsx
+│   │   │       └── reservas/              # Sub-feature slice (booking)
+│   │   │           ├── ReservasPanel.tsx
+│   │   │           ├── ReservaFormModal.tsx
+│   │   │           ├── ReservaStatusBadge.tsx
+│   │   │           └── index.ts
 │   │   │   └── planes/                   # Feature slice (portal/planes)
 │   │   │       ├── PlanesPage.tsx
 │   │   │       ├── PlanesTable.tsx
@@ -86,7 +91,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamientos/
 │   │           ├── useEntrenamientos.ts
 │   │           ├── useEntrenamientoForm.ts
-│   │           └── useEntrenamientoScope.ts
+│   │           ├── useEntrenamientoScope.ts
+│   │           └── reservas/              # Sub-feature hooks (booking)
+│   │               ├── useReservas.ts
+│   │               └── useReservaForm.ts
 │   │       └── planes/
 │   │           ├── usePlanes.ts
 │   │           └── usePlanForm.ts
@@ -103,6 +111,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
+│   │       │   └── reservas.service.ts
 │   │       │   └── planes.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
@@ -114,6 +123,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts
+│   │       └── reservas.types.ts
 │   │       └── planes.types.ts
 │   │
 │   └── lib/                              # Pure utilities

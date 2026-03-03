@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useEntrenamientos } from '@/hooks/portal/entrenamientos/useEntrenamientos';
+import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { useState } from 'react';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
 import { EntrenamientoFormModal } from './EntrenamientoFormModal';
@@ -9,6 +10,7 @@ import { EntrenamientoScopeModal } from './EntrenamientoScopeModal';
 import { EntrenamientoActionModal } from './EntrenamientoActionModal';
 import { EntrenamientosCalendar } from './EntrenamientosCalendar';
 import { EntrenamientosList } from './EntrenamientosList';
+import { ReservasPanel } from './reservas';
 
 type EntrenamientosPageProps = {
   tenantId: string;
@@ -47,6 +49,10 @@ function toSelectedDateLabel(dateKey: string): string {
 
 export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
   const currentTimestamp = new Date().getTime();
+  const { role } = useTenantAccess(tenantId);
+  const canManage = role === 'administrador' || role === 'entrenador';
+  const [reservasPanelOpen, setReservasPanelOpen] = useState(false);
+  const [reservasPanelInstance, setReservasPanelInstance] = useState<TrainingInstance | null>(null);
 
   const {
     loading,
@@ -175,6 +181,17 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     goToNextMonth();
   };
 
+  const openReservasPanel = (instance: TrainingInstance) => {
+    setReservasPanelInstance(instance);
+    setReservasPanelOpen(true);
+    closeActionModal();
+  };
+
+  const closeReservasPanel = () => {
+    setReservasPanelOpen(false);
+    setReservasPanelInstance(null);
+  };
+
   return (
     <section className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
@@ -184,16 +201,18 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
             Administra entrenamientos por serie, con reglas recurrentes y excepciones por instancia.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
-        >
-          Crear entrenamiento
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            add
-          </span>
-        </button>
+        {canManage && (
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
+          >
+            Crear entrenamiento
+            <span className="material-symbols-outlined text-base" aria-hidden="true">
+              add
+            </span>
+          </button>
+        )}
       </header>
 
       {successMessage ? (
@@ -232,6 +251,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
               items={calendarItems}
               disciplinas={disciplinas}
               selectedDateKey={selectedDateKey}
+              canManage={canManage}
               onPreviousMonth={handleGoToPreviousMonth}
               onNextMonth={handleGoToNextMonth}
               onOpenActions={openActionModal}
@@ -245,6 +265,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
               selectedDateLabel={selectedDateLabel}
               disciplineNameById={disciplineNameById}
               scenarioNameById={scenarioNameById}
+              canManage={canManage}
               onOpenActions={openActionModal}
               onClearDateFilter={() => setSelectedDateKey(null)}
             />
@@ -255,8 +276,9 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
       <EntrenamientoActionModal
         open={Boolean(selectedInstanceForAction)}
         trainingName={selectedInstanceForAction?.nombre ?? ''}
-        canEdit={selectedActionContext.canEdit}
-        canDelete={selectedActionContext.canDelete}
+        canManage={canManage}
+        canEdit={canManage && selectedActionContext.canEdit}
+        canDelete={canManage && selectedActionContext.canDelete}
         editDisabledReason={selectedActionContext.editDisabledReason}
         deleteDisabledReason={selectedActionContext.deleteDisabledReason}
         onClose={closeActionModal}
@@ -274,6 +296,20 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
           requestDeleteInstance(selectedInstanceForAction);
           closeActionModal();
         }}
+        onViewReservas={
+          selectedInstanceForAction
+            ? () => openReservasPanel(selectedInstanceForAction)
+            : undefined
+        }
+      />
+
+      <ReservasPanel
+        open={reservasPanelOpen}
+        tenantId={tenantId}
+        instance={reservasPanelInstance}
+        role={role}
+        onClose={closeReservasPanel}
+        onMutationComplete={() => void refresh()}
       />
 
       <EntrenamientoFormModal

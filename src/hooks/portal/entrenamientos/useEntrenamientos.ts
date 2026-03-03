@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
+import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { useEntrenamientoForm } from './useEntrenamientoForm';
 import { useEntrenamientoScope } from './useEntrenamientoScope';
 import { useEntrenamientosCalendar } from './useEntrenamientosCalendar';
@@ -53,6 +54,8 @@ type UseEntrenamientosResult = {
   formValues: ReturnType<typeof useEntrenamientoForm>['formValues'];
   fieldErrors: ReturnType<typeof useEntrenamientoForm>['fieldErrors'];
   ruleErrors: ReturnType<typeof useEntrenamientoForm>['ruleErrors'];
+  selectedInstanceId: string | null;
+  setSelectedInstanceId: (id: string | null) => void;
   goToNextMonth: () => void;
   goToPreviousMonth: () => void;
   refresh: () => Promise<void>;
@@ -309,6 +312,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
   const [isUniqueTypeLocked, setIsUniqueTypeLocked] = useState(false);
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
 
   const supabase = useMemo(() => createClient(), []);
   const form = useEntrenamientoForm();
@@ -343,10 +347,23 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       ]);
 
       setGroups(groupsData);
-      setInstances(instancesData);
       setDisciplinas(disciplinasData);
       setEscenarios(escenariosData);
       setEntrenadores(entrenadoresData);
+
+      // Enrich instances with reservas_activas count (batch, not N+1)
+      const capacidades = await Promise.all(
+        instancesData.map((inst) =>
+          reservasService.getCapacidad(tenantId, inst.id).catch(() => null),
+        ),
+      );
+
+      const enrichedInstances = instancesData.map((inst, index) => ({
+        ...inst,
+        reservas_activas: capacidades[index]?.reservas_activas ?? undefined,
+      }));
+
+      setInstances(enrichedInstances);
     } catch {
       setGroups([]);
       setInstances([]);
@@ -761,6 +778,8 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     formValues: form.formValues,
     fieldErrors: form.fieldErrors,
     ruleErrors: form.ruleErrors,
+    selectedInstanceId,
+    setSelectedInstanceId,
     goToNextMonth: calendar.goToNextMonth,
     goToPreviousMonth: calendar.goToPreviousMonth,
     refresh: loadAll,

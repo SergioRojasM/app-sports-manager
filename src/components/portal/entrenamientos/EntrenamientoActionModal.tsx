@@ -1,6 +1,7 @@
 type EntrenamientoActionModalProps = {
   open: boolean;
   trainingName: string;
+  canManage: boolean;
   canEdit: boolean;
   canDelete: boolean;
   editDisabledReason?: string;
@@ -8,11 +9,13 @@ type EntrenamientoActionModalProps = {
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onViewReservas?: () => void;
 };
 
 export function EntrenamientoActionModal({
   open,
   trainingName,
+  canManage,
   canEdit,
   canDelete,
   editDisabledReason,
@@ -20,6 +23,7 @@ export function EntrenamientoActionModal({
   onClose,
   onEdit,
   onDelete,
+  onViewReservas,
 }: EntrenamientoActionModalProps) {
   if (!open) {
     return null;
@@ -35,42 +39,57 @@ export function EntrenamientoActionModal({
       />
 
       <div className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-5 shadow-xl">
-        <h3 className="text-lg font-semibold text-slate-100">¿Qué deseas hacer?</h3>
-        <p className="mt-1 text-sm text-slate-400">Selecciona una acción para el entrenamiento.</p>
+        <h3 className="text-lg font-semibold text-slate-100">{canManage ? '¿Qué deseas hacer?' : 'Acciones disponibles'}</h3>
+        <p className="mt-1 text-sm text-slate-400">{canManage ? 'Selecciona una acción para el entrenamiento.' : 'Puedes consultar las reservas de este entrenamiento.'}</p>
         <p className="mt-2 text-sm font-semibold text-slate-200">{trainingName}</p>
 
         <div className="mt-5 space-y-2">
-          <button
-            type="button"
-            onClick={onEdit}
-            disabled={!canEdit}
-            className={`w-full rounded-lg border px-4 py-3 text-left transition ${
-              canEdit
-                ? 'border-portal-border bg-navy-deep/70 hover:border-turquoise/70'
-                : 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 opacity-70'
-            }`}
-          >
-            <p className="text-sm font-semibold text-slate-100">Editar</p>
-            <p className="mt-0.5 text-xs text-slate-400">
-              {canEdit ? 'Permite ajustar datos del entrenamiento único.' : (editDisabledReason ?? 'Acción no disponible.')}
-            </p>
-          </button>
+          {onViewReservas && (
+            <button
+              type="button"
+              onClick={onViewReservas}
+              className="w-full rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-3 text-left transition hover:border-turquoise/70"
+            >
+              <p className="text-sm font-semibold text-slate-100">Ver reservas</p>
+              <p className="mt-0.5 text-xs text-slate-400">Consulta las reservas de este entrenamiento.</p>
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={!canDelete}
-            className={`w-full rounded-lg border px-4 py-3 text-left transition ${
-              canDelete
-                ? 'border-rose-400/40 bg-rose-500/10 hover:border-rose-300/70'
-                : 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 opacity-70'
-            }`}
-          >
-            <p className={`text-sm font-semibold ${canDelete ? 'text-rose-200' : 'text-slate-200'}`}>Eliminar</p>
-            <p className={`mt-0.5 text-xs ${canDelete ? 'text-rose-200/80' : 'text-slate-400'}`}>
-              {canDelete ? 'Permite eliminar según las reglas de alcance.' : (deleteDisabledReason ?? 'Acción no disponible.')}
-            </p>
-          </button>
+          {canManage && (
+            <button
+              type="button"
+              onClick={onEdit}
+              disabled={!canEdit}
+              className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+                canEdit
+                  ? 'border-portal-border bg-navy-deep/70 hover:border-turquoise/70'
+                  : 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 opacity-70'
+              }`}
+            >
+              <p className="text-sm font-semibold text-slate-100">Editar</p>
+              <p className="mt-0.5 text-xs text-slate-400">
+                {canEdit ? 'Permite ajustar datos del entrenamiento único.' : (editDisabledReason ?? 'Acción no disponible.')}
+              </p>
+            </button>
+          )}
+
+          {canManage && (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={!canDelete}
+              className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+                canDelete
+                  ? 'border-rose-400/40 bg-rose-500/10 hover:border-rose-300/70'
+                  : 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 opacity-70'
+              }`}
+            >
+              <p className={`text-sm font-semibold ${canDelete ? 'text-rose-200' : 'text-slate-200'}`}>Eliminar</p>
+              <p className={`mt-0.5 text-xs ${canDelete ? 'text-rose-200/80' : 'text-slate-400'}`}>
+                {canDelete ? 'Permite eliminar según las reglas de alcance.' : (deleteDisabledReason ?? 'Acción no disponible.')}
+              </p>
+            </button>
+          )}
         </div>
 
         <div className="mt-4 flex justify-end">
