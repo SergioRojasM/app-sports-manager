@@ -23,6 +23,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── loading.tsx
 │   │       ├── page.tsx
 │   │       ├── bootstrap/route.ts
+│   │       ├── perfil/page.tsx           # User profile (global, not tenant-scoped)
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users)
 │   │           └── [tenant_id]/
@@ -39,8 +40,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               ├── (entrenador)/
 │   │               │   └── atletas/page.tsx
 │   │               └── (shared)/
-│   │                   ├── gestion-entrenamientos/page.tsx
-│   │                   └── perfil/page.tsx
+│   │                   └── gestion-entrenamientos/page.tsx
 │   │
 │   ├── components/                       # Presentation layer
 │   │   ├── auth/
@@ -82,6 +82,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EquipoStatsCards.tsx
 │   │   │       ├── EquipoHeaderFilters.tsx
 │   │   │       └── EquipoStatusBadge.tsx
+│   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
+│   │   │       ├── PerfilPage.tsx
+│   │   │       ├── PerfilHeader.tsx
+│   │   │       ├── PerfilPersonalForm.tsx
+│   │   │       ├── PerfilDeportivoForm.tsx
+│   │   │       └── index.ts
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -107,6 +113,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── usePlanForm.ts
 │   │       └── gestion-equipo/
 │   │           └── useEquipo.ts
+│   │       └── perfil/
+│   │           └── usePerfil.ts
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -123,6 +131,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── reservas.service.ts
 │   │       │   └── planes.service.ts
 │   │       │   └── equipo.service.ts
+│   │       │   └── perfil.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
@@ -136,6 +145,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── reservas.types.ts
 │   │       └── planes.types.ts
 │   │       └── equipo.types.ts
+│   │       └── perfil.types.ts
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
