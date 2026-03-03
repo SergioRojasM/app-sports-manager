@@ -28,8 +28,8 @@
       )
     );
   ```
-- [ ] 2.2 Apply the migration locally: `npx supabase db diff -f add_identificacion_cols_usuarios` then `npx supabase migration up`
-- [ ] 2.3 Verify the two new columns and both check constraints appear in the local DB schema
+- [x] 2.2 Apply the migration locally: `npx supabase db diff -f add_identificacion_cols_usuarios` then `npx supabase migration up`
+- [x] 2.3 Verify the two new columns and both check constraints appear in the local DB schema
 - [x] 2.4 Verify the `miembros_tenant_select_admin` RLS policy exists (check `supabase/migrations` for any pre-existing conflicting policy first) — SKIPPED: existing `miembros_tenant_select_authenticated` policy with `using(true)` already grants SELECT to all authenticated users
 
 ## 3. Types
@@ -127,7 +127,7 @@
 
 ## 11. Commit and Pull Request
 
-- [ ] 11.1 Stage all changes and create a commit with message:
+- [x] 11.1 Stage all changes and create a commit with message:
   ```
   feat(equipo): add team management module for administrators
 
@@ -143,7 +143,7 @@
 
   Closes US0017
   ```
-- [ ] 11.2 Open a Pull Request with the following description:
+- [x] 11.2 Open a Pull Request with the following description:
   ```
   ## Summary
   Implements the Gestion Equipo module (US0017) — a read-only administrator view
