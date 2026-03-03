@@ -54,11 +54,20 @@ The page is **read-only** in this story — no create/edit/delete actions are re
 *(Added by migration `20260303195145_add_estado_col_usuarios.sql`)*
 
 ### New migration required
-Add `tipo_identificacion` and `numero_identificacion` columns to `public.usuarios`:
+Add `tipo_identificacion` and `numero_identificacion` columns to `public.usuarios`, along with check constraints for both `tipo_identificacion` and `estado`:
 
 ```sql
-alter table public.usuarios add column tipo_identificacion varchar(20);
-alter table public.usuarios add column numero_identificacion varchar(30);
+alter table public.usuarios
+  add column tipo_identificacion varchar(20),
+  add column numero_identificacion varchar(30);
+
+alter table public.usuarios
+  add constraint usuarios_tipo_identificacion_ck
+    check (tipo_identificacion in ('CC', 'CE', 'TI', 'NIT', 'Pasaporte', 'Otro'));
+
+alter table public.usuarios
+  add constraint usuarios_estado_ck
+    check (estado in ('activo', 'mora', 'suspendido', 'inactivo'));
 ```
 
 Migration file naming convention: `20260303XXXXXX_add_identificacion_cols_usuarios.sql`.
@@ -115,8 +124,27 @@ supabase/migrations/YYYYMMDDXXXXXX_add_identificacion_cols_usuarios.sql
 Create migration file `supabase/migrations/YYYYMMDDXXXXXX_add_identificacion_cols_usuarios.sql`:
 
 ```sql
-alter table public.usuarios add column tipo_identificacion varchar(20);
-alter table public.usuarios add column numero_identificacion varchar(30);
+alter table public.usuarios
+  add column tipo_identificacion varchar(20),
+  add column numero_identificacion varchar(30);
+
+alter table public.usuarios
+  add constraint usuarios_tipo_identificacion_ck
+    check (tipo_identificacion in ('CC', 'CE', 'TI', 'NIT', 'Pasaporte', 'Otro'));
+
+alter table public.usuarios
+  add constraint usuarios_estado_ck
+    check (estado in ('activo', 'mora', 'suspendido', 'inactivo'));
+
+-- RLS: admin SELECT on all tenant members
+drop policy if exists miembros_tenant_select_admin on public.miembros_tenant;
+create policy miembros_tenant_select_admin on public.miembros_tenant
+  for select to authenticated
+  using (
+    tenant_id in (
+      select id from public.get_admin_tenants_for_authenticated_user()
+    )
+  );
 ```
 
 Apply locally: `npx supabase db diff -f add_identificacion_cols_usuarios` then `npx supabase migration up`.
@@ -127,13 +155,14 @@ Apply locally: `npx supabase db diff -f add_identificacion_cols_usuarios` then `
 
 ```typescript
 export type MiembroEstado = 'activo' | 'mora' | 'suspendido' | 'inactivo';
+export type TipoIdentificacion = 'CC' | 'CE' | 'TI' | 'NIT' | 'Pasaporte' | 'Otro';
 
 export type MiembroRow = {
   // usuarios fields
   usuario_id: string;
   nombre: string | null;
   apellido: string | null;
-  tipo_identificacion: string | null;
+  tipo_identificacion: TipoIdentificacion | null;
   numero_identificacion: string | null;
   telefono: string | null;
   email: string;
@@ -205,8 +234,18 @@ Responsibilities:
 - Call `equipo.service.ts` on mount.
 - Manage `loading`, `error`, `members` state.
 - Derive `filteredMembers` by applying `searchTerm` (name/email/phone) and `estadoFilter` (`MiembroEstado | 'all'`).
+- Derive `paginatedMembers` by slicing `filteredMembers` with `currentPage` and `pageSize`.
 - Derive `stats: EquipoStats` from the raw member list.
-- Expose `setSearchTerm`, `setEstadoFilter`, `refresh`.
+- Expose `setSearchTerm`, `setEstadoFilter`, `setCurrentPage`, `setPageSize`, `refresh`.
+- Reset `currentPage` to `1` whenever `searchTerm` or `estadoFilter` changes.
+
+Pagination state:
+```typescript
+pageSize: 20 | 50 | 100        // default 20
+currentPage: number             // 1-based, default 1
+totalFiltered: number           // filteredMembers.length
+totalPages: number              // Math.ceil(totalFiltered / pageSize)
+```
 
 No mutations needed for this story.
 
@@ -238,7 +277,7 @@ Props: `searchTerm`, `onSearchChange`, `estadoFilter`, `onEstadoFilterChange`.
 - Row of quick-filter chips: **Todos · Activo · Mora · Suspendido · Inactivo**. Active chip uses an accent border/bg to indicate selection.
 
 #### `EquipoTable.tsx`
-Props: `rows: MiembroTableItem[]`.
+Props: `rows: MiembroTableItem[]`, `currentPage: number`, `pageSize: 20 | 50 | 100`, `totalPages: number`, `totalFiltered: number`, `onPageChange: (n: number) => void`, `onPageSizeChange: (n: 20 | 50 | 100) => void`.
 Table columns (in order):
 
 | Column header | Source |
@@ -253,10 +292,15 @@ Table columns (in order):
 
 Follow the visual style of `PlanesTable` (dark table, `border-portal-border`, hover row highlight).
 
+Below the table render a **pagination bar** with:
+- "Mostrando X–Y de Z miembros" label.
+- Previous / Next buttons (disabled at boundaries).
+- Page-size selector: `<select>` with options `20`, `50`, `100`.
+
 #### `EquipoPage.tsx`
 Top-level composition component — mirrors `PlanesPage.tsx` structure:
 - Renders loading / error / empty states.
-- Composes `EquipoStatsCards` → `EquipoHeaderFilters` → `EquipoTable`.
+- Composes `EquipoStatsCards` → `EquipoHeaderFilters` → `EquipoTable` (with pagination props passed down).
 
 ---
 
@@ -305,7 +349,7 @@ If a similar policy already exists from prior migrations, skip this step and doc
 | Area | Requirement |
 |---|---|
 | **Security** | Route group `(administrador)` layout enforces role gate via `miembros_tenant` check; no extra client-side role check needed, but the service query must use the authenticated Supabase client so RLS applies |
-| **Performance** | Member list is fetched once on mount. Client-side filtering avoids additional round-trips. If the list exceeds 500 rows, consider server-side pagination in a follow-up story |
+| **Performance** | Member list is fetched once on mount. Client-side pagination (20/50/100 rows per page) limits DOM size. Server-side pagination deferred. |
 | **Type safety** | No `any` types. All Supabase results explicitly typed or mapped through a row-type interface |
 | **Accessibility** | Table must include `<thead>` with `scope="col"` headers. Badges must include an `aria-label` attribute |
 | **Consistency** | Reuse existing Tailwind design tokens and CSS classes (glass, portal-border, etc.) from other portal feature slices |

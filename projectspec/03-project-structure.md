@@ -30,6 +30,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               ├── page.tsx          # Redirect to tenant role landing
 │   │               ├── (administrador)/
 │   │               │   ├── gestion-disciplinas/page.tsx
+│   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   └── gestion-planes/page.tsx
@@ -75,6 +76,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PlanesTable.tsx
 │   │   │       ├── PlanesHeaderFilters.tsx
 │   │   │       └── PlanFormModal.tsx
+│   │   │   └── gestion-equipo/            # Feature slice (portal/gestion-equipo)
+│   │   │       ├── EquipoPage.tsx
+│   │   │       ├── EquipoTable.tsx
+│   │   │       ├── EquipoStatsCards.tsx
+│   │   │       ├── EquipoHeaderFilters.tsx
+│   │   │       └── EquipoStatusBadge.tsx
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -98,6 +105,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── planes/
 │   │           ├── usePlanes.ts
 │   │           └── usePlanForm.ts
+│   │       └── gestion-equipo/
+│   │           └── useEquipo.ts
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -113,6 +122,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── entrenamientos.service.ts
 │   │       │   └── reservas.service.ts
 │   │       │   └── planes.service.ts
+│   │       │   └── equipo.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
@@ -125,6 +135,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamientos.types.ts
 │   │       └── reservas.types.ts
 │   │       └── planes.types.ts
+│   │       └── equipo.types.ts
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
