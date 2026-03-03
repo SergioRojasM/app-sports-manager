@@ -6,6 +6,7 @@ type EntrenamientosCalendarProps = {
   items: TrainingCalendarItem[];
   disciplinas: SelectOption[];
   selectedDateKey: string | null;
+  canManage: boolean;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
   onOpenActions: (trainingId: string) => void;
@@ -94,6 +95,7 @@ export function EntrenamientosCalendar({
   items,
   disciplinas,
   selectedDateKey,
+  canManage,
   onPreviousMonth,
   onNextMonth,
   onOpenActions,
@@ -220,7 +222,7 @@ export function EntrenamientosCalendar({
                               event.stopPropagation();
                               onOpenActions(item.instance.id);
                             }}
-                            title={`${item.instance.nombre} · ${timeLabel} (click: opciones)`}
+                            title={`${item.instance.nombre} · ${timeLabel}${canManage ? ' (click: opciones)' : ' (click: ver reservas)'}`}
                             aria-label={`${item.instance.nombre} ${timeLabel}`}
                             className={`transition hover:scale-110 ${disciplineColor} ${
                               isPublic

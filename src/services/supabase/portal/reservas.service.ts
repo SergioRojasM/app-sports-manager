@@ -197,7 +197,7 @@ async function create(input: CreateReservaInput): Promise<Reserva> {
       tenant_id: input.tenant_id,
       atleta_id: input.atleta_id,
       entrenamiento_id: input.entrenamiento_id,
-      estado: 'pendiente',
+      estado: 'confirmada',
       fecha_reserva: new Date().toISOString(),
       notas: input.notas?.trim() || null,
     })

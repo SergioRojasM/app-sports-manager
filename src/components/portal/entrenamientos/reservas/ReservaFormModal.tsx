@@ -40,7 +40,6 @@ type ReservaFormModalProps = {
 // ─────────────────────────────────────────────
 
 const ESTADO_OPTIONS: { value: ReservaEstado; label: string }[] = [
-  { value: 'pendiente', label: 'Pendiente' },
   { value: 'confirmada', label: 'Confirmada' },
   { value: 'cancelada', label: 'Cancelada' },
   { value: 'completada', label: 'Completada' },

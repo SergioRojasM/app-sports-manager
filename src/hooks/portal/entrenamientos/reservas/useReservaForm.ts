@@ -49,7 +49,7 @@ type UseReservaFormResult = {
 const EMPTY_FORM: ReservaFormValues = {
   atleta_id: '',
   notas: '',
-  estado: 'pendiente',
+  estado: 'confirmada',
 };
 
 // ─────────────────────────────────────────────
@@ -153,7 +153,7 @@ export function useReservaForm({
     setForm({
       atleta_id: values.atleta_id ?? '',
       notas: values.notas ?? '',
-      estado: values.estado ?? 'pendiente',
+      estado: values.estado ?? 'confirmada',
     });
     setErrors({});
     setSubmitError(null);

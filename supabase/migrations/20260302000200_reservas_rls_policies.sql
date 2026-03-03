@@ -43,15 +43,15 @@ create policy reservas_select_authenticated on public.reservas
       where mt.tenant_id = reservas.tenant_id
         and mt.usuario_id = auth.uid()
     )
-    and (
-      -- Own booking
-      atleta_id = auth.uid()
-      -- OR entrenador/admin of the tenant
-      or reservas.tenant_id in (
-        select ta.tenant_id
-        from public.get_trainer_or_admin_tenants_for_authenticated_user() ta
-      )
-    )
+    -- and (
+    --   -- Own booking
+    --   atleta_id = auth.uid()
+    --   -- OR entrenador/admin of the tenant
+    --   or reservas.tenant_id in (
+    --     select ta.tenant_id
+    --     from public.get_trainer_or_admin_tenants_for_authenticated_user() ta
+    --   )
+    -- )
   );
 
 -- -------------------------------------------------------
@@ -79,19 +79,26 @@ create policy reservas_insert_authenticated on public.reservas
   );
 
 -- -------------------------------------------------------
--- UPDATE: only entrenador or administrador of the tenant.
+-- UPDATE: the athlete can update (cancel) their own
+-- booking; entrenador/admin can update any booking in
+-- the tenant.
 -- -------------------------------------------------------
 drop policy if exists reservas_update_trainer_or_admin on public.reservas;
-create policy reservas_update_trainer_or_admin on public.reservas
+drop policy if exists reservas_update_authenticated on public.reservas;
+create policy reservas_update_authenticated on public.reservas
   for update to authenticated
   using (
-    reservas.tenant_id in (
+    -- Own booking
+    atleta_id = auth.uid()
+    -- OR entrenador/admin of the tenant
+    or reservas.tenant_id in (
       select ta.tenant_id
       from public.get_trainer_or_admin_tenants_for_authenticated_user() ta
     )
   )
   with check (
-    reservas.tenant_id in (
+    atleta_id = auth.uid()
+    or reservas.tenant_id in (
       select ta.tenant_id
       from public.get_trainer_or_admin_tenants_for_authenticated_user() ta
     )

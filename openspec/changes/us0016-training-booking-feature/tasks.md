@@ -61,8 +61,8 @@
 
 ## 10. Commit and Pull Request
 
-- [ ] 10.1 Stage all changes and create a commit with message: `feat(reservas): add training booking feature (US-0016) — ReservasPanel, useReservas, reservasService, RLS migrations, capacity indicator`
-- [ ] 10.2 Push branch and open a Pull Request with the following description:
+- [x] 10.1 Stage all changes and create a commit with message: `feat(reservas): add training booking feature (US-0016) — ReservasPanel, useReservas, reservasService, RLS migrations, capacity indicator`
+- [x] 10.2 Push branch and open a Pull Request with the following description:
 
   **Title:** `feat: Training Booking Feature (US-0016)`
 

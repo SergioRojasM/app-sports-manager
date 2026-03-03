@@ -37,6 +37,7 @@ type EntrenamientosListProps = {
   selectedDateLabel: string | null;
   disciplineNameById: Record<string, string>;
   scenarioNameById: Record<string, string>;
+  canManage: boolean;
   onOpenActions: (trainingId: string) => void;
   onClearDateFilter: () => void;
 };
@@ -46,6 +47,7 @@ export function EntrenamientosList({
   selectedDateLabel,
   disciplineNameById,
   scenarioNameById,
+  canManage,
   onOpenActions,
   onClearDateFilter,
 }: EntrenamientosListProps) {
@@ -171,15 +173,10 @@ export function EntrenamientosList({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    disabled={isHistorical}
                     onClick={() => onOpenActions(item.instance.id)}
-                    className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition duration-200 ease-out ${
-                      isHistorical
-                        ? 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 text-slate-500'
-                        : 'border-portal-border bg-navy-deep text-slate-200 hover:-translate-y-0.5 hover:border-turquoise/50 hover:bg-navy-deep/80 hover:text-slate-100'
-                    }`}
+                    className="rounded-lg border border-portal-border bg-navy-deep px-2.5 py-1.5 text-xs font-semibold text-slate-200 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-turquoise/50 hover:bg-navy-deep/80 hover:text-slate-100"
                   >
-                    Opciones
+                    {canManage ? 'Opciones' : 'Ver'}
                   </button>
                 </div>
               </div>

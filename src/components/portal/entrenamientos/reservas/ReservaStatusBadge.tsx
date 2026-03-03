@@ -28,7 +28,7 @@ const BADGE_STYLES: Record<ReservaEstado, { label: string; className: string; do
 };
 
 export function ReservaStatusBadge({ estado }: ReservaStatusBadgeProps) {
-  const style = BADGE_STYLES[estado] ?? BADGE_STYLES.pendiente;
+  const style = BADGE_STYLES[estado] ?? BADGE_STYLES.confirmada;
 
   return (
     <span

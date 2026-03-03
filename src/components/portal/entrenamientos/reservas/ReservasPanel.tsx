@@ -94,6 +94,11 @@ export function ReservasPanel({
     ) ?? null;
   }, [currentUserId, reservasHook.reservas]);
 
+  // Only show active bookings (pendiente / confirmada) to all users
+  const displayedReservas = useMemo(() => {
+    return reservasHook.reservas.filter((r) => r.estado === 'pendiente' || r.estado === 'confirmada');
+  }, [reservasHook.reservas]);
+
   const handleCancel = async (reservaId: string) => {
     const confirmed = window.confirm('¿Confirmas la cancelación de esta reserva?');
     if (!confirmed) return;
@@ -231,18 +236,18 @@ export function ReservasPanel({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {reservasHook.isLoading ? (
             <p className="text-sm text-slate-400">Cargando reservas...</p>
-          ) : reservasHook.reservas.length === 0 ? (
+          ) : displayedReservas.length === 0 ? (
             <p className="text-sm text-slate-400">No hay reservas registradas.</p>
           ) : (
             <ul className="space-y-3">
-              {reservasHook.reservas.map((reserva) => {
+              {displayedReservas.map((reserva) => {
                 const isOwn = reserva.atleta_id === currentUserId;
                 const canCancel =
                   reserva.estado !== 'cancelada' &&
                   reserva.estado !== 'completada' &&
                   (isOwn || isAdmin);
                 const canDelete =
-                  (reserva.estado === 'pendiente' || reserva.estado === 'cancelada') &&
+                  (reserva.estado === 'confirmada' || reserva.estado === 'cancelada') &&
                   isAdmin;
                 const canEdit = isAdmin;
 
@@ -263,7 +268,6 @@ export function ReservasPanel({
                             <span className="ml-2 text-[10px] font-semibold uppercase text-turquoise">(Tú)</span>
                           )}
                         </p>
-                        <p className="mt-0.5 truncate text-xs text-slate-400">{reserva.atleta_email}</p>
                       </div>
                       <ReservaStatusBadge estado={reserva.estado} />
                     </div>
