@@ -1,85 +1,97 @@
 ## ADDED Requirements
 
-### Requirement: Tenant shared trainings route
-The system SHALL provide the tenant shared route `/portal/orgs/[tenant_id]/gestion-entrenamientos` as the entry point for training management, and the route page SHALL only compose/render the trainings feature root component.
+### Requirement: Training instance visibility assignment
+Each training instance SHALL carry a `visibilidad` field with values `'privado'` or `'publico'`. The default value MUST be `'privado'`. The form MUST expose a radio group selector labelled "Visibilidad" with options `Privado` and `Público`, placed after the `descripcion` field, including a reactive helper text paragraph that describes the implication of the current selection.
 
-#### Scenario: Render-only route composition
-- **WHEN** an authenticated tenant member navigates to `/portal/orgs/<tenant_id>/gestion-entrenamientos`
-- **THEN** the route renders the trainings feature root without direct Supabase calls in the page layer
+#### Scenario: Default visibility on new training form
+- **WHEN** an administrator opens the training form modal to create a new training
+- **THEN** the visibility selector defaults to `Privado` and the helper text reads "Este entrenamiento solo será visible para los miembros de tu organización."
 
-### Requirement: Training overview visualization
-The system SHALL show trainings grouped by series with list/calendar visualization, and SHALL expose loading, empty, and error states with a `Crear entrenamiento` action.
+#### Scenario: Helper text updates on visibility change
+- **WHEN** an administrator selects `Público` in the visibility selector
+- **THEN** the helper text immediately changes to "Este entrenamiento será visible públicamente y podrá ser descubierto por atletas fuera de tu organización."
 
-#### Scenario: Trainings are displayed by series
-- **WHEN** training groups and instances exist for the tenant in the selected month
-- **THEN** the UI presents them grouped by training series and each instance displays its series relationship
+#### Scenario: Visibility value is persisted on create
+- **WHEN** an administrator submits the form with `visibilidad = 'publico'`
+- **THEN** the created training instance has `visibilidad = 'publico'` in the database
 
-#### Scenario: Default month and month navigation
-- **WHEN** the trainings screen is opened for the first time
-- **THEN** the selected range defaults to the current month and the user can navigate to previous or next months
+#### Scenario: Visibility is loaded correctly on edit
+- **WHEN** an administrator opens the form modal to edit an existing training with `visibilidad = 'publico'`
+- **THEN** the radio selector is pre-selected to `Público` and the correct helper text is shown
 
-### Requirement: Series creation wizard
-The system SHALL provide a wizard to create `unico` and `recurrente` training series using base data (`disciplina`, `escenario`, `entrenador`, `duracion`, `cupo`) and type-specific scheduling inputs.
+---
 
-#### Scenario: Create unique training series
-- **WHEN** an administrator completes wizard base data with type `unico` and valid schedule fields
-- **THEN** the system creates one training group and one linked training instance
+### Requirement: Server-side visible_para computation
+The service layer SHALL always compute `visible_para` from `visibilidad` and `tenant_id` using the rule: `visibilidad = 'privado'` → `visible_para = tenant_id`; `visibilidad = 'publico'` → `visible_para = PUBLIC_TENANT_ID ('2a089688-3cfc-4216-9372-33f50079fbd1')`. The client MUST NOT send `visible_para` directly.
 
-#### Scenario: Create recurrent training series
-- **WHEN** an administrator completes wizard data with type `recurrente` and valid recurrence rules
-- **THEN** the system creates a training group, stores recurrence rules, and links generated instances to the created series
+#### Scenario: Private training sets visible_para to own tenant
+- **WHEN** a training is created or updated with `visibilidad = 'privado'`
+- **THEN** the persisted `visible_para` equals the training's `tenant_id`
 
-### Requirement: Immediate recurrent instance generation
-For recurrent series creation, the system MUST generate all eligible instances immediately for the configured range instead of lazy generation by visible window.
+#### Scenario: Public training sets visible_para to the public tenant
+- **WHEN** a training is created or updated with `visibilidad = 'publico'`
+- **THEN** the persisted `visible_para` equals `'2a089688-3cfc-4216-9372-33f50079fbd1'`
 
-#### Scenario: Recurrent creation materializes full range
-- **WHEN** a recurrent series is created with a valid date range and recurrence rules
-- **THEN** all eligible instances in that configured range are generated during the same creation flow
+---
 
-### Requirement: Scope-aware edit operations
-The system SHALL support edit actions with explicit scope values `single`, `future`, and `series` for recurring data behavior.
+### Requirement: Visibility-based cross-tenant data access
+The RLS SELECT policy on `public.entrenamientos` SHALL allow any authenticated user to read training instances where `visibilidad = 'publico'`, regardless of their tenant membership. Private trainings SHALL remain readable only by members of the owning tenant.
 
-#### Scenario: Edit only one instance
-- **WHEN** an administrator edits one instance with `scope=single`
-- **THEN** only the selected instance is updated and it is marked as a series exception (`es_excepcion_serie=true`, `bloquear_sync_grupo=true`)
+#### Scenario: Authenticated user reads public training from another tenant
+- **WHEN** an authenticated user with no membership in tenant A queries `entrenamientos`
+- **THEN** they can read training instances from tenant A that have `visibilidad = 'publico'`
 
-#### Scenario: Edit future instances from an effective point
-- **WHEN** an administrator edits with `scope=future` from a selected instance/date
-- **THEN** the system applies changes from that effective point forward according to recurring mutation rules
+#### Scenario: Authenticated user cannot read private training from another tenant
+- **WHEN** an authenticated user with no membership in tenant A queries `entrenamientos`
+- **THEN** they cannot read training instances from tenant A that have `visibilidad = 'privado'`
 
-#### Scenario: Edit whole series
-- **WHEN** an administrator edits with `scope=series`
-- **THEN** the system updates the series and synchronizes eligible future instances while preserving blocked/existing exceptions
+#### Scenario: Unauthenticated access is never allowed
+- **WHEN** an unauthenticated request queries `public.entrenamientos`
+- **THEN** no rows are returned, regardless of the `visibilidad` value
 
-### Requirement: Scope-aware delete operations
-The system SHALL support delete actions with explicit scope values `single`, `future`, and `series`, each with confirmation and deterministic error messaging.
+---
 
-#### Scenario: Delete one instance
-- **WHEN** an administrator confirms delete with `scope=single`
-- **THEN** only the selected instance is removed or cancelled according to service behavior
+### Requirement: Visibility propagation in series sync
+When a series edit is applied with `scope = 'series'` or `scope = 'future'`, the `visibilidad` and `visible_para` fields SHALL be propagated to eligible instances using the same eligibility rules as all other synced fields: future instances (`fecha_hora >= now()` or `fecha_hora IS NULL`), not cancelled, and `bloquear_sync_grupo = false`.
 
-#### Scenario: Delete future instances
-- **WHEN** an administrator confirms delete with `scope=future` and an effective point
-- **THEN** the system applies deletion from that point forward without affecting earlier instances
+#### Scenario: Series edit propagates visibility to eligible future instances
+- **WHEN** an administrator edits a series with scope `'series'` and sets `visibilidad = 'publico'`
+- **THEN** all eligible future instances have their `visibilidad` set to `'publico'` and `visible_para` recomputed to `PUBLIC_TENANT_ID`
 
-#### Scenario: Delete whole series
-- **WHEN** an administrator confirms delete with `scope=series`
-- **THEN** the system removes the training series and linked data according to database constraints
+#### Scenario: Blocked exception instance is not overwritten by series sync
+- **WHEN** a series edit with scope `'series'` propagates visibility
+- **THEN** instances with `bloquear_sync_grupo = true` retain their current `visibilidad` and `visible_para` values unchanged
 
-### Requirement: Validation and deterministic errors
-The system SHALL validate required fields and schedule constraints before submit and SHALL map backend failures to deterministic user-facing messages.
+#### Scenario: Single-instance edit does not affect sibling instances
+- **WHEN** an administrator edits one instance with scope `'single'` and changes `visibilidad`
+- **THEN** only that instance has its `visibilidad` and `visible_para` updated; no sibling instances are affected
 
-#### Scenario: Client-side validation blocks invalid schedule
-- **WHEN** form data violates required constraints (e.g., missing required IDs, invalid time window, or invalid date range)
-- **THEN** submission is blocked and actionable validation messages are shown
+---
 
-#### Scenario: Backend failure is mapped deterministically
-- **WHEN** a create/update/delete mutation fails due to permission, integrity, or conflict conditions
-- **THEN** the UI displays a deterministic error message and keeps the interface in a recoverable state
+### Requirement: Visibility badge in training list view
+Each row in the trainings list view (`EntrenamientosList`) SHALL display a small badge indicating the visibility state of the training instance. The badge SHALL use a visually distinct accent color for `'publico'` and a neutral/muted color for `'privado'`.
 
-### Requirement: Layered architecture compliance
-Training management implementation SHALL follow the project architecture flow `components -> hooks -> services -> supabase` with typed contracts in the feature slice.
+#### Scenario: Public training shows accented badge in list
+- **WHEN** the training list renders an instance with `visibilidad = 'publico'`
+- **THEN** a badge with the label "Público" in the defined accent color is displayed adjacent to the training name
 
-#### Scenario: Data access remains outside presentation
-- **WHEN** trainings feature code is reviewed
-- **THEN** Supabase access is implemented in services and consumed via hooks, not from page/component layers
+#### Scenario: Private training shows muted badge in list
+- **WHEN** the training list renders an instance with `visibilidad = 'privado'`
+- **THEN** a badge with the label "Privado" in the neutral/muted color is displayed adjacent to the training name
+
+---
+
+### Requirement: Visibility color coding and legend in calendar view
+The calendar view (`EntrenamientosCalendar`) SHALL use different dot/indicator colors per training instance based on `visibilidad`. A legend MUST be displayed in the calendar header or footer that explains the dot color semantics: one entry for public (accent color) and one for private (muted color).
+
+#### Scenario: Public training instance uses accent dot color in calendar
+- **WHEN** the calendar renders a day cell that contains a public training instance
+- **THEN** the instance indicator dot uses the accent color defined for public visibility
+
+#### Scenario: Private training instance uses muted dot color in calendar
+- **WHEN** the calendar renders a day cell that contains a private training instance
+- **THEN** the instance indicator dot uses the neutral/muted color defined for private visibility
+
+#### Scenario: Calendar legend is always visible
+- **WHEN** the calendar view is displayed
+- **THEN** a legend is permanently shown (in the header or footer) with two entries: one for the public color and one for the private color, with descriptive labels
