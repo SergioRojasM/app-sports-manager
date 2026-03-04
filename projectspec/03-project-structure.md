@@ -33,14 +33,14 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-disciplinas/page.tsx
 │   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
-│   │               │   ├── gestion-organizacion/page.tsx
-│   │               │   └── gestion-planes/page.tsx
+│   │               │   └── gestion-organizacion/page.tsx
 │   │               ├── (atleta)/
 │   │               │   └── entrenamientos-disponibles/page.tsx
 │   │               ├── (entrenador)/
 │   │               │   └── atletas/page.tsx
 │   │               └── (shared)/
-│   │                   └── gestion-entrenamientos/page.tsx
+│   │                   ├── gestion-entrenamientos/page.tsx
+│   │                   └── gestion-planes/page.tsx
 │   │
 │   ├── components/                       # Presentation layer
 │   │   ├── auth/
@@ -75,7 +75,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PlanesPage.tsx
 │   │   │       ├── PlanesTable.tsx
 │   │   │       ├── PlanesHeaderFilters.tsx
-│   │   │       └── PlanFormModal.tsx
+│   │   │       ├── PlanFormModal.tsx
+│   │   │       ├── PlanesViewPage.tsx
+│   │   │       ├── PlanesRolePage.tsx
+│   │   │       ├── SuscripcionModal.tsx
+│   │   │       └── index.ts
 │   │   │   └── gestion-equipo/            # Feature slice (portal/gestion-equipo)
 │   │   │       ├── EquipoPage.tsx
 │   │   │       ├── EquipoTable.tsx
@@ -110,7 +114,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │               └── useReservaForm.ts
 │   │       └── planes/
 │   │           ├── usePlanes.ts
-│   │           └── usePlanForm.ts
+│   │           ├── usePlanForm.ts
+│   │           ├── usePlanesView.ts
+│   │           └── useSuscripcion.ts
 │   │       └── gestion-equipo/
 │   │           └── useEquipo.ts
 │   │       └── perfil/
@@ -130,6 +136,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── entrenamientos.service.ts
 │   │       │   └── reservas.service.ts
 │   │       │   └── planes.service.ts
+│   │       │   └── suscripciones.service.ts
+│   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
 │   │       │   └── perfil.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
@@ -144,6 +152,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamientos.types.ts
 │   │       └── reservas.types.ts
 │   │       └── planes.types.ts
+│   │       └── suscripciones.types.ts
+│   │       └── pagos.types.ts
 │   │       └── equipo.types.ts
 │   │       └── perfil.types.ts
 │   │
