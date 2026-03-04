@@ -69,8 +69,8 @@
 
 ## 10. Commit & Pull Request
 
-- [ ] 10.1 Stage all changes and create commit with message: `feat(perfil): implement user profile management page (US0018)`
-- [ ] 10.2 Push branch and open Pull Request with description:
+- [x] 10.1 Stage all changes and create commit with message: `feat(perfil): implement user profile management page (US0018)`
+- [x] 10.2 Push branch and open Pull Request with description:
   - **Summary**: Implements the user profile page at `/portal/perfil` (globally accessible, outside tenant scope).
   - **Changes**: New feature slice (types, service, hook, 4 components, route page); RLS migration for `usuarios` UPDATE and `perfil_deportivo` INSERT/UPDATE; removes tenant-scoped stub page.
   - **Testing**: Manual validation per tasks 8.1–8.11.

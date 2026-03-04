@@ -12,7 +12,7 @@
 - [x] 2.5 Add RLS `INSERT` policy `suscripciones_insert_own` on `public.suscripciones` restricting to `atleta_id = auth.uid()`
 - [x] 2.6 Add RLS `SELECT` policy `suscripciones_select_own` on `public.suscripciones` restricting to `atleta_id = auth.uid()`
 - [x] 2.7 Add RLS `INSERT` policy `pagos_insert_own` on `public.pagos` restricting to `suscripcion_id` owned by `auth.uid()`
-- [ ] 2.8 Run `supabase db push` (or `supabase migration up`) and verify the migration applies cleanly _(manual — requires linked project)_
+- [x] 2.8 Run `supabase db push` (or `supabase migration up`) and verify the migration applies cleanly _(manual — requires linked project)_
 
 ## 3. TypeScript Types
 
@@ -57,12 +57,12 @@
 
 ## 10. Manual QA
 
-- [ ] 10.1 _(manual)_ Log in as `administrador` — navigate to `/portal/orgs/[tenant_id]/gestion-planes` and verify full CRUD view renders as before
-- [ ] 10.2 _(manual)_ Log in as `entrenador` — verify "Planes" appears in the sidebar and the page shows a read-only plan list with no action buttons
-- [ ] 10.3 _(manual)_ Log in as `usuario` — verify "Planes" appears in the sidebar, each active plan row has an "Adquirir" button, and inactive plans are hidden
-- [ ] 10.4 _(manual)_ As `usuario`, click "Adquirir" — verify `SuscripcionModal` opens with plan summary, comentarios textarea, and comprobante file input
-- [ ] 10.5 _(manual)_ As `usuario`, confirm subscription — verify `suscripciones` and `pagos` rows appear in Supabase Studio with `estado = 'pendiente'`
-- [ ] 10.6 _(manual)_ As `usuario`, attempt to subscribe to the same plan again — verify the modal shows _"Ya tienes una solicitud pendiente para este plan"_ and Confirmar is disabled
+- [x] 10.1 _(manual)_ Log in as `administrador` — navigate to `/portal/orgs/[tenant_id]/gestion-planes` and verify full CRUD view renders as before
+- [x] 10.2 _(manual)_ Log in as `entrenador` — verify "Planes" appears in the sidebar and the page shows a read-only plan list with no action buttons
+- [x] 10.3 _(manual)_ Log in as `usuario` — verify "Planes" appears in the sidebar, each active plan row has an "Adquirir" button, and inactive plans are hidden
+- [x] 10.4 _(manual)_ As `usuario`, click "Adquirir" — verify `SuscripcionModal` opens with plan summary, comentarios textarea, and comprobante file input
+- [x] 10.5 _(manual)_ As `usuario`, confirm subscription — verify `suscripciones` and `pagos` rows appear in Supabase Studio with `estado = 'pendiente'`
+- [x] 10.6 _(manual)_ As `usuario`, attempt to subscribe to the same plan again — verify the modal shows _"Ya tienes una solicitud pendiente para este plan"_ and Confirmar is disabled
 
 ## 11. Commit and Pull Request
 
