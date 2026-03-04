@@ -2,8 +2,11 @@ import type { PlanTableItem, PlanWithDisciplinas } from '@/types/portal/planes.t
 
 type PlanesTableProps = {
   rows: PlanTableItem[];
-  onEdit: (plan: PlanWithDisciplinas) => void;
-  onDelete: (plan: PlanWithDisciplinas) => void;
+  readOnly?: boolean;
+  onEdit?: (plan: PlanWithDisciplinas) => void;
+  onDelete?: (plan: PlanWithDisciplinas) => void;
+  /** Optional render function for a custom action column per row */
+  renderRowAction?: (plan: PlanTableItem) => React.ReactNode;
 };
 
 function formatCurrency(value: number): string {
@@ -15,7 +18,7 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
+export function PlanesTable({ rows, readOnly, onEdit, onDelete, renderRowAction }: PlanesTableProps) {
   return (
     <div className="glass overflow-hidden rounded-xl border border-portal-border">
       <div className="overflow-x-auto">
@@ -30,7 +33,9 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Disciplinas</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Beneficios</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Estado</th>
-              <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Acciones</th>
+              {!readOnly ? (
+                <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Acciones</th>
+              ) : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-portal-border bg-navy-deep/50">
@@ -117,24 +122,30 @@ export function PlanesTable({ rows, onEdit, onDelete }: PlanesTableProps) {
                     {row.statusLabel}
                   </span>
                 </td>
-                <td className="pl-6 pr-8 py-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onEdit(row)}
-                      className="rounded-lg border border-portal-border bg-navy-medium px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDelete(row)}
-                      className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
+                {!readOnly ? (
+                  <td className="pl-6 pr-8 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      {renderRowAction ? renderRowAction(row) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => onEdit?.(row)}
+                            className="rounded-lg border border-portal-border bg-navy-medium px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDelete?.(row)}
+                            className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                          >
+                            Eliminar
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>

@@ -4,3 +4,5 @@ export { scenariosService } from './scenarios.service';
 export { disciplinesService } from './disciplines.service';
 export { entrenamientosService } from './entrenamientos.service';
 export { planesService } from './planes.service';
+export { suscripcionesService } from './suscripciones.service';
+export { pagosService } from './pagos.service';

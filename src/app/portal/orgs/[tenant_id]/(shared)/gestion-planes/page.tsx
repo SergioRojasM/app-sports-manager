@@ -1,13 +1,13 @@
-import { PlanesPage } from '@/components/portal/planes';
+import { PlanesRolePage } from '@/components/portal/planes/PlanesRolePage';
 
 type GestionPlanesTenantPageProps = {
-	params: Promise<{ tenant_id: string }>;
+  params: Promise<{ tenant_id: string }>;
 };
 
 export default async function GestionPlanesTenantPage({
-	params,
+  params,
 }: GestionPlanesTenantPageProps) {
-	const { tenant_id: tenantId } = await params;
+  const { tenant_id: tenantId } = await params;
 
-	return <PlanesPage tenantId={tenantId} />;
+  return <PlanesRolePage tenantId={tenantId} />;
 }
