@@ -33,7 +33,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-disciplinas/page.tsx
 │   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
-│   │               │   └── gestion-organizacion/page.tsx
+│   │               │   ├── gestion-organizacion/page.tsx
+│   │               │   └── gestion-suscripciones/page.tsx
 │   │               ├── (atleta)/
 │   │               │   └── entrenamientos-disponibles/page.tsx
 │   │               ├── (entrenador)/
@@ -87,6 +88,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EquipoStatsCards.tsx
 │   │   │       ├── EquipoHeaderFilters.tsx
 │   │   │       └── EquipoStatusBadge.tsx
+│   │   │   └── gestion-suscripciones/     # Feature slice (portal/gestion-suscripciones)
+│   │   │       ├── GestionSuscripcionesPage.tsx
+│   │   │       ├── SuscripcionesTable.tsx
+│   │   │       ├── SuscripcionesStatsCards.tsx
+│   │   │       ├── SuscripcionesHeaderFilters.tsx
+│   │   │       ├── SuscripcionEstadoBadge.tsx
+│   │   │       ├── PagoEstadoBadge.tsx
+│   │   │       ├── ValidarPagoModal.tsx
+│   │   │       ├── ValidarSuscripcionModal.tsx
+│   │   │       └── index.ts
 │   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
 │   │   │       ├── PerfilPage.tsx
 │   │   │       ├── PerfilHeader.tsx
@@ -120,6 +131,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useSuscripcion.ts
 │   │       └── gestion-equipo/
 │   │           └── useEquipo.ts
+│   │       └── gestion-suscripciones/
+│   │           ├── useGestionSuscripciones.ts
+│   │           ├── useValidarPago.ts
+│   │           └── useValidarSuscripcion.ts
 │   │       └── perfil/
 │   │           └── usePerfil.ts
 │   │
@@ -140,6 +155,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── suscripciones.service.ts
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
+│   │       │   └── gestion-suscripciones.service.ts
 │   │       │   └── perfil.service.ts
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
@@ -156,6 +172,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
 │   │       └── equipo.types.ts
+│   │       └── gestion-suscripciones.types.ts
 │   │       └── perfil.types.ts
 │   │
 │   └── lib/                              # Pure utilities
