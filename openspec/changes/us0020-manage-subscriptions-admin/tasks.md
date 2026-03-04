@@ -100,7 +100,7 @@
   - add Suscripciones entry to ROLE_TENANT_ITEMS.administrador in portal.types.ts
   - update projectspec/03-project-structure.md
   ```
-- [ ] 11.2 Create a Pull Request with title `feat(us0020): admin subscription management` and description:
+- [x] 11.2 Create a Pull Request with title `feat(us0020): admin subscription management` and description:
   - **What**: New admin-only `gestion-suscripciones` module. Lists all tenant subscriptions with joined athlete/plan/payment data, stats cards, search + filter chips, and approve/reject modals for payments and subscriptions.
   - **Migration**: `20260305000100_gestion_suscripciones_admin_rls.sql` — additive RLS policies, no schema changes.
   - **Testing**: Verified with admin + athlete sessions; TypeScript clean.
