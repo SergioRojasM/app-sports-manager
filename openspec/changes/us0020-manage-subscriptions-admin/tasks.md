@@ -91,7 +91,7 @@
 
 ## 11. Commit and PR
 
-- [ ] 11.1 Stage all changes and write a commit message:
+- [x] 11.1 Stage all changes and write a commit message:
   ```
   feat(us0020): add admin subscription management module
 
