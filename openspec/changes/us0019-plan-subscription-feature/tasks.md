@@ -66,8 +66,8 @@
 
 ## 11. Commit and Pull Request
 
-- [ ] 11.1 Stage all changes and create a commit with message: `feat(planes): add plan subscription flow for usuario/entrenador roles (US-0019)`
-- [ ] 11.2 Push the feature branch and open a pull request with the following description:
+- [x] 11.1 Stage all changes and create a commit with message: `feat(planes): add plan subscription flow for usuario/entrenador roles (US-0019)`
+- [x] 11.2 Push the feature branch and open a pull request with the following description:
 
   **Title:** `feat: Plan membership subscription feature (US-0019)`
 
