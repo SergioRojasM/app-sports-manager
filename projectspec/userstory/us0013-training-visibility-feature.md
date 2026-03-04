@@ -238,19 +238,19 @@ No new app routes are required. All changes are additive to existing service con
 
 ## Steps for Completion (Definition of Done)
 
-- [ ] Migration file created with new columns, constraints, indexes, and backfill UPDATE.
-- [ ] Migration applied locally (`supabase db reset` or `supabase migration up`) without errors.
-- [ ] RLS `SELECT` policy updated to allow authenticated users to read public trainings cross-tenant.
-- [ ] `PUBLIC_TENANT_ID` constant defined in `src/lib/constants.ts`.
-- [ ] TypeScript types updated: `TrainingVisibility`, `TrainingInstance`, and input types.
-- [ ] Service functions updated: `createTrainingSeries`, `updateTrainingSeries`, `updateTrainingInstance`, `generateSeriesInstances`.
-- [ ] Hook `useEntrenamientoForm` updated with `visibilidad` state and submission payload.
-- [ ] `EntrenamientoFormModal` renders the visibility selector with default `'privado'` and reactive helper text.
-- [ ] Creating a training with `visibilidad = 'publico'` persists the correct `visible_para` value in the DB.
-- [ ] Editing a series with scope `'series'` or `'future'` propagates `visibilidad` and `visible_para` to eligible instances.
-- [ ] Single-instance exception (`bloquear_sync_grupo = true`) is NOT overwritten by series sync.
-- [ ] No TypeScript or ESLint errors (`pnpm lint` / `pnpm tsc --noEmit` passes).
-- [ ] Manual smoke test: create public training → verify it is visible in an athlete's `entrenamientos-disponibles` page from a different tenant.
+- [x] Migration file created with new columns, constraints, indexes, and backfill UPDATE.
+- [x] Migration applied locally (`supabase db reset` or `supabase migration up`) without errors.
+- [x] RLS `SELECT` policy updated to allow authenticated users to read public trainings cross-tenant.
+- [x] `PUBLIC_TENANT_ID` constant defined in `src/lib/constants.ts`.
+- [x] TypeScript types updated: `TrainingVisibility`, `TrainingInstance`, and input types.
+- [x] Service functions updated: `createTrainingSeries`, `updateTrainingSeries`, `updateTrainingInstance`, `generateSeriesInstances`.
+- [x] Hook `useEntrenamientoForm` updated with `visibilidad` state and submission payload.
+- [x] `EntrenamientoFormModal` renders the visibility selector with default `'privado'` and reactive helper text.
+- [x] Creating a training with `visibilidad = 'publico'` persists the correct `visible_para` value in the DB.
+- [x] Editing a series with scope `'series'` or `'future'` propagates `visibilidad` and `visible_para` to eligible instances.
+- [x] Single-instance exception (`bloquear_sync_grupo = true`) is NOT overwritten by series sync.
+- [x] No TypeScript or ESLint errors (`pnpm lint` / `pnpm tsc --noEmit` passes).
+- [x] Manual smoke test: create public training → verify it is visible in an athlete's `entrenamientos-disponibles` page from a different tenant.
 
 ---
 

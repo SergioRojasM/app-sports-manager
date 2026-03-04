@@ -85,8 +85,8 @@
 
 ## 11. Documentation
 
-- [ ] 11.1 Update `projectspec/03-project-structure.md`: add note to the `entrenamientos` feature-slice section about the `visibilidad`/`visible_para` fields and the `PUBLIC_TENANT_ID` constant
-- [ ] 11.2 Update `projectspec/userstory/us0013-training-visibility-feature.md` Definition of Done checkboxes to reflect any scope changes from design/spec phases
+- [x] 11.1 Update `projectspec/03-project-structure.md`: add note to the `entrenamientos` feature-slice section about the `visibilidad`/`visible_para` fields and the `PUBLIC_TENANT_ID` constant
+- [x] 11.2 Update `projectspec/userstory/us0013-training-visibility-feature.md` Definition of Done checkboxes to reflect any scope changes from design/spec phases
 
 ## 12. Verification & PR
 
@@ -95,7 +95,7 @@
 - [x] 12.3 Smoke test: edit a series with scope `'series'` and change visibility → verify eligible future instances are updated; verify blocked exceptions are not changed
 - [x] 12.4 Smoke test: open the list view → confirm Público/Privado badges appear per row
 - [x] 12.5 Smoke test: open the calendar view → confirm dot colors differ by visibility and the legend is visible
-- [ ] 12.6 Write commit message following conventional commits format:
+- [x] 12.6 Write commit message following conventional commits format:
   ```
   feat(entrenamientos): add visibility control (publico/privado) to training instances
 

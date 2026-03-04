@@ -64,8 +64,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       └── DisciplineFormModal.tsx
 │   │   │   └── entrenamientos/           # Feature slice (portal/entrenamientos)
 │   │   │       ├── EntrenamientosPage.tsx
-│   │   │       ├── EntrenamientosCalendar.tsx
-│   │   │       ├── EntrenamientoFormModal.tsx
+│   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by visibilidad; includes public/private legend
+│   │   │       ├── EntrenamientoFormModal.tsx   # Includes visibilidad radio group (publico/privado, default 'privado')
+│   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row
 │   │   │       └── reservas/              # Sub-feature slice (booking)
 │   │   │           ├── ReservasPanel.tsx
 │   │   │           ├── ReservaFormModal.tsx
@@ -159,7 +160,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
-│       ├── constants.ts
+       ├── constants.ts                      # PUBLIC_TENANT_ID: well-known UUID for the system-level public tenant (used by resolveVisiblePara in entrenamientos.service.ts)
 │       └── validators.ts
 │
 ├── public/                      # Static assets
