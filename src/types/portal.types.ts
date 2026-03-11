@@ -32,6 +32,12 @@ export type UserProfile = PortalDisplayProfile & {
   membership: UserMembershipContext;
 };
 
+const INICIO_MENU_ITEM: MenuItem = {
+  label: 'Inicio',
+  href: '/portal/inicio',
+  icon: 'home',
+};
+
 const BASE_MENU_ITEM: MenuItem = {
   label: 'Organizaciones Disponibles',
   href: '/portal/orgs',
@@ -65,7 +71,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
 
 export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[] {
   if (!tenantId) {
-    return [BASE_MENU_ITEM];
+    return [INICIO_MENU_ITEM, BASE_MENU_ITEM];
   }
 
   const tenantPrefix = `/portal/orgs/${tenantId}`;
@@ -82,5 +88,5 @@ export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[]
     icon: item.icon,
   }));
 
-  return [BASE_MENU_ITEM, ...roleItems, ...sharedItems];
+  return [INICIO_MENU_ITEM, BASE_MENU_ITEM, ...roleItems, ...sharedItems];
 };

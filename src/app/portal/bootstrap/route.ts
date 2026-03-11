@@ -14,7 +14,7 @@ const COOKIE_OPTIONS = {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const nextParam = searchParams.get('next');
-  const nextPath = nextParam?.startsWith('/') ? nextParam : '/portal/orgs';
+  const nextPath = nextParam?.startsWith('/') ? nextParam : '/portal/inicio';
 
   const supabase = await createClient();
   const {
