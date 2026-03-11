@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNivelesDisciplina } from '@/hooks/portal/nivel-disciplina/useNivelesDisciplina';
 import { NivelDisciplinaFormModal } from './NivelDisciplinaFormModal';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
@@ -169,19 +170,25 @@ export function NivelesDisciplinaPanel({ tenantId, disciplinaId }: NivelesDiscip
           ) : null}
         </div>
 
-        <NivelDisciplinaFormModal
-          open={modalOpen}
-          mode={modalMode}
-          tenantId={tenantId}
-          disciplinaId={disciplinaId}
-          initial={editTarget}
-          isSubmitting={isSubmitting}
-          submitError={submitError}
-          onClose={() => setModalOpen(false)}
-          onCreate={handleCreate}
-          onUpdate={handleUpdate}
-        />
       </td>
+
+      {modalOpen
+        ? createPortal(
+            <NivelDisciplinaFormModal
+              open={modalOpen}
+              mode={modalMode}
+              tenantId={tenantId}
+              disciplinaId={disciplinaId}
+              initial={editTarget}
+              isSubmitting={isSubmitting}
+              submitError={submitError}
+              onClose={() => setModalOpen(false)}
+              onCreate={handleCreate}
+              onUpdate={handleUpdate}
+            />,
+            document.body,
+          )
+        : null}
     </tr>
   );
 }
