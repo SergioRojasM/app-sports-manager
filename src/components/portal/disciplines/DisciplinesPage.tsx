@@ -95,6 +95,7 @@ export function DisciplinesPage({ tenantId }: DisciplinesPageProps) {
       {!loading && !error && filteredDisciplines.length > 0 ? (
         <DisciplinesTable
           rows={filteredDisciplines}
+          tenantId={tenantId}
           onEdit={openEditModal}
           onDelete={(discipline) => void deleteDiscipline(discipline)}
         />

@@ -1,3 +1,5 @@
+import type { NivelDisciplina } from './nivel-disciplina.types';
+
 export type Discipline = {
   id: string;
   tenant_id: string;
@@ -67,3 +69,13 @@ export class DisciplineServiceError extends Error {
     this.name = 'DisciplineServiceError';
   }
 }
+
+export type DisciplineWithNiveles = Discipline & {
+  niveles: NivelDisciplina[];
+};
+
+export type NivelDisciplinaCount = {
+  disciplina_id: string;
+  total: number;
+  activos: number;
+};

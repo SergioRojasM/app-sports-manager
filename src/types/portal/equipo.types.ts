@@ -53,3 +53,28 @@ export class EquipoServiceError extends Error {
     this.code = code;
   }
 }
+
+export type UsuarioNivelDisciplina = {
+  id: string;
+  usuario_id: string;
+  tenant_id: string;
+  disciplina_id: string;
+  nivel_id: string;
+  asignado_por: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UsuarioNivelDisciplinaInput = {
+  usuario_id: string;
+  tenant_id: string;
+  disciplina_id: string;
+  nivel_id: string;
+};
+
+export type AsignarNivelView = {
+  disciplina_id: string;
+  disciplina_nombre: string;
+  niveles: Array<{ id: string; nombre: string; orden: number }>;
+  nivel_actual_id: string | null;
+};

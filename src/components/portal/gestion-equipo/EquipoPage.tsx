@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useEquipo } from '@/hooks/portal/gestion-equipo/useEquipo';
 import { EquipoStatsCards } from './EquipoStatsCards';
 import { EquipoHeaderFilters } from './EquipoHeaderFilters';
 import { EquipoTable } from './EquipoTable';
+import { AsignarNivelModal } from './AsignarNivelModal';
 
 type EquipoPageProps = {
   tenantId: string;
@@ -43,6 +45,8 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
     stats,
     refresh,
   } = useEquipo({ tenantId });
+
+  const [asignarNivelTarget, setAsignarNivelTarget] = useState<string | null>(null);
 
   return (
     <section className="space-y-6">
@@ -89,6 +93,16 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
           totalFiltered={totalFiltered}
           onPageChange={setCurrentPage}
           onPageSizeChange={setPageSize}
+          onAsignarNivel={(usuarioId) => setAsignarNivelTarget(usuarioId)}
+        />
+      ) : null}
+
+      {asignarNivelTarget ? (
+        <AsignarNivelModal
+          open
+          tenantId={tenantId}
+          usuarioId={asignarNivelTarget}
+          onClose={() => setAsignarNivelTarget(null)}
         />
       ) : null}
     </section>

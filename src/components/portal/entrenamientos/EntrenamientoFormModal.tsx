@@ -2,12 +2,15 @@
 
 import { useEffect } from 'react';
 import type {
+  CategoriasFormState,
   SelectOption,
   TrainingFieldErrors,
   TrainingRuleErrors,
   TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
+import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import { EntrenamientoWizard } from './EntrenamientoWizard';
+import { EntrenamientoCategoriasSection } from './EntrenamientoCategoriasSection';
 
 type EntrenamientoFormModalProps = {
   open: boolean;
@@ -28,6 +31,16 @@ type EntrenamientoFormModalProps = {
   onAddRule: () => void;
   onRemoveRule: (index: number) => void;
   onChangeRuleField: (index: number, field: 'tipo_bloque' | 'hora_inicio' | 'hora_fin' | 'horas_especificas', value: string | string[]) => void;
+  // Categories
+  disciplinaHasNiveles: boolean;
+  categoriasForm: CategoriasFormState;
+  activeNiveles: NivelDisciplina[];
+  totalAsignado: number;
+  cuposSinCategoria: number;
+  sumExceedsMax: boolean;
+  categoriasError: string | null;
+  onToggleCategorias: (enabled: boolean) => void;
+  onUpdateCategoriasCupos: (nivelId: string, cupos: number) => void;
 };
 
 export function EntrenamientoFormModal({
@@ -49,6 +62,15 @@ export function EntrenamientoFormModal({
   onAddRule,
   onRemoveRule,
   onChangeRuleField,
+  disciplinaHasNiveles,
+  categoriasForm,
+  activeNiveles,
+  totalAsignado,
+  cuposSinCategoria,
+  sumExceedsMax,
+  categoriasError,
+  onToggleCategorias,
+  onUpdateCategoriasCupos,
 }: EntrenamientoFormModalProps) {
   useEffect(() => {
     if (!open) return;
@@ -121,6 +143,22 @@ export function EntrenamientoFormModal({
             onRemoveRule={onRemoveRule}
             onChangeRuleField={onChangeRuleField}
           />
+
+          {disciplinaHasNiveles ? (
+            <div className="mt-6">
+              <EntrenamientoCategoriasSection
+                categoriasForm={categoriasForm}
+                activeNiveles={activeNiveles}
+                capacidadMaxima={Number(values.cupo_maximo) || 0}
+                totalAsignado={totalAsignado}
+                cuposSinCategoria={cuposSinCategoria}
+                sumExceedsMax={sumExceedsMax}
+                categoriasError={categoriasError}
+                onToggle={onToggleCategorias}
+                onUpdateCupos={onUpdateCategoriasCupos}
+              />
+            </div>
+          ) : null}
 
           {submitError ? (
             <div className="mt-4 rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
