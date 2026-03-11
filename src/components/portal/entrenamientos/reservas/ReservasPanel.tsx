@@ -4,10 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import { useReservas } from '@/hooks/portal/entrenamientos/reservas/useReservas';
 import { useReservaForm } from '@/hooks/portal/entrenamientos/reservas/useReservaForm';
+import { useAsistencias } from '@/hooks/portal/entrenamientos/reservas/useAsistencias';
 import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
+import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
+import { AsistenciaFormModal } from './AsistenciaFormModal';
 import type { UserRole } from '@/types/portal.types';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
+import type { ReservaView } from '@/types/portal/reservas.types';
 
 // ─────────────────────────────────────────────
 // Types
@@ -48,6 +52,8 @@ export function ReservasPanel({
 }: ReservasPanelProps) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [selectedReservaForAsistencia, setSelectedReservaForAsistencia] = useState<ReservaView | null>(null);
+  const [savingAsistencia, setSavingAsistencia] = useState(false);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
 
@@ -63,6 +69,12 @@ export function ReservasPanel({
     tenantId,
     entrenamientoId: instance?.id ?? null,
     role,
+  });
+
+  const asistenciasHook = useAsistencias({
+    tenantId,
+    entrenamientoId: instance?.id ?? null,
+    isEnabled: isAdmin,
   });
 
   const reservaForm = useReservaForm({
@@ -307,7 +319,19 @@ export function ReservasPanel({
                             {reserva.categoria_nombre}
                           </span>
                         )}
+                        <AsistenciaStatusBadge asistencia={asistenciasHook.asistenciaMap[reserva.id]} />
                         <ReservaStatusBadge estado={reserva.estado} />
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedReservaForAsistencia(reserva)}
+                            title="Verificar asistencia"
+                            className="rounded-md p-1 text-slate-400 hover:bg-slate-700/40 hover:text-turquoise"
+                          >
+                            <span className="material-symbols-outlined text-base" aria-hidden="true">fact_check</span>
+                            <span className="sr-only">Verificar asistencia</span>
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -354,6 +378,38 @@ export function ReservasPanel({
           )}
         </div>
       </aside>
+
+      {/* Attendance modal */}
+      {selectedReservaForAsistencia && (
+        <AsistenciaFormModal
+          open={true}
+          reservaId={selectedReservaForAsistencia.id}
+          atletaNombre={`${selectedReservaForAsistencia.atleta_nombre} ${selectedReservaForAsistencia.atleta_apellido}`.trim()}
+          existing={asistenciasHook.asistenciaMap[selectedReservaForAsistencia.id] ?? null}
+          saving={savingAsistencia}
+          onSave={async (values) => {
+            setSavingAsistencia(true);
+            const ok = await asistenciasHook.upsertAsistencia(values, selectedReservaForAsistencia.id);
+            setSavingAsistencia(false);
+            if (ok) {
+              await asistenciasHook.refresh();
+              setSelectedReservaForAsistencia(null);
+            }
+          }}
+          onDelete={async () => {
+            const asistencia = asistenciasHook.asistenciaMap[selectedReservaForAsistencia.id];
+            if (!asistencia) return;
+            setSavingAsistencia(true);
+            const ok = await asistenciasHook.deleteAsistencia(asistencia.id);
+            setSavingAsistencia(false);
+            if (ok) {
+              await asistenciasHook.refresh();
+              setSelectedReservaForAsistencia(null);
+            }
+          }}
+          onClose={() => setSelectedReservaForAsistencia(null)}
+        />
+      )}
 
       {/* Form modal (create/edit) */}
       <ReservaFormModal

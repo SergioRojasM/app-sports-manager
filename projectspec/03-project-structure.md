@@ -88,6 +88,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │           ├── ReservasPanel.tsx
 │   │   │           ├── ReservaFormModal.tsx
 │   │   │           ├── ReservaStatusBadge.tsx
+│   │   │           ├── AsistenciaStatusBadge.tsx  # Inline badge: Sin registrar / Asistió / No asistió
+│   │   │           ├── AsistenciaFormModal.tsx    # Create/edit/delete attendance record (admin/coach only)
 │   │   │           └── index.ts
 │   │   │   └── planes/                   # Feature slice (portal/planes)
 │   │   │       ├── PlanesPage.tsx
@@ -141,9 +143,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useEntrenamientoForm.ts
 │   │           ├── useEntrenamientoScope.ts
 │   │           ├── useEntrenamientoCategorias.ts  # Fetch categories for a selected training instance
-│   │           └── reservas/              # Sub-feature hooks (booking)
-│   │               ├── useReservas.ts     # Loads reservas, capacidad, categorias; exposes refetchCategorias
-│   │               └── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
+│               └── reservas/              # Sub-feature hooks (booking + attendance)
+│               │   ├── useReservas.ts     # Loads reservas, capacidad, categorias; exposes refetchCategorias
+│               │   ├── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
+│               │   └── useAsistencias.ts  # Attendance map keyed by reserva_id; isEnabled guard skips fetch for atleta role
 │   │       └── planes/
 │   │           ├── usePlanes.ts
 │   │           ├── usePlanForm.ts
@@ -172,6 +175,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
 │   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check
+│   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │       │   └── planes.service.ts
 │   │       │   └── suscripciones.service.ts
 │   │       │   └── pagos.service.ts
@@ -193,6 +197,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts
 │   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad (level availability with cupos)
+│   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts

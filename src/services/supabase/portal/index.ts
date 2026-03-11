@@ -6,3 +6,4 @@ export { entrenamientosService } from './entrenamientos.service';
 export { planesService } from './planes.service';
 export { suscripcionesService } from './suscripciones.service';
 export { pagosService } from './pagos.service';
+export { asistenciasService } from './asistencias.service';
