@@ -3,6 +3,7 @@ import type {
   Reserva,
   ReservaView,
   ReservaCapacidad,
+  CategoriaDisponibilidad,
   CreateReservaInput,
   UpdateReservaInput,
 } from '@/types/portal/reservas.types';
@@ -13,6 +14,7 @@ import type {
 
 export type ReservaServiceErrorCode =
   | 'capacity_exceeded'
+  | 'categoria_not_found'
   | 'duplicate_booking'
   | 'invalid_estado'
   | 'not_found'
@@ -64,6 +66,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       tenant_id,
       atleta_id,
       entrenamiento_id,
+      entrenamiento_categoria_id,
       fecha_reserva,
       estado,
       notas,
@@ -73,6 +76,11 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
         nombre,
         apellido,
         email
+      ),
+      entrenamiento_categorias (
+        nivel_disciplina (
+          nombre
+        )
       )
     `)
     .eq('tenant_id', tenantId)
@@ -85,11 +93,13 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
 
   return (data ?? []).map((row) => {
     const usuario = row.usuarios as unknown as { nombre: string | null; apellido: string | null; email: string } | null;
+    const catJoin = row.entrenamiento_categorias as unknown as { nivel_disciplina: { nombre: string } | null } | null;
     return {
       id: row.id,
       tenant_id: row.tenant_id,
       atleta_id: row.atleta_id,
       entrenamiento_id: row.entrenamiento_id,
+      entrenamiento_categoria_id: row.entrenamiento_categoria_id ?? null,
       fecha_reserva: row.fecha_reserva,
       estado: row.estado as Reserva['estado'],
       notas: row.notas,
@@ -98,6 +108,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       atleta_nombre: usuario?.nombre ?? '',
       atleta_apellido: usuario?.apellido ?? '',
       atleta_email: usuario?.email ?? '',
+      categoria_nombre: catJoin?.nivel_disciplina?.nombre ?? null,
     };
   });
 }
@@ -169,6 +180,94 @@ async function getCapacidad(tenantId: string, entrenamientoId: string): Promise<
 // Mutations
 // ─────────────────────────────────────────────
 
+async function getCategoriasConDisponibilidad(
+  tenantId: string,
+  entrenamientoId: string,
+): Promise<CategoriaDisponibilidad[]> {
+  const supabase = createClient();
+
+  // Query 1: categories with level info
+  const { data: categorias, error: catError } = await supabase
+    .from('entrenamiento_categorias')
+    .select(`
+      id,
+      nivel_id,
+      cupos_asignados,
+      nivel_disciplina!inner (
+        nombre,
+        orden
+      )
+    `)
+    .eq('entrenamiento_id', entrenamientoId);
+
+  if (catError) {
+    throw mapServiceError(catError);
+  }
+
+  if (!categorias || categorias.length === 0) {
+    return [];
+  }
+
+  // Query 2: active bookings per category
+  const { data: reservas, error: resError } = await supabase
+    .from('reservas')
+    .select('entrenamiento_categoria_id')
+    .eq('tenant_id', tenantId)
+    .eq('entrenamiento_id', entrenamientoId)
+    .neq('estado', 'cancelada')
+    .not('entrenamiento_categoria_id', 'is', null);
+
+  if (resError) {
+    throw mapServiceError(resError);
+  }
+
+  // Count bookings per category
+  const countMap = new Map<string, number>();
+  for (const r of reservas ?? []) {
+    const catId = r.entrenamiento_categoria_id as string;
+    countMap.set(catId, (countMap.get(catId) ?? 0) + 1);
+  }
+
+  // Merge and return
+  return categorias
+    .map((cat) => {
+      const nivel = cat.nivel_disciplina as unknown as { nombre: string; orden: number };
+      const reservasActivas = countMap.get(cat.id) ?? 0;
+      return {
+        id: cat.id,
+        nivel_id: cat.nivel_id,
+        nombre: nivel.nombre,
+        orden: nivel.orden,
+        cupos_asignados: cat.cupos_asignados,
+        reservas_activas: reservasActivas,
+        disponible: reservasActivas < cat.cupos_asignados,
+      };
+    })
+    .sort((a, b) => a.orden - b.orden);
+}
+
+async function getAtletaNivelId(
+  tenantId: string,
+  atletaId: string,
+  disciplinaId: string,
+): Promise<string | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('usuario_nivel_disciplina')
+    .select('nivel_id')
+    .eq('tenant_id', tenantId)
+    .eq('usuario_id', atletaId)
+    .eq('disciplina_id', disciplinaId)
+    .maybeSingle();
+
+  if (error) {
+    throw mapServiceError(error);
+  }
+
+  return data?.nivel_id ?? null;
+}
+
 async function create(input: CreateReservaInput): Promise<Reserva> {
   const supabase = createClient();
 
@@ -190,13 +289,54 @@ async function create(input: CreateReservaInput): Promise<Reserva> {
     );
   }
 
-  // 3. Insert
+  // 3. Per-category capacity check
+  if (input.entrenamiento_categoria_id) {
+    const supabaseCheck = createClient();
+    const { data: catRow, error: catCheckErr } = await supabaseCheck
+      .from('entrenamiento_categorias')
+      .select('id, cupos_asignados')
+      .eq('id', input.entrenamiento_categoria_id)
+      .eq('entrenamiento_id', input.entrenamiento_id)
+      .maybeSingle();
+
+    if (catCheckErr) {
+      throw mapServiceError(catCheckErr);
+    }
+
+    if (!catRow) {
+      throw new ReservaServiceError(
+        'categoria_not_found',
+        'La categoría seleccionada no pertenece a este entrenamiento.',
+      );
+    }
+
+    const { count: catActiveCount, error: catCountErr } = await supabaseCheck
+      .from('reservas')
+      .select('*', { count: 'exact', head: true })
+      .eq('entrenamiento_id', input.entrenamiento_id)
+      .eq('entrenamiento_categoria_id', input.entrenamiento_categoria_id)
+      .neq('estado', 'cancelada');
+
+    if (catCountErr) {
+      throw mapServiceError(catCountErr);
+    }
+
+    if ((catActiveCount ?? 0) >= catRow.cupos_asignados) {
+      throw new ReservaServiceError(
+        'capacity_exceeded',
+        'No hay cupos disponibles para el nivel seleccionado.',
+      );
+    }
+  }
+
+  // 4. Insert
   const { data, error } = await supabase
     .from('reservas')
     .insert({
       tenant_id: input.tenant_id,
       atleta_id: input.atleta_id,
       entrenamiento_id: input.entrenamiento_id,
+      entrenamiento_categoria_id: input.entrenamiento_categoria_id ?? null,
       estado: 'confirmada',
       fecha_reserva: new Date().toISOString(),
       notas: input.notas?.trim() || null,
@@ -298,6 +438,8 @@ export const reservasService = {
   getByEntrenamiento,
   getMyReserva,
   getCapacidad,
+  getCategoriasConDisponibilidad,
+  getAtletaNivelId,
   create,
   update,
   cancel,

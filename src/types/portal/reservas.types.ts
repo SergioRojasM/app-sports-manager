@@ -40,3 +40,13 @@ export type ReservaCapacidad = {
   reservas_activas: number;
   disponible: boolean;
 };
+
+export type CategoriaDisponibilidad = {
+  id: string;
+  nivel_id: string;
+  nombre: string;
+  orden: number;
+  cupos_asignados: number;
+  reservas_activas: number;
+  disponible: boolean;
+};

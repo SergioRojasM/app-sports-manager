@@ -68,11 +68,15 @@ export function ReservasPanel({
   const reservaForm = useReservaForm({
     tenantId,
     entrenamientoId: instance?.id ?? '',
+    categorias: reservasHook.categorias,
+    disciplinaId: instance?.disciplina_id ?? null,
+    atletaId: currentUserId,
     onCreateReserva: async (input) => {
       const success = await reservasHook.createReserva(input);
       if (success) {
         setFormModalOpen(false);
         onMutationComplete?.();
+        void reservasHook.refetchCategorias();
       }
       return success;
     },
@@ -106,6 +110,7 @@ export function ReservasPanel({
     const success = await reservasHook.cancelReserva(reservaId);
     if (success) {
       onMutationComplete?.();
+      void reservasHook.refetchCategorias();
     }
   };
 
@@ -119,14 +124,14 @@ export function ReservasPanel({
     }
   };
 
-  const handleSelfBook = () => {
+  const handleSelfBook = async () => {
     if (!currentUserId) return;
-    reservaForm.openCreate(currentUserId);
+    await reservaForm.openCreate(currentUserId);
     setFormModalOpen(true);
   };
 
-  const handleAdminCreate = () => {
-    reservaForm.openCreate();
+  const handleAdminCreate = async () => {
+    await reservaForm.openCreate();
     setFormModalOpen(true);
   };
 
@@ -196,6 +201,33 @@ export function ReservasPanel({
               </span>
             )}
           </div>
+
+          {/* Per-category capacity breakdown */}
+          {reservasHook.categorias.length > 0 && (
+            <div className="mt-3 space-y-1.5">
+              {reservasHook.categorias.map((cat) => {
+                const cuposLibres = cat.cupos_asignados - cat.reservas_activas;
+                return (
+                  <div key={cat.id} className="flex items-center gap-2 text-xs">
+                    <span className="rounded-md border border-purple-400/30 bg-purple-500/15 px-1.5 py-0.5 font-medium text-purple-200">
+                      {cat.nombre}
+                    </span>
+                    <span className={`font-semibold ${capacityColorClass(cat.reservas_activas, cat.cupos_asignados)}`}>
+                      {cat.reservas_activas} / {cat.cupos_asignados}
+                    </span>
+                    <span className="text-slate-500">
+                      ({cuposLibres} {cuposLibres === 1 ? 'disponible' : 'disponibles'})
+                    </span>
+                    {!cat.disponible && (
+                      <span className="rounded-md border border-rose-400/40 bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-rose-200">
+                        Lleno
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Error */}
@@ -269,7 +301,14 @@ export function ReservasPanel({
                           )}
                         </p>
                       </div>
-                      <ReservaStatusBadge estado={reserva.estado} />
+                      <div className="flex flex-shrink-0 items-center gap-1.5">
+                        {reserva.categoria_nombre && (
+                          <span className="rounded-md border border-purple-400/30 bg-purple-500/15 px-1.5 py-0.5 text-[10px] font-medium text-purple-200">
+                            {reserva.categoria_nombre}
+                          </span>
+                        )}
+                        <ReservaStatusBadge estado={reserva.estado} />
+                      </div>
                     </div>
 
                     {reserva.notas && (
@@ -322,6 +361,8 @@ export function ReservasPanel({
         mode={reservaForm.mode}
         tenantId={tenantId}
         showAtletaPicker={isAdmin}
+        categorias={reservasHook.categorias}
+        loadingCategorias={reservasHook.loadingCategorias}
         form={reservaForm.form}
         errors={reservaForm.errors}
         isSubmitting={reservaForm.isSubmitting}
