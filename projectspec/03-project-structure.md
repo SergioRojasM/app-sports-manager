@@ -21,8 +21,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │   └── portal/                       # Main post-login bounded context
 │   │       ├── layout.tsx                # Shared portal shell (header + nav)
 │   │       ├── loading.tsx
-│   │       ├── page.tsx
-│   │       ├── bootstrap/route.ts
+│   │       ├── page.tsx                  # Redirects to /portal/inicio
+│   │       ├── bootstrap/route.ts        # Post-login bootstrap (default → /portal/inicio)
+│   │       ├── inicio/                   # User home dashboard (cross-tenant overview)
+│   │       │   ├── page.tsx
+│   │       │   └── loading.tsx
 │   │       ├── perfil/page.tsx           # User profile (global, not tenant-scoped)
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users)
@@ -52,6 +55,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   ├── PortalSidebar.tsx
 │   │   │   ├── RoleBasedMenu.tsx
 │   │   │   ├── UserAvatarMenu.tsx
+│   │   │   ├── inicio/                   # Feature slice (portal/inicio — user home dashboard)
+│   │   │   │   ├── InicioPage.tsx
+│   │   │   │   ├── InicioStatsCards.tsx
+│   │   │   │   ├── InicioFeaturedTraining.tsx
+│   │   │   │   ├── InicioProximosEntrenamientos.tsx
+│   │   │   │   ├── InicioSuscripciones.tsx  # "use client" — filter chips
+│   │   │   │   ├── InicioOrganizaciones.tsx
+│   │   │   │   ├── InicioQuickActions.tsx
+│   │   │   │   ├── InicioPagosPendientesAlert.tsx
+│   │   │   │   └── index.ts
 │   │   │   ├── tenant/                   # Feature slice (portal/tenant)
 │   │   │   │   ├── TenantIdentityCard.tsx
 │   │   │   │   └── TenantContactCard.tsx
@@ -157,11 +170,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── equipo.service.ts
 │   │       │   └── gestion-suscripciones.service.ts
 │   │       │   └── perfil.service.ts
+│   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
 │   │   ├── auth.types.ts
-│   │   ├── portal.types.ts               # Shared portal contracts
+│   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, resolvePortalMenu, etc.)
 │   │   └── portal/
 │   │       ├── tenant.types.ts
 │   │       └── scenarios.types.ts
@@ -174,6 +188,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── equipo.types.ts
 │   │       └── gestion-suscripciones.types.ts
 │   │       └── perfil.types.ts
+│   │       └── inicio.types.ts            # Dashboard view model interfaces
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
