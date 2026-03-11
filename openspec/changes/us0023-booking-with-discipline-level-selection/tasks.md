@@ -53,5 +53,5 @@
 
 ## 9. Commit and PR
 
-- [ ] 9.1 Stage all changes, create commit with message: `feat(reservas): level-aware booking with discipline category selection (US0023)`
-- [ ] 9.2 Push branch and open pull request with description: "Implements US0023 — when a training has per-level categories (`entrenamiento_categorias`), the booking form now shows a level selector with remaining spots. The athlete's assigned level is auto-selected when available. Per-category capacity is validated server-side before insert. Trainings without categories retain existing behavior unchanged."
+- [x] 9.1 Stage all changes, create commit with message: `feat(reservas): level-aware booking with discipline category selection (US0023)`
+- [x] 9.2 Push branch and open pull request with description: "Implements US0023 — when a training has per-level categories (`entrenamiento_categorias`), the booking form now shows a level selector with remaining spots. The athlete's assigned level is auto-selected when available. Per-category capacity is validated server-side before insert. Trainings without categories retain existing behavior unchanged."

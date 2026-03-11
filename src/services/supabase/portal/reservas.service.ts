@@ -66,6 +66,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       tenant_id,
       atleta_id,
       entrenamiento_id,
+      entrenamiento_categoria_id,
       fecha_reserva,
       estado,
       notas,
@@ -75,6 +76,11 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
         nombre,
         apellido,
         email
+      ),
+      entrenamiento_categorias (
+        nivel_disciplina (
+          nombre
+        )
       )
     `)
     .eq('tenant_id', tenantId)
@@ -87,11 +93,13 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
 
   return (data ?? []).map((row) => {
     const usuario = row.usuarios as unknown as { nombre: string | null; apellido: string | null; email: string } | null;
+    const catJoin = row.entrenamiento_categorias as unknown as { nivel_disciplina: { nombre: string } | null } | null;
     return {
       id: row.id,
       tenant_id: row.tenant_id,
       atleta_id: row.atleta_id,
       entrenamiento_id: row.entrenamiento_id,
+      entrenamiento_categoria_id: row.entrenamiento_categoria_id ?? null,
       fecha_reserva: row.fecha_reserva,
       estado: row.estado as Reserva['estado'],
       notas: row.notas,
@@ -100,6 +108,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       atleta_nombre: usuario?.nombre ?? '',
       atleta_apellido: usuario?.apellido ?? '',
       atleta_email: usuario?.email ?? '',
+      categoria_nombre: catJoin?.nivel_disciplina?.nombre ?? null,
     };
   });
 }
