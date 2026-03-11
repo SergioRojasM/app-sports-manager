@@ -16,12 +16,15 @@ export type ReservaView = Reserva & {
   atleta_nombre: string;
   atleta_apellido: string;
   atleta_email: string;
+  entrenamiento_categoria_id?: string | null;
+  categoria_nombre?: string | null;
 };
 
 export type CreateReservaInput = {
   tenant_id: string;
   atleta_id: string;
   entrenamiento_id: string;
+  entrenamiento_categoria_id?: string | null;
   notas?: string;
 };
 

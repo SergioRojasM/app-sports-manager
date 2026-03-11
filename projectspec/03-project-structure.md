@@ -75,11 +75,14 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── disciplines/              # Feature slice (portal/disciplines)
 │   │   │       ├── DisciplinesPage.tsx
 │   │   │       ├── DisciplinesTable.tsx
-│   │   │       └── DisciplineFormModal.tsx
+│   │   │       ├── DisciplineFormModal.tsx
+│   │   │       ├── NivelesDisciplinaPanel.tsx   # Collapsible panel per discipline row for level CRUD
+│   │   │       └── NivelDisciplinaFormModal.tsx  # Right-side modal for create/edit level
 │   │   │   └── entrenamientos/           # Feature slice (portal/entrenamientos)
 │   │   │       ├── EntrenamientosPage.tsx
 │   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by visibilidad; includes public/private legend
 │   │   │       ├── EntrenamientoFormModal.tsx   # Includes visibilidad radio group (publico/privado, default 'privado')
+│   │   │       ├── EntrenamientoCategoriasSection.tsx  # Optional per-level capacity allocation step
 │   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row
 │   │   │       └── reservas/              # Sub-feature slice (booking)
 │   │   │           ├── ReservasPanel.tsx
@@ -100,7 +103,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EquipoTable.tsx
 │   │   │       ├── EquipoStatsCards.tsx
 │   │   │       ├── EquipoHeaderFilters.tsx
-│   │   │       └── EquipoStatusBadge.tsx
+│   │   │       ├── EquipoStatusBadge.tsx
+│   │   │       └── AsignarNivelModal.tsx        # Per-discipline level assignment for athletes
 │   │   │   └── gestion-suscripciones/     # Feature slice (portal/gestion-suscripciones)
 │   │   │       ├── GestionSuscripcionesPage.tsx
 │   │   │       ├── SuscripcionesTable.tsx
@@ -130,10 +134,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── disciplines/
 │   │           ├── useDisciplines.ts
 │   │           └── useDisciplineForm.ts
+│   │       └── nivel-disciplina/
+│   │           └── useNivelesDisciplina.ts    # List + CRUD state for discipline levels
 │   │       └── entrenamientos/
 │   │           ├── useEntrenamientos.ts
 │   │           ├── useEntrenamientoForm.ts
 │   │           ├── useEntrenamientoScope.ts
+│   │           ├── useEntrenamientoCategorias.ts  # Fetch categories for a selected training instance
 │   │           └── reservas/              # Sub-feature hooks (booking)
 │   │               ├── useReservas.ts
 │   │               └── useReservaForm.ts
@@ -143,7 +150,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── usePlanesView.ts
 │   │           └── useSuscripcion.ts
 │   │       └── gestion-equipo/
-│   │           └── useEquipo.ts
+│   │           ├── useEquipo.ts
+│   │           └── useUsuarioNivelDisciplina.ts  # Fetch + upsert athlete discipline levels
 │   │       └── gestion-suscripciones/
 │   │           ├── useGestionSuscripciones.ts
 │   │           ├── useValidarPago.ts
@@ -168,6 +176,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── suscripciones.service.ts
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
+│   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
+│   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
+│   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts
 │   │       │   └── perfil.service.ts
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
@@ -186,6 +197,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
 │   │       └── equipo.types.ts
+│   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
+│   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── gestion-suscripciones.types.ts
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces

@@ -1,13 +1,16 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type {
+  CategoriasFormState,
   TrainingFieldErrors,
   TrainingRuleErrors,
   TrainingVisibility,
   TrainingWizardRuleFormValue,
   TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
+import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
+import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 
 const EMPTY_RULE: TrainingWizardRuleFormValue = {
   tipo_bloque: 'una_vez_dia',
@@ -112,10 +115,20 @@ export function useEntrenamientoForm() {
   const [fieldErrors, setFieldErrors] = useState<TrainingFieldErrors>({});
   const [ruleErrors, setRuleErrors] = useState<TrainingRuleErrors>([]);
 
+  // Categories state
+  const [categoriasForm, setCategoriasForm] = useState<CategoriasFormState>({ enabled: false, items: {} });
+  const [disciplinaHasNiveles, setDisciplinaHasNiveles] = useState(false);
+  const [activeNiveles, setActiveNiveles] = useState<NivelDisciplina[]>([]);
+  const [categoriasError, setCategoriasError] = useState<string | null>(null);
+
   const resetForm = useCallback(() => {
     setFormValues(EMPTY_FORM);
     setFieldErrors({});
     setRuleErrors([]);
+    setCategoriasForm({ enabled: false, items: {} });
+    setDisciplinaHasNiveles(false);
+    setActiveNiveles([]);
+    setCategoriasError(null);
   }, []);
 
   const setFormValuesFromExternal = useCallback((values: TrainingWizardValues) => {
@@ -347,6 +360,71 @@ export function useEntrenamientoForm() {
     };
   }, []);
 
+  // Categories: computed values
+  const totalAsignado = useMemo(() => {
+    if (!categoriasForm.enabled) return 0;
+    return Object.values(categoriasForm.items).reduce((sum, v) => sum + (v || 0), 0);
+  }, [categoriasForm]);
+
+  const cuposSinCategoria = useMemo(() => {
+    const max = Number(formValues.cupo_maximo) || 0;
+    return Math.max(0, max - totalAsignado);
+  }, [formValues.cupo_maximo, totalAsignado]);
+
+  const sumExceedsMax = useMemo(() => {
+    if (!categoriasForm.enabled) return false;
+    const max = Number(formValues.cupo_maximo) || 0;
+    return max > 0 && totalAsignado > max;
+  }, [categoriasForm.enabled, formValues.cupo_maximo, totalAsignado]);
+
+  const checkDisciplinaHasNiveles = useCallback(async (disciplinaId: string, tenantId: string) => {
+    setCategoriasForm({ enabled: false, items: {} });
+    setCategoriasError(null);
+    if (!disciplinaId) {
+      setDisciplinaHasNiveles(false);
+      setActiveNiveles([]);
+      return;
+    }
+    try {
+      const niveles = await nivelDisciplinaService.getNivelesDisciplina(tenantId, disciplinaId);
+      const active = niveles.filter((n) => n.activo);
+      setActiveNiveles(active);
+      setDisciplinaHasNiveles(active.length > 0);
+    } catch {
+      setDisciplinaHasNiveles(false);
+      setActiveNiveles([]);
+    }
+  }, []);
+
+  const toggleCategorias = useCallback((enabled: boolean) => {
+    setCategoriasForm((prev) => ({ ...prev, enabled }));
+    setCategoriasError(null);
+  }, []);
+
+  const updateCategoriasCupos = useCallback((nivelId: string, cupos: number) => {
+    setCategoriasForm((prev) => ({
+      ...prev,
+      items: { ...prev.items, [nivelId]: cupos },
+    }));
+    setCategoriasError(null);
+  }, []);
+
+  const validateCategorias = useCallback((): boolean => {
+    if (!categoriasForm.enabled) return true;
+    const max = Number(formValues.cupo_maximo) || 0;
+    const total = Object.values(categoriasForm.items).reduce((s, v) => s + (v || 0), 0);
+    if (max > 0 && total > max) {
+      setCategoriasError(`La suma de cupos (${total}) excede la capacidad máxima (${max}).`);
+      return false;
+    }
+    if (total === 0) {
+      setCategoriasError('Al menos una categoría debe tener cupos asignados.');
+      return false;
+    }
+    setCategoriasError(null);
+    return true;
+  }, [categoriasForm, formValues.cupo_maximo]);
+
   return {
     formValues,
     fieldErrors,
@@ -358,5 +436,17 @@ export function useEntrenamientoForm() {
     removeRule,
     updateRuleField,
     validate,
+    // Categories
+    categoriasForm,
+    disciplinaHasNiveles,
+    activeNiveles,
+    categoriasError,
+    totalAsignado,
+    cuposSinCategoria,
+    sumExceedsMax,
+    checkDisciplinaHasNiveles,
+    toggleCategorias,
+    updateCategoriasCupos,
+    validateCategorias,
   };
 }

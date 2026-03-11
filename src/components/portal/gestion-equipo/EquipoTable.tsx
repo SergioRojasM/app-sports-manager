@@ -9,6 +9,7 @@ type EquipoTableProps = {
   totalFiltered: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: 20 | 50 | 100) => void;
+  onAsignarNivel?: (usuarioId: string) => void;
 };
 
 const PAGE_SIZE_OPTIONS: (20 | 50 | 100)[] = [20, 50, 100];
@@ -25,6 +26,7 @@ export function EquipoTable({
   totalFiltered,
   onPageChange,
   onPageSizeChange,
+  onAsignarNivel,
 }: EquipoTableProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalFiltered);
@@ -44,6 +46,7 @@ export function EquipoTable({
               <th scope="col" className="px-4 py-3">RH</th>
               <th scope="col" className="px-4 py-3">Estado</th>
               <th scope="col" className="px-4 py-3">Perfil</th>
+              {onAsignarNivel ? <th scope="col" className="px-4 py-3 text-right">Acciones</th> : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-portal-border">
@@ -76,6 +79,18 @@ export function EquipoTable({
                 <td className="px-4 py-3 text-slate-300">
                   {row.rol_nombre}
                 </td>
+                {onAsignarNivel ? (
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => onAsignarNivel(row.usuario_id)}
+                      className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+                      title="Asignar nivel"
+                    >
+                      <span className="material-symbols-outlined text-sm" aria-hidden="true">military_tech</span>
+                    </button>
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>

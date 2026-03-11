@@ -15,6 +15,7 @@ import {
   type UpdateTrainingSeriesInput,
   type UpsertTrainingGroupRulesInput,
 } from '@/types/portal/entrenamientos.types';
+import { entrenamientoCategoriasService } from './entrenamiento-categorias.service';
 
 type TrainingGroupRow = Omit<TrainingGroup, 'tipo' | 'estado'> & {
   tipo: string | null;
@@ -373,7 +374,7 @@ export const entrenamientosService = {
       const visibilidad = input.visibilidad ?? 'privado';
       const visible_para = resolveVisiblePara(visibilidad, input.tenantId);
 
-      const { error: uniqueError } = await supabase
+      const { data: unicoData, error: uniqueError } = await supabase
         .from('entrenamientos')
         .insert({
           tenant_id: input.tenantId,
@@ -390,10 +391,20 @@ export const entrenamientosService = {
           cupo_maximo: input.group.cupo_maximo ?? null,
           visibilidad,
           visible_para,
-        });
+        })
+        .select('id')
+        .single();
 
-      if (uniqueError) {
+      if (uniqueError || !unicoData) {
         throw mapServiceError(uniqueError);
+      }
+
+      if (input.categorias?.length) {
+        await entrenamientoCategoriasService.upsertInstanceCategorias(
+          unicoData.id,
+          input.categorias,
+          true,
+        );
       }
 
       return null;
@@ -434,7 +445,7 @@ export const entrenamientosService = {
       rules: input.rules,
     });
 
-    await this.generateSeriesInstances({
+    const instances = await this.generateSeriesInstances({
       tenantId: input.tenantId,
       visibilidad: input.visibilidad,
       trainingGroup: group,
@@ -443,6 +454,13 @@ export const entrenamientosService = {
       toDate: input.group.fecha_fin,
       uniqueDateTime: input.uniqueDateTime,
     });
+
+    if (input.categorias?.length) {
+      await entrenamientoCategoriasService.upsertGrupoCategorias(group.id, input.categorias);
+      for (const inst of instances) {
+        await entrenamientoCategoriasService.upsertInstanceCategorias(inst.id, input.categorias, true);
+      }
+    }
 
     return group;
   },
@@ -673,6 +691,31 @@ export const entrenamientosService = {
       }
     }
 
+    // Sync categories if provided
+    if (input.categorias) {
+      await entrenamientoCategoriasService.upsertGrupoCategorias(input.trainingGroupId, input.categorias);
+
+      // Re-sync instance categories for eligible instances (sincronizado_grupo = true)
+      const { data: eligibleInstances } = await supabase
+        .from('entrenamientos')
+        .select('id')
+        .eq('tenant_id', input.tenantId)
+        .eq('entrenamiento_grupo_id', input.trainingGroupId)
+        .eq('bloquear_sync_grupo', false)
+        .neq('estado', 'cancelado')
+        .gte('fecha_hora', mutationFromIso);
+
+      if (eligibleInstances) {
+        for (const inst of eligibleInstances) {
+          const existingCats = await entrenamientoCategoriasService.getEntrenamientoCategorias(inst.id);
+          const isInSync = existingCats.length === 0 || existingCats.every((c) => c.sincronizado_grupo);
+          if (isInSync) {
+            await entrenamientoCategoriasService.upsertInstanceCategorias(inst.id, input.categorias, true);
+          }
+        }
+      }
+    }
+
     return group;
   },
 
@@ -706,6 +749,11 @@ export const entrenamientosService = {
 
       if (error) {
         throw mapServiceError(error);
+      }
+
+      // Single-scope category override: mark sincronizado_grupo = false
+      if (input.categorias) {
+        await entrenamientoCategoriasService.upsertInstanceCategorias(input.trainingId, input.categorias, false);
       }
 
       return;

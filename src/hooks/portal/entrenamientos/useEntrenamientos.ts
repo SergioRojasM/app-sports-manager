@@ -7,8 +7,10 @@ import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { useEntrenamientoForm } from './useEntrenamientoForm';
 import { useEntrenamientoScope } from './useEntrenamientoScope';
 import { useEntrenamientosCalendar } from './useEntrenamientosCalendar';
+import { useEntrenamientoCategorias } from './useEntrenamientoCategorias';
 import {
   TrainingServiceError,
+  type CategoriasFormState,
   type SelectOption,
   type TrainingCalendarItem,
   type TrainingGroupRule,
@@ -17,6 +19,8 @@ import {
   type TrainingScope,
   type TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
+import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
+import type { EntrenamientoCategoria } from '@/types/portal/entrenamiento-categorias.types';
 
 type UseEntrenamientosOptions = {
   tenantId: string;
@@ -72,6 +76,20 @@ type UseEntrenamientosResult = {
   addRule: () => void;
   removeRule: (index: number) => void;
   updateRuleField: (index: number, field: 'tipo_bloque' | 'hora_inicio' | 'hora_fin' | 'horas_especificas', value: string | string[]) => void;
+  // Categories
+  categoriasForm: CategoriasFormState;
+  disciplinaHasNiveles: boolean;
+  activeNiveles: NivelDisciplina[];
+  categoriasError: string | null;
+  totalAsignado: number;
+  cuposSinCategoria: number;
+  sumExceedsMax: boolean;
+  checkDisciplinaHasNiveles: (disciplinaId: string, tenantId: string) => Promise<void>;
+  toggleCategorias: (enabled: boolean) => void;
+  updateCategoriasCupos: (nivelId: string, cupos: number) => void;
+  validateCategorias: () => boolean;
+  instanciaCategorias: EntrenamientoCategoria[];
+  instanciaCategoriasLoading: boolean;
 };
 
 const EMPTY_SUCCESS: string | null = null;
@@ -318,6 +336,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const form = useEntrenamientoForm();
   const scope = useEntrenamientoScope();
   const calendar = useEntrenamientosCalendar();
+  const instanciaCategorias = useEntrenamientoCategorias({ entrenamientoId: selectedInstanceId });
 
   const groupsById = useMemo(() => new Map(groups.map((group) => [group.id, group])), [groups]);
 
@@ -387,6 +406,14 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       mounted = false;
     };
   }, [loadAll]);
+
+  // Check discipline levels when disciplina_id changes
+  useEffect(() => {
+    const disciplinaId = form.formValues.disciplina_id;
+    if (disciplinaId && formOpen) {
+      void form.checkDisciplinaHasNiveles(disciplinaId, tenantId);
+    }
+  }, [form.formValues.disciplina_id, formOpen, tenantId]);
 
   const openCreateModal = useCallback(() => {
     setFormMode('create');
@@ -678,11 +705,24 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       return false;
     }
 
+    // Validate categories if enabled
+    if (form.categoriasForm.enabled && !form.validateCategorias()) {
+      return false;
+    }
+
     setIsSubmitting(true);
+
+    // Build categorias payload if enabled
+    const categoriasPayload = form.categoriasForm.enabled
+      ? Object.entries(form.categoriasForm.items)
+          .filter(([, cupos]) => cupos > 0)
+          .map(([nivel_id, cupos_asignados]) => ({ nivel_id, cupos_asignados }))
+      : undefined;
 
     try {
       if (formMode === 'create') {
-        await entrenamientosService.createTrainingSeries(toCreatePayload(tenantId, form.formValues));
+        const payload = toCreatePayload(tenantId, form.formValues);
+        await entrenamientosService.createTrainingSeries({ ...payload, categorias: categoriasPayload });
         await loadAll();
         setSuccessMessage('Entrenamiento creado correctamente.');
         setFormOpen(false);
@@ -706,6 +746,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             fecha_fin: form.formValues.tipo === 'recurrente' ? form.formValues.fecha_fin || null : null,
           },
           rules: toUpdateRules(form.formValues),
+          categorias: categoriasPayload,
         });
       }
 
@@ -722,6 +763,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
               ...toUpdatePatch(form.formValues),
               fecha_hora: form.formValues.fecha_hora_unico ? toBogotaIsoFromLocalInput(form.formValues.fecha_hora_unico) : null,
             },
+            categorias: categoriasPayload,
           });
         } else if (editTarget.trainingGroupId) {
           await entrenamientosService.updateTrainingSeries({
@@ -736,6 +778,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
               fecha_fin: form.formValues.tipo === 'recurrente' ? form.formValues.fecha_fin || null : null,
             },
             rules: toUpdateRules(form.formValues),
+            categorias: categoriasPayload,
           });
         } else {
           throw new TrainingServiceError('validation', 'No se encontró la serie asociada para aplicar el alcance seleccionado.');
@@ -796,5 +839,19 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     addRule: form.addRule,
     removeRule: form.removeRule,
     updateRuleField: form.updateRuleField,
+    // Categories
+    categoriasForm: form.categoriasForm,
+    disciplinaHasNiveles: form.disciplinaHasNiveles,
+    activeNiveles: form.activeNiveles,
+    categoriasError: form.categoriasError,
+    totalAsignado: form.totalAsignado,
+    cuposSinCategoria: form.cuposSinCategoria,
+    sumExceedsMax: form.sumExceedsMax,
+    checkDisciplinaHasNiveles: form.checkDisciplinaHasNiveles,
+    toggleCategorias: form.toggleCategorias,
+    updateCategoriasCupos: form.updateCategoriasCupos,
+    validateCategorias: form.validateCategorias,
+    instanciaCategorias: instanciaCategorias.categorias,
+    instanciaCategoriasLoading: instanciaCategorias.loading,
   };
 }

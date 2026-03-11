@@ -91,6 +91,16 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     addRule,
     removeRule,
     updateRuleField,
+    // Categories
+    categoriasForm,
+    disciplinaHasNiveles,
+    activeNiveles,
+    categoriasError,
+    totalAsignado,
+    cuposSinCategoria,
+    sumExceedsMax,
+    toggleCategorias,
+    updateCategoriasCupos,
   } = useEntrenamientos({ tenantId });
 
   const instanceMap = useMemo(() => new Map(instances.map((instance) => [instance.id, instance])), [instances]);
@@ -331,6 +341,15 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         onAddRule={addRule}
         onRemoveRule={removeRule}
         onChangeRuleField={updateRuleField}
+        disciplinaHasNiveles={disciplinaHasNiveles}
+        categoriasForm={categoriasForm}
+        activeNiveles={activeNiveles}
+        totalAsignado={totalAsignado}
+        cuposSinCategoria={cuposSinCategoria}
+        sumExceedsMax={sumExceedsMax}
+        categoriasError={categoriasError}
+        onToggleCategorias={toggleCategorias}
+        onUpdateCategoriasCupos={updateCategoriasCupos}
       />
 
       <EntrenamientoScopeModal

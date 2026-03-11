@@ -1,3 +1,7 @@
+import type { EntrenamientoCategoriaInput, EntrenamientoGrupoCategoria, EntrenamientoCategoria } from './entrenamiento-categorias.types';
+
+export type { EntrenamientoGrupoCategoria, EntrenamientoCategoria };
+
 export type TrainingType = 'unico' | 'recurrente';
 export type TrainingScope = 'single' | 'future' | 'series';
 export type TrainingVisibility = 'publico' | 'privado';
@@ -21,6 +25,7 @@ export type TrainingGroup = {
   fecha_inicio: string;
   fecha_fin: string | null;
   estado: TrainingGroupStatus;
+  categorias?: EntrenamientoGrupoCategoria[];
   created_at: string;
   updated_at: string;
 };
@@ -59,6 +64,7 @@ export type TrainingInstance = {
   visible_para: string | null;
   estado: TrainingInstanceStatus;
   reservas_activas?: number;
+  categorias?: EntrenamientoCategoria[];
   created_at: string;
   updated_at: string;
 };
@@ -169,6 +175,7 @@ export type CreateTrainingSeriesInput = {
     hora_fin?: string | null;
     horas_especificas?: string[] | null;
   }>;
+  categorias?: EntrenamientoCategoriaInput[];
 };
 
 export type UpsertTrainingGroupRulesInput = {
@@ -215,6 +222,7 @@ export type UpdateTrainingSeriesInput = {
     estado: TrainingGroupStatus;
   }>;
   rules?: UpsertTrainingGroupRulesInput['rules'];
+  categorias?: EntrenamientoCategoriaInput[];
 };
 
 export type UpdateTrainingInstanceInput = {
@@ -236,6 +244,12 @@ export type UpdateTrainingInstanceInput = {
     cupo_maximo: number | null;
     estado: TrainingInstanceStatus;
   }>;
+  categorias?: EntrenamientoCategoriaInput[];
+};
+
+export type CategoriasFormState = {
+  enabled: boolean;
+  items: Record<string, number>;
 };
 
 export type DeleteTrainingWithScopeInput = {
