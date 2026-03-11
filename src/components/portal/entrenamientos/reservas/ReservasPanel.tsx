@@ -74,7 +74,7 @@ export function ReservasPanel({
   const asistenciasHook = useAsistencias({
     tenantId,
     entrenamientoId: instance?.id ?? null,
-    isEnabled: isAdmin,
+    isEnabled: true,
   });
 
   const reservaForm = useReservaForm({
@@ -319,7 +319,9 @@ export function ReservasPanel({
                             {reserva.categoria_nombre}
                           </span>
                         )}
-                        <AsistenciaStatusBadge asistencia={asistenciasHook.asistenciaMap[reserva.id]} />
+                        {(isAdmin || isOwn) && (
+                          <AsistenciaStatusBadge asistencia={asistenciasHook.asistenciaMap[reserva.id]} />
+                        )}
                         <ReservaStatusBadge estado={reserva.estado} />
                         {isAdmin && (
                           <button
