@@ -7,6 +7,7 @@ import type {
   ReservaCapacidad,
   CreateReservaInput,
   UpdateReservaInput,
+  CategoriaDisponibilidad,
 } from '@/types/portal/reservas.types';
 import type { UserRole } from '@/types/portal.types';
 
@@ -23,12 +24,15 @@ type UseReservasOptions = {
 type UseReservasResult = {
   reservas: ReservaView[];
   capacidad: ReservaCapacidad | null;
+  categorias: CategoriaDisponibilidad[];
+  loadingCategorias: boolean;
   isLoading: boolean;
   error: string | null;
   createReserva: (input: CreateReservaInput) => Promise<boolean>;
   updateReserva: (id: string, input: UpdateReservaInput) => Promise<boolean>;
   cancelReserva: (id: string) => Promise<boolean>;
   deleteReserva: (id: string) => Promise<boolean>;
+  refetchCategorias: () => Promise<void>;
   refresh: () => Promise<void>;
 };
 
@@ -50,6 +54,8 @@ function mapReservaError(error: unknown, fallback: string): string {
 export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): UseReservasResult {
   const [reservas, setReservas] = useState<ReservaView[]>([]);
   const [capacidad, setCapacidad] = useState<ReservaCapacidad | null>(null);
+  const [categorias, setCategorias] = useState<CategoriaDisponibilidad[]>([]);
+  const [loadingCategorias, setLoadingCategorias] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,6 +70,7 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
     if (!entrenamientoId) {
       setReservas([]);
       setCapacidad(null);
+      setCategorias([]);
       return;
     }
 
@@ -71,17 +78,20 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
     setError(null);
 
     try {
-      const [reservasData, capacidadData] = await Promise.all([
+      const [reservasData, capacidadData, categoriasData] = await Promise.all([
         reservasService.getByEntrenamiento(tenantId, entrenamientoId),
         reservasService.getCapacidad(tenantId, entrenamientoId),
+        reservasService.getCategoriasConDisponibilidad(tenantId, entrenamientoId),
       ]);
 
       setReservas(reservasData);
       setCapacidad(capacidadData);
+      setCategorias(categoriasData);
     } catch (caughtError) {
       setError(mapReservaError(caughtError, 'No fue posible cargar las reservas.'));
       setReservas([]);
       setCapacidad(null);
+      setCategorias([]);
     } finally {
       setIsLoading(false);
     }
@@ -203,15 +213,31 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
     [tenantId, capacidad, loadReservas],
   );
 
+  const refetchCategorias = useCallback(async () => {
+    if (!entrenamientoId) return;
+    setLoadingCategorias(true);
+    try {
+      const data = await reservasService.getCategoriasConDisponibilidad(tenantId, entrenamientoId);
+      setCategorias(data);
+    } catch {
+      // Non-critical — keep existing categorias
+    } finally {
+      setLoadingCategorias(false);
+    }
+  }, [tenantId, entrenamientoId]);
+
   return {
     reservas,
     capacidad,
+    categorias,
+    loadingCategorias,
     isLoading,
     error,
     createReserva,
     updateReserva,
     cancelReserva,
     deleteReserva: deleteReservaAction,
+    refetchCategorias,
     refresh: loadReservas,
   };
 }

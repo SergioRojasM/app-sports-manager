@@ -68,11 +68,15 @@ export function ReservasPanel({
   const reservaForm = useReservaForm({
     tenantId,
     entrenamientoId: instance?.id ?? '',
+    categorias: reservasHook.categorias,
+    disciplinaId: instance?.disciplina_id ?? null,
+    atletaId: currentUserId,
     onCreateReserva: async (input) => {
       const success = await reservasHook.createReserva(input);
       if (success) {
         setFormModalOpen(false);
         onMutationComplete?.();
+        void reservasHook.refetchCategorias();
       }
       return success;
     },
@@ -106,6 +110,7 @@ export function ReservasPanel({
     const success = await reservasHook.cancelReserva(reservaId);
     if (success) {
       onMutationComplete?.();
+      void reservasHook.refetchCategorias();
     }
   };
 
@@ -119,14 +124,14 @@ export function ReservasPanel({
     }
   };
 
-  const handleSelfBook = () => {
+  const handleSelfBook = async () => {
     if (!currentUserId) return;
-    reservaForm.openCreate(currentUserId);
+    await reservaForm.openCreate(currentUserId);
     setFormModalOpen(true);
   };
 
-  const handleAdminCreate = () => {
-    reservaForm.openCreate();
+  const handleAdminCreate = async () => {
+    await reservaForm.openCreate();
     setFormModalOpen(true);
   };
 
@@ -322,6 +327,8 @@ export function ReservasPanel({
         mode={reservaForm.mode}
         tenantId={tenantId}
         showAtletaPicker={isAdmin}
+        categorias={reservasHook.categorias}
+        loadingCategorias={reservasHook.loadingCategorias}
         form={reservaForm.form}
         errors={reservaForm.errors}
         isSubmitting={reservaForm.isSubmitting}

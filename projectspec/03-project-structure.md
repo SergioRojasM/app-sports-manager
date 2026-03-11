@@ -142,8 +142,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useEntrenamientoScope.ts
 │   │           ├── useEntrenamientoCategorias.ts  # Fetch categories for a selected training instance
 │   │           └── reservas/              # Sub-feature hooks (booking)
-│   │               ├── useReservas.ts
-│   │               └── useReservaForm.ts
+│   │               ├── useReservas.ts     # Loads reservas, capacidad, categorias; exposes refetchCategorias
+│   │               └── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
 │   │       └── planes/
 │   │           ├── usePlanes.ts
 │   │           ├── usePlanForm.ts
@@ -171,7 +171,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
-│   │       │   └── reservas.service.ts
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check
 │   │       │   └── planes.service.ts
 │   │       │   └── suscripciones.service.ts
 │   │       │   └── pagos.service.ts
@@ -192,7 +192,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts
-│   │       └── reservas.types.ts
+│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad (level availability with cupos)
 │   │       └── planes.types.ts
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts

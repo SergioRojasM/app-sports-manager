@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
-import type { ReservaEstado } from '@/types/portal/reservas.types';
+import type { ReservaEstado, CategoriaDisponibilidad } from '@/types/portal/reservas.types';
 
 // ─────────────────────────────────────────────
 // Types
@@ -19,18 +19,22 @@ type ReservaFormModalProps = {
   tenantId: string;
   /** Only needed for admin/entrenador create-on-behalf */
   showAtletaPicker: boolean;
+  categorias: CategoriaDisponibilidad[];
+  loadingCategorias: boolean;
   form: {
     atleta_id: string;
+    entrenamiento_categoria_id: string | null;
     notas: string;
     estado: ReservaEstado;
   };
   errors: {
     atleta_id?: string;
+    entrenamiento_categoria_id?: string;
     notas?: string;
   };
   isSubmitting: boolean;
   submitError: string | null;
-  onUpdateField: (field: 'atleta_id' | 'notas' | 'estado', value: string) => void;
+  onUpdateField: (field: 'atleta_id' | 'entrenamiento_categoria_id' | 'notas' | 'estado', value: string) => void;
   onSubmit: () => Promise<boolean>;
   onClose: () => void;
 };
@@ -54,6 +58,8 @@ export function ReservaFormModal({
   mode,
   tenantId,
   showAtletaPicker,
+  categorias,
+  loadingCategorias,
   form,
   errors,
   isSubmitting,
@@ -196,6 +202,53 @@ export function ReservaFormModal({
                 ))}
               </select>
             </div>
+          )}
+
+          {/* Level selector — only in create mode when categories exist */}
+          {mode === 'create' && categorias.length > 0 && (
+            <fieldset disabled={isSubmitting}>
+              <legend className="mb-2 text-sm font-medium text-slate-300">Nivel</legend>
+              {loadingCategorias ? (
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <span className="material-symbols-rounded animate-spin text-base">progress_activity</span>
+                  Cargando niveles...
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {categorias.map((cat) => {
+                    const cuposDisponibles = cat.cupos_asignados - cat.reservas_activas;
+                    return (
+                      <label
+                        key={cat.id}
+                        className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors ${
+                          form.entrenamiento_categoria_id === cat.id
+                            ? 'border-turquoise bg-turquoise/10'
+                            : 'border-portal-border bg-navy-deep hover:border-slate-500'
+                        } ${!cat.disponible ? 'cursor-not-allowed opacity-50' : ''}`}
+                      >
+                        <input
+                          type="radio"
+                          name="entrenamiento_categoria_id"
+                          value={cat.id}
+                          checked={form.entrenamiento_categoria_id === cat.id}
+                          onChange={(e) => onUpdateField('entrenamiento_categoria_id', e.target.value)}
+                          disabled={!cat.disponible}
+                          aria-disabled={!cat.disponible}
+                          className="accent-turquoise"
+                        />
+                        <span className="flex-1 text-sm text-slate-100">{cat.nombre}</span>
+                        <span className="text-xs text-slate-400">
+                          {cuposDisponibles} {cuposDisponibles === 1 ? 'cupo disponible' : 'cupos disponibles'}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+              {errors.entrenamiento_categoria_id && (
+                <p className="mt-1 text-xs text-rose-300">{errors.entrenamiento_categoria_id}</p>
+              )}
+            </fieldset>
           )}
 
           {/* Notas */}
