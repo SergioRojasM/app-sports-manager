@@ -51,7 +51,7 @@ function mapRawRow(row: RawSolicitudRow): SolicitudRow {
 /* ────────── Select columns ────────── */
 
 const SOLICITUD_SELECT =
-  'id, tenant_id, usuario_id, estado, mensaje, nota_revision, revisado_por, revisado_at, created_at, usuarios!inner(nombre, apellido, email, foto_url)';
+  'id, tenant_id, usuario_id, estado, mensaje, nota_revision, revisado_por, revisado_at, created_at, usuarios!usuario_id(nombre, apellido, email, foto_url)';
 
 /* ────────── Service object ────────── */
 

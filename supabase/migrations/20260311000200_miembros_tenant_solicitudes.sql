@@ -100,4 +100,15 @@ create policy solicitudes_update_admin on public.miembros_tenant_solicitudes
     )
   );
 
+-- ─── miembros_tenant: INSERT policy for admins (needed when accepting solicitudes) ───
+drop policy if exists miembros_tenant_insert_admin on public.miembros_tenant;
+create policy miembros_tenant_insert_admin on public.miembros_tenant
+  for insert to authenticated
+  with check (
+    tenant_id in (
+      select admin_tenants.id
+      from public.get_admin_tenants_for_authenticated_user() admin_tenants
+    )
+  );
+
 commit;
