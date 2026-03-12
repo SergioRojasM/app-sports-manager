@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { TenantIdentityCard } from '@/components/portal/tenant/TenantIdentityCard';
+import { SolicitarAccesoButton } from '@/components/portal/tenant/SolicitarAccesoButton';
 import type { PortalTenantListItem } from '@/types/portal/tenant.types';
 import type { UserRole } from '@/types/portal.types';
 
@@ -24,44 +25,36 @@ function getDefaultTenantPath(tenantId: string, role: UserRole): string {
 }
 
 export function TenantDirectoryList({ organizations }: TenantDirectoryListProps) {
-  const [feedback, setFeedback] = useState<string | null>(null);
-
   const sortedOrganizations = useMemo(
     () => [...organizations].sort((first, second) => first.identity.name.localeCompare(second.identity.name)),
     [organizations],
   );
 
   return (
-    <div className="space-y-4">
-      {feedback ? (
-        <div className="rounded-lg border border-amber-300/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-100" role="status">
-          {feedback}
-        </div>
-      ) : null}
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {sortedOrganizations.map((organization) => {
+        const role = organization.userMembershipRole;
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {sortedOrganizations.map((organization) => {
-          const role = organization.userMembershipRole;
-
+        if (organization.canAccess && role) {
           return (
             <TenantIdentityCard
               key={organization.identity.tenantId}
               identity={organization.identity}
-              actionLabel={organization.canAccess ? 'Ingresar' : 'Suscribirse'}
-              actionHref={organization.canAccess && role ? getDefaultTenantPath(organization.identity.tenantId, role) : undefined}
-              actionVariant={organization.canAccess ? 'access' : 'subscribe'}
-              onActionClick={
-                organization.canAccess
-                  ? undefined
-                  : () =>
-                      setFeedback(
-                        `La suscripción para \"${organization.identity.name}\" todavía no está disponible.`,
-                      )
-              }
+              actionLabel="Ingresar"
+              actionHref={getDefaultTenantPath(organization.identity.tenantId, role)}
+              actionVariant="access"
             />
           );
-        })}
-      </div>
+        }
+
+        return (
+          <TenantIdentityCard
+            key={organization.identity.tenantId}
+            identity={organization.identity}
+            customAction={<SolicitarAccesoButton tenantId={organization.identity.tenantId} />}
+          />
+        );
+      })}
     </div>
   );
 }
