@@ -9,6 +9,7 @@ type TenantIdentityCardProps = {
   actionHref?: string;
   onActionClick?: () => void;
   actionVariant?: 'access' | 'subscribe';
+  customAction?: React.ReactNode;
 };
 
 function formatDate(dateValue: string | null): string {
@@ -33,6 +34,7 @@ export function TenantIdentityCard({
   actionHref,
   onActionClick,
   actionVariant = 'access',
+  customAction,
 }: TenantIdentityCardProps) {
   return (
     <article className="overflow-hidden rounded-lg border border-portal-border bg-navy-medium/95 shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
@@ -87,6 +89,8 @@ export function TenantIdentityCard({
           </div>
 
         </dl>
+
+        {customAction ?? null}
 
         {actionLabel ? (
           actionHref ? (

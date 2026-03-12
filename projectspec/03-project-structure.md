@@ -67,7 +67,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   └── index.ts
 │   │   │   ├── tenant/                   # Feature slice (portal/tenant)
 │   │   │   │   ├── TenantIdentityCard.tsx
-│   │   │   │   └── TenantContactCard.tsx
+│   │   │   │   ├── TenantContactCard.tsx
+│   │   │   │   ├── TenantDirectoryList.tsx
+│   │   │   │   └── SolicitarAccesoButton.tsx  # 4-state access request button with confirmation + history
 │   │   │   └── scenarios/                # Feature slice (portal/scenarios)
 │   │   │       ├── ScenariosPage.tsx
 │   │   │       ├── ScenarioCard.tsx
@@ -107,6 +109,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EquipoHeaderFilters.tsx
 │   │   │       ├── EquipoStatusBadge.tsx
 │   │   │       └── AsignarNivelModal.tsx        # Per-discipline level assignment for athletes
+│   │   │   └── gestion-solicitudes/       # Feature slice (portal/gestion-equipo/gestion-solicitudes)
+│   │   │       ├── SolicitudEstadoBadge.tsx
+│   │   │       ├── SolicitudesTable.tsx
+│   │   │       ├── AceptarSolicitudModal.tsx
+│   │   │       └── SolicitudesTab.tsx
 │   │   │   └── gestion-suscripciones/     # Feature slice (portal/gestion-suscripciones)
 │   │   │       ├── GestionSuscripcionesPage.tsx
 │   │   │       ├── SuscripcionesTable.tsx
@@ -155,6 +162,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
 │   │           └── useUsuarioNivelDisciplina.ts  # Fetch + upsert athlete discipline levels
+│   │       └── gestion-solicitudes/
+│   │           ├── useSolicitudesAdmin.ts    # Admin: load pending, accept/reject actions
+│   │           └── useSolicitudRequest.ts   # User: submit request, track history/blocked state
 │   │       └── gestion-suscripciones/
 │   │           ├── useGestionSuscripciones.ts
 │   │           ├── useValidarPago.ts
@@ -180,6 +190,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── suscripciones.service.ts
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
+│   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests)
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
@@ -202,6 +213,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
 │   │       └── equipo.types.ts
+│   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── gestion-suscripciones.types.ts
