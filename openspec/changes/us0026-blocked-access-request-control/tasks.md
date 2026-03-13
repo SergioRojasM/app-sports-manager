@@ -60,11 +60,11 @@
 
 - [x] 8.1 Run `npx tsc --noEmit` and fix any TypeScript errors
 - [x] 8.2 Run `npx next build` (or `npm run build`) and verify no build errors
-- [ ] 8.3 Manually verify the full flow: reject a user request twice → confirm auto-block fires → "Bloqueados" tab shows the user → "Desbloquear" removes the block → user can submit again
-- [ ] 8.4 Manually verify manual block: click "Bloquear" in Solicitudes tab → confirm block record created → user sees blocked message on `SolicitarAccesoButton`
-- [ ] 8.5 Manually verify `max_solicitudes` edit: change value in org edit form → save → reject requests up to new value → confirm auto-block fires at new threshold
+- [x] 8.3 Manually verify the full flow: reject a user request twice → confirm auto-block fires → "Bloqueados" tab shows the user → "Desbloquear" removes the block → user can submit again
+- [x] 8.4 Manually verify manual block: click "Bloquear" in Solicitudes tab → confirm block record created → user sees blocked message on `SolicitarAccesoButton`
+- [x] 8.5 Manually verify `max_solicitudes` edit: change value in org edit form → save → reject requests up to new value → confirm auto-block fires at new threshold
 
 ## 9. Commit and Pull Request
 
-- [ ] 9.1 Stage all changes and create a commit with message: `feat(us0026): blocked access request control — persistent block table, configurable threshold, admin block/unblock UI`
+- [x] 9.1 Stage all changes and create a commit with message: `feat(us0026): blocked access request control — persistent block table, configurable threshold, admin block/unblock UI`
 - [ ] 9.2 Push branch and open a Pull Request with title: `feat/us0026-blocked-access-request-control` → `develop`; PR description: summarize the 4 improvements (configurable threshold, persistent block table, Bloqueados tab, manual block action), reference US0026, list files changed
