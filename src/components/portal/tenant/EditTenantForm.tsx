@@ -36,6 +36,13 @@ const FIELDS: FieldConfig[] = [
 ];
 
 export function EditTenantForm({ values, errors, isSubmitting, onChange }: EditTenantFormProps) {
+  const maxSolicitudesError = errors.max_solicitudes;
+  const maxSolicitudesInputClass = `w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition-all placeholder:text-slate-500 focus:ring-2 ${
+    maxSolicitudesError
+      ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
+      : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35'
+  }`;
+
   return (
     <div className="space-y-4">
       {FIELDS.map((field) => {
@@ -84,6 +91,31 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange }: EditT
           </div>
         );
       })}
+
+      {/* max_solicitudes — numeric field */}
+      <div className="space-y-1.5">
+        <label htmlFor="max_solicitudes" className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          Máximo de solicitudes rechazadas antes de bloqueo
+        </label>
+        <input
+          id="max_solicitudes"
+          name="max_solicitudes"
+          type="number"
+          min={1}
+          max={10}
+          step={1}
+          value={values.max_solicitudes}
+          onChange={(event) => onChange('max_solicitudes', event.target.value)}
+          disabled={isSubmitting}
+          placeholder="2"
+          className={maxSolicitudesInputClass}
+        />
+        {maxSolicitudesError ? (
+          <p className="text-xs font-medium text-rose-300" role="alert">
+            {maxSolicitudesError}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -16,6 +16,7 @@ type UseSolicitudesAdminResult = {
   pendingCount: number;
   aceptar: (solicitud: SolicitudRow, rolId: string, revisadoPor: string) => Promise<void>;
   rechazar: (solicitud: SolicitudRow, revisadoPor: string, notaRevision?: string) => Promise<void>;
+  bloquear: (solicitud: SolicitudRow, revisadoPor: string, motivo?: string) => Promise<void>;
   refresh: () => Promise<void>;
 };
 
@@ -63,8 +64,23 @@ export function useSolicitudesAdmin({ tenantId }: UseSolicitudesAdminOptions): U
     async (solicitud: SolicitudRow, revisadoPor: string, notaRevision?: string) => {
       await solicitudesService.rechazarSolicitud({
         solicitud_id: solicitud.id,
+        tenant_id: solicitud.tenant_id,
+        usuario_id: solicitud.usuario_id,
         revisado_por: revisadoPor,
         nota_revision: notaRevision,
+      });
+      await loadData();
+    },
+    [loadData],
+  );
+
+  const bloquear = useCallback(
+    async (solicitud: SolicitudRow, revisadoPor: string, motivo?: string) => {
+      await solicitudesService.bloquearUsuario({
+        tenant_id: solicitud.tenant_id,
+        usuario_id: solicitud.usuario_id,
+        bloqueado_por: revisadoPor,
+        motivo,
       });
       await loadData();
     },
@@ -78,6 +94,7 @@ export function useSolicitudesAdmin({ tenantId }: UseSolicitudesAdminOptions): U
     pendingCount: solicitudes.length,
     aceptar,
     rechazar,
+    bloquear,
     refresh: loadData,
   };
 }

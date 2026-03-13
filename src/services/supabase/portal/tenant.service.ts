@@ -25,6 +25,7 @@ type TenantRow = {
   instagram_url: string | null;
   facebook_url: string | null;
   x_url: string | null;
+  max_solicitudes: number;
   updated_at?: string | null;
 };
 
@@ -65,6 +66,7 @@ function mapTenantToEditFormValues(tenant: TenantRow): TenantEditFormValues {
     instagram_url: toEditableString(tenant.instagram_url),
     facebook_url: toEditableString(tenant.facebook_url),
     x_url: toEditableString(tenant.x_url),
+    max_solicitudes: String(tenant.max_solicitudes ?? 2),
   };
 }
 
@@ -121,7 +123,7 @@ export const tenantService = {
   async fetchTenantById(supabase: SupabaseClient, tenantId: string): Promise<TenantRow> {
     const { data, error } = await supabase
       .from('tenants')
-      .select('id, nombre, descripcion, logo_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url')
+      .select('id, nombre, descripcion, logo_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes')
       .eq('id', tenantId)
       .single();
 
@@ -212,11 +214,26 @@ export const tenantService = {
     return this.fetchTenantViewData(supabase, userId, tenantId);
   },
 
+  async getTenantMaxSolicitudes(tenantId: string): Promise<number> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('tenants')
+      .select('max_solicitudes')
+      .eq('id', tenantId)
+      .single();
+
+    if (error || !data) {
+      return 2;
+    }
+
+    return (data as { max_solicitudes: number }).max_solicitudes ?? 2;
+  },
+
   async listVisibleTenantsForPortal(supabase: SupabaseClient): Promise<TenantRow[]> {
     const { data, error } = await supabase
       .from('tenants')
       .select(
-        'id, nombre, descripcion, logo_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url',
+        'id, nombre, descripcion, logo_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes',
       )
       .neq('nombre', 'public')
       .order('fecha_creacion', { ascending: true });

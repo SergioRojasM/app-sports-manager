@@ -19,6 +19,7 @@ const EMPTY_VALUES: TenantEditFormValues = {
   instagram_url: '',
   facebook_url: '',
   x_url: '',
+  max_solicitudes: '2',
 };
 
 const URL_FIELDS: Array<keyof TenantEditFormValues> = [
@@ -48,6 +49,7 @@ function normalizeNullable(value: string): string | null {
 }
 
 function toPayload(values: TenantEditFormValues): TenantEditPayload {
+  const maxSolicitudes = Math.max(1, Math.min(10, parseInt(values.max_solicitudes, 10) || 2));
   return {
     nombre: values.nombre.trim(),
     descripcion: normalizeNullable(values.descripcion),
@@ -58,6 +60,7 @@ function toPayload(values: TenantEditFormValues): TenantEditPayload {
     instagram_url: normalizeNullable(values.instagram_url),
     facebook_url: normalizeNullable(values.facebook_url),
     x_url: normalizeNullable(values.x_url),
+    max_solicitudes: maxSolicitudes,
   };
 }
 
@@ -94,6 +97,11 @@ function validate(values: TenantEditFormValues): TenantEditFieldErrors {
     if (value && !isValidUrl(value)) {
       errors[field] = 'Ingresa una URL válida (http o https).';
     }
+  }
+
+  const maxSol = parseInt(values.max_solicitudes, 10);
+  if (Number.isNaN(maxSol) || maxSol < 1 || maxSol > 10) {
+    errors.max_solicitudes = 'El valor debe ser un entero entre 1 y 10.';
   }
 
   return errors;

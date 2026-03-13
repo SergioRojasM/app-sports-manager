@@ -8,6 +8,7 @@ type SolicitudesTableProps = {
   rows: SolicitudRow[];
   onAceptar: (solicitud: SolicitudRow) => void;
   onRechazar: (solicitud: SolicitudRow, notaRevision?: string) => void;
+  onBloquear: (solicitud: SolicitudRow) => void;
 };
 
 function formatDate(dateStr: string): string {
@@ -20,7 +21,7 @@ function formatDate(dateStr: string): string {
   }).format(parsed);
 }
 
-export function SolicitudesTable({ rows, onAceptar, onRechazar }: SolicitudesTableProps) {
+export function SolicitudesTable({ rows, onAceptar, onRechazar, onBloquear }: SolicitudesTableProps) {
   const [rechazandoId, setRechazandoId] = useState<string | null>(null);
   const [notaRevision, setNotaRevision] = useState('');
 
@@ -119,6 +120,15 @@ export function SolicitudesTable({ rows, onAceptar, onRechazar }: SolicitudesTab
                     >
                       Rechazar
                     </button>
+                    {(solicitud.estado === 'pendiente' || solicitud.estado === 'rechazada') ? (
+                      <button
+                        type="button"
+                        onClick={() => onBloquear(solicitud)}
+                        className="rounded-md border border-violet-400/30 bg-violet-900/30 px-2.5 py-1 text-xs font-semibold text-violet-200 hover:bg-violet-900/50"
+                      >
+                        Bloquear
+                      </button>
+                    ) : null}
                   </div>
                 )}
               </td>

@@ -42,16 +42,41 @@ export type AceptarSolicitudInput = {
 /** Input for rejecting a request (admin). */
 export type RechazarSolicitudInput = {
   solicitud_id: string;
+  tenant_id: string;
+  usuario_id: string;
   revisado_por: string;
   nota_revision?: string;
 };
 
+/** Row returned by the bloqueados service join query (includes user info). */
+export type BloqueadoRow = {
+  id: string;
+  tenant_id: string;
+  usuario_id: string;
+  bloqueado_por: string | null;
+  bloqueado_at: string;
+  motivo: string | null;
+  created_at: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  foto_url: string | null;
+};
+
+/** Input for blocking a user (admin). */
+export type BloquearUsuarioInput = {
+  tenant_id: string;
+  usuario_id: string;
+  bloqueado_por: string;
+  motivo?: string;
+};
+
 /** Service-level error with a typed code. */
 export class SolicitudesServiceError extends Error {
-  readonly code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'unknown';
+  readonly code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'blocked' | 'unknown';
 
   constructor(
-    code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'unknown',
+    code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'blocked' | 'unknown',
     message: string,
   ) {
     super(message);

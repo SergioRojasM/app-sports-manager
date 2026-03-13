@@ -51,6 +51,7 @@ export type TenantEditFormValues = {
   instagram_url: string;
   facebook_url: string;
   x_url: string;
+  max_solicitudes: string;
 };
 
 export type TenantEditPayload = {
@@ -63,6 +64,7 @@ export type TenantEditPayload = {
   instagram_url: string | null;
   facebook_url: string | null;
   x_url: string | null;
+  max_solicitudes: number;
 };
 
 export type TenantEditResult = {

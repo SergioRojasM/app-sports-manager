@@ -2,6 +2,8 @@ import { createClient } from '@/services/supabase/client';
 import {
   SolicitudesServiceError,
   type AceptarSolicitudInput,
+  type BloquearUsuarioInput,
+  type BloqueadoRow,
   type CreateSolicitudInput,
   type RechazarSolicitudInput,
   type SolicitudEstado,
@@ -53,6 +55,43 @@ function mapRawRow(row: RawSolicitudRow): SolicitudRow {
 const SOLICITUD_SELECT =
   'id, tenant_id, usuario_id, estado, mensaje, nota_revision, revisado_por, revisado_at, created_at, usuarios!usuario_id(nombre, apellido, email, foto_url)';
 
+const BLOQUEADO_SELECT =
+  'id, tenant_id, usuario_id, bloqueado_por, bloqueado_at, motivo, created_at, usuarios!usuario_id(nombre, apellido, email, foto_url)';
+
+/* ─── Raw row shape for bloqueados ─── */
+
+type RawBloqueadoRow = {
+  id: string;
+  tenant_id: string;
+  usuario_id: string;
+  bloqueado_por: string | null;
+  bloqueado_at: string;
+  motivo: string | null;
+  created_at: string;
+  usuarios: {
+    nombre: string | null;
+    apellido: string | null;
+    email: string;
+    foto_url: string | null;
+  };
+};
+
+function mapBloqueadoRow(row: RawBloqueadoRow): BloqueadoRow {
+  return {
+    id: row.id,
+    tenant_id: row.tenant_id,
+    usuario_id: row.usuario_id,
+    bloqueado_por: row.bloqueado_por,
+    bloqueado_at: row.bloqueado_at,
+    motivo: row.motivo,
+    created_at: row.created_at,
+    nombre: row.usuarios.nombre ?? '',
+    apellido: row.usuarios.apellido ?? '',
+    email: row.usuarios.email,
+    foto_url: row.usuarios.foto_url ?? null,
+  };
+}
+
 /* ────────── Service object ────────── */
 
 export const solicitudesService = {
@@ -81,21 +120,20 @@ export const solicitudesService = {
       throw new SolicitudesServiceError('duplicate', 'Ya existe una solicitud pendiente para esta organización.');
     }
 
-    // Guard 2: count rechazada rows
-    const { count, error: countError } = await supabase
-      .from('miembros_tenant_solicitudes')
+    // Guard 2: check if user is blocked
+    const { count: blockedCount, error: blockedError } = await supabase
+      .from('miembros_tenant_bloqueados')
       .select('id', { count: 'exact', head: true })
       .eq('tenant_id', input.tenant_id)
-      .eq('usuario_id', input.usuario_id)
-      .eq('estado', 'rechazada');
+      .eq('usuario_id', input.usuario_id);
 
-    if (countError) {
-      throw new SolicitudesServiceError('unknown', 'Error al verificar historial de solicitudes.');
+    if (blockedError) {
+      throw new SolicitudesServiceError('unknown', 'Error al verificar el estado de bloqueo.');
     }
 
-    if ((count ?? 0) >= 3) {
+    if ((blockedCount ?? 0) > 0) {
       throw new SolicitudesServiceError(
-        'max_rejections',
+        'blocked',
         'Has alcanzado el límite de solicitudes rechazadas para esta organización.',
       );
     }
@@ -209,6 +247,7 @@ export const solicitudesService = {
 
   /**
    * Reject a request: update estado → rechazada with optional nota_revision.
+   * Auto-blocks the user if rejection count reaches tenant's max_solicitudes.
    */
   async rechazarSolicitud(input: RechazarSolicitudInput): Promise<void> {
     const supabase = createClient();
@@ -225,6 +264,108 @@ export const solicitudesService = {
 
     if (error) {
       throw new SolicitudesServiceError('unknown', 'No fue posible rechazar la solicitud.');
+    }
+
+    // Auto-block: check rejection count vs tenant max
+    const [{ count: rejectionCount }, { data: tenantData }] = await Promise.all([
+      supabase
+        .from('miembros_tenant_solicitudes')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', input.tenant_id)
+        .eq('usuario_id', input.usuario_id)
+        .eq('estado', 'rechazada'),
+      supabase
+        .from('tenants')
+        .select('max_solicitudes')
+        .eq('id', input.tenant_id)
+        .single(),
+    ]);
+
+    const maxSolicitudes = (tenantData as { max_solicitudes: number } | null)?.max_solicitudes ?? 2;
+
+    if ((rejectionCount ?? 0) >= maxSolicitudes) {
+      await this.bloquearUsuario({
+        tenant_id: input.tenant_id,
+        usuario_id: input.usuario_id,
+        bloqueado_por: input.revisado_por,
+        motivo: input.nota_revision ?? undefined,
+      });
+    }
+  },
+
+  /**
+   * Check if a user is blocked for a tenant.
+   */
+  async getUserBloqueadoForTenant(tenantId: string, userId: string): Promise<boolean> {
+    const supabase = createClient();
+
+    const { count, error } = await supabase
+      .from('miembros_tenant_bloqueados')
+      .select('id', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId)
+      .eq('usuario_id', userId);
+
+    if (error) {
+      throw new SolicitudesServiceError('unknown', 'Error al verificar el estado de bloqueo.');
+    }
+
+    return (count ?? 0) > 0;
+  },
+
+  /**
+   * Get all blocked users for a tenant (admin view).
+   */
+  async getBloqueadosByTenant(tenantId: string): Promise<BloqueadoRow[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('miembros_tenant_bloqueados')
+      .select(BLOQUEADO_SELECT)
+      .eq('tenant_id', tenantId)
+      .order('bloqueado_at', { ascending: false });
+
+    if (error) {
+      throw new SolicitudesServiceError('unknown', 'No fue posible cargar los usuarios bloqueados.');
+    }
+
+    return ((data ?? []) as unknown as RawBloqueadoRow[]).map(mapBloqueadoRow);
+  },
+
+  /**
+   * Block a user for a tenant.
+   */
+  async bloquearUsuario(input: BloquearUsuarioInput): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('miembros_tenant_bloqueados')
+      .insert({
+        tenant_id: input.tenant_id,
+        usuario_id: input.usuario_id,
+        bloqueado_por: input.bloqueado_por ?? null,
+        motivo: input.motivo ?? null,
+      });
+
+    // ON CONFLICT (tenant_id, usuario_id) — Supabase unique violation code 23505
+    if (error && error.code !== '23505') {
+      throw new SolicitudesServiceError('unknown', 'No fue posible bloquear al usuario.');
+    }
+  },
+
+  /**
+   * Unblock a user for a tenant.
+   */
+  async desbloquearUsuario(tenantId: string, usuarioId: string): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('miembros_tenant_bloqueados')
+      .delete()
+      .eq('tenant_id', tenantId)
+      .eq('usuario_id', usuarioId);
+
+    if (error) {
+      throw new SolicitudesServiceError('unknown', 'No fue posible desbloquear al usuario.');
     }
   },
 };

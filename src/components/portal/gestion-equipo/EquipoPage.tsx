@@ -4,17 +4,19 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useEquipo } from '@/hooks/portal/gestion-equipo/useEquipo';
 import { useSolicitudesAdmin } from '@/hooks/portal/gestion-solicitudes/useSolicitudesAdmin';
+import { useBloqueados } from '@/hooks/portal/gestion-solicitudes/useBloqueados';
 import { EquipoStatsCards } from './EquipoStatsCards';
 import { EquipoHeaderFilters } from './EquipoHeaderFilters';
 import { EquipoTable } from './EquipoTable';
 import { AsignarNivelModal } from './AsignarNivelModal';
 import { SolicitudesTab } from './gestion-solicitudes/SolicitudesTab';
+import { BloqueadosTab } from './gestion-solicitudes/BloqueadosTab';
 
 type EquipoPageProps = {
   tenantId: string;
 };
 
-type ActiveTab = 'equipo' | 'solicitudes';
+type ActiveTab = 'equipo' | 'solicitudes' | 'bloqueados';
 
 function LoadingState() {
   return (
@@ -54,6 +56,7 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
   } = useEquipo({ tenantId });
 
   const solicitudesAdmin = useSolicitudesAdmin({ tenantId });
+  const bloqueadosAdmin = useBloqueados({ tenantId });
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('equipo');
   const [asignarNivelTarget, setAsignarNivelTarget] = useState<string | null>(null);
@@ -97,6 +100,18 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               {solicitudesAdmin.pendingCount}
             </span>
           ) : null}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('bloqueados')}
+          className={[
+            'rounded-md px-4 py-2 text-sm font-semibold transition',
+            activeTab === 'bloqueados'
+              ? 'bg-navy-soft text-slate-100'
+              : 'text-slate-400 hover:text-slate-200',
+          ].join(' ')}
+        >
+          Bloqueados
         </button>
       </nav>
 
@@ -161,8 +176,20 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
           error={solicitudesAdmin.error}
           aceptar={solicitudesAdmin.aceptar}
           rechazar={solicitudesAdmin.rechazar}
+          bloquear={solicitudesAdmin.bloquear}
           refresh={solicitudesAdmin.refresh}
           currentUserId={user?.id ?? ''}
+        />
+      ) : null}
+
+      {/* Bloqueados tab content */}
+      {activeTab === 'bloqueados' ? (
+        <BloqueadosTab
+          bloqueados={bloqueadosAdmin.bloqueados}
+          loading={bloqueadosAdmin.loading}
+          error={bloqueadosAdmin.error}
+          desbloquear={bloqueadosAdmin.desbloquear}
+          refresh={bloqueadosAdmin.refresh}
         />
       ) : null}
     </section>

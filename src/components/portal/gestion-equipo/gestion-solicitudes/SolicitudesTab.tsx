@@ -11,6 +11,7 @@ type SolicitudesTabProps = {
   error: string | null;
   aceptar: (solicitud: SolicitudRow, rolId: string, revisadoPor: string) => Promise<void>;
   rechazar: (solicitud: SolicitudRow, revisadoPor: string, notaRevision?: string) => Promise<void>;
+  bloquear: (solicitud: SolicitudRow, revisadoPor: string) => Promise<void>;
   refresh: () => Promise<void>;
   currentUserId: string;
 };
@@ -21,6 +22,7 @@ export function SolicitudesTab({
   error,
   aceptar,
   rechazar,
+  bloquear,
   refresh,
   currentUserId,
 }: SolicitudesTabProps) {
@@ -33,6 +35,10 @@ export function SolicitudesTab({
 
   async function handleRechazar(solicitud: SolicitudRow, notaRevision?: string) {
     await rechazar(solicitud, currentUserId, notaRevision);
+  }
+
+  async function handleBloquear(solicitud: SolicitudRow) {
+    await bloquear(solicitud, currentUserId);
   }
 
   if (loading) {
@@ -72,6 +78,7 @@ export function SolicitudesTab({
         rows={solicitudes}
         onAceptar={(s) => setAceptarTarget(s)}
         onRechazar={handleRechazar}
+        onBloquear={handleBloquear}
       />
 
       {aceptarTarget ? (

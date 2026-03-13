@@ -414,14 +414,20 @@ src/
 ├── hooks/portal/disciplines/
 │   ├── useDisciplines.ts
 │   └── useDisciplineForm.ts
+├── hooks/portal/gestion-solicitudes/
+│   ├── useSolicitudRequest.ts
+│   ├── useSolicitudesAdmin.ts
+│   └── useBloqueados.ts
 ├── services/supabase/portal/
 │   ├── tenant.service.ts
 │   └── scenarios.service.ts
 │   └── disciplines.service.ts
+│   └── solicitudes.service.ts
 └── types/portal/
   ├── tenant.types.ts
   └── scenarios.types.ts
   └── disciplines.types.ts
+  └── solicitudes.types.ts
 ```
 
 ### Code Flow Example

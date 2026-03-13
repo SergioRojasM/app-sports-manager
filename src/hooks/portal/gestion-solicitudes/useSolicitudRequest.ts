@@ -23,6 +23,7 @@ type UseSolicitudRequestResult = {
 export function useSolicitudRequest({ tenantId }: UseSolicitudRequestOptions): UseSolicitudRequestResult {
   const { user } = useAuth();
   const [solicitudes, setSolicitudes] = useState<SolicitudRow[]>([]);
+  const [isBanned, setIsBanned] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -32,8 +33,12 @@ export function useSolicitudRequest({ tenantId }: UseSolicitudRequestOptions): U
     if (!userId) return;
     setLoading(true);
     try {
-      const data = await solicitudesService.getUserSolicitudesForTenant(tenantId, userId);
+      const [data, banned] = await Promise.all([
+        solicitudesService.getUserSolicitudesForTenant(tenantId, userId),
+        solicitudesService.getUserBloqueadoForTenant(tenantId, userId),
+      ]);
       setSolicitudes(data);
+      setIsBanned(banned);
     } catch {
       // Silently fail — button renders default state
     } finally {
@@ -47,7 +52,7 @@ export function useSolicitudRequest({ tenantId }: UseSolicitudRequestOptions): U
 
   const hasPending = solicitudes.some((s) => s.estado === 'pendiente');
   const rejectionCount = solicitudes.filter((s) => s.estado === 'rechazada').length;
-  const isBlocked = rejectionCount >= 3;
+  const isBlocked = isBanned;
 
   const submit = useCallback(
     async (mensaje?: string) => {
