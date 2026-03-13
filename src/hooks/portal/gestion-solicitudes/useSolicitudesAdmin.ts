@@ -76,6 +76,15 @@ export function useSolicitudesAdmin({ tenantId }: UseSolicitudesAdminOptions): U
 
   const bloquear = useCallback(
     async (solicitud: SolicitudRow, revisadoPor: string, motivo?: string) => {
+      if (solicitud.estado === 'pendiente') {
+        await solicitudesService.rechazarSolicitud({
+          solicitud_id: solicitud.id,
+          tenant_id: solicitud.tenant_id,
+          usuario_id: solicitud.usuario_id,
+          revisado_por: revisadoPor,
+          nota_revision: motivo ?? 'Bloqueado por administrador',
+        });
+      }
       await solicitudesService.bloquearUsuario({
         tenant_id: solicitud.tenant_id,
         usuario_id: solicitud.usuario_id,
