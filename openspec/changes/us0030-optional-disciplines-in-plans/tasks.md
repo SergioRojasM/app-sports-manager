@@ -20,14 +20,14 @@
 - [x] 5.1 Verify `src/services/supabase/portal/planes.service.ts` — confirm both `createPlan` and `updatePlan` already guard `planes_disciplina` insert with `if (input.disciplinaIds.length > 0)` (no code change needed, read-only check)
 - [x] 5.2 Verify `src/hooks/portal/planes/usePlanes.ts` — confirm `toTableItem` maps an empty `disciplinas` array to an empty `disciplinaNames` array without errors
 - [x] 5.3 Run `npm run build` (or `tsc --noEmit`) to confirm no TypeScript errors introduced
-- [ ] 5.4 Manual smoke test: create a plan with no disciplines selected → plan saves successfully and displays "Sin disciplinas" in the table
-- [ ] 5.5 Manual smoke test: edit an existing plan and remove all disciplines → plan saves and table reflects the change
-- [ ] 5.6 Manual smoke test: existing plans with disciplines continue to display and function normally
+- [x] 5.4 Manual smoke test: create a plan with no disciplines selected → plan saves successfully and displays "Sin disciplinas" in the table
+- [x] 5.5 Manual smoke test: edit an existing plan and remove all disciplines → plan saves and table reflects the change
+- [x] 5.6 Manual smoke test: existing plans with disciplines continue to display and function normally
 
 ## 6. Commit and Pull Request
 
-- [ ] 6.1 Stage and commit all changes with message: `feat(planes): make discipline selection optional in plan form`
-- [ ] 6.2 Push branch and open a Pull Request to `develop` with the following description:
+- [x] 6.1 Stage and commit all changes with message: `feat(planes): make discipline selection optional in plan form`
+- [x] 6.2 Push branch and open a Pull Request to `develop` with the following description:
 
   **Title:** `feat(us0030): Optional disciplines in plans`
 
