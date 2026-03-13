@@ -3,3 +3,6 @@ export { EquipoTable } from './EquipoTable';
 export { EquipoStatsCards } from './EquipoStatsCards';
 export { EquipoHeaderFilters } from './EquipoHeaderFilters';
 export { EquipoStatusBadge } from './EquipoStatusBadge';
+export { EditarPerfilMiembroModal } from './EditarPerfilMiembroModal';
+export { EliminarMiembroModal } from './EliminarMiembroModal';
+export { BloquearMiembroModal } from './BloquearMiembroModal';

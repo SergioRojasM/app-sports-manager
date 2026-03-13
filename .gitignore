@@ -52,3 +52,5 @@ next-env.d.ts
 .env.keys
 .env.local
 .env.*.local
+
+seed.sql

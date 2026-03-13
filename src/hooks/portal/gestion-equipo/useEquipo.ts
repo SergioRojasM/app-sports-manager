@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { equipoService, getEquipoStats } from '@/services/supabase/portal/equipo.service';
 import type {
+  EditarPerfilMiembroInput,
+  EliminarMiembroInput,
   EquipoStats,
   MiembroEstado,
   MiembroRow,
   MiembroTableItem,
 } from '@/types/portal/equipo.types';
 import { EquipoServiceError } from '@/types/portal/equipo.types';
+import type { BloquearUsuarioInput } from '@/types/portal/solicitudes.types';
 
 type UseEquipoOptions = {
   tenantId: string;
@@ -40,6 +43,9 @@ type UseEquipoResult = {
 
   /** Actions */
   refresh: () => Promise<void>;
+  editarPerfil: (input: EditarPerfilMiembroInput) => Promise<void>;
+  eliminarDelEquipo: (input: EliminarMiembroInput) => Promise<void>;
+  bloquearDelEquipo: (input: BloquearUsuarioInput & { miembro_id: string }) => Promise<void>;
 };
 
 /* ────────── Helpers ────────── */
@@ -143,6 +149,23 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
     setCurrentPage(1);
   }, []);
 
+  /* ── Mutations ── */
+
+  const editarPerfil = useCallback(async (input: EditarPerfilMiembroInput) => {
+    await equipoService.editarPerfilMiembro(input);
+    await loadData();
+  }, [loadData]);
+
+  const eliminarDelEquipo = useCallback(async (input: EliminarMiembroInput) => {
+    await equipoService.eliminarMiembro(input);
+    await loadData();
+  }, [loadData]);
+
+  const bloquearDelEquipo = useCallback(async (input: BloquearUsuarioInput & { miembro_id: string }) => {
+    await equipoService.bloquearMiembroDelEquipo(input);
+    await loadData();
+  }, [loadData]);
+
   return {
     members,
     loading,
@@ -160,5 +183,8 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
     paginatedMembers,
     stats,
     refresh: loadData,
+    editarPerfil,
+    eliminarDelEquipo,
+    bloquearDelEquipo,
   };
 }

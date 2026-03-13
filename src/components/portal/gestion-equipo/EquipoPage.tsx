@@ -9,8 +9,12 @@ import { EquipoStatsCards } from './EquipoStatsCards';
 import { EquipoHeaderFilters } from './EquipoHeaderFilters';
 import { EquipoTable } from './EquipoTable';
 import { AsignarNivelModal } from './AsignarNivelModal';
+import { EditarPerfilMiembroModal } from './EditarPerfilMiembroModal';
+import { EliminarMiembroModal } from './EliminarMiembroModal';
+import { BloquearMiembroModal } from './BloquearMiembroModal';
 import { SolicitudesTab } from './gestion-solicitudes/SolicitudesTab';
 import { BloqueadosTab } from './gestion-solicitudes/BloqueadosTab';
+import type { MiembroTableItem } from '@/types/portal/equipo.types';
 
 type EquipoPageProps = {
   tenantId: string;
@@ -53,6 +57,9 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
     paginatedMembers,
     stats,
     refresh,
+    editarPerfil,
+    eliminarDelEquipo,
+    bloquearDelEquipo,
   } = useEquipo({ tenantId });
 
   const solicitudesAdmin = useSolicitudesAdmin({ tenantId });
@@ -60,6 +67,9 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('equipo');
   const [asignarNivelTarget, setAsignarNivelTarget] = useState<string | null>(null);
+  const [editTarget, setEditTarget] = useState<MiembroTableItem | null>(null);
+  const [removeTarget, setRemoveTarget] = useState<MiembroTableItem | null>(null);
+  const [blockTarget, setBlockTarget] = useState<MiembroTableItem | null>(null);
 
   return (
     <section className="space-y-6">
@@ -154,6 +164,9 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               onPageChange={setCurrentPage}
               onPageSizeChange={setPageSize}
               onAsignarNivel={(usuarioId) => setAsignarNivelTarget(usuarioId)}
+              onEditarPerfil={(row) => setEditTarget(row)}
+              onEliminar={(row) => setRemoveTarget(row)}
+              onBloquear={(row) => setBlockTarget(row)}
             />
           ) : null}
 
@@ -165,6 +178,36 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               onClose={() => setAsignarNivelTarget(null)}
             />
           ) : null}
+
+          <EditarPerfilMiembroModal
+            miembro={editTarget}
+            onClose={() => setEditTarget(null)}
+            onSave={editarPerfil}
+          />
+
+          <EliminarMiembroModal
+            miembro={removeTarget}
+            onClose={() => setRemoveTarget(null)}
+            onConfirm={async () => {
+              if (!removeTarget) return;
+              await eliminarDelEquipo({ miembro_id: removeTarget.miembro_id, tenant_id: tenantId });
+            }}
+          />
+
+          <BloquearMiembroModal
+            miembro={blockTarget}
+            onClose={() => setBlockTarget(null)}
+            onConfirm={async (motivo) => {
+              if (!blockTarget || !user) return;
+              await bloquearDelEquipo({
+                miembro_id: blockTarget.miembro_id,
+                tenant_id: tenantId,
+                usuario_id: blockTarget.usuario_id,
+                bloqueado_por: user.id,
+                motivo,
+              });
+            }}
+          />
         </>
       ) : null}
 

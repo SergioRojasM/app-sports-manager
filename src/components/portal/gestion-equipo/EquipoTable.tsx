@@ -10,6 +10,9 @@ type EquipoTableProps = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: 20 | 50 | 100) => void;
   onAsignarNivel?: (usuarioId: string) => void;
+  onEditarPerfil?: (row: MiembroTableItem) => void;
+  onEliminar?: (row: MiembroTableItem) => void;
+  onBloquear?: (row: MiembroTableItem) => void;
 };
 
 const PAGE_SIZE_OPTIONS: (20 | 50 | 100)[] = [20, 50, 100];
@@ -27,6 +30,9 @@ export function EquipoTable({
   onPageChange,
   onPageSizeChange,
   onAsignarNivel,
+  onEditarPerfil,
+  onEliminar,
+  onBloquear,
 }: EquipoTableProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalFiltered);
@@ -46,7 +52,7 @@ export function EquipoTable({
               <th scope="col" className="px-4 py-3">RH</th>
               <th scope="col" className="px-4 py-3">Estado</th>
               <th scope="col" className="px-4 py-3">Perfil</th>
-              {onAsignarNivel ? <th scope="col" className="px-4 py-3 text-right">Acciones</th> : null}
+              <th scope="col" className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-portal-border">
@@ -79,18 +85,50 @@ export function EquipoTable({
                 <td className="px-4 py-3 text-slate-300">
                   {row.rol_nombre}
                 </td>
-                {onAsignarNivel ? (
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onAsignarNivel(row.usuario_id)}
-                      className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
-                      title="Asignar nivel"
-                    >
-                      <span className="material-symbols-outlined text-sm" aria-hidden="true">military_tech</span>
-                    </button>
-                  </td>
-                ) : null}
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    {onEditarPerfil ? (
+                      <button
+                        type="button"
+                        onClick={() => onEditarPerfil(row)}
+                        className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+                        title="Editar perfil"
+                      >
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
+                      </button>
+                    ) : null}
+                    {onAsignarNivel ? (
+                      <button
+                        type="button"
+                        onClick={() => onAsignarNivel(row.usuario_id)}
+                        className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+                        title="Asignar nivel"
+                      >
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">military_tech</span>
+                      </button>
+                    ) : null}
+                    {onEliminar ? (
+                      <button
+                        type="button"
+                        onClick={() => onEliminar(row)}
+                        className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-rose-400"
+                        title="Eliminar del equipo"
+                      >
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">person_remove</span>
+                      </button>
+                    ) : null}
+                    {onBloquear ? (
+                      <button
+                        type="button"
+                        onClick={() => onBloquear(row)}
+                        className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-amber-400"
+                        title="Bloquear usuario"
+                      >
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">block</span>
+                      </button>
+                    ) : null}
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

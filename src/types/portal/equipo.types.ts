@@ -78,3 +78,32 @@ export type AsignarNivelView = {
   niveles: Array<{ id: string; nombre: string; orden: number }>;
   nivel_actual_id: string | null;
 };
+
+/* ───────── Admin action inputs (US-0027) ───────── */
+
+/** Input for editing a member's profile (usuarios + perfil_deportivo). */
+export type EditarPerfilMiembroInput = {
+  usuario_id: string;
+  nombre: string;
+  apellido?: string | null;
+  telefono?: string | null;
+  fecha_nacimiento?: string | null;
+  tipo_identificacion?: TipoIdentificacion | null;
+  numero_identificacion?: string | null;
+  rh?: string | null;
+  estado: MiembroEstado;
+  peso_kg?: number | null;
+  altura_cm?: number | null;
+};
+
+/** Input for removing a member from a tenant. */
+export type EliminarMiembroInput = {
+  miembro_id: string;
+  tenant_id: string;
+};
+
+/** Return shape for getPerfilDeportivo. */
+export type PerfilDeportivoRow = {
+  peso_kg: number | null;
+  altura_cm: number | null;
+};

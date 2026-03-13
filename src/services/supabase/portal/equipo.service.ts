@@ -1,11 +1,15 @@
 import { createClient } from '@/services/supabase/client';
 import {
   EquipoServiceError,
+  type EditarPerfilMiembroInput,
+  type EliminarMiembroInput,
   type EquipoStats,
   type MiembroEstado,
   type MiembroRow,
+  type PerfilDeportivoRow,
   type TipoIdentificacion,
 } from '@/types/portal/equipo.types';
+import type { BloquearUsuarioInput } from '@/types/portal/solicitudes.types';
 
 /* ────────── Raw row shape returned by Supabase ────────── */
 
@@ -134,5 +138,104 @@ export const equipoService = {
     }
 
     return ((data ?? []) as unknown as RawMiembroRow[]).map(mapRawRow);
+  },
+
+  /**
+   * Fetch sports profile (peso_kg, altura_cm) for a given user.
+   * Returns nulls if no row exists.
+   */
+  async getPerfilDeportivo(usuarioId: string): Promise<PerfilDeportivoRow> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('perfil_deportivo')
+      .select('peso_kg, altura_cm')
+      .eq('user_id', usuarioId)
+      .maybeSingle();
+
+    if (error) throw mapPostgrestError(error);
+
+    return { peso_kg: data?.peso_kg ?? null, altura_cm: data?.altura_cm ?? null };
+  },
+
+  /**
+   * Update a member's profile (usuarios + optional perfil_deportivo upsert).
+   */
+  async editarPerfilMiembro(input: EditarPerfilMiembroInput): Promise<void> {
+    const supabase = createClient();
+
+    const { error: userError } = await supabase
+      .from('usuarios')
+      .update({
+        nombre: input.nombre,
+        apellido: input.apellido ?? null,
+        telefono: input.telefono ?? null,
+        fecha_nacimiento: input.fecha_nacimiento ?? null,
+        tipo_identificacion: input.tipo_identificacion ?? null,
+        numero_identificacion: input.numero_identificacion ?? null,
+        rh: input.rh ?? null,
+        estado: input.estado,
+      })
+      .eq('id', input.usuario_id);
+
+    if (userError) throw mapPostgrestError(userError);
+
+    if (input.peso_kg != null || input.altura_cm != null) {
+      const { error: perfilError } = await supabase
+        .from('perfil_deportivo')
+        .upsert(
+          {
+            user_id: input.usuario_id,
+            peso_kg: input.peso_kg ?? null,
+            altura_cm: input.altura_cm ?? null,
+          },
+          { onConflict: 'user_id' },
+        );
+
+      if (perfilError) throw mapPostgrestError(perfilError);
+    }
+  },
+
+  /**
+   * Remove a member from the tenant (delete miembros_tenant row).
+   */
+  async eliminarMiembro(input: EliminarMiembroInput): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('miembros_tenant')
+      .delete()
+      .eq('id', input.miembro_id)
+      .eq('tenant_id', input.tenant_id);
+
+    if (error) throw mapPostgrestError(error);
+  },
+
+  /**
+   * Block a member from the team: insert block record first, then remove membership.
+   */
+  async bloquearMiembroDelEquipo(
+    input: BloquearUsuarioInput & { miembro_id: string },
+  ): Promise<void> {
+    const supabase = createClient();
+
+    const { error: blockError } = await supabase
+      .from('miembros_tenant_bloqueados')
+      .insert({
+        tenant_id: input.tenant_id,
+        usuario_id: input.usuario_id,
+        bloqueado_por: input.bloqueado_por,
+        motivo: input.motivo ?? null,
+      });
+
+    if (blockError) throw mapPostgrestError(blockError);
+
+    const { error: deleteError } = await supabase
+      .from('miembros_tenant')
+      .delete()
+      .eq('id', input.miembro_id)
+      .eq('tenant_id', input.tenant_id);
+
+    if (deleteError) throw mapPostgrestError(deleteError);
   },
 };

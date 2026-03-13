@@ -108,7 +108,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EquipoStatsCards.tsx
 │   │   │       ├── EquipoHeaderFilters.tsx
 │   │   │       ├── EquipoStatusBadge.tsx
-│   │   │       └── AsignarNivelModal.tsx        # Per-discipline level assignment for athletes
+│   │   │       ├── AsignarNivelModal.tsx        # Per-discipline level assignment for athletes
+│   │   │       ├── EditarPerfilMiembroModal.tsx  # Slide-in modal: edit member profile + sports data
+│   │   │       ├── EliminarMiembroModal.tsx      # Confirmation dialog: remove member from team
+│   │   │       └── BloquearMiembroModal.tsx      # Confirmation dialog: block member with optional motivo
 │   │   │   └── gestion-solicitudes/       # Feature slice (portal/gestion-equipo/gestion-solicitudes)
 │   │   │       ├── SolicitudEstadoBadge.tsx
 │   │   │       ├── SolicitudesTable.tsx
