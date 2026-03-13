@@ -89,10 +89,6 @@ export function usePlanForm() {
       }
     }
 
-    if (values.disciplinaIds.length === 0) {
-      errors.disciplinaIds = 'Debe seleccionar al menos una disciplina.';
-    }
-
     setFieldErrors(errors);
     return {
       valid: Object.keys(errors).length === 0,

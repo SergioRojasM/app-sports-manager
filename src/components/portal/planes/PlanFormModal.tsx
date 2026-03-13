@@ -336,7 +336,7 @@ export function PlanFormModal({
           {/* Disciplines multi-select */}
           <div>
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-              Disciplinas
+              Disciplinas <span className="normal-case font-normal text-slate-500">(opcional)</span>
             </span>
             {activeDisciplines.length === 0 ? (
               <p className="rounded-lg border border-amber-400/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
@@ -387,7 +387,7 @@ export function PlanFormModal({
           <button
             type="button"
             onClick={() => void onSubmit()}
-            disabled={isSubmitting || activeDisciplines.length === 0}
+            disabled={isSubmitting}
             className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear plan' : 'Guardar cambios'}

@@ -86,7 +86,7 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, renderRowAction 
                         </span>
                       ))
                     ) : (
-                      <span className="text-xs text-slate-500">—</span>
+                      <span className="text-xs italic text-slate-500">Sin disciplinas</span>
                     )}
                   </div>
                 </td>
