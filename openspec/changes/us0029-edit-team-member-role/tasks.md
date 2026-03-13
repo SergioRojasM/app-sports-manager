@@ -64,7 +64,7 @@
 ## 11. Verification & Commit
 
 - [x] 11.1 Run `npm run build` and verify no TypeScript compilation errors
-- [ ] 11.2 Manually test: change a member's role, verify the table refreshes and shows the new role
-- [ ] 11.3 Manually test: try to change the last admin's role — verify the last-admin error is displayed
-- [ ] 11.4 Manually test: change own role away from admin — verify the self-demotion warning appears
-- [ ] 11.5 Create a commit with message: `feat(equipo): add inline role editing for team members (US-0029)` and a pull request description summarizing the changes
+- [x] 11.2 Manually test: change a member's role, verify the table refreshes and shows the new role
+- [x] 11.3 Manually test: try to change the last admin's role — verify the last-admin error is displayed
+- [x] 11.4 Manually test: change own role away from admin — verify the self-demotion warning appears
+- [x] 11.5 Create a commit with message: `feat(equipo): add inline role editing for team members (US-0029)` and a pull request description summarizing the changes
