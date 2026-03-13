@@ -111,7 +111,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── AsignarNivelModal.tsx        # Per-discipline level assignment for athletes
 │   │   │       ├── EditarPerfilMiembroModal.tsx  # Slide-in modal: edit member profile + sports data
 │   │   │       ├── EliminarMiembroModal.tsx      # Confirmation dialog: remove member from team
-│   │   │       └── BloquearMiembroModal.tsx      # Confirmation dialog: block member with optional motivo
+│   │   │       ├── BloquearMiembroModal.tsx      # Confirmation dialog: block member with optional motivo
+│   │   │       └── CambiarRolModal.tsx           # Confirmation dialog: change member role with self-demotion warning
 │   │   │   └── gestion-solicitudes/       # Feature slice (portal/gestion-equipo/gestion-solicitudes)
 │   │   │       ├── SolicitudEstadoBadge.tsx
 │   │   │       ├── SolicitudesTable.tsx

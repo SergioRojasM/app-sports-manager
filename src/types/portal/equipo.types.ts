@@ -45,9 +45,9 @@ export type EquipoStats = {
 
 /** Service-level error with a typed code. */
 export class EquipoServiceError extends Error {
-  readonly code: 'forbidden' | 'unknown';
+  readonly code: 'forbidden' | 'unknown' | 'last_admin' | 'not_found';
 
-  constructor(code: 'forbidden' | 'unknown', message: string) {
+  constructor(code: 'forbidden' | 'unknown' | 'last_admin' | 'not_found', message: string) {
     super(message);
     this.name = 'EquipoServiceError';
     this.code = code;
@@ -106,4 +106,19 @@ export type EliminarMiembroInput = {
 export type PerfilDeportivoRow = {
   peso_kg: number | null;
   altura_cm: number | null;
+};
+
+/* ───────── Role editing types (US-0029) ───────── */
+
+/** A selectable role option from the roles lookup table. */
+export type RolOption = {
+  id: string;
+  nombre: string;
+};
+
+/** Input for changing a member's role. */
+export type CambiarRolMiembroInput = {
+  miembro_id: string;
+  tenant_id: string;
+  nuevo_rol_id: string;
 };

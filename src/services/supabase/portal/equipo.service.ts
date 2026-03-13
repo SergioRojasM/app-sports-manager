@@ -1,12 +1,14 @@
 import { createClient } from '@/services/supabase/client';
 import {
   EquipoServiceError,
+  type CambiarRolMiembroInput,
   type EditarPerfilMiembroInput,
   type EliminarMiembroInput,
   type EquipoStats,
   type MiembroEstado,
   type MiembroRow,
   type PerfilDeportivoRow,
+  type RolOption,
   type TipoIdentificacion,
 } from '@/types/portal/equipo.types';
 import type { BloquearUsuarioInput } from '@/types/portal/solicitudes.types';
@@ -237,5 +239,94 @@ export const equipoService = {
       .eq('tenant_id', input.tenant_id);
 
     if (deleteError) throw mapPostgrestError(deleteError);
+  },
+
+  /**
+   * Fetch all available roles from the roles lookup table.
+   */
+  async getRoles(): Promise<RolOption[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('roles')
+      .select('id, nombre')
+      .order('nombre');
+
+    if (error) throw mapPostgrestError(error);
+
+    return (data ?? []) as RolOption[];
+  },
+
+  /**
+   * Change a member's role with last-admin guard.
+   * Throws 'last_admin' if the member is the sole admin and is being demoted.
+   * Throws 'not_found' if the member row doesn't exist in the tenant.
+   */
+  async cambiarRolMiembro(input: CambiarRolMiembroInput): Promise<void> {
+    const supabase = createClient();
+
+    // Fetch current member to get current rol_id
+    const { data: currentMember, error: fetchError } = await supabase
+      .from('miembros_tenant')
+      .select('rol_id, roles!inner(nombre)')
+      .eq('id', input.miembro_id)
+      .eq('tenant_id', input.tenant_id)
+      .maybeSingle();
+
+    if (fetchError) throw mapPostgrestError(fetchError);
+    if (!currentMember) {
+      throw new EquipoServiceError('not_found', 'El miembro no fue encontrado en esta organización.');
+    }
+
+    const currentRolNombre = (currentMember.roles as unknown as { nombre: string }).nombre;
+
+    // Fetch the new role name to check if we're changing away from admin
+    const { data: newRole, error: newRoleError } = await supabase
+      .from('roles')
+      .select('nombre')
+      .eq('id', input.nuevo_rol_id)
+      .single();
+
+    if (newRoleError) throw mapPostgrestError(newRoleError);
+
+    // Last-admin guard: if current role is admin and new is not, check count
+    if (
+      currentRolNombre.toLowerCase() === 'administrador' &&
+      newRole.nombre.toLowerCase() !== 'administrador'
+    ) {
+      const { count, error: countError } = await supabase
+        .from('miembros_tenant')
+        .select('id', { count: 'exact', head: true })
+        .eq('tenant_id', input.tenant_id)
+        .eq('rol_id', currentMember.rol_id);
+
+      if (countError) throw mapPostgrestError(countError);
+
+      if ((count ?? 0) <= 1) {
+        throw new EquipoServiceError(
+          'last_admin',
+          'No se puede cambiar el rol del único administrador de la organización. Asigna otro administrador primero.',
+        );
+      }
+    }
+
+    // Execute the UPDATE
+    const { data: updated, error: updateError } = await supabase
+      .from('miembros_tenant')
+      .update({ rol_id: input.nuevo_rol_id })
+      .eq('id', input.miembro_id)
+      .eq('tenant_id', input.tenant_id)
+      .select('id');
+
+    if (updateError) {
+      if (updateError.code === '42501') {
+        throw new EquipoServiceError('forbidden', 'No tienes permisos para cambiar el rol de este miembro.');
+      }
+      throw mapPostgrestError(updateError);
+    }
+
+    if (!updated || updated.length === 0) {
+      throw new EquipoServiceError('not_found', 'El miembro no fue encontrado en esta organización.');
+    }
   },
 };

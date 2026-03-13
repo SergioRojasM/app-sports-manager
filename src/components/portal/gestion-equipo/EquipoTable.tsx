@@ -1,4 +1,4 @@
-import type { MiembroTableItem } from '@/types/portal/equipo.types';
+import type { MiembroTableItem, RolOption } from '@/types/portal/equipo.types';
 import { EquipoStatusBadge } from './EquipoStatusBadge';
 
 type EquipoTableProps = {
@@ -13,6 +13,8 @@ type EquipoTableProps = {
   onEditarPerfil?: (row: MiembroTableItem) => void;
   onEliminar?: (row: MiembroTableItem) => void;
   onBloquear?: (row: MiembroTableItem) => void;
+  roles?: RolOption[];
+  onCambiarRol?: (row: MiembroTableItem, nuevoRol: RolOption) => void;
 };
 
 const PAGE_SIZE_OPTIONS: (20 | 50 | 100)[] = [20, 50, 100];
@@ -33,6 +35,8 @@ export function EquipoTable({
   onEditarPerfil,
   onEliminar,
   onBloquear,
+  roles,
+  onCambiarRol,
 }: EquipoTableProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalFiltered);
@@ -83,7 +87,27 @@ export function EquipoTable({
                   <EquipoStatusBadge estado={row.estado} />
                 </td>
                 <td className="px-4 py-3 text-slate-300">
-                  {row.rol_nombre}
+                  {roles && onCambiarRol ? (
+                    <select
+                      value={roles.find((r) => r.nombre === row.rol_nombre)?.id ?? ''}
+                      onChange={(e) => {
+                        const selected = roles.find((r) => r.id === e.target.value);
+                        if (selected && selected.nombre !== row.rol_nombre) {
+                          onCambiarRol(row, selected);
+                        }
+                      }}
+                      aria-label="Cambiar rol"
+                      className="rounded border border-portal-border bg-navy-deep px-2 py-1 text-xs text-slate-200 outline-none focus:border-turquoise/50"
+                    >
+                      {roles.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    row.rol_nombre
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">

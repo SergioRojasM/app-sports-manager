@@ -6,3 +6,4 @@ export { EquipoStatusBadge } from './EquipoStatusBadge';
 export { EditarPerfilMiembroModal } from './EditarPerfilMiembroModal';
 export { EliminarMiembroModal } from './EliminarMiembroModal';
 export { BloquearMiembroModal } from './BloquearMiembroModal';
+export { CambiarRolModal } from './CambiarRolModal';

@@ -12,9 +12,11 @@ import { AsignarNivelModal } from './AsignarNivelModal';
 import { EditarPerfilMiembroModal } from './EditarPerfilMiembroModal';
 import { EliminarMiembroModal } from './EliminarMiembroModal';
 import { BloquearMiembroModal } from './BloquearMiembroModal';
+import { CambiarRolModal } from './CambiarRolModal';
 import { SolicitudesTab } from './gestion-solicitudes/SolicitudesTab';
 import { BloqueadosTab } from './gestion-solicitudes/BloqueadosTab';
 import type { MiembroTableItem } from '@/types/portal/equipo.types';
+import type { RolOption } from '@/types/portal/equipo.types';
 
 type EquipoPageProps = {
   tenantId: string;
@@ -60,6 +62,9 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
     editarPerfil,
     eliminarDelEquipo,
     bloquearDelEquipo,
+    roles,
+    cambiarRol,
+    isCambiandoRol,
   } = useEquipo({ tenantId });
 
   const solicitudesAdmin = useSolicitudesAdmin({ tenantId });
@@ -70,6 +75,7 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
   const [editTarget, setEditTarget] = useState<MiembroTableItem | null>(null);
   const [removeTarget, setRemoveTarget] = useState<MiembroTableItem | null>(null);
   const [blockTarget, setBlockTarget] = useState<MiembroTableItem | null>(null);
+  const [rolChangeTarget, setRolChangeTarget] = useState<{ miembro: MiembroTableItem; nuevoRol: RolOption } | null>(null);
 
   return (
     <section className="space-y-6">
@@ -167,6 +173,8 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               onEditarPerfil={(row) => setEditTarget(row)}
               onEliminar={(row) => setRemoveTarget(row)}
               onBloquear={(row) => setBlockTarget(row)}
+              roles={roles}
+              onCambiarRol={(row, nuevoRol) => setRolChangeTarget({ miembro: row, nuevoRol })}
             />
           ) : null}
 
@@ -207,6 +215,28 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
                 motivo,
               });
             }}
+          />
+
+          <CambiarRolModal
+            miembro={rolChangeTarget?.miembro ?? null}
+            nuevoRol={rolChangeTarget?.nuevoRol ?? null}
+            isSelfDemotion={
+              !!rolChangeTarget &&
+              !!user &&
+              rolChangeTarget.miembro.usuario_id === user.id &&
+              rolChangeTarget.miembro.rol_nombre.toLowerCase() === 'administrador' &&
+              rolChangeTarget.nuevoRol.nombre.toLowerCase() !== 'administrador'
+            }
+            onClose={() => setRolChangeTarget(null)}
+            onConfirm={async () => {
+              if (!rolChangeTarget) return;
+              await cambiarRol({
+                miembro_id: rolChangeTarget.miembro.miembro_id,
+                tenant_id: tenantId,
+                nuevo_rol_id: rolChangeTarget.nuevoRol.id,
+              });
+            }}
+            isLoading={isCambiandoRol}
           />
         </>
       ) : null}

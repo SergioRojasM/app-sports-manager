@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { equipoService, getEquipoStats } from '@/services/supabase/portal/equipo.service';
 import type {
+  CambiarRolMiembroInput,
   EditarPerfilMiembroInput,
   EliminarMiembroInput,
   EquipoStats,
   MiembroEstado,
   MiembroRow,
   MiembroTableItem,
+  RolOption,
 } from '@/types/portal/equipo.types';
 import { EquipoServiceError } from '@/types/portal/equipo.types';
 import type { BloquearUsuarioInput } from '@/types/portal/solicitudes.types';
@@ -22,6 +24,9 @@ type UseEquipoResult = {
   members: MiembroRow[];
   loading: boolean;
   error: string | null;
+
+  /** Available roles */
+  roles: RolOption[];
 
   /** Search / filter state */
   searchTerm: string;
@@ -46,6 +51,8 @@ type UseEquipoResult = {
   editarPerfil: (input: EditarPerfilMiembroInput) => Promise<void>;
   eliminarDelEquipo: (input: EliminarMiembroInput) => Promise<void>;
   bloquearDelEquipo: (input: BloquearUsuarioInput & { miembro_id: string }) => Promise<void>;
+  cambiarRol: (input: CambiarRolMiembroInput) => Promise<void>;
+  isCambiandoRol: boolean;
 };
 
 /* ────────── Helpers ────────── */
@@ -71,8 +78,10 @@ function matchesSearch(item: MiembroTableItem, term: string): boolean {
 
 export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
   const [members, setMembers] = useState<MiembroRow[]>([]);
+  const [roles, setRoles] = useState<RolOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCambiandoRol, setIsCambiandoRol] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<MiembroEstado | 'all'>('all');
@@ -86,8 +95,12 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
     setLoading(true);
     setError(null);
     try {
-      const data = await equipoService.getEquipo(tenantId);
+      const [data, rolesData] = await Promise.all([
+        equipoService.getEquipo(tenantId),
+        equipoService.getRoles(),
+      ]);
       setMembers(data);
+      setRoles(rolesData);
     } catch (err) {
       const msg =
         err instanceof EquipoServiceError
@@ -166,10 +179,21 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
     await loadData();
   }, [loadData]);
 
+  const cambiarRol = useCallback(async (input: CambiarRolMiembroInput) => {
+    setIsCambiandoRol(true);
+    try {
+      await equipoService.cambiarRolMiembro(input);
+      await loadData();
+    } finally {
+      setIsCambiandoRol(false);
+    }
+  }, [loadData]);
+
   return {
     members,
     loading,
     error,
+    roles,
     searchTerm,
     setSearchTerm,
     estadoFilter,
@@ -186,5 +210,7 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
     editarPerfil,
     eliminarDelEquipo,
     bloquearDelEquipo,
+    cambiarRol,
+    isCambiandoRol,
   };
 }
