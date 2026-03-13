@@ -61,7 +61,7 @@
 
 ## 9. Commit & Pull Request
 
-- [ ] 9.1 Stage all changes and create a commit with message:
+- [x] 9.1 Stage all changes and create a commit with message:
   ```
   feat(gestion-equipo): add edit profile, remove, and block row actions
 
@@ -74,4 +74,4 @@
 
   Closes US-0027
   ```
-- [ ] 9.2 Open a pull request with title `feat: team member row actions (US-0027)` and description summarising the three new actions, the RLS migration, and files modified
+- [x] 9.2 Open a pull request with title `feat: team member row actions (US-0027)` and description summarising the three new actions, the RLS migration, and files modified
