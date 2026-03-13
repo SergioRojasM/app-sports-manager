@@ -67,4 +67,4 @@
 ## 9. Commit and Pull Request
 
 - [x] 9.1 Stage all changes and create a commit with message: `feat(us0026): blocked access request control — persistent block table, configurable threshold, admin block/unblock UI`
-- [ ] 9.2 Push branch and open a Pull Request with title: `feat/us0026-blocked-access-request-control` → `develop`; PR description: summarize the 4 improvements (configurable threshold, persistent block table, Bloqueados tab, manual block action), reference US0026, list files changed
+- [x] 9.2 Push branch and open a Pull Request with title: `feat/us0026-blocked-access-request-control` → `develop`; PR description: summarize the 4 improvements (configurable threshold, persistent block table, Bloqueados tab, manual block action), reference US0026, list files changed
