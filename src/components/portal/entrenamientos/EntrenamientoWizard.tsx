@@ -171,6 +171,19 @@ export function EntrenamientoWizard({
           </div>
 
           <div className="md:col-span-2">
+            <label htmlFor="formulario_externo" className="mb-1 block text-xs text-slate-300">Formulario externo</label>
+            <input
+              id="formulario_externo"
+              type="url"
+              maxLength={500}
+              value={values.formulario_externo}
+              onChange={(event) => onChangeField('formulario_externo', event.target.value)}
+              className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
+              placeholder="https://"
+            />
+          </div>
+
+          <div className="md:col-span-2">
             <label className="mb-1 block text-xs text-slate-300">Visibilidad</label>
             <div className="flex items-center gap-4">
               <label className="inline-flex items-center gap-2 text-sm text-slate-200">
