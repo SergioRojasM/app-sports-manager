@@ -59,8 +59,8 @@
 
 ## 9. Commit & Pull Request
 
-- [ ] 9.1 Stage all changes and create a commit with message: `feat(entrenamientos): add formulario_externo URL field to training groups and instances`
-- [ ] 9.2 Push branch and open a pull request with the following description:
+- [x] 9.1 Stage all changes and create a commit with message: `feat(entrenamientos): add formulario_externo URL field to training groups and instances`
+- [x] 9.2 Push branch and open a pull request with the following description:
 
   **Title:** `feat: add external form link (formulario_externo) to trainings`
 
