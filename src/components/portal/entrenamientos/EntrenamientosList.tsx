@@ -169,6 +169,25 @@ export function EntrenamientosList({
                       {item.instance.punto_encuentro}
                     </p>
                   ) : null}
+                  {item.instance.formulario_externo ? (
+                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
+                      <span
+                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
+                        style={{ fontSize: '14px' }}
+                        aria-hidden="true"
+                      >
+                        link
+                      </span>
+                      <a
+                        href={item.instance.formulario_externo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-turquoise hover:underline"
+                      >
+                        Formulario externo
+                      </a>
+                    </p>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <button

@@ -16,6 +16,7 @@ export type TrainingGroup = {
   nombre: string;
   descripcion: string | null;
   punto_encuentro: string | null;
+  formulario_externo: string | null;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string | null;
@@ -54,6 +55,7 @@ export type TrainingInstance = {
   nombre: string;
   descripcion: string | null;
   punto_encuentro: string | null;
+  formulario_externo: string | null;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string | null;
@@ -97,6 +99,7 @@ export type TrainingWizardValues = {
   nombre: string;
   descripcion: string;
   punto_encuentro: string;
+  formulario_externo: string;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string;
@@ -127,7 +130,8 @@ export type TrainingField =
   | 'dias_semana'
   | 'repetir_cada_semanas'
   | 'descripcion'
-  | 'punto_encuentro';
+  | 'punto_encuentro'
+  | 'formulario_externo';
 
 export type TrainingRuleField = 'tipo_bloque' | 'hora_inicio' | 'hora_fin' | 'horas_especificas';
 
@@ -157,6 +161,7 @@ export type CreateTrainingSeriesInput = {
     nombre: string;
     descripcion?: string | null;
     punto_encuentro?: string | null;
+    formulario_externo?: string | null;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id?: string | null;
@@ -212,6 +217,7 @@ export type UpdateTrainingSeriesInput = {
     nombre: string;
     descripcion: string | null;
     punto_encuentro: string | null;
+    formulario_externo: string | null;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id: string | null;
@@ -236,6 +242,7 @@ export type UpdateTrainingInstanceInput = {
     nombre: string;
     descripcion: string | null;
     punto_encuentro: string | null;
+    formulario_externo: string | null;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id: string | null;

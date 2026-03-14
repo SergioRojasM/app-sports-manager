@@ -213,6 +213,19 @@ export function ReservasPanel({
               </span>
             )}
           </div>
+          {instance.formulario_externo && (
+            <div className="mt-2 flex items-center gap-2 text-sm">
+              <span className="material-symbols-outlined text-base text-slate-400" aria-hidden="true">link</span>
+              <a
+                href={instance.formulario_externo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-turquoise hover:underline"
+              >
+                Formulario externo
+              </a>
+            </div>
+          )}
 
           {/* Per-category capacity breakdown */}
           {reservasHook.categorias.length > 0 && (

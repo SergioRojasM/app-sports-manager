@@ -23,6 +23,7 @@ const EMPTY_FORM: TrainingWizardValues = {
   nombre: '',
   descripcion: '',
   punto_encuentro: '',
+  formulario_externo: '',
   disciplina_id: '',
   escenario_id: '',
   entrenador_id: '',
