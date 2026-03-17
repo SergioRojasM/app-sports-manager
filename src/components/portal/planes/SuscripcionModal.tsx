@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
+import type { MetodoPago } from '@/types/portal/metodos-pago.types';
 
 type SuscripcionModalProps = {
   open: boolean;
@@ -10,7 +11,9 @@ type SuscripcionModalProps = {
   error: string | null;
   isDuplicate: boolean;
   checkingDuplicate: boolean;
-  onConfirm: (data: { comentarios: string }) => void;
+  metodosPago: MetodoPago[];
+  metodosPagoError: string | null;
+  onConfirm: (data: { comentarios: string; metodo_pago_id: string }) => void;
   onClose: () => void;
 };
 
@@ -38,10 +41,13 @@ export function SuscripcionModal({
   error,
   isDuplicate,
   checkingDuplicate,
+  metodosPago,
+  metodosPagoError,
   onConfirm,
   onClose,
 }: SuscripcionModalProps) {
   const [comentarios, setComentarios] = useState('');
+  const [selectedMetodoId, setSelectedMetodoId] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,12 +72,14 @@ export function SuscripcionModal({
   }, []);
 
   const handleConfirm = useCallback(() => {
-    onConfirm({ comentarios });
-  }, [comentarios, onConfirm]);
+    if (!selectedMetodoId) return;
+    onConfirm({ comentarios, metodo_pago_id: selectedMetodoId });
+  }, [comentarios, selectedMetodoId, onConfirm]);
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return;
     setComentarios('');
+    setSelectedMetodoId('');
     setFileName(null);
     setFileError(null);
     onClose();
@@ -81,7 +89,8 @@ export function SuscripcionModal({
 
   const vigencia = plan.vigencia_meses === 1 ? '1 mes' : `${plan.vigencia_meses} meses`;
   const clasesLabel = plan.clases_incluidas != null ? `${plan.clases_incluidas} clases` : 'Ilimitadas';
-  const confirmDisabled = isSubmitting || isDuplicate || checkingDuplicate;
+  const selectedMetodo = metodosPago.find((m) => m.id === selectedMetodoId) ?? null;
+  const confirmDisabled = isSubmitting || isDuplicate || checkingDuplicate || !selectedMetodoId;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -137,6 +146,75 @@ export function SuscripcionModal({
 
         {/* Form fields */}
         <div className="mt-4 space-y-4">
+          {/* Método de pago */}
+          <div>
+            <label
+              htmlFor="suscripcion-metodo-pago"
+              className="mb-1 block text-xs font-medium text-slate-300"
+            >
+              Método de pago <span className="text-rose-400">*</span>
+            </label>
+            {metodosPagoError ? (
+              <div
+                className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+                role="alert"
+              >
+                {metodosPagoError}
+              </div>
+            ) : metodosPago.length === 0 ? (
+              <p className="text-sm text-slate-400">
+                No hay métodos de pago disponibles. Contacta al administrador.
+              </p>
+            ) : (
+              <>
+                <select
+                  id="suscripcion-metodo-pago"
+                  value={selectedMetodoId}
+                  onChange={(e) => setSelectedMetodoId(e.target.value)}
+                  disabled={isSubmitting || isDuplicate}
+                  className="w-full rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-2 text-sm text-slate-200 focus:border-turquoise/60 focus:outline-none focus:ring-1 focus:ring-turquoise/40 disabled:opacity-50"
+                >
+                  <option value="">Selecciona un método de pago</option>
+                  {metodosPago.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.nombre}
+                    </option>
+                  ))}
+                </select>
+
+                {selectedMetodo ? (
+                  <div className="mt-2 rounded-lg border border-portal-border bg-navy-deep/40 px-3 py-2 text-xs text-slate-300 space-y-1">
+                    {selectedMetodo.valor ? (
+                      <p>
+                        <span className="font-medium text-slate-400">Número:</span>{' '}
+                        {selectedMetodo.valor}
+                      </p>
+                    ) : null}
+                    {selectedMetodo.url ? (
+                      <p>
+                        <span className="font-medium text-slate-400">Enlace:</span>{' '}
+                        <a
+                          href={selectedMetodo.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-turquoise underline"
+                        >
+                          {selectedMetodo.url}
+                        </a>
+                      </p>
+                    ) : null}
+                    {selectedMetodo.comentarios ? (
+                      <p>
+                        <span className="font-medium text-slate-400">Instrucciones:</span>{' '}
+                        {selectedMetodo.comentarios}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+
           {/* Comentarios */}
           <div>
             <label

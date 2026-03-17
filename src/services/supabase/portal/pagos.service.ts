@@ -13,9 +13,10 @@ export const pagosService = {
         monto: payload.monto,
         comprobante_url: payload.comprobante_url,
         estado: payload.estado,
+        metodo_pago_id: payload.metodo_pago_id ?? null,
       })
       .select(
-        'id, tenant_id, suscripcion_id, monto, metodo_pago, comprobante_url, estado, validado_por, fecha_pago, fecha_validacion, created_at',
+        'id, tenant_id, suscripcion_id, monto, metodo_pago, metodo_pago_id, comprobante_url, estado, validado_por, fecha_pago, fecha_validacion, created_at',
       )
       .single();
 

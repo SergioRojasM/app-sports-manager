@@ -3,11 +3,14 @@
 import { useCallback, useState } from 'react';
 import { suscripcionesService } from '@/services/supabase/portal/suscripciones.service';
 import { pagosService } from '@/services/supabase/portal/pagos.service';
+import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
 import { createClient } from '@/services/supabase/client';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
+import type { MetodoPago } from '@/types/portal/metodos-pago.types';
 
 type SuscripcionSubmitData = {
   comentarios: string;
+  metodo_pago_id: string;
 };
 
 type UseSuscripcionOptions = {
@@ -25,6 +28,8 @@ type UseSuscripcionResult = {
   successMessage: string | null;
   isDuplicate: boolean;
   checkingDuplicate: boolean;
+  metodosPago: MetodoPago[];
+  metodosPagoError: string | null;
 };
 
 export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripcionResult {
@@ -35,35 +40,47 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isDuplicate, setIsDuplicate] = useState(false);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
+  const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([]);
+  const [metodosPagoError, setMetodosPagoError] = useState<string | null>(null);
 
   const openModal = useCallback(async (plan: PlanWithDisciplinas) => {
     setSelectedPlan(plan);
     setError(null);
     setSuccessMessage(null);
     setIsDuplicate(false);
+    setMetodosPago([]);
+    setMetodosPagoError(null);
     setModalOpen(true);
 
-    // Check for existing pendiente subscription
+    // Fetch active payment methods and check duplicate subscription in parallel
     setCheckingDuplicate(true);
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    const methodsPromise = metodosPagoService
+      .getMetodosPago(tenantId, true)
+      .then((methods) => setMetodosPago(methods))
+      .catch(() => setMetodosPagoError('No fue posible cargar los métodos de pago.'));
 
-      if (user) {
-        const hasPending = await suscripcionesService.hasPendingSuscripcion(user.id, plan.id);
-        setIsDuplicate(hasPending);
-        if (hasPending) {
-          setError('Ya tienes una solicitud pendiente para este plan.');
+    const duplicatePromise = (async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const hasPending = await suscripcionesService.hasPendingSuscripcion(user.id, plan.id);
+          setIsDuplicate(hasPending);
+          if (hasPending) {
+            setError('Ya tienes una solicitud pendiente para este plan.');
+          }
         }
+      } catch {
+        // Non-blocking: if check fails, allow submission (server will catch real issues)
       }
-    } catch {
-      // Non-blocking: if check fails, allow submission (server will catch real issues)
-    } finally {
-      setCheckingDuplicate(false);
-    }
-  }, []);
+    })();
+
+    await Promise.allSettled([methodsPromise, duplicatePromise]);
+    setCheckingDuplicate(false);
+  }, [tenantId]);
 
   const closeModal = useCallback(() => {
     if (isSubmitting) return;
@@ -110,6 +127,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
             monto: selectedPlan.precio,
             comprobante_url: null,
             estado: 'pendiente',
+            metodo_pago_id: data.metodo_pago_id,
           });
         } catch {
           // Pago insert failed — suscripcion is orphaned but benign (pendiente state)
@@ -142,5 +160,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
     successMessage,
     isDuplicate,
     checkingDuplicate,
+    metodosPago,
+    metodosPagoError,
   };
 }

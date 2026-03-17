@@ -1,4 +1,5 @@
 import { TenantInfoCards } from '@/components/portal/tenant/TenantInfoCards';
+import { TenantPaymentMethodsCard } from '@/components/portal/tenant/TenantPaymentMethodsCard';
 
 type GestionOrganizacionTenantPageProps = {
   params: Promise<{ tenant_id: string }>;
@@ -19,6 +20,7 @@ export default async function GestionOrganizacionTenantPage({
       </header>
 
       <TenantInfoCards tenantId={tenantId} />
+      <TenantPaymentMethodsCard tenantId={tenantId} />
     </section>
   );
 }
