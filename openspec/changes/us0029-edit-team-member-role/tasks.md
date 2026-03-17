@@ -7,7 +7,7 @@
 
 - [x] 2.1 Create migration file `supabase/migrations/YYYYMMDDHHMMSS_equipo_update_rol.sql` with RLS policy `miembros_tenant_update_rol_admin` for UPDATE on `public.miembros_tenant`, scoped to `get_admin_tenants_for_authenticated_user()` with both `USING` and `WITH CHECK` clauses
 - [x] 2.2 Add `GRANT UPDATE ON TABLE public.miembros_tenant TO authenticated` in the same migration (verify it is not already granted)
-- [ ] 2.3 Apply the migration locally with `supabase db push` or `supabase migration up` and verify it succeeds
+- [x] 2.3 Apply the migration locally with `supabase db push` or `supabase migration up` and verify it succeeds
 
 ## 3. Types
 

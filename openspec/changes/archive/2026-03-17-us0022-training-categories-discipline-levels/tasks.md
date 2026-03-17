@@ -47,51 +47,51 @@
 
 ## 5. Hook Layer
 
-- [ ] 5.1 Create `src/hooks/portal/nivel-disciplina/useNivelesDisciplina.ts` — manage `niveles` list, `loading`, `error`, and expose `createNivel`, `updateNivel`, `deleteNivel` actions; accepts `(tenantId, disciplinaId)`; fetches lazily (called by consumer on demand)
-- [ ] 5.2 Create `src/hooks/portal/gestion-equipo/useUsuarioNivelDisciplina.ts` — fetch `getUsuarioNivelesDisciplina` on mount, expose `asignarNivel(input)` action, `loading`, `error`, `successMessage`
-- [ ] 5.3 Create `src/hooks/portal/entrenamientos/useEntrenamientoCategorias.ts` — fetch `getEntrenamientoCategorias(entrenamientoId)` reactively, expose `categorias`, `loading`, `error`
-- [ ] 5.4 Extend `src/hooks/portal/entrenamientos/useEntrenamientoForm.ts` — add `categoriasEnabled` toggle state, `categoriasForm` (map of `nivel_id → cupos_asignados`), computed `totalAsignado`, `cuposSinCategoria`, validation `sumExceedsMax` and `allZeroWhenEnabled`; wire `checkDisciplinaHasNiveles(disciplinaId, tenantId)` call that toggles step visibility; pass categorias to `createTrainingSeries` / `updateTrainingSeries` calls
-- [ ] 5.5 Extend `src/hooks/portal/entrenamientos/useEntrenamientos.ts` — wire `useEntrenamientoCategorias` for the selected `entrenamientoId`; expose `instanciaCategorias` alongside existing instance data
+- [x] 5.1 Create `src/hooks/portal/nivel-disciplina/useNivelesDisciplina.ts` — manage `niveles` list, `loading`, `error`, and expose `createNivel`, `updateNivel`, `deleteNivel` actions; accepts `(tenantId, disciplinaId)`; fetches lazily (called by consumer on demand)
+- [x] 5.2 Create `src/hooks/portal/gestion-equipo/useUsuarioNivelDisciplina.ts` — fetch `getUsuarioNivelesDisciplina` on mount, expose `asignarNivel(input)` action, `loading`, `error`, `successMessage`
+- [x] 5.3 Create `src/hooks/portal/entrenamientos/useEntrenamientoCategorias.ts` — fetch `getEntrenamientoCategorias(entrenamientoId)` reactively, expose `categorias`, `loading`, `error`
+- [x] 5.4 Extend `src/hooks/portal/entrenamientos/useEntrenamientoForm.ts` — add `categoriasEnabled` toggle state, `categoriasForm` (map of `nivel_id → cupos_asignados`), computed `totalAsignado`, `cuposSinCategoria`, validation `sumExceedsMax` and `allZeroWhenEnabled`; wire `checkDisciplinaHasNiveles(disciplinaId, tenantId)` call that toggles step visibility; pass categorias to `createTrainingSeries` / `updateTrainingSeries` calls
+- [x] 5.5 Extend `src/hooks/portal/entrenamientos/useEntrenamientos.ts` — wire `useEntrenamientoCategorias` for the selected `entrenamientoId`; expose `instanciaCategorias` alongside existing instance data
 
 ---
 
 ## 6. Component Layer — New Components
 
-- [ ] 6.1 Create `src/components/portal/disciplines/NivelDisciplinaFormModal.tsx` — right-side modal (create/edit mode) with fields `nombre` (text, required, max 50), `orden` (number, required, >0), `activo` (checkbox); inline field-level validation; submit/cancel with loading state
-- [ ] 6.2 Create `src/components/portal/disciplines/NivelesDisciplinaPanel.tsx` — collapsible panel rendered below a discipline row; table with columns `orden`, `nombre`, `activo`, actions (edit/delete); loading, empty, and error states; "Agregar nivel" button; delete confirmation; FK-blocked delete error message using `useNivelesDisciplina`
-- [ ] 6.3 Create `src/components/portal/entrenamientos/EntrenamientoCategoriasSection.tsx` — renders the categories step: "¿Usar categorías?" toggle; when enabled, shows one number input per active `nivel_disciplina` row (sorted by `orden ASC`) labelled with `nombre`; summary row showing "Total asignado", "Cupos sin categoría", and inline validation error when sum exceeds `capacidad_maxima`
-- [ ] 6.4 Create `src/components/portal/gestion-equipo/AsignarNivelModal.tsx` — modal for assigning levels; shows a dropdown per discipline (filtered to disciplines with active levels); pre-selects current level; uses `useUsuarioNivelDisciplina`; inline error; success toast on submit
+- [x] 6.1 Create `src/components/portal/disciplines/NivelDisciplinaFormModal.tsx` — right-side modal (create/edit mode) with fields `nombre` (text, required, max 50), `orden` (number, required, >0), `activo` (checkbox); inline field-level validation; submit/cancel with loading state
+- [x] 6.2 Create `src/components/portal/disciplines/NivelesDisciplinaPanel.tsx` — collapsible panel rendered below a discipline row; table with columns `orden`, `nombre`, `activo`, actions (edit/delete); loading, empty, and error states; "Agregar nivel" button; delete confirmation; FK-blocked delete error message using `useNivelesDisciplina`
+- [x] 6.3 Create `src/components/portal/entrenamientos/EntrenamientoCategoriasSection.tsx` — renders the categories step: "¿Usar categorías?" toggle; when enabled, shows one number input per active `nivel_disciplina` row (sorted by `orden ASC`) labelled with `nombre`; summary row showing "Total asignado", "Cupos sin categoría", and inline validation error when sum exceeds `capacidad_maxima`
+- [x] 6.4 Create `src/components/portal/gestion-equipo/AsignarNivelModal.tsx` — modal for assigning levels; shows a dropdown per discipline (filtered to disciplines with active levels); pre-selects current level; uses `useUsuarioNivelDisciplina`; inline error; success toast on submit
 
 ---
 
 ## 7. Component Layer — Modified Components
 
-- [ ] 7.1 Modify `src/components/portal/disciplines/DisciplinesTable.tsx` — add an expand/collapse chevron icon button to each row; manage `expandedDisciplinaId` state; render `NivelesDisciplinaPanel` below the expanded row passing `tenantId` and `disciplinaId`; verify existing edit/delete/toggle actions are unaffected
-- [ ] 7.2 Modify `src/components/portal/entrenamientos/EntrenamientoFormModal.tsx` — wire `EntrenamientoCategoriasSection` after the discipline field; pass `disciplinaId` and `tenantId` to the section; conditionally render based on `useEntrenamientoForm.disciplinaHasNiveles`
-- [ ] 7.3 Modify `src/components/portal/gestion-equipo/EquipoTable.tsx` — add "Asignar nivel" icon button (`military_tech` or equivalent) to each row's action column; wire `onAsignarNivel(usuarioId)` callback prop; verify all existing action buttons are unaffected
-- [ ] 7.4 Modify `src/components/portal/gestion-equipo/EquipoPage.tsx` — add `asignarNivelTarget: string | null` state; pass `onAsignarNivel` to `EquipoTable`; render `AsignarNivelModal` when `asignarNivelTarget` is set; reset state on modal close
+- [x] 7.1 Modify `src/components/portal/disciplines/DisciplinesTable.tsx` — add an expand/collapse chevron icon button to each row; manage `expandedDisciplinaId` state; render `NivelesDisciplinaPanel` below the expanded row passing `tenantId` and `disciplinaId`; verify existing edit/delete/toggle actions are unaffected
+- [x] 7.2 Modify `src/components/portal/entrenamientos/EntrenamientoFormModal.tsx` — wire `EntrenamientoCategoriasSection` after the discipline field; pass `disciplinaId` and `tenantId` to the section; conditionally render based on `useEntrenamientoForm.disciplinaHasNiveles`
+- [x] 7.3 Modify `src/components/portal/gestion-equipo/EquipoTable.tsx` — add "Asignar nivel" icon button (`military_tech` or equivalent) to each row's action column; wire `onAsignarNivel(usuarioId)` callback prop; verify all existing action buttons are unaffected
+- [x] 7.4 Modify `src/components/portal/gestion-equipo/EquipoPage.tsx` — add `asignarNivelTarget: string | null` state; pass `onAsignarNivel` to `EquipoTable`; render `AsignarNivelModal` when `asignarNivelTarget` is set; reset state on modal close
 
 ---
 
 ## 8. Page Layer
 
-- [ ] 8.1 Review `src/app/portal/orgs/[tenant_id]/(administrador)/gestion-equipo/page.tsx` — confirm `tenantId` is forwarded correctly to `EquipoPage`; no route-level changes needed if `administrador` route-group gate already handles access; verify `entrenador` access notes in spec are addressed at RLS layer only
-- [ ] 8.2 Review `src/app/portal/orgs/[tenant_id]/(administrador)/gestion-disciplinas/page.tsx` — confirm no changes needed (modifications are component-level only)
+- [x] 8.1 Review `src/app/portal/orgs/[tenant_id]/(administrador)/gestion-equipo/page.tsx` — confirm `tenantId` is forwarded correctly to `EquipoPage`; no route-level changes needed if `administrador` route-group gate already handles access; verify `entrenador` access notes in spec are addressed at RLS layer only
+- [x] 8.2 Review `src/app/portal/orgs/[tenant_id]/(administrador)/gestion-disciplinas/page.tsx` — confirm no changes needed (modifications are component-level only)
 
 ---
 
 ## 9. Documentation
 
-- [ ] 9.1 Update `projectspec/03-project-structure.md` — add `NivelesDisciplinaPanel.tsx`, `NivelDisciplinaFormModal.tsx` under `disciplines/` slice; add `EntrenamientoCategoriasSection.tsx` under `entrenamientos/` slice; add `AsignarNivelModal.tsx` under `gestion-equipo/` slice
-- [ ] 9.2 Update `projectspec/03-project-structure.md` — add `nivel-disciplina.types.ts`, `entrenamiento-categorias.types.ts` under `types/portal/`
-- [ ] 9.3 Update `projectspec/03-project-structure.md` — add `nivel-disciplina.service.ts`, `usuario-nivel-disciplina.service.ts`, `entrenamiento-categorias.service.ts` under `services/supabase/portal/`
-- [ ] 9.4 Update `projectspec/03-project-structure.md` — add `useNivelesDisciplina.ts` under `hooks/portal/nivel-disciplina/`; add `useUsuarioNivelDisciplina.ts` under `hooks/portal/gestion-equipo/`; add `useEntrenamientoCategorias.ts` under `hooks/portal/entrenamientos/`
+- [x] 9.1 Update `projectspec/03-project-structure.md` — add `NivelesDisciplinaPanel.tsx`, `NivelDisciplinaFormModal.tsx` under `disciplines/` slice; add `EntrenamientoCategoriasSection.tsx` under `entrenamientos/` slice; add `AsignarNivelModal.tsx` under `gestion-equipo/` slice
+- [x] 9.2 Update `projectspec/03-project-structure.md` — add `nivel-disciplina.types.ts`, `entrenamiento-categorias.types.ts` under `types/portal/`
+- [x] 9.3 Update `projectspec/03-project-structure.md` — add `nivel-disciplina.service.ts`, `usuario-nivel-disciplina.service.ts`, `entrenamiento-categorias.service.ts` under `services/supabase/portal/`
+- [x] 9.4 Update `projectspec/03-project-structure.md` — add `useNivelesDisciplina.ts` under `hooks/portal/nivel-disciplina/`; add `useUsuarioNivelDisciplina.ts` under `hooks/portal/gestion-equipo/`; add `useEntrenamientoCategorias.ts` under `hooks/portal/entrenamientos/`
 
 ---
 
 ## 10. Commit and Pull Request
 
-- [ ] 10.1 Stage all changes and create a commit with message:
+- [x] 10.1 Stage all changes and create a commit with message:
   ```
   feat(us0022): training categories with discipline levels
 
@@ -103,7 +103,7 @@
   - Implement AsignarNivelModal + Asignar nivel action in EquipoTable/EquipoPage
   - Extend TrainingGroup, TrainingInstance, equipo, and reservas types
   ```
-- [ ] 10.2 Push branch and open Pull Request with description:
+- [x] 10.2 Push branch and open Pull Request with description:
   ```
   ## US-0022 — Training Categories with Discipline Levels
 
