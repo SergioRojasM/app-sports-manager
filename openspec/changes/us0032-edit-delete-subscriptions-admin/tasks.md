@@ -62,8 +62,8 @@
 
 ## 12. Commit and Pull Request
 
-- [ ] 12.1 Stage all changes and create a commit with message: `feat(gestion-suscripciones): add edit and delete subscription actions for admins (US0032)`
-- [ ] 12.2 Push branch and open a Pull Request with description:
+- [x] 12.1 Stage all changes and create a commit with message: `feat(gestion-suscripciones): add edit and delete subscription actions for admins (US0032)`
+- [x] 12.2 Push branch and open a Pull Request with description:
   ```
   ## Summary
   Adds "Editar" and "Eliminar" actions to every row in the admin subscription table.
