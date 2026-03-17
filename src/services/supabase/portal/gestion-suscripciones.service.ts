@@ -5,6 +5,7 @@ import {
   type PagoEstado,
   type SuscripcionAdminRow,
   type ValidarSuscripcionFormValues,
+  type EditarSuscripcionFormValues,
 } from '@/types/portal/gestion-suscripciones.types';
 
 /* ────────── Raw row shape returned by Supabase join ────────── */
@@ -212,6 +213,49 @@ export const gestionSuscripcionesService = {
       .from('suscripciones')
       .update(payload)
       .eq('id', id);
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+  },
+
+  /**
+   * Edit all editable fields of an existing subscription.
+   */
+  async editarSuscripcion(
+    suscripcionId: string,
+    values: EditarSuscripcionFormValues,
+  ): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('suscripciones')
+      .update({
+        plan_id: values.plan_id,
+        estado: values.estado,
+        fecha_inicio: values.fecha_inicio,
+        fecha_fin: values.fecha_fin,
+        clases_restantes: values.clases_restantes,
+        clases_plan: values.clases_plan,
+        comentarios: values.comentarios,
+      })
+      .eq('id', suscripcionId);
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+  },
+
+  /**
+   * Permanently delete a subscription (cascades to pagos via FK).
+   */
+  async eliminarSuscripcion(suscripcionId: string): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('suscripciones')
+      .delete()
+      .eq('id', suscripcionId);
 
     if (error) {
       throw mapPostgrestError(error);

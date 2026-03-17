@@ -12,6 +12,8 @@ type SuscripcionesTableProps = {
   onPageSizeChange: (size: 20 | 50 | 100) => void;
   onValidarPago: (row: SuscripcionAdminRow) => void;
   onValidarSuscripcion: (row: SuscripcionAdminRow) => void;
+  onEditar: (row: SuscripcionAdminRow) => void;
+  onEliminar: (row: SuscripcionAdminRow) => void;
 };
 
 const PAGE_SIZE_OPTIONS: (20 | 50 | 100)[] = [20, 50, 100];
@@ -41,6 +43,8 @@ export function SuscripcionesTable({
   onPageSizeChange,
   onValidarPago,
   onValidarSuscripcion,
+  onEditar,
+  onEliminar,
 }: SuscripcionesTableProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalFiltered);
@@ -131,6 +135,22 @@ export function SuscripcionesTable({
                       Cancelar
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => onEditar(row)}
+                    className="rounded border border-amber-400/30 px-2 py-1 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-900/30"
+                    aria-label={`Editar suscripción de ${row.atleta_nombre}`}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onEliminar(row)}
+                    className="rounded border border-rose-500/30 px-2 py-1 text-xs font-medium text-rose-400 transition-colors hover:bg-rose-900/30"
+                    aria-label={`Eliminar suscripción de ${row.atleta_nombre}`}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </td>
             </tr>

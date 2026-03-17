@@ -129,6 +129,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PagoEstadoBadge.tsx
 │   │   │       ├── ValidarPagoModal.tsx
 │   │   │       ├── ValidarSuscripcionModal.tsx
+│   │   │       ├── EditarSuscripcionModal.tsx    # Full-field edit modal for existing subscriptions
+│   │   │       ├── EliminarSuscripcionModal.tsx  # Confirmation dialog for permanent deletion
 │   │   │       └── index.ts
 │   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
 │   │   │       ├── PerfilPage.tsx
@@ -175,7 +177,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── gestion-suscripciones/
 │   │           ├── useGestionSuscripciones.ts
 │   │           ├── useValidarPago.ts
-│   │           └── useValidarSuscripcion.ts
+│   │           ├── useValidarSuscripcion.ts
+│   │           ├── useEditarSuscripcion.ts   # Form state + plans fetch + date validation for full-field edit
+│   │           └── useEliminarSuscripcion.ts  # Confirmation + delete action for permanent deletion
 │   │       └── perfil/
 │   │           └── usePerfil.ts
 │   │

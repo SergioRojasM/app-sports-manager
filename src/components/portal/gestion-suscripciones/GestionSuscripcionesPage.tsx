@@ -8,6 +8,8 @@ import { SuscripcionesHeaderFilters } from './SuscripcionesHeaderFilters';
 import { SuscripcionesTable } from './SuscripcionesTable';
 import { ValidarPagoModal } from './ValidarPagoModal';
 import { ValidarSuscripcionModal } from './ValidarSuscripcionModal';
+import { EditarSuscripcionModal } from './EditarSuscripcionModal';
+import { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
 
 type GestionSuscripcionesPageProps = {
   tenantId: string;
@@ -51,6 +53,8 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
     modalType,
     openPagoModal,
     openSuscripcionModal,
+    openEditarModal,
+    openEliminarModal,
     closeModal,
     refresh,
   } = useGestionSuscripciones({ tenantId });
@@ -121,6 +125,8 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
           onPageSizeChange={setPageSize}
           onValidarPago={openPagoModal}
           onValidarSuscripcion={openSuscripcionModal}
+          onEditar={openEditarModal}
+          onEliminar={openEliminarModal}
         />
       ) : null}
 
@@ -138,6 +144,23 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
         <ValidarSuscripcionModal
           row={selectedRow}
           adminUserId={adminUserId}
+          onClose={closeModal}
+          onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {selectedRow && modalType === 'editar' && (
+        <EditarSuscripcionModal
+          row={selectedRow}
+          tenantId={tenantId}
+          onClose={closeModal}
+          onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {selectedRow && modalType === 'eliminar' && (
+        <EliminarSuscripcionModal
+          row={selectedRow}
           onClose={closeModal}
           onSuccess={handleModalSuccess}
         />

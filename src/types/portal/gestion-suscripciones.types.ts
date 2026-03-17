@@ -63,6 +63,17 @@ export interface ValidarSuscripcionFormValues {
   clases_restantes: number | null;
 }
 
+/** Form values for the full-field edit modal. */
+export interface EditarSuscripcionFormValues {
+  plan_id: string;
+  estado: SuscripcionEstado;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  clases_restantes: number | null;
+  clases_plan: number | null;
+  comentarios: string | null;
+}
+
 /** Service-level error with typed code. */
 export class GestionSuscripcionesServiceError extends Error {
   readonly code: 'forbidden' | 'unknown';
