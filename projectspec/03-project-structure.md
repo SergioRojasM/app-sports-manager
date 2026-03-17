@@ -69,6 +69,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   ├── TenantIdentityCard.tsx
 │   │   │   │   ├── TenantContactCard.tsx
 │   │   │   │   ├── TenantDirectoryList.tsx
+│   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods
+│   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method
 │   │   │   │   └── SolicitarAccesoButton.tsx  # 4-state access request button with confirmation + history
 │   │   │   └── scenarios/                # Feature slice (portal/scenarios)
 │   │   │       ├── ScenariosPage.tsx
@@ -141,7 +143,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   └── portal/
 │   │       ├── usePortalNavigation.ts    # Shared portal logic
 │   │       ├── tenant/
-│   │       │   └── useTenantView.ts
+│   │       │   ├── useTenantView.ts
+│   │       │   └── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago
 │   │       └── scenarios/
 │   │           └── useScenarios.ts
 │   │       └── disciplines/
@@ -200,6 +203,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts
 │   │       │   └── perfil.service.ts
+│   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
@@ -216,6 +220,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── planes.types.ts
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
+│   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
 │   │       └── equipo.types.ts
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types

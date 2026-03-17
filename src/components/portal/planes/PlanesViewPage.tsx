@@ -88,6 +88,8 @@ export function PlanesViewPage({ tenantId, role }: PlanesViewPageProps) {
         error={suscripcion.error}
         isDuplicate={suscripcion.isDuplicate}
         checkingDuplicate={suscripcion.checkingDuplicate}
+        metodosPago={suscripcion.metodosPago}
+        metodosPagoError={suscripcion.metodosPagoError}
         onConfirm={(data) => void suscripcion.submit(data)}
         onClose={suscripcion.closeModal}
       />

@@ -6,6 +6,7 @@ export type Pago = {
   suscripcion_id: string;
   monto: number;
   metodo_pago: string | null;
+  metodo_pago_id: string | null;
   comprobante_url: string | null;
   estado: PagoEstado;
   validado_por: string | null;
@@ -20,4 +21,5 @@ export type PagoInsert = {
   monto: number;
   comprobante_url: null;
   estado: 'pendiente';
+  metodo_pago_id?: string | null;
 };
