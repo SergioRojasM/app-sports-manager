@@ -6,3 +6,5 @@ export { SuscripcionEstadoBadge } from './SuscripcionEstadoBadge';
 export { PagoEstadoBadge } from './PagoEstadoBadge';
 export { ValidarPagoModal } from './ValidarPagoModal';
 export { ValidarSuscripcionModal } from './ValidarSuscripcionModal';
+export { EditarSuscripcionModal } from './EditarSuscripcionModal';
+export { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
