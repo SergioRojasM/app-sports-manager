@@ -68,7 +68,7 @@
 
 ## 9. Commit and Pull Request
 
-- [ ] 9.1 Stage all changes and create a commit with message:
+- [x] 9.1 Stage all changes and create a commit with message:
   `feat(us0033): add bookings attendance CSV export from Reservas panel`
-- [ ] 9.2 Push branch and open a pull request with description:
+- [x] 9.2 Push branch and open a pull request with description:
   > Adds a "Descargar CSV" button to the Reservas panel (admin/coach only). Introduces `reservas_reporte_view` DB view for efficient flat data access, `src/lib/csv.ts` RFC 4180 utility, `getReservasReport` service function, and `ReservaReportRow` type. All CSV generation is client-side with no new API routes or npm packages.
