@@ -312,7 +312,7 @@ export const entrenamientosService = {
       supabase
         .from('entrenamientos_grupo')
         .select(
-          'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+          'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
         )
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false }),
@@ -323,7 +323,7 @@ export const entrenamientosService = {
         .order('created_at', { ascending: true }),
       supabase
         .from('entrenamientos')
-        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
+        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
         .eq('tenant_id', tenantId),
     ]);
 
@@ -352,7 +352,7 @@ export const entrenamientosService = {
 
     let query = supabase
       .from('entrenamientos')
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
       .eq('tenant_id', tenantId)
       .order('fecha_hora', { ascending: true, nullsFirst: false });
 
@@ -458,7 +458,7 @@ export const entrenamientosService = {
         cancelacion_antelacion_horas: input.cancelacion_antelacion_horas ?? null,
       })
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
       )
       .single();
 
@@ -657,7 +657,7 @@ export const entrenamientosService = {
     const { data, error } = await supabase
       .from('entrenamientos')
       .insert(rows)
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at');
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at');
 
     if (error) {
       throw mapServiceError(error);
@@ -690,7 +690,7 @@ export const entrenamientosService = {
       .eq('id', input.trainingGroupId)
       .eq('tenant_id', input.tenantId)
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
       )
       .single();
 
