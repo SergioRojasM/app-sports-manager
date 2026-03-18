@@ -5,6 +5,8 @@ import { createClient } from '@/services/supabase/client';
 import { useReservas } from '@/hooks/portal/entrenamientos/reservas/useReservas';
 import { useReservaForm } from '@/hooks/portal/entrenamientos/reservas/useReservaForm';
 import { useAsistencias } from '@/hooks/portal/entrenamientos/reservas/useAsistencias';
+import { reservasService } from '@/services/supabase/portal/reservas.service';
+import { toCsvString, downloadTextFile } from '@/lib/csv';
 import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
@@ -54,6 +56,7 @@ export function ReservasPanel({
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [selectedReservaForAsistencia, setSelectedReservaForAsistencia] = useState<ReservaView | null>(null);
   const [savingAsistencia, setSavingAsistencia] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
 
@@ -158,6 +161,81 @@ export function ReservasPanel({
     setFormModalOpen(true);
   };
 
+  const handleExportCsv = async () => {
+    if (!instance) return;
+    setIsExporting(true);
+    try {
+      const rows = await reservasService.getReservasReport(tenantId, instance.id);
+
+      const formatDate = (iso: string | null): string => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
+      const csvHeaders = [
+        'entrenamiento_nombre',
+        'entrenamiento_fecha',
+        'disciplina',
+        'escenario',
+        'nivel_disciplina',
+        'reserva_id',
+        'reserva_estado',
+        'fecha_reserva',
+        'fecha_cancelacion',
+        'notas_reserva',
+        'atleta_nombre',
+        'atleta_apellido',
+        'atleta_email',
+        'atleta_telefono',
+        'tipo_identificacion',
+        'numero_identificacion',
+        'asistio',
+        'fecha_asistencia',
+        'observaciones_asistencia',
+        'validado_por_email',
+      ] as const;
+
+      const mapped = rows.map((r) => ({
+        entrenamiento_nombre: r.entrenamiento_nombre ?? '',
+        entrenamiento_fecha: formatDate(r.entrenamiento_fecha),
+        disciplina: r.disciplina ?? '',
+        escenario: r.escenario ?? '',
+        nivel_disciplina: r.nivel_disciplina ?? '',
+        reserva_id: r.reserva_id,
+        reserva_estado: r.reserva_estado,
+        fecha_reserva: formatDate(r.fecha_reserva),
+        fecha_cancelacion: formatDate(r.fecha_cancelacion),
+        notas_reserva: r.notas_reserva ?? '',
+        atleta_nombre: r.atleta_nombre ?? '',
+        atleta_apellido: r.atleta_apellido ?? '',
+        atleta_email: r.atleta_email ?? '',
+        atleta_telefono: r.atleta_telefono ?? '',
+        tipo_identificacion: r.tipo_identificacion ?? '',
+        numero_identificacion: r.numero_identificacion ?? '',
+        asistio: r.asistio === true ? 'Sí' : r.asistio === false ? 'No' : 'Sin registrar',
+        fecha_asistencia: formatDate(r.fecha_asistencia),
+        observaciones_asistencia: r.observaciones_asistencia ?? '',
+        validado_por_email: r.validado_por_email ?? '',
+      }));
+
+      const csv = toCsvString(mapped, [...csvHeaders]);
+
+      const slug = instance.nombre.toLowerCase().replace(/\s+/g, '_');
+      const dateStr = instance.fecha_hora ? instance.fecha_hora.slice(0, 10) : 'sin-fecha';
+      const filename = `reservas_${slug}_${dateStr}.csv`;
+
+      downloadTextFile(csv, filename);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al exportar';
+      window.alert(message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (!open || !instance) {
     return null;
   }
@@ -189,14 +267,30 @@ export function ReservasPanel({
             <h2 className="truncate text-lg font-semibold text-slate-100">{instance.nombre}</h2>
             <p className="mt-1 text-sm text-slate-400">Reservas del entrenamiento</p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ml-4 flex-shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-700/40 hover:text-slate-200"
-          >
-            <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
-            <span className="sr-only">Cerrar panel</span>
-          </button>
+          <div className="ml-4 flex flex-shrink-0 items-center gap-1">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                disabled={isExporting}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
+                title="Descargar CSV"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">
+                  {isExporting ? 'hourglass_empty' : 'download'}
+                </span>
+                <span>{isExporting ? 'Exportando...' : 'Descargar CSV'}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-700/40 hover:text-slate-200"
+            >
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
+              <span className="sr-only">Cerrar panel</span>
+            </button>
+          </div>
         </header>
 
         {/* Capacity indicator */}

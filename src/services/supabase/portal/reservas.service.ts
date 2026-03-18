@@ -6,6 +6,7 @@ import type {
   CategoriaDisponibilidad,
   CreateReservaInput,
   UpdateReservaInput,
+  ReservaReportRow,
 } from '@/types/portal/reservas.types';
 
 // ─────────────────────────────────────────────
@@ -431,6 +432,30 @@ async function deleteReserva(id: string, tenantId: string): Promise<void> {
 }
 
 // ─────────────────────────────────────────────
+// Report query (for CSV export)
+// ─────────────────────────────────────────────
+
+async function getReservasReport(
+  tenantId: string,
+  entrenamientoId: string,
+): Promise<ReservaReportRow[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('reservas_reporte_view')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .eq('entrenamiento_id', entrenamientoId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    throw mapServiceError(error);
+  }
+
+  return (data ?? []) as ReservaReportRow[];
+}
+
+// ─────────────────────────────────────────────
 // Service export
 // ─────────────────────────────────────────────
 
@@ -440,6 +465,7 @@ export const reservasService = {
   getCapacidad,
   getCategoriasConDisponibilidad,
   getAtletaNivelId,
+  getReservasReport,
   create,
   update,
   cancel,
