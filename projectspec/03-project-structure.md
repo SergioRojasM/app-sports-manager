@@ -195,7 +195,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export via reservas_reporte_view)
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │       │   └── planes.service.ts
 │   │       │   └── suscripciones.service.ts
@@ -219,7 +219,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts
-│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad (level availability with cupos)
+│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts
 │   │       └── suscripciones.types.ts
@@ -236,6 +236,7 @@ Following structure reflects the current implementation and the target scalable 
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
        ├── constants.ts                      # PUBLIC_TENANT_ID: well-known UUID for the system-level public tenant (used by resolveVisiblePara in entrenamientos.service.ts)
+│       ├── csv.ts                           # RFC 4180 CSV generation (toCsvString, downloadTextFile) — used by ReservasPanel CSV export
 │       └── validators.ts
 │
 ├── public/                      # Static assets
