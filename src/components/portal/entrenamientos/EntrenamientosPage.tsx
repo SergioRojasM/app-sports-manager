@@ -101,6 +101,17 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     sumExceedsMax,
     toggleCategorias,
     updateCategoriasCupos,
+    // Restrictions
+    planes,
+    restricciones,
+    reservaAntelacionHoras,
+    cancelacionAntelacionHoras,
+    addRestriccion,
+    duplicateRestriccion,
+    removeRestriccion,
+    updateRestriccion,
+    setReservaAntelacionHoras,
+    setCancelacionAntelacionHoras,
   } = useEntrenamientos({ tenantId });
 
   const instanceMap = useMemo(() => new Map(instances.map((instance) => [instance.id, instance])), [instances]);
@@ -350,6 +361,16 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         categoriasError={categoriasError}
         onToggleCategorias={toggleCategorias}
         onUpdateCategoriasCupos={updateCategoriasCupos}
+        planes={planes}
+        restricciones={restricciones}
+        reservaAntelacionHoras={reservaAntelacionHoras}
+        cancelacionAntelacionHoras={cancelacionAntelacionHoras}
+        onAddRestriccion={addRestriccion}
+        onDuplicateRestriccion={duplicateRestriccion}
+        onRemoveRestriccion={removeRestriccion}
+        onUpdateRestriccion={updateRestriccion}
+        onSetReservaAntelacion={setReservaAntelacionHoras}
+        onSetCancelacionAntelacion={setCancelacionAntelacionHoras}
       />
 
       <EntrenamientoScopeModal

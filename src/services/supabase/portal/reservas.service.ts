@@ -8,6 +8,7 @@ import type {
   UpdateReservaInput,
   ReservaReportRow,
 } from '@/types/portal/reservas.types';
+import type { BookingResult } from '@/types/entrenamiento-restricciones.types';
 
 // ─────────────────────────────────────────────
 // Error class
@@ -269,7 +270,274 @@ async function getAtletaNivelId(
   return data?.nivel_id ?? null;
 }
 
-async function create(input: CreateReservaInput): Promise<Reserva> {
+// ─────────────────────────────────────────────
+// Booking restriction validation
+// ─────────────────────────────────────────────
+
+function formatFechaHora(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function validateBookingRestrictions(
+  entrenamientoId: string,
+  atletaId: string,
+  tenantId: string,
+): Promise<BookingResult> {
+  const supabase = createClient();
+
+  // 1. Load training record (timing + fecha_hora + disciplina)
+  const { data: ent, error: entErr } = await supabase
+    .from('entrenamientos')
+    .select('fecha_hora, reserva_antelacion_horas, disciplina_id')
+    .eq('id', entrenamientoId)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  if (entErr || !ent) {
+    throw new ReservaServiceError('not_found', 'No se encontró el entrenamiento.');
+  }
+
+  const fechaHora = ent.fecha_hora as string | null;
+  const reservaAntelacion = ent.reserva_antelacion_horas as number | null;
+  const disciplinaId = ent.disciplina_id as string;
+
+  // 2. Check timing restriction
+  if (reservaAntelacion != null && fechaHora) {
+    const cutoff = new Date(new Date(fechaHora).getTime() - reservaAntelacion * 3600000);
+    if (new Date() > cutoff) {
+      return {
+        ok: false,
+        code: 'TIMING_RESERVA',
+        message: `Solo puedes reservar con al menos ${reservaAntelacion} h de antelación. El entrenamiento comienza el ${formatFechaHora(fechaHora)}.`,
+      };
+    }
+  }
+
+  // 3. Load restriction rows
+  const { data: restricciones, error: restErr } = await supabase
+    .from('entrenamiento_restricciones')
+    .select('*')
+    .eq('entrenamiento_id', entrenamientoId)
+    .eq('tenant_id', tenantId)
+    .order('orden', { ascending: true });
+
+  if (restErr) throw mapServiceError(restErr);
+
+  // Zero rows = unrestricted
+  if (!restricciones || restricciones.length === 0) {
+    return { ok: true };
+  }
+
+  // 4. Pre-fetch athlete data needed for evaluation
+  // 4a. User active status
+  const { data: usuario } = await supabase
+    .from('usuarios')
+    .select('activo')
+    .eq('id', atletaId)
+    .single();
+  const isActivo = usuario?.activo === true;
+
+  // 4b. Active subscriptions
+  const { data: suscripciones } = await supabase
+    .from('suscripciones')
+    .select('plan_id')
+    .eq('tenant_id', tenantId)
+    .eq('atleta_id', atletaId)
+    .eq('estado', 'activa');
+  const activePlanIds = new Set((suscripciones ?? []).map((s) => s.plan_id as string));
+
+  // 4c. Plan-discipline mapping for active plans
+  const activePlanArray = [...activePlanIds];
+  let activeDisciplinaIds = new Set<string>();
+  if (activePlanArray.length > 0) {
+    const { data: pd } = await supabase
+      .from('planes_disciplina')
+      .select('disciplina_id')
+      .in('plan_id', activePlanArray);
+    activeDisciplinaIds = new Set((pd ?? []).map((r) => r.disciplina_id as string));
+  }
+
+  // 4d. Athlete's level for the training's discipline (if needed)
+  const needsLevel = restricciones.some((r) => r.validar_nivel_disciplina);
+  let atletaNivelOrden: number | null = null;
+  if (needsLevel) {
+    const { data: und } = await supabase
+      .from('usuario_nivel_disciplina')
+      .select('nivel_id')
+      .eq('usuario_id', atletaId)
+      .eq('tenant_id', tenantId)
+      .eq('disciplina_id', disciplinaId)
+      .maybeSingle();
+
+    if (und?.nivel_id) {
+      const { data: nivel } = await supabase
+        .from('nivel_disciplina')
+        .select('orden')
+        .eq('id', und.nivel_id)
+        .single();
+      atletaNivelOrden = nivel?.orden as number | null ?? null;
+    }
+  }
+
+  // 4e. Training category level (minimum level for this training)
+  let entrenamientoNivelOrden: number | null = null;
+  let entrenamientoNivelNombre: string | null = null;
+  if (needsLevel) {
+    const { data: cats } = await supabase
+      .from('entrenamiento_categorias')
+      .select('nivel_id, nivel_disciplina!inner(orden, nombre)')
+      .eq('entrenamiento_id', entrenamientoId)
+      .order('nivel_disciplina(orden)', { ascending: true })
+      .limit(1);
+
+    if (cats && cats.length > 0) {
+      const nivel = (cats[0] as Record<string, unknown>).nivel_disciplina as { orden: number; nombre: string } | null;
+      entrenamientoNivelOrden = nivel?.orden ?? null;
+      entrenamientoNivelNombre = nivel?.nombre ?? null;
+    }
+  }
+
+  // 5. Evaluate OR rows
+  let firstRowRejection: BookingResult | null = null;
+
+  for (const row of restricciones) {
+    let rowPasses = true;
+    let firstFailCode: BookingResult | null = null;
+
+    // 5a. usuario_estado = 'activo'
+    if (row.usuario_estado === 'activo' && !isActivo) {
+      rowPasses = false;
+      firstFailCode ??= {
+        ok: false,
+        code: 'USUARIO_INACTIVO',
+        message: 'Tu cuenta está inactiva. Contacta al administrador para reactivar tu acceso.',
+      };
+    }
+
+    // 5b. plan_id
+    if (row.plan_id && rowPasses) {
+      if (!activePlanIds.has(row.plan_id as string)) {
+        const { data: plan } = await supabase
+          .from('planes')
+          .select('nombre')
+          .eq('id', row.plan_id)
+          .single();
+        const planName = (plan?.nombre as string | null) ?? 'el plan requerido';
+        rowPasses = false;
+        firstFailCode ??= {
+          ok: false,
+          code: 'PLAN_REQUERIDO',
+          message: `Este entrenamiento requiere una suscripción activa al plan ${planName}.`,
+        };
+      }
+    }
+
+    // 5c. disciplina_id
+    if (row.disciplina_id && rowPasses) {
+      if (!activeDisciplinaIds.has(row.disciplina_id as string)) {
+        const { data: disc } = await supabase
+          .from('disciplinas')
+          .select('nombre')
+          .eq('id', row.disciplina_id)
+          .single();
+        const discName = (disc?.nombre as string | null) ?? 'la disciplina requerida';
+        rowPasses = false;
+        firstFailCode ??= {
+          ok: false,
+          code: 'DISCIPLINA_REQUERIDA',
+          message: `Este entrenamiento requiere una suscripción activa que incluya la disciplina ${discName}.`,
+        };
+      }
+    }
+
+    // 5d. validar_nivel_disciplina
+    if (row.validar_nivel_disciplina && rowPasses) {
+      if (entrenamientoNivelOrden != null) {
+        if (atletaNivelOrden == null || atletaNivelOrden < entrenamientoNivelOrden) {
+          const { data: disc } = await supabase
+            .from('disciplinas')
+            .select('nombre')
+            .eq('id', disciplinaId)
+            .single();
+          const discName = (disc?.nombre as string | null) ?? 'la disciplina';
+          const levelName = entrenamientoNivelNombre ?? 'el nivel requerido';
+          rowPasses = false;
+          firstFailCode ??= {
+            ok: false,
+            code: 'NIVEL_INSUFICIENTE',
+            message: `Tu nivel actual en ${discName} no es suficiente para este entrenamiento (mínimo: ${levelName}).`,
+          };
+        }
+      }
+    }
+
+    if (rowPasses) {
+      return { ok: true };
+    }
+
+    // Capture first row's rejection for the final result
+    firstRowRejection ??= firstFailCode;
+  }
+
+  // No row passed — return rejection from first row
+  return firstRowRejection ?? {
+    ok: false,
+    code: 'PLAN_REQUERIDO',
+    message: 'No cumples los requisitos de acceso para este entrenamiento.',
+  };
+}
+
+async function validateCancellationRestriction(
+  entrenamientoId: string,
+  tenantId: string,
+  isAdminOrCoach: boolean,
+): Promise<BookingResult> {
+  if (isAdminOrCoach) return { ok: true };
+
+  const supabase = createClient();
+  const { data: ent, error: entErr } = await supabase
+    .from('entrenamientos')
+    .select('fecha_hora, cancelacion_antelacion_horas')
+    .eq('id', entrenamientoId)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  if (entErr || !ent) {
+    throw new ReservaServiceError('not_found', 'No se encontró el entrenamiento.');
+  }
+
+  const fechaHora = ent.fecha_hora as string | null;
+  const cancelAntelacion = ent.cancelacion_antelacion_horas as number | null;
+
+  if (cancelAntelacion != null && fechaHora) {
+    const cutoff = new Date(new Date(fechaHora).getTime() - cancelAntelacion * 3600000);
+    if (new Date() > cutoff) {
+      return {
+        ok: false,
+        code: 'TIMING_CANCELACION',
+        message: `Solo puedes cancelar con al menos ${cancelAntelacion} h de antelación. El entrenamiento comienza el ${formatFechaHora(fechaHora)}.`,
+      };
+    }
+  }
+
+  return { ok: true };
+}
+
+// ─────────────────────────────────────────────
+// Mutations
+// ─────────────────────────────────────────────
+
+async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
+  // 0. Booking restriction check
+  const restrictionResult = await validateBookingRestrictions(
+    input.entrenamiento_id,
+    input.atleta_id,
+    input.tenant_id,
+  );
+  if (!restrictionResult.ok) return restrictionResult;
+
   const supabase = createClient();
 
   // 1. Capacity check
@@ -391,7 +659,22 @@ async function update(id: string, tenantId: string, input: UpdateReservaInput): 
   return data as Reserva;
 }
 
-async function cancel(id: string, tenantId: string): Promise<Reserva> {
+async function cancel(
+  id: string,
+  tenantId: string,
+  entrenamientoId?: string,
+  isAdminOrCoach?: boolean,
+): Promise<Reserva | BookingResult> {
+  // Cancellation timing restriction (only for athletes)
+  if (entrenamientoId) {
+    const cancResult = await validateCancellationRestriction(
+      entrenamientoId,
+      tenantId,
+      isAdminOrCoach ?? false,
+    );
+    if (!cancResult.ok) return cancResult;
+  }
+
   return update(id, tenantId, {
     estado: 'cancelada',
     fecha_cancelacion: new Date().toISOString(),
@@ -466,6 +749,8 @@ export const reservasService = {
   getCategoriasConDisponibilidad,
   getAtletaNivelId,
   getReservasReport,
+  validateBookingRestrictions,
+  validateCancellationRestriction,
   create,
   update,
   cancel,

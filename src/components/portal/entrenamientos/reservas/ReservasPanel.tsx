@@ -74,6 +74,14 @@ export function ReservasPanel({
     role,
   });
 
+  // Clear booking rejection when panel closes
+  useEffect(() => {
+    if (!open) {
+      reservasHook.clearRejection();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   const asistenciasHook = useAsistencias({
     tenantId,
     entrenamientoId: instance?.id ?? null,
@@ -353,6 +361,22 @@ export function ReservasPanel({
         {reservasHook.error && (
           <div className="mx-6 mt-4 rounded-lg border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
             {reservasHook.error}
+          </div>
+        )}
+
+        {/* Booking rejection alert */}
+        {reservasHook.bookingRejection && (
+          <div className="mx-6 mt-4 flex items-start gap-2 rounded-lg border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-200">
+            <span className="material-symbols-outlined mt-0.5 text-base text-amber-300" aria-hidden="true">warning</span>
+            <span className="flex-1">{reservasHook.bookingRejection.message}</span>
+            <button
+              type="button"
+              onClick={reservasHook.clearRejection}
+              className="ml-2 shrink-0 rounded p-0.5 text-amber-300 hover:bg-amber-500/20 hover:text-amber-100"
+              aria-label="Cerrar alerta"
+            >
+              <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
+            </button>
           </div>
         )}
 
