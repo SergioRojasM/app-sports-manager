@@ -34,7 +34,7 @@
   - SELECT policy: any authenticated `miembros_tenant` member of the tenant
   - INSERT / UPDATE / DELETE policy: admin only via `get_admin_tenants_for_authenticated_user()`
   - `GRANT SELECT, INSERT, UPDATE, DELETE ON both tables TO authenticated`
-- [ ] 3.5 Apply migration to local Supabase (`supabase db reset` or `supabase migration up`) and verify no errors
+- [x] 3.5 Apply migration to local Supabase (`supabase db reset` or `supabase migration up`) and verify no errors
 
 ## 4. Service — `entrenamientos.service.ts`
 
@@ -93,8 +93,8 @@
 
 ## 9. Component — `EntrenamientoFormModal.tsx`
 
-- [ ] 9.1 Import `EntrenamientoRestriccionesSection` and add it after the last existing form section
-- [ ] 9.2 Connect all restriction-related props and handlers from `useEntrenamientoForm`
+- [x] 9.1 Import `EntrenamientoRestriccionesSection` and add it after the last existing form section
+- [x] 9.2 Connect all restriction-related props and handlers from `useEntrenamientoForm`
 
 ## 10. Component — `ReservasPanel.tsx`
 
@@ -112,9 +112,9 @@
 ## 12. Wrap-up
 
 - [x] 12.1 Run `supabase db reset` (or equivalent) and verify migration applies cleanly
-- [ ] 12.2 Smoke-test: create a training with one restriction row requiring a specific plan → verify athlete without that plan cannot book and sees the rejection message
-- [ ] 12.3 Smoke-test: set `reserva_antelacion_horas = 1` on a training scheduled in 30 minutes → verify booking is blocked with `TIMING_RESERVA` message
-- [ ] 12.4 Smoke-test: set `cancelacion_antelacion_horas = 2` on a training 1 hour away → verify atleta cannot self-cancel but admin can
+- [x] 12.2 Smoke-test: create a training with one restriction row requiring a specific plan → verify athlete without that plan cannot book and sees the rejection message
+- [x] 12.3 Smoke-test: set `reserva_antelacion_horas = 1` on a training scheduled in 30 minutes → verify booking is blocked with `TIMING_RESERVA` message
+- [x] 12.4 Smoke-test: set `cancelacion_antelacion_horas = 2` on a training 1 hour away → verify atleta cannot self-cancel but admin can
 - [x] 12.5 Verify TypeScript compiles with no errors (`tsc --noEmit`)
 - [x] 12.6 Commit with message: `feat(us0034): add training booking restrictions with access conditions and timing enforcement`
-- [ ] 12.7 Open pull request: title `[US-0034] Training Booking Restrictions`, body summarising the two new DB tables, timing columns, restriction row editor in the form, and the `BookingRejection` inline feedback in `ReservasPanel`
+- [x] 12.7 Open pull request: title `[US-0034] Training Booking Restrictions`, body summarising the two new DB tables, timing columns, restriction row editor in the form, and the `BookingRejection` inline feedback in `ReservasPanel`
