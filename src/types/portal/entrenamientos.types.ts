@@ -1,4 +1,5 @@
 import type { EntrenamientoCategoriaInput, EntrenamientoGrupoCategoria, EntrenamientoCategoria } from './entrenamiento-categorias.types';
+import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccion, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 
 export type { EntrenamientoGrupoCategoria, EntrenamientoCategoria };
 
@@ -26,7 +27,10 @@ export type TrainingGroup = {
   fecha_inicio: string;
   fecha_fin: string | null;
   estado: TrainingGroupStatus;
+  reserva_antelacion_horas: number | null;
+  cancelacion_antelacion_horas: number | null;
   categorias?: EntrenamientoGrupoCategoria[];
+  restricciones?: EntrenamientoGrupoRestriccion[];
   created_at: string;
   updated_at: string;
 };
@@ -65,8 +69,11 @@ export type TrainingInstance = {
   visibilidad: TrainingVisibility;
   visible_para: string | null;
   estado: TrainingInstanceStatus;
+  reserva_antelacion_horas: number | null;
+  cancelacion_antelacion_horas: number | null;
   reservas_activas?: number;
   categorias?: EntrenamientoCategoria[];
+  restricciones?: EntrenamientoRestriccion[];
   created_at: string;
   updated_at: string;
 };
@@ -181,6 +188,9 @@ export type CreateTrainingSeriesInput = {
     horas_especificas?: string[] | null;
   }>;
   categorias?: EntrenamientoCategoriaInput[];
+  restricciones?: EntrenamientoRestriccionInput[];
+  reserva_antelacion_horas?: number | null;
+  cancelacion_antelacion_horas?: number | null;
 };
 
 export type UpsertTrainingGroupRulesInput = {
@@ -229,6 +239,9 @@ export type UpdateTrainingSeriesInput = {
   }>;
   rules?: UpsertTrainingGroupRulesInput['rules'];
   categorias?: EntrenamientoCategoriaInput[];
+  restricciones?: EntrenamientoGrupoRestriccionInput[];
+  reserva_antelacion_horas?: number | null;
+  cancelacion_antelacion_horas?: number | null;
 };
 
 export type UpdateTrainingInstanceInput = {
@@ -252,6 +265,9 @@ export type UpdateTrainingInstanceInput = {
     estado: TrainingInstanceStatus;
   }>;
   categorias?: EntrenamientoCategoriaInput[];
+  restricciones?: EntrenamientoRestriccionInput[];
+  reserva_antelacion_horas?: number | null;
+  cancelacion_antelacion_horas?: number | null;
 };
 
 export type CategoriasFormState = {

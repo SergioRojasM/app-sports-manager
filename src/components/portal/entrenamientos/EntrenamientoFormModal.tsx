@@ -11,6 +11,8 @@ import type {
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import { EntrenamientoWizard } from './EntrenamientoWizard';
 import { EntrenamientoCategoriasSection } from './EntrenamientoCategoriasSection';
+import { EntrenamientoRestriccionesSection } from './EntrenamientoRestriccionesSection';
+import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 
 type EntrenamientoFormModalProps = {
   open: boolean;
@@ -41,6 +43,17 @@ type EntrenamientoFormModalProps = {
   categoriasError: string | null;
   onToggleCategorias: (enabled: boolean) => void;
   onUpdateCategoriasCupos: (nivelId: string, cupos: number) => void;
+  // Restrictions
+  planes: SelectOption[];
+  restricciones: EntrenamientoRestriccionInput[];
+  reservaAntelacionHoras: number | null;
+  cancelacionAntelacionHoras: number | null;
+  onSetReservaAntelacion: (value: number | null) => void;
+  onSetCancelacionAntelacion: (value: number | null) => void;
+  onAddRestriccion: () => void;
+  onDuplicateRestriccion: (index: number) => void;
+  onRemoveRestriccion: (index: number) => void;
+  onUpdateRestriccion: (index: number, patch: Partial<EntrenamientoRestriccionInput>) => void;
 };
 
 export function EntrenamientoFormModal({
@@ -71,6 +84,16 @@ export function EntrenamientoFormModal({
   categoriasError,
   onToggleCategorias,
   onUpdateCategoriasCupos,
+  planes,
+  restricciones,
+  reservaAntelacionHoras,
+  cancelacionAntelacionHoras,
+  onSetReservaAntelacion,
+  onSetCancelacionAntelacion,
+  onAddRestriccion,
+  onDuplicateRestriccion,
+  onRemoveRestriccion,
+  onUpdateRestriccion,
 }: EntrenamientoFormModalProps) {
   useEffect(() => {
     if (!open) return;
@@ -159,6 +182,23 @@ export function EntrenamientoFormModal({
               />
             </div>
           ) : null}
+
+          {/* Restrictions */}
+          <div className="mt-6">
+            <EntrenamientoRestriccionesSection
+              restricciones={restricciones}
+              planes={planes}
+              disciplinas={disciplinas}
+              reservaAntelacionHoras={reservaAntelacionHoras}
+              cancelacionAntelacionHoras={cancelacionAntelacionHoras}
+              onSetReservaAntelacion={onSetReservaAntelacion}
+              onSetCancelacionAntelacion={onSetCancelacionAntelacion}
+              onAdd={onAddRestriccion}
+              onDuplicate={onDuplicateRestriccion}
+              onRemove={onRemoveRestriccion}
+              onUpdate={onUpdateRestriccion}
+            />
+          </div>
 
           {submitError ? (
             <div className="mt-4 rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">

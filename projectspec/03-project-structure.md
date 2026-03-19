@@ -87,6 +87,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by visibilidad; includes public/private legend
 │   │   │       ├── EntrenamientoFormModal.tsx   # Includes visibilidad radio group (publico/privado, default 'privado')
 │   │   │       ├── EntrenamientoCategoriasSection.tsx  # Optional per-level capacity allocation step
+│   │   │       ├── EntrenamientoRestriccionesSection.tsx  # Collapsible restriction-row editor (timing + access conditions)
 │   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row
 │   │   │       └── reservas/              # Sub-feature slice (booking)
 │   │   │           ├── ReservasPanel.tsx
@@ -156,7 +157,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useNivelesDisciplina.ts    # List + CRUD state for discipline levels
 │   │       └── entrenamientos/
 │   │           ├── useEntrenamientos.ts
-│   │           ├── useEntrenamientoForm.ts
+│   │           ├── useEntrenamientoForm.ts  # Includes restriction row state (add/remove/duplicate/update) and timing fields
 │   │           ├── useEntrenamientoScope.ts
 │   │           ├── useEntrenamientoCategorias.ts  # Fetch categories for a selected training instance
 │               └── reservas/              # Sub-feature hooks (booking + attendance)
@@ -195,7 +196,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export via reservas_reporte_view)
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions, validateCancellationRestriction
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │       │   └── planes.service.ts
 │   │       │   └── suscripciones.service.ts
@@ -229,6 +230,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
+│   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion, restriction inputs, BookingRejection, BookingResult
 │   │       └── gestion-suscripciones.types.ts
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces

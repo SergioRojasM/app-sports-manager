@@ -9,6 +9,7 @@ import type {
   UpdateReservaInput,
   CategoriaDisponibilidad,
 } from '@/types/portal/reservas.types';
+import type { BookingRejection } from '@/types/portal/entrenamiento-restricciones.types';
 import type { UserRole } from '@/types/portal.types';
 
 // ─────────────────────────────────────────────
@@ -28,6 +29,8 @@ type UseReservasResult = {
   loadingCategorias: boolean;
   isLoading: boolean;
   error: string | null;
+  bookingRejection: BookingRejection | null;
+  clearRejection: () => void;
   createReserva: (input: CreateReservaInput) => Promise<boolean>;
   updateReserva: (id: string, input: UpdateReservaInput) => Promise<boolean>;
   cancelReserva: (id: string) => Promise<boolean>;
@@ -51,13 +54,14 @@ function mapReservaError(error: unknown, fallback: string): string {
 // Hook
 // ─────────────────────────────────────────────
 
-export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): UseReservasResult {
+export function useReservas({ tenantId, entrenamientoId, role }: UseReservasOptions): UseReservasResult {
   const [reservas, setReservas] = useState<ReservaView[]>([]);
   const [capacidad, setCapacidad] = useState<ReservaCapacidad | null>(null);
   const [categorias, setCategorias] = useState<CategoriaDisponibilidad[]>([]);
   const [loadingCategorias, setLoadingCategorias] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bookingRejection, setBookingRejection] = useState<BookingRejection | null>(null);
 
   // Keep latest refs for optimistic rollback
   const reservasRef = useRef<ReservaView[]>([]);
@@ -116,9 +120,14 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
   const createReserva = useCallback(
     async (input: CreateReservaInput): Promise<boolean> => {
       setError(null);
+      setBookingRejection(null);
 
       try {
-        await reservasService.create(input);
+        const result = await reservasService.create(input);
+        if ('ok' in result && !result.ok) {
+          setBookingRejection(result);
+          return false;
+        }
         await loadReservas();
         return true;
       } catch (caughtError) {
@@ -148,6 +157,7 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
   const cancelReserva = useCallback(
     async (id: string): Promise<boolean> => {
       setError(null);
+      setBookingRejection(null);
 
       // Optimistic: update the status locally
       const previousReservas = reservasRef.current;
@@ -165,7 +175,15 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
       }
 
       try {
-        await reservasService.cancel(id, tenantId);
+        const isAdminOrCoach = role === 'administrador' || role === 'entrenador';
+        const result = await reservasService.cancel(id, tenantId, entrenamientoId ?? undefined, isAdminOrCoach);
+        if ('ok' in result && !result.ok) {
+          // Rollback optimistic update
+          setReservas(previousReservas);
+          setCapacidad(previousCapacidad);
+          setBookingRejection(result);
+          return false;
+        }
         await loadReservas();
         return true;
       } catch (caughtError) {
@@ -176,7 +194,7 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
         return false;
       }
     },
-    [tenantId, capacidad, loadReservas],
+    [tenantId, entrenamientoId, role, capacidad, loadReservas],
   );
 
   const deleteReservaAction = useCallback(
@@ -226,6 +244,10 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
     }
   }, [tenantId, entrenamientoId]);
 
+  const clearRejection = useCallback(() => {
+    setBookingRejection(null);
+  }, []);
+
   return {
     reservas,
     capacidad,
@@ -233,6 +255,8 @@ export function useReservas({ tenantId, entrenamientoId }: UseReservasOptions): 
     loadingCategorias,
     isLoading,
     error,
+    bookingRejection,
+    clearRejection,
     createReserva,
     updateReserva,
     cancelReserva,

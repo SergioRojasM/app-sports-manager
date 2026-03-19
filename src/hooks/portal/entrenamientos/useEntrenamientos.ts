@@ -21,6 +21,7 @@ import {
 } from '@/types/portal/entrenamientos.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import type { EntrenamientoCategoria } from '@/types/portal/entrenamiento-categorias.types';
+import type { EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 
 type UseEntrenamientosOptions = {
   tenantId: string;
@@ -90,6 +91,17 @@ type UseEntrenamientosResult = {
   validateCategorias: () => boolean;
   instanciaCategorias: EntrenamientoCategoria[];
   instanciaCategoriasLoading: boolean;
+  // Restrictions
+  planes: SelectOption[];
+  restricciones: ReturnType<typeof useEntrenamientoForm>['restricciones'];
+  reservaAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['reservaAntelacionHoras'];
+  cancelacionAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['cancelacionAntelacionHoras'];
+  addRestriccion: ReturnType<typeof useEntrenamientoForm>['addRestriccion'];
+  duplicateRestriccion: ReturnType<typeof useEntrenamientoForm>['duplicateRestriccion'];
+  removeRestriccion: ReturnType<typeof useEntrenamientoForm>['removeRestriccion'];
+  updateRestriccion: ReturnType<typeof useEntrenamientoForm>['updateRestriccion'];
+  setReservaAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['setReservaAntelacionHoras'];
+  setCancelacionAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['setCancelacionAntelacionHoras'];
 };
 
 const EMPTY_SUCCESS: string | null = null;
@@ -330,6 +342,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [disciplinas, setDisciplinas] = useState<SelectOption[]>([]);
   const [escenarios, setEscenarios] = useState<SelectOption[]>([]);
   const [entrenadores, setEntrenadores] = useState<SelectOption[]>([]);
+  const [planes, setPlanes] = useState<SelectOption[]>([]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -362,18 +375,20 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         throw new Error('No active session');
       }
 
-      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData] = await Promise.all([
+      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, planesData] = await Promise.all([
         entrenamientosService.listTrainingGroupsByTenant(tenantId),
         entrenamientosService.listTrainingInstancesByTenantAndRange(tenantId, calendar.range.from, calendar.range.to),
         entrenamientosService.listDisciplineOptions(tenantId),
         entrenamientosService.listScenarioOptions(tenantId),
         entrenamientosService.listTrainerOptions(tenantId),
+        entrenamientosService.listPlanOptions(tenantId),
       ]);
 
       setGroups(groupsData);
       setDisciplinas(disciplinasData);
       setEscenarios(escenariosData);
       setEntrenadores(entrenadoresData);
+      setPlanes(planesData);
 
       // Enrich instances with reservas_activas count (batch, not N+1)
       const capacidades = await Promise.all(
@@ -530,6 +545,22 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       };
 
       form.setFormValuesFromExternal(values);
+
+      // Hydrate restriction state from group
+      form.setReservaAntelacionHoras(group.reserva_antelacion_horas);
+      form.setCancelacionAntelacionHoras(group.cancelacion_antelacion_horas);
+      void entrenamientosService.getGroupRestrictions(tenantId, group.id).then((rows) => {
+        form.setRestricciones(
+          rows.map((r, i) => ({
+            usuario_estado: r.usuario_estado as string | null,
+            plan_id: r.plan_id as string | null,
+            disciplina_id: r.disciplina_id as string | null,
+            validar_nivel_disciplina: r.validar_nivel_disciplina as boolean,
+            orden: i + 1,
+          })),
+        );
+      }).catch(() => form.setRestricciones([]));
+
       setFormMode('edit');
       setIsUniqueTypeLocked(group.tipo === 'unico');
       setEditTarget({
@@ -542,7 +573,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       setSuccessMessage(null);
       setFormOpen(true);
     },
-    [form, instances],
+    [form, instances, tenantId],
   );
 
   const prepareEditFromInstance = useCallback(
@@ -575,6 +606,22 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         };
 
         form.setFormValuesFromExternal(values);
+
+        // Hydrate restriction state from instance
+        form.setReservaAntelacionHoras(instance.reserva_antelacion_horas);
+        form.setCancelacionAntelacionHoras(instance.cancelacion_antelacion_horas);
+        void entrenamientosService.getInstanceRestrictions(tenantId, instance.id).then((rows) => {
+          form.setRestricciones(
+            rows.map((r, i) => ({
+              usuario_estado: r.usuario_estado as string | null,
+              plan_id: r.plan_id as string | null,
+              disciplina_id: r.disciplina_id as string | null,
+              validar_nivel_disciplina: r.validar_nivel_disciplina as boolean,
+              orden: i + 1,
+            })),
+          );
+        }).catch(() => form.setRestricciones([]));
+
         setFormMode('edit');
         setIsUniqueTypeLocked(true);
         setEditTarget({
@@ -614,6 +661,29 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       };
 
       form.setFormValuesFromExternal(values);
+
+      // Hydrate restriction state from group (series/future scope)
+      const sourceGroup = relatedGroup;
+      if (sourceGroup) {
+        form.setReservaAntelacionHoras(sourceGroup.reserva_antelacion_horas);
+        form.setCancelacionAntelacionHoras(sourceGroup.cancelacion_antelacion_horas);
+        void entrenamientosService.getGroupRestrictions(tenantId, sourceGroup.id).then((rows) => {
+          form.setRestricciones(
+            rows.map((r, i) => ({
+              usuario_estado: r.usuario_estado as string | null,
+              plan_id: r.plan_id as string | null,
+              disciplina_id: r.disciplina_id as string | null,
+              validar_nivel_disciplina: r.validar_nivel_disciplina as boolean,
+              orden: i + 1,
+            })),
+          );
+        }).catch(() => form.setRestricciones([]));
+      } else {
+        form.setReservaAntelacionHoras(null);
+        form.setCancelacionAntelacionHoras(null);
+        form.setRestricciones([]);
+      }
+
       setFormMode('edit');
       setIsUniqueTypeLocked((relatedGroup?.tipo ?? 'unico') === 'unico');
       setEditTarget({
@@ -627,7 +697,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       setSuccessMessage(null);
       setFormOpen(true);
     },
-    [form, groupsById],
+    [form, groupsById, tenantId],
   );
 
   const executeDeleteWithScope = useCallback(
@@ -730,7 +800,13 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     try {
       if (formMode === 'create') {
         const payload = toCreatePayload(tenantId, form.formValues);
-        await entrenamientosService.createTrainingSeries({ ...payload, categorias: categoriasPayload });
+        await entrenamientosService.createTrainingSeries({
+          ...payload,
+          categorias: categoriasPayload,
+          restricciones: form.restricciones.length > 0 ? form.restricciones : undefined,
+          reserva_antelacion_horas: form.reservaAntelacionHoras,
+          cancelacion_antelacion_horas: form.cancelacionAntelacionHoras,
+        });
         await loadAll();
         setSuccessMessage('Entrenamiento creado correctamente.');
         setFormOpen(false);
@@ -742,6 +818,17 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       }
 
       if (editTarget.source === 'group' && editTarget.trainingGroupId) {
+        const grupoRestricciones: EntrenamientoGrupoRestriccionInput[] | undefined =
+          form.restricciones.length > 0
+            ? form.restricciones.map((r) => ({
+                usuario_estado: r.usuario_estado,
+                plan_id: r.plan_id,
+                disciplina_id: r.disciplina_id,
+                validar_nivel_disciplina: r.validar_nivel_disciplina,
+                orden: r.orden,
+              }))
+            : undefined;
+
         await entrenamientosService.updateTrainingSeries({
           tenantId,
           trainingGroupId: editTarget.trainingGroupId,
@@ -755,6 +842,9 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           },
           rules: toUpdateRules(form.formValues),
           categorias: categoriasPayload,
+          restricciones: grupoRestricciones,
+          reserva_antelacion_horas: form.reservaAntelacionHoras,
+          cancelacion_antelacion_horas: form.cancelacionAntelacionHoras,
         });
       }
 
@@ -772,8 +862,22 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
               fecha_hora: form.formValues.fecha_hora_unico ? toBogotaIsoFromLocalInput(form.formValues.fecha_hora_unico) : null,
             },
             categorias: categoriasPayload,
+            restricciones: form.restricciones.length > 0 ? form.restricciones : undefined,
+            reserva_antelacion_horas: form.reservaAntelacionHoras,
+            cancelacion_antelacion_horas: form.cancelacionAntelacionHoras,
           });
         } else if (editTarget.trainingGroupId) {
+          const grupoRestricciones: EntrenamientoGrupoRestriccionInput[] | undefined =
+            form.restricciones.length > 0
+              ? form.restricciones.map((r) => ({
+                  usuario_estado: r.usuario_estado,
+                  plan_id: r.plan_id,
+                  disciplina_id: r.disciplina_id,
+                  validar_nivel_disciplina: r.validar_nivel_disciplina,
+                  orden: r.orden,
+                }))
+              : undefined;
+
           await entrenamientosService.updateTrainingSeries({
             tenantId,
             trainingGroupId: editTarget.trainingGroupId,
@@ -787,6 +891,9 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             },
             rules: toUpdateRules(form.formValues),
             categorias: categoriasPayload,
+            restricciones: grupoRestricciones,
+            reserva_antelacion_horas: form.reservaAntelacionHoras,
+            cancelacion_antelacion_horas: form.cancelacionAntelacionHoras,
           });
         } else {
           throw new TrainingServiceError('validation', 'No se encontró la serie asociada para aplicar el alcance seleccionado.');
@@ -861,5 +968,16 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     validateCategorias: form.validateCategorias,
     instanciaCategorias: instanciaCategorias.categorias,
     instanciaCategoriasLoading: instanciaCategorias.loading,
+    // Restrictions
+    planes,
+    restricciones: form.restricciones,
+    reservaAntelacionHoras: form.reservaAntelacionHoras,
+    cancelacionAntelacionHoras: form.cancelacionAntelacionHoras,
+    addRestriccion: form.addRestriccion,
+    duplicateRestriccion: form.duplicateRestriccion,
+    removeRestriccion: form.removeRestriccion,
+    updateRestriccion: form.updateRestriccion,
+    setReservaAntelacionHoras: form.setReservaAntelacionHoras,
+    setCancelacionAntelacionHoras: form.setCancelacionAntelacionHoras,
   };
 }

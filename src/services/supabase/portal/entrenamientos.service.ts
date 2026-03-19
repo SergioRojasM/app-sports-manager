@@ -88,6 +88,8 @@ function mapTrainingGroup(row: TrainingGroupRow): TrainingGroup {
     fecha_inicio: row.fecha_inicio,
     fecha_fin: row.fecha_fin,
     estado: row.estado === 'cancelado' || row.estado === 'finalizado' ? row.estado : 'activo',
+    reserva_antelacion_horas: (row as Record<string, unknown>).reserva_antelacion_horas as number | null ?? null,
+    cancelacion_antelacion_horas: (row as Record<string, unknown>).cancelacion_antelacion_horas as number | null ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -114,6 +116,8 @@ function mapTrainingInstance(row: TrainingInstanceRow): TrainingInstance {
     visibilidad: row.visibilidad === 'publico' ? 'publico' : 'privado',
     visible_para: row.visible_para,
     estado: row.estado,
+    reserva_antelacion_horas: (row as Record<string, unknown>).reserva_antelacion_horas as number | null ?? null,
+    cancelacion_antelacion_horas: (row as Record<string, unknown>).cancelacion_antelacion_horas as number | null ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -308,7 +312,7 @@ export const entrenamientosService = {
       supabase
         .from('entrenamientos_grupo')
         .select(
-          'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+          'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
         )
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false }),
@@ -319,7 +323,7 @@ export const entrenamientosService = {
         .order('created_at', { ascending: true }),
       supabase
         .from('entrenamientos')
-        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
+        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
         .eq('tenant_id', tenantId),
     ]);
 
@@ -348,7 +352,7 @@ export const entrenamientosService = {
 
     let query = supabase
       .from('entrenamientos')
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at')
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
       .eq('tenant_id', tenantId)
       .order('fecha_hora', { ascending: true, nullsFirst: false });
 
@@ -394,6 +398,8 @@ export const entrenamientosService = {
           cupo_maximo: input.group.cupo_maximo ?? null,
           visibilidad,
           visible_para,
+          reserva_antelacion_horas: input.reserva_antelacion_horas ?? null,
+          cancelacion_antelacion_horas: input.cancelacion_antelacion_horas ?? null,
         })
         .select('id')
         .single();
@@ -408,6 +414,23 @@ export const entrenamientosService = {
           input.categorias,
           true,
         );
+      }
+
+      // Insert restriction rows for the unique training
+      if (input.restricciones?.length) {
+        const restriccionRows = input.restricciones.map((r, i) => ({
+          tenant_id: input.tenantId,
+          entrenamiento_id: unicoData.id,
+          usuario_estado: r.usuario_estado ?? null,
+          plan_id: r.plan_id ?? null,
+          disciplina_id: r.disciplina_id ?? null,
+          validar_nivel_disciplina: r.validar_nivel_disciplina,
+          orden: r.orden ?? i + 1,
+        }));
+        const { error: restError } = await supabase
+          .from('entrenamiento_restricciones')
+          .insert(restriccionRows);
+        if (restError) throw mapServiceError(restError);
       }
 
       return null;
@@ -431,9 +454,11 @@ export const entrenamientosService = {
         fecha_inicio: input.group.fecha_inicio,
         fecha_fin: input.group.fecha_fin ?? null,
         estado: input.group.estado ?? 'activo',
+        reserva_antelacion_horas: input.reserva_antelacion_horas ?? null,
+        cancelacion_antelacion_horas: input.cancelacion_antelacion_horas ?? null,
       })
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
       )
       .single();
 
@@ -463,6 +488,40 @@ export const entrenamientosService = {
       await entrenamientoCategoriasService.upsertGrupoCategorias(group.id, input.categorias);
       for (const inst of instances) {
         await entrenamientoCategoriasService.upsertInstanceCategorias(inst.id, input.categorias, true);
+      }
+    }
+
+    // Insert grupo restriction rows
+    if (input.restricciones?.length) {
+      const grupoRestRows = input.restricciones.map((r, i) => ({
+        tenant_id: input.tenantId,
+        entrenamiento_grupo_id: group.id,
+        usuario_estado: r.usuario_estado ?? null,
+        plan_id: r.plan_id ?? null,
+        disciplina_id: r.disciplina_id ?? null,
+        validar_nivel_disciplina: r.validar_nivel_disciplina,
+        orden: r.orden ?? i + 1,
+      }));
+      const { error: grError } = await supabase
+        .from('entrenamiento_grupo_restricciones')
+        .insert(grupoRestRows);
+      if (grError) throw mapServiceError(grError);
+
+      // Copy grupo restrictions to generated instances
+      for (const inst of instances) {
+        const instRestRows = input.restricciones.map((r, i) => ({
+          tenant_id: input.tenantId,
+          entrenamiento_id: inst.id,
+          usuario_estado: r.usuario_estado ?? null,
+          plan_id: r.plan_id ?? null,
+          disciplina_id: r.disciplina_id ?? null,
+          validar_nivel_disciplina: r.validar_nivel_disciplina,
+          orden: r.orden ?? i + 1,
+        }));
+        const { error: irError } = await supabase
+          .from('entrenamiento_restricciones')
+          .insert(instRestRows);
+        if (irError) throw mapServiceError(irError);
       }
     }
 
@@ -540,6 +599,8 @@ export const entrenamientosService = {
         cupo_maximo: input.trainingGroup.cupo_maximo,
         visibilidad,
         visible_para,
+        reserva_antelacion_horas: input.trainingGroup.reserva_antelacion_horas ?? null,
+        cancelacion_antelacion_horas: input.trainingGroup.cancelacion_antelacion_horas ?? null,
       });
     } else {
       let cursor = start;
@@ -579,6 +640,8 @@ export const entrenamientosService = {
               cupo_maximo: input.trainingGroup.cupo_maximo,
               visibilidad,
               visible_para,
+              reserva_antelacion_horas: input.trainingGroup.reserva_antelacion_horas ?? null,
+              cancelacion_antelacion_horas: input.trainingGroup.cancelacion_antelacion_horas ?? null,
             });
           }
         }
@@ -594,7 +657,7 @@ export const entrenamientosService = {
     const { data, error } = await supabase
       .from('entrenamientos')
       .insert(rows)
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, created_at, updated_at');
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at');
 
     if (error) {
       throw mapServiceError(error);
@@ -621,11 +684,13 @@ export const entrenamientosService = {
         fecha_inicio: input.groupPatch.fecha_inicio,
         fecha_fin: input.groupPatch.fecha_fin,
         estado: input.groupPatch.estado,
+        ...(input.reserva_antelacion_horas !== undefined ? { reserva_antelacion_horas: input.reserva_antelacion_horas } : {}),
+        ...(input.cancelacion_antelacion_horas !== undefined ? { cancelacion_antelacion_horas: input.cancelacion_antelacion_horas } : {}),
       })
       .eq('id', input.trainingGroupId)
       .eq('tenant_id', input.tenantId)
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
       )
       .single();
 
@@ -724,6 +789,32 @@ export const entrenamientosService = {
       }
     }
 
+    // Sync grupo restrictions if provided (delete-and-reinsert)
+    if (input.restricciones !== undefined) {
+      const { error: delRestErr } = await supabase
+        .from('entrenamiento_grupo_restricciones')
+        .delete()
+        .eq('tenant_id', input.tenantId)
+        .eq('entrenamiento_grupo_id', input.trainingGroupId);
+      if (delRestErr) throw mapServiceError(delRestErr);
+
+      if (input.restricciones.length > 0) {
+        const grupoRestRows = input.restricciones.map((r, i) => ({
+          tenant_id: input.tenantId,
+          entrenamiento_grupo_id: input.trainingGroupId,
+          usuario_estado: r.usuario_estado ?? null,
+          plan_id: r.plan_id ?? null,
+          disciplina_id: r.disciplina_id ?? null,
+          validar_nivel_disciplina: r.validar_nivel_disciplina,
+          orden: r.orden ?? i + 1,
+        }));
+        const { error: insRestErr } = await supabase
+          .from('entrenamiento_grupo_restricciones')
+          .insert(grupoRestRows);
+        if (insRestErr) throw mapServiceError(insRestErr);
+      }
+    }
+
     return group;
   },
 
@@ -748,6 +839,12 @@ export const entrenamientosService = {
         singlePatch.visibilidad = input.visibilidad;
         singlePatch.visible_para = resolveVisiblePara(input.visibilidad, input.tenantId);
       }
+      if (input.reserva_antelacion_horas !== undefined) {
+        singlePatch.reserva_antelacion_horas = input.reserva_antelacion_horas;
+      }
+      if (input.cancelacion_antelacion_horas !== undefined) {
+        singlePatch.cancelacion_antelacion_horas = input.cancelacion_antelacion_horas;
+      }
 
       const { error } = await supabase
         .from('entrenamientos')
@@ -762,6 +859,32 @@ export const entrenamientosService = {
       // Single-scope category override: mark sincronizado_grupo = false
       if (input.categorias) {
         await entrenamientoCategoriasService.upsertInstanceCategorias(input.trainingId, input.categorias, false);
+      }
+
+      // Replace instance restriction rows (delete-and-reinsert)
+      if (input.restricciones !== undefined) {
+        const { error: delErr } = await supabase
+          .from('entrenamiento_restricciones')
+          .delete()
+          .eq('tenant_id', input.tenantId)
+          .eq('entrenamiento_id', input.trainingId);
+        if (delErr) throw mapServiceError(delErr);
+
+        if (input.restricciones.length > 0) {
+          const restRows = input.restricciones.map((r, i) => ({
+            tenant_id: input.tenantId,
+            entrenamiento_id: input.trainingId,
+            usuario_estado: r.usuario_estado ?? null,
+            plan_id: r.plan_id ?? null,
+            disciplina_id: r.disciplina_id ?? null,
+            validar_nivel_disciplina: r.validar_nivel_disciplina,
+            orden: r.orden ?? i + 1,
+          }));
+          const { error: insErr } = await supabase
+            .from('entrenamiento_restricciones')
+            .insert(restRows);
+          if (insErr) throw mapServiceError(insErr);
+        }
       }
 
       return;
@@ -896,6 +1019,30 @@ export const entrenamientosService = {
     }
   },
 
+  async getInstanceRestrictions(tenantId: string, entrenamientoId: string) {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('entrenamiento_restricciones')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('entrenamiento_id', entrenamientoId)
+      .order('orden', { ascending: true });
+    if (error) throw mapServiceError(error);
+    return data ?? [];
+  },
+
+  async getGroupRestrictions(tenantId: string, grupoId: string) {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('entrenamiento_grupo_restricciones')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('entrenamiento_grupo_id', grupoId)
+      .order('orden', { ascending: true });
+    if (error) throw mapServiceError(error);
+    return data ?? [];
+  },
+
   async listDisciplineOptions(tenantId: string): Promise<SelectOption[]> {
     const supabase = createClient();
 
@@ -987,5 +1134,25 @@ export const entrenamientosService = {
         label: fullName.length > 0 ? fullName : ((row.email as string | null) ?? 'Entrenador'),
       };
     });
+  },
+
+  async listPlanOptions(tenantId: string): Promise<SelectOption[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('planes')
+      .select('id, nombre')
+      .eq('tenant_id', tenantId)
+      .eq('activo', true)
+      .order('nombre', { ascending: true });
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+
+    return (data ?? []).map((row) => ({
+      id: row.id as string,
+      label: (row.nombre as string | null) ?? 'Plan',
+    }));
   },
 };

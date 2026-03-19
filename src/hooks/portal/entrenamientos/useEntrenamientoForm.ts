@@ -10,7 +10,16 @@ import type {
   TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
+import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
+
+const EMPTY_RESTRICCION: EntrenamientoRestriccionInput = {
+  usuario_estado: null,
+  plan_id: null,
+  disciplina_id: null,
+  validar_nivel_disciplina: false,
+  orden: 1,
+};
 
 const EMPTY_RULE: TrainingWizardRuleFormValue = {
   tipo_bloque: 'una_vez_dia',
@@ -122,6 +131,11 @@ export function useEntrenamientoForm() {
   const [activeNiveles, setActiveNiveles] = useState<NivelDisciplina[]>([]);
   const [categoriasError, setCategoriasError] = useState<string | null>(null);
 
+  // Restriction state
+  const [restricciones, setRestricciones] = useState<EntrenamientoRestriccionInput[]>([]);
+  const [reservaAntelacionHoras, setReservaAntelacionHoras] = useState<number | null>(null);
+  const [cancelacionAntelacionHoras, setCancelacionAntelacionHoras] = useState<number | null>(null);
+
   const resetForm = useCallback(() => {
     setFormValues(EMPTY_FORM);
     setFieldErrors({});
@@ -130,6 +144,9 @@ export function useEntrenamientoForm() {
     setDisciplinaHasNiveles(false);
     setActiveNiveles([]);
     setCategoriasError(null);
+    setRestricciones([]);
+    setReservaAntelacionHoras(null);
+    setCancelacionAntelacionHoras(null);
   }, []);
 
   const setFormValuesFromExternal = useCallback((values: TrainingWizardValues) => {
@@ -410,6 +427,39 @@ export function useEntrenamientoForm() {
     setCategoriasError(null);
   }, []);
 
+  // Restriction handlers
+  const addRestriccion = useCallback(() => {
+    setRestricciones((prev) => [
+      ...prev,
+      { ...EMPTY_RESTRICCION, orden: prev.length + 1 },
+    ]);
+  }, []);
+
+  const duplicateRestriccion = useCallback((index: number) => {
+    setRestricciones((prev) => {
+      const source = prev[index];
+      if (!source) return prev;
+      const copy = { ...source, orden: prev.length + 1 };
+      return [...prev, copy];
+    });
+  }, []);
+
+  const removeRestriccion = useCallback((index: number) => {
+    setRestricciones((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      return next.map((r, i) => ({ ...r, orden: i + 1 }));
+    });
+  }, []);
+
+  const updateRestriccion = useCallback(
+    (index: number, patch: Partial<EntrenamientoRestriccionInput>) => {
+      setRestricciones((prev) =>
+        prev.map((r, i) => (i === index ? { ...r, ...patch } : r)),
+      );
+    },
+    [],
+  );
+
   const validateCategorias = useCallback((): boolean => {
     if (!categoriasForm.enabled) return true;
     const max = Number(formValues.cupo_maximo) || 0;
@@ -449,5 +499,16 @@ export function useEntrenamientoForm() {
     toggleCategorias,
     updateCategoriasCupos,
     validateCategorias,
+    // Restrictions
+    restricciones,
+    reservaAntelacionHoras,
+    cancelacionAntelacionHoras,
+    setRestricciones,
+    setReservaAntelacionHoras,
+    setCancelacionAntelacionHoras,
+    addRestriccion,
+    duplicateRestriccion,
+    removeRestriccion,
+    updateRestriccion,
   };
 }
