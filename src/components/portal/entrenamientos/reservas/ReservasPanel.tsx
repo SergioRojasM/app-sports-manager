@@ -6,6 +6,7 @@ import { useReservas } from '@/hooks/portal/entrenamientos/reservas/useReservas'
 import { useReservaForm } from '@/hooks/portal/entrenamientos/reservas/useReservaForm';
 import { useAsistencias } from '@/hooks/portal/entrenamientos/reservas/useAsistencias';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
+import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
 import { toCsvString, downloadTextFile } from '@/lib/csv';
 import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
@@ -57,6 +58,7 @@ export function ReservasPanel({
   const [selectedReservaForAsistencia, setSelectedReservaForAsistencia] = useState<ReservaView | null>(null);
   const [savingAsistencia, setSavingAsistencia] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [restrictionLabels, setRestrictionLabels] = useState<string[]>([]);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
 
@@ -82,6 +84,45 @@ export function ReservasPanel({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Fetch restriction labels when panel opens
+  useEffect(() => {
+    if (!open || !instance) {
+      setRestrictionLabels([]);
+      return;
+    }
+    const labels: string[] = [];
+    if (instance.reserva_antelacion_horas != null) {
+      labels.push(`Reservar con al menos ${instance.reserva_antelacion_horas}h de antelación`);
+    }
+    if (instance.cancelacion_antelacion_horas != null) {
+      labels.push(`Cancelar con al menos ${instance.cancelacion_antelacion_horas}h de antelación`);
+    }
+    entrenamientosService.getInstanceRestrictions(tenantId, instance.id)
+      .then(async (rows) => {
+        if (rows.length === 0) {
+          setRestrictionLabels(labels);
+          return;
+        }
+        const [planes, disciplinas] = await Promise.all([
+          entrenamientosService.listPlanOptions(tenantId),
+          entrenamientosService.listDisciplineOptions(tenantId),
+        ]);
+        const planMap = new Map(planes.map((p) => [p.id, p.label]));
+        const discMap = new Map(disciplinas.map((d) => [d.id, d.label]));
+        for (const row of rows) {
+          const parts: string[] = [];
+          if (row.usuario_estado) parts.push(`usuario ${row.usuario_estado}`);
+          if (row.plan_id) parts.push(`plan "${planMap.get(row.plan_id) ?? row.plan_id}"`);
+          if (row.disciplina_id) parts.push(`disciplina "${discMap.get(row.disciplina_id) ?? row.disciplina_id}"`);
+          if (row.validar_nivel_disciplina) parts.push('nivel de disciplina válido');
+          labels.push(parts.length > 0 ? parts.join(' + ') : 'Sin condiciones específicas');
+        }
+        setRestrictionLabels(labels);
+      })
+      .catch(() => setRestrictionLabels(labels));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, instance?.id, tenantId]);
+
   const asistenciasHook = useAsistencias({
     tenantId,
     entrenamientoId: instance?.id ?? null,
@@ -97,10 +138,10 @@ export function ReservasPanel({
     onCreateReserva: async (input) => {
       const success = await reservasHook.createReserva(input);
       if (success) {
-        setFormModalOpen(false);
         onMutationComplete?.();
         void reservasHook.refetchCategorias();
       }
+      setFormModalOpen(false);
       return success;
     },
     onUpdateReserva: async (id, input) => {
@@ -356,6 +397,24 @@ export function ReservasPanel({
             </div>
           )}
         </div>
+
+        {/* Restrictions */}
+        {restrictionLabels.length > 0 && (
+          <div className="border-b border-portal-border px-6 py-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">lock</span>
+              Restricciones
+            </div>
+            <ul className="mt-1.5 space-y-1">
+              {restrictionLabels.map((label, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                  <span className="mt-0.5 text-slate-500" aria-hidden="true">•</span>
+                  {label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Error */}
         {reservasHook.error && (
