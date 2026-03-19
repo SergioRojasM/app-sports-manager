@@ -56,7 +56,8 @@ export type BookingRejectionCode =
   | 'USUARIO_INACTIVO'
   | 'PLAN_REQUERIDO'
   | 'DISCIPLINA_REQUERIDA'
-  | 'NIVEL_INSUFICIENTE';
+  | 'NIVEL_INSUFICIENTE'
+  | 'CLASES_AGOTADAS';
 
 export type BookingRejection = {
   ok: false;

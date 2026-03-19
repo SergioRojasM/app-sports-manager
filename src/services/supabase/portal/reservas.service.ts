@@ -73,6 +73,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       estado,
       notas,
       fecha_cancelacion,
+      suscripcion_id,
       created_at,
       usuarios!reservas_atleta_id_fkey (
         nombre,
@@ -106,6 +107,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       estado: row.estado as Reserva['estado'],
       notas: row.notas,
       fecha_cancelacion: row.fecha_cancelacion,
+      suscripcion_id: (row.suscripcion_id as string | null) ?? null,
       created_at: row.created_at,
       atleta_nombre: usuario?.nombre ?? '',
       atleta_apellido: usuario?.apellido ?? '',
@@ -526,6 +528,48 @@ async function validateCancellationRestriction(
 }
 
 // ─────────────────────────────────────────────
+// Subscription class deduction helper
+// ─────────────────────────────────────────────
+
+async function findSubscriptionToCharge(
+  tenantId: string,
+  atletaId: string,
+  planId: string,
+): Promise<{ suscripcionId: string | null; exhausted: boolean }> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('suscripciones')
+    .select('id, clases_restantes')
+    .eq('tenant_id', tenantId)
+    .eq('atleta_id', atletaId)
+    .eq('plan_id', planId)
+    .eq('estado', 'activa')
+    .order('clases_restantes', { ascending: true, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw mapServiceError(error);
+  }
+
+  if (!data) {
+    return { suscripcionId: null, exhausted: false };
+  }
+
+  // NULL clases_restantes = unlimited plan — no deduction needed
+  if (data.clases_restantes === null) {
+    return { suscripcionId: null, exhausted: false };
+  }
+
+  if (data.clases_restantes === 0) {
+    return { suscripcionId: null, exhausted: true };
+  }
+
+  return { suscripcionId: data.id as string, exhausted: false };
+}
+
+// ─────────────────────────────────────────────
 // Mutations
 // ─────────────────────────────────────────────
 
@@ -539,6 +583,36 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
   if (!restrictionResult.ok) return restrictionResult;
 
   const supabase = createClient();
+
+  // 0b. Find subscription to charge (if plan-restricted training)
+  let suscripcionId: string | null = null;
+
+  const { data: restricciones } = await supabase
+    .from('entrenamiento_restricciones')
+    .select('plan_id')
+    .eq('entrenamiento_id', input.entrenamiento_id)
+    .eq('tenant_id', input.tenant_id)
+    .not('plan_id', 'is', null)
+    .limit(1)
+    .maybeSingle();
+
+  if (restricciones?.plan_id) {
+    const chargeResult = await findSubscriptionToCharge(
+      input.tenant_id,
+      input.atleta_id,
+      restricciones.plan_id as string,
+    );
+
+    if (chargeResult.exhausted) {
+      return {
+        ok: false,
+        code: 'CLASES_AGOTADAS',
+        message: 'No te quedan clases disponibles en tu suscripción al plan requerido. Contacta al administrador para renovar o ampliar tu plan.',
+      };
+    }
+
+    suscripcionId = chargeResult.suscripcionId;
+  }
 
   // 1. Capacity check
   const capacidad = await getCapacidad(input.tenant_id, input.entrenamiento_id);
@@ -598,22 +672,25 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     }
   }
 
-  // 4. Insert
-  const { data, error } = await supabase
-    .from('reservas')
-    .insert({
-      tenant_id: input.tenant_id,
-      atleta_id: input.atleta_id,
-      entrenamiento_id: input.entrenamiento_id,
-      entrenamiento_categoria_id: input.entrenamiento_categoria_id ?? null,
-      estado: 'confirmada',
-      fecha_reserva: new Date().toISOString(),
-      notas: input.notas?.trim() || null,
-    })
-    .select()
-    .single();
+  // 4. Insert via atomic RPC (deducts class + inserts reservation)
+  const { data, error } = await supabase.rpc('book_and_deduct_class', {
+    p_tenant_id: input.tenant_id,
+    p_atleta_id: input.atleta_id,
+    p_entrenamiento_id: input.entrenamiento_id,
+    p_entrenamiento_categoria_id: input.entrenamiento_categoria_id ?? null,
+    p_notas: input.notas?.trim() || null,
+    p_suscripcion_id: suscripcionId,
+  });
 
   if (error) {
+    // Concurrent race: another booking consumed the last class
+    if (error.code === 'P0001' && error.message?.includes('CLASES_AGOTADAS')) {
+      return {
+        ok: false,
+        code: 'CLASES_AGOTADAS',
+        message: 'No te quedan clases disponibles en tu suscripción al plan requerido. Contacta al administrador para renovar o ampliar tu plan.',
+      };
+    }
     throw mapServiceError(error);
   }
 
@@ -675,10 +752,31 @@ async function cancel(
     if (!cancResult.ok) return cancResult;
   }
 
-  return update(id, tenantId, {
-    estado: 'cancelada',
-    fecha_cancelacion: new Date().toISOString(),
+  // Fetch suscripcion_id from the reservation for class restoration
+  const supabase = createClient();
+  const { data: reserva, error: fetchErr } = await supabase
+    .from('reservas')
+    .select('suscripcion_id')
+    .eq('id', id)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  if (fetchErr || !reserva) {
+    throw new ReservaServiceError('not_found', 'La reserva no fue encontrada.');
+  }
+
+  // Cancel via atomic RPC (updates status + restores class if applicable)
+  const { data, error } = await supabase.rpc('cancel_and_restore_class', {
+    p_reserva_id: id,
+    p_tenant_id: tenantId,
+    p_suscripcion_id: (reserva.suscripcion_id as string | null) ?? null,
   });
+
+  if (error) {
+    throw mapServiceError(error);
+  }
+
+  return data as Reserva;
 }
 
 async function deleteReserva(id: string, tenantId: string): Promise<void> {

@@ -129,19 +129,9 @@ export function EditarSuscripcionModal({
               <label className="mb-1 block text-xs font-medium text-slate-400">
                 Clases Restantes
               </label>
-              <input
-                type="number"
-                min={0}
-                value={formValues.clases_restantes ?? ''}
-                onChange={(e) =>
-                  setField(
-                    'clases_restantes',
-                    e.target.value === '' ? null : Math.max(0, parseInt(e.target.value, 10)),
-                  )
-                }
-                disabled={isSubmitting}
-                className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 outline-none focus:border-turquoise/50 focus:ring-1 focus:ring-turquoise/30 disabled:opacity-50"
-              />
+              <div className="w-full rounded-lg border border-portal-border bg-navy-deep/50 px-3 py-2 text-sm text-slate-400">
+                {formValues.clases_restantes ?? 'Ilimitado'}
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-400">Clases Plan</label>
