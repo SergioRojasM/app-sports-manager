@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { EntrenamientoRestriccionInput } from '@/types/entrenamiento-restricciones.types';
+import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 import type { SelectOption } from '@/types/portal/entrenamientos.types';
 
 type Props = {

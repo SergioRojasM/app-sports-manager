@@ -9,7 +9,7 @@ import type {
   UpdateReservaInput,
   CategoriaDisponibilidad,
 } from '@/types/portal/reservas.types';
-import type { BookingRejection } from '@/types/entrenamiento-restricciones.types';
+import type { BookingRejection } from '@/types/portal/entrenamiento-restricciones.types';
 import type { UserRole } from '@/types/portal.types';
 
 // ─────────────────────────────────────────────

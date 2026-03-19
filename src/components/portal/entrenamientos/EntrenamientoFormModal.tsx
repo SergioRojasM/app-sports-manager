@@ -12,7 +12,7 @@ import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import { EntrenamientoWizard } from './EntrenamientoWizard';
 import { EntrenamientoCategoriasSection } from './EntrenamientoCategoriasSection';
 import { EntrenamientoRestriccionesSection } from './EntrenamientoRestriccionesSection';
-import type { EntrenamientoRestriccionInput } from '@/types/entrenamiento-restricciones.types';
+import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 
 type EntrenamientoFormModalProps = {
   open: boolean;

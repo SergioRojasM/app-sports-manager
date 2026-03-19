@@ -21,7 +21,7 @@ import {
 } from '@/types/portal/entrenamientos.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import type { EntrenamientoCategoria } from '@/types/portal/entrenamiento-categorias.types';
-import type { EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccionInput } from '@/types/entrenamiento-restricciones.types';
+import type { EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 
 type UseEntrenamientosOptions = {
   tenantId: string;

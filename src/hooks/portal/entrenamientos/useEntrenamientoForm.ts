@@ -10,7 +10,7 @@ import type {
   TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
-import type { EntrenamientoRestriccionInput } from '@/types/entrenamiento-restricciones.types';
+import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 
 const EMPTY_RESTRICCION: EntrenamientoRestriccionInput = {

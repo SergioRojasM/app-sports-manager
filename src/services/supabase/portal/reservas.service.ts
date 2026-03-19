@@ -8,7 +8,7 @@ import type {
   UpdateReservaInput,
   ReservaReportRow,
 } from '@/types/portal/reservas.types';
-import type { BookingResult } from '@/types/entrenamiento-restricciones.types';
+import type { BookingResult } from '@/types/portal/entrenamiento-restricciones.types';
 
 // ─────────────────────────────────────────────
 // Error class

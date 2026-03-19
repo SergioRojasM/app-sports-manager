@@ -1,5 +1,5 @@
 import type { EntrenamientoCategoriaInput, EntrenamientoGrupoCategoria, EntrenamientoCategoria } from './entrenamiento-categorias.types';
-import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccion, EntrenamientoGrupoRestriccionInput } from '@/types/entrenamiento-restricciones.types';
+import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccion, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 
 export type { EntrenamientoGrupoCategoria, EntrenamientoCategoria };
 
