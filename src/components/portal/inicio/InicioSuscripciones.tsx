@@ -124,13 +124,17 @@ export function InicioSuscripciones({
                 <div className="mt-2">
                   <div className="flex justify-between text-[10px] text-slate-500 mb-1">
                     <span>Clases restantes</span>
-                    <span>
+                    <span className={(s.clases_restantes ?? 0) === 0 ? 'text-rose-400 font-bold' : ''}>
                       {s.clases_restantes ?? 0} / {s.clases_plan}
                     </span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all"
+                      className={`h-full rounded-full transition-all ${
+                        (s.clases_restantes ?? 0) === 0
+                          ? 'bg-rose-500'
+                          : 'bg-gradient-to-r from-secondary to-primary'
+                      }`}
                       style={{
                         width: `${Math.min(
                           100,

@@ -9,6 +9,7 @@ export type Reserva = {
   estado: ReservaEstado;
   notas: string | null;
   fecha_cancelacion: string | null;
+  suscripcion_id: string | null;
   created_at: string;
 };
 

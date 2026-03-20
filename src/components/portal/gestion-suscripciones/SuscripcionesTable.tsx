@@ -87,7 +87,9 @@ export function SuscripcionesTable({
                 <div className="text-xs text-slate-400">{formatDate(row.fecha_fin)}</div>
               </td>
               <td className="px-4 py-3 text-slate-300">
-                {cell(row.clases_restantes)} / {cell(row.clases_plan)}
+                {row.clases_restantes === null && row.clases_plan === null
+                  ? 'Ilimitado'
+                  : `${cell(row.clases_restantes)} / ${cell(row.clases_plan)}`}
               </td>
               <td className="px-4 py-3 text-slate-300">
                 {row.pago ? `$${row.pago.monto.toLocaleString()}` : '—'}
