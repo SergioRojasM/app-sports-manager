@@ -5,7 +5,7 @@ import { createClient } from '@/services/supabase/client';
 import { planesService } from '@/services/supabase/portal/planes.service';
 import { disciplinesService } from '@/services/supabase/portal/disciplines.service';
 import type { Discipline } from '@/types/portal/disciplines.types';
-import type { PlanWithDisciplinas, PlanTableItem } from '@/types/portal/planes.types';
+import type { PlanWithDisciplinas, PlanTableItem, PlanTipo } from '@/types/portal/planes.types';
 
 type UsePlanesViewOptions = {
   tenantId: string;
@@ -32,6 +32,12 @@ function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): P
     vigenciaLabel: vigencia,
     disciplinaNames,
   };
+}
+
+export function getActiveTipos(plan: PlanWithDisciplinas): PlanTipo[] {
+  return (plan.plan_tipos ?? [])
+    .filter((t) => t.activo)
+    .sort((a, b) => a.nombre.localeCompare(b.nombre));
 }
 
 export function usePlanesView({ tenantId }: UsePlanesViewOptions): UsePlanesViewResult {

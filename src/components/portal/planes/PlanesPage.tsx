@@ -37,6 +37,9 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
     modalMode,
     formValues,
     fieldErrors,
+    tiposForm,
+    tiposErrors,
+    tiposGlobalError,
     submitError,
     successMessage,
     isSubmitting,
@@ -45,6 +48,9 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
     deletePlan,
     closeModal,
     updateField,
+    addTipo,
+    updateTipo,
+    removeTipo,
     submit,
     refresh,
   } = usePlanes({ tenantId });
@@ -109,9 +115,15 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
         fieldErrors={fieldErrors}
         submitError={submitError}
         disciplines={disciplines}
+        tiposForm={tiposForm}
+        tiposErrors={tiposErrors}
+        tiposGlobalError={tiposGlobalError}
         onClose={closeModal}
         onSubmit={submit}
         onChangeField={updateField}
+        onAddTipo={addTipo}
+        onUpdateTipo={updateTipo}
+        onRemoveTipo={removeTipo}
       />
     </section>
   );

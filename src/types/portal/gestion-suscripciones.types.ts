@@ -34,6 +34,9 @@ export interface SuscripcionAdminRow {
   plan_nombre: string;
   plan_vigencia_meses: number;
   plan_clases_incluidas: number | null;
+  plan_tipo_id: string | null;
+  plan_tipo_nombre: string | null;
+  plan_tipo_clases_incluidas: number | null;
   atleta_id: string;
   atleta_nombre: string;
   atleta_email: string;

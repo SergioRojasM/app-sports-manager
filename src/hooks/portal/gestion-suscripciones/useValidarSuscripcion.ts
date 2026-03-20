@@ -47,7 +47,7 @@ function computeDefaults(row: SuscripcionAdminRow): ValidarSuscripcionFormValues
   const fechaInicio = row.fecha_inicio ?? toISODate(today);
   const start = new Date(fechaInicio);
   const fechaFin = row.fecha_fin ?? toISODate(addMonths(start, row.plan_vigencia_meses));
-  const clasesRestantes = row.clases_restantes ?? row.plan_clases_incluidas;
+  const clasesRestantes = row.clases_restantes ?? row.plan_tipo_clases_incluidas ?? row.plan_clases_incluidas;
 
   return { fecha_inicio: fechaInicio, fecha_fin: fechaFin, clases_restantes: clasesRestantes };
 }

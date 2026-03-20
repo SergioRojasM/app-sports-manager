@@ -2,11 +2,28 @@ import { createClient } from '@/services/supabase/client';
 import {
   PlanServiceError,
   type CreatePlanInput,
+  type CreatePlanTipoInput,
   type Plan,
+  type PlanModalidad,
   type PlanTipo,
   type PlanWithDisciplinas,
   type UpdatePlanInput,
+  type UpdatePlanTipoInput,
 } from '@/types/portal/planes.types';
+
+type PlanTipoRow = {
+  id: string;
+  plan_id: string;
+  tenant_id: string;
+  nombre: string;
+  descripcion: string | null;
+  precio: number;
+  vigencia_dias: number;
+  clases_incluidas: number;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
 type PlanRow = {
   id: string;
@@ -22,6 +39,7 @@ type PlanRow = {
   created_at: string;
   updated_at: string;
   planes_disciplina: { disciplina_id: string }[];
+  plan_tipos: PlanTipoRow[];
 };
 
 function toNullable(value: string | null | undefined): string | null {
@@ -43,12 +61,13 @@ function mapPlanRow(row: PlanRow): PlanWithDisciplinas {
     precio: row.precio,
     vigencia_meses: row.vigencia_meses,
     clases_incluidas: row.clases_incluidas,
-    tipo: (row.tipo as PlanTipo) ?? null,
+    tipo: (row.tipo as PlanModalidad) ?? null,
     beneficios: row.beneficios,
     activo: row.activo,
     created_at: row.created_at,
     updated_at: row.updated_at,
     disciplinas: (row.planes_disciplina ?? []).map((pd) => pd.disciplina_id),
+    plan_tipos: (row.plan_tipos ?? []) as PlanTipo[],
   };
 }
 
@@ -78,7 +97,7 @@ export const planesService = {
 
     const { data, error } = await supabase
       .from('planes')
-      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id)')
+      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id), plan_tipos(*)')
       .eq('tenant_id', tenantId)
       .order('nombre');
 
@@ -195,5 +214,107 @@ export const planesService = {
     if (error) {
       throw mapPostgrestError(error);
     }
+  },
+
+  async getPlanTiposByPlan(planId: string): Promise<PlanTipo[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('plan_tipos')
+      .select('*')
+      .eq('plan_id', planId)
+      .order('nombre');
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+
+    return (data ?? []) as PlanTipo[];
+  },
+
+  async createPlanTipo(input: CreatePlanTipoInput): Promise<PlanTipo> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('plan_tipos')
+      .insert({
+        plan_id: input.plan_id,
+        tenant_id: input.tenant_id,
+        nombre: input.nombre.trim(),
+        descripcion: input.descripcion?.trim() || null,
+        precio: input.precio,
+        vigencia_dias: input.vigencia_dias,
+        clases_incluidas: input.clases_incluidas,
+        activo: input.activo ?? true,
+      })
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      throw mapPostgrestError(error);
+    }
+
+    return data as PlanTipo;
+  },
+
+  async updatePlanTipo(id: string, input: UpdatePlanTipoInput): Promise<PlanTipo> {
+    const supabase = createClient();
+
+    const payload: Record<string, unknown> = {};
+    if (input.nombre !== undefined) payload.nombre = input.nombre.trim();
+    if (input.descripcion !== undefined) payload.descripcion = input.descripcion?.trim() || null;
+    if (input.precio !== undefined) payload.precio = input.precio;
+    if (input.vigencia_dias !== undefined) payload.vigencia_dias = input.vigencia_dias;
+    if (input.clases_incluidas !== undefined) payload.clases_incluidas = input.clases_incluidas;
+    if (input.activo !== undefined) payload.activo = input.activo;
+
+    const { data, error } = await supabase
+      .from('plan_tipos')
+      .update(payload)
+      .eq('id', id)
+      .select('*')
+      .single();
+
+    if (error || !data) {
+      throw mapPostgrestError(error);
+    }
+
+    return data as PlanTipo;
+  },
+
+  async deletePlanTipo(id: string): Promise<{ deleted: boolean; deactivated: boolean }> {
+    const supabase = createClient();
+
+    // Check for active/pending subscriptions referencing this subtype
+    const { count, error: countError } = await supabase
+      .from('suscripciones')
+      .select('id', { count: 'exact', head: true })
+      .eq('plan_tipo_id', id)
+      .in('estado', ['activa', 'pendiente']);
+
+    if (countError) {
+      throw mapPostgrestError(countError);
+    }
+
+    if ((count ?? 0) > 0) {
+      // Soft-deactivate instead of deleting
+      await supabase
+        .from('plan_tipos')
+        .update({ activo: false })
+        .eq('id', id);
+
+      return { deleted: false, deactivated: true };
+    }
+
+    const { error } = await supabase
+      .from('plan_tipos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+
+    return { deleted: true, deactivated: false };
   },
 };
