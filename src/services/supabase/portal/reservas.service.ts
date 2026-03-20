@@ -538,6 +538,7 @@ async function findSubscriptionToCharge(
 ): Promise<{ suscripcionId: string | null; exhausted: boolean }> {
   const supabase = createClient();
 
+  // Only consider subscriptions with available classes (>0) or unlimited (null)
   const { data, error } = await supabase
     .from('suscripciones')
     .select('id, clases_restantes')
@@ -545,6 +546,7 @@ async function findSubscriptionToCharge(
     .eq('atleta_id', atletaId)
     .eq('plan_id', planId)
     .eq('estado', 'activa')
+    .or('clases_restantes.gt.0,clases_restantes.is.null')
     .order('clases_restantes', { ascending: true, nullsFirst: false })
     .limit(1)
     .maybeSingle();
@@ -553,20 +555,29 @@ async function findSubscriptionToCharge(
     throw mapServiceError(error);
   }
 
-  if (!data) {
-    return { suscripcionId: null, exhausted: false };
+  if (data) {
+    // NULL clases_restantes = unlimited plan — no deduction needed
+    if (data.clases_restantes === null) {
+      return { suscripcionId: null, exhausted: false };
+    }
+    return { suscripcionId: data.id as string, exhausted: false };
   }
 
-  // NULL clases_restantes = unlimited plan — no deduction needed
-  if (data.clases_restantes === null) {
-    return { suscripcionId: null, exhausted: false };
+  // No subscription with available classes — check if any exhausted (0) exist
+  const { count, error: countError } = await supabase
+    .from('suscripciones')
+    .select('id', { count: 'exact', head: true })
+    .eq('tenant_id', tenantId)
+    .eq('atleta_id', atletaId)
+    .eq('plan_id', planId)
+    .eq('estado', 'activa')
+    .eq('clases_restantes', 0);
+
+  if (countError) {
+    throw mapServiceError(countError);
   }
 
-  if (data.clases_restantes === 0) {
-    return { suscripcionId: null, exhausted: true };
-  }
-
-  return { suscripcionId: data.id as string, exhausted: false };
+  return { suscripcionId: null, exhausted: (count ?? 0) > 0 };
 }
 
 // ─────────────────────────────────────────────

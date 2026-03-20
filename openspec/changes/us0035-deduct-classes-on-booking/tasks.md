@@ -34,4 +34,4 @@
 
 ## 7. Commit & Pull Request
 
-- [ ] 7.1 Stage all changes and create a commit with message: `feat(reservas): deduct and restore subscription classes on booking/cancellation (US-0035)` — body should reference the two RPCs, the new FK column, and the CLASES_AGOTADAS rejection; write a PR description summarising the problem (clases_restantes was never auto-managed), solution (SECURITY DEFINER atomic RPCs), files changed, and testing steps
+- [x] 7.1 Stage all changes and create a commit with message: `feat(reservas): deduct and restore subscription classes on booking/cancellation (US-0035)` — body should reference the two RPCs, the new FK column, and the CLASES_AGOTADAS rejection; write a PR description summarising the problem (clases_restantes was never auto-managed), solution (SECURITY DEFINER atomic RPCs), files changed, and testing steps
