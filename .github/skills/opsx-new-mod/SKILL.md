@@ -1,10 +1,12 @@
 ---
-description: Start a new change using the experimental artifact workflow (OPSX)
+name: opsx-new-mod
+description: Start a new change using the experimental artifact workflow (OPSX). Use when the user wants to create a new feature, fix, or modification with a structured step-by-step approach, providing a User Story, Change Request, or description as input.
+argument-hint: 'File path of a user story/change request, or a description of what to build'
 ---
 
 Start a new change using the experimental artifact-driven approach.
 
-**Input**: The argument after `/opsx:new` is file path of the change or user story, OR a description of what the user wants to build.
+**Input**: The argument after `/opsx:new` is file path of the change or user story.
 
 **Steps**
 
