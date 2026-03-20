@@ -1,4 +1,5 @@
 import type { PlanTableItem, PlanWithDisciplinas } from '@/types/portal/planes.types';
+import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
 
 type PlanesTableProps = {
   rows: PlanTableItem[];
@@ -26,10 +27,8 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, renderRowAction 
           <thead className="bg-navy-medium/80">
             <tr>
               <th className="pl-8 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Nombre</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Precio</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Vigencia</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Clases</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Tipo</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Subtipos</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Disciplinas</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Beneficios</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Estado</th>
@@ -48,17 +47,6 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, renderRowAction 
                   ) : null}
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-slate-200">{formatCurrency(row.precio)}</span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-slate-200">{row.vigenciaLabel}</span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm text-slate-200">
-                    {row.clases_incluidas != null ? row.clases_incluidas : '—'}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
                   {row.tipo ? (
                     <span className={[
                       'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
@@ -73,6 +61,28 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, renderRowAction 
                   ) : (
                     <span className="text-xs text-slate-500">—</span>
                   )}
+                </td>
+                <td className="px-6 py-4">
+                  {(() => {
+                    const tipos = getActiveTipos(row);
+                    return tipos.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {tipos.map((t) => (
+                          <div
+                            key={t.id}
+                            className="rounded-md border border-turquoise/20 bg-turquoise/5 px-2.5 py-1.5 text-xs"
+                          >
+                            <span className="font-medium text-slate-100">{t.nombre}</span>
+                            <span className="ml-2 text-slate-400">
+                              {formatCurrency(t.precio)} · {t.vigencia_dias}d · {t.clases_incluidas != null ? `${t.clases_incluidas} cls` : '∞'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-500">—</span>
+                    );
+                  })()}
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex flex-wrap gap-1.5">

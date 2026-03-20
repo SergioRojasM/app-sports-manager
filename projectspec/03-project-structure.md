@@ -198,7 +198,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── entrenamientos.service.ts
 │   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions, validateCancellationRestriction, findSubscriptionToCharge; create() and cancel() delegate to SECURITY DEFINER RPCs book_and_deduct_class / cancel_and_restore_class for atomic class deduction/restoration; reservas.suscripcion_id FK tracks which subscription was charged
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
-│   │       │   └── planes.service.ts
+│   │       │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard)
 │   │       │   └── suscripciones.service.ts
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
@@ -206,7 +206,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
-│   │       │   └── gestion-suscripciones.service.ts
+│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_clases_incluidas
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
@@ -222,7 +222,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamientos.types.ts
 │   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
-│   │       └── planes.types.ts
+│   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
@@ -231,7 +231,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion, restriction inputs, BookingRejection, BookingResult
-│   │       └── gestion-suscripciones.types.ts
+│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_clases_incluidas
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces
 │   │

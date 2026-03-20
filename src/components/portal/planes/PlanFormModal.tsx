@@ -6,7 +6,11 @@ import type {
   PlanFieldErrors,
   PlanFormValues,
   PlanFormField,
+  PlanTipoFormValues,
 } from '@/types/portal/planes.types';
+import type { TipoFieldErrors } from '@/hooks/portal/planes/usePlanForm';
+
+type TipoFormEntry = PlanTipoFormValues & { _id?: string };
 
 type PlanFormModalProps = {
   open: boolean;
@@ -16,9 +20,15 @@ type PlanFormModalProps = {
   fieldErrors: PlanFieldErrors;
   submitError: string | null;
   disciplines: Discipline[];
+  tiposForm: TipoFormEntry[];
+  tiposErrors: TipoFieldErrors;
+  tiposGlobalError: string | null;
   onClose: () => void;
   onSubmit: () => Promise<boolean>;
   onChangeField: (field: PlanFormField | 'activo', value: string | boolean | string[]) => void;
+  onAddTipo: () => void;
+  onUpdateTipo: (index: number, values: Partial<PlanTipoFormValues>) => void;
+  onRemoveTipo: (index: number) => void;
 };
 
 export function PlanFormModal({
@@ -29,9 +39,15 @@ export function PlanFormModal({
   fieldErrors,
   submitError,
   disciplines,
+  tiposForm,
+  tiposErrors,
+  tiposGlobalError,
   onClose,
   onSubmit,
   onChangeField,
+  onAddTipo,
+  onUpdateTipo,
+  onRemoveTipo,
 }: PlanFormModalProps) {
   useEffect(() => {
     if (!open) return;
@@ -165,90 +181,6 @@ export function PlanFormModal({
             />
           </div>
 
-          {/* Price */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-precio">
-              Precio
-            </label>
-            <input
-              id="plan-precio"
-              type="number"
-              min="0"
-              step="0.01"
-              value={values.precio}
-              onChange={(event) => onChangeField('precio', event.target.value)}
-              disabled={isSubmitting}
-              placeholder="0.00"
-              className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
-                fieldErrors.precio
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-              ].join(' ')}
-            />
-            {fieldErrors.precio ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
-                {fieldErrors.precio}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Validity (months) */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-vigencia">
-              Vigencia (meses)
-            </label>
-            <input
-              id="plan-vigencia"
-              type="number"
-              min="1"
-              step="1"
-              value={values.vigencia_meses}
-              onChange={(event) => onChangeField('vigencia_meses', event.target.value)}
-              disabled={isSubmitting}
-              placeholder="1"
-              className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
-                fieldErrors.vigencia_meses
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-              ].join(' ')}
-            />
-            {fieldErrors.vigencia_meses ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
-                {fieldErrors.vigencia_meses}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Classes included */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-clases">
-              Clases incluidas
-            </label>
-            <input
-              id="plan-clases"
-              type="number"
-              min="0"
-              step="1"
-              value={values.clases_incluidas}
-              onChange={(event) => onChangeField('clases_incluidas', event.target.value)}
-              disabled={isSubmitting}
-              placeholder="Opcional"
-              className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
-                fieldErrors.clases_incluidas
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-              ].join(' ')}
-            />
-            {fieldErrors.clases_incluidas ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
-                {fieldErrors.clases_incluidas}
-              </p>
-            ) : null}
-          </div>
-
           {/* Type (virtual / presencial) */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plan-tipo">
@@ -266,6 +198,172 @@ export function PlanFormModal({
               <option value="virtual">Virtual</option>
               <option value="mixto">Mixto</option>
             </select>
+          </div>
+
+          {/* Subtipos (plan_tipos) inline rows */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                Subtipos de plan
+              </span>
+              <button
+                type="button"
+                onClick={onAddTipo}
+                disabled={isSubmitting}
+                className="inline-flex items-center gap-1 rounded-lg border border-turquoise/40 bg-turquoise/10 px-2.5 py-1.5 text-xs font-semibold text-turquoise transition hover:bg-turquoise/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-sm" aria-hidden="true">add</span>
+                Agregar subtipo
+              </button>
+            </div>
+
+            {tiposGlobalError ? (
+              <p className="mb-2 text-xs font-medium text-rose-300" role="alert">
+                {tiposGlobalError}
+              </p>
+            ) : null}
+
+            {tiposForm.length === 0 ? (
+              <p className="rounded-lg border border-slate-700/50 bg-navy-deep/40 px-4 py-3 text-sm text-slate-500">
+                Sin subtipos. Agrega al menos uno para ofrecer opciones de suscripción.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {tiposForm.map((tipo, index) => {
+                  const errorsForRow = tiposErrors.filter((e) => e.index === index);
+                  const getError = (field: string) => errorsForRow.find((e) => e.field === field)?.message;
+
+                  return (
+                    <div
+                      key={tipo._id ?? `new-${index}`}
+                      className="rounded-xl border border-slate-700 bg-navy-deep/60 p-3 space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-slate-400">
+                          Subtipo {index + 1}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <label className="flex items-center gap-1.5 text-xs text-slate-300">
+                            <input
+                              type="checkbox"
+                              checked={tipo.activo}
+                              onChange={(e) => onUpdateTipo(index, { activo: e.target.checked })}
+                              disabled={isSubmitting}
+                              className="rounded border-slate-600 bg-navy-deep"
+                            />
+                            Activo
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => onRemoveTipo(index)}
+                            disabled={isSubmitting}
+                            className="rounded p-1 text-slate-400 transition hover:text-rose-300 disabled:cursor-not-allowed"
+                            aria-label={`Eliminar subtipo ${index + 1}`}
+                          >
+                            <span className="material-symbols-outlined text-base" aria-hidden="true">delete</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            value={tipo.nombre}
+                            onChange={(e) => onUpdateTipo(index, { nombre: e.target.value })}
+                            disabled={isSubmitting}
+                            placeholder="Nombre del subtipo"
+                            className={[
+                              'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-1',
+                              getError('nombre')
+                                ? 'border-rose-400/80 focus:ring-rose-300/35'
+                                : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                            ].join(' ')}
+                          />
+                          {getError('nombre') ? (
+                            <p className="mt-0.5 text-xs text-rose-300">{getError('nombre')}</p>
+                          ) : null}
+                        </div>
+
+                        <div>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={tipo.precio}
+                            onChange={(e) => onUpdateTipo(index, { precio: e.target.value })}
+                            disabled={isSubmitting}
+                            placeholder="Precio"
+                            className={[
+                              'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-1',
+                              getError('precio')
+                                ? 'border-rose-400/80 focus:ring-rose-300/35'
+                                : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                            ].join(' ')}
+                          />
+                          {getError('precio') ? (
+                            <p className="mt-0.5 text-xs text-rose-300">{getError('precio')}</p>
+                          ) : null}
+                        </div>
+
+                        <div>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={tipo.vigencia_dias}
+                            onChange={(e) => onUpdateTipo(index, { vigencia_dias: e.target.value })}
+                            disabled={isSubmitting}
+                            placeholder="Vigencia (días)"
+                            className={[
+                              'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-1',
+                              getError('vigencia_dias')
+                                ? 'border-rose-400/80 focus:ring-rose-300/35'
+                                : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                            ].join(' ')}
+                          />
+                          {getError('vigencia_dias') ? (
+                            <p className="mt-0.5 text-xs text-rose-300">{getError('vigencia_dias')}</p>
+                          ) : null}
+                        </div>
+
+                        <div>
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={tipo.clases_incluidas}
+                            onChange={(e) => onUpdateTipo(index, { clases_incluidas: e.target.value })}
+                            disabled={isSubmitting}
+                            placeholder="Clases incluidas"
+                            className={[
+                              'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-1',
+                              getError('clases_incluidas')
+                                ? 'border-rose-400/80 focus:ring-rose-300/35'
+                                : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                            ].join(' ')}
+                          />
+                          {getError('clases_incluidas') ? (
+                            <p className="mt-0.5 text-xs text-rose-300">{getError('clases_incluidas')}</p>
+                          ) : null}
+                        </div>
+
+                        <div className="col-span-2">
+                          <input
+                            type="text"
+                            value={tipo.descripcion}
+                            onChange={(e) => onUpdateTipo(index, { descripcion: e.target.value })}
+                            disabled={isSubmitting}
+                            placeholder="Descripción (opcional)"
+                            className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-1 focus:ring-turquoise/35"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Benefits (tag input) */}

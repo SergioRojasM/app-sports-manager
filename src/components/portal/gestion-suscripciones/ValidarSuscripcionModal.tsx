@@ -95,9 +95,11 @@ export function ValidarSuscripcionModal({ row, adminUserId, onClose, onSuccess }
                 disabled={isSubmitting}
                 className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 outline-none focus:border-turquoise/50 focus:ring-1 focus:ring-turquoise/30 disabled:opacity-50"
               />
-              {row.plan_clases_incluidas !== null && (
+              {(row.plan_tipo_clases_incluidas ?? row.plan_clases_incluidas) !== null && (
                 <p className="mt-1 text-xs text-slate-500">
-                  El plan incluye {row.plan_clases_incluidas} clases.
+                  {row.plan_tipo_nombre
+                    ? `El subtipo "${row.plan_tipo_nombre}" incluye ${row.plan_tipo_clases_incluidas} clases.`
+                    : `El plan incluye ${row.plan_clases_incluidas} clases.`}
                 </p>
               )}
             </div>

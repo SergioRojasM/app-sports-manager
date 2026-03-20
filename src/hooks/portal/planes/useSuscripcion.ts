@@ -20,6 +20,8 @@ type UseSuscripcionOptions = {
 type UseSuscripcionResult = {
   modalOpen: boolean;
   selectedPlan: PlanWithDisciplinas | null;
+  selectedTipoId: string | null;
+  selectTipo: (id: string) => void;
   openModal: (plan: PlanWithDisciplinas) => void;
   closeModal: () => void;
   submit: (data: SuscripcionSubmitData) => Promise<boolean>;
@@ -42,9 +44,16 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
   const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([]);
   const [metodosPagoError, setMetodosPagoError] = useState<string | null>(null);
+  const [selectedTipoId, setSelectedTipoId] = useState<string | null>(null);
+
+  const selectTipo = useCallback((id: string) => {
+    setSelectedTipoId(id);
+    setError(null);
+  }, []);
 
   const openModal = useCallback(async (plan: PlanWithDisciplinas) => {
     setSelectedPlan(plan);
+    setSelectedTipoId(null);
     setError(null);
     setSuccessMessage(null);
     setIsDuplicate(false);
@@ -87,12 +96,31 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
     setModalOpen(false);
     setError(null);
     setSelectedPlan(null);
+    setSelectedTipoId(null);
     setIsDuplicate(false);
   }, [isSubmitting]);
 
   const submit = useCallback(
     async (data: SuscripcionSubmitData): Promise<boolean> => {
       if (!selectedPlan || isDuplicate) return false;
+
+      // Resolve selected subtype
+      const activeTipos = (selectedPlan.plan_tipos ?? []).filter((t) => t.activo);
+      const hasSubtypes = activeTipos.length > 0;
+
+      if (hasSubtypes && !selectedTipoId) {
+        setError('Selecciona un subtipo de plan antes de continuar.');
+        return false;
+      }
+
+      const selectedTipo = hasSubtypes
+        ? activeTipos.find((t) => t.id === selectedTipoId) ?? null
+        : null;
+
+      if (hasSubtypes && !selectedTipo) {
+        setError('El subtipo seleccionado ya no está disponible.');
+        return false;
+      }
 
       setIsSubmitting(true);
       setError(null);
@@ -114,7 +142,8 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           tenant_id: tenantId,
           atleta_id: user.id,
           plan_id: selectedPlan.id,
-          clases_plan: selectedPlan.clases_incluidas,
+          plan_tipo_id: selectedTipo?.id ?? null,
+          clases_plan: selectedTipo?.clases_incluidas ?? selectedPlan.clases_incluidas,
           comentarios: data.comentarios.trim() || null,
           estado: 'pendiente',
         });
@@ -124,7 +153,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           await pagosService.createPago({
             tenant_id: tenantId,
             suscripcion_id: suscripcion.id,
-            monto: selectedPlan.precio,
+            monto: selectedTipo?.precio ?? selectedPlan.precio,
             comprobante_url: null,
             estado: 'pendiente',
             metodo_pago_id: data.metodo_pago_id,
@@ -138,6 +167,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
         setSuccessMessage('Solicitud enviada. El administrador revisará tu suscripción.');
         setModalOpen(false);
         setSelectedPlan(null);
+        setSelectedTipoId(null);
         return true;
       } catch {
         setError('No fue posible enviar la solicitud. Inténtalo nuevamente.');
@@ -146,12 +176,14 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
         setIsSubmitting(false);
       }
     },
-    [isDuplicate, selectedPlan, tenantId],
+    [isDuplicate, selectedPlan, selectedTipoId, tenantId],
   );
 
   return {
     modalOpen,
     selectedPlan,
+    selectedTipoId,
+    selectTipo,
     openModal,
     closeModal,
     submit,

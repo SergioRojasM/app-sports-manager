@@ -5,6 +5,7 @@ export type Suscripcion = {
   tenant_id: string;
   atleta_id: string;
   plan_id: string;
+  plan_tipo_id: string | null;
   fecha_inicio: string | null;
   fecha_fin: string | null;
   clases_restantes: number | null;
@@ -18,6 +19,7 @@ export type SuscripcionInsert = {
   tenant_id: string;
   atleta_id: string;
   plan_id: string;
+  plan_tipo_id?: string | null;
   clases_plan: number | null;
   comentarios: string | null;
   estado: 'pendiente';

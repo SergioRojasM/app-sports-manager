@@ -26,11 +26,17 @@ type UsePlanesResult = PlanesViewModel & {
   setSearchTerm: (value: string) => void;
   formValues: ReturnType<typeof usePlanForm>['formValues'];
   fieldErrors: ReturnType<typeof usePlanForm>['fieldErrors'];
+  tiposForm: ReturnType<typeof usePlanForm>['tiposForm'];
+  tiposErrors: ReturnType<typeof usePlanForm>['tiposErrors'];
+  tiposGlobalError: ReturnType<typeof usePlanForm>['tiposGlobalError'];
   openCreateModal: () => void;
   openEditModal: (plan: PlanWithDisciplinas) => void;
   deletePlan: (plan: PlanWithDisciplinas) => Promise<void>;
   closeModal: () => void;
   updateField: ReturnType<typeof usePlanForm>['updateField'];
+  addTipo: ReturnType<typeof usePlanForm>['addTipo'];
+  updateTipo: ReturnType<typeof usePlanForm>['updateTipo'];
+  removeTipo: ReturnType<typeof usePlanForm>['removeTipo'];
   submit: () => Promise<boolean>;
   refresh: () => Promise<void>;
 };
@@ -148,6 +154,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     setModalMode('edit');
     setSelectedPlan(plan);
     form.setFormFromPlan(plan);
+    form.setTiposFromPlan(plan);
     setModalOpen(true);
     setSuccessMessage(null);
     setSubmitError(null);
@@ -205,6 +212,8 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     setIsSubmitting(true);
 
     try {
+      let planId: string;
+
       if (modalMode === 'create') {
         const payload: CreatePlanInput = {
           tenantId,
@@ -219,10 +228,9 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           disciplinaIds: form.formValues.disciplinaIds,
         };
 
-        await planesService.createPlan(payload);
-      }
-
-      if (modalMode === 'edit' && selectedPlan) {
+        const created = await planesService.createPlan(payload);
+        planId = created.id;
+      } else if (selectedPlan) {
         const payload: UpdatePlanInput = {
           tenantId,
           planId: selectedPlan.id,
@@ -238,6 +246,28 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
         };
 
         await planesService.updatePlan(payload);
+        planId = selectedPlan.id;
+      } else {
+        return false;
+      }
+
+      // Apply tipos diff
+      const diff = form.computeTiposDiff();
+
+      for (const input of diff.toCreate) {
+        await planesService.createPlanTipo({
+          ...input,
+          plan_id: planId,
+          tenant_id: tenantId,
+        });
+      }
+
+      for (const { id, input } of diff.toUpdate) {
+        await planesService.updatePlanTipo(id, input);
+      }
+
+      for (const tipoId of diff.toDelete) {
+        await planesService.deletePlanTipo(tipoId);
       }
 
       await loadData();
@@ -274,11 +304,17 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     setSearchTerm,
     formValues: form.formValues,
     fieldErrors: form.fieldErrors,
+    tiposForm: form.tiposForm,
+    tiposErrors: form.tiposErrors,
+    tiposGlobalError: form.tiposGlobalError,
     openCreateModal,
     openEditModal,
     deletePlan,
     closeModal,
     updateField: form.updateField,
+    addTipo: form.addTipo,
+    updateTipo: form.updateTipo,
+    removeTipo: form.removeTipo,
     submit,
     refresh: loadData,
   };
