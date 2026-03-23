@@ -11,15 +11,15 @@
 
 ## 3. Validation
 
-- [ ] 3.1 Run the app (`pnpm dev`) and open DevTools at 375 px width — confirm breadcrumb and its divider are not visible and avatar/notifications are fully accessible
-- [ ] 3.2 Confirm breadcrumb and divider are fully visible at 1280 px width with no visual regression
+- [x] 3.1 Run the app (`pnpm dev`) and open DevTools at 375 px width — confirm breadcrumb and its divider are not visible and avatar/notifications are fully accessible
+- [x] 3.2 Confirm breadcrumb and divider are fully visible at 1280 px width with no visual regression
 - [x] 3.3 Run `pnpm lint` and confirm no lint errors
 - [x] 3.4 Run `pnpm build` and confirm no type or build errors
 
 ## 4. Commit & PR
 
-- [ ] 4.1 Stage changes and create a commit with message: `fix: hide portal breadcrumb on mobile to prevent avatar obstruction`
-- [ ] 4.2 Create a pull request with the following description:
+- [x] 4.1 Stage changes and create a commit with message: `fix: hide portal breadcrumb on mobile to prevent avatar obstruction`
+- [x] 4.2 Create a pull request with the following description:
 
   **Title**: `fix: hide portal breadcrumb on mobile`
 
