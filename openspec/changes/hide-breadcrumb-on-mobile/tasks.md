@@ -1,20 +1,20 @@
 ## 1. Setup
 
-- [ ] 1.1 Create a new branch named `fix/hide-breadcrumb-on-mobile`
-- [ ] 1.2 Validate that the working branch is NOT `main`, `master`, or `develop`
+- [x] 1.1 Create a new branch named `fix/hide-breadcrumb-on-mobile`
+- [x] 1.2 Validate that the working branch is NOT `main`, `master`, or `develop`
 
 ## 2. Component Update
 
-- [ ] 2.1 Open `src/components/portal/PortalHeader.tsx` and locate the left-section block containing the second `<div className="h-5 w-px bg-portal-border" />` (the one immediately before `<PortalBreadcrumb />`)
-- [ ] 2.2 Wrap that divider and `<PortalBreadcrumb />` together in `<div className="hidden md:flex items-center gap-2">` with a JSX comment explaining the purpose
-- [ ] 2.3 Verify `PortalBreadcrumb.tsx` itself has NOT been modified
+- [x] 2.1 Open `src/components/portal/PortalHeader.tsx` and locate the left-section block containing the second `<div className="h-5 w-px bg-portal-border" />` (the one immediately before `<PortalBreadcrumb />`)
+- [x] 2.2 Wrap that divider and `<PortalBreadcrumb />` together in `<div className="hidden md:flex items-center gap-2">` with a JSX comment explaining the purpose
+- [x] 2.3 Verify `PortalBreadcrumb.tsx` itself has NOT been modified
 
 ## 3. Validation
 
 - [ ] 3.1 Run the app (`pnpm dev`) and open DevTools at 375 px width — confirm breadcrumb and its divider are not visible and avatar/notifications are fully accessible
 - [ ] 3.2 Confirm breadcrumb and divider are fully visible at 1280 px width with no visual regression
-- [ ] 3.3 Run `pnpm lint` and confirm no lint errors
-- [ ] 3.4 Run `pnpm build` and confirm no type or build errors
+- [x] 3.3 Run `pnpm lint` and confirm no lint errors
+- [x] 3.4 Run `pnpm build` and confirm no type or build errors
 
 ## 4. Commit & PR
 
