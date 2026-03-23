@@ -27,8 +27,11 @@ export function PortalHeader({ profile, role }: PortalHeaderProps) {
         </Link>
         <div className="h-5 w-px bg-portal-border" />
         <PortalNavMenu role={role} />
-        <div className="h-5 w-px bg-portal-border" />
-        <PortalBreadcrumb />
+        {/* Breadcrumb — hidden on mobile to keep avatar/notifications accessible */}
+        <div className="hidden md:flex items-center gap-2">
+          <div className="h-5 w-px bg-portal-border" />
+          <PortalBreadcrumb />
+        </div>
       </div>
 
       {/* Right: actions */}
