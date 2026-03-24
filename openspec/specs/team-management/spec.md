@@ -27,7 +27,7 @@ The system SHALL expose the route `/portal/orgs/[tenant_id]/gestion-equipo` with
 ---
 
 ### Requirement: System SHALL list all members of the tenant
-`equipo.service.ts` SHALL query `public.miembros_tenant` joined with `public.usuarios` and `public.roles`, filtered by `tenant_id`. The result SHALL include every user who has an active membership record for that tenant, including the administrator themselves.
+`equipo.service.ts` SHALL query `public.v_miembros_equipo` (instead of `public.miembros_tenant` directly) filtered by `tenant_id`. The view returns a flat row shape with fields from `miembros_tenant`, `usuarios`, and `roles` already joined, plus an `inasistencias_recientes` integer computed by a lateral subquery. `RawMiembroRow` SHALL be a flat type matching the view's column set (no nested `usuarios` or `roles` sub-objects). `mapRawRow` SHALL read `estado` and `inasistencias_recientes` from the top-level row. The result SHALL include every user who has an active membership record for that tenant, including the administrator themselves.
 
 #### Scenario: Members are loaded on page mount
 - **WHEN** an administrator navigates to the team management page for a tenant
@@ -41,22 +41,65 @@ The system SHALL expose the route `/portal/orgs/[tenant_id]/gestion-equipo` with
 - **WHEN** the Supabase query fails (e.g., network error or RLS denial)
 - **THEN** the system SHALL display an error message with a retry button
 
+#### Scenario: Each member row includes inasistencias_recientes
+- **WHEN** the member list is fetched
+- **THEN** each `MiembroRow` SHALL include an `inasistencias_recientes: number` field (defaults to `0` if null)
+
 ---
 
 ### Requirement: Member table SHALL display required columns
-The `EquipoTable` component SHALL render a table with the following columns in order: **Nombre** (full name), **Tipo ID**, **N° Identificación**, **Teléfono**, **Correo**, **Estado** (as a colour-coded badge), **Perfil** (role name), and **Acciones**. The table SHALL include `<thead>` with `scope="col"` on every `<th>`. Nullable fields SHALL display `—` when empty. The **Acciones** column SHALL always be rendered regardless of which action callbacks are provided; individual action buttons within the column SHALL render only when their corresponding callback prop is passed.
+The `EquipoTable` component SHALL render a table with the following columns in order: **Nombre** (full name), **Tipo ID**, **N° Identificación**, **Teléfono**, **Correo**, **Estado** (as a colour-coded badge sourced from `miembros_tenant.estado` via `v_miembros_equipo`), **Fallas (30d)** (absence counter with colour coding), **Perfil** (role display), and **Acciones**. The table SHALL include `<thead>` with `scope="col"` on every `<th>`. Nullable fields SHALL display `—` when empty. The **Acciones** column SHALL always be rendered regardless of which action callbacks are provided.
+
+The **Fallas (30d)** column SHALL render `inasistencias_recientes` with the following visual treatment:
+- `0` → em-dash (`—`) in slate colour (neutral)
+- `1–2` → amber badge (e.g., `bg-amber-900/30 text-amber-300`)
+- `3+` → red badge (e.g., `bg-red-900/30 text-red-300`)
+
+When `roles` and `onCambiarRol` props are provided, the **Perfil** column SHALL render a `<select>` dropdown populated with the available roles, with the current role pre-selected. Selecting a different role SHALL call `onCambiarRol(row, selectedRolOption)`. When `roles` or `onCambiarRol` is not provided, the **Perfil** column SHALL fall back to displaying the static `rol_nombre` text.
 
 #### Scenario: All columns are rendered for a complete member record
 - **WHEN** a member has all fields populated
-- **THEN** the system SHALL display full name, tipo ID, número de identificación, phone, email, status badge, role name, and the Acciones cell in the corresponding columns
+- **THEN** the system SHALL display full name, tipo ID, número de identificación, phone, email, status badge, fallas counter, role name, and the Acciones cell in the corresponding columns
 
 #### Scenario: Nullable identification fields display em-dash
 - **WHEN** a member's `tipo_identificacion` or `numero_identificacion` is null
 - **THEN** the system SHALL render `—` in the respective column cell
 
+#### Scenario: Fallas column shows dash for zero absences
+- **WHEN** `inasistencias_recientes` is `0`
+- **THEN** the cell SHALL display `—` in a neutral slate colour
+
+#### Scenario: Fallas column shows amber badge for 1-2 absences
+- **WHEN** `inasistencias_recientes` is `1` or `2`
+- **THEN** the cell SHALL display the count in an amber badge
+
+#### Scenario: Fallas column shows red badge for 3 or more absences
+- **WHEN** `inasistencias_recientes` is `3` or greater
+- **THEN** the cell SHALL display the count in a red badge
+
+#### Scenario: Estado column reflects miembros_tenant.estado
+- **WHEN** a member's `miembros_tenant.estado` is `'mora'` and `usuarios.estado` is `'activo'`
+- **THEN** the Estado cell SHALL display the `'mora'` badge, not the `'activo'` badge
+
 #### Scenario: Acciones column header is always present
 - **WHEN** the `EquipoTable` renders
 - **THEN** the system SHALL always include an **Acciones** `<th>` as the last column, regardless of which callback props are provided
+
+#### Scenario: Role column renders a dropdown when roles prop is provided
+- **WHEN** `EquipoTable` receives `roles` and `onCambiarRol` props
+- **THEN** each row's Perfil cell SHALL render a `<select>` element with the three role options, and the current role SHALL be pre-selected
+
+#### Scenario: Role column renders static text when roles prop is not provided
+- **WHEN** `EquipoTable` does not receive a `roles` prop
+- **THEN** each row's Perfil cell SHALL render the `rol_nombre` as static text
+
+#### Scenario: Selecting a different role triggers the callback
+- **WHEN** the admin selects a different option in the role `<select>` dropdown
+- **THEN** the system SHALL call `onCambiarRol` with the row and the selected `RolOption`
+
+#### Scenario: Role select has an accessible label
+- **WHEN** the role `<select>` is rendered
+- **THEN** it SHALL include an `aria-label` attribute (e.g., `"Cambiar rol"`)
 
 ---
 
@@ -339,26 +382,36 @@ The migration SHALL add `tipo_identificacion varchar(20)` and `numero_identifica
 
 ---
 
-### Requirement: Acciones column SHALL render up to four icon buttons per row
+### Requirement: Acciones column SHALL render up to six icon buttons per row
 Each row in `EquipoTable` SHALL render the following icon buttons (using `material-symbols-outlined`) in the Acciones cell, each conditionally rendered based on whether its callback prop is provided:
-1. **Edit Profile** (`edit` icon) — calls `onEditarPerfil(row)`.
-2. **Assign Level** (`military_tech` icon) — calls `onAsignarNivel(row.usuario_id)` (existing).
-3. **Remove from Team** (`person_remove` icon) — calls `onEliminar(row)`.
-4. **Block from Team** (`block` icon) — calls `onBloquear(row)`.
+1. **Edit Profile** (`edit` icon) — calls `onEditarPerfil(row)`. `hover:text-turquoise`.
+2. **Assign Level** (`military_tech` icon) — calls `onAsignarNivel(row.usuario_id)`. `hover:text-turquoise`.
+3. **Change Status** (`swap_horiz` or `label` icon) — calls `onCambiarEstado(row)`. `hover:text-turquoise`. Visible to admins only.
+4. **View Novedades** (`history` icon) — calls `onVerNovedades(row)`. `hover:text-turquoise`. Visible to admins only.
+5. **Remove from Team** (`person_remove` icon) — calls `onEliminar(row)`. `hover:text-rose-400`.
+6. **Block from Team** (`block` icon) — calls `onBloquear(row)`. `hover:text-amber-400`.
 
-Each button SHALL include a `title` attribute describing its action for accessibility. Edit and Assign Level buttons SHALL use `hover:text-turquoise`. Remove SHALL use `hover:text-rose-400`. Block SHALL use `hover:text-amber-400`.
+Each button SHALL include a `title` attribute describing its action for accessibility.
 
-#### Scenario: All four action buttons render when all callbacks are provided
-- **WHEN** `EquipoTable` receives `onEditarPerfil`, `onAsignarNivel`, `onEliminar`, and `onBloquear` props
-- **THEN** the system SHALL render all four icon buttons in each row's Acciones cell
+#### Scenario: Admin sees Cambiar Estado button for each member
+- **WHEN** an authenticated administrator views the team management table and `onCambiarEstado` prop is provided
+- **THEN** each row SHALL display the "Cambiar Estado" icon button in the actions column
 
-#### Scenario: Absent callback omits its button
-- **WHEN** `EquipoTable` does not receive `onEliminar`
-- **THEN** the system SHALL NOT render the person_remove button in any row
+#### Scenario: Admin sees Ver Novedades button for each member
+- **WHEN** an authenticated administrator views the team management table and `onVerNovedades` prop is provided
+- **THEN** each row SHALL display the "Ver Novedades" icon button in the actions column
 
-#### Scenario: Action buttons have accessible title attributes
-- **WHEN** an action button is rendered
-- **THEN** each button SHALL have a non-empty `title` attribute describing its action
+#### Scenario: Clicking Cambiar Estado opens CambiarEstadoModal for the correct member
+- **WHEN** an administrator clicks the "Cambiar Estado" button on a member row
+- **THEN** the system SHALL call `onCambiarEstado` with that row's `MiembroTableItem` data
+
+#### Scenario: Clicking Ver Novedades opens NovedadesMiembroModal for the correct member
+- **WHEN** an administrator clicks the "Ver Novedades" button on a member row
+- **THEN** the system SHALL call `onVerNovedades` with that row's `MiembroTableItem` data
+
+#### Scenario: Existing action buttons are unaffected
+- **WHEN** the new action buttons are added to the table
+- **THEN** all existing row action buttons (edit, assign level, remove, block) SHALL continue to function without regression
 
 ---
 
@@ -500,3 +553,155 @@ Non-admin roles (usuario, entrenador) SHALL NOT be able to execute these operati
 #### Scenario: Non-admin cannot delete miembros_tenant rows
 - **WHEN** an authenticated non-admin executes a DELETE on `public.miembros_tenant`
 - **THEN** the operation SHALL be rejected by RLS
+
+## ADDED Requirements
+
+### Requirement: EquipoPage SHALL wire CambiarEstadoModal and NovedadesMiembroModal
+`EquipoPage` SHALL manage two additional state variables: `cambiarEstadoTarget: MiembroTableItem | null` (default `null`) and `novedadesTarget: MiembroTableItem | null` (default `null`). It SHALL pass `onCambiarEstado` and `onVerNovedades` callbacks to `EquipoTable`. It SHALL render `<CambiarEstadoModal>` and `<NovedadesMiembroModal>` controlled by those state variables. On a successful status change, a success toast SHALL be shown and the equipo list SHALL be refreshed.
+
+#### Scenario: Clicking Cambiar Estado opens the modal for the target member
+- **WHEN** an administrator clicks "Cambiar Estado" on a member row
+- **THEN** `cambiarEstadoTarget` SHALL be set to that member and `CambiarEstadoModal` SHALL render
+
+#### Scenario: Closing CambiarEstadoModal resets cambiarEstadoTarget
+- **WHEN** the administrator closes `CambiarEstadoModal` without confirming
+- **THEN** `cambiarEstadoTarget` SHALL be reset to `null` and the modal SHALL be removed from the DOM
+
+#### Scenario: Successful status change shows success toast and refreshes list
+- **WHEN** a status change is confirmed in `CambiarEstadoModal`
+- **THEN** a success toast SHALL be displayed and the equipo member list SHALL reload with the updated estado
+
+#### Scenario: Clicking Ver Novedades opens the history modal for the target member
+- **WHEN** an administrator clicks "Ver Novedades" on a member row
+- **THEN** `novedadesTarget` SHALL be set to that member and `NovedadesMiembroModal` SHALL render
+
+#### Scenario: Closing NovedadesMiembroModal resets novedadesTarget
+- **WHEN** the administrator closes `NovedadesMiembroModal`
+- **THEN** `novedadesTarget` SHALL be reset to `null` and the modal SHALL be removed from the DOM
+
+---
+
+### Requirement: Service SHALL expose a function to fetch all available roles
+`equipo.service.ts` SHALL export a `getRoles()` function that queries `public.roles` and returns an array of `RolOption` objects (`{ id: string; nombre: string }`), ordered by `nombre`. The result SHALL contain exactly the three seeded roles: `administrador`, `entrenador`, `usuario`.
+
+#### Scenario: Roles are fetched successfully
+- **WHEN** `getRoles()` is called by the hook on mount
+- **THEN** the service SHALL return an array of three `RolOption` objects corresponding to the `administrador`, `entrenador`, and `usuario` roles
+
+#### Scenario: Roles query fails
+- **WHEN** the Supabase query for `public.roles` fails (e.g., network error)
+- **THEN** the service SHALL throw an `EquipoServiceError` with `code: 'unknown'`
+
+---
+
+### Requirement: Service SHALL expose a function to change a member's role with last-admin guard
+`equipo.service.ts` SHALL export a `cambiarRolMiembro(input: CambiarRolMiembroInput)` function that updates `miembros_tenant.rol_id` for the given member. Before executing the UPDATE, the function SHALL count the number of members with the `administrador` role in the tenant. If the target member is the only administrator and the new role is not `administrador`, the function SHALL throw an `EquipoServiceError` with `code: 'last_admin'`.
+
+#### Scenario: Role change succeeds for a non-last-admin member
+- **WHEN** `cambiarRolMiembro` is called for a member who is not the sole administrator
+- **THEN** the service SHALL update `miembros_tenant.rol_id` to the new role UUID and resolve without error
+
+#### Scenario: Role change is blocked for the last administrator
+- **WHEN** `cambiarRolMiembro` is called for the only member with `administrador` role in the tenant, and the new role is not `administrador`
+- **THEN** the service SHALL throw an `EquipoServiceError` with `code: 'last_admin'` and SHALL NOT execute the UPDATE
+
+#### Scenario: Role change to administrador is always allowed for the last admin
+- **WHEN** `cambiarRolMiembro` is called for the only administrator but the new role is also `administrador`
+- **THEN** the service SHALL allow the operation (no-op effectively, but not blocked)
+
+#### Scenario: Member not found
+- **WHEN** `cambiarRolMiembro` is called with a `miembro_id` that does not exist or does not belong to the specified tenant
+- **THEN** the service SHALL throw an `EquipoServiceError` with `code: 'not_found'`
+
+#### Scenario: RLS denies the update
+- **WHEN** `cambiarRolMiembro` is called by a non-admin user (bypassing UI controls)
+- **THEN** the database RLS policy SHALL reject the UPDATE and the service SHALL throw an `EquipoServiceError` with `code: 'forbidden'`
+
+---
+
+### Requirement: Hook SHALL expose roles list and role change mutation
+`useEquipo` SHALL fetch the available roles via `getRoles()` on mount and expose them as `roles: RolOption[]`. It SHALL also expose `cambiarRol: (input: CambiarRolMiembroInput) => Promise<void>` and `isCambiandoRol: boolean`. On successful role change, the hook SHALL call `refresh()` to reload the member list.
+
+#### Scenario: Roles are available after mount
+- **WHEN** the `useEquipo` hook mounts
+- **THEN** `roles` SHALL contain the three role options fetched from the service
+
+#### Scenario: Successful role change refreshes the member list
+- **WHEN** `cambiarRol` is called and the service resolves without error
+- **THEN** the hook SHALL call `refresh()` to reload the member list and `isCambiandoRol` SHALL return to `false`
+
+#### Scenario: Last-admin error is surfaced
+- **WHEN** `cambiarRol` is called and the service throws with `code: 'last_admin'`
+- **THEN** the hook SHALL propagate the error so the UI can display the specific last-admin message
+
+#### Scenario: Loading flag is set during mutation
+- **WHEN** `cambiarRol` is called
+- **THEN** `isCambiandoRol` SHALL be `true` until the operation completes or fails
+
+---
+
+### Requirement: Confirmation dialog SHALL be shown before committing a role change
+`CambiarRolModal` SHALL render a centered confirmation dialog when a role change is initiated. The dialog SHALL display the member's full name, their current role, and the selected new role. It SHALL include a Cancel button and a Confirm button.
+
+#### Scenario: Modal displays role change details
+- **WHEN** the admin selects a different role for a member in the table dropdown
+- **THEN** the system SHALL open `CambiarRolModal` showing the member name, current role, and new role
+
+#### Scenario: Admin confirms the role change
+- **WHEN** the admin clicks the Confirm button in the modal
+- **THEN** the system SHALL call the `cambiarRol` mutation and close the modal on success
+
+#### Scenario: Admin cancels the role change
+- **WHEN** the admin clicks Cancel or the backdrop overlay
+- **THEN** the system SHALL close the modal without making any changes, and the dropdown SHALL revert to the original role value
+
+#### Scenario: Loading state is shown during submission
+- **WHEN** the role change is in progress
+- **THEN** the Confirm button SHALL display a loading indicator and be disabled
+
+---
+
+### Requirement: Self-demotion warning SHALL be displayed when admin changes their own role
+When the authenticated administrator is changing their **own** membership role away from `administrador`, the `CambiarRolModal` SHALL display a prominent amber warning banner with the text: _"Estás a punto de remover tus permisos de administrador. Si continúas, perderás acceso a las funciones de administración de esta organización."_
+
+#### Scenario: Self-demotion warning is shown
+- **WHEN** the admin selects a non-`administrador` role for their own membership row
+- **THEN** the confirmation modal SHALL display the amber self-demotion warning banner
+
+#### Scenario: Self-demotion warning is not shown for other members
+- **WHEN** the admin selects a different role for another member's row
+- **THEN** the confirmation modal SHALL NOT display the self-demotion warning banner
+
+#### Scenario: Self-demotion is allowed after confirmation
+- **WHEN** the admin confirms the role change despite the self-demotion warning
+- **THEN** the system SHALL proceed with the role change normally
+
+---
+
+### Requirement: Last-admin guard SHALL block removal of the only administrator
+When an admin attempts to change the role of the only `administrador` member in the tenant to a non-admin role, the system SHALL block the change and display the message: _"No se puede cambiar el rol del único administrador de la organización. Asigna otro administrador primero."_
+
+#### Scenario: Last-admin role change is blocked in the UI
+- **WHEN** `cambiarRol` returns a `last_admin` error
+- **THEN** the system SHALL display the last-admin error message in the modal and SHALL NOT close the modal
+
+#### Scenario: Multiple admins allow role change
+- **WHEN** the tenant has more than one member with `administrador` role
+- **THEN** changing any administrator's role to a non-admin role SHALL be allowed
+
+---
+
+### Requirement: Database migration SHALL add RLS policy for UPDATE on miembros_tenant
+A migration SHALL create an RLS policy `miembros_tenant_update_rol_admin` on `public.miembros_tenant` for the `UPDATE` operation, restricted to `authenticated` users whose tenant is returned by `get_admin_tenants_for_authenticated_user()`. The migration SHALL also grant `UPDATE` permission on `public.miembros_tenant` to `authenticated` if not already granted.
+
+#### Scenario: Admin can update miembros_tenant via RLS
+- **WHEN** an authenticated administrator executes an UPDATE on `miembros_tenant` for a row in their tenant
+- **THEN** the database SHALL allow the operation
+
+#### Scenario: Non-admin update is rejected by RLS
+- **WHEN** an authenticated user who is not an administrator executes an UPDATE on `miembros_tenant`
+- **THEN** the database SHALL reject the operation with an RLS denial
+
+#### Scenario: Cross-tenant update is rejected by RLS
+- **WHEN** an administrator executes an UPDATE on `miembros_tenant` for a row in a tenant they do not administer
+- **THEN** the database SHALL reject the operation with an RLS denial

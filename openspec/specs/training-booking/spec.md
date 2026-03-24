@@ -11,11 +11,17 @@ The system SHALL render a `ReservasPanel` within the `gestion-entrenamientos` pa
 - **WHEN** an authenticated entrenador or administrador selects a training instance
 - **THEN** the system renders the booking panel showing all bookings for that training, a capacity indicator, and action controls for create, edit, cancel, and delete
 
-### Requirement: Atleta self-booking
-The system SHALL allow an atleta to reserve a spot in a training instance. The booking MUST be created with `atleta_id = auth.uid()`, `estado = 'pendiente'`, and `fecha_reserva = now()`.
+### Requirement: Atleta self-booking — class deduction integrated into create flow
+The `create()` function in `reservas.service.ts` SHALL delegate the reservation INSERT to the `book_and_deduct_class` RPC. The service MUST:
+1. Run all pre-booking validation checks (`validateBookingRestrictions`) to produce non-database rejections (TIMING_RESERVA, PLAN_REQUERIDO, NIVEL_INSUFICIENTE, etc.) before calling the RPC.
+2. Call `book_and_deduct_class(p_tenant_id, p_atleta_id, p_entrenamiento_id, p_entrenamiento_categoria_id, p_notas, p_suscripcion_id)` where `p_suscripcion_id` is the result of the subscription selection strategy (see `subscription-class-deduction/spec.md`) or `NULL` when no class deduction applies.
+3. If the RPC raises a Postgres `P0001` exception with message matching `'CLASES_AGOTADAS'`, the service SHALL return `{ ok: false, code: 'CLASES_AGOTADAS', message: '...' }`.
+4. The `book_and_deduct_class` RPC is the sole write path for reservation creation — direct INSERT into `reservas` without class management is not a supported flow.
+
+Before invoking the RPC, the service MUST evaluate all booking restrictions configured for the training: advance-notice timing (`reserva_antelacion_horas`) and access condition rows (`entrenamiento_restricciones`). If any check fails, the booking MUST be rejected with a typed `BookingRejection` result containing a `code` and a human-readable Spanish `message`. No booking row is inserted on rejection.
 
 #### Scenario: Successful self-booking
-- **WHEN** an atleta clicks "Reservar" on an available training and confirms the action
+- **WHEN** an atleta clicks "Reservar" on an available training, all restriction checks pass, and the atleta confirms the action
 - **THEN** a new booking record is created in `pendiente` state and the panel reflects the new booking immediately
 
 #### Scenario: Booking blocked when training is full
@@ -30,16 +36,66 @@ The system SHALL allow an atleta to reserve a spot in a training instance. The b
 - **WHEN** an atleta attempts to book a training with `estado = 'cancelado'` or `'finalizado'`
 - **THEN** the booking action is unavailable and a descriptive message is shown
 
-### Requirement: Atleta self-cancellation
-The system SHALL allow an atleta to cancel their own booking while its `estado` is `pendiente` or `confirmada`. Cancellation MUST set `estado = 'cancelada'` and `fecha_cancelacion = now()`.
+#### Scenario: Booking blocked by advance-notice restriction
+- **WHEN** `reserva_antelacion_horas` is set on the training and the atleta attempts to book with less time remaining than required
+- **THEN** the booking is rejected and the panel displays the `TIMING_RESERVA` rejection message inline
+
+#### Scenario: Booking blocked by unmet plan requirement
+- **WHEN** a restriction row requires an active subscription to a specific plan and the atleta does not have one
+- **THEN** the booking is rejected and the panel displays the `PLAN_REQUERIDO` rejection message naming the required plan
+
+#### Scenario: Booking blocked by unmet discipline requirement
+- **WHEN** a restriction row requires an active subscription including a specific discipline and the atleta does not satisfy it
+- **THEN** the booking is rejected and the panel displays the `DISCIPLINA_REQUERIDA` rejection message naming the required discipline
+
+#### Scenario: Booking blocked by insufficient discipline level
+- **WHEN** a restriction row has `validar_nivel_disciplina = true` and the atleta's level order is below the training's assigned level order
+- **THEN** the booking is rejected and the panel displays the `NIVEL_INSUFICIENTE` rejection message naming the discipline and minimum level
+
+#### Scenario: Booking allowed when at least one restriction row passes
+- **WHEN** multiple restriction rows exist and the atleta satisfies all conditions of at least one row
+- **THEN** the access check passes and the booking proceeds normally
+
+#### Scenario: Booking form delegates to `book_and_deduct_class`
+- **WHEN** a user submits the booking form and validation passes
+- **THEN** the service calls `book_and_deduct_class` and a reservation row is returned; no direct INSERT into `reservas` is issued by the client
+
+#### Scenario: Validation rejection is returned before RPC call
+- **WHEN** `validateBookingRestrictions` returns a rejection (e.g., PLAN_REQUERIDO)
+- **THEN** the service returns the rejection immediately and `book_and_deduct_class` is NOT called
+
+### Requirement: Atleta self-cancellation — class restoration integrated into cancel flow
+The `cancel()` function in `reservas.service.ts` SHALL delegate the reservation status update to the `cancel_and_restore_class` RPC. The service MUST:
+1. Run `validateCancellationRestriction` to produce timing-based rejections (TIMING_CANCELACION) before calling the RPC.
+2. Determine `suscripcion_id` from the fetched reservation row (may be `NULL`).
+3. Call `cancel_and_restore_class(p_reserva_id, p_tenant_id, p_suscripcion_id)`.
+4. Direct `UPDATE reservas SET estado='cancelada'` without the RPC is not a supported flow.
+
+Cancellation MUST check `cancelacion_antelacion_horas` on the training. If less than `cancelacion_antelacion_horas` hours remain before `fecha_hora`, the cancellation MUST be rejected with code `TIMING_CANCELACION` and a descriptive message. Admin and coach cancellations bypass this timing check.
 
 #### Scenario: Successful self-cancellation
-- **WHEN** an atleta cancels their own booking in `pendiente` or `confirmada` state
+- **WHEN** an atleta cancels their own booking in `pendiente` or `confirmada` state and the cancellation timing check passes
 - **THEN** the booking `estado` is updated to `cancelada`, `fecha_cancelacion` is set, and the panel updates accordingly
 
 #### Scenario: Cancellation blocked for completed bookings
 - **WHEN** an atleta attempts to cancel a booking with `estado = 'completada'`
 - **THEN** the cancel action is unavailable
+
+#### Scenario: Self-cancellation blocked by cancellation timing restriction
+- **WHEN** an atleta attempts to cancel their booking and less than `cancelacion_antelacion_horas` hours remain before the training's `fecha_hora`
+- **THEN** the cancellation is rejected and the panel displays the `TIMING_CANCELACION` rejection message inline
+
+#### Scenario: Admin/coach cancellation bypasses timing check
+- **WHEN** an administrador or entrenador cancels a booking regardless of remaining time before `fecha_hora`
+- **THEN** the `cancelacion_antelacion_horas` check is not evaluated and the cancellation proceeds
+
+#### Scenario: Admin/coach cancellation also uses cancel_and_restore_class
+- **WHEN** an admin or entrenador cancels a booking
+- **THEN** the same `cancel_and_restore_class` RPC is called; timing restriction is bypassed for admin roles but class restoration logic is identical
+
+#### Scenario: Cancellation of booking with no linked subscription
+- **WHEN** `reservas.suscripcion_id IS NULL` and a cancellation is requested
+- **THEN** `cancel_and_restore_class` is called with `p_suscripcion_id = NULL`; the RPC performs only the status update and the caller receives a success result
 
 ### Requirement: Admin and trainer booking management — create on behalf
 The system SHALL allow entrenadores and administradores to create a booking on behalf of any tenant atleta by selecting that atleta from a picker filtered to tenant members with `atleta` role.
@@ -240,3 +296,37 @@ The system SHALL render an attendance action button (pencil/verify icon) per boo
 #### Scenario: Attendance action button absent for athletes
 - **WHEN** an atleta views the bookings panel showing their own booking
 - **THEN** no attendance action button is rendered on the booking row
+
+---
+
+### Requirement: Booking rejection feedback in ReservasPanel
+The `ReservasPanel` SHALL display a contextual inline alert when a booking or cancellation attempt is rejected due to access restrictions or timing. The alert MUST render the `message` from the `BookingRejection` result. The alert MUST be cleared when the panel is closed or when the atleta retries the action successfully.
+
+#### Scenario: Rejection alert displayed after failed booking attempt
+- **WHEN** an atleta's booking attempt is rejected by any restriction check
+- **THEN** an inline alert appears in `ReservasPanel` above the action buttons showing the human-readable rejection message
+
+#### Scenario: Rejection alert cleared on panel close
+- **WHEN** the atleta closes `ReservasPanel` after a rejection alert is shown
+- **THEN** the `bookingRejection` state is cleared; re-opening the panel shows no alert until a new attempt is made
+
+#### Scenario: Rejection alert cleared on successful retry
+- **WHEN** an atleta retries a booking action and it succeeds
+- **THEN** the rejection alert is removed and the panel reflects the new booking state
+
+#### Scenario: Atleta role sees rejection alert; admin does not
+- **WHEN** an administrador or entrenador creates a booking on behalf of an atleta and it is blocked by a restriction
+- **THEN** the rejection message is shown in the admin/coach booking form context (not silently ignored), using the same `message` string
+
+---
+
+### Requirement: CLASES_AGOTADAS rejection code in BookingResult
+The `BookingRejectionCode` type in `entrenamiento-restricciones.types.ts` SHALL include the literal `'CLASES_AGOTADAS'` in its union. The booking form component SHALL handle this code by displaying the message: `"No te quedan clases disponibles en tu suscripción al plan requerido. Contacta al administrador para renovar o ampliar tu plan."` No further action (e.g., redirect or retry) is required.
+
+#### Scenario: CLASES_AGOTADAS is type-safe at service boundary
+- **WHEN** the RPC raises a P0001 exception with message 'CLASES_AGOTADAS'
+- **THEN** the service returns `BookingResult = { ok: false, code: 'CLASES_AGOTADAS', message: <human-readable string> }` and `BookingRejectionCode` includes this literal so TypeScript exhaustive checks compile without cast
+
+#### Scenario: Booking form shows inline error for CLASES_AGOTADAS
+- **WHEN** the `ReservaFormModal` (or equivalent booking UI component) receives a `BookingResult` with `code === 'CLASES_AGOTADAS'`
+- **THEN** an inline error message is rendered inside the modal without closing it; the submit button is re-enabled so the user can dismiss and seek help
