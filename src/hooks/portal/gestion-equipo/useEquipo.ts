@@ -8,6 +8,8 @@ import type {
   EliminarMiembroInput,
   EquipoStats,
   MiembroEstado,
+  MiembroNovedad,
+  MiembroNovedadTipo,
   MiembroRow,
   MiembroTableItem,
   RolOption,
@@ -53,6 +55,9 @@ type UseEquipoResult = {
   bloquearDelEquipo: (input: BloquearUsuarioInput & { miembro_id: string }) => Promise<void>;
   cambiarRol: (input: CambiarRolMiembroInput) => Promise<void>;
   isCambiandoRol: boolean;
+  cambiarEstado: (miembroId: string, nuevoEstado: MiembroEstado, tipo: MiembroNovedadTipo, descripcion?: string) => Promise<void>;
+  getNovedades: (miembroId: string) => Promise<MiembroNovedad[]>;
+  isCambiandoEstado: boolean;
 };
 
 /* ────────── Helpers ────────── */
@@ -82,6 +87,7 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCambiandoRol, setIsCambiandoRol] = useState(false);
+  const [isCambiandoEstado, setIsCambiandoEstado] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [estadoFilter, setEstadoFilter] = useState<MiembroEstado | 'all'>('all');
@@ -189,6 +195,31 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
     }
   }, [loadData]);
 
+  const cambiarEstado = useCallback(async (
+    miembroId: string,
+    nuevoEstado: MiembroEstado,
+    tipo: MiembroNovedadTipo,
+    descripcion?: string,
+  ) => {
+    setIsCambiandoEstado(true);
+    try {
+      await equipoService.cambiarEstadoMiembro({
+        miembroId,
+        tenantId,
+        nuevoEstado,
+        tipo,
+        descripcion,
+      });
+      await loadData();
+    } finally {
+      setIsCambiandoEstado(false);
+    }
+  }, [loadData, tenantId]);
+
+  const getNovedades = useCallback(async (miembroId: string): Promise<MiembroNovedad[]> => {
+    return equipoService.getNovedadesMiembro(miembroId, tenantId);
+  }, [tenantId]);
+
   return {
     members,
     loading,
@@ -212,5 +243,8 @@ export function useEquipo({ tenantId }: UseEquipoOptions): UseEquipoResult {
     bloquearDelEquipo,
     cambiarRol,
     isCambiandoRol,
+    cambiarEstado,
+    getNovedades,
+    isCambiandoEstado,
   };
 }
