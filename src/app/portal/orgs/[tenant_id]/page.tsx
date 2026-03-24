@@ -10,7 +10,7 @@ function resolveTenantLandingPath(tenantId: string, role: 'administrador' | 'usu
       return `/portal/orgs/${tenantId}/atletas`;
     case 'usuario':
     default:
-      return `/portal/orgs/${tenantId}/landing-org`;
+      return `/portal/orgs/${tenantId}/gestion-entrenamientos`;
   }
 }
 

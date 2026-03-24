@@ -174,7 +174,6 @@ export const equipoService = {
         tipo_identificacion: input.tipo_identificacion ?? null,
         numero_identificacion: input.numero_identificacion ?? null,
         rh: input.rh ?? null,
-        estado: input.estado,
       })
       .eq('id', input.usuario_id);
 

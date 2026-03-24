@@ -17,10 +17,10 @@ function getDefaultTenantPath(tenantId: string, role: UserRole): string {
     case 'administrador':
       return `${base}/gestion-organizacion`;
     case 'entrenador':
-      return `${base}/atletas`;
+      return `${base}/gestion-entrenamientos`;
     case 'usuario':
     default:
-      return `${base}/landing-org`;
+      return `${base}/gestion-entrenamientos`;
   }
 }
 

@@ -92,7 +92,6 @@ export type EditarPerfilMiembroInput = {
   tipo_identificacion?: TipoIdentificacion | null;
   numero_identificacion?: string | null;
   rh?: string | null;
-  estado: MiembroEstado;
   peso_kg?: number | null;
   altura_cm?: number | null;
 };

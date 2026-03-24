@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { equipoService } from '@/services/supabase/portal/equipo.service';
 import type {
   EditarPerfilMiembroInput,
-  MiembroEstado,
   MiembroTableItem,
   TipoIdentificacion,
 } from '@/types/portal/equipo.types';
@@ -15,7 +14,6 @@ type EditarPerfilMiembroModalProps = {
   onSave: (input: EditarPerfilMiembroInput) => Promise<void>;
 };
 
-const ESTADO_OPTIONS: MiembroEstado[] = ['activo', 'mora', 'suspendido', 'inactivo'];
 const TIPO_ID_OPTIONS: TipoIdentificacion[] = ['CC', 'CE', 'TI', 'NIT', 'Pasaporte', 'Otro'];
 
 export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPerfilMiembroModalProps) {
@@ -27,7 +25,6 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
   const [tipoIdentificacion, setTipoIdentificacion] = useState('');
   const [numeroIdentificacion, setNumeroIdentificacion] = useState('');
   const [rh, setRh] = useState('');
-  const [estado, setEstado] = useState<MiembroEstado>('activo');
   const [pesoKg, setPesoKg] = useState('');
   const [alturaCm, setAlturaCm] = useState('');
 
@@ -46,7 +43,6 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
     setTipoIdentificacion(miembro.tipo_identificacion ?? '');
     setNumeroIdentificacion(miembro.numero_identificacion ?? '');
     setRh(miembro.rh ?? '');
-    setEstado(miembro.estado);
     setErrorMsg(null);
     setNombreError(false);
 
@@ -87,7 +83,6 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
         tipo_identificacion: (tipoIdentificacion as TipoIdentificacion) || null,
         numero_identificacion: numeroIdentificacion.trim() || null,
         rh: rh.trim() || null,
-        estado,
         peso_kg: pesoKg ? Number(pesoKg) : null,
         altura_cm: alturaCm ? Number(alturaCm) : null,
       });
@@ -97,7 +92,7 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
     } finally {
       setIsSubmitting(false);
     }
-  }, [miembro, nombre, apellido, telefono, fechaNacimiento, tipoIdentificacion, numeroIdentificacion, rh, estado, pesoKg, alturaCm, onSave, onClose]);
+  }, [miembro, nombre, apellido, telefono, fechaNacimiento, tipoIdentificacion, numeroIdentificacion, rh, pesoKg, alturaCm, onSave, onClose]);
 
   if (!miembro) return null;
 
@@ -214,20 +209,6 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
                 className="w-full rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-turquoise/50"
               />
             </div>
-          </fieldset>
-
-          {/* Status */}
-          <fieldset className="space-y-3">
-            <legend className="text-xs font-semibold uppercase tracking-wider text-slate-400">Estado</legend>
-            <select
-              value={estado}
-              onChange={(e) => setEstado(e.target.value as MiembroEstado)}
-              className="w-full rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-turquoise/50"
-            >
-              {ESTADO_OPTIONS.map((s) => (
-                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-              ))}
-            </select>
           </fieldset>
 
           {/* Sports profile */}
