@@ -48,7 +48,7 @@
 
 ## 5. Commit and PR
 
-- [ ] 5.1 Stage changes and create commit:
+- [x] 5.1 Stage changes and create commit:
   ```
   fix(reservas): validate usuario_estado against miembros_tenant.estado (tenant-scoped)
 
@@ -58,7 +58,7 @@
 
   Closes US-0039
   ```
-- [ ] 5.2 Create PR with description:
+- [x] 5.2 Create PR with description:
   ```
   ## Summary
   Fixes the `usuario_estado` restriction validation in `validateBookingRestrictions` to use `miembros_tenant.estado` (tenant-scoped) instead of `usuarios.activo` (global boolean).
