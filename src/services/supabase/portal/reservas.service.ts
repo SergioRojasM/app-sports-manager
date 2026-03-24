@@ -333,13 +333,14 @@ async function validateBookingRestrictions(
   }
 
   // 4. Pre-fetch athlete data needed for evaluation
-  // 4a. User active status
-  const { data: usuario } = await supabase
-    .from('usuarios')
-    .select('activo')
-    .eq('id', atletaId)
+  // 4a. Tenant-scoped member status
+  const { data: miembro } = await supabase
+    .from('miembros_tenant')
+    .select('estado')
+    .eq('tenant_id', tenantId)
+    .eq('usuario_id', atletaId)
     .single();
-  const isActivo = usuario?.activo === true;
+  const miembroEstado = (miembro?.estado as string) ?? null;
 
   // 4b. Active subscriptions
   const { data: suscripciones } = await supabase
@@ -408,14 +409,23 @@ async function validateBookingRestrictions(
     let rowPasses = true;
     let firstFailCode: BookingResult | null = null;
 
-    // 5a. usuario_estado = 'activo'
-    if (row.usuario_estado === 'activo' && !isActivo) {
-      rowPasses = false;
-      firstFailCode ??= {
-        ok: false,
-        code: 'USUARIO_INACTIVO',
-        message: 'Tu cuenta está inactiva. Contacta al administrador para reactivar tu acceso.',
-      };
+    // 5a. usuario_estado check (tenant-scoped)
+    if (row.usuario_estado) {
+      if (miembroEstado === null) {
+        rowPasses = false;
+        firstFailCode ??= {
+          ok: false,
+          code: 'USUARIO_INACTIVO',
+          message: 'No se encontró tu membresía en esta organización.',
+        };
+      } else if (miembroEstado !== row.usuario_estado) {
+        rowPasses = false;
+        firstFailCode ??= {
+          ok: false,
+          code: 'USUARIO_INACTIVO',
+          message: `Tu estado en esta organización no permite reservar este entrenamiento. Estado requerido: ${row.usuario_estado}. Tu estado actual: ${miembroEstado}. Contacta al administrador.`,
+        };
+      }
     }
 
     // 5b. plan_id
