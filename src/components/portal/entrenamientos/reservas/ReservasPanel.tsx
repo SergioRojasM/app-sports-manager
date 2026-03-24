@@ -61,6 +61,7 @@ export function ReservasPanel({
   const [restrictionLabels, setRestrictionLabels] = useState<string[]>([]);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
+  const isPast = !!instance?.fecha_hora && new Date(instance.fecha_hora) < new Date();
 
   // Get current user ID
   useEffect(() => {
@@ -452,15 +453,19 @@ export function ReservasPanel({
               Nueva reserva
             </button>
           ) : !myReserva ? (
-            <button
-              type="button"
-              onClick={handleSelfBook}
-              disabled={capacidad !== null && !capacidad.disponible}
-              className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-3 py-1.5 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
-            >
-              <span className="material-symbols-outlined text-base" aria-hidden="true">bookmark_add</span>
-              Reservar
-            </button>
+            isPast ? (
+              <p className="text-sm text-slate-400">Entrenamiento finalizado</p>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSelfBook}
+                disabled={capacidad !== null && !capacidad.disponible}
+                className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-3 py-1.5 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">bookmark_add</span>
+                Reservar
+              </button>
+            )
           ) : (
             <p className="text-sm text-slate-400">Ya tienes una reserva activa para este entrenamiento.</p>
           )}
@@ -547,7 +552,8 @@ export function ReservasPanel({
                           <button
                             type="button"
                             onClick={() => handleCancel(reserva.id)}
-                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700/40 hover:text-amber-300"
+                            disabled={isPast && !isAdmin}
+                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700/40 hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Cancelar
                           </button>

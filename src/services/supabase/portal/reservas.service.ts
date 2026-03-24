@@ -591,11 +591,41 @@ async function findSubscriptionToCharge(
 }
 
 // ─────────────────────────────────────────────
+// Helpers — past-date guard
+// ─────────────────────────────────────────────
+
+async function isEntrenamientoPast(
+  entrenamientoId: string,
+  tenantId: string,
+): Promise<boolean> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('entrenamientos')
+    .select('fecha_hora')
+    .eq('id', entrenamientoId)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  if (!data?.fecha_hora) return false;
+  return new Date(data.fecha_hora) < new Date();
+}
+
+// ─────────────────────────────────────────────
 // Mutations
 // ─────────────────────────────────────────────
 
 async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
-  // 0. Booking restriction check
+  // 0. Past-date guard
+  const past = await isEntrenamientoPast(input.entrenamiento_id, input.tenant_id);
+  if (past) {
+    return {
+      ok: false,
+      code: 'ENTRENAMIENTO_PASADO',
+      message: 'No puedes reservar un entrenamiento que ya ha finalizado.',
+    };
+  }
+
+  // 1. Booking restriction check
   const restrictionResult = await validateBookingRestrictions(
     input.entrenamiento_id,
     input.atleta_id,
@@ -763,6 +793,18 @@ async function cancel(
   entrenamientoId?: string,
   isAdminOrCoach?: boolean,
 ): Promise<Reserva | BookingResult> {
+  // Past-date guard (athletes only)
+  if (entrenamientoId && !isAdminOrCoach) {
+    const past = await isEntrenamientoPast(entrenamientoId, tenantId);
+    if (past) {
+      return {
+        ok: false,
+        code: 'ENTRENAMIENTO_PASADO',
+        message: 'No puedes cancelar la reserva de un entrenamiento que ya ha finalizado.',
+      };
+    }
+  }
+
   // Cancellation timing restriction (only for athletes)
   if (entrenamientoId) {
     const cancResult = await validateCancellationRestriction(
