@@ -196,7 +196,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions, validateCancellationRestriction, findSubscriptionToCharge; create() and cancel() delegate to SECURITY DEFINER RPCs book_and_deduct_class / cancel_and_restore_class for atomic class deduction/restoration; reservas.suscripcion_id FK tracks which subscription was charged
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions, validateCancellationRestriction, findSubscriptionToCharge; create() and cancel() include isEntrenamientoPast guard (blocks athletes from booking/cancelling past sessions) and delegate to SECURITY DEFINER RPCs book_and_deduct_class / cancel_and_restore_class for atomic class deduction/restoration; reservas.suscripcion_id FK tracks which subscription was charged
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │       │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard)
 │   │       │   └── suscripciones.service.ts

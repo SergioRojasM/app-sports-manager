@@ -57,7 +57,8 @@ export type BookingRejectionCode =
   | 'PLAN_REQUERIDO'
   | 'DISCIPLINA_REQUERIDA'
   | 'NIVEL_INSUFICIENTE'
-  | 'CLASES_AGOTADAS';
+  | 'CLASES_AGOTADAS'
+  | 'ENTRENAMIENTO_PASADO';
 
 export type BookingRejection = {
   ok: false;
