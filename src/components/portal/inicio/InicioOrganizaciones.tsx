@@ -31,7 +31,7 @@ export function InicioOrganizaciones({
             <Link
               key={m.tenant_id}
               href={`/portal/orgs/${m.tenant_id}`}
-              className="flex items-center gap-3 p-3 rounded-md bg-slate-800/20 border border-transparent hover:border-primary/20 transition-all"
+              className="flex items-center gap-3 p-3 rounded-md bg-slate-700/30 border border-white/5 hover:border-primary/30 transition-all"
               aria-label={`Ver organización ${m.org_nombre}`}
             >
               {/* Org logo */}

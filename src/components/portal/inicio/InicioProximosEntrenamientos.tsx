@@ -55,7 +55,7 @@ export function InicioProximosEntrenamientos({
             <Link
               key={e.reserva_id}
               href={`/portal/orgs/${e.tenant_id}/gestion-entrenamientos`}
-              className="flex items-center gap-4 p-4 rounded-md bg-slate-800/20 border border-transparent hover:border-primary/20 transition-all group"
+              className="flex items-center gap-4 p-4 rounded-md bg-slate-700/30 border border-white/5 hover:border-primary/30 transition-all group"
               aria-label={`Ver entrenamiento ${e.nombre}`}
             >
               {/* Discipline icon */}

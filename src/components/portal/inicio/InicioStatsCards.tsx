@@ -6,6 +6,7 @@ type StatCard = {
   icon: string;
   colorClass: string;
   bgClass: string;
+  accentClass: string;
 };
 
 function buildCards(stats: InicioStats): StatCard[] {
@@ -16,6 +17,7 @@ function buildCards(stats: InicioStats): StatCard[] {
       icon: 'card_membership',
       colorClass: 'text-secondary',
       bgClass: 'bg-secondary/20',
+      accentClass: 'border-t-2 border-secondary/40',
     },
     {
       label: 'Próximos Entrenamientos',
@@ -23,6 +25,7 @@ function buildCards(stats: InicioStats): StatCard[] {
       icon: 'directions_run',
       colorClass: 'text-secondary',
       bgClass: 'bg-secondary/20',
+      accentClass: 'border-t-2 border-secondary/40',
     },
     {
       label: 'Pagos Pendientes',
@@ -30,6 +33,7 @@ function buildCards(stats: InicioStats): StatCard[] {
       icon: 'payments',
       colorClass: 'text-yellow-400',
       bgClass: 'bg-yellow-500/20',
+      accentClass: 'border-t-2 border-yellow-500/40',
     },
     {
       label: 'Organizaciones',
@@ -37,6 +41,7 @@ function buildCards(stats: InicioStats): StatCard[] {
       icon: 'corporate_fare',
       colorClass: 'text-secondary',
       bgClass: 'bg-secondary/20',
+      accentClass: 'border-t-2 border-secondary/40',
     },
   ];
 }
@@ -49,7 +54,7 @@ export function InicioStatsCards({ stats }: { stats: InicioStats }) {
       {cards.map((card) => (
         <div
           key={card.label}
-          className="glass-card stat-card rounded-md p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5"
+          className={`glass-card stat-card rounded-md p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${card.accentClass}`}
         >
           <div
             className={`size-11 rounded-md ${card.bgClass} flex items-center justify-center ${card.colorClass}`}
@@ -57,7 +62,7 @@ export function InicioStatsCards({ stats }: { stats: InicioStats }) {
             <span className="material-symbols-outlined text-2xl">{card.icon}</span>
           </div>
           <div>
-            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">
               {card.label}
             </p>
             <h3 className="text-xl font-bold">{card.value}</h3>
