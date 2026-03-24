@@ -27,7 +27,8 @@ function cell(value: string | number | null | undefined): string {
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
   try {
-    return new Date(iso).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' });
+    const [year, month, day] = iso.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' });
   } catch {
     return iso;
   }
