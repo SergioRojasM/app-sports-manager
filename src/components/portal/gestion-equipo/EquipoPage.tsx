@@ -13,6 +13,8 @@ import { EditarPerfilMiembroModal } from './EditarPerfilMiembroModal';
 import { EliminarMiembroModal } from './EliminarMiembroModal';
 import { BloquearMiembroModal } from './BloquearMiembroModal';
 import { CambiarRolModal } from './CambiarRolModal';
+import { CambiarEstadoModal } from './CambiarEstadoModal';
+import { NovedadesMiembroModal } from './NovedadesMiembroModal';
 import { SolicitudesTab } from './gestion-solicitudes/SolicitudesTab';
 import { BloqueadosTab } from './gestion-solicitudes/BloqueadosTab';
 import type { MiembroTableItem } from '@/types/portal/equipo.types';
@@ -65,6 +67,9 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
     roles,
     cambiarRol,
     isCambiandoRol,
+    cambiarEstado,
+    getNovedades,
+    isCambiandoEstado,
   } = useEquipo({ tenantId });
 
   const solicitudesAdmin = useSolicitudesAdmin({ tenantId });
@@ -76,6 +81,8 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
   const [removeTarget, setRemoveTarget] = useState<MiembroTableItem | null>(null);
   const [blockTarget, setBlockTarget] = useState<MiembroTableItem | null>(null);
   const [rolChangeTarget, setRolChangeTarget] = useState<{ miembro: MiembroTableItem; nuevoRol: RolOption } | null>(null);
+  const [cambiarEstadoTarget, setCambiarEstadoTarget] = useState<MiembroTableItem | null>(null);
+  const [novedadesTarget, setNovedadesTarget] = useState<MiembroTableItem | null>(null);
 
   return (
     <section className="space-y-6">
@@ -175,6 +182,8 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               onBloquear={(row) => setBlockTarget(row)}
               roles={roles}
               onCambiarRol={(row, nuevoRol) => setRolChangeTarget({ miembro: row, nuevoRol })}
+              onCambiarEstado={(row) => setCambiarEstadoTarget(row)}
+              onVerNovedades={(row) => setNovedadesTarget(row)}
             />
           ) : null}
 
@@ -237,6 +246,23 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               });
             }}
             isLoading={isCambiandoRol}
+          />
+
+          <CambiarEstadoModal
+            member={cambiarEstadoTarget}
+            isOpen={!!cambiarEstadoTarget}
+            onClose={() => setCambiarEstadoTarget(null)}
+            onConfirm={async (nuevoEstado, tipo, descripcion) => {
+              if (!cambiarEstadoTarget) return;
+              await cambiarEstado(cambiarEstadoTarget.miembro_id, nuevoEstado, tipo, descripcion);
+            }}
+          />
+
+          <NovedadesMiembroModal
+            member={novedadesTarget}
+            isOpen={!!novedadesTarget}
+            onClose={() => setNovedadesTarget(null)}
+            getNovedades={getNovedades}
           />
         </>
       ) : null}

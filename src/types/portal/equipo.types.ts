@@ -23,6 +23,7 @@ export type MiembroRow = {
   rh: string | null;
   miembro_id: string;
   rol_nombre: string;
+  inasistencias_recientes: number;
 };
 
 /** Presentational view-model used by EquipoTable. */
@@ -121,4 +122,34 @@ export type CambiarRolMiembroInput = {
   miembro_id: string;
   tenant_id: string;
   nuevo_rol_id: string;
+};
+
+/* ───────── Tenant-scoped status types (US-0037) ───────── */
+
+/** Allowed novedad types for member status changes. */
+export type MiembroNovedadTipo =
+  | 'falta_pago'
+  | 'inasistencias_acumuladas'
+  | 'suspension_manual'
+  | 'reactivacion'
+  | 'otro';
+
+/** A single audit-log entry for a member status change. */
+export type MiembroNovedad = {
+  id: string;
+  miembro_id: string;
+  tipo: MiembroNovedadTipo;
+  descripcion: string | null;
+  estado_resultante: MiembroEstado;
+  registrado_por: string;
+  created_at: string;
+};
+
+/** Input for changing a member's tenant-scoped status. */
+export type CambiarEstadoMiembroInput = {
+  miembroId: string;
+  tenantId: string;
+  nuevoEstado: MiembroEstado;
+  tipo: MiembroNovedadTipo;
+  descripcion?: string;
 };

@@ -1,11 +1,13 @@
 import { createClient } from '@/services/supabase/client';
 import {
   EquipoServiceError,
+  type CambiarEstadoMiembroInput,
   type CambiarRolMiembroInput,
   type EditarPerfilMiembroInput,
   type EliminarMiembroInput,
   type EquipoStats,
   type MiembroEstado,
+  type MiembroNovedad,
   type MiembroRow,
   type PerfilDeportivoRow,
   type RolOption,
@@ -13,27 +15,24 @@ import {
 } from '@/types/portal/equipo.types';
 import type { BloquearUsuarioInput } from '@/types/portal/solicitudes.types';
 
-/* ────────── Raw row shape returned by Supabase ────────── */
+/* ────────── Raw row shape returned by v_miembros_equipo view ────────── */
 
 type RawMiembroRow = {
   id: string;
   tenant_id: string;
   usuario_id: string;
   rol_id: string;
-  usuarios: {
-    nombre: string | null;
-    apellido: string | null;
-    tipo_identificacion: string | null;
-    numero_identificacion: string | null;
-    telefono: string | null;
-    email: string;
-    foto_url: string | null;
-    estado: string;
-    rh: string | null;
-  };
-  roles: {
-    nombre: string;
-  };
+  estado: string;
+  nombre: string | null;
+  apellido: string | null;
+  tipo_identificacion: string | null;
+  numero_identificacion: string | null;
+  telefono: string | null;
+  email: string;
+  foto_url: string | null;
+  rh: string | null;
+  rol_nombre: string;
+  inasistencias_recientes: number;
 };
 
 /* ────────── Mappers ────────── */
@@ -42,16 +41,17 @@ function mapRawRow(row: RawMiembroRow): MiembroRow {
   return {
     miembro_id: row.id,
     usuario_id: row.usuario_id,
-    nombre: row.usuarios.nombre ?? '',
-    apellido: row.usuarios.apellido ?? '',
-    tipo_identificacion: (row.usuarios.tipo_identificacion as TipoIdentificacion) ?? null,
-    numero_identificacion: row.usuarios.numero_identificacion ?? null,
-    telefono: row.usuarios.telefono ?? null,
-    email: row.usuarios.email,
-    foto_url: row.usuarios.foto_url ?? null,
-    estado: (row.usuarios.estado as MiembroEstado) ?? 'activo',
-    rh: row.usuarios.rh ?? null,
-    rol_nombre: row.roles.nombre,
+    nombre: row.nombre ?? '',
+    apellido: row.apellido ?? '',
+    tipo_identificacion: (row.tipo_identificacion as TipoIdentificacion) ?? null,
+    numero_identificacion: row.numero_identificacion ?? null,
+    telefono: row.telefono ?? null,
+    email: row.email,
+    foto_url: row.foto_url ?? null,
+    estado: (row.estado as MiembroEstado) ?? 'activo',
+    rh: row.rh ?? null,
+    rol_nombre: row.rol_nombre,
+    inasistencias_recientes: row.inasistencias_recientes ?? 0,
   };
 }
 
@@ -128,10 +128,8 @@ export const equipoService = {
     const supabase = createClient();
 
     const { data, error } = await supabase
-      .from('miembros_tenant')
-      .select(
-        'id, tenant_id, usuario_id, rol_id, usuarios!inner(nombre, apellido, tipo_identificacion, numero_identificacion, telefono, email, foto_url, estado, rh), roles!inner(nombre)',
-      )
+      .from('v_miembros_equipo')
+      .select('*')
       .eq('tenant_id', tenantId)
       .order('usuario_id');
 
@@ -328,5 +326,50 @@ export const equipoService = {
     if (!updated || updated.length === 0) {
       throw new EquipoServiceError('not_found', 'El miembro no fue encontrado en esta organización.');
     }
+  },
+
+  /**
+   * Atomically change a member's tenant-scoped status and record an audit novedad.
+   * Delegates to the cambiar_estado_miembro SECURITY DEFINER RPC.
+   */
+  async cambiarEstadoMiembro(input: CambiarEstadoMiembroInput): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase.rpc('cambiar_estado_miembro', {
+      p_miembro_id: input.miembroId,
+      p_tenant_id: input.tenantId,
+      p_nuevo_estado: input.nuevoEstado,
+      p_tipo: input.tipo,
+      p_descripcion: input.descripcion ?? null,
+    });
+
+    if (error) {
+      if (error.code === '42501') {
+        throw new EquipoServiceError('forbidden', 'No tienes permisos para cambiar el estado de este miembro.');
+      }
+      if (error.code === 'P0002') {
+        throw new EquipoServiceError('not_found', 'El miembro no fue encontrado en esta organización.');
+      }
+      throw new EquipoServiceError('unknown', 'No fue posible cambiar el estado del miembro.');
+    }
+  },
+
+  /**
+   * Fetch the audit log (novedades) for a specific member in a tenant.
+   * Returns newest-first.
+   */
+  async getNovedadesMiembro(miembroId: string, tenantId: string): Promise<MiembroNovedad[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('miembros_tenant_novedades')
+      .select('id, miembro_id, tipo, descripcion, estado_resultante, registrado_por, created_at')
+      .eq('miembro_id', miembroId)
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw mapPostgrestError(error);
+
+    return (data ?? []) as unknown as MiembroNovedad[];
   },
 };
