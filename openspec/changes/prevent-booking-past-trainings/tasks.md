@@ -21,12 +21,12 @@
 
 ## 5. Manual Verification
 
-- [ ] 5.1 As an athlete, attempt to book a training whose `fecha_hora` is in the past → blocked with "No puedes reservar un entrenamiento que ya ha finalizado."
-- [ ] 5.2 As an athlete, attempt to cancel an existing booking on a past training → blocked with "No puedes cancelar la reserva de un entrenamiento que ya ha finalizado."
-- [ ] 5.3 As an admin, cancel a booking on a past training → succeeds normally
-- [ ] 5.4 As an athlete, book a future training → succeeds normally
-- [ ] 5.5 Confirm that `book_and_deduct_class` and `cancel_and_restore_class` RPCs are NOT called for the blocked scenarios (check Supabase logs / network tab)
-- [ ] 5.6 Confirm that a training with `fecha_hora = null` is not blocked
+- [x] 5.1 As an athlete, attempt to book a training whose `fecha_hora` is in the past → blocked with "No puedes reservar un entrenamiento que ya ha finalizado."
+- [x] 5.2 As an athlete, attempt to cancel an existing booking on a past training → blocked with "No puedes cancelar la reserva de un entrenamiento que ya ha finalizado."
+- [x] 5.3 As an admin, cancel a booking on a past training → succeeds normally
+- [x] 5.4 As an athlete, book a future training → succeeds normally
+- [x] 5.5 Confirm that `book_and_deduct_class` and `cancel_and_restore_class` RPCs are NOT called for the blocked scenarios (check Supabase logs / network tab)
+- [x] 5.6 Confirm that a training with `fecha_hora = null` is not blocked
 
 ## 6. Documentation
 
@@ -34,8 +34,8 @@
 
 ## 7. Commit & PR
 
-- [ ] 7.1 Stage and commit all changes with message: `feat: prevent athletes from booking or cancelling past training sessions`
-- [ ] 7.2 Write pull request description:
+- [x] 7.1 Stage and commit all changes with message: `feat: prevent athletes from booking or cancelling past training sessions`
+- [x] 7.2 Write pull request description:
   - **What**: Adds a past-date guard to `reservas.service.ts` `create()` and `cancel()`, and disables book/cancel buttons for athletes in `ReservasPanel` when the training's `fecha_hora` is in the past.
   - **Why**: Athletes were able to book and cancel reservations for sessions that already occurred, incorrectly triggering class deduction/restoration RPCs.
   - **Files changed**: `entrenamiento-restricciones.types.ts`, `reservas.service.ts`, `ReservasPanel.tsx`
