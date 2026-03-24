@@ -37,8 +37,9 @@ export async function fetchInicioStats(
 
     supabase
       .from('miembros_tenant')
-      .select('*', { count: 'exact', head: true })
-      .eq('usuario_id', userId),
+      .select('*, tenants!inner ( nombre )', { count: 'exact', head: true })
+      .eq('usuario_id', userId)
+      .neq('tenants.nombre', 'public'), // Excluye tenants con nombre "public"
   ]);
 
   return {
@@ -228,10 +229,11 @@ export async function fetchMisMembresias(
     .from('miembros_tenant')
     .select(`
       tenant_id,
-      tenants ( nombre, logo_url ),
-      roles ( nombre )
+      tenants!inner ( nombre, logo_url ),
+      roles!inner ( nombre )
     `)
-    .eq('usuario_id', userId);
+    .eq('usuario_id', userId)
+    .neq('tenants.nombre', 'public'); // Solo membresías activas (con tenant asociado)
 
   if (error) {
     console.error('fetchMisMembresias error:', error.message);

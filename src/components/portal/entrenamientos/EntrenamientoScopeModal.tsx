@@ -18,8 +18,8 @@ const SCOPE_LABELS: Record<TrainingScope, { title: string; description: string }
     description: 'Aplica desde este punto hacia adelante, sin tocar históricos.',
   },
   series: {
-    title: 'Toda la serie',
-    description: 'Cancela la serie y elimina solo entrenamientos no pasados.',
+    title: 'Este y futuros entrenamientos de la serie',
+    description: 'Cancela y elimina este entrenamiento y todos los futuros de la serie.',
   },
 };
 

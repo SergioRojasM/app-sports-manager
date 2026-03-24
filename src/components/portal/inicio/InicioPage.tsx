@@ -19,16 +19,17 @@ export function InicioPage({ data }: { data: InicioDashboardData }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left column */}
         <div className="lg:col-span-1 space-y-6">
-          <InicioOrganizaciones membresias={data.membresias} />
-          <InicioQuickActions />
           <InicioSuscripciones suscripciones={data.suscripciones} />
+          <InicioOrganizaciones membresias={data.membresias} />
+          {/* <InicioQuickActions /> */}
+          
         </div>
 
         {/* Right column */}
         <div className="lg:col-span-2 space-y-6">
           <InicioFeaturedTraining entrenamiento={featured} />
           <InicioProximosEntrenamientos entrenamientos={data.proximosEntrenamientos} />
-          <InicioPagosPendientesAlert pagos={data.pagosPendientes} />
+          {/* <InicioPagosPendientesAlert pagos={data.pagosPendientes} /> */}
         </div>
       </div>
     </div>
