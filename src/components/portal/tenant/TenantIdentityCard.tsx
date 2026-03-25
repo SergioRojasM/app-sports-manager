@@ -1,7 +1,11 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import type { TenantIdentityPayload } from '@/types/portal/tenant.types';
+import { createClient } from '@/services/supabase/client';
+import { storageService } from '@/services/supabase/portal/storage.service';
+import { buildOrgLogoPath } from '@/types/portal/storage.types';
 
 type TenantIdentityCardProps = {
   identity: TenantIdentityPayload;
@@ -36,17 +40,44 @@ export function TenantIdentityCard({
   actionVariant = 'access',
   customAction,
 }: TenantIdentityCardProps) {
+  const [logoSrc, setLogoSrc] = useState(identity.logoUrl);
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  const handleLogoError = useCallback(async () => {
+    if (logoFailed) return; // Only try once
+    setLogoFailed(true);
+
+    try {
+      const supabase = createClient();
+      // Try common extensions
+      for (const ext of ['png', 'jpg', 'webp']) {
+        const path = buildOrgLogoPath(identity.tenantId, ext);
+        try {
+          const url = await storageService.getSignedUrl(supabase, path);
+          setLogoSrc(url);
+          return;
+        } catch {
+          // Try next extension
+        }
+      }
+    } catch {
+      // All attempts failed — fallback to shield icon
+      setLogoSrc(null);
+    }
+  }, [identity.tenantId, logoFailed]);
+
   return (
     <article className="overflow-hidden rounded-lg border border-portal-border bg-navy-medium/95 shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
       <div className="relative h-24 bg-gradient-to-r from-primary/45 to-turquoise/35">
-        <div className="absolute left-4 top-4 rounded-lg bg-navy-deep p-1.5">
-          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-portal-border bg-navy-soft">
-            {identity.logoUrl ? (
+        <div className="absolute left-4 top-2">
+          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-portal-border bg-navy-soft shadow-lg">
+            {logoSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={identity.logoUrl}
+                src={logoSrc}
                 alt={`${identity.name} logo`}
                 className="h-full w-full object-cover"
+                onError={() => void handleLogoError()}
               />
             ) : (
               <span className="material-symbols-outlined text-2xl text-slate-400" aria-hidden="true">

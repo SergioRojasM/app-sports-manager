@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useEditTenant } from '@/hooks/portal/tenant/useEditTenant';
+import { useOrgLogoUpload } from '@/hooks/portal/tenant/useOrgLogoUpload';
 import { useTenantView } from '@/hooks/portal/tenant/useTenantView';
 import { TenantIdentityCard } from './TenantIdentityCard';
 import { TenantContactCard } from './TenantContactCard';
@@ -29,6 +30,13 @@ type TenantInfoCardsProps = {
 
 export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
   const { data, loading, error, retry, refresh } = useTenantView({ tenantId });
+  const logoUploadHook = useOrgLogoUpload();
+
+  const uploadLogoForTenant = useCallback(async () => {
+    if (!logoUploadHook.selectedFile) return null;
+    return logoUploadHook.upload(tenantId);
+  }, [logoUploadHook, tenantId]);
+
   const {
     isDrawerOpen,
     isInitialLoading,
@@ -41,7 +49,11 @@ export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
     closeDrawer,
     updateField,
     submit,
-  } = useEditTenant({ tenantId, onSaved: refresh });
+  } = useEditTenant({
+    tenantId,
+    onSaved: refresh,
+    uploadLogo: logoUploadHook.selectedFile ? uploadLogoForTenant : undefined,
+  });
 
   useEffect(() => {
     if (!data && isDrawerOpen) {
@@ -111,6 +123,12 @@ export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
         onClose={closeDrawer}
         onSubmit={submit}
         onChangeField={updateField}
+        logoUpload={{
+          previewUrl: logoUploadHook.previewUrl,
+          error: logoUploadHook.error,
+          uploading: logoUploadHook.uploading,
+          onFileSelect: logoUploadHook.handleFileSelect,
+        }}
       />
     </div>
   );

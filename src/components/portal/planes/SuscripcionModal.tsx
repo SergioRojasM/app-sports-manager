@@ -16,7 +16,7 @@ type SuscripcionModalProps = {
   metodosPagoError: string | null;
   selectedTipoId: string | null;
   onSelectTipo: (id: string) => void;
-  onConfirm: (data: { comentarios: string; metodo_pago_id: string }) => void;
+  onConfirm: (data: { comentarios: string; metodo_pago_id: string; file: File | null }) => void;
   onClose: () => void;
 };
 
@@ -54,6 +54,7 @@ export function SuscripcionModal({
   const [comentarios, setComentarios] = useState('');
   const [selectedMetodoId, setSelectedMetodoId] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<1 | 2>(1);
@@ -68,6 +69,7 @@ export function SuscripcionModal({
       setComentarios('');
       setSelectedMetodoId('');
       setFileName(null);
+      setSelectedFile(null);
       setFileError(null);
     }
   }, [open, hasSubtypes]);
@@ -78,23 +80,34 @@ export function SuscripcionModal({
 
     if (!file) {
       setFileName(null);
+      setSelectedFile(null);
       return;
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
       setFileError('Solo se permiten imágenes (JPEG, PNG, GIF, WebP) o PDF.');
       setFileName(null);
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFileError('El archivo no puede superar 5 MB.');
+      setFileName(null);
+      setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
     setFileName(file.name);
+    setSelectedFile(file);
   }, []);
 
   const handleConfirm = useCallback(() => {
     if (!selectedMetodoId) return;
-    onConfirm({ comentarios, metodo_pago_id: selectedMetodoId });
-  }, [comentarios, selectedMetodoId, onConfirm]);
+    onConfirm({ comentarios, metodo_pago_id: selectedMetodoId, file: selectedFile });
+  }, [comentarios, selectedMetodoId, selectedFile, onConfirm]);
 
   const handleClose = useCallback(() => {
     if (isSubmitting) return;
@@ -102,6 +115,7 @@ export function SuscripcionModal({
     setComentarios('');
     setSelectedMetodoId('');
     setFileName(null);
+    setSelectedFile(null);
     setFileError(null);
     onClose();
   }, [isSubmitting, onClose]);

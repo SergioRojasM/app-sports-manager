@@ -1,4 +1,5 @@
 import { createClient } from '@/services/supabase/client';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Pago, PagoInsert } from '@/types/portal/pagos.types';
 
 export const pagosService = {
@@ -25,5 +26,16 @@ export const pagosService = {
     }
 
     return data as Pago;
+  },
+
+  async updateComprobanteUrl(supabase: SupabaseClient, pagoId: string, url: string): Promise<void> {
+    const { error } = await supabase
+      .from('pagos')
+      .update({ comprobante_url: url })
+      .eq('id', pagoId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
   },
 };
