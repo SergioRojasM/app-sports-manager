@@ -12,12 +12,12 @@ export const pagosService = {
         tenant_id: payload.tenant_id,
         suscripcion_id: payload.suscripcion_id,
         monto: payload.monto,
-        comprobante_url: payload.comprobante_url,
+        comprobante_path: payload.comprobante_path,
         estado: payload.estado,
         metodo_pago_id: payload.metodo_pago_id ?? null,
       })
       .select(
-        'id, tenant_id, suscripcion_id, monto, metodo_pago, metodo_pago_id, comprobante_url, estado, validado_por, fecha_pago, fecha_validacion, created_at',
+        'id, tenant_id, suscripcion_id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at',
       )
       .single();
 
@@ -28,10 +28,10 @@ export const pagosService = {
     return data as Pago;
   },
 
-  async updateComprobanteUrl(supabase: SupabaseClient, pagoId: string, url: string): Promise<void> {
+  async updateComprobantePath(supabase: SupabaseClient, pagoId: string, path: string): Promise<void> {
     const { error } = await supabase
       .from('pagos')
-      .update({ comprobante_url: url })
+      .update({ comprobante_path: path })
       .eq('id', pagoId);
 
     if (error) {

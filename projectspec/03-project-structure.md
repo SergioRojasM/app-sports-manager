@@ -180,6 +180,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useGestionSuscripciones.ts
 │   │           ├── useValidarPago.ts
 │   │           ├── useValidarSuscripcion.ts
+│   │           ├── useComprobanteViewer.ts    # Signed-URL generation for comprobante_path (TTL 300s)
 │   │           ├── useEditarSuscripcion.ts   # Form state + plans fetch + date validation for full-field edit
 │   │           └── useEliminarSuscripcion.ts  # Confirmation + delete action for permanent deletion
 │   │       └── perfil/

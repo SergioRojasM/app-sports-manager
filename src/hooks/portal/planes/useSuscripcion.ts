@@ -156,7 +156,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
             tenant_id: tenantId,
             suscripcion_id: suscripcion.id,
             monto: selectedTipo?.precio ?? selectedPlan.precio,
-            comprobante_url: null,
+            comprobante_path: null,
             estado: 'pendiente',
             metodo_pago_id: data.metodo_pago_id,
           });
@@ -171,7 +171,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
                 pago.id,
                 data.file,
               );
-              await pagosService.updateComprobanteUrl(supabase, pago.id, result.signedUrl);
+              await pagosService.updateComprobantePath(supabase, pago.id, result.path);
             } catch {
               // Non-blocking: subscription and pago were created successfully
               // The proof upload failed but the request is still valid
