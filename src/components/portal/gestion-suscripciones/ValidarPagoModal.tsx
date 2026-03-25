@@ -128,14 +128,6 @@ export function ValidarPagoModal({ row, adminUserId, onClose, onSuccess }: Valid
                   >
                     Ver comprobante
                   </a>
-                  <a
-                    href={signedUrl}
-                    download={filenameFromPath(pago.comprobante_path)}
-                    aria-label="Descargar comprobante de pago"
-                    className="text-turquoise underline hover:text-turquoise/80"
-                  >
-                    Descargar
-                  </a>
                 </div>
               </div>
             )}

@@ -47,17 +47,17 @@
 
 ## 8. Manual Verification
 
-- [ ] 8.1 Open `ValidarPagoModal` for a pago with `metodo_pago_id` set — verify method name from `tenant_metodos_pago` is shown
-- [ ] 8.2 Open modal for a pago with image `comprobante_path` — verify inline thumbnail appears and download link works
-- [ ] 8.3 Open modal for a pago with PDF `comprobante_path` — verify PDF indicator shown and download link works
-- [ ] 8.4 Open modal for a pago with `comprobante_path = null` — verify no receipt section is rendered
-- [ ] 8.5 Submit a new subscription with a proof file — verify `pagos` row has `comprobante_path` set and `comprobante_url` column absent
-- [ ] 8.6 Verify approve/reject actions work correctly when signed URL generation fails
+- [x] 8.1 Open `ValidarPagoModal` for a pago with `metodo_pago_id` set — verify method name from `tenant_metodos_pago` is shown
+- [x] 8.2 Open modal for a pago with image `comprobante_path` — verify inline thumbnail appears and download link works
+- [x] 8.3 Open modal for a pago with PDF `comprobante_path` — verify PDF indicator shown and download link works
+- [x] 8.4 Open modal for a pago with `comprobante_path = null` — verify no receipt section is rendered
+- [x] 8.5 Submit a new subscription with a proof file — verify `pagos` row has `comprobante_path` set and `comprobante_url` column absent
+- [x] 8.6 Verify approve/reject actions work correctly when signed URL generation fails
 
 ## 9. Commit and Pull Request
 
-- [ ] 9.1 Stage all changes and create commit with message: `feat(pagos): replace comprobante_url with comprobante_path; add inline receipt viewer in ValidarPagoModal`
-- [ ] 9.2 Push branch and open pull request with description:
+- [x] 9.1 Stage all changes and create commit with message: `feat(pagos): replace comprobante_url with comprobante_path; add inline receipt viewer in ValidarPagoModal`
+- [x] 9.2 Push branch and open pull request with description:
   > **What**: Drops `pagos.comprobante_url` (no production data) and introduces `comprobante_path` as the sole storage reference. Adds `useComprobanteViewer` hook to generate fresh 5-minute signed URLs on modal open. Updates `ValidarPagoModal` with inline image/PDF preview, view and download actions, and payment method name resolution via `metodo_pago_id` join.
   >
   > **Why**: Long-lived stored signed URLs cannot be regenerated from the URL alone and represent an unnecessary security exposure. Storing the storage path enables on-demand short-lived URL generation and decouples the DB record from an ephemeral URL.
