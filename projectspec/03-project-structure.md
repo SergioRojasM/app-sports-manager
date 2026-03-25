@@ -147,7 +147,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── usePortalNavigation.ts    # Shared portal logic
 │   │       ├── tenant/
 │   │       │   ├── useTenantView.ts
-│   │       │   └── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago
+│   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago
+│   │       │   └── useOrgLogoUpload.ts    # File select, MIME/size validation, preview URL, upload trigger for org logo
 │   │       └── scenarios/
 │   │           └── useScenarios.ts
 │   │       └── disciplines/
@@ -210,6 +211,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
+│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadPaymentProof, getSignedUrl — wraps Supabase Storage API for org-assets bucket
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts

@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { suscripcionesService } from '@/services/supabase/portal/suscripciones.service';
 import { pagosService } from '@/services/supabase/portal/pagos.service';
+import { storageService } from '@/services/supabase/portal/storage.service';
 import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
 import { createClient } from '@/services/supabase/client';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
@@ -11,6 +12,7 @@ import type { MetodoPago } from '@/types/portal/metodos-pago.types';
 type SuscripcionSubmitData = {
   comentarios: string;
   metodo_pago_id: string;
+  file: File | null;
 };
 
 type UseSuscripcionOptions = {
@@ -150,7 +152,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
 
         // Step 2: Create pago linked to the suscripcion
         try {
-          await pagosService.createPago({
+          const pago = await pagosService.createPago({
             tenant_id: tenantId,
             suscripcion_id: suscripcion.id,
             monto: selectedTipo?.precio ?? selectedPlan.precio,
@@ -158,6 +160,23 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
             estado: 'pendiente',
             metodo_pago_id: data.metodo_pago_id,
           });
+
+          // Step 3: Upload payment proof if file was provided
+          if (data.file) {
+            try {
+              const result = await storageService.uploadPaymentProof(
+                supabase,
+                tenantId,
+                user.id,
+                pago.id,
+                data.file,
+              );
+              await pagosService.updateComprobanteUrl(supabase, pago.id, result.signedUrl);
+            } catch {
+              // Non-blocking: subscription and pago were created successfully
+              // The proof upload failed but the request is still valid
+            }
+          }
         } catch {
           // Pago insert failed — suscripcion is orphaned but benign (pendiente state)
           setError('Se creó la suscripción pero hubo un error al registrar el pago. Contacta al administrador.');

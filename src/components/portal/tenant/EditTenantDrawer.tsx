@@ -7,6 +7,13 @@ import type {
   TenantEditFormValues,
 } from '@/types/portal/tenant.types';
 
+type LogoUploadState = {
+  previewUrl: string | null;
+  error: string | null;
+  uploading: boolean;
+  onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
 type EditTenantDrawerProps = {
   isOpen: boolean;
   isLoading: boolean;
@@ -17,6 +24,7 @@ type EditTenantDrawerProps = {
   onClose: () => void;
   onSubmit: () => Promise<boolean>;
   onChangeField: (field: keyof TenantEditFormValues, value: string) => void;
+  logoUpload?: LogoUploadState;
 };
 
 export function EditTenantDrawer({
@@ -29,6 +37,7 @@ export function EditTenantDrawer({
   onClose,
   onSubmit,
   onChangeField,
+  logoUpload,
 }: EditTenantDrawerProps) {
   useEffect(() => {
     if (!isOpen) return;
@@ -94,6 +103,7 @@ export function EditTenantDrawer({
               errors={errors}
               isSubmitting={isSubmitting}
               onChange={onChangeField}
+              logoUpload={logoUpload}
             />
           )}
 

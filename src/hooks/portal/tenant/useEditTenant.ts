@@ -27,7 +27,6 @@ const URL_FIELDS: Array<keyof TenantEditFormValues> = [
   'instagram_url',
   'facebook_url',
   'x_url',
-  'logo_url',
 ];
 
 function isValidUrl(value: string): boolean {
@@ -110,6 +109,7 @@ function validate(values: TenantEditFormValues): TenantEditFieldErrors {
 type UseEditTenantOptions = {
   tenantId: string;
   onSaved: () => Promise<void>;
+  uploadLogo?: () => Promise<string | null>;
 };
 
 type UseEditTenantResult = {
@@ -126,7 +126,7 @@ type UseEditTenantResult = {
   submit: () => Promise<boolean>;
 };
 
-export function useEditTenant({ tenantId, onSaved }: UseEditTenantOptions): UseEditTenantResult {
+export function useEditTenant({ tenantId, onSaved, uploadLogo }: UseEditTenantOptions): UseEditTenantResult {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -201,7 +201,17 @@ export function useEditTenant({ tenantId, onSaved }: UseEditTenantOptions): UseE
         throw new Error('No active session');
       }
 
-      await tenantService.updateTenant(supabase, user.id, tenantId, toPayload(values));
+      // If a new logo file was selected, upload it first
+      let logoUrl = values.logo_url;
+      if (uploadLogo) {
+        const signedUrl = await uploadLogo();
+        if (signedUrl) {
+          logoUrl = signedUrl;
+        }
+      }
+
+      const payload = toPayload({ ...values, logo_url: logoUrl });
+      await tenantService.updateTenant(supabase, user.id, tenantId, payload);
       await onSaved();
       setSuccessMessage('La organización se actualizó correctamente.');
       setIsDrawerOpen(false);
@@ -212,7 +222,7 @@ export function useEditTenant({ tenantId, onSaved }: UseEditTenantOptions): UseE
     } finally {
       setIsSubmitting(false);
     }
-  }, [onSaved, supabase, tenantId, values]);
+  }, [onSaved, supabase, tenantId, values, uploadLogo]);
 
   return {
     isDrawerOpen,
