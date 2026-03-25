@@ -17,7 +17,9 @@ export interface PagoAdminRow {
   id: string;
   monto: number;
   metodo_pago: MetodoPago | null;
-  comprobante_url: string | null;
+  metodo_pago_nombre: string | null;
+  metodo_pago_tipo: string | null;
+  comprobante_path: string | null;
   estado: PagoEstado;
   validado_por: string | null;
   validado_por_nombre: string | null;

@@ -7,7 +7,7 @@ export type Pago = {
   monto: number;
   metodo_pago: string | null;
   metodo_pago_id: string | null;
-  comprobante_url: string | null;
+  comprobante_path: string | null;
   estado: PagoEstado;
   validado_por: string | null;
   fecha_pago: string | null;
@@ -19,7 +19,7 @@ export type PagoInsert = {
   tenant_id: string;
   suscripcion_id: string;
   monto: number;
-  comprobante_url: null;
+  comprobante_path: null;
   estado: 'pendiente';
   metodo_pago_id?: string | null;
 };

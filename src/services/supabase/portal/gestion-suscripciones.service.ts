@@ -46,7 +46,8 @@ type RawSuscripcionRow = {
     id: string;
     monto: number;
     metodo_pago: string | null;
-    comprobante_url: string | null;
+    metodo_pago_id: string | null;
+    comprobante_path: string | null;
     estado: string;
     validado_por: string | null;
     fecha_pago: string | null;
@@ -55,6 +56,11 @@ type RawSuscripcionRow = {
     validador: {
       nombre: string | null;
       apellido: string | null;
+    } | null;
+    metodo_pago_ref: {
+      id: string;
+      nombre: string;
+      tipo: string;
     } | null;
   }>;
 };
@@ -93,7 +99,9 @@ function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
           id: latestPago.id,
           monto: latestPago.monto,
           metodo_pago: latestPago.metodo_pago as PagoAdminRow['metodo_pago'],
-          comprobante_url: latestPago.comprobante_url,
+          metodo_pago_nombre: latestPago.metodo_pago_ref?.nombre ?? null,
+          metodo_pago_tipo: latestPago.metodo_pago_ref?.tipo ?? null,
+          comprobante_path: latestPago.comprobante_path,
           estado: latestPago.estado as PagoAdminRow['estado'],
           validado_por: latestPago.validado_por,
           validado_por_nombre: latestPago.validador
@@ -148,7 +156,7 @@ export const gestionSuscripcionesService = {
         atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
         plan:planes!suscripciones_plan_id_fkey(nombre, vigencia_meses, clases_incluidas),
         plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, clases_incluidas),
-        pagos(id, monto, metodo_pago, comprobante_url, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido))
+        pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo))
         `,
       )
       .eq('tenant_id', tenantId)
