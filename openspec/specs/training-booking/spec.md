@@ -13,16 +13,25 @@ The system SHALL render a `ReservasPanel` within the `gestion-entrenamientos` pa
 
 ### Requirement: Atleta self-booking — class deduction integrated into create flow
 The `create()` function in `reservas.service.ts` SHALL delegate the reservation INSERT to the `book_and_deduct_class` RPC. The service MUST:
-1. Run all pre-booking validation checks (`validateBookingRestrictions`) to produce non-database rejections (TIMING_RESERVA, PLAN_REQUERIDO, NIVEL_INSUFICIENTE, etc.) before calling the RPC.
-2. Call `book_and_deduct_class(p_tenant_id, p_atleta_id, p_entrenamiento_id, p_entrenamiento_categoria_id, p_notas, p_suscripcion_id)` where `p_suscripcion_id` is the result of the subscription selection strategy (see `subscription-class-deduction/spec.md`) or `NULL` when no class deduction applies.
-3. If the RPC raises a Postgres `P0001` exception with message matching `'CLASES_AGOTADAS'`, the service SHALL return `{ ok: false, code: 'CLASES_AGOTADAS', message: '...' }`.
-4. The `book_and_deduct_class` RPC is the sole write path for reservation creation — direct INSERT into `reservas` without class management is not a supported flow.
+1. **As step 0**, call `isEntrenamientoPast(entrenamientoId, tenantId)`. If the training's `fecha_hora` is not null and is in the past, the service SHALL return `{ ok: false, code: 'ENTRENAMIENTO_PASADO', message: 'No puedes reservar un entrenamiento que ya ha finalizado.' }` and no further validation or database operation SHALL be performed.
+2. Run all pre-booking validation checks (`validateBookingRestrictions`) to produce non-database rejections (TIMING_RESERVA, PLAN_REQUERIDO, NIVEL_INSUFICIENTE, etc.) before calling the RPC.
+3. Call `book_and_deduct_class(p_tenant_id, p_atleta_id, p_entrenamiento_id, p_entrenamiento_categoria_id, p_notas, p_suscripcion_id)` where `p_suscripcion_id` is the result of the subscription selection strategy (see `subscription-class-deduction/spec.md`) or `NULL` when no class deduction applies.
+4. If the RPC raises a Postgres `P0001` exception with message matching `'CLASES_AGOTADAS'`, the service SHALL return `{ ok: false, code: 'CLASES_AGOTADAS', message: '...' }`.
+5. The `book_and_deduct_class` RPC is the sole write path for reservation creation — direct INSERT into `reservas` without class management is not a supported flow.
 
 Before invoking the RPC, the service MUST evaluate all booking restrictions configured for the training: advance-notice timing (`reserva_antelacion_horas`) and access condition rows (`entrenamiento_restricciones`). If any check fails, the booking MUST be rejected with a typed `BookingRejection` result containing a `code` and a human-readable Spanish `message`. No booking row is inserted on rejection.
 
 #### Scenario: Successful self-booking
-- **WHEN** an atleta clicks "Reservar" on an available training, all restriction checks pass, and the atleta confirms the action
+- **WHEN** an atleta clicks "Reservar" on an available future training, all restriction checks pass, and the atleta confirms the action
 - **THEN** a new booking record is created in `pendiente` state and the panel reflects the new booking immediately
+
+#### Scenario: Booking blocked for past training
+- **WHEN** an atleta attempts to book a training whose `fecha_hora` is not null and is before the current timestamp
+- **THEN** the service returns `{ ok: false, code: 'ENTRENAMIENTO_PASADO' }`, no RPC is called, and the panel displays the message "No puedes reservar un entrenamiento que ya ha finalizado."
+
+#### Scenario: Booking allowed when fecha_hora is null
+- **WHEN** an atleta attempts to book a training whose `fecha_hora` is null
+- **THEN** the past-date guard does not block the action and standard validation continues
 
 #### Scenario: Booking blocked when training is full
 - **WHEN** an atleta attempts to book a training whose active booking count equals `cupo_maximo`
