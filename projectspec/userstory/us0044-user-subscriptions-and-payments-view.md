@@ -49,6 +49,18 @@ If the subscription has an associated `pago`:
 
 If the subscription has no associated `pago`, show an informational message: _"No payment record found for this subscription."_
 
+#### Filters
+The page includes a filter bar above the subscription list that allows the user to narrow results by:
+
+- **Subscription status** (`suscripcion_estado`): chip/select with options — All, Pendiente, Activa, Vencida, Cancelada. Default: All.
+- **Payment status** (`pago_estado`): chip/select with options — All, Pendiente, Validado, Rechazado. Default: All.
+
+Filtering is **client-side** — the full list is fetched once on page load and the hook applies the active filters in memory. No additional server requests are made when the user changes a filter.
+
+When both filters are active, results must satisfy both conditions simultaneously (AND logic).
+
+When filters result in zero matching subscriptions (but the user does have subscriptions for the tenant), display a "No results match the selected filters" message with a "Clear filters" action that resets both filters to All. This is distinct from the true empty state (user has no subscriptions at all).
+
 **Empty State:**
 When the user has no subscriptions for this tenant, display a friendly empty state message with a call-to-action linking to the plans page (`gestion-planes`).
 
@@ -108,8 +120,9 @@ No new migrations required.
 | Types | `src/types/portal/mis-suscripciones-y-pagos.types.ts` | **New** — `MiPagoRow`, `MiSuscripcionRow` |
 | Service | `src/services/supabase/portal/mis-suscripciones.service.ts` | **New** — `fetchMisSuscripcionesTenant` |
 | Service | `src/services/supabase/portal/storage.service.ts` | **Modify** — add `options?: { upsert?: boolean }` to `uploadPaymentProof` |
-| Hook | `src/hooks/portal/mis-suscripciones-y-pagos/useMisSuscripciones.ts` | **New** — fetch subscriptions + payments for the current user/tenant |
+| Hook | `src/hooks/portal/mis-suscripciones-y-pagos/useMisSuscripciones.ts` | **New** — fetch subscriptions + payments, expose filter state and filtered results |
 | Hook | `src/hooks/portal/mis-suscripciones-y-pagos/useSubirComprobante.ts` | **New** — file validation, upload, `comprobante_path` update |
+| Component | `src/components/portal/mis-suscripciones-y-pagos/MisSuscripcionesFilters.tsx` | **New** — filter bar: subscription status + payment status chip selectors |
 | Component | `src/components/portal/mis-suscripciones-y-pagos/SuscripcionCard.tsx` | **New** — subscription card with plan info and `SuscripcionEstadoBadge` |
 | Component | `src/components/portal/mis-suscripciones-y-pagos/PagoCard.tsx` | **New** — payment info, comprobante viewer, upload trigger |
 | Component | `src/components/portal/mis-suscripciones-y-pagos/MisSuscripcionesYPagosPage.tsx` | **New** — page container, list + empty state |
@@ -138,11 +151,16 @@ No new migrations required.
 9. Selecting a file larger than 5 MB shows a client-side validation error and does not trigger the upload.
 10. A successful upload updates `pagos.comprobante_path` in the database and immediately refreshes the comprobante preview with the new file.
 11. A re-upload (when a `comprobante_path` already exists and `estado` is `pendiente` or `rechazado`) replaces the existing file in storage and updates the path in the DB.
-12. When the user has no subscriptions for the current tenant, an empty state message is displayed with a link to the plans page.
-13. When a subscription has no associated `pago`, the payment section shows: _"No payment record found for this subscription."_
-14. An authenticated user with role `administrador` or `entrenador` who navigates directly to `/{tenant_id}/mis-suscripciones-y-pagos` is redirected to the tenant landing page (role guard).
-15. An unauthenticated user navigating to the page is redirected to `/auth/login` (handled by existing root layout).
-16. Upload errors (network failure, storage error) are displayed as an inline error message below the upload button without crashing the page.
+12. A filter bar is shown above the subscription list with two independent selectors: subscription status and payment status, both defaulting to "All".
+13. Selecting a subscription status filter shows only subscriptions whose `estado` matches the selected value; selecting "All" removes the filter.
+14. Selecting a payment status filter shows only subscriptions whose associated `pago.estado` matches the selected value; subscriptions without a payment record are excluded when any payment status filter is active.
+15. When both filters are active, only subscriptions matching both conditions are shown.
+16. When filters produce zero results but the user has subscriptions, a "No results match the selected filters" message is shown with a "Clear filters" button that resets both filters to All.
+17. When the user has no subscriptions for the current tenant, an empty state message is displayed with a link to the plans page (filter bar is not shown in this state).
+18. When a subscription has no associated `pago`, the payment section shows: _"No payment record found for this subscription."_
+19. An authenticated user with role `administrador` or `entrenador` who navigates directly to `/{tenant_id}/mis-suscripciones-y-pagos` is redirected to the tenant landing page (role guard).
+20. An unauthenticated user navigating to the page is redirected to `/auth/login` (handled by existing root layout).
+21. Upload errors (network failure, storage error) are displayed as an inline error message below the upload button without crashing the page.
 
 ---
 
@@ -151,15 +169,16 @@ No new migrations required.
 - [ ] Create `src/types/portal/mis-suscripciones-y-pagos.types.ts` with `MiPagoRow` and `MiSuscripcionRow` interfaces
 - [ ] Create `src/services/supabase/portal/mis-suscripciones.service.ts` with `fetchMisSuscripcionesTenant`
 - [ ] Modify `src/services/supabase/portal/storage.service.ts` — add `options?: { upsert?: boolean }` to `uploadPaymentProof`
-- [ ] Create `src/hooks/portal/mis-suscripciones-y-pagos/useMisSuscripciones.ts`
+- [ ] Create `src/hooks/portal/mis-suscripciones-y-pagos/useMisSuscripciones.ts` — include `suscripcionEstadoFilter`, `pagoEstadoFilter`, setters, `filteredSuscripciones`, and `clearFilters`
 - [ ] Create `src/hooks/portal/mis-suscripciones-y-pagos/useSubirComprobante.ts`
+- [ ] Create `src/components/portal/mis-suscripciones-y-pagos/MisSuscripcionesFilters.tsx`
 - [ ] Create `src/components/portal/mis-suscripciones-y-pagos/SuscripcionCard.tsx`
 - [ ] Create `src/components/portal/mis-suscripciones-y-pagos/PagoCard.tsx` (reuse `useComprobanteViewer`, `PagoEstadoBadge`)
 - [ ] Create `src/components/portal/mis-suscripciones-y-pagos/MisSuscripcionesYPagosPage.tsx`
 - [ ] Create `src/components/portal/mis-suscripciones-y-pagos/index.ts`
 - [ ] Create `src/app/portal/orgs/[tenant_id]/(usuario)/mis-suscripciones-y-pagos/page.tsx` with role guard
 - [ ] Modify `src/types/portal.types.ts` — add `{ label: 'Mis Suscripciones', path: 'mis-suscripciones-y-pagos', icon: 'receipt_long' }` to `ROLE_TENANT_ITEMS.usuario`
-- [ ] Test manually: happy path (view + upload), re-upload flow, `validado` hides button, role guard redirect, empty state, >5 MB file rejection
+- [ ] Test manually: happy path (view + upload), re-upload flow, `validado` hides button, role guard redirect, empty state, >5 MB file rejection, filter combinations, filter empty state + clear
 
 ---
 
