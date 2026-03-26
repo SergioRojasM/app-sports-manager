@@ -19,6 +19,7 @@ const EMPTY_VALUES: TenantEditFormValues = {
   instagram_url: '',
   facebook_url: '',
   x_url: '',
+  banner_url: '',
   max_solicitudes: '2',
 };
 
@@ -59,6 +60,7 @@ function toPayload(values: TenantEditFormValues): TenantEditPayload {
     instagram_url: normalizeNullable(values.instagram_url),
     facebook_url: normalizeNullable(values.facebook_url),
     x_url: normalizeNullable(values.x_url),
+    banner_url: normalizeNullable(values.banner_url),
     max_solicitudes: maxSolicitudes,
   };
 }
@@ -110,6 +112,7 @@ type UseEditTenantOptions = {
   tenantId: string;
   onSaved: () => Promise<void>;
   uploadLogo?: () => Promise<string | null>;
+  uploadBanner?: () => Promise<string | null>;
 };
 
 type UseEditTenantResult = {
@@ -126,7 +129,7 @@ type UseEditTenantResult = {
   submit: () => Promise<boolean>;
 };
 
-export function useEditTenant({ tenantId, onSaved, uploadLogo }: UseEditTenantOptions): UseEditTenantResult {
+export function useEditTenant({ tenantId, onSaved, uploadLogo, uploadBanner }: UseEditTenantOptions): UseEditTenantResult {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -210,7 +213,16 @@ export function useEditTenant({ tenantId, onSaved, uploadLogo }: UseEditTenantOp
         }
       }
 
-      const payload = toPayload({ ...values, logo_url: logoUrl });
+      // If a new banner file was selected, upload it first
+      let bannerUrl = values.banner_url;
+      if (uploadBanner) {
+        const signedUrl = await uploadBanner();
+        if (signedUrl) {
+          bannerUrl = signedUrl;
+        }
+      }
+
+      const payload = toPayload({ ...values, logo_url: logoUrl, banner_url: bannerUrl });
       await tenantService.updateTenant(supabase, user.id, tenantId, payload);
       await onSaved();
       setSuccessMessage('La organización se actualizó correctamente.');
@@ -222,7 +234,7 @@ export function useEditTenant({ tenantId, onSaved, uploadLogo }: UseEditTenantOp
     } finally {
       setIsSubmitting(false);
     }
-  }, [onSaved, supabase, tenantId, values, uploadLogo]);
+  }, [onSaved, supabase, tenantId, values, uploadLogo, uploadBanner]);
 
   return {
     isDrawerOpen,

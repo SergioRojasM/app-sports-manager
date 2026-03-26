@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { TenantIdentityPayload } from '@/types/portal/tenant.types';
 import { createClient } from '@/services/supabase/client';
 import { storageService } from '@/services/supabase/portal/storage.service';
-import { buildOrgLogoPath } from '@/types/portal/storage.types';
+import { buildOrgLogoPath, buildOrgBannerPath } from '@/types/portal/storage.types';
 
 type TenantIdentityCardProps = {
   identity: TenantIdentityPayload;
@@ -42,6 +42,8 @@ export function TenantIdentityCard({
 }: TenantIdentityCardProps) {
   const [logoSrc, setLogoSrc] = useState(identity.logoUrl);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [bannerSrc, setBannerSrc] = useState(identity.bannerUrl);
+  const [bannerFailed, setBannerFailed] = useState(false);
 
   const handleLogoError = useCallback(async () => {
     if (logoFailed) return; // Only try once
@@ -66,9 +68,40 @@ export function TenantIdentityCard({
     }
   }, [identity.tenantId, logoFailed]);
 
+  const handleBannerError = useCallback(async () => {
+    if (bannerFailed) return;
+    setBannerFailed(true);
+
+    try {
+      const supabase = createClient();
+      for (const ext of ['png', 'jpg', 'webp']) {
+        const path = buildOrgBannerPath(identity.tenantId, ext);
+        try {
+          const url = await storageService.getSignedUrl(supabase, path);
+          setBannerSrc(url);
+          return;
+        } catch {
+          // Try next extension
+        }
+      }
+    } catch {
+      // All attempts failed — fallback to gradient
+    }
+    setBannerSrc(null);
+  }, [identity.tenantId, bannerFailed]);
+
   return (
     <article className="overflow-hidden rounded-lg border border-portal-border bg-navy-medium/95 shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
       <div className="relative h-24 bg-gradient-to-r from-primary/45 to-turquoise/35">
+        {bannerSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={bannerSrc}
+            alt={`${identity.name} banner`}
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={() => void handleBannerError()}
+          />
+        ) : null}
         <div className="absolute left-4 top-2">
           <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-portal-border bg-navy-soft shadow-lg">
             {logoSrc ? (
@@ -86,18 +119,6 @@ export function TenantIdentityCard({
             )}
           </div>
         </div>
-
-        <button
-          type="button"
-          aria-label="Edit organization banner (coming soon)"
-          className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-slate-100"
-          onClick={(event) => event.preventDefault()}
-        >
-          <span className="material-symbols-outlined text-xs" aria-hidden="true">
-            photo_camera
-          </span>
-          Edit Banner
-        </button>
       </div>
 
       <div className="space-y-4 px-4 pb-5 pt-3">

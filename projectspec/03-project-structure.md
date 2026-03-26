@@ -149,6 +149,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── useTenantView.ts
 │   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago
 │   │       │   └── useOrgLogoUpload.ts    # File select, MIME/size validation, preview URL, upload trigger for org logo
+│   │       │   └── useOrgBannerUpload.ts   # File select, MIME/size validation, preview URL, upload trigger for org banner
 │   │       └── scenarios/
 │   │           └── useScenarios.ts
 │   │       └── disciplines/
@@ -212,14 +213,14 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
-│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadPaymentProof, getSignedUrl — wraps Supabase Storage API for org-assets bucket
+│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof, getSignedUrl — wraps Supabase Storage API for org-assets bucket
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
 │   │   ├── auth.types.ts
 │   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, resolvePortalMenu, etc.)
 │   │   └── portal/
-│   │       ├── tenant.types.ts
+│   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url)
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts

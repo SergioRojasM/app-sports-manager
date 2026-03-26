@@ -18,6 +18,7 @@ type TenantRow = {
   nombre: string;
   descripcion: string | null;
   logo_url: string | null;
+  banner_url: string | null;
   fecha_creacion: string | null;
   email: string | null;
   telefono: string | null;
@@ -60,6 +61,7 @@ function mapTenantToEditFormValues(tenant: TenantRow): TenantEditFormValues {
     nombre: toEditableString(tenant.nombre),
     descripcion: toEditableString(tenant.descripcion),
     logo_url: toEditableString(tenant.logo_url),
+    banner_url: toEditableString(tenant.banner_url),
     email: toEditableString(tenant.email),
     telefono: toEditableString(tenant.telefono),
     web_url: toEditableString(tenant.web_url),
@@ -123,7 +125,7 @@ export const tenantService = {
   async fetchTenantById(supabase: SupabaseClient, tenantId: string): Promise<TenantRow> {
     const { data, error } = await supabase
       .from('tenants')
-      .select('id, nombre, descripcion, logo_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes')
+      .select('id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes')
       .eq('id', tenantId)
       .single();
 
@@ -193,6 +195,7 @@ export const tenantService = {
         name: tenant.nombre,
         description: tenant.descripcion,
         logoUrl: tenant.logo_url,
+        bannerUrl: tenant.banner_url,
         foundedAt: tenant.fecha_creacion,
       },
       contact: {
@@ -233,7 +236,7 @@ export const tenantService = {
     const { data, error } = await supabase
       .from('tenants')
       .select(
-        'id, nombre, descripcion, logo_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes',
+        'id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes',
       )
       .neq('nombre', 'public')
       .order('fecha_creacion', { ascending: true });
@@ -311,6 +314,7 @@ export const tenantService = {
           name: tenant.nombre,
           description: tenant.descripcion,
           logoUrl: tenant.logo_url,
+          bannerUrl: tenant.banner_url,
           foundedAt: tenant.fecha_creacion,
         },
         canAccess: Boolean(membership),

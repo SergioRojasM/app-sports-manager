@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from 'react';
 import { useEditTenant } from '@/hooks/portal/tenant/useEditTenant';
 import { useOrgLogoUpload } from '@/hooks/portal/tenant/useOrgLogoUpload';
+import { useOrgBannerUpload } from '@/hooks/portal/tenant/useOrgBannerUpload';
 import { useTenantView } from '@/hooks/portal/tenant/useTenantView';
 import { TenantIdentityCard } from './TenantIdentityCard';
 import { TenantContactCard } from './TenantContactCard';
@@ -31,11 +32,17 @@ type TenantInfoCardsProps = {
 export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
   const { data, loading, error, retry, refresh } = useTenantView({ tenantId });
   const logoUploadHook = useOrgLogoUpload();
+  const bannerUploadHook = useOrgBannerUpload();
 
   const uploadLogoForTenant = useCallback(async () => {
     if (!logoUploadHook.selectedFile) return null;
     return logoUploadHook.upload(tenantId);
   }, [logoUploadHook, tenantId]);
+
+  const uploadBannerForTenant = useCallback(async () => {
+    if (!bannerUploadHook.selectedFile) return null;
+    return bannerUploadHook.upload(tenantId);
+  }, [bannerUploadHook, tenantId]);
 
   const {
     isDrawerOpen,
@@ -53,6 +60,7 @@ export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
     tenantId,
     onSaved: refresh,
     uploadLogo: logoUploadHook.selectedFile ? uploadLogoForTenant : undefined,
+    uploadBanner: bannerUploadHook.selectedFile ? uploadBannerForTenant : undefined,
   });
 
   useEffect(() => {
@@ -128,6 +136,12 @@ export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
           error: logoUploadHook.error,
           uploading: logoUploadHook.uploading,
           onFileSelect: logoUploadHook.handleFileSelect,
+        }}
+        bannerUpload={{
+          previewUrl: bannerUploadHook.previewUrl,
+          error: bannerUploadHook.error,
+          uploading: bannerUploadHook.uploading,
+          onFileSelect: bannerUploadHook.handleFileSelect,
         }}
       />
     </div>
