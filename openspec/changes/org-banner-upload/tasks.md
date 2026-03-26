@@ -67,5 +67,5 @@
 
 ## 12. Commit & PR
 
-- [ ] 12.1 Stage all changes and commit: `feat(org-banner-upload): add banner upload to tenant identity card`
+- [x] 12.1 Stage all changes and commit: `feat(org-banner-upload): add banner upload to tenant identity card`
 - [ ] 12.2 Push branch and open pull request with description referencing US-0043
