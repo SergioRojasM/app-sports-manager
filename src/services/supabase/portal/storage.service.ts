@@ -3,6 +3,7 @@ import {
   STORAGE_BUCKET,
   SIGNED_URL_TTL,
   buildOrgLogoPath,
+  buildOrgBannerPath,
   buildReceiptPath,
   type StorageUploadResult,
 } from '@/types/portal/storage.types';
@@ -25,6 +26,37 @@ export const storageService = {
   ): Promise<StorageUploadResult> {
     const ext = getExtension(file);
     const path = buildOrgLogoPath(tenantId, ext);
+
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const { data: signedData, error: signError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .createSignedUrl(path, SIGNED_URL_TTL);
+
+    if (signError || !signedData?.signedUrl) {
+      throw new Error(signError?.message ?? 'No fue posible generar la URL firmada.');
+    }
+
+    return { signedUrl: signedData.signedUrl, path };
+  },
+
+  /**
+   * Upload (upsert) the org banner and return a signed URL.
+   * Path: orgs/{tenantId}/brand/banner.{ext}
+   */
+  async uploadOrgBanner(
+    supabase: SupabaseClient,
+    tenantId: string,
+    file: File,
+  ): Promise<StorageUploadResult> {
+    const ext = getExtension(file);
+    const path = buildOrgBannerPath(tenantId, ext);
 
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKET)

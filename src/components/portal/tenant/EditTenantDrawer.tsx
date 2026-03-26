@@ -25,6 +25,7 @@ type EditTenantDrawerProps = {
   onSubmit: () => Promise<boolean>;
   onChangeField: (field: keyof TenantEditFormValues, value: string) => void;
   logoUpload?: LogoUploadState;
+  bannerUpload?: LogoUploadState;
 };
 
 export function EditTenantDrawer({
@@ -38,6 +39,7 @@ export function EditTenantDrawer({
   onSubmit,
   onChangeField,
   logoUpload,
+  bannerUpload,
 }: EditTenantDrawerProps) {
   useEffect(() => {
     if (!isOpen) return;
@@ -104,6 +106,7 @@ export function EditTenantDrawer({
               isSubmitting={isSubmitting}
               onChange={onChangeField}
               logoUpload={logoUpload}
+              bannerUpload={bannerUpload}
             />
           )}
 

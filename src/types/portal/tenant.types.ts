@@ -3,6 +3,7 @@ export type TenantIdentityPayload = {
   name: string;
   description: string | null;
   logoUrl: string | null;
+  bannerUrl: string | null;
   foundedAt: string | null;
 };
 
@@ -51,6 +52,7 @@ export type TenantEditFormValues = {
   instagram_url: string;
   facebook_url: string;
   x_url: string;
+  banner_url: string;
   max_solicitudes: string;
 };
 
@@ -64,6 +66,7 @@ export type TenantEditPayload = {
   instagram_url: string | null;
   facebook_url: string | null;
   x_url: string | null;
+  banner_url: string | null;
   max_solicitudes: number;
 };
 

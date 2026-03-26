@@ -12,6 +12,11 @@ export function buildOrgLogoPath(tenantId: string, ext: string): string {
   return `orgs/${tenantId}/brand/logo.${ext}`;
 }
 
+/** Banner path: orgs/{tenantId}/brand/banner.{ext} */
+export function buildOrgBannerPath(tenantId: string, ext: string): string {
+  return `orgs/${tenantId}/brand/banner.${ext}`;
+}
+
 /** Receipt path: orgs/{tenantId}/users/{userId}/receipts/{pagoId}.{ext} */
 export function buildReceiptPath(
   tenantId: string,
@@ -30,6 +35,11 @@ export type StorageUploadResult = {
 };
 
 export type UploadOrgLogoInput = {
+  tenantId: string;
+  file: File;
+};
+
+export type UploadOrgBannerInput = {
   tenantId: string;
   file: File;
 };
