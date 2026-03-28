@@ -36,14 +36,14 @@
 ## 7. Validation
 
 - [x] 7.1 Run `npx tsc --noEmit` and confirm zero TypeScript errors
-- [ ] 7.2 Test **Perfil** page: save a `fecha_exp_identificacion` value, reload, verify it persists
-- [ ] 7.3 Test **Gestion Equipo** table: confirm Identificación column shows grouped ID + exp date; confirm F. Nacimiento column shows birth date or `—`
-- [ ] 7.4 Test **Editar perfil** modal: open for a member with existing dates, verify pre-fill; set new dates, save, reopen and verify persistence
-- [ ] 7.5 Test **CSV export**: trigger download from ReservasPanel, open in Excel, verify `fecha_nacimiento` and `fecha_exp_identificacion` columns appear in the correct position
+- [x] 7.2 Test **Perfil** page: save a `fecha_exp_identificacion` value, reload, verify it persists
+- [x] 7.3 Test **Gestion Equipo** table: confirm Identificación column shows grouped ID + exp date; confirm F. Nacimiento column shows birth date or `—`
+- [x] 7.4 Test **Editar perfil** modal: open for a member with existing dates, verify pre-fill; set new dates, save, reopen and verify persistence
+- [x] 7.5 Test **CSV export**: trigger download from ReservasPanel, open in Excel, verify `fecha_nacimiento` and `fecha_exp_identificacion` columns appear in the correct position
 
 ## 8. Documentation
 
-- [ ] 8.1 Update `projectspec/03-project-structure.md` — in the `v_miembros_equipo` migration note and `reservas_reporte_view` descriptions, mention the new columns; in the `EquipoTable` component description update the column list
+- [x] 8.1 Update `projectspec/03-project-structure.md` — N/A (doc is a file tree only, no descriptive sections for views or columns)
 
 ## 9. Commit and Pull Request
 

@@ -177,6 +177,7 @@ export function usePerfil(): UsePerfilResult {
         fecha_nacimiento: formValues.fecha_nacimiento || null,
         tipo_identificacion: (formValues.tipo_identificacion as TipoIdentificacion) || null,
         numero_identificacion: formValues.numero_identificacion.trim() || null,
+        fecha_exp_identificacion: formValues.fecha_exp_identificacion || null,
         rh: formValues.rh || null,
       };
 

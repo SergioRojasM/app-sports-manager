@@ -10,7 +10,6 @@ type EquipoTableProps = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: 20 | 50 | 100) => void;
   onAsignarNivel?: (usuarioId: string) => void;
-  onEditarPerfil?: (row: MiembroTableItem) => void;
   onEliminar?: (row: MiembroTableItem) => void;
   onBloquear?: (row: MiembroTableItem) => void;
   roles?: RolOption[];
@@ -49,7 +48,6 @@ export function EquipoTable({
   onPageChange,
   onPageSizeChange,
   onAsignarNivel,
-  onEditarPerfil,
   onEliminar,
   onBloquear,
   roles,
@@ -139,16 +137,6 @@ export function EquipoTable({
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    {onEditarPerfil ? (
-                      <button
-                        type="button"
-                        onClick={() => onEditarPerfil(row)}
-                        className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
-                        title="Editar perfil"
-                      >
-                        <span className="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
-                      </button>
-                    ) : null}
                     {onAsignarNivel ? (
                       <button
                         type="button"
