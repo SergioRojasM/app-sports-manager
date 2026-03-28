@@ -18,6 +18,7 @@ export type PerfilUsuario = {
   foto_url: string | null;
   tipo_identificacion: TipoIdentificacion | null;
   numero_identificacion: string | null;
+  fecha_exp_identificacion: string | null; // ISO date string (YYYY-MM-DD)
   rh: string | null;
 };
 
@@ -38,6 +39,7 @@ export type PerfilFormValues = {
   fecha_nacimiento: string;
   tipo_identificacion: TipoIdentificacion | '';
   numero_identificacion: string;
+  fecha_exp_identificacion: string;
   rh: TipoRH | '';
   /** String representation to avoid numeric input quirks */
   peso_kg: string;

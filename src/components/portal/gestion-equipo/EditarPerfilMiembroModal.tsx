@@ -24,6 +24,7 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [tipoIdentificacion, setTipoIdentificacion] = useState('');
   const [numeroIdentificacion, setNumeroIdentificacion] = useState('');
+  const [fechaExpIdentificacion, setFechaExpIdentificacion] = useState('');
   const [rh, setRh] = useState('');
   const [pesoKg, setPesoKg] = useState('');
   const [alturaCm, setAlturaCm] = useState('');
@@ -39,9 +40,10 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
     setNombre(miembro.nombre ?? '');
     setApellido(miembro.apellido ?? '');
     setTelefono(miembro.telefono ?? '');
-    setFechaNacimiento('');
+    setFechaNacimiento(miembro.fecha_nacimiento ?? '');
     setTipoIdentificacion(miembro.tipo_identificacion ?? '');
     setNumeroIdentificacion(miembro.numero_identificacion ?? '');
+    setFechaExpIdentificacion(miembro.fecha_exp_identificacion ?? '');
     setRh(miembro.rh ?? '');
     setErrorMsg(null);
     setNombreError(false);
@@ -82,6 +84,7 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
         fecha_nacimiento: fechaNacimiento || null,
         tipo_identificacion: (tipoIdentificacion as TipoIdentificacion) || null,
         numero_identificacion: numeroIdentificacion.trim() || null,
+        fecha_exp_identificacion: fechaExpIdentificacion || null,
         rh: rh.trim() || null,
         peso_kg: pesoKg ? Number(pesoKg) : null,
         altura_cm: alturaCm ? Number(alturaCm) : null,
@@ -92,7 +95,7 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
     } finally {
       setIsSubmitting(false);
     }
-  }, [miembro, nombre, apellido, telefono, fechaNacimiento, tipoIdentificacion, numeroIdentificacion, rh, pesoKg, alturaCm, onSave, onClose]);
+  }, [miembro, nombre, apellido, telefono, fechaNacimiento, tipoIdentificacion, numeroIdentificacion, fechaExpIdentificacion, rh, pesoKg, alturaCm, onSave, onClose]);
 
   if (!miembro) return null;
 
@@ -199,6 +202,15 @@ export function EditarPerfilMiembroModal({ miembro, onClose, onSave }: EditarPer
                   className="w-full rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-turquoise/50"
                 />
               </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-slate-400">Fecha expedición ID</label>
+              <input
+                type="date"
+                value={fechaExpIdentificacion}
+                onChange={(e) => setFechaExpIdentificacion(e.target.value)}
+                className="w-full rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-turquoise/50"
+              />
             </div>
             <div>
               <label className="mb-1 block text-xs text-slate-400">RH</label>

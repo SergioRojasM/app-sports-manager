@@ -16,6 +16,8 @@ export type MiembroRow = {
   apellido: string;
   tipo_identificacion: TipoIdentificacion | null;
   numero_identificacion: string | null;
+  fecha_nacimiento: string | null;
+  fecha_exp_identificacion: string | null;
   telefono: string | null;
   email: string;
   foto_url: string | null;
@@ -91,6 +93,7 @@ export type EditarPerfilMiembroInput = {
   fecha_nacimiento?: string | null;
   tipo_identificacion?: TipoIdentificacion | null;
   numero_identificacion?: string | null;
+  fecha_exp_identificacion?: string | null;
   rh?: string | null;
   peso_kg?: number | null;
   altura_cm?: number | null;

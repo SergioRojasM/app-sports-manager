@@ -68,11 +68,11 @@ export function EquipoTable({
           <thead className="glass border-b border-portal-border text-xs uppercase tracking-wider text-slate-400">
             <tr>
               <th scope="col" className="px-4 py-3">Nombre</th>
-              <th scope="col" className="px-4 py-3">Tipo ID</th>
-              <th scope="col" className="px-4 py-3">N° Identificación</th>
+              <th scope="col" className="px-4 py-3">Identificación</th>
               <th scope="col" className="px-4 py-3">Teléfono</th>
               <th scope="col" className="px-4 py-3">Correo</th>
               <th scope="col" className="px-4 py-3">RH</th>
+              <th scope="col" className="px-4 py-3">F. Nacimiento</th>
               <th scope="col" className="px-4 py-3">Estado</th>
               <th scope="col" className="px-4 py-3">Fallas (30d)</th>
               <th scope="col" className="px-4 py-3">Perfil</th>
@@ -89,10 +89,12 @@ export function EquipoTable({
                   {row.fullName || '—'}
                 </td>
                 <td className="px-4 py-3 text-slate-300">
-                  {cell(row.tipo_identificacion)}
-                </td>
-                <td className="px-4 py-3 text-slate-300">
-                  {cell(row.numero_identificacion)}
+                  <div>
+                    <span>{cell(row.tipo_identificacion)} · {cell(row.numero_identificacion)}</span>
+                    <span className="block text-xs text-slate-500">
+                      Exp: {row.fecha_exp_identificacion ?? '—'}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-slate-300">
                   {cell(row.telefono)}
@@ -102,6 +104,9 @@ export function EquipoTable({
                 </td>
                 <td className="px-4 py-3 text-slate-300">
                   {cell(row.rh)}
+                </td>
+                <td className="px-4 py-3 text-slate-300">
+                  {row.fecha_nacimiento ?? '—'}
                 </td>
                 <td className="px-4 py-3">
                   <EquipoStatusBadge estado={row.estado} />

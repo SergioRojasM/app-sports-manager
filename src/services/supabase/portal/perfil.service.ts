@@ -33,7 +33,7 @@ export async function getPerfil(
     supabase
       .from('usuarios')
       .select(
-        'id, email, nombre, apellido, telefono, fecha_nacimiento, foto_url, tipo_identificacion, numero_identificacion, rh',
+        'id, email, nombre, apellido, telefono, fecha_nacimiento, foto_url, tipo_identificacion, numero_identificacion, fecha_exp_identificacion, rh',
       )
       .eq('id', userId)
       .single(),
