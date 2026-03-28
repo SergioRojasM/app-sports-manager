@@ -47,7 +47,7 @@
 
 ## 9. Commit and Pull Request
 
-- [ ] 9.1 Stage all changes: `git add -A`
-- [ ] 9.2 Create commit: `git commit -m "feat(us0045): add fecha_exp_identificacion and fecha_nacimiento to profile, team, and CSV export"`
-- [ ] 9.3 Push branch: `git push origin feat/us0045-user-date-fields`
-- [ ] 9.4 Open a Pull Request with title: `feat: US-0045 — Add ID issue date and birth date fields` and description summarising: migrations (3 files), types (3 files), services (2 files), hook (1 file), components (4 files); reference US-0045 acceptance criteria
+- [x] 9.1 Stage all changes: `git add -A`
+- [x] 9.2 Create commit: `git commit -m "feat(us0045): add fecha_exp_identificacion and fecha_nacimiento to profile, team, and CSV export"`
+- [x] 9.3 Push branch: `git push origin feat/us0045-user-date-fields`
+- [x] 9.4 Open a Pull Request with title: `feat: US-0045 — Add ID issue date and birth date fields` and description summarising: migrations (3 files), types (3 files), services (2 files), hook (1 file), components (4 files); reference US-0045 acceptance criteria
