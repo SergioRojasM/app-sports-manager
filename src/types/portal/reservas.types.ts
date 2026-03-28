@@ -67,6 +67,8 @@ export type ReservaReportRow = {
   atleta_telefono: string | null;
   tipo_identificacion: string | null;
   numero_identificacion: string | null;
+  fecha_nacimiento: string | null;
+  fecha_exp_identificacion: string | null;
   entrenamiento_nombre: string | null;
   entrenamiento_fecha: string | null;
   disciplina: string | null;

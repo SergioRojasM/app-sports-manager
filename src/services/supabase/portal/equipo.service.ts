@@ -27,6 +27,8 @@ type RawMiembroRow = {
   apellido: string | null;
   tipo_identificacion: string | null;
   numero_identificacion: string | null;
+  fecha_nacimiento: string | null;
+  fecha_exp_identificacion: string | null;
   telefono: string | null;
   email: string;
   foto_url: string | null;
@@ -45,6 +47,8 @@ function mapRawRow(row: RawMiembroRow): MiembroRow {
     apellido: row.apellido ?? '',
     tipo_identificacion: (row.tipo_identificacion as TipoIdentificacion) ?? null,
     numero_identificacion: row.numero_identificacion ?? null,
+    fecha_nacimiento: row.fecha_nacimiento ?? null,
+    fecha_exp_identificacion: row.fecha_exp_identificacion ?? null,
     telefono: row.telefono ?? null,
     email: row.email,
     foto_url: row.foto_url ?? null,

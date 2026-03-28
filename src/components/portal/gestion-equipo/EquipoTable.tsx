@@ -10,7 +10,6 @@ type EquipoTableProps = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: 20 | 50 | 100) => void;
   onAsignarNivel?: (usuarioId: string) => void;
-  onEditarPerfil?: (row: MiembroTableItem) => void;
   onEliminar?: (row: MiembroTableItem) => void;
   onBloquear?: (row: MiembroTableItem) => void;
   roles?: RolOption[];
@@ -49,7 +48,6 @@ export function EquipoTable({
   onPageChange,
   onPageSizeChange,
   onAsignarNivel,
-  onEditarPerfil,
   onEliminar,
   onBloquear,
   roles,
@@ -68,11 +66,11 @@ export function EquipoTable({
           <thead className="glass border-b border-portal-border text-xs uppercase tracking-wider text-slate-400">
             <tr>
               <th scope="col" className="px-4 py-3">Nombre</th>
-              <th scope="col" className="px-4 py-3">Tipo ID</th>
-              <th scope="col" className="px-4 py-3">N° Identificación</th>
+              <th scope="col" className="px-4 py-3">Identificación</th>
               <th scope="col" className="px-4 py-3">Teléfono</th>
               <th scope="col" className="px-4 py-3">Correo</th>
               <th scope="col" className="px-4 py-3">RH</th>
+              <th scope="col" className="px-4 py-3">F. Nacimiento</th>
               <th scope="col" className="px-4 py-3">Estado</th>
               <th scope="col" className="px-4 py-3">Fallas (30d)</th>
               <th scope="col" className="px-4 py-3">Perfil</th>
@@ -89,10 +87,12 @@ export function EquipoTable({
                   {row.fullName || '—'}
                 </td>
                 <td className="px-4 py-3 text-slate-300">
-                  {cell(row.tipo_identificacion)}
-                </td>
-                <td className="px-4 py-3 text-slate-300">
-                  {cell(row.numero_identificacion)}
+                  <div>
+                    <span>{cell(row.tipo_identificacion)} · {cell(row.numero_identificacion)}</span>
+                    <span className="block text-xs text-slate-500">
+                      Exp: {row.fecha_exp_identificacion ?? '—'}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-slate-300">
                   {cell(row.telefono)}
@@ -102,6 +102,9 @@ export function EquipoTable({
                 </td>
                 <td className="px-4 py-3 text-slate-300">
                   {cell(row.rh)}
+                </td>
+                <td className="px-4 py-3 text-slate-300">
+                  {row.fecha_nacimiento ?? '—'}
                 </td>
                 <td className="px-4 py-3">
                   <EquipoStatusBadge estado={row.estado} />
@@ -134,16 +137,6 @@ export function EquipoTable({
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    {onEditarPerfil ? (
-                      <button
-                        type="button"
-                        onClick={() => onEditarPerfil(row)}
-                        className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
-                        title="Editar perfil"
-                      >
-                        <span className="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
-                      </button>
-                    ) : null}
                     {onAsignarNivel ? (
                       <button
                         type="button"

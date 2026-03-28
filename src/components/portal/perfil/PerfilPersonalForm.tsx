@@ -212,6 +212,22 @@ export function PerfilPersonalForm({
             className={inputClass}
           />
         </FormField>
+
+        {/* Fecha Expedición ID */}
+        <FormField
+          id="fecha_exp_identificacion"
+          label="Fecha Expedición ID"
+          icon="calendar_today"
+          error={fieldErrors.fecha_exp_identificacion}
+        >
+          <input
+            id="fecha_exp_identificacion"
+            type="date"
+            value={formValues.fecha_exp_identificacion}
+            onChange={(e) => updateField('fecha_exp_identificacion', e.target.value)}
+            className={inputClass}
+          />
+        </FormField>
       </div>
     </section>
   );

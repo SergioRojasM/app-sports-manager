@@ -9,7 +9,6 @@ import { EquipoStatsCards } from './EquipoStatsCards';
 import { EquipoHeaderFilters } from './EquipoHeaderFilters';
 import { EquipoTable } from './EquipoTable';
 import { AsignarNivelModal } from './AsignarNivelModal';
-import { EditarPerfilMiembroModal } from './EditarPerfilMiembroModal';
 import { EliminarMiembroModal } from './EliminarMiembroModal';
 import { BloquearMiembroModal } from './BloquearMiembroModal';
 import { CambiarRolModal } from './CambiarRolModal';
@@ -61,7 +60,6 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
     paginatedMembers,
     stats,
     refresh,
-    editarPerfil,
     eliminarDelEquipo,
     bloquearDelEquipo,
     roles,
@@ -77,7 +75,6 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('equipo');
   const [asignarNivelTarget, setAsignarNivelTarget] = useState<string | null>(null);
-  const [editTarget, setEditTarget] = useState<MiembroTableItem | null>(null);
   const [removeTarget, setRemoveTarget] = useState<MiembroTableItem | null>(null);
   const [blockTarget, setBlockTarget] = useState<MiembroTableItem | null>(null);
   const [rolChangeTarget, setRolChangeTarget] = useState<{ miembro: MiembroTableItem; nuevoRol: RolOption } | null>(null);
@@ -177,7 +174,6 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               onPageChange={setCurrentPage}
               onPageSizeChange={setPageSize}
               onAsignarNivel={(usuarioId) => setAsignarNivelTarget(usuarioId)}
-              onEditarPerfil={(row) => setEditTarget(row)}
               onEliminar={(row) => setRemoveTarget(row)}
               onBloquear={(row) => setBlockTarget(row)}
               roles={roles}
@@ -195,12 +191,6 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               onClose={() => setAsignarNivelTarget(null)}
             />
           ) : null}
-
-          <EditarPerfilMiembroModal
-            miembro={editTarget}
-            onClose={() => setEditTarget(null)}
-            onSave={editarPerfil}
-          />
 
           <EliminarMiembroModal
             miembro={removeTarget}
