@@ -33,7 +33,7 @@ export function MisSuscripcionesYPagosPage({
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold text-slate-100">Mis Suscripciones</h1>
-        <div className="rounded-xl border border-portal-border bg-navy-card p-8 text-center">
+        <div className="glass-card rounded-md p-8 text-center">
           <span className="material-symbols-outlined mb-2 text-4xl text-slate-500">
             credit_card_off
           </span>
@@ -42,7 +42,7 @@ export function MisSuscripcionesYPagosPage({
           </p>
           <a
             href={`/portal/orgs/${tenantId}/gestion-planes`}
-            className="mt-3 inline-block text-sm font-medium text-turquoise hover:underline"
+            className="mt-3 inline-block text-sm font-medium text-secondary hover:underline"
           >
             Ver planes disponibles
           </a>
@@ -65,12 +65,12 @@ export function MisSuscripcionesYPagosPage({
 
       {/* Filter empty state */}
       {isFilterEmpty ? (
-        <div className="rounded-xl border border-portal-border bg-navy-card p-8 text-center">
+        <div className="glass-card rounded-md p-8 text-center">
           <p className="text-slate-400">No se encontraron resultados con los filtros seleccionados.</p>
           <button
             type="button"
             onClick={clearFilters}
-            className="mt-3 text-sm font-medium text-turquoise hover:underline"
+            className="mt-3 text-sm font-medium text-secondary hover:underline"
           >
             Limpiar filtros
           </button>

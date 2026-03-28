@@ -12,10 +12,6 @@ type PagoCardProps = {
   userId: string;
 };
 
-function isImage(path: string): boolean {
-  return /\.(jpe?g|png|webp)$/i.test(path);
-}
-
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -58,84 +54,66 @@ export function PagoCard({ pago, tenantId, userId }: PagoCardProps) {
   };
 
   return (
-    <div className="mt-3 space-y-3 rounded-lg border border-portal-border/50 bg-navy-deep/40 p-3">
-      {/* Payment info row */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+    <div className="mt-2 rounded-md bg-slate-700/30 border border-white/5 p-2">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
         <span className="text-slate-100 font-medium">{formatCurrency(pago.monto)}</span>
         <span className="text-slate-400">{pago.metodo_pago_nombre ?? '—'}</span>
         <PagoEstadoBadge estado={pago.estado} />
         <span className="text-slate-400">
           {pago.fecha_pago ? formatDate(pago.fecha_pago) : '—'}
         </span>
+
+        {/* Comprobante download link */}
+        {comprobantePath && !urlLoading && signedUrl && (
+          <a
+            href={signedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-secondary hover:underline"
+          >
+            <span className="material-symbols-outlined !text-[14px] !leading-[14px]">attachment</span>
+            Comprobante
+          </a>
+        )}
+
+        {/* Upload button */}
+        {canUpload && (
+          <>
+            <label htmlFor={`comprobante-${pago.id}`} className="sr-only">
+              Subir comprobante
+            </label>
+            <input
+              ref={fileInputRef}
+              id={`comprobante-${pago.id}`}
+              type="file"
+              accept="image/*,.pdf"
+              onChange={handleFileChange}
+              disabled={isUploading}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="inline-flex items-center gap-1.5 rounded-md border border-portal-border bg-slate-800/40 px-2.5 py-1 text-[10px] font-medium text-slate-300 transition-all hover:border-turquoise/50 hover:bg-turquoise/10 hover:text-turquoise disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined !text-[14px] !leading-[14px]">
+                {isUploading ? 'hourglass_empty' : 'upload_file'}
+              </span>
+              {isUploading
+                ? 'Subiendo…'
+                : comprobantePath
+                  ? 'Resubir comprobante'
+                  : 'Subir comprobante'}
+            </button>
+          </>
+        )}
       </div>
 
-      {/* Comprobante preview */}
-      {comprobantePath && (
-        <div className="space-y-1">
-          <span className="text-xs font-medium text-slate-400">Comprobante</span>
-          {urlLoading ? (
-            <div className="h-24 w-full animate-pulse rounded bg-slate-700/40" />
-          ) : signedUrl ? (
-            isImage(comprobantePath) ? (
-              <img
-                src={signedUrl}
-                alt="Comprobante de pago"
-                className="max-h-48 rounded border border-portal-border object-contain"
-              />
-            ) : (
-              <a
-                href={signedUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-turquoise hover:underline"
-              >
-                <span className="material-symbols-outlined text-base">picture_as_pdf</span>
-                Descargar PDF
-              </a>
-            )
-          ) : null}
-        </div>
-      )}
-
-      {/* Upload button */}
-      {canUpload && (
-        <div className="space-y-1">
-          <label
-            htmlFor={`comprobante-${pago.id}`}
-            className="sr-only"
-          >
-            Subir comprobante
-          </label>
-          <input
-            ref={fileInputRef}
-            id={`comprobante-${pago.id}`}
-            type="file"
-            accept="image/*,.pdf"
-            onChange={handleFileChange}
-            disabled={isUploading}
-            className="hidden"
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="inline-flex items-center gap-1.5 rounded-md border border-portal-border bg-navy-deep px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-turquoise/50 hover:text-turquoise disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined text-base">
-              {isUploading ? 'hourglass_empty' : 'upload_file'}
-            </span>
-            {isUploading
-              ? 'Subiendo…'
-              : comprobantePath
-                ? 'Resubir comprobante'
-                : 'Subir comprobante'}
-          </button>
-          {error && (
-            <p className="text-xs text-rose-400" role="alert" aria-live="assertive">
-              {error}
-            </p>
-          )}
-        </div>
+      {error && (
+        <p className="mt-1 text-xs text-rose-400" role="alert" aria-live="assertive">
+          {error}
+        </p>
       )}
     </div>
   );

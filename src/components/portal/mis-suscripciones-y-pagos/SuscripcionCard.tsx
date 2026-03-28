@@ -25,15 +25,15 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
   const showClases = clases_restantes != null && clases_plan != null;
 
   return (
-    <div className="rounded-xl border border-portal-border bg-navy-card p-4">
+    <div className="glass-card rounded-md p-4 border border-white/5 hover:border-primary/20 transition-all">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h3 className="text-base font-semibold text-slate-100">{plan_nombre}</h3>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-1">
+        <h3 className="text-sm font-semibold text-secondary truncate">{plan_nombre}</h3>
         <SuscripcionEstadoBadge estado={estado} />
       </div>
 
       {/* Dates + classes */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
         <span>
           <span className="text-slate-500">Inicio:</span>{' '}
           {fecha_inicio ? formatDate(fecha_inicio) : '—'}
@@ -53,8 +53,8 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
       {pago ? (
         <PagoCard pago={pago} tenantId={tenantId} userId={userId} />
       ) : (
-        <p className="mt-3 text-sm italic text-slate-500">
-          No payment record found for this subscription.
+        <p className="mt-2 text-xs italic text-slate-500">
+          Sin registro de pago para esta suscripción.
         </p>
       )}
     </div>

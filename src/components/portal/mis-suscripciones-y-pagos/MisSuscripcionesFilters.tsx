@@ -51,10 +51,10 @@ function ChipGroup<T extends string>({
               key={chip.value}
               type="button"
               onClick={() => onChange(chip.value)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
                 isActive
-                  ? 'border-turquoise/60 bg-turquoise/15 text-turquoise'
-                  : 'border-portal-border bg-transparent text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                  ? 'bg-turquoise/20 text-turquoise border border-turquoise/50'
+                  : 'bg-slate-800/40 text-slate-400 border border-transparent hover:text-slate-200'
               }`}
             >
               {chip.label}

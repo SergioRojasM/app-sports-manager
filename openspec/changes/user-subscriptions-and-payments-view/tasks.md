@@ -39,5 +39,5 @@
 
 ## 9. Commit & Pull Request
 
-- [ ] 9.1 Stage all changes and create a commit with message: `feat(portal): add user subscriptions and payments view for usuario role`
-- [ ] 9.2 Write pull request description summarizing: new `mis-suscripciones-y-pagos` page for `usuario` role with client-side filtering, comprobante preview and re-upload, role guard, and `uploadPaymentProof` upsert extension; reference US-0044; list AC items verified
+- [x] 9.1 Stage all changes and create a commit with message: `feat(portal): add user subscriptions and payments view for usuario role`
+- [x] 9.2 Write pull request description summarizing: new `mis-suscripciones-y-pagos` page for `usuario` role with client-side filtering, comprobante preview and re-upload, role guard, and `uploadPaymentProof` upsert extension; reference US-0044; list AC items verified
