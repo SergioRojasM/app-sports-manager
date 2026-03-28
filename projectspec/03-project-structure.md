@@ -39,7 +39,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   └── gestion-suscripciones/page.tsx
 │   │               ├── (atleta)/
-│   │               │   └── entrenamientos-disponibles/page.tsx
+│   │               │   ├── entrenamientos-disponibles/page.tsx
+│   │               │   └── mis-suscripciones-y-pagos/page.tsx  # Usuario: view own subscriptions + upload comprobante (role guard: usuario only)
 │   │               ├── (entrenador)/
 │   │               │   └── atletas/page.tsx
 │   │               └── (shared)/
@@ -139,6 +140,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PerfilPersonalForm.tsx
 │   │   │       ├── PerfilDeportivoForm.tsx
 │   │   │       └── index.ts
+│   │   │   └── mis-suscripciones-y-pagos/  # Feature slice (portal/mis-suscripciones-y-pagos — user subscription & payment view)
+│   │   │       ├── MisSuscripcionesYPagosPage.tsx  # List container with filters, empty states
+│   │   │       ├── MisSuscripcionesFilters.tsx     # Chip filter bar (subscription status + payment status)
+│   │   │       ├── SuscripcionCard.tsx              # Subscription card with plan info + SuscripcionEstadoBadge
+│   │   │       ├── PagoCard.tsx                     # Payment info, comprobante viewer, upload trigger
+│   │   │       └── index.ts
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -186,6 +193,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useEliminarSuscripcion.ts  # Confirmation + delete action for permanent deletion
 │   │       └── perfil/
 │   │           └── usePerfil.ts
+│   │       └── mis-suscripciones-y-pagos/
+│   │           ├── useMisSuscripciones.ts      # Client-side filter state (subscription + payment status) with AND logic
+│   │           └── useSubirComprobante.ts     # File validation (MIME, 5 MB), upload with upsert, comprobante_path update
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -213,7 +223,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
-│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof, getSignedUrl — wraps Supabase Storage API for org-assets bucket
+│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket
+│   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripcionesTenant — user's subscriptions with plan + pago joins, scoped by atleta_id + tenant_id
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
@@ -236,6 +247,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion, restriction inputs, BookingRejection, BookingResult
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_clases_incluidas
+│   │       └── mis-suscripciones-y-pagos.types.ts  # MiSuscripcionRow, MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces
 │   │

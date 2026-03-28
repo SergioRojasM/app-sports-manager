@@ -87,13 +87,14 @@ export const storageService = {
     userId: string,
     pagoId: string,
     file: File,
+    options?: { upsert?: boolean },
   ): Promise<StorageUploadResult> {
     const ext = getExtension(file);
     const path = buildReceiptPath(tenantId, userId, pagoId, ext);
 
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .upload(path, file, { upsert: false, contentType: file.type });
+      .upload(path, file, { upsert: options?.upsert ?? false, contentType: file.type });
 
     if (uploadError) {
       throw new Error(uploadError.message);
