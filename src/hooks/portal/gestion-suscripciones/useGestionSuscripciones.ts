@@ -14,7 +14,7 @@ type UseGestionSuscripcionesOptions = {
   tenantId: string;
 };
 
-type ModalType = 'pago' | 'suscripcion' | 'editar' | 'eliminar' | null;
+type ModalType = 'pago' | 'suscripcion' | 'editar' | 'eliminar' | 'verDetalle' | null;
 
 type UseGestionSuscripcionesResult = {
   /** Full unfiltered list */
@@ -49,6 +49,7 @@ type UseGestionSuscripcionesResult = {
   openSuscripcionModal: (row: SuscripcionAdminRow) => void;
   openEditarModal: (row: SuscripcionAdminRow) => void;
   openEliminarModal: (row: SuscripcionAdminRow) => void;
+  openVerDetalleModal: (row: SuscripcionAdminRow) => void;
   closeModal: () => void;
 
   /** Actions */
@@ -189,6 +190,11 @@ export function useGestionSuscripciones({
     setModalType('eliminar');
   }, []);
 
+  const openVerDetalleModal = useCallback((row: SuscripcionAdminRow) => {
+    setSelectedRow(row);
+    setModalType('verDetalle');
+  }, []);
+
   const closeModal = useCallback(() => {
     setSelectedRow(null);
     setModalType(null);
@@ -218,6 +224,7 @@ export function useGestionSuscripciones({
     openSuscripcionModal,
     openEditarModal,
     openEliminarModal,
+    openVerDetalleModal,
     closeModal,
     refresh: loadData,
   };

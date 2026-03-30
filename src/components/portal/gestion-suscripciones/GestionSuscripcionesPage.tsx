@@ -10,6 +10,7 @@ import { ValidarPagoModal } from './ValidarPagoModal';
 import { ValidarSuscripcionModal } from './ValidarSuscripcionModal';
 import { EditarSuscripcionModal } from './EditarSuscripcionModal';
 import { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
+import { VerDetallePagoModal } from './VerDetallePagoModal';
 
 type GestionSuscripcionesPageProps = {
   tenantId: string;
@@ -55,6 +56,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
     openSuscripcionModal,
     openEditarModal,
     openEliminarModal,
+    openVerDetalleModal,
     closeModal,
     refresh,
   } = useGestionSuscripciones({ tenantId });
@@ -127,6 +129,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
           onValidarSuscripcion={openSuscripcionModal}
           onEditar={openEditarModal}
           onEliminar={openEliminarModal}
+          onVerDetallePago={openVerDetalleModal}
         />
       ) : null}
 
@@ -163,6 +166,13 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
           row={selectedRow}
           onClose={closeModal}
           onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {selectedRow && modalType === 'verDetalle' && (
+        <VerDetallePagoModal
+          row={selectedRow}
+          onClose={closeModal}
         />
       )}
     </section>

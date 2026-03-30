@@ -133,6 +133,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── ValidarSuscripcionModal.tsx
 │   │   │       ├── EditarSuscripcionModal.tsx    # Full-field edit modal for existing subscriptions
 │   │   │       ├── EliminarSuscripcionModal.tsx  # Confirmation dialog for permanent deletion
+│   │   │       ├── VerDetallePagoModal.tsx       # Read-only modal: full payment details + comprobante viewer (all payment statuses)
 │   │   │       └── index.ts
 │   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
 │   │   │       ├── PerfilPage.tsx
