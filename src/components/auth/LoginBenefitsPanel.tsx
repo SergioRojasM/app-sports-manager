@@ -34,9 +34,9 @@ export function LoginBenefitsPanel() {
             </div>
             <div>
               <h3 className="text-base font-semibold text-slate-100">
-                <span className="mr-2 text-turquoise">•</span>Analítica Avanzada de Rendimiento
+                <span className="mr-2 text-turquoise">•</span>Gestiona adecuadamente tu organizacion 
               </h3>
-              <p className="text-sm text-slate-500">Profundiza en métricas individuales y del equipo.</p>
+              <p className="text-sm text-slate-500">Crea y administra planes de suscripcion, entrenadores y atletas.</p>
             </div>
           </li>
 
@@ -48,7 +48,7 @@ export function LoginBenefitsPanel() {
               <h3 className="text-base font-semibold text-slate-100">
                 <span className="mr-2 text-turquoise">•</span>Gestión de Sesiones de Entrenamiento
               </h3>
-              <p className="text-sm text-slate-500">Programa ejercicios y controla la disponibilidad de jugadores.</p>
+              <p className="text-sm text-slate-500">Programa entrenamientos y controla su gestion.</p>
             </div>
           </li>
 
@@ -58,9 +58,9 @@ export function LoginBenefitsPanel() {
             </div>
             <div>
               <h3 className="text-base font-semibold text-slate-100">
-                <span className="mr-2 text-turquoise">•</span>Información del Equipo en Tiempo Real
+                <span className="mr-2 text-turquoise">•</span>Información del Equipo
               </h3>
-              <p className="text-sm text-slate-500">Retroalimentación instantánea durante sesiones activas.</p>
+              <p className="text-sm text-slate-500">Centraliza los datos de tus atletas y entrenadores.</p>
             </div>
           </li>
 
@@ -70,14 +70,14 @@ export function LoginBenefitsPanel() {
             </div>
             <div>
               <h3 className="text-base font-semibold text-slate-100">
-                <span className="mr-2 text-turquoise">•</span>Reportes Centralizados
+                <span className="mr-2 text-turquoise">•</span>Hub de Entrenamientos
               </h3>
-              <p className="text-sm text-slate-500">Paneles completos para cada entrenador.</p>
+              <p className="text-sm text-slate-500">Accede a entrenamientos desde un solo lugar.</p>
             </div>
           </li>
         </ul>
 
-        <p className="mt-auto pt-6 text-xs text-slate-600">© 2026 qbop training Inc. Todos los derechos reservados.</p>
+        <p className="mt-auto pt-6 text-xs text-slate-600">© 2026 GRIT Arena. Todos los derechos reservados.</p>
       </div>
     </section>
   );

@@ -10,7 +10,7 @@ export default function Footer() {
                 exercise
               </span>
             </div>
-            <h2 className="text-white text-lg font-black italic">qbop training</h2>
+            <h2 className="text-white text-lg font-black italic">GRIT Arena</h2>
           </div>
           
           <p className="text-slate-500 text-sm leading-relaxed">
@@ -77,16 +77,6 @@ export default function Footer() {
             </li>
             <li>
               <a className="hover:text-white transition-colors" href="#">
-                Carreras
-              </a>
-            </li>
-            <li>
-              <a className="hover:text-white transition-colors" href="#">
-                Prensa
-              </a>
-            </li>
-            <li>
-              <a className="hover:text-white transition-colors" href="#">
                 Contacto
               </a>
             </li>
@@ -95,9 +85,9 @@ export default function Footer() {
 
         {/* Newsletter Column */}
         <div>
-          <h4 className="text-white font-bold mb-6">Suscríbete al Newsletter</h4>
+          <h4 className="text-white font-bold mb-6">Suscríbete</h4>
           <p className="text-slate-500 text-sm mb-4">
-            Recibe consejos tácticos y actualizaciones de producto.
+            Recibe notificaciones de entrenamientos y actualizaciones de producto.
           </p>
           <form className="flex flex-col gap-3">
             <input
@@ -115,7 +105,7 @@ export default function Footer() {
       {/* Bottom Section */}
       <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
         <p className="text-slate-600 text-xs">
-          © 2024 qbop training Inc. Todos los derechos reservados.
+          © 2026 GRIT Arena. Todos los derechos reservados.
         </p>
         <div className="flex gap-6 text-slate-600 text-xs">
           <a className="hover:text-white" href="#">

@@ -33,17 +33,21 @@ Following structure reflects the current implementation and the target scalable 
 │   │               ├── layout.tsx        # Membership + role gate for tenant entry
 │   │               ├── page.tsx          # Redirect to tenant role landing
 │   │               ├── (administrador)/
+│   │               │   ├── layout.tsx        # Role guard: redirects non-administrador users to /portal/orgs/[tenant_id]
 │   │               │   ├── gestion-disciplinas/page.tsx
 │   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   └── gestion-suscripciones/page.tsx
 │   │               ├── (atleta)/
+│   │               │   ├── layout.tsx        # Role guard: redirects non-usuario users to /portal/orgs/[tenant_id]
 │   │               │   ├── entrenamientos-disponibles/page.tsx
-│   │               │   └── mis-suscripciones-y-pagos/page.tsx  # Usuario: view own subscriptions + upload comprobante (role guard: usuario only)
+│   │               │   └── mis-suscripciones-y-pagos/page.tsx  # Usuario: view own subscriptions + upload comprobante
 │   │               ├── (entrenador)/
+│   │               │   ├── layout.tsx        # Role guard: redirects non-entrenador users to /portal/orgs/[tenant_id]
 │   │               │   └── atletas/page.tsx
 │   │               └── (shared)/
+│   │                   ├── layout.tsx        # Membership guard: any valid role allowed
 │   │                   ├── gestion-entrenamientos/page.tsx
 │   │                   └── gestion-planes/page.tsx
 │   │
@@ -256,7 +260,11 @@ Following structure reflects the current implementation and the target scalable 
 │       ├── utils.ts
        ├── constants.ts                      # PUBLIC_TENANT_ID: well-known UUID for the system-level public tenant (used by resolveVisiblePara in entrenamientos.service.ts)
 │       ├── csv.ts                           # RFC 4180 CSV generation (toCsvString, downloadTextFile) — used by ReservasPanel CSV export
-│       └── validators.ts
+│       ├── validators.ts
+│       └── portal/
+│           └── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
+│       └── portal/
+│           └── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
 │
 ├── public/                      # Static assets
 │   ├── images/

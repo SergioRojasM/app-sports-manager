@@ -13,8 +13,8 @@ export default function Home() {
       <HeroSection />
       <TrustedBySection />
       <FeaturesSection />
-      <ShowcaseSection />
-      <PricingSection />
+      {/* <ShowcaseSection /> */}
+      {/* <PricingSection /> */}
       <Footer />
     </div>
   );

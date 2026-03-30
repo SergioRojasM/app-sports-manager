@@ -1,11 +1,10 @@
 export default function TrustedBySection() {
   const teams = [
-    'Manchester City',
-    'L.A. Lakers',
-    'Bulls',
-    'F.C. Barcelona',
-    'Real Madrid',
-    'All Blacks'
+    'WOLFPACK-SXH',
+    'WOLFPACK-SXH',
+    'WOLFPACK-SXH',
+    'WOLFPACK-SXH',
+    'WOLFPACK-SXH'
   ];
 
   return (
