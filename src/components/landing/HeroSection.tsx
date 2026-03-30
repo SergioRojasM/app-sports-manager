@@ -42,7 +42,7 @@ export default function HeroSection() {
             <div
               className="w-full bg-center bg-no-repeat aspect-[16/10] bg-cover rounded-xl"
               style={{
-                backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDEKqO66Ce9oKr8Xm0wM_K9AJEa5jfIpjZW-ymimzk1Q_S81UJYPs1pfmZHzVU3h70NygkRPWe00iYkIRgPxXKcNDyHQ0npz08o8azF2TzrSenoJY3J1w9BoEB_iqBSmkBvLtqYi7lCABIm6q_NA_qvhm8X4SyJINhH37VNVfYaavCCT9QzO87BSkztHDLo81wf7iMAxisTA-qYYS0AISxoXOLqW7l3RlIoTvGE-GsgaVLReHK0tiHq-s_D2TXP4HZ-SYYkES_sI6s")'
+                backgroundImage: 'url("/app-demo.png")'
               }}
             />
           </div>

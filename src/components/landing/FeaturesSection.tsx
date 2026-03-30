@@ -1,24 +1,29 @@
 export default function FeaturesSection() {
   const features = [
     {
+      icon: 'monitoring',
+      title: 'Procesos centralizados de tu equipo',
+      description: 'Gestiona y centraliza todos los procesos relacionados a la gestion de tu equipo.'
+    },
+    {
       icon: 'sports_score',
-      title: 'Training Management',
-      description: 'Planificación de sesiones y ejercicios tácticos avanzados con visualización 3D.'
+      title: 'Administración de entrenamientos',
+      description: 'Planificación de sesiones de entrenamiento, seguimiento de rendimiento y análisis de datos.'
     },
     {
       icon: 'chat_bubble',
-      title: 'Player Communication',
-      description: 'Canales directos encriptados para feedback instantáneo entre staff y jugadores.'
-    },
-    {
-      icon: 'monitoring',
-      title: 'Real-time Stats',
-      description: 'Captura de datos biométricos y rendimiento técnico durante cada sesión de juego.'
+      title: 'Gestión de Atletas',
+      description: 'Seguimiento y gestión integral de los atletas, incluyendo estadísticas, rendimiento y comunicación.'
     },
     {
       icon: 'payments',
-      title: 'Payment Calendar',
-      description: 'Automatización de cuotas, membresías y finanzas del club integradas en la nube.'
+      title: 'Seguimiento y gestion de pagos',
+      description: 'Centralización de pagos, membresías y restricciones.'
+    },
+    {
+      icon: 'sports',
+      title: 'Acceso a entrenamientos públicos y privados',
+      description: 'Centralización de entrenamientos, control y disponibilidad a entrenamientos públicos y privados.'
     }
   ];
 

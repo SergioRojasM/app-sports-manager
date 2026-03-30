@@ -14,7 +14,7 @@ export default function Header() {
             className="object-contain"
           />
         </div>
-          <h2 className="text-white text-xl font-black tracking-tighter italic">Sport Manager</h2>
+          <h2 className="text-white text-xl font-black tracking-tighter italic">GRIT Arena</h2>
         </Link>
         
         <div className="hidden md:flex items-center gap-10">
