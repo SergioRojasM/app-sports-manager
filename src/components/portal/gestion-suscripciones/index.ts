@@ -8,3 +8,4 @@ export { ValidarPagoModal } from './ValidarPagoModal';
 export { ValidarSuscripcionModal } from './ValidarSuscripcionModal';
 export { EditarSuscripcionModal } from './EditarSuscripcionModal';
 export { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
+export { VerDetallePagoModal } from './VerDetallePagoModal';

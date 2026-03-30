@@ -10,6 +10,7 @@ type SuscripcionesTableProps = {
   totalFiltered: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: 20 | 50 | 100) => void;
+  onVerDetallePago: (row: SuscripcionAdminRow) => void;
   onValidarPago: (row: SuscripcionAdminRow) => void;
   onValidarSuscripcion: (row: SuscripcionAdminRow) => void;
   onEditar: (row: SuscripcionAdminRow) => void;
@@ -42,6 +43,7 @@ export function SuscripcionesTable({
   totalFiltered,
   onPageChange,
   onPageSizeChange,
+  onVerDetallePago,
   onValidarPago,
   onValidarSuscripcion,
   onEditar,
@@ -108,6 +110,16 @@ export function SuscripcionesTable({
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-right">
                 <div className="flex items-center justify-end gap-1">
+                  {row.pago !== null && (
+                    <button
+                      type="button"
+                      onClick={() => onVerDetallePago(row)}
+                      className="rounded border border-slate-500/30 px-2 py-1 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700/30"
+                      aria-label={`Ver detalle de pago de ${row.atleta_nombre}`}
+                    >
+                      Ver Pago
+                    </button>
+                  )}
                   {row.pago?.estado === 'pendiente' && (
                     <button
                       type="button"
