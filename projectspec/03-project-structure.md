@@ -72,7 +72,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   ├── TenantDirectoryList.tsx
 │   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods
 │   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method
-│   │   │   │   └── SolicitarAccesoButton.tsx  # 4-state access request button with confirmation + history
+│   │   │   │   └── SolicitarAccesoButton.tsx  # 5-state access request button: idle/pending/blocked/incomplete_profile/member
 │   │   │   └── scenarios/                # Feature slice (portal/scenarios)
 │   │   │       ├── ScenariosPage.tsx
 │   │   │       ├── ScenarioCard.tsx
@@ -448,7 +448,7 @@ src/
 │   ├── useDisciplines.ts
 │   └── useDisciplineForm.ts
 ├── hooks/portal/gestion-solicitudes/
-│   ├── useSolicitudRequest.ts
+│   ├── useSolicitudRequest.ts        # submit, track hasPending/isBlocked/isProfileIncomplete state
 │   ├── useSolicitudesAdmin.ts
 │   └── useBloqueados.ts
 ├── services/supabase/portal/

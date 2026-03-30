@@ -21,6 +21,7 @@ const EMPTY_VALUES: TenantEditFormValues = {
   x_url: '',
   banner_url: '',
   max_solicitudes: '2',
+  requiere_perfil_completo: 'false',
 };
 
 const URL_FIELDS: Array<keyof TenantEditFormValues> = [
@@ -62,6 +63,7 @@ function toPayload(values: TenantEditFormValues): TenantEditPayload {
     x_url: normalizeNullable(values.x_url),
     banner_url: normalizeNullable(values.banner_url),
     max_solicitudes: maxSolicitudes,
+    requiere_perfil_completo: values.requiere_perfil_completo === 'true',
   };
 }
 

@@ -138,6 +138,47 @@ export const solicitudesService = {
       );
     }
 
+    // Guard 3: check if tenant requires a complete user profile
+    const { data: tenantFlag, error: tenantFlagError } = await supabase
+      .from('tenants')
+      .select('requiere_perfil_completo')
+      .eq('id', input.tenant_id)
+      .single();
+
+    if (tenantFlagError) {
+      throw new SolicitudesServiceError('unknown', 'Error al verificar la configuración de la organización.');
+    }
+
+    if (tenantFlag?.requiere_perfil_completo) {
+      const { data: userProfile, error: profileError } = await supabase
+        .from('usuarios')
+        .select('nombre, apellido, telefono, fecha_nacimiento, tipo_identificacion, numero_identificacion, fecha_exp_identificacion, rh')
+        .eq('id', input.usuario_id)
+        .single();
+
+      if (profileError) {
+        throw new SolicitudesServiceError('unknown', 'Error al verificar el perfil del usuario.');
+      }
+
+      const isComplete =
+        userProfile &&
+        userProfile.nombre?.trim() &&
+        userProfile.apellido?.trim() &&
+        userProfile.telefono?.trim() &&
+        userProfile.fecha_nacimiento &&
+        userProfile.tipo_identificacion?.trim() &&
+        userProfile.numero_identificacion?.trim() &&
+        userProfile.fecha_exp_identificacion &&
+        userProfile.rh?.trim();
+
+      if (!isComplete) {
+        throw new SolicitudesServiceError(
+          'incomplete_profile',
+          'Esta organización requiere que completes tu perfil antes de solicitar acceso.',
+        );
+      }
+    }
+
     // Insert new pendiente row
     const { error: insertError } = await supabase
       .from('miembros_tenant_solicitudes')

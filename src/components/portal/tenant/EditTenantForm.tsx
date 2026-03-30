@@ -208,6 +208,32 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
           </p>
         ) : null}
       </div>
+
+      {/* requiere_perfil_completo — boolean toggle */}
+      <div className="space-y-1.5">
+        <span
+          id="requiere-perfil-desc"
+          className="block text-[11px] text-slate-500"
+        >
+          Cuando está activo, los usuarios deberán completar su perfil (nombre, apellido, teléfono, fecha de nacimiento,
+          tipo y número de identificación, fecha de expedición y RH) para poder enviar una solicitud de acceso.
+        </span>
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            id="requiere_perfil_completo"
+            name="requiere_perfil_completo"
+            type="checkbox"
+            checked={values.requiere_perfil_completo === 'true'}
+            onChange={(event) => onChange('requiere_perfil_completo', event.target.checked ? 'true' : 'false')}
+            disabled={isSubmitting}
+            aria-describedby="requiere-perfil-desc"
+            className="h-4 w-4 rounded border-slate-600 bg-navy-deep accent-turquoise disabled:opacity-50"
+          />
+          <span className="text-sm font-medium text-slate-200">
+            Requerir perfil completo para solicitar acceso
+          </span>
+        </label>
+      </div>
     </div>
   );
 }

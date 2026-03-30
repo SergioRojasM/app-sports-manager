@@ -27,6 +27,7 @@ type TenantRow = {
   facebook_url: string | null;
   x_url: string | null;
   max_solicitudes: number;
+  requiere_perfil_completo: boolean;
   updated_at?: string | null;
 };
 
@@ -69,6 +70,7 @@ function mapTenantToEditFormValues(tenant: TenantRow): TenantEditFormValues {
     facebook_url: toEditableString(tenant.facebook_url),
     x_url: toEditableString(tenant.x_url),
     max_solicitudes: String(tenant.max_solicitudes ?? 2),
+    requiere_perfil_completo: String(tenant.requiere_perfil_completo ?? false),
   };
 }
 
@@ -125,7 +127,7 @@ export const tenantService = {
   async fetchTenantById(supabase: SupabaseClient, tenantId: string): Promise<TenantRow> {
     const { data, error } = await supabase
       .from('tenants')
-      .select('id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes')
+      .select('id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes, requiere_perfil_completo')
       .eq('id', tenantId)
       .single();
 

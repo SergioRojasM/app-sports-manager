@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useSolicitudRequest } from '@/hooks/portal/gestion-solicitudes/useSolicitudRequest';
 import { SolicitudEstadoBadge } from '@/components/portal/gestion-equipo/gestion-solicitudes/SolicitudEstadoBadge';
 
@@ -19,7 +20,7 @@ function formatDate(dateStr: string): string {
 }
 
 export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) {
-  const { solicitudes, loading, hasPending, rejectionCount, isBlocked, submit, submitting } =
+  const { solicitudes, loading, hasPending, rejectionCount, isBlocked, isProfileIncomplete, submit, submitting } =
     useSolicitudRequest({ tenantId });
 
   const [confirming, setConfirming] = useState(false);
@@ -57,6 +58,9 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
 
   if (isBlocked) {
     label = 'Acceso bloqueado';
+    disabled = true;
+  } else if (isProfileIncomplete) {
+    label = 'Perfil incompleto';
     disabled = true;
   } else if (hasPending) {
     label = 'Solicitud en revisión';
@@ -128,6 +132,20 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
         <p className="text-center text-[11px] text-slate-500">
           Has alcanzado el límite de solicitudes. Contacta a la organización directamente.
         </p>
+      ) : null}
+
+      {/* Incomplete profile banner */}
+      {isProfileIncomplete ? (
+        <div className="rounded-lg border border-amber-400/30 bg-amber-950/30 px-3 py-2.5 text-xs text-amber-200" role="alert">
+          <p>Esta organización requiere que completes tu perfil antes de solicitar acceso.</p>
+          <Link
+            href="/portal/perfil"
+            className="mt-1 inline-flex items-center gap-1 font-semibold text-turquoise hover:underline"
+          >
+            <span className="material-symbols-outlined text-xs" aria-hidden="true">arrow_forward</span>
+            Completar perfil
+          </Link>
+        </div>
       ) : null}
 
       {/* History toggle */}
