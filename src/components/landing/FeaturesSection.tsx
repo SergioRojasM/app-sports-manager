@@ -23,7 +23,7 @@ export default function FeaturesSection() {
     {
       icon: 'sports',
       title: 'Acceso a entrenamientos públicos y privados',
-      description: 'Centralización de entrenamientos, control y disponibilidad a entrenamientos públicos y privados.'
+      description: 'Centralización de entrenamientos, control y disponibilidad a entrenamientos públicos y privados'
     }
   ];
 
