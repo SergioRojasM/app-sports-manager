@@ -28,6 +28,7 @@ export default function RootLayout({
       </head>
       <body className="font-display antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
