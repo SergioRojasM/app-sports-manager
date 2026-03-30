@@ -54,6 +54,7 @@ export type TenantEditFormValues = {
   x_url: string;
   banner_url: string;
   max_solicitudes: string;
+  requiere_perfil_completo: string;
 };
 
 export type TenantEditPayload = {
@@ -68,6 +69,7 @@ export type TenantEditPayload = {
   x_url: string | null;
   banner_url: string | null;
   max_solicitudes: number;
+  requiere_perfil_completo: boolean;
 };
 
 export type TenantEditResult = {

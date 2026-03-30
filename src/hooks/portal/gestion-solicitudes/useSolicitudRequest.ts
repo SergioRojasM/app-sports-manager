@@ -16,6 +16,7 @@ type UseSolicitudRequestResult = {
   hasPending: boolean;
   rejectionCount: number;
   isBlocked: boolean;
+  isProfileIncomplete: boolean;
   submit: (mensaje?: string) => Promise<void>;
   submitting: boolean;
 };
@@ -24,6 +25,7 @@ export function useSolicitudRequest({ tenantId }: UseSolicitudRequestOptions): U
   const { user } = useAuth();
   const [solicitudes, setSolicitudes] = useState<SolicitudRow[]>([]);
   const [isBanned, setIsBanned] = useState(false);
+  const [isProfileIncomplete, setIsProfileIncomplete] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -64,8 +66,12 @@ export function useSolicitudRequest({ tenantId }: UseSolicitudRequestOptions): U
           usuario_id: userId,
           mensaje,
         });
+        setIsProfileIncomplete(false);
         await loadData();
       } catch (err) {
+        if (err instanceof SolicitudesServiceError && err.code === 'incomplete_profile') {
+          setIsProfileIncomplete(true);
+        }
         const msg =
           err instanceof SolicitudesServiceError
             ? err.message
@@ -84,6 +90,7 @@ export function useSolicitudRequest({ tenantId }: UseSolicitudRequestOptions): U
     hasPending,
     rejectionCount,
     isBlocked,
+    isProfileIncomplete,
     submit,
     submitting,
   };

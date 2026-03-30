@@ -73,10 +73,10 @@ export type BloquearUsuarioInput = {
 
 /** Service-level error with a typed code. */
 export class SolicitudesServiceError extends Error {
-  readonly code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'blocked' | 'unknown';
+  readonly code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'blocked' | 'incomplete_profile' | 'unknown';
 
   constructor(
-    code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'blocked' | 'unknown',
+    code: 'forbidden' | 'duplicate' | 'max_rejections' | 'already_member' | 'blocked' | 'incomplete_profile' | 'unknown',
     message: string,
   ) {
     super(message);

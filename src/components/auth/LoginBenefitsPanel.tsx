@@ -9,7 +9,7 @@ export function LoginBenefitsPanel() {
         <header className="xl-6 flex items-center gap-3">
           <div className="size-30 align-middle relative">
             <Image
-                src="/logo.png"
+                src="/icono_2.png"
               alt="Logo de Qbop Sports Manager"
                 fill
                 className="object-contain"

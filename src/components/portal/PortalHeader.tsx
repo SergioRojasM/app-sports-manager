@@ -19,10 +19,10 @@ export function PortalHeader({ profile, role }: PortalHeaderProps) {
       <div className="flex items-center gap-4">
         <Link href="/portal" className="flex items-center gap-2.5">
           <div className="relative h-8 w-8">
-            <Image src="/logo2.png" alt="qbop sports" fill className="object-contain" />
+            <Image src="/icono_2.png" alt="qbop sports" fill className="object-contain" />
           </div>
           <span className="font-display text-sm font-semibold text-slate-100">
-            qbop <span className="text-turquoise">sports</span>
+            GRIT <span className="text-turquoise"> Arena</span>
           </span>
         </Link>
         <div className="h-5 w-px bg-portal-border" />
