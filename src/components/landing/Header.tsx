@@ -8,7 +8,7 @@ export default function Header() {
         <Link href="/" className="flex items-center gap-2">
           <div className="size-12 align-middle relative">
           <Image
-            src="/logo2.png"
+            src="/icono_2.png"
             alt="Wolfpack Logo"
             fill
             className="object-contain"
