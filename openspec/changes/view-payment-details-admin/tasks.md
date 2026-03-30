@@ -50,8 +50,8 @@
 
 ## 9. Commit and PR
 
-- [ ] 9.1 Stage all changes and create a commit: `feat(gestion-suscripciones): add Ver Pago read-only payment detail modal (US-0046)`
-- [ ] 9.2 Push branch and open a Pull Request with description:
+- [x] 9.1 Stage all changes and create a commit: `feat(gestion-suscripciones): add Ver Pago read-only payment detail modal (US-0046)`
+- [x] 9.2 Push branch and open a Pull Request with description:
   ```
   ## Summary
   Adds a "Ver Pago" read-only action to the admin subscription management table.
