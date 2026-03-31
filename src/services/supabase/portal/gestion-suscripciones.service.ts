@@ -35,12 +35,11 @@ type RawSuscripcionRow = {
   };
   plan: {
     nombre: string;
-    vigencia_meses: number;
-    clases_incluidas: number | null;
   };
   plan_tipo: {
     nombre: string;
-    clases_incluidas: number;
+    vigencia_dias: number;
+    clases_incluidas: number | null;
   } | null;
   pagos: Array<{
     id: string;
@@ -75,10 +74,9 @@ function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
     tenant_id: row.tenant_id,
     plan_id: row.plan_id,
     plan_nombre: row.plan.nombre,
-    plan_vigencia_meses: row.plan.vigencia_meses,
-    plan_clases_incluidas: row.plan.clases_incluidas,
     plan_tipo_id: row.plan_tipo_id,
     plan_tipo_nombre: row.plan_tipo?.nombre ?? null,
+    plan_tipo_vigencia_dias: row.plan_tipo?.vigencia_dias ?? null,
     plan_tipo_clases_incluidas: row.plan_tipo?.clases_incluidas ?? null,
     atleta_id: row.atleta_id,
     atleta_nombre: `${row.atleta.nombre ?? ''} ${row.atleta.apellido ?? ''}`.trim(),
@@ -154,8 +152,8 @@ export const gestionSuscripcionesService = {
         estado, comentarios, validado_por, created_at,
         validador_suscripcion:usuarios!suscripciones_validado_por_fkey(nombre, apellido),
         atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
-        plan:planes!suscripciones_plan_id_fkey(nombre, vigencia_meses, clases_incluidas),
-        plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, clases_incluidas),
+        plan:planes!suscripciones_plan_id_fkey(nombre),
+        plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias, clases_incluidas),
         pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo))
         `,
       )

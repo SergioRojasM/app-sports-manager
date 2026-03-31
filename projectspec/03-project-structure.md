@@ -103,9 +103,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │           └── index.ts
 │   │   │   └── planes/                   # Feature slice (portal/planes)
 │   │   │       ├── PlanesPage.tsx
-│   │   │       ├── PlanesTable.tsx
+│   │   │       ├── PlanesTable.tsx         # Props: onEdit, onDuplicate?, onDelete?, renderRowAction?
 │   │   │       ├── PlanesHeaderFilters.tsx
-│   │   │       ├── PlanFormModal.tsx
+│   │   │       ├── PlanFormModal.tsx        # mode: 'create' | 'edit' | 'duplicate'
 │   │   │       ├── PlanesViewPage.tsx
 │   │   │       ├── PlanesRolePage.tsx
 │   │   │       ├── SuscripcionModal.tsx
@@ -179,8 +179,8 @@ Following structure reflects the current implementation and the target scalable 
 │               │   ├── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
 │               │   └── useAsistencias.ts  # Attendance map keyed by reserva_id; isEnabled guard skips fetch for atleta role
 │   │       └── planes/
-│   │           ├── usePlanes.ts
-│   │           ├── usePlanForm.ts
+│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal
+│   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate
 │   │           ├── usePlanesView.ts
 │   │           └── useSuscripcion.ts
 │   │       └── gestion-equipo/
@@ -224,7 +224,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
-│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_clases_incluidas
+│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_clases_incluidas / plan_tipo_vigencia_dias
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
@@ -251,7 +251,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion, restriction inputs, BookingRejection, BookingResult
-│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_clases_incluidas
+│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_clases_incluidas, plan_tipo_vigencia_dias
 │   │       └── mis-suscripciones-y-pagos.types.ts  # MiSuscripcionRow, MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces

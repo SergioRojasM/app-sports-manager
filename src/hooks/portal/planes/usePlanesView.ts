@@ -20,7 +20,18 @@ type UsePlanesViewResult = {
 
 function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): PlanTableItem {
   const status = plan.activo ? 'Activo' : 'Inactivo';
-  const vigencia = plan.vigencia_meses === 1 ? '1 mes' : `${plan.vigencia_meses} meses`;
+
+  // Derive vigenciaLabel from active plan_tipos
+  const activeTipos = (plan.plan_tipos ?? []).filter((t) => t.activo);
+  let vigencia: string;
+  if (activeTipos.length === 0) {
+    vigencia = '—';
+  } else {
+    const days = activeTipos.map((t) => t.vigencia_dias);
+    const minD = Math.min(...days);
+    const maxD = Math.max(...days);
+    vigencia = minD === maxD ? `${minD}d` : `${minD}d – ${maxD}d`;
+  }
 
   const disciplinaNames = plan.disciplinas
     .map((id) => allDisciplines.find((d) => d.id === id)?.nombre)

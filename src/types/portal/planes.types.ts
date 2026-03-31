@@ -10,7 +10,7 @@ export type PlanTipo = {
   descripcion: string | null;
   precio: number;
   vigencia_dias: number;
-  clases_incluidas: number;
+  clases_incluidas: number | null;
   activo: boolean;
   created_at: string;
   updated_at: string;
@@ -23,7 +23,7 @@ export type CreatePlanTipoInput = {
   descripcion?: string | null;
   precio: number;
   vigencia_dias: number;
-  clases_incluidas: number;
+  clases_incluidas: number | null;
   activo?: boolean;
 };
 
@@ -32,7 +32,7 @@ export type UpdatePlanTipoInput = {
   descripcion?: string | null;
   precio?: number;
   vigencia_dias?: number;
-  clases_incluidas?: number;
+  clases_incluidas?: number | null;
   activo?: boolean;
 };
 
@@ -52,9 +52,6 @@ export type Plan = {
   tenant_id: string;
   nombre: string;
   descripcion: string | null;
-  precio: number;
-  vigencia_meses: number;
-  clases_incluidas: number | null;
   tipo: PlanModalidad | null;
   beneficios: string | null;
   activo: boolean;
@@ -84,9 +81,6 @@ export type CreatePlanInput = {
   tenantId: string;
   nombre: string;
   descripcion?: string | null;
-  precio: number;
-  vigencia_meses: number;
-  clases_incluidas?: number | null;
   tipo?: PlanModalidad | null;
   beneficios?: string | null;
   activo?: boolean;
@@ -100,16 +94,13 @@ export type UpdatePlanInput = CreatePlanInput & {
 export type PlanFormValues = {
   nombre: string;
   descripcion: string;
-  precio: string;           // string for controlled input, parsed on submit
-  vigencia_meses: string;   // string for controlled input
-  clases_incluidas: string; // string for controlled input
   tipo: PlanModalidad | '';       // '' = not selected
   beneficios: string[];     // each item is one benefit text; stored concatenated with '|'
   activo: boolean;
   disciplinaIds: string[];
 };
 
-export type PlanFormField = 'nombre' | 'descripcion' | 'precio' | 'vigencia_meses' | 'clases_incluidas' | 'tipo' | 'beneficios' | 'disciplinaIds';
+export type PlanFormField = 'nombre' | 'descripcion' | 'tipo' | 'beneficios' | 'disciplinaIds';
 export type PlanFieldErrors = Partial<Record<PlanFormField, string>>;
 
 export type PlanesViewModel = {
@@ -118,7 +109,7 @@ export type PlanesViewModel = {
   loading: boolean;
   error: string | null;
   modalOpen: boolean;
-  modalMode: 'create' | 'edit';
+  modalMode: 'create' | 'edit' | 'duplicate';
   selectedPlan: PlanWithDisciplinas | null;
   submitError: string | null;
   successMessage: string | null;
