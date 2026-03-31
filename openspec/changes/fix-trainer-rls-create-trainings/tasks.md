@@ -31,8 +31,8 @@
 
 ## 5. Commit and Pull Request
 
-- [ ] 5.1 Stage and commit the migration: `git add supabase/migrations/20260330000200_entrenamientos_rls_allow_trainer.sql && git commit -m "fix(rls): allow entrenador role to create, edit and delete trainings"`
-- [ ] 5.2 Push branch and open a Pull Request with the following description:
+- [x] 5.1 Stage and commit the migration: `git add supabase/migrations/20260330000200_entrenamientos_rls_allow_trainer.sql && git commit -m "fix(rls): allow entrenador role to create, edit and delete trainings"`
+- [x] 5.2 Push branch and open a Pull Request with the following description:
 
   **Title**: `fix(rls): allow entrenador role to create, edit and delete trainings`
 
