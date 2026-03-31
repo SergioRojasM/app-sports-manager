@@ -109,7 +109,7 @@ export type PlanesViewModel = {
   loading: boolean;
   error: string | null;
   modalOpen: boolean;
-  modalMode: 'create' | 'edit';
+  modalMode: 'create' | 'edit' | 'duplicate';
   selectedPlan: PlanWithDisciplinas | null;
   submitError: string | null;
   successMessage: string | null;

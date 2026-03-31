@@ -45,6 +45,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
     isSubmitting,
     openCreateModal,
     openEditModal,
+    openDuplicateModal,
     deletePlan,
     closeModal,
     updateField,
@@ -103,6 +104,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
         <PlanesTable
           rows={filteredPlanes}
           onEdit={openEditModal}
+          onDuplicate={openDuplicateModal}
           onDelete={(plan) => void deletePlan(plan)}
         />
       ) : null}

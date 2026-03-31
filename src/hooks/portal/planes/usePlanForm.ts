@@ -90,6 +90,20 @@ export function usePlanForm() {
     initialTipos.current = entries.map((e) => ({ ...e }));
   }, []);
 
+  const setFormForDuplicate = useCallback((plan: PlanWithDisciplinas) => {
+    const duplicateName = 'Copia de ' + plan.nombre.slice(0, 91);
+    setFormValues({ ...toFormValues(plan), nombre: duplicateName });
+    setFieldErrors({});
+    // Strip _id so computeTiposDiff treats every entry as toCreate
+    const entries = (plan.plan_tipos ?? [])
+      .map(planTipoToFormEntry)
+      .map(({ _id: _stripped, ...rest }) => rest as TipoFormEntry);
+    setTiposForm(entries);
+    setTiposErrors([]);
+    setTiposGlobalError(null);
+    initialTipos.current = [];
+  }, []);
+
   const updateField = useCallback((field: PlanFormField | 'activo', value: string | boolean | string[]) => {
     setFormValues((current) => ({ ...current, [field]: value }));
     setFieldErrors((current) => {
@@ -255,6 +269,7 @@ export function usePlanForm() {
     tiposGlobalError,
     resetForm,
     setFormFromPlan,
+    setFormForDuplicate,
     updateField,
     addTipo,
     updateTipo,

@@ -103,9 +103,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │           └── index.ts
 │   │   │   └── planes/                   # Feature slice (portal/planes)
 │   │   │       ├── PlanesPage.tsx
-│   │   │       ├── PlanesTable.tsx
+│   │   │       ├── PlanesTable.tsx         # Props: onEdit, onDuplicate?, onDelete?, renderRowAction?
 │   │   │       ├── PlanesHeaderFilters.tsx
-│   │   │       ├── PlanFormModal.tsx
+│   │   │       ├── PlanFormModal.tsx        # mode: 'create' | 'edit' | 'duplicate'
 │   │   │       ├── PlanesViewPage.tsx
 │   │   │       ├── PlanesRolePage.tsx
 │   │   │       ├── SuscripcionModal.tsx
@@ -179,8 +179,8 @@ Following structure reflects the current implementation and the target scalable 
 │               │   ├── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
 │               │   └── useAsistencias.ts  # Attendance map keyed by reserva_id; isEnabled guard skips fetch for atleta role
 │   │       └── planes/
-│   │           ├── usePlanes.ts
-│   │           ├── usePlanForm.ts
+│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal
+│   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate
 │   │           ├── usePlanesView.ts
 │   │           └── useSuscripcion.ts
 │   │       └── gestion-equipo/

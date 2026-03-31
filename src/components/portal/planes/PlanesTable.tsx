@@ -6,6 +6,7 @@ type PlanesTableProps = {
   readOnly?: boolean;
   onEdit?: (plan: PlanWithDisciplinas) => void;
   onDelete?: (plan: PlanWithDisciplinas) => void;
+  onDuplicate?: (plan: PlanWithDisciplinas) => void;
   /** Optional render function for a custom action column per row */
   renderRowAction?: (plan: PlanTableItem) => React.ReactNode;
 };
@@ -19,7 +20,7 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-export function PlanesTable({ rows, readOnly, onEdit, onDelete, renderRowAction }: PlanesTableProps) {
+export function PlanesTable({ rows, readOnly, onEdit, onDelete, onDuplicate, renderRowAction }: PlanesTableProps) {
   return (
     <div className="glass overflow-hidden rounded-xl border border-portal-border">
       <div className="overflow-x-auto">
@@ -143,6 +144,13 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, renderRowAction 
                             className="rounded-lg border border-portal-border bg-navy-medium px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
                           >
                             Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onDuplicate?.(row)}
+                            className="rounded-lg border border-portal-border bg-navy-medium px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+                          >
+                            Duplicar
                           </button>
                           <button
                             type="button"
