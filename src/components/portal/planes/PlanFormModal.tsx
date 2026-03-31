@@ -14,7 +14,7 @@ type TipoFormEntry = PlanTipoFormValues & { _id?: string };
 
 type PlanFormModalProps = {
   open: boolean;
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'duplicate';
   isSubmitting: boolean;
   values: PlanFormValues;
   fieldErrors: PlanFieldErrors;
@@ -128,7 +128,7 @@ export function PlanFormModal({
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label={mode === 'create' ? 'Crear plan' : 'Editar plan'}
+        aria-label={mode === 'edit' ? 'Editar plan' : mode === 'duplicate' ? 'Duplicar plan' : 'Crear plan'}
         className={[
           'absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out',
           visible ? 'translate-x-0' : 'translate-x-full',
@@ -137,7 +137,7 @@ export function PlanFormModal({
         <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-100">
-              {mode === 'create' ? 'Crear plan' : 'Editar plan'}
+              {mode === 'edit' ? 'Editar plan' : mode === 'duplicate' ? 'Duplicar plan' : 'Crear plan'}
             </h2>
             <p className="mt-1 text-xs text-slate-400">
               Configura los datos del plan para esta organización.
@@ -505,7 +505,7 @@ export function PlanFormModal({
             disabled={isSubmitting}
             className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
           >
-            {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear plan' : 'Guardar cambios'}
+            {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar cambios' : 'Crear plan'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               save
             </span>

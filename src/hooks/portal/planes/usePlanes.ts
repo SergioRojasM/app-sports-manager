@@ -31,6 +31,7 @@ type UsePlanesResult = PlanesViewModel & {
   tiposGlobalError: ReturnType<typeof usePlanForm>['tiposGlobalError'];
   openCreateModal: () => void;
   openEditModal: (plan: PlanWithDisciplinas) => void;
+  openDuplicateModal: (plan: PlanWithDisciplinas) => void;
   deletePlan: (plan: PlanWithDisciplinas) => Promise<void>;
   closeModal: () => void;
   updateField: ReturnType<typeof usePlanForm>['updateField'];
@@ -82,7 +83,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'duplicate'>('create');
   const [selectedPlan, setSelectedPlan] = useState<PlanWithDisciplinas | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -171,6 +172,15 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     setSubmitError(null);
   }, [form]);
 
+  const openDuplicateModal = useCallback((plan: PlanWithDisciplinas) => {
+    setModalMode('duplicate');
+    setSelectedPlan(null);
+    form.setFormForDuplicate(plan);
+    setModalOpen(true);
+    setSuccessMessage(null);
+    setSubmitError(null);
+  }, [form]);
+
   const closeModal = useCallback(() => {
     if (isSubmitting) {
       return;
@@ -225,7 +235,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     try {
       let planId: string;
 
-      if (modalMode === 'create') {
+      if (modalMode === 'create' || modalMode === 'duplicate') {
         const payload: CreatePlanInput = {
           tenantId,
           nombre: form.formValues.nombre.trim(),
@@ -314,6 +324,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     tiposGlobalError: form.tiposGlobalError,
     openCreateModal,
     openEditModal,
+    openDuplicateModal,
     deletePlan,
     closeModal,
     updateField: form.updateField,
