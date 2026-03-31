@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
 
 type LoginFormProps = {
@@ -12,12 +12,16 @@ type LoginFormProps = {
 
 export function LoginForm({ nextPath }: LoginFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn, errorMessage } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resetBannerVisible, setResetBannerVisible] = useState(
+    searchParams.get("reset") === "success"
+  );
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -47,6 +51,15 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
+        {resetBannerVisible && (
+          <div
+            className="rounded-lg border border-turquoise/40 bg-turquoise/10 px-4 py-3 text-sm text-turquoise"
+            role="status"
+          >
+            Contraseña actualizada correctamente. Inicia sesión con tu nueva contraseña.
+          </div>
+        )}
+
         {errorMessage && (
           <div
             className="rounded-lg border border-red-500/60 bg-red-950/40 px-4 py-3 text-sm text-red-200"
@@ -72,7 +85,10 @@ export function LoginForm({ nextPath }: LoginFormProps) {
               required
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setResetBannerVisible(false);
+              }}
             />
           </div>
         </div>
@@ -93,7 +109,10 @@ export function LoginForm({ nextPath }: LoginFormProps) {
               required
               type="password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setResetBannerVisible(false);
+              }}
             />
           </div>
         </div>
