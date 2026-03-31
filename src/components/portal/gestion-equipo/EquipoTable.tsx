@@ -1,6 +1,12 @@
 import type { MiembroTableItem, RolOption } from '@/types/portal/equipo.types';
 import { EquipoStatusBadge } from './EquipoStatusBadge';
 
+const ROL_DISPLAY_LABELS: Record<string, string> = {
+  usuario: 'Atleta',
+  administrador: 'Administrador',
+  entrenador: 'Entrenador',
+};
+
 type EquipoTableProps = {
   rows: MiembroTableItem[];
   currentPage: number;
@@ -127,12 +133,12 @@ export function EquipoTable({
                     >
                       {roles.map((r) => (
                         <option key={r.id} value={r.id}>
-                          {r.nombre}
+                          {ROL_DISPLAY_LABELS[r.nombre] ?? r.nombre}
                         </option>
                       ))}
                     </select>
                   ) : (
-                    row.rol_nombre
+                    ROL_DISPLAY_LABELS[row.rol_nombre] ?? row.rol_nombre
                   )}
                 </td>
                 <td className="px-4 py-3 text-right">

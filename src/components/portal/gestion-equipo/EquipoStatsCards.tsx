@@ -20,7 +20,7 @@ const ROW_1: StatCardDef[] = [
 ];
 
 const ROW_2: StatCardDef[] = [
-  { label: 'Usuarios Activos', getValue: (s) => s.usuariosActivos, icon: 'person', color: 'text-sky-400' },
+  { label: 'Atletas Activos', getValue: (s) => s.usuariosActivos, icon: 'person', color: 'text-sky-400' },
   { label: 'Administradores Activos', getValue: (s) => s.administradoresActivos, icon: 'admin_panel_settings', color: 'text-violet-400' },
   { label: 'Entrenadores Activos', getValue: (s) => s.entrenadoresActivos, icon: 'fitness_center', color: 'text-teal-400' },
 ];
