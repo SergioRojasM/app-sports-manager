@@ -41,17 +41,17 @@
 ## 7. Verification
 
 - [x] 7.1 Run `npm run build` (or `npx tsc --noEmit`) and confirm zero TypeScript errors
-- [ ] 7.2 Manually test: duplicate a plan with multiple subtypes → verify new plan appears in the table and source plan is unchanged
-- [ ] 7.3 Manually test: duplicate a plan with `nombre` longer than 91 chars → verify prefixed name stays within 100 chars
-- [ ] 7.4 Manually test: duplicate when "Copia de X" already exists → verify inline error appears in the modal
-- [ ] 7.5 Manually test: close the duplicate modal without submitting → verify no plan is created
-- [ ] 7.6 Verify the "Duplicar" button is absent when `PlanesTable` receives `readOnly={true}`
+- [x] 7.2 Manually test: duplicate a plan with multiple subtypes → verify new plan appears in the table and source plan is unchanged
+- [x] 7.3 Manually test: duplicate a plan with `nombre` longer than 91 chars → verify prefixed name stays within 100 chars
+- [x] 7.4 Manually test: duplicate when "Copia de X" already exists → verify inline error appears in the modal
+- [x] 7.5 Manually test: close the duplicate modal without submitting → verify no plan is created
+- [x] 7.6 Verify the "Duplicar" button is absent when `PlanesTable` receives `readOnly={true}`
 
 ## 8. Documentation & Commit
 
 - [x] 8.1 Update `projectspec/03-project-structure.md`: add `onDuplicate` prop note to `PlanesTable` entry; add `openDuplicateModal` to `usePlanes` hook entry; note `'duplicate'` mode in `PlanFormModal`
-- [ ] 8.2 Create the final commit with message: `feat(planes): add duplicate plan action with pre-filled modal`
-- [ ] 8.3 Open a pull request with description:
+- [x] 8.2 Create the final commit with message: `feat(planes): add duplicate plan action with pre-filled modal`
+- [x] 8.3 Open a pull request with description:
   - **What**: Adds a "Duplicar" button to each plan row that opens the creation modal pre-filled with all source plan data (name prefixed with "Copia de", all subtypes pre-loaded without IDs so they are created as new rows).
   - **Why**: Allows admins to quickly create plan variants without re-entering all fields.
   - **How**: New `setFormForDuplicate` in `usePlanForm` (strips `_id` from tipos); new `openDuplicateModal` in `usePlanes`; extended `mode` union in `PlanFormModal`; new `onDuplicate` prop in `PlanesTable`; wired in `PlanesPage`. No DB migrations or new service functions.
