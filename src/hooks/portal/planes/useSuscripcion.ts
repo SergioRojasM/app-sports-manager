@@ -145,7 +145,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           atleta_id: user.id,
           plan_id: selectedPlan.id,
           plan_tipo_id: selectedTipo?.id ?? null,
-          clases_plan: selectedTipo?.clases_incluidas ?? selectedPlan.clases_incluidas,
+          clases_plan: selectedTipo?.clases_incluidas ?? null,
           comentarios: data.comentarios.trim() || null,
           estado: 'pendiente',
         });
@@ -155,7 +155,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           const pago = await pagosService.createPago({
             tenant_id: tenantId,
             suscripcion_id: suscripcion.id,
-            monto: selectedTipo?.precio ?? selectedPlan.precio,
+            monto: selectedTipo?.precio ?? 0,
             comprobante_path: null,
             estado: 'pendiente',
             metodo_pago_id: data.metodo_pago_id,

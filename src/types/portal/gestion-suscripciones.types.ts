@@ -34,10 +34,9 @@ export interface SuscripcionAdminRow {
   tenant_id: string;
   plan_id: string;
   plan_nombre: string;
-  plan_vigencia_meses: number;
-  plan_clases_incluidas: number | null;
   plan_tipo_id: string | null;
   plan_tipo_nombre: string | null;
+  plan_tipo_vigencia_dias: number | null;
   plan_tipo_clases_incluidas: number | null;
   atleta_id: string;
   atleta_nombre: string;

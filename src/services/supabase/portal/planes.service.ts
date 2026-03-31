@@ -19,7 +19,7 @@ type PlanTipoRow = {
   descripcion: string | null;
   precio: number;
   vigencia_dias: number;
-  clases_incluidas: number;
+  clases_incluidas: number | null;
   activo: boolean;
   created_at: string;
   updated_at: string;
@@ -30,9 +30,6 @@ type PlanRow = {
   tenant_id: string;
   nombre: string | null;
   descripcion: string | null;
-  precio: number;
-  vigencia_meses: number;
-  clases_incluidas: number | null;
   tipo: string | null;
   beneficios: string | null;
   activo: boolean;
@@ -58,9 +55,6 @@ function mapPlanRow(row: PlanRow): PlanWithDisciplinas {
     tenant_id: row.tenant_id,
     nombre: row.nombre ?? 'Plan sin nombre',
     descripcion: row.descripcion,
-    precio: row.precio,
-    vigencia_meses: row.vigencia_meses,
-    clases_incluidas: row.clases_incluidas,
     tipo: (row.tipo as PlanModalidad) ?? null,
     beneficios: row.beneficios,
     activo: row.activo,
@@ -97,7 +91,7 @@ export const planesService = {
 
     const { data, error } = await supabase
       .from('planes')
-      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id), plan_tipos(*)')
+      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id), plan_tipos(*)')
       .eq('tenant_id', tenantId)
       .order('nombre');
 
@@ -117,14 +111,11 @@ export const planesService = {
         tenant_id: input.tenantId,
         nombre: input.nombre.trim(),
         descripcion: toNullable(input.descripcion),
-        precio: input.precio,
-        vigencia_meses: input.vigencia_meses,
-        clases_incluidas: toNullableInt(input.clases_incluidas),
         tipo: toNullable(input.tipo),
         beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
       })
-      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at')
+      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at')
       .single();
 
     if (error || !data) {
@@ -158,16 +149,13 @@ export const planesService = {
       .update({
         nombre: input.nombre.trim(),
         descripcion: toNullable(input.descripcion),
-        precio: input.precio,
-        vigencia_meses: input.vigencia_meses,
-        clases_incluidas: toNullableInt(input.clases_incluidas),
         tipo: toNullable(input.tipo),
         beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
       })
       .eq('id', input.planId)
       .eq('tenant_id', input.tenantId)
-      .select('id, tenant_id, nombre, descripcion, precio, vigencia_meses, clases_incluidas, tipo, beneficios, activo, created_at, updated_at')
+      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at')
       .single();
 
     if (error || !data) {

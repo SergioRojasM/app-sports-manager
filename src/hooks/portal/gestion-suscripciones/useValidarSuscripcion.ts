@@ -25,16 +25,11 @@ type UseValidarSuscripcionResult = {
   cancel: () => Promise<void>;
 };
 
-/* ── Plain-JS addMonths (no date-fns) ── */
+/* ── Plain-JS addDays (no date-fns) ── */
 
-function addMonths(date: Date, months: number): Date {
+function addDays(date: Date, days: number): Date {
   const result = new Date(date);
-  const day = result.getDate();
-  result.setMonth(result.getMonth() + months);
-  // If the day overflowed (e.g. Jan 31 + 1 month), clamp to last day of target month
-  if (result.getDate() !== day) {
-    result.setDate(0);
-  }
+  result.setDate(result.getDate() + days);
   return result;
 }
 
@@ -46,8 +41,8 @@ function computeDefaults(row: SuscripcionAdminRow): ValidarSuscripcionFormValues
   const today = new Date();
   const fechaInicio = row.fecha_inicio ?? toISODate(today);
   const start = new Date(fechaInicio);
-  const fechaFin = row.fecha_fin ?? toISODate(addMonths(start, row.plan_vigencia_meses));
-  const clasesRestantes = row.clases_restantes ?? row.plan_tipo_clases_incluidas ?? row.plan_clases_incluidas;
+  const fechaFin = row.fecha_fin ?? (row.plan_tipo_vigencia_dias != null ? toISODate(addDays(start, row.plan_tipo_vigencia_dias)) : toISODate(start));
+  const clasesRestantes = row.clases_restantes ?? row.plan_tipo_clases_incluidas;
 
   return { fecha_inicio: fechaInicio, fecha_fin: fechaFin, clases_restantes: clasesRestantes };
 }
