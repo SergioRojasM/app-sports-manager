@@ -26,22 +26,22 @@
 
 ## 6. Manual Testing
 
-- [ ] 6.1 Navigate to `/auth/forgot-password` — verify page renders without errors
-- [ ] 6.2 Submit a valid email — verify success state appears and submit button is disabled
-- [ ] 6.3 Check Supabase inbucket at `http://127.0.0.1:54324` and verify the reset email was received
-- [ ] 6.4 Click the link in the email — verify redirect lands on `/auth/update-password`
-- [ ] 6.5 Test mismatched passwords — verify "Las contraseñas no coinciden" error appears
-- [ ] 6.6 Test password shorter than 6 chars — verify "La contraseña debe tener al menos 6 caracteres" error appears
-- [ ] 6.7 Submit valid new password — verify redirect to `/auth/login?reset=success`
-- [ ] 6.8 Verify success banner "Contraseña actualizada correctamente..." is visible on login page
-- [ ] 6.9 Start typing in the login form — verify banner disappears
-- [ ] 6.10 Login with the new password — verify authentication succeeds
-- [ ] 6.11 Navigate to `/auth/update-password` directly (no session) — verify redirect to `/auth/forgot-password`
+- [x] 6.1 Navigate to `/auth/forgot-password` — verify page renders without errors
+- [x] 6.2 Submit a valid email — verify success state appears and submit button is disabled
+- [x] 6.3 Check Supabase inbucket at `http://127.0.0.1:54324` and verify the reset email was received
+- [x] 6.4 Click the link in the email — verify redirect lands on `/auth/update-password`
+- [x] 6.5 Test mismatched passwords — verify "Las contraseñas no coinciden" error appears
+- [x] 6.6 Test password shorter than 6 chars — verify "La contraseña debe tener al menos 6 caracteres" error appears
+- [x] 6.7 Submit valid new password — verify redirect to `/auth/login?reset=success`
+- [x] 6.8 Verify success banner "Contraseña actualizada correctamente..." is visible on login page
+- [x] 6.9 Start typing in the login form — verify banner disappears
+- [x] 6.10 Login with the new password — verify authentication succeeds
+- [x] 6.11 Navigate to `/auth/update-password` directly (no session) — verify redirect to `/auth/forgot-password`
 
 ## 7. Commit and PR
 
-- [ ] 7.1 Stage all changes and create a commit with message: `feat(auth): implement password reset flow (US-0050)`
-- [ ] 7.2 Write PR description:
+- [x] 7.1 Stage all changes and create a commit with message: `feat(auth): implement password reset flow (US-0050)`
+- [x] 7.2 Write PR description:
   - **Title**: `feat(auth): password reset flow`
   - **Summary**: Implements two-step self-service password reset using Supabase PKCE flow. Adds `/auth/forgot-password` and `/auth/update-password` pages, extends `authService` and `useAuth`, and adds a post-reset success banner to the login form.
   - **Related**: US-0050
