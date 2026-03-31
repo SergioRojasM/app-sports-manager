@@ -65,6 +65,17 @@ export function PlanFormModal({
   // Beneficios tag input state (must be before early return)
   const [beneficioInput, setBeneficioInput] = useState('');
 
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      // Trigger enter animation on next frame
+      requestAnimationFrame(() => setVisible(true));
+    } else {
+      setVisible(false);
+    }
+  }, [open]);
+
   if (!open) {
     return null;
   }
@@ -106,7 +117,10 @@ export function PlanFormModal({
       <button
         type="button"
         aria-label="Cerrar formulario de plan"
-        className="absolute inset-0 bg-slate-950/70"
+        className={[
+          'absolute inset-0 bg-slate-950/70 transition-opacity duration-300',
+          visible ? 'opacity-100' : 'opacity-0',
+        ].join(' ')}
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -115,7 +129,10 @@ export function PlanFormModal({
         role="dialog"
         aria-modal="true"
         aria-label={mode === 'create' ? 'Crear plan' : 'Editar plan'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className={[
+          'absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out',
+          visible ? 'translate-x-0' : 'translate-x-full',
+        ].join(' ')}
       >
         <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
           <div>
@@ -236,7 +253,7 @@ export function PlanFormModal({
                   return (
                     <div
                       key={tipo._id ?? `new-${index}`}
-                      className="rounded-xl border border-slate-700 bg-navy-deep/60 p-3 space-y-2"
+                      className="rounded-xl border border-slate-700 bg-navy-deep/60 p-3 space-y-2 transition-all duration-200 hover:border-turquoise/40 hover:bg-navy-deep/80 hover:shadow-lg hover:shadow-turquoise/5"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-medium text-slate-400">
@@ -335,7 +352,7 @@ export function PlanFormModal({
                             value={tipo.clases_incluidas}
                             onChange={(e) => onUpdateTipo(index, { clases_incluidas: e.target.value })}
                             disabled={isSubmitting}
-                            placeholder="Clases incluidas"
+                            placeholder="Sin límite (dejar vacío)"
                             className={[
                               'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-1',
                               getError('clases_incluidas')
@@ -478,7 +495,7 @@ export function PlanFormModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:border-slate-500 hover:bg-navy-deep hover:text-slate-100"
           >
             Cancelar
           </button>
@@ -486,7 +503,7 @@ export function PlanFormModal({
             type="button"
             onClick={() => void onSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
           >
             {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear plan' : 'Guardar cambios'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">

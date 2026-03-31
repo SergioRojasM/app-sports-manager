@@ -43,7 +43,18 @@ type UsePlanesResult = PlanesViewModel & {
 
 function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): PlanTableItem {
   const status = plan.activo ? 'Activo' : 'Inactivo';
-  const vigencia = plan.vigencia_meses === 1 ? '1 mes' : `${plan.vigencia_meses} meses`;
+
+  // Derive vigenciaLabel from active plan_tipos
+  const activeTipos = (plan.plan_tipos ?? []).filter((t) => t.activo);
+  let vigencia: string;
+  if (activeTipos.length === 0) {
+    vigencia = '—';
+  } else {
+    const days = activeTipos.map((t) => t.vigencia_dias);
+    const minD = Math.min(...days);
+    const maxD = Math.max(...days);
+    vigencia = minD === maxD ? `${minD}d` : `${minD}d – ${maxD}d`;
+  }
 
   const disciplinaNames = plan.disciplinas
     .map((id) => allDisciplines.find((d) => d.id === id)?.nombre)
@@ -219,9 +230,6 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           tenantId,
           nombre: form.formValues.nombre.trim(),
           descripcion: form.formValues.descripcion.trim(),
-          precio: parseFloat(form.formValues.precio),
-          vigencia_meses: parseInt(form.formValues.vigencia_meses, 10),
-          clases_incluidas: form.formValues.clases_incluidas.trim() !== '' ? parseInt(form.formValues.clases_incluidas, 10) : null,
           tipo: form.formValues.tipo || null,
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
@@ -236,9 +244,6 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           planId: selectedPlan.id,
           nombre: form.formValues.nombre.trim(),
           descripcion: form.formValues.descripcion.trim(),
-          precio: parseFloat(form.formValues.precio),
-          vigencia_meses: parseInt(form.formValues.vigencia_meses, 10),
-          clases_incluidas: form.formValues.clases_incluidas.trim() !== '' ? parseInt(form.formValues.clases_incluidas, 10) : null,
           tipo: form.formValues.tipo || null,
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,

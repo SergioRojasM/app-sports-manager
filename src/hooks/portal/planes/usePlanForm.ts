@@ -15,9 +15,6 @@ import type {
 const EMPTY_FORM: PlanFormValues = {
   nombre: '',
   descripcion: '',
-  precio: '',
-  vigencia_meses: '1',
-  clases_incluidas: '',
   tipo: '',
   beneficios: [],
   activo: true,
@@ -39,9 +36,6 @@ function toFormValues(plan: PlanWithDisciplinas): PlanFormValues {
   return {
     nombre: plan.nombre,
     descripcion: plan.descripcion ?? '',
-    precio: String(plan.precio),
-    vigencia_meses: String(plan.vigencia_meses),
-    clases_incluidas: plan.clases_incluidas != null ? String(plan.clases_incluidas) : '',
     tipo: plan.tipo ?? '',
     beneficios: plan.beneficios ? plan.beneficios.split('|').filter(Boolean) : [],
     activo: plan.activo,
@@ -56,7 +50,7 @@ function planTipoToFormEntry(t: PlanTipo): TipoFormEntry {
     descripcion: t.descripcion ?? '',
     precio: String(t.precio),
     vigencia_dias: String(t.vigencia_dias),
-    clases_incluidas: String(t.clases_incluidas),
+    clases_incluidas: t.clases_incluidas != null ? String(t.clases_incluidas) : '',
     activo: t.activo,
   };
 }
@@ -152,27 +146,6 @@ export function usePlanForm() {
       errors.nombre = 'El nombre no puede superar 100 caracteres.';
     }
 
-    const precio = parseFloat(values.precio);
-    if (values.precio.trim() === '' || isNaN(precio)) {
-      errors.precio = 'El precio es obligatorio.';
-    } else if (precio < 0) {
-      errors.precio = 'El precio debe ser mayor o igual a 0.';
-    }
-
-    const vigencia = parseInt(values.vigencia_meses, 10);
-    if (values.vigencia_meses.trim() === '' || isNaN(vigencia)) {
-      errors.vigencia_meses = 'La vigencia es obligatoria.';
-    } else if (vigencia < 1 || !Number.isInteger(vigencia)) {
-      errors.vigencia_meses = 'La vigencia debe ser un número entero mayor o igual a 1.';
-    }
-
-    if (values.clases_incluidas.trim() !== '') {
-      const clases = parseInt(values.clases_incluidas, 10);
-      if (isNaN(clases) || clases < 0 || !Number.isInteger(clases)) {
-        errors.clases_incluidas = 'Las clases incluidas deben ser un número entero mayor o igual a 0.';
-      }
-    }
-
     // Validate tipos
     const tErrors: TipoFieldErrors = [];
     let globalTipoError: string | null = null;
@@ -197,15 +170,17 @@ export function usePlanForm() {
         tErrors.push({ index: i, field: 'vigencia_dias', message: 'La vigencia debe ser al menos 1 día.' });
       }
 
-      const tipoClases = parseInt(tipo.clases_incluidas, 10);
-      if (tipo.clases_incluidas.trim() === '' || isNaN(tipoClases)) {
-        tErrors.push({ index: i, field: 'clases_incluidas', message: 'Las clases incluidas son obligatorias.' });
-      } else if (tipoClases < 0 || !Number.isInteger(tipoClases)) {
-        tErrors.push({ index: i, field: 'clases_incluidas', message: 'Debe ser un número entero mayor o igual a 0.' });
+      if (tipo.clases_incluidas.trim() !== '') {
+        const tipoClases = parseInt(tipo.clases_incluidas, 10);
+        if (isNaN(tipoClases) || tipoClases < 0 || !Number.isInteger(tipoClases)) {
+          tErrors.push({ index: i, field: 'clases_incluidas', message: 'Debe ser un número entero mayor o igual a 0.' });
+        }
       }
     });
 
-    if (tiposForm.length > 0 && !tiposForm.some((t) => t.activo)) {
+    if (tiposForm.length === 0) {
+      globalTipoError = 'El plan debe tener al menos un subtipo.';
+    } else if (!tiposForm.some((t) => t.activo)) {
       globalTipoError = 'Debe haber al menos un subtipo activo.';
     }
 
@@ -237,7 +212,7 @@ export function usePlanForm() {
           descripcion: entry.descripcion.trim() || null,
           precio: parseFloat(entry.precio),
           vigencia_dias: parseInt(entry.vigencia_dias, 10),
-          clases_incluidas: parseInt(entry.clases_incluidas, 10),
+          clases_incluidas: entry.clases_incluidas.trim() !== '' ? parseInt(entry.clases_incluidas, 10) : null,
           activo: entry.activo,
         });
       }
@@ -254,7 +229,7 @@ export function usePlanForm() {
       if ((entry.descripcion.trim() || null) !== (original.descripcion.trim() || null)) changes.descripcion = entry.descripcion.trim() || null;
       if (entry.precio !== original.precio) changes.precio = parseFloat(entry.precio);
       if (entry.vigencia_dias !== original.vigencia_dias) changes.vigencia_dias = parseInt(entry.vigencia_dias, 10);
-      if (entry.clases_incluidas !== original.clases_incluidas) changes.clases_incluidas = parseInt(entry.clases_incluidas, 10);
+      if (entry.clases_incluidas !== original.clases_incluidas) changes.clases_incluidas = entry.clases_incluidas.trim() !== '' ? parseInt(entry.clases_incluidas, 10) : null;
       if (entry.activo !== original.activo) changes.activo = entry.activo;
 
       if (Object.keys(changes).length > 0) {

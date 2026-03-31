@@ -123,8 +123,6 @@ export function SuscripcionModal({
   if (!open || !plan) return null;
 
   const selectedTipo = activeTipos.find((t) => t.id === selectedTipoId) ?? null;
-  const vigencia = plan.vigencia_meses === 1 ? '1 mes' : `${plan.vigencia_meses} meses`;
-  const clasesLabel = plan.clases_incluidas != null ? `${plan.clases_incluidas} clases` : 'Ilimitadas';
   const selectedMetodo = metodosPago.find((m) => m.id === selectedMetodoId) ?? null;
   const confirmDisabled = isSubmitting || isDuplicate || checkingDuplicate || !selectedMetodoId;
 
@@ -249,7 +247,7 @@ export function SuscripcionModal({
               <div className="mt-2 grid grid-cols-3 gap-3 text-xs text-slate-300">
                 <div>
                   <span className="block font-medium text-slate-400">Precio</span>
-                  {formatCurrency(selectedTipo?.precio ?? plan.precio)}
+                  {selectedTipo ? formatCurrency(selectedTipo.precio) : '—'}
                 </div>
                 <div>
                   <span className="block font-medium text-slate-400">Vigencia</span>
@@ -259,7 +257,7 @@ export function SuscripcionModal({
                       : selectedTipo.vigencia_dias === 30
                         ? '1 mes'
                         : `${selectedTipo.vigencia_dias} días`
-                    : vigencia}
+                    : '—'}
                 </div>
                 <div>
                   <span className="block font-medium text-slate-400">Clases</span>
@@ -267,7 +265,7 @@ export function SuscripcionModal({
                     ? selectedTipo.clases_incluidas != null
                       ? `${selectedTipo.clases_incluidas} clases`
                       : 'Ilimitadas'
-                    : clasesLabel}
+                    : '—'}
                 </div>
               </div>
             </div>
