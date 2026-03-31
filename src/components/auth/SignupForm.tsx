@@ -60,13 +60,13 @@ export function SignupForm() {
       <div className="mb-6 text-center md:text-left">
         <div className="mb-4 flex justify-center md:justify-start">
           <div className="relative h-14 w-14">
-            <Image src="/logo2.png" alt="Logo de Qbop Sports Manager" fill className="object-contain" />
+            <Image src="/icono_2.png" alt="Logo de GRIT Arena" fill className="object-contain" />
           </div>
         </div>
         <h2 className="mb-2 text-3xl font-bold text-slate-100">
           Crea tu <span className="text-turquoise">cuenta</span>
         </h2>
-        <p className="text-sm text-slate-400">Únete a qbop training y empieza a optimizar el rendimiento de tu equipo.</p>
+        <p className="text-sm text-slate-400">Únete a GRIT Arena y empieza a optimizar el rendimiento de tu equipo.</p>
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
@@ -96,7 +96,7 @@ export function SignupForm() {
             className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-slate-200 outline-none transition-all placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/40"
             id="email"
             name="email"
-            placeholder="coach@qboptraining.com"
+            placeholder="coach@training.com"
             required
             type="email"
             value={email}
