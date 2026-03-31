@@ -38,4 +38,18 @@ export const authService = {
     const { error } = await supabase.auth.signOut();
     return error ? error.message : null;
   },
+
+  async resetPasswordForEmail(email: string): Promise<{ errorMessage: string | null }> {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
+    });
+    return { errorMessage: error ? error.message : null };
+  },
+
+  async updatePassword(password: string): Promise<{ errorMessage: string | null }> {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password });
+    return { errorMessage: error ? error.message : null };
+  },
 };

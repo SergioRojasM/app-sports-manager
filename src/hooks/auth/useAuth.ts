@@ -94,11 +94,29 @@ export function useAuth() {
     return error;
   }, []);
 
+  const resetPassword = useCallback(
+    async (email: string): Promise<{ errorMessage: string | null }> => {
+      const result = await authService.resetPasswordForEmail(email);
+      return result;
+    },
+    []
+  );
+
+  const updatePassword = useCallback(
+    async (password: string): Promise<{ errorMessage: string | null }> => {
+      const result = await authService.updatePassword(password);
+      return result;
+    },
+    []
+  );
+
   return {
     ...state,
     errorMessage,
     signIn,
     signUp,
     signOut,
+    resetPassword,
+    updatePassword,
   };
 }
