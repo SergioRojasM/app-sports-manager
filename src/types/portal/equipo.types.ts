@@ -26,6 +26,8 @@ export type MiembroRow = {
   miembro_id: string;
   rol_nombre: string;
   inasistencias_recientes: number;
+  tenant_regla_suspension_id: string | null;
+  regla_suspension_nombre: string | null;
 };
 
 /** Presentational view-model used by EquipoTable. */
@@ -154,4 +156,13 @@ export type CambiarEstadoMiembroInput = {
   nuevoEstado: MiembroEstado;
   tipo: MiembroNovedadTipo;
   descripcion?: string;
+};
+
+/* ───────── Suspension rule assignment types (US-0055) ───────── */
+
+/** Input for bulk-assigning or removing a suspension rule from members. */
+export type AsignarReglaSuspensionInput = {
+  tenantId: string;
+  reglaId: string | null;
+  miembroIds: string[];
 };

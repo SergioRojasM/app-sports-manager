@@ -122,7 +122,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EditarPerfilMiembroModal.tsx  # Slide-in modal: edit member profile + sports data
 │   │   │       ├── EliminarMiembroModal.tsx      # Confirmation dialog: remove member from team
 │   │   │       ├── BloquearMiembroModal.tsx      # Confirmation dialog: block member with optional motivo
-│   │   │       └── CambiarRolModal.tsx           # Confirmation dialog: change member role with self-demotion warning
+│   │   │       ├── CambiarRolModal.tsx           # Confirmation dialog: change member role with self-demotion warning
+│   │   │       └── ConfigurarSuspensionModal.tsx  # 2-step modal: assign/remove suspension rules to members in bulk
 │   │   │   └── gestion-solicitudes/       # Feature slice (portal/gestion-equipo/gestion-solicitudes)
 │   │   │       ├── SolicitudEstadoBadge.tsx
 │   │   │       ├── SolicitudesTable.tsx
@@ -188,6 +189,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useSuscripcion.ts
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
+│   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
 │   │           └── useUsuarioNivelDisciplina.ts  # Fetch + upsert athlete discipline levels
 │   │       └── gestion-solicitudes/
 │   │           ├── useSolicitudesAdmin.ts    # Admin: load pending, accept/reject actions
