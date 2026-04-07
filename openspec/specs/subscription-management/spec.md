@@ -14,7 +14,7 @@ The system SHALL provide a tenant-scoped subscription management screen at `/por
 ---
 
 ### Requirement: Subscription list with joined athlete, plan, and payment data
-The system SHALL fetch all subscriptions belonging to the active tenant in a single joined query that includes the athlete's name and email (from `usuarios`), the plan name and `vigencia_meses` (from `planes`), and the latest payment record (from `pagos`) for each subscription. The result SHALL be displayed in a tabular layout.
+The system SHALL fetch all subscriptions belonging to the active tenant in a single joined query that includes the athlete's name and email (from `usuarios`), the plan name (from `planes`), the plan_tipo name, `vigencia_dias`, and `clases_incluidas` (from `plan_tipos`), and the latest payment record (from `pagos`) for each subscription. The join on `planes` SHALL NOT select `vigencia_meses` or `clases_incluidas` — these fields no longer exist on the `planes` table. The result SHALL be displayed in a tabular layout.
 
 #### Scenario: Subscriptions are loaded on page mount
 - **WHEN** an administrator lands on the subscription management page
@@ -93,12 +93,33 @@ Each subscription row SHALL expose a "Validate Payment" action that opens a moda
 
 ---
 
+### Requirement: View payment details action in subscription table
+Each subscription row in the admin table SHALL expose a "Ver Pago" action button whenever the row has an associated payment record (`pago !== null`), regardless of the payment's `estado`. Clicking the button SHALL open the `VerDetallePagoModal` in read-only mode without performing any data mutation.
+
+#### Scenario: Ver Pago button is visible for rows with any payment status
+- **WHEN** an administrator views the subscription table and a row has `pago !== null`
+- **THEN** the row SHALL display a "Ver Pago" button regardless of whether `pago.estado` is `pendiente`, `validado`, or `rechazado`
+
+#### Scenario: Ver Pago button is absent for rows without a payment
+- **WHEN** an administrator views the subscription table and a row has `pago === null`
+- **THEN** the row SHALL NOT display a "Ver Pago" button
+
+#### Scenario: Clicking Ver Pago opens VerDetallePagoModal
+- **WHEN** an administrator clicks the "Ver Pago" button on a subscription row
+- **THEN** the system SHALL open `VerDetallePagoModal` pre-loaded with the row's `pago` and subscription context; no data write SHALL occur
+
+#### Scenario: Existing Validar Pago button is unaffected
+- **WHEN** a subscription row has `pago.estado === 'pendiente'`
+- **THEN** both the "Validar Pago" button and the "Ver Pago" button SHALL be visible simultaneously; "Validar Pago" continues to open `ValidarPagoModal` with approve/reject actions
+
+---
+
 ### Requirement: Validate subscription action
-Each subscription row SHALL expose a "Validate Subscription" action that opens a modal pre-populated with computed approval defaults that the administrator MAY override before confirming.
+Each subscription row SHALL expose a "Validate Subscription" action that opens a modal pre-populated with computed approval defaults that the administrator MAY override before confirming. The `fecha_fin` default SHALL be calculated as `fecha_inicio + plan_tipo.vigencia_dias` days (using addDays), not months. The `clases_restantes` default SHALL be taken from `plan_tipo.clases_incluidas` (which may be null for unlimited). The modal SHALL NOT reference plan-level `vigencia_meses` or `clases_incluidas`.
 
 #### Scenario: Modal opens with pre-computed default values
 - **WHEN** an administrator clicks "Validate Subscription" for a row
-- **THEN** the system SHALL open a modal pre-populating `fecha_inicio` with today's date (if currently null), `fecha_fin` calculated as `fecha_inicio + vigencia_meses months`, and `clases_restantes` from `clases_plan` (if currently null); all three fields SHALL be editable by the administrator before submission
+- **THEN** the system SHALL open a modal pre-populating `fecha_inicio` with today's date (if currently null), `fecha_fin` calculated as `fecha_inicio + plan_tipo.vigencia_dias` days, and `clases_restantes` from `plan_tipo.clases_incluidas` (if currently null); all three fields SHALL be editable by the administrator before submission
 
 #### Scenario: Administrator approves a subscription
 - **WHEN** the administrator confirms approval with the (optionally adjusted) values
@@ -111,6 +132,14 @@ Each subscription row SHALL expose a "Validate Subscription" action that opens a
 #### Scenario: Modal closes without action on dismiss
 - **WHEN** the administrator closes the modal without submitting
 - **THEN** the system SHALL not modify any database records
+
+#### Scenario: fecha_fin uses plan_tipo vigencia_dias in days
+- **WHEN** the modal computes the default `fecha_fin`
+- **THEN** the system SHALL use `addDays(fecha_inicio, plan_tipo_vigencia_dias)` and SHALL NOT use `addMonths` with plan-level `vigencia_meses`
+
+#### Scenario: clases_restantes defaults to plan_tipo clases_incluidas
+- **WHEN** the modal computes the default `clases_restantes` and the subscription has no existing value
+- **THEN** the system SHALL use `plan_tipo_clases_incluidas` as the default, which may be null (unlimited)
 
 ---
 
