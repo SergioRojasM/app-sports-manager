@@ -1,6 +1,7 @@
 import { createClient } from '@/services/supabase/client';
 import {
   EquipoServiceError,
+  type AsignarReglaSuspensionInput,
   type CambiarEstadoMiembroInput,
   type CambiarRolMiembroInput,
   type EditarPerfilMiembroInput,
@@ -35,6 +36,8 @@ type RawMiembroRow = {
   rh: string | null;
   rol_nombre: string;
   inasistencias_recientes: number;
+  tenant_regla_suspension_id: string | null;
+  regla_suspension_nombre: string | null;
 };
 
 /* ────────── Mappers ────────── */
@@ -56,6 +59,8 @@ function mapRawRow(row: RawMiembroRow): MiembroRow {
     rh: row.rh ?? null,
     rol_nombre: row.rol_nombre,
     inasistencias_recientes: row.inasistencias_recientes ?? 0,
+    tenant_regla_suspension_id: row.tenant_regla_suspension_id ?? null,
+    regla_suspension_nombre: row.regla_suspension_nombre ?? null,
   };
 }
 
@@ -374,5 +379,25 @@ export const equipoService = {
     if (error) throw mapPostgrestError(error);
 
     return (data ?? []) as unknown as MiembroNovedad[];
+  },
+
+  /**
+   * Bulk-assign or remove a suspension rule from selected members.
+   */
+  async asignarReglaSuspension(input: AsignarReglaSuspensionInput): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('miembros_tenant')
+      .update({ tenant_regla_suspension_id: input.reglaId })
+      .in('id', input.miembroIds)
+      .eq('tenant_id', input.tenantId);
+
+    if (error) {
+      if (error.code === '42501') {
+        throw new EquipoServiceError('forbidden', 'No tienes permisos para asignar reglas de suspensión.');
+      }
+      throw new EquipoServiceError('unknown', 'No fue posible asignar la regla de suspensión.');
+    }
   },
 };

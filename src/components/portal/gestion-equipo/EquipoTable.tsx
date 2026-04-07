@@ -79,6 +79,7 @@ export function EquipoTable({
               <th scope="col" className="px-4 py-3">F. Nacimiento</th>
               <th scope="col" className="px-4 py-3">Estado</th>
               <th scope="col" className="px-4 py-3">Fallas (30d)</th>
+              <th scope="col" className="px-4 py-3">Regla suspensión</th>
               <th scope="col" className="px-4 py-3">Perfil</th>
               <th scope="col" className="px-4 py-3 text-right">Acciones</th>
             </tr>
@@ -117,6 +118,15 @@ export function EquipoTable({
                 </td>
                 <td className="px-4 py-3">
                   <FallasCell count={row.inasistencias_recientes} />
+                </td>
+                <td className="px-4 py-3">
+                  {row.regla_suspension_nombre ? (
+                    <span className="inline-flex items-center rounded-full border border-amber-400/30 bg-amber-900/30 px-2.5 py-0.5 text-xs font-medium text-amber-300">
+                      {row.regla_suspension_nombre}
+                    </span>
+                  ) : (
+                    <span className="text-slate-500">—</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-slate-300">
                   {roles && onCambiarRol ? (
