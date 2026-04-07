@@ -76,6 +76,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   ├── TenantDirectoryList.tsx
 │   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods
 │   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method
+│   │   │   │   ├── TenantReglasSuspensionCard.tsx # Admin card: CRUD list of suspension rules (max 3)
+│   │   │   │   ├── ReglaSuspensionFormModal.tsx   # Right-side form modal for create/edit suspension rule
 │   │   │   │   └── SolicitarAccesoButton.tsx  # 5-state access request button: idle/pending/blocked/incomplete_profile/member
 │   │   │   └── scenarios/                # Feature slice (portal/scenarios)
 │   │   │       ├── ScenariosPage.tsx
@@ -160,6 +162,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── tenant/
 │   │       │   ├── useTenantView.ts
 │   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago
+│   │       │   ├── useReglasSuspension.ts  # CRUD state + 3-rule limit guard for tenant_reglas_suspension
 │   │       │   └── useOrgLogoUpload.ts    # File select, MIME/size validation, preview URL, upload trigger for org logo
 │   │       │   └── useOrgBannerUpload.ts   # File select, MIME/size validation, preview URL, upload trigger for org banner
 │   │       └── scenarios/
@@ -227,6 +230,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_clases_incluidas / plan_tipo_vigencia_dias
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
+│   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
 │   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket
 │   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripcionesTenant — user's subscriptions with plan + pago joins, scoped by atleta_id + tenant_id
@@ -246,6 +250,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
+│   │       └── reglas-suspension.types.ts # ReglaSuspension, ReglaSuspensionCreatePayload, ReglaSuspensionUpdatePayload, ReglaSuspensionFormValues
 │   │       └── equipo.types.ts
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
