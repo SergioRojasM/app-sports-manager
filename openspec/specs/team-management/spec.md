@@ -27,7 +27,7 @@ The system SHALL expose the route `/portal/orgs/[tenant_id]/gestion-equipo` with
 ---
 
 ### Requirement: System SHALL list all members of the tenant
-`equipo.service.ts` SHALL query `public.v_miembros_equipo` (instead of `public.miembros_tenant` directly) filtered by `tenant_id`. The view returns a flat row shape with fields from `miembros_tenant`, `usuarios`, and `roles` already joined, plus an `inasistencias_recientes` integer computed by a lateral subquery. `RawMiembroRow` SHALL be a flat type matching the view's column set (no nested `usuarios` or `roles` sub-objects). `mapRawRow` SHALL read `estado` and `inasistencias_recientes` from the top-level row. The result SHALL include every user who has an active membership record for that tenant, including the administrator themselves.
+`equipo.service.ts` SHALL query `public.v_miembros_equipo` (instead of `public.miembros_tenant` directly) filtered by `tenant_id`. The view returns a flat row shape with fields from `miembros_tenant`, `usuarios`, and `roles` already joined, plus an `inasistencias_recientes` integer computed by a lateral subquery, plus `tenant_regla_suspension_id` and `regla_suspension_nombre` (left-joined from `tenant_reglas_suspension`). `RawMiembroRow` SHALL be a flat type matching the view's column set (no nested `usuarios` or `roles` sub-objects) and SHALL include `tenant_regla_suspension_id: string | null` and `regla_suspension_nombre: string | null`. `mapRawRow` SHALL read `estado`, `inasistencias_recientes`, `tenant_regla_suspension_id`, and `regla_suspension_nombre` from the top-level row. The type SHALL also include `fecha_nacimiento: string | null` and `fecha_exp_identificacion: string | null` from the view. The result SHALL include every user who has an active membership record for that tenant, including the administrator themselves.
 
 #### Scenario: Members are loaded on page mount
 - **WHEN** an administrator navigates to the team management page for a tenant
@@ -45,10 +45,18 @@ The system SHALL expose the route `/portal/orgs/[tenant_id]/gestion-equipo` with
 - **WHEN** the member list is fetched
 - **THEN** each `MiembroRow` SHALL include an `inasistencias_recientes: number` field (defaults to `0` if null)
 
+#### Scenario: Each member row includes date fields
+- **WHEN** the member list is fetched
+- **THEN** each `MiembroRow` SHALL include `fecha_nacimiento: string | null` and `fecha_exp_identificacion: string | null` sourced from `v_miembros_equipo`
+
+#### Scenario: Each member row includes suspension rule fields
+- **WHEN** the member list is fetched
+- **THEN** each `MiembroRow` SHALL include `tenant_regla_suspension_id: string | null` and `regla_suspension_nombre: string | null` sourced from `v_miembros_equipo`
+
 ---
 
 ### Requirement: Member table SHALL display required columns
-The `EquipoTable` component SHALL render a table with the following columns in order: **Nombre** (full name), **Tipo ID**, **N° Identificación**, **Teléfono**, **Correo**, **Estado** (as a colour-coded badge sourced from `miembros_tenant.estado` via `v_miembros_equipo`), **Fallas (30d)** (absence counter with colour coding), **Perfil** (role display), and **Acciones**. The table SHALL include `<thead>` with `scope="col"` on every `<th>`. Nullable fields SHALL display `—` when empty. The **Acciones** column SHALL always be rendered regardless of which action callbacks are provided.
+The `EquipoTable` component SHALL render a table with the following columns in order: **Nombre** (full name), **Identificación** (grouped column showing tipo ID · número on one line and "Exp: {fecha_exp_identificacion}" below it; each part shows `—` when null), **Teléfono**, **Correo**, **RH**, **F. Nacimiento** (ISO date YYYY-MM-DD or `—`), **Estado** (as a colour-coded badge sourced from `miembros_tenant.estado` via `v_miembros_equipo`), **Fallas (30d)** (absence counter with colour coding), **Perfil** (role display), and **Acciones**. The table SHALL include `<thead>` with `scope="col"` on every `<th>`. Nullable fields SHALL display `—` when empty. The **Acciones** column SHALL always be rendered regardless of which action callbacks are provided.
 
 The **Fallas (30d)** column SHALL render `inasistencias_recientes` with the following visual treatment:
 - `0` → em-dash (`—`) in slate colour (neutral)
@@ -59,11 +67,23 @@ When `roles` and `onCambiarRol` props are provided, the **Perfil** column SHALL 
 
 #### Scenario: All columns are rendered for a complete member record
 - **WHEN** a member has all fields populated
-- **THEN** the system SHALL display full name, tipo ID, número de identificación, phone, email, status badge, fallas counter, role name, and the Acciones cell in the corresponding columns
+- **THEN** the system SHALL display full name, grouped identification (tipo · número with exp date below), phone, email, RH, birth date, status badge, fallas counter, role name, and the Acciones cell
 
-#### Scenario: Nullable identification fields display em-dash
+#### Scenario: Identification column shows grouped ID data
+- **WHEN** a member has `tipo_identificacion = 'CC'`, `numero_identificacion = '12345678'`, and `fecha_exp_identificacion = '2020-03-15'`
+- **THEN** the Identificación cell SHALL render "CC · 12345678" on the first line and "Exp: 2020-03-15" on a second smaller line
+
+#### Scenario: Identification column shows em-dash for null parts
 - **WHEN** a member's `tipo_identificacion` or `numero_identificacion` is null
-- **THEN** the system SHALL render `—` in the respective column cell
+- **THEN** those parts of the Identificación cell SHALL render `—`
+
+#### Scenario: F. Nacimiento column shows ISO date when set
+- **WHEN** a member's `fecha_nacimiento` is set
+- **THEN** the F. Nacimiento column SHALL display the value in YYYY-MM-DD format
+
+#### Scenario: F. Nacimiento column shows em-dash when null
+- **WHEN** a member's `fecha_nacimiento` is null
+- **THEN** the F. Nacimiento column SHALL display `—`
 
 #### Scenario: Fallas column shows dash for zero absences
 - **WHEN** `inasistencias_recientes` is `0`
@@ -419,7 +439,7 @@ Each button SHALL include a `title` attribute describing its action for accessib
 `EquipoPage` SHALL open `EditarPerfilMiembroModal` when `onEditarPerfil` is called for a row. The modal SHALL be pre-filled with the member's current data from `MiembroTableItem` for `usuarios` fields, and SHALL fetch `perfil_deportivo` (`peso_kg`, `altura_cm`) lazily on open. The admin SHALL be able to update the following fields:
 - **Identity**: `nombre` (required), `apellido` (optional).
 - **Contact**: `telefono` (optional), `fecha_nacimiento` (ISO date string, optional).
-- **Document**: `tipo_identificacion` (select: CC/CE/TI/NIT/Pasaporte/Otro, optional), `numero_identificacion` (optional), `rh` (optional).
+- **Document**: `tipo_identificacion` (select: CC/CE/TI/NIT/Pasaporte/Otro, optional), `numero_identificacion` (optional), `fecha_exp_identificacion` (ISO date string, optional), `rh` (optional).
 - **Status**: `estado` (select: activo/mora/suspendido/inactivo, required).
 - **Sports Profile**: `peso_kg` (numeric, optional), `altura_cm` (numeric, optional).
 
@@ -452,6 +472,35 @@ The `email` field SHALL be displayed as a read-only disabled field and SHALL NOT
 #### Scenario: Service error surfaces in the modal
 - **WHEN** `editarPerfilMiembro` throws an error
 - **THEN** the system SHALL display an inline error message inside the modal without closing it
+
+---
+
+### Requirement: EditarPerfilMiembroModal SHALL pre-fill fecha_nacimiento and expose a fecha_exp_identificacion field
+`EditarPerfilMiembroModal` SHALL initialise `fechaNacimiento` from `miembro.fecha_nacimiento` (converting `null` to `''`) when the modal opens. It SHALL also manage a `fechaExpIdentificacion` state variable initialised from `miembro.fecha_exp_identificacion` (converting `null` to `''`). The Document fieldset SHALL render a `<input type="date">` labelled **"Fecha expedición ID"** below the existing Tipo ID / N° Identificación row. Both date values SHALL be included in the `EditarPerfilMiembroInput` payload passed to `onSave`.
+
+#### Scenario: fecha_nacimiento is pre-filled on open
+- **WHEN** the admin opens EditarPerfilMiembroModal for a member with a non-null `fecha_nacimiento`
+- **THEN** the birth date input SHALL display the stored ISO date value
+
+#### Scenario: fecha_nacimiento is empty when null
+- **WHEN** the admin opens EditarPerfilMiembroModal for a member with null `fecha_nacimiento`
+- **THEN** the birth date input SHALL be empty (no value)
+
+#### Scenario: fecha_exp_identificacion field is rendered in the Document section
+- **WHEN** the admin opens EditarPerfilMiembroModal
+- **THEN** the Document fieldset SHALL include a date input labelled "Fecha expedición ID"
+
+#### Scenario: fecha_exp_identificacion is pre-filled on open
+- **WHEN** the admin opens EditarPerfilMiembroModal for a member with a non-null `fecha_exp_identificacion`
+- **THEN** the issue date input SHALL display the stored ISO date value
+
+#### Scenario: fecha_exp_identificacion is saved correctly
+- **WHEN** the admin sets a date in the issue date input and clicks Guardar
+- **THEN** `onSave` SHALL be called with `fecha_exp_identificacion` set to the ISO date string
+
+#### Scenario: fecha_exp_identificacion can be cleared
+- **WHEN** the admin clears the issue date input and clicks Guardar
+- **THEN** `onSave` SHALL be called with `fecha_exp_identificacion: null`
 
 ---
 

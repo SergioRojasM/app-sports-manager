@@ -76,6 +76,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   ├── TenantDirectoryList.tsx
 │   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods
 │   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method
+│   │   │   │   ├── TenantReglasSuspensionCard.tsx # Admin card: CRUD list of suspension rules (max 3)
+│   │   │   │   ├── ReglaSuspensionFormModal.tsx   # Right-side form modal for create/edit suspension rule
 │   │   │   │   └── SolicitarAccesoButton.tsx  # 5-state access request button: idle/pending/blocked/incomplete_profile/member
 │   │   │   └── scenarios/                # Feature slice (portal/scenarios)
 │   │   │       ├── ScenariosPage.tsx
@@ -120,7 +122,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EditarPerfilMiembroModal.tsx  # Slide-in modal: edit member profile + sports data
 │   │   │       ├── EliminarMiembroModal.tsx      # Confirmation dialog: remove member from team
 │   │   │       ├── BloquearMiembroModal.tsx      # Confirmation dialog: block member with optional motivo
-│   │   │       └── CambiarRolModal.tsx           # Confirmation dialog: change member role with self-demotion warning
+│   │   │       ├── CambiarRolModal.tsx           # Confirmation dialog: change member role with self-demotion warning
+│   │   │       └── ConfigurarSuspensionModal.tsx  # 2-step modal: assign/remove suspension rules to members in bulk
 │   │   │   └── gestion-solicitudes/       # Feature slice (portal/gestion-equipo/gestion-solicitudes)
 │   │   │       ├── SolicitudEstadoBadge.tsx
 │   │   │       ├── SolicitudesTable.tsx
@@ -160,6 +163,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── tenant/
 │   │       │   ├── useTenantView.ts
 │   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago
+│   │       │   ├── useReglasSuspension.ts  # CRUD state + 3-rule limit guard for tenant_reglas_suspension
 │   │       │   └── useOrgLogoUpload.ts    # File select, MIME/size validation, preview URL, upload trigger for org logo
 │   │       │   └── useOrgBannerUpload.ts   # File select, MIME/size validation, preview URL, upload trigger for org banner
 │   │       └── scenarios/
@@ -185,6 +189,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useSuscripcion.ts
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
+│   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
 │   │           └── useUsuarioNivelDisciplina.ts  # Fetch + upsert athlete discipline levels
 │   │       └── gestion-solicitudes/
 │   │           ├── useSolicitudesAdmin.ts    # Admin: load pending, accept/reject actions
@@ -227,6 +232,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_clases_incluidas / plan_tipo_vigencia_dias
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
+│   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
 │   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket
 │   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripcionesTenant — user's subscriptions with plan + pago joins, scoped by atleta_id + tenant_id
@@ -246,6 +252,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
+│   │       └── reglas-suspension.types.ts # ReglaSuspension, ReglaSuspensionCreatePayload, ReglaSuspensionUpdatePayload, ReglaSuspensionFormValues
 │   │       └── equipo.types.ts
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
@@ -335,6 +342,23 @@ Service (data access)
     ↓
 Supabase (database)
 ```
+
+## Database Functions & Scheduled Jobs
+
+### PL/pgSQL SECURITY DEFINER Functions
+
+| Function | Purpose | Trigger |
+|----------|---------|---------|
+| `book_and_deduct_class(...)` | Atomic booking + class deduction | Called via RPC from `reservas.service.ts` |
+| `cancel_and_restore_class(...)` | Atomic cancellation + class restoration | Called via RPC from `reservas.service.ts` |
+| `evaluar_suspensiones_cron()` | Evaluates active members against assigned suspension rules; suspends those exceeding absence thresholds, logs `miembros_tenant_novedades` (tipo `inasistencias_acumuladas`), and marks processed absences (`validacion_suspension = true`) | pg_cron daily schedule |
+| `reactivar_suspensiones_expiradas()` | Reactivates members whose temporary suspension (`duracion > 0`) has elapsed; logs novedad (tipo `reactivacion`) | pg_cron daily schedule |
+
+### pg_cron Scheduled Jobs
+
+| Job Name | Schedule | Description |
+|----------|----------|-------------|
+| `evaluar-suspensiones-diarias` | `0 6 * * *` (06:00 UTC / 01:00 AM COT) | Runs `reactivar_suspensiones_expiradas()` first, then `evaluar_suspensiones_cron()` |
 
 ## File Naming Conventions
 

@@ -70,11 +70,23 @@ The database SHALL enable Row Level Security on `plan_tipos`. SELECT SHALL be op
 
 ### Requirement: PlanTipo TypeScript interface and related input types are defined
 The system SHALL define the following TypeScript types in `src/types/portal/planes.types.ts`:
-- `PlanTipo` interface with all `plan_tipos` columns, including optional nullable fields.
-- `CreatePlanTipoInput` for service create calls.
-- `UpdatePlanTipoInput` for service update calls.
-- `PlanTipoFormValues` for controlled form inputs (numeric fields as strings, `activo` as boolean).
-- The existing `PlanTipo` union type `'virtual' | 'presencial' | 'mixto'` SHALL be renamed to `PlanModalidad` to free the `PlanTipo` identifier.
+- `PlanTipo` interface with all `plan_tipos` columns. The `clases_incluidas` field SHALL be typed as `number | null`, where `null` indicates unlimited classes.
+- `CreatePlanTipoInput` for service create calls. The `clases_incluidas` field SHALL be typed as `number | null`.
+- `UpdatePlanTipoInput` for service update calls. The `clases_incluidas` field SHALL be typed as `number | null`.
+- `PlanTipoFormValues` for controlled form inputs (numeric fields as strings, `activo` as boolean). The `clases_incluidas` field SHALL remain typed as `string`; an empty string SHALL map to `null` (unlimited) at form submit time.
+- The existing `PlanModalidad` type SHALL remain unchanged.
+
+#### Scenario: PlanTipoFormValues clases_incluidas empty string maps to null
+- **WHEN** a `PlanTipoFormValues` object has `clases_incluidas` set to an empty string `''`
+- **THEN** the form submission logic SHALL map it to `null` in the `CreatePlanTipoInput` or `UpdatePlanTipoInput` payload, indicating unlimited classes
+
+#### Scenario: PlanTipoFormValues clases_incluidas with numeric string maps to integer
+- **WHEN** a `PlanTipoFormValues` object has `clases_incluidas` set to a numeric string like `'10'`
+- **THEN** the form submission logic SHALL parse it to the integer `10` in the input payload
+
+#### Scenario: PlanTipo.clases_incluidas null renders as unlimited in UI
+- **WHEN** a `PlanTipo` record has `clases_incluidas = null`
+- **THEN** the UI SHALL display "Ilimitadas" or "Sin límite" wherever class count is shown
 
 #### Scenario: PlanModalidad rename does not change runtime values
 - **WHEN** a plan's delivery modality is read or written

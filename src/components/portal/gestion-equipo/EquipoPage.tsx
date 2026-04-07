@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useEquipo } from '@/hooks/portal/gestion-equipo/useEquipo';
 import { useSolicitudesAdmin } from '@/hooks/portal/gestion-solicitudes/useSolicitudesAdmin';
 import { useBloqueados } from '@/hooks/portal/gestion-solicitudes/useBloqueados';
+import { useReglasSuspension } from '@/hooks/portal/tenant/useReglasSuspension';
 import { EquipoStatsCards } from './EquipoStatsCards';
 import { EquipoHeaderFilters } from './EquipoHeaderFilters';
 import { EquipoTable } from './EquipoTable';
@@ -14,6 +15,7 @@ import { BloquearMiembroModal } from './BloquearMiembroModal';
 import { CambiarRolModal } from './CambiarRolModal';
 import { CambiarEstadoModal } from './CambiarEstadoModal';
 import { NovedadesMiembroModal } from './NovedadesMiembroModal';
+import { ConfigurarSuspensionModal } from './ConfigurarSuspensionModal';
 import { SolicitudesTab } from './gestion-solicitudes/SolicitudesTab';
 import { BloqueadosTab } from './gestion-solicitudes/BloqueadosTab';
 import type { MiembroTableItem } from '@/types/portal/equipo.types';
@@ -43,8 +45,11 @@ function EmptyState() {
 
 export function EquipoPage({ tenantId }: EquipoPageProps) {
   const { user } = useAuth();
+  const { rules: reglasActivas, isLoading: isLoadingReglas } = useReglasSuspension({ tenantId });
+  const [suspensionModalOpen, setSuspensionModalOpen] = useState(false);
 
   const {
+    members,
     loading,
     error,
     searchTerm,
@@ -80,6 +85,16 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
   const [rolChangeTarget, setRolChangeTarget] = useState<{ miembro: MiembroTableItem; nuevoRol: RolOption } | null>(null);
   const [cambiarEstadoTarget, setCambiarEstadoTarget] = useState<MiembroTableItem | null>(null);
   const [novedadesTarget, setNovedadesTarget] = useState<MiembroTableItem | null>(null);
+
+  const allMembersAsTableItems = useMemo<MiembroTableItem[]>(
+    () =>
+      members.map((m) => ({
+        ...m,
+        fullName: `${m.nombre} ${m.apellido}`.trim(),
+        estadoLabel: m.estado.charAt(0).toUpperCase() + m.estado.slice(1),
+      })),
+    [members],
+  );
 
   return (
     <section className="space-y-6">
@@ -146,6 +161,26 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
             estadoFilter={estadoFilter}
             onEstadoFilterChange={setEstadoFilter}
           />
+
+          {/* Configurar Suspensión button */}
+          {!loading && !error ? (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSuspensionModalOpen(true)}
+                disabled={reglasActivas.filter((r) => r.activo).length === 0 && !isLoadingReglas}
+                title={
+                  reglasActivas.filter((r) => r.activo).length === 0
+                    ? 'No hay reglas de suspensión activas'
+                    : 'Configurar regla de suspensión para miembros'
+                }
+                className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined text-base">gavel</span>
+                Configurar Suspensión
+              </button>
+            </div>
+          ) : null}
 
           {loading ? <LoadingState /> : null}
 
@@ -253,6 +288,15 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
             isOpen={!!novedadesTarget}
             onClose={() => setNovedadesTarget(null)}
             getNovedades={getNovedades}
+          />
+
+          <ConfigurarSuspensionModal
+            isOpen={suspensionModalOpen}
+            onClose={() => setSuspensionModalOpen(false)}
+            rules={reglasActivas}
+            members={allMembersAsTableItems}
+            tenantId={tenantId}
+            onSuccess={() => void refresh()}
           />
         </>
       ) : null}

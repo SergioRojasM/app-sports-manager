@@ -58,16 +58,16 @@
 
 ## 11. Verification
 
-- [ ] 11.1 Run `npx tsc --noEmit` and fix any TypeScript errors
-- [ ] 11.2 Manual test — flag off: submit access request → succeeds as before
-- [ ] 11.3 Manual test — flag on, incomplete profile: submit access request → blocked, button shows "Perfil incompleto" and banner appears
-- [ ] 11.4 Manual test — flag on, complete profile: submit access request → succeeds, no banner
-- [ ] 11.5 Manual test — admin toggle: enable/disable `requiere_perfil_completo` in edit drawer, save, verify DB value
+- [x] 11.1 Run `npx tsc --noEmit` and fix any TypeScript errors
+- [x] 11.2 Manual test — flag off: submit access request → succeeds as before
+- [x] 11.3 Manual test — flag on, incomplete profile: submit access request → blocked, button shows "Perfil incompleto" and banner appears
+- [x] 11.4 Manual test — flag on, complete profile: submit access request → succeeds, no banner
+- [x] 11.5 Manual test — admin toggle: enable/disable `requiere_perfil_completo` in edit drawer, save, verify DB value
 
 ## 12. Commit and Pull Request
 
-- [ ] 12.1 Stage all changes and create a commit with message: `feat: add requiere_perfil_completo flag to tenants for access request profile validation (US-0047)`
-- [ ] 12.2 Push branch and open a pull request with description:
+- [x] 12.1 Stage all changes and create a commit with message: `feat: add requiere_perfil_completo flag to tenants for access request profile validation (US-0047)`
+- [x] 12.2 Push branch and open a pull request with description:
   - **Summary**: Adds a per-tenant boolean flag `requiere_perfil_completo` that, when enabled, requires users to have all eight profile fields filled (`nombre`, `apellido`, `telefono`, `fecha_nacimiento`, `tipo_identificacion`, `numero_identificacion`, `fecha_exp_identificacion`, `rh`) before submitting an access request.
   - **Changes**: migration + types + service guard + hook state + edit drawer toggle + button render state
   - **Testing**: manual happy/sad paths documented in task 11

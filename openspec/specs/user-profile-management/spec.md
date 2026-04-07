@@ -5,7 +5,7 @@ The system SHALL display the authenticated user's personal information and sport
 
 #### Scenario: Profile page loads with existing data
 - **WHEN** an authenticated user navigates to `/portal/perfil`
-- **THEN** the system SHALL fetch and display their `usuarios` row (nombre, apellido, email, telefono, fecha_nacimiento, tipo_identificacion, numero_identificacion, rh) and their `perfil_deportivo` row (peso_kg, altura_cm) if it exists
+- **THEN** the system SHALL fetch and display their `usuarios` row (nombre, apellido, email, telefono, fecha_nacimiento, tipo_identificacion, numero_identificacion, fecha_exp_identificacion, rh) and their `perfil_deportivo` row (peso_kg, altura_cm) if it exists
 
 #### Scenario: Profile page loads when no sports profile exists
 - **WHEN** an authenticated user navigates to `/portal/perfil` and no `perfil_deportivo` row exists for that user
@@ -22,7 +22,7 @@ The system SHALL display the authenticated user's personal information and sport
 ---
 
 ### Requirement: User can edit their personal information
-The system SHALL provide an editable form for the authenticated user to modify their personal profile fields: nombre, apellido, telefono, fecha_nacimiento, tipo_identificacion, numero_identificacion, and rh.
+The system SHALL provide an editable form for the authenticated user to modify their personal profile fields: nombre, apellido, telefono, fecha_nacimiento, tipo_identificacion, numero_identificacion, fecha_exp_identificacion, and rh.
 
 #### Scenario: Fields are editable on page load
 - **WHEN** the profile page finishes loading
@@ -39,6 +39,18 @@ The system SHALL provide an editable form for the authenticated user to modify t
 #### Scenario: RH field renders as a select
 - **WHEN** the user interacts with the rh field
 - **THEN** the system SHALL present a dropdown with options: O+, O−, A+, A−, B+, B−, AB+, AB−
+
+#### Scenario: Fecha Expedición ID field is a date input
+- **WHEN** the profile form renders the fecha_exp_identificacion field
+- **THEN** the system SHALL render a date input (type="date") labelled "Fecha Expedición ID" placed immediately after the N° Identificación field
+
+#### Scenario: Fecha Expedición ID saves correctly
+- **WHEN** the user sets fecha_exp_identificacion to a valid date and clicks "Guardar Cambios"
+- **THEN** the system SHALL persist the value to `public.usuarios` and the field SHALL reflect the saved value after reload
+
+#### Scenario: Fecha Expedición ID can be cleared
+- **WHEN** the user clears the fecha_exp_identificacion date input and saves
+- **THEN** the system SHALL persist NULL for that field without validation error
 
 ---
 

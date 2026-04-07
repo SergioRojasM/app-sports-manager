@@ -1,5 +1,6 @@
 import { TenantInfoCards } from '@/components/portal/tenant/TenantInfoCards';
 import { TenantPaymentMethodsCard } from '@/components/portal/tenant/TenantPaymentMethodsCard';
+import { TenantReglasSuspensionCard } from '@/components/portal/tenant/TenantReglasSuspensionCard';
 
 type GestionOrganizacionTenantPageProps = {
   params: Promise<{ tenant_id: string }>;
@@ -20,7 +21,10 @@ export default async function GestionOrganizacionTenantPage({
       </header>
 
       <TenantInfoCards tenantId={tenantId} />
-      <TenantPaymentMethodsCard tenantId={tenantId} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TenantPaymentMethodsCard tenantId={tenantId} />
+        <TenantReglasSuspensionCard tenantId={tenantId} />
+      </div>
     </section>
   );
 }
