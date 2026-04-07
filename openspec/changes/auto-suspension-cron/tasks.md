@@ -40,6 +40,6 @@
 
 ## 7. Commit and PR
 
-- [ ] 7.1 Stage all changes: `git add -A`
-- [ ] 7.2 Commit with message: `feat: automated suspension evaluation cron job (US-0056)`
-- [ ] 7.3 Create pull request with description summarizing: pg_cron enablement, `validacion_suspension` column, `evaluar_suspensiones_cron()` and `reactivar_suspensiones_expiradas()` functions, daily `0 6 * * *` schedule, nullable `registrado_por`
+- [x] 7.1 Stage all changes: `git add -A`
+- [x] 7.2 Commit with message: `feat: automated suspension evaluation cron job (US-0056)`
+- [x] 7.3 Create pull request with description summarizing: pg_cron enablement, `validacion_suspension` column, `evaluar_suspensiones_cron()` and `reactivar_suspensiones_expiradas()` functions, daily `0 6 * * *` schedule, nullable `registrado_por`
