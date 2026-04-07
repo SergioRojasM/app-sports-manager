@@ -150,3 +150,12 @@ The organization edit form (`EditTenantDrawer`) SHALL include a boolean toggle (
 #### Scenario: requiere_perfil_completo is included in the select query
 - **WHEN** `tenantService.fetchTenantById` is called
 - **THEN** the Supabase select string SHALL include `requiere_perfil_completo` so the value is available for the form mapper
+
+---
+
+### Requirement: gestion-organizacion page includes TenantReglasSuspensionCard
+The `gestion-organizacion` page (`src/app/portal/orgs/[tenant_id]/(administrador)/gestion-organizacion/page.tsx`) SHALL render `<TenantReglasSuspensionCard tenantId={tenantId} />` below the existing `<TenantPaymentMethodsCard />` section.
+
+#### Scenario: Suspension rules card appears below payment methods card
+- **WHEN** an authenticated administrator opens the `gestion-organizacion` page
+- **THEN** the page SHALL display the `TenantReglasSuspensionCard` section positioned below the `TenantPaymentMethodsCard` section
