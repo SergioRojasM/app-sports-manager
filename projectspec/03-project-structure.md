@@ -343,6 +343,23 @@ Service (data access)
 Supabase (database)
 ```
 
+## Database Functions & Scheduled Jobs
+
+### PL/pgSQL SECURITY DEFINER Functions
+
+| Function | Purpose | Trigger |
+|----------|---------|---------|
+| `book_and_deduct_class(...)` | Atomic booking + class deduction | Called via RPC from `reservas.service.ts` |
+| `cancel_and_restore_class(...)` | Atomic cancellation + class restoration | Called via RPC from `reservas.service.ts` |
+| `evaluar_suspensiones_cron()` | Evaluates active members against assigned suspension rules; suspends those exceeding absence thresholds, logs `miembros_tenant_novedades` (tipo `inasistencias_acumuladas`), and marks processed absences (`validacion_suspension = true`) | pg_cron daily schedule |
+| `reactivar_suspensiones_expiradas()` | Reactivates members whose temporary suspension (`duracion > 0`) has elapsed; logs novedad (tipo `reactivacion`) | pg_cron daily schedule |
+
+### pg_cron Scheduled Jobs
+
+| Job Name | Schedule | Description |
+|----------|----------|-------------|
+| `evaluar-suspensiones-diarias` | `0 6 * * *` (06:00 UTC / 01:00 AM COT) | Runs `reactivar_suspensiones_expiradas()` first, then `evaluar_suspensiones_cron()` |
+
 ## File Naming Conventions
 
 ### Components
