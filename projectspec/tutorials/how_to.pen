@@ -1,0 +1,3716 @@
+{
+  "version": "2.11",
+  "children": [
+    {
+      "type": "frame",
+      "id": "HADYq",
+      "x": -583,
+      "y": -434.9999999999998,
+      "name": "Tutorial 1- Registro Equipo",
+      "width": 760,
+      "height": 2728,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "CpRLK",
+          "name": "--- Tutorial 1: Accede a tu equipo ---",
+          "width": "fill_container",
+          "height": 70,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0A1628",
+                "position": 0
+              },
+              {
+                "color": "#0D2545",
+                "position": 1
+              }
+            ]
+          },
+          "gap": 16,
+          "padding": [
+            0,
+            40
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "N9guG",
+              "name": "Brand",
+              "height": 44,
+              "fill": {
+                "type": "color",
+                "color": "#FFFFFF",
+                "enabled": false
+              },
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "J5mEN",
+                  "name": "Icono",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "../../public/icono_2.png",
+                    "mode": "fit"
+                  },
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "text",
+                  "id": "oZoeK",
+                  "name": "App Name",
+                  "fill": "#FFFFFF",
+                  "content": "GRIT Arena",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "qrXOB",
+              "name": "sep_text",
+              "fill": "#FFFFFF",
+              "content": "Tutorial 1: Regístrate en tu Equipo",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FonGz",
+          "name": "Paso 1 - Iniciar Sesión",
+          "clip": true,
+          "width": 760,
+          "height": 436,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "QhCBu",
+              "name": "Step Zone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "tXLyf",
+                  "name": "Step Circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "XgCvW",
+                      "name": "Num",
+                      "fill": "#FFFFFF",
+                      "content": "1",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "vDW4Q",
+                  "name": "Text Col",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "b6BEu",
+                      "name": "Title",
+                      "fill": "#0A1628",
+                      "content": "Inicia sesión en tu cuenta",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "KtV2K",
+                      "name": "Desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "Ve a grit-arena.com e ingresa con tu correo y contraseña. Si no tienes cuenta, regístrate primero.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "r7ZBvd",
+                  "name": "p1_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "log-in",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "lxXa6",
+              "name": "Image Area",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "Uoerl",
+                  "name": "Imagen App - Paso 1",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/login.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#90C8E8"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "KIrlo",
+          "name": "Paso 2 - Completa tu Perfil",
+          "clip": true,
+          "width": 759,
+          "height": 430,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "rvfES",
+              "name": "np_stepzone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "zBPF2",
+                  "name": "np_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FXrPu",
+                      "name": "np_num",
+                      "fill": "#FFFFFF",
+                      "content": "2",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "zMTIc",
+                  "name": "np_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JJ6QZ",
+                      "name": "np_title",
+                      "fill": "#0A1628",
+                      "content": "Completa tu perfil de usuario",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "bKCcC",
+                      "name": "np_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 580,
+                      "content": "Antes de unirte a un equipo, tu perfil debe estar completo. Ve a \"Perfil\" y agrega tus datos personales. Es un requisito para inscribirse al equipo.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "zQppl",
+                  "name": "np_icon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "user-check",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gtPTm",
+              "name": "np_imgarea",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "NEwDc",
+                  "name": "Imagen App - T1 Paso 2 Perfil",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/perfil.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#90C8E8"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "mu1lT",
+          "name": "Paso 3 - Dashboard",
+          "clip": true,
+          "width": 760,
+          "height": 119,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "TMNJ2",
+              "name": "Step Zone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Vi78q",
+                  "name": "Step Circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "lovKA",
+                      "name": "p2_circlenum",
+                      "fill": "#FFFFFF",
+                      "content": "3",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UEXel",
+                  "name": "Text Col",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DJuC6",
+                      "name": "p2_title",
+                      "fill": "#0A1628",
+                      "content": "Accede al Dashboard principal",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "KPPUe",
+                      "name": "p2_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "Luego de iniciar sesión, serás redirigido al Dashboard. Aquí verás un resumen de tu actividad y el menú de navegación.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "Kghao",
+                  "name": "p2_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "layout-dashboard",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "L8AyhQ",
+          "name": "Paso 4 - Organizaciones",
+          "clip": true,
+          "width": 760,
+          "height": 439,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Hn0Ja",
+              "name": "p3_stepzone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LPWFU",
+                  "name": "p3_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "WNJvw",
+                      "name": "p3_num",
+                      "fill": "#FFFFFF",
+                      "content": "4",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "XH0D8",
+                  "name": "p3_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "OBcqr",
+                      "name": "p3_title",
+                      "fill": "#0A1628",
+                      "content": "Navega a la sección \"Organizaciones Disponibles\"",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "BSerp",
+                      "name": "p3_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "En el menú superior, busca la opción \"Organizaciones disponibles\". Haz clic para ver la lista de organizaciones disponibles.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "AVzN5",
+                  "name": "p3_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "building-2",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gg4UD",
+              "name": "p3_imgarea",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "O1vEm",
+                  "name": "Imagen App - Paso 3",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/got_organizaciones.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#90C8E8"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "e3HUhZ",
+          "name": "Paso 5 - Buscar Organización",
+          "clip": true,
+          "width": 760,
+          "height": 449,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "jBvgY",
+              "name": "p4_stepzone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Icf84",
+                  "name": "p4_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "N3BqX",
+                      "name": "p4_num",
+                      "fill": "#FFFFFF",
+                      "content": "5",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DTTHB",
+                  "name": "p4_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BaFZR",
+                      "name": "p4_title",
+                      "fill": "#0A1628",
+                      "content": "Busca y selecciona tu organización",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OXLcc",
+                      "name": "p4_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "Busca el nombre de tu equipo y haz clic en el botón \"Solicitar Acceso\". Tu solicitud quedará pendiente de aprobación por el administrador.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "R5LZpc",
+                  "name": "p4_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "search",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "s9QGCb",
+              "name": "p4_imgarea",
+              "width": 760,
+              "height": 333,
+              "fill": "#EBF4FF",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "KgU81",
+                  "name": "Imagen App - Paso 4",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/solicitud_acceso.png",
+                    "mode": "fill"
+                  },
+                  "width": 355,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#90C8E8"
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "WZozW",
+                  "name": "Imagen App - Paso 4",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/acceso_pendiente.png",
+                    "mode": "fill"
+                  },
+                  "width": 348,
+                  "height": "fill_container",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#90C8E8"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "f9N4F",
+          "name": "Paso 7 - ¡Bienvenido!",
+          "clip": true,
+          "width": 760,
+          "height": 783,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "J9pbG",
+              "name": "p6_stepzone",
+              "width": 760,
+              "height": 130,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 90,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#003d8f",
+                    "position": 0
+                  },
+                  {
+                    "color": "#006FA6",
+                    "position": 1
+                  }
+                ]
+              },
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "i2guI",
+                  "name": "p6_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "bvj8t",
+                      "name": "p6_checkicon",
+                      "width": 32,
+                      "height": 32,
+                      "iconFontName": "circle-check",
+                      "iconFontFamily": "lucide",
+                      "fill": "#00A8CC"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PzqfC",
+                  "name": "p6_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zILdX",
+                      "name": "p6_title",
+                      "fill": "#FFFFFF",
+                      "content": "¡Bienvenido a tu organización!",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Zkcuu",
+                      "name": "p6_desc",
+                      "fill": "#B8E0F0",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "Una vez aprobado, recibirás acceso completo para gestionar reservas, entrenamientos, pagos y mucho más.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "T4WOt2",
+              "name": "p6_imgarea",
+              "width": 760,
+              "height": 606,
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "j7Ln1q",
+                  "name": "Imagen App - Paso 6",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/acceso_org.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#90C8E8"
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "ABQs1",
+                  "name": "Imagen App - Paso 6",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/vista_org.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#90C8E8"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "G4OPe",
+              "name": "p6_footer",
+              "width": 760,
+              "height": 48,
+              "fill": "#0A1628",
+              "gap": 8,
+              "padding": [
+                0,
+                20
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "KkSVh",
+                  "name": "p6_footerbar",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#00CC66",
+                        "position": 0
+                      },
+                      {
+                        "color": "#0088FF",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 36,
+                  "height": 4
+                },
+                {
+                  "type": "text",
+                  "id": "QsANa",
+                  "name": "p6_footertext",
+                  "fill": "#5A7A9A",
+                  "content": "grit-arena.com  ·  Guía de usuario",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "E7v3v",
+      "x": 400,
+      "y": -435,
+      "name": "Tutorial 2- Suscripción y Entrenamiento",
+      "width": 760,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "cNoIW",
+          "name": "--- Tutorial 2: Suscripción y Entrenamiento ---",
+          "width": "fill_container",
+          "height": 70,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0A1628",
+                "position": 0
+              },
+              {
+                "color": "#0D2545",
+                "position": 1
+              }
+            ]
+          },
+          "gap": 16,
+          "padding": [
+            0,
+            40
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "xak5X",
+              "name": "s1_brand",
+              "height": 44,
+              "fill": {
+                "type": "color",
+                "color": "#FFFFFF",
+                "enabled": false
+              },
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "klGeu",
+                  "name": "s1_icon",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "../../public/icono_2.png",
+                    "mode": "fit"
+                  },
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "type": "text",
+                  "id": "BrdaA",
+                  "name": "s1_appname",
+                  "fill": "#FFFFFF",
+                  "content": "GRIT Arena",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "vGUta",
+              "name": "sep_text",
+              "fill": "#FFFFFF",
+              "content": "Tutorial 2: Adquirir una Suscripción y Agendar un Entrenamiento",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CcFs8",
+          "name": "T2 Paso 1 - Accede a Suscripciones",
+          "clip": true,
+          "width": 760,
+          "height": 435,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "G4JI4",
+              "name": "s1_zone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "a45xG8",
+                  "name": "s1_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JYs7X",
+                      "name": "s1_num",
+                      "fill": "#FFFFFF",
+                      "content": "1",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "t6EkTz",
+                  "name": "s1_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "P3LBF",
+                      "name": "s1_title",
+                      "fill": "#0A1628",
+                      "content": "Accede a la sección \"Planes\"",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zk8vZ",
+                      "name": "s1_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 590,
+                      "content": "Estando dentro de la organización ingresa en el menú de navegación, busca la opción \"Planes\". Desde aquí podrás ver todos los planes disponibles en tu organización.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "qMRD0",
+                  "name": "s1_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "credit-card",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EFitd",
+              "name": "s1_img",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "p2vbr",
+                  "name": "Imagen App - T2 Paso 1",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/goto_planes.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#f3f0f5ff"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zyX5F",
+          "name": "T2 Paso 2 - Elige tu Plan",
+          "clip": true,
+          "width": 760,
+          "height": 431,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "GA99X",
+              "name": "s2_zone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "W39Ohp",
+                  "name": "s2_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SANnk",
+                      "name": "s2_num",
+                      "fill": "#FFFFFF",
+                      "content": "2",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ygdkD",
+                  "name": "s2_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kAKCp",
+                      "name": "s2_title",
+                      "fill": "#0A1628",
+                      "content": "Elige tu plan de suscripción",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "CCKgW",
+                      "name": "s2_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 590,
+                      "content": "Compara los planes disponibles (mensual, trimestral, anual) y selecciona el que mejor se adapte a tus necesidades. Haz clic en \"Adquirir\" para conocer los detalles.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "p9eUZW",
+                  "name": "s2_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "list-checks",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Oy9q2",
+              "name": "s2_img",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "ARygT",
+                  "name": "Imagen App - T2 Paso 2",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/seleccion_plan.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Jd5O3",
+          "name": "T2 Paso 3 - Confirma el Pago",
+          "clip": true,
+          "width": 760,
+          "height": 457,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "HirJn",
+              "name": "s3_zone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Ih1UP",
+                  "name": "s3_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JPgrq",
+                      "name": "s3_num",
+                      "fill": "#FFFFFF",
+                      "content": "3",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "X5mKy",
+                  "name": "s3_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "TBXhe",
+                      "name": "s3_title",
+                      "fill": "#0A1628",
+                      "content": "Selecciona el método de pago",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "iJizs",
+                      "name": "s3_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 590,
+                      "content": "Selecciona una opción según la duración del plan y elige tu método de pago (transferencia, efectivo u otro). Adjunta el comprobante si es requerido. Tu solicitud quedará pendiente de aprobación por el administrador.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "cCUXT",
+                  "name": "s3_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "wallet",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ImYpI",
+              "name": "s3_img",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "iP2x1",
+                  "name": "Imagen App - T2 Paso 3",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/duracion_plan.png",
+                    "mode": "fill"
+                  },
+                  "width": 334,
+                  "height": 323,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#faf7fbff"
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "RR2nM",
+                  "name": "Imagen App - T2 Paso 3",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/metodo_pago.png",
+                    "mode": "fill"
+                  },
+                  "width": 334,
+                  "height": 323,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#faf7fbff"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "o93K2q",
+          "name": "T2 Paso 4 - Suscripción Activa",
+          "clip": true,
+          "width": 760,
+          "height": 745,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "v9aT0",
+              "name": "s4_zone",
+              "width": 760,
+              "height": 130,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 90,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#145214",
+                    "position": 0
+                  },
+                  {
+                    "color": "#1A7A1A",
+                    "position": 1
+                  }
+                ]
+              },
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "O6mpa",
+                  "name": "s4_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "dGr8Q",
+                      "name": "s4_checkicon",
+                      "width": 32,
+                      "height": 32,
+                      "iconFontName": "circle-check",
+                      "iconFontFamily": "lucide",
+                      "fill": "#00CC66"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QPsGB",
+                  "name": "s4_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ymd0G",
+                      "name": "s4_title",
+                      "fill": "#FFFFFF",
+                      "content": "¡Suscripción activa!",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ewYWr",
+                      "name": "s4_desc",
+                      "fill": "#A8EFC4",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "Una vez el administrador haya aprobado tu suscripción, podrás verla en el dashboard de inicio o en Menú > Mis suscripciones.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vfUGl",
+              "name": "s4_img",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "EQ1tJ",
+                  "name": "Imagen App - T2 Paso 4",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/inicio.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "pB2ER",
+                  "name": "Imagen App - T2 Paso 4",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/mis_suscripciones.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "oJ10A",
+          "name": "T2 Paso 5 - Accede a Entrenamientos",
+          "clip": true,
+          "width": 760,
+          "height": 436,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "U5Gbzq",
+              "name": "s5_zone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Drv2J",
+                  "name": "s5_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ctV1V",
+                      "name": "s5_num",
+                      "fill": "#FFFFFF",
+                      "content": "5",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "z1Tfh",
+                  "name": "s5_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SbFfY",
+                      "name": "s5_title",
+                      "fill": "#0A1628",
+                      "content": "Accede a la sección \"Entrenamientos\"",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "DGK1U",
+                      "name": "s5_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 590,
+                      "content": "En el menú principal ve a \"Entrenamientos\". Verás el calendario con todas las sesiones disponibles y su disponibilidad en tiempo real.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "trocl",
+                  "name": "s5_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "dumbbell",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zmmql",
+              "name": "s5_img",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "bASum",
+                  "name": "Imagen App - T2 Paso 5",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/entrenamientos.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FGCSV",
+          "name": "T2 Paso 6 - Reserva Entrenamientos",
+          "clip": true,
+          "width": 760,
+          "height": 476,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "zfB7E",
+              "name": "s5_zone",
+              "width": 760,
+              "height": 116,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "OycSI",
+                  "name": "s5_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PAQ92",
+                      "name": "s5_num",
+                      "fill": "#FFFFFF",
+                      "content": "6",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "YPMfi",
+                  "name": "s5_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "MIZI3",
+                      "name": "s5_title",
+                      "fill": "#0A1628",
+                      "content": "Reserva un Entrenamiento",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SDZF9",
+                      "name": "s5_desc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 590,
+                      "content": "Filtra el día en el que quieres reservar el entrenamiento, haciendo clic en el calendario. Ingresa al entrenamiento seleccionando el círculo del entrenamiento o en el listado de entrenamientos seleccionando la opción Ver.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "SrkRK",
+                  "name": "s5_stepicon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "dumbbell",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Ma6Bl",
+              "name": "s5_img",
+              "width": 760,
+              "height": "fill_container",
+              "fill": "#EBF4FF",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "f5vNA",
+                  "name": "Imagen App - T2 Paso 5",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/seleccion_entrenamiento.png",
+                    "mode": "fill"
+                  },
+                  "width": 180,
+                  "height": 330,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "mZp09",
+                  "name": "Imagen App - T2 Paso 5",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/reserva_1.png",
+                    "mode": "fill"
+                  },
+                  "width": 191,
+                  "height": 330,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "iYFMh",
+                  "name": "Imagen App - T2 Paso 5",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/reserva.png",
+                    "mode": "fill"
+                  },
+                  "width": 191,
+                  "height": 330,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "UioDQ",
+          "name": "T2 Paso 6 - Confirma tu Reserva",
+          "clip": true,
+          "width": 760,
+          "height": 500,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "sB16O",
+              "name": "s6_zone",
+              "width": 760,
+              "height": 130,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 135,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#003d8f",
+                    "position": 0
+                  },
+                  {
+                    "color": "#006FA6",
+                    "position": 1
+                  }
+                ]
+              },
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "k3Qu7m",
+                  "name": "s6_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "O3xuI",
+                      "name": "s6_checkicon",
+                      "width": 30,
+                      "height": 30,
+                      "iconFontName": "calendar-check",
+                      "iconFontFamily": "lucide",
+                      "fill": "#00C4CC"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "v2pOQX",
+                  "name": "s6_textcol",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fFrEO",
+                      "name": "s6_title",
+                      "fill": "#FFFFFF",
+                      "content": "¡Entrenamiento agendado con éxito!",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "h1c9H",
+                      "name": "s6_desc",
+                      "fill": "#E0CCFF",
+                      "textGrowth": "fixed-width",
+                      "width": 600,
+                      "content": "Una vez reservado el entrenamiento, podrás verlo en el dashboard de inicio.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "SFPuV",
+              "name": "s6_img",
+              "width": 760,
+              "height": 321,
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "a6q0k6",
+                  "name": "Imagen App - T2 Paso 6",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/inicio_2.png",
+                    "mode": "fill"
+                  },
+                  "width": 640,
+                  "height": 290,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#ffffffff"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iCkNB",
+              "name": "s6_footer",
+              "width": 760,
+              "height": 48,
+              "fill": "#0A1628",
+              "gap": 8,
+              "padding": [
+                0,
+                20
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "rizer",
+                  "name": "s6_fbar",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#C45AFF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00CC66",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 36,
+                  "height": 4
+                },
+                {
+                  "type": "text",
+                  "id": "OFnWv",
+                  "name": "s6_ftxt",
+                  "fill": "#5A7A9A",
+                  "content": "grit-arena.com  ·  Guía de usuario",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "hKoor",
+      "x": 1332,
+      "y": -435,
+      "name": "Tutorial 3- Crear Series de Entrenamientos",
+      "width": 760,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "R5DFwD",
+          "name": "--- Tutorial 3: Crear Series de Entrenamientos ---",
+          "width": "fill_container",
+          "height": 70,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0A1628",
+                "position": 0
+              },
+              {
+                "color": "#0D2545",
+                "position": 1
+              }
+            ]
+          },
+          "gap": 16,
+          "padding": [
+            0,
+            40
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "e7UHC",
+              "name": "t3sep_text",
+              "fill": "#FFFFFF",
+              "content": "Tutorial 3: Crear Series de Entrenamientos",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "XPhuq",
+              "name": "t3sep_pill",
+              "height": 26,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 0,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#00C4CC",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0088FF",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 13,
+              "padding": [
+                0,
+                12
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jeac6",
+                  "name": "t3sep_pilltext",
+                  "fill": "#FFFFFF",
+                  "content": "6 PASOS",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "TnXCU",
+          "name": "T3 Paso 1 - Panel de Entrenamientos",
+          "clip": true,
+          "width": 760,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "k6ajK",
+              "name": "t3p1_header",
+              "width": 760,
+              "height": 56,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 90,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#0A1628",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0D2545",
+                    "position": 1
+                  }
+                ]
+              },
+              "padding": [
+                0,
+                20
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yGRG3",
+                  "name": "t3p1_brand",
+                  "height": 44,
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "jtPxG",
+                      "name": "t3p1_icon",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "../../public/icono_2.png",
+                        "mode": "fit"
+                      },
+                      "width": 28,
+                      "height": 28
+                    },
+                    {
+                      "type": "text",
+                      "id": "kJa4r",
+                      "name": "t3p1_appname",
+                      "fill": "#FFFFFF",
+                      "content": "GRIT Arena",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AlNDb",
+                  "name": "t3p1_badge",
+                  "height": 28,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 14,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "knsvJ",
+                      "name": "t3p1_badgetxt",
+                      "fill": "#FFFFFF",
+                      "content": "PASO 1 / 6",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "TOdda",
+              "name": "t3p1_zone",
+              "width": 760,
+              "height": 120,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "kwMMX",
+                  "name": "t3p1_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bSrld",
+                      "fill": "#FFFFFF",
+                      "content": "1",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DGweb",
+                  "name": "t3p1_tc",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "T0V7F",
+                      "fill": "#0A1628",
+                      "content": "Accede a Gestión de Entrenamientos",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "t4cBx",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 530,
+                      "content": "En el menú principal ve a \"Entrenamientos\". Verás el calendario mensual con la leyenda por disciplina y el filtro de visibilidad (Público/Privado). Haz clic en \"Crear entrenamiento +\" para comenzar.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "eT88O",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "calendar",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GpK4u",
+              "name": "t3p1_imgarea",
+              "width": 760,
+              "height": 370,
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "padding": [
+                12,
+                120
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "B9JU5",
+                  "name": "img_t3p1",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "Images_entrenamientos/entrenamientos_1.png",
+                    "mode": "fit"
+                  },
+                  "width": 220,
+                  "height": 340
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "UXCs3",
+          "name": "T3 Paso 2 - Datos Base",
+          "clip": true,
+          "width": 760,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "wiUzp",
+              "name": "t3p2_zone",
+              "width": 760,
+              "height": 186,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "l5CLWB",
+                  "name": "t3p2_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fi5D0",
+                      "fill": "#FFFFFF",
+                      "content": "2",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "pmusl",
+                  "name": "t3p2_tc",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "esWyG",
+                      "fill": "#0A1628",
+                      "content": "Completa los datos base del entrenamiento",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "bElce",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 530,
+                      "content": "Rellena el formulario con: Nombre · Disciplina* (deporte) · Escenario* (lugar físico) · Entrenador (opcional) · Duración en minutos · Cupo máximo de participantes · Descripción · Punto de encuentro · Formulario externo (URL) · Visibilidad (Público o Privado).",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "cooBL",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "clipboard-list",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "FLZ5G",
+              "name": "t3p2_imgarea",
+              "width": 760,
+              "height": 370,
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "padding": [
+                12,
+                120
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "ndtuZ",
+                  "name": "img_t3p2",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "Images_entrenamientos/entrenamientos_2.png",
+                    "mode": "fit"
+                  },
+                  "width": 220,
+                  "height": 340
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ykaaS",
+          "name": "T3 Paso 4 - Cupos por Nivel",
+          "clip": true,
+          "width": 760,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "HoX1V",
+              "name": "t3p4_zone",
+              "width": 760,
+              "height": 196,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "d3bvQX",
+                  "name": "t3p4_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "WgSn6",
+                      "fill": "#FFFFFF",
+                      "content": "4",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kz508",
+                  "name": "t3p4_tc",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "an94E",
+                      "fill": "#0A1628",
+                      "content": "Cupos por nivel: aprovecha los niveles de tu disciplina",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "K3sIbL",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 530,
+                      "content": "Si la disciplina tiene niveles de progresión configurados (Inicial, Intermedio, Avanzado…Carril 1, Carril 2, Carril3, etc), al activar «¿Usar categorías?» en el entrenamiento cada nivel aparece con su propio cupo. La suma de cupos por nivel debe igualar el Cupo máximo global.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "u2GOH",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "layers",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "BI4h2",
+              "name": "t3p4_tip",
+              "width": 760,
+              "height": 40,
+              "fill": "#EBF9FF",
+              "gap": 8,
+              "padding": [
+                0,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "zgqkd",
+                  "width": 16,
+                  "height": 16,
+                  "iconFontName": "info",
+                  "iconFontFamily": "lucide",
+                  "fill": "#0088FF"
+                },
+                {
+                  "type": "text",
+                  "id": "kYSy0",
+                  "fill": "#0066CC",
+                  "content": "Prerequisito: configura los niveles en Disciplinas → elige la disciplina → sección \"Niveles de Progresión\".",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "V4GoR6",
+              "name": "t3p4_imgarea",
+              "width": 760,
+              "height": 408,
+              "fill": "#EBF4FF",
+              "gap": 24,
+              "padding": [
+                20,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "N6w5yf",
+                  "name": "t3p4_col1",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Jm0Aw",
+                      "fill": "#0A1628",
+                      "content": "1. Configura niveles en Disciplinas",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 8,
+                      "id": "s5qnuC",
+                      "name": "img_niveles",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "Images_entrenamientos/niveles_disciplinas.png",
+                        "mode": "fit"
+                      },
+                      "width": 200,
+                      "height": 350
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fJZpf",
+                  "name": "t3p4_col2",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qEinZ",
+                      "fill": "#0A1628",
+                      "content": "2. Los niveles aparecen como cupos en el entrenamiento",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 8,
+                      "id": "V2IQK",
+                      "name": "img_cupos",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "Images_entrenamientos/cupos_niveles.png",
+                        "mode": "fit"
+                      },
+                      "width": 200,
+                      "height": 350
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "q6KC2",
+          "name": "T3 Paso 3 - Tipo y Programación",
+          "clip": true,
+          "width": 760,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "GkFmy",
+              "name": "t3p3_zone",
+              "width": 760,
+              "height": 196,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "OsZZA",
+                  "name": "t3p3_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nA5mt",
+                      "fill": "#FFFFFF",
+                      "content": "3",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "zBemk",
+                  "name": "t3p3_tc",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "F5Qde2",
+                      "fill": "#0A1628",
+                      "content": "Define el tipo Serie y la programación",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "bT5cS",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 530,
+                      "content": "Selecciona Tipo: «Serie» para generar sesiones recurrentes automáticamente. Indica la Fecha inicio y Fecha fin de la serie. En Recurrencia semanal marca los días (Lun–Dom) y cuántas semanas repetir. Finalmente agrega un bloque horario con la Hora de inicio de cada sesión.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "QrEKa",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "calendar-range",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DfvUP",
+              "name": "t3p3_imgarea",
+              "width": 760,
+              "height": 370,
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "padding": [
+                12,
+                120
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "blhhB",
+                  "name": "img_t3p3",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "Images_entrenamientos/entrenamientos_4.png",
+                    "mode": "fit"
+                  },
+                  "width": 220,
+                  "height": 340
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "h3O3Zv",
+          "name": "T3 Paso 5 - Categorías y Restricciones",
+          "clip": true,
+          "width": 760,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "SjrXc",
+              "name": "t3p4_zone",
+              "width": 760,
+              "height": 196,
+              "fill": "#FFFFFF",
+              "gap": 16,
+              "padding": [
+                20,
+                24
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "p2SDtg",
+                  "name": "t3p4_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FoMp4",
+                      "fill": "#FFFFFF",
+                      "content": "5",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 24,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "K7tdY",
+                  "name": "t3p4_tc",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HLg21",
+                      "fill": "#0A1628",
+                      "content": "Configura restricciones de reserva",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "UkXdc",
+                      "fill": "#4A6080",
+                      "textGrowth": "fixed-width",
+                      "width": 530,
+                      "content": "Categorías por nivel: actívalo para gestionar cupos separados por nivel de atleta. Restricciones de reserva: define la Antelación mínima para reservar y para cancelar (en horas). Agrega condiciones por Estado de usuario, Plan, Disciplina y Validar nivel para controlar quién puede reservar.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "icon_font",
+                  "id": "NU35Q",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "shield-check",
+                  "iconFontFamily": "lucide",
+                  "fill": "#00C4CC"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "AOtK4",
+              "name": "t3p4_imgarea",
+              "width": 760,
+              "height": 370,
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "padding": [
+                12,
+                120
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "WwEKg",
+                  "name": "img_t3p4",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "Images_entrenamientos/entrenamientos_5.png",
+                    "mode": "fit"
+                  },
+                  "width": 220,
+                  "height": 340
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "auCep",
+          "name": "T3 Paso 6 - Serie Creada",
+          "clip": true,
+          "width": 760,
+          "fill": "#F4F8FC",
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Yu05o",
+              "name": "t3p5_header",
+              "width": 760,
+              "height": 56,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 90,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#0A1628",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0D2545",
+                    "position": 1
+                  }
+                ]
+              },
+              "padding": [
+                0,
+                20
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "av3YU",
+                  "name": "t3p5_brand",
+                  "height": 44,
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "s264tf",
+                      "name": "t3p5_icon",
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "../../public/icono_2.png",
+                        "mode": "fit"
+                      },
+                      "width": 28,
+                      "height": 28
+                    },
+                    {
+                      "type": "text",
+                      "id": "c4jP6s",
+                      "name": "t3p5_appname",
+                      "fill": "#FFFFFF",
+                      "content": "GRIT Arena",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fiVqv",
+                  "name": "t3p5_badge",
+                  "height": 28,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#0088FF",
+                        "position": 0
+                      },
+                      {
+                        "color": "#00C4CC",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 14,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uBRhd",
+                      "name": "t3p5_badgetxt",
+                      "fill": "#FFFFFF",
+                      "content": "PASO 6 / 6",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PqONi",
+              "name": "t3p5_zone",
+              "width": 760,
+              "height": 130,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 135,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#003d8f",
+                    "position": 0
+                  },
+                  {
+                    "color": "#006FA6",
+                    "position": 1
+                  }
+                ]
+              },
+              "gap": 16,
+              "padding": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "q3lDA",
+                  "name": "t3p5_circle",
+                  "width": 56,
+                  "height": 56,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "UEVip",
+                      "width": 32,
+                      "height": 32,
+                      "iconFontName": "circle-check",
+                      "iconFontFamily": "lucide",
+                      "fill": "#00A8CC"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fcXz3",
+                  "name": "t3p5_tc",
+                  "width": "fill_container",
+                  "fill": {
+                    "type": "color",
+                    "color": "#FFFFFF",
+                    "enabled": false
+                  },
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "L7O2x",
+                      "fill": "#FFFFFF",
+                      "content": "¡Serie de entrenamientos creada con éxito!",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "q2LmD",
+                      "fill": "#B8E0F0",
+                      "textGrowth": "fixed-width",
+                      "width": 560,
+                      "content": "El calendario muestra un punto de color por cada sesión generada. La lista lateral detalla cada entrenamiento: nombre, visibilidad, cupo disponible, serie de origen, disciplina, fecha y hora de inicio, y duración.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "K5brPX",
+              "name": "t3p5_imgarea",
+              "width": 760,
+              "height": 330,
+              "fill": "#EBF4FF",
+              "layout": "vertical",
+              "padding": [
+                12,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "cZKGn",
+                  "name": "img_t3p5",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "Images_entrenamientos/entrenamientos_6.png",
+                    "mode": "fit"
+                  },
+                  "width": 640,
+                  "height": 300
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aH7tV",
+              "name": "t3p5_footer",
+              "width": 760,
+              "height": 48,
+              "fill": "#0A1628",
+              "gap": 8,
+              "padding": [
+                0,
+                20
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "rNngJ",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#00CC66",
+                        "position": 0
+                      },
+                      {
+                        "color": "#0088FF",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 36,
+                  "height": 4
+                },
+                {
+                  "type": "text",
+                  "id": "qj2AB",
+                  "fill": "#5A7A9A",
+                  "content": "grit-arena.com  ·  Guía de usuario",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
