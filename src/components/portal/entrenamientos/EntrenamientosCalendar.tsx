@@ -9,7 +9,6 @@ type EntrenamientosCalendarProps = {
   canManage: boolean;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
-  onOpenActions: (trainingId: string) => void;
   onSelectDate: (dateKey: string) => void;
 };
 
@@ -98,7 +97,6 @@ export function EntrenamientosCalendar({
   canManage,
   onPreviousMonth,
   onNextMonth,
-  onOpenActions,
   onSelectDate,
 }: EntrenamientosCalendarProps) {
   const itemsByDate = items.reduce<Record<string, TrainingCalendarItem[]>>((accumulator, item) => {
@@ -215,16 +213,11 @@ export function EntrenamientosCalendar({
                           ? toTimeLabelInBogota(item.instance.fecha_hora)
                           : 'Sin hora';
                         return (
-                          <button
+                          <span
                             key={item.instance.id}
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onOpenActions(item.instance.id);
-                            }}
-                            title={`${item.instance.nombre} · ${timeLabel}${canManage ? ' (click: opciones)' : ' (click: ver reservas)'}`}
+                            title={`${item.instance.nombre} · ${timeLabel}`}
                             aria-label={`${item.instance.nombre} ${timeLabel}`}
-                            className={`transition hover:scale-110 ${disciplineColor} ${
+                            className={`${disciplineColor} ${
                               isPublic
                                 ? 'h-3 w-3'
                                 : 'h-2.5 w-2.5 rounded-full ring-1 ring-white/20'

@@ -275,7 +275,6 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
               canManage={canManage}
               onPreviousMonth={handleGoToPreviousMonth}
               onNextMonth={handleGoToNextMonth}
-              onOpenActions={openActionModal}
               onSelectDate={handleSelectDate}
             />
           </div>
