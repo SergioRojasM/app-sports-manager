@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import type { ReservaEstado, CategoriaDisponibilidad } from '@/types/portal/reservas.types';
 
@@ -11,6 +11,10 @@ import type { ReservaEstado, CategoriaDisponibilidad } from '@/types/portal/rese
 type AtletaOption = {
   id: string;
   label: string;
+  /** "{tipo}: {numero}" or '' when no identification data */
+  identificacion: string;
+  /** Lowercase concat of label + numero_identificacion for fast client-side filtering */
+  searchText: string;
 };
 
 type ReservaFormModalProps = {
@@ -71,6 +75,12 @@ export function ReservaFormModal({
   const [atletaOptions, setAtletaOptions] = useState<AtletaOption[]>([]);
   const [loadingAtletas, setLoadingAtletas] = useState(false);
 
+  // Combobox state
+  const [searchInput, setSearchInput] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Load atletas for the picker when open and in create mode with picker visible
   useEffect(() => {
     if (!open || !showAtletaPicker) {
@@ -90,11 +100,13 @@ export function ReservaFormModal({
             usuarios!miembros_tenant_usuario_id_fkey (
               nombre,
               apellido,
-              email
+              email,
+              numero_identificacion,
+              tipo_identificacion
             )
           `)
           .eq('tenant_id', tenantId)
-          .eq('activo', true);
+          .neq('estado', 'inactivo');
 
         if (!cancelled && data) {
           const options: AtletaOption[] = data.map((row) => {
@@ -102,11 +114,19 @@ export function ReservaFormModal({
               nombre: string | null;
               apellido: string | null;
               email: string;
+              numero_identificacion: string | null;
+              tipo_identificacion: string | null;
             } | null;
-            const name = [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || usuario?.email || 'Sin nombre';
+            const label = [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || usuario?.email || 'Sin nombre';
+            const identificacion =
+              usuario?.numero_identificacion
+                ? `${usuario.tipo_identificacion ?? 'ID'}: ${usuario.numero_identificacion}`
+                : '';
             return {
               id: row.usuario_id,
-              label: name,
+              label,
+              identificacion,
+              searchText: `${label} ${usuario?.numero_identificacion ?? ''}`.toLowerCase(),
             };
           });
           setAtletaOptions(options.sort((a, b) => a.label.localeCompare(b.label)));
@@ -127,9 +147,80 @@ export function ReservaFormModal({
     };
   }, [open, showAtletaPicker, tenantId]);
 
+  // Auto-focus the search input when the modal opens in admin create mode
+  useEffect(() => {
+    if (open && showAtletaPicker && mode === 'create') {
+      const timer = setTimeout(() => searchInputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [open, showAtletaPicker, mode]);
+
+  // Reset combobox state when modal closes
+  useEffect(() => {
+    if (!open) {
+      setSearchInput('');
+      setIsDropdownOpen(false);
+      setHighlightedIndex(-1);
+    }
+  }, [open]);
+
   if (!open) {
     return null;
   }
+
+  // ── Combobox helpers ──────────────────────────────
+
+  const filteredOptions = searchInput.trim()
+    ? atletaOptions.filter((o) => o.searchText.includes(searchInput.toLowerCase()))
+    : atletaOptions;
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(event.target.value);
+    onUpdateField('atleta_id', '');
+    setIsDropdownOpen(true);
+    setHighlightedIndex(-1);
+  };
+
+  const handleSearchFocus = () => {
+    setIsDropdownOpen(true);
+  };
+
+  const handleSearchBlur = () => {
+    setTimeout(() => setIsDropdownOpen(false), 150);
+  };
+
+  const handleOptionSelect = (option: AtletaOption) => {
+    onUpdateField('atleta_id', option.id);
+    setSearchInput(option.label);
+    setIsDropdownOpen(false);
+    setHighlightedIndex(-1);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        setIsDropdownOpen(true);
+        setHighlightedIndex((prev) => Math.min(prev + 1, filteredOptions.length - 1));
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        setHighlightedIndex((prev) => Math.max(prev - 1, 0));
+        break;
+      case 'Enter':
+        event.preventDefault();
+        if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
+          handleOptionSelect(filteredOptions[highlightedIndex]);
+        }
+        break;
+      case 'Escape':
+        setIsDropdownOpen(false);
+        setHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  // ─────────────────────────────────────────────
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -157,25 +248,68 @@ export function ReservaFormModal({
           {/* Atleta picker — only admin/entrenador create mode */}
           {showAtletaPicker && mode === 'create' && (
             <div>
-              <label htmlFor="reserva-atleta" className="mb-1 block text-sm font-medium text-slate-300">
+              <label htmlFor="reserva-atleta-search" className="mb-1 block text-sm font-medium text-slate-300">
                 Atleta
               </label>
-              <select
-                id="reserva-atleta"
-                value={form.atleta_id}
-                onChange={(event) => onUpdateField('atleta_id', event.target.value)}
-                disabled={loadingAtletas || isSubmitting}
-                className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 focus:border-turquoise focus:outline-none"
-              >
-                <option value="">
-                  {loadingAtletas ? 'Cargando atletas...' : 'Selecciona un atleta'}
-                </option>
-                {atletaOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  ref={searchInputRef}
+                  id="reserva-atleta-search"
+                  type="text"
+                  role="combobox"
+                  aria-expanded={isDropdownOpen}
+                  aria-controls="reserva-atleta-listbox"
+                  aria-autocomplete="list"
+                  aria-activedescendant={
+                    highlightedIndex >= 0 ? `atleta-option-${highlightedIndex}` : undefined
+                  }
+                  value={searchInput}
+                  onChange={handleSearchChange}
+                  onFocus={handleSearchFocus}
+                  onBlur={handleSearchBlur}
+                  onKeyDown={handleKeyDown}
+                  disabled={loadingAtletas || isSubmitting}
+                  placeholder={loadingAtletas ? 'Cargando atletas…' : 'Buscar por nombre o cédula…'}
+                  autoComplete="off"
+                  className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-turquoise focus:outline-none disabled:opacity-60"
+                />
+                {isDropdownOpen && !loadingAtletas && (
+                  <ul
+                    id="reserva-atleta-listbox"
+                    role="listbox"
+                    aria-label="Atletas"
+                    className="absolute left-0 top-full z-[60] mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-portal-border bg-navy-deep shadow-xl"
+                  >
+                    {filteredOptions.length === 0 ? (
+                      <li className="px-3 py-2 text-sm text-slate-500">Sin resultados</li>
+                    ) : (
+                      filteredOptions.map((option, index) => (
+                        <li
+                          key={option.id}
+                          id={`atleta-option-${index}`}
+                          role="option"
+                          aria-selected={form.atleta_id === option.id}
+                          onMouseDown={(e) => {
+                            // Prevent blur from firing before the click registers
+                            e.preventDefault();
+                            handleOptionSelect(option);
+                          }}
+                          className={`cursor-pointer px-3 py-2 transition-colors ${
+                            index === highlightedIndex
+                              ? 'bg-turquoise/20 text-turquoise'
+                              : 'text-slate-100 hover:bg-slate-700/50'
+                          }`}
+                        >
+                          <p className="text-sm font-medium leading-tight">{option.label}</p>
+                          {option.identificacion && (
+                            <p className="text-xs text-slate-400">{option.identificacion}</p>
+                          )}
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                )}
+              </div>
               {errors.atleta_id && (
                 <p className="mt-1 text-xs text-rose-300">{errors.atleta_id}</p>
               )}
