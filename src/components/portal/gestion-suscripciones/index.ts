@@ -9,3 +9,4 @@ export { ValidarSuscripcionModal } from './ValidarSuscripcionModal';
 export { EditarSuscripcionModal } from './EditarSuscripcionModal';
 export { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
 export { VerDetallePagoModal } from './VerDetallePagoModal';
+export { CrearSuscripcionModal } from './CrearSuscripcionModal';

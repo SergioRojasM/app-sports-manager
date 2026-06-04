@@ -11,6 +11,7 @@ import { ValidarSuscripcionModal } from './ValidarSuscripcionModal';
 import { EditarSuscripcionModal } from './EditarSuscripcionModal';
 import { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
 import { VerDetallePagoModal } from './VerDetallePagoModal';
+import { CrearSuscripcionModal } from './CrearSuscripcionModal';
 
 type GestionSuscripcionesPageProps = {
   tenantId: string;
@@ -57,6 +58,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
     openEditarModal,
     openEliminarModal,
     openVerDetalleModal,
+    openCrearModal,
     closeModal,
     refresh,
   } = useGestionSuscripciones({ tenantId });
@@ -80,11 +82,22 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
   return (
     <section className="space-y-6">
       <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Gestión de Suscripciones</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Visualiza y administra las suscripciones de tu organización. Valida pagos y aprueba o
-          cancela suscripciones.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold text-slate-100">Gestión de Suscripciones</h1>
+            <p className="mt-2 text-sm text-slate-400">
+              Visualiza y administra las suscripciones de tu organización. Valida pagos y aprueba o
+              cancela suscripciones.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={openCrearModal}
+            className="shrink-0 rounded-lg border border-turquoise/40 bg-turquoise/10 px-4 py-2 text-sm font-medium text-turquoise transition-colors hover:bg-turquoise/20"
+          >
+            + Nueva suscripción
+          </button>
+        </div>
       </header>
 
       {/* Stats always visible when data is loaded */}
@@ -175,6 +188,13 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
           onClose={closeModal}
         />
       )}
+
+      <CrearSuscripcionModal
+        open={modalType === 'crear'}
+        tenantId={tenantId}
+        onClose={closeModal}
+        onSuccess={handleModalSuccess}
+      />
     </section>
   );
 }
