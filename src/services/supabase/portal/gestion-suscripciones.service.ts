@@ -1,6 +1,7 @@
 import { createClient } from '@/services/supabase/client';
 import {
   GestionSuscripcionesServiceError,
+  type CrearSuscripcionAdminPayload,
   type PagoAdminRow,
   type PagoEstado,
   type SuscripcionAdminRow,
@@ -274,6 +275,62 @@ export const gestionSuscripcionesService = {
 
     if (error) {
       throw mapPostgrestError(error);
+    }
+  },
+
+  /**
+   * Admin-create a subscription on behalf of an athlete.
+   * Inserts into suscripciones and, if payload.pago is set, into pagos.
+   * A pago INSERT failure throws without rolling back the subscription.
+   */
+  async crearSuscripcionAdmin(payload: CrearSuscripcionAdminPayload): Promise<void> {
+    const supabase = createClient();
+
+    const suscripcionInsert: Record<string, unknown> = {
+      tenant_id: payload.tenant_id,
+      atleta_id: payload.atleta_id,
+      plan_id: payload.plan_id,
+      plan_tipo_id: payload.plan_tipo_id,
+      clases_plan: payload.clases_plan,
+      clases_restantes: payload.clases_restantes,
+      estado: payload.estado,
+      fecha_inicio: payload.fecha_inicio,
+      fecha_fin: payload.fecha_fin,
+      comentarios: payload.comentarios,
+    };
+
+    if (payload.estado === 'activa' && payload.validado_por) {
+      suscripcionInsert.validado_por = payload.validado_por;
+    }
+
+    const { data: suscripcionData, error: suscripcionError } = await supabase
+      .from('suscripciones')
+      .insert(suscripcionInsert)
+      .select('id')
+      .single();
+
+    if (suscripcionError || !suscripcionData) {
+      throw mapPostgrestError(suscripcionError);
+    }
+
+    if (payload.pago !== null) {
+      const { error: pagoError } = await supabase
+        .from('pagos')
+        .insert({
+          tenant_id: payload.tenant_id,
+          suscripcion_id: suscripcionData.id,
+          monto: payload.pago.monto,
+          metodo_pago_id: payload.pago.metodo_pago_id,
+          estado: payload.pago.estado,
+        });
+
+      if (pagoError) {
+        // Subscription was created — surface the payment failure distinctly
+        throw new GestionSuscripcionesServiceError(
+          'pago_failed',
+          'La suscripción fue creada, pero no se pudo registrar el pago. Puedes agregarlo desde la tabla.',
+        );
+      }
     }
   },
 };

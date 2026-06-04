@@ -141,6 +141,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EditarSuscripcionModal.tsx    # Full-field edit modal for existing subscriptions
 │   │   │       ├── EliminarSuscripcionModal.tsx  # Confirmation dialog for permanent deletion
 │   │   │       ├── VerDetallePagoModal.tsx       # Read-only modal: full payment details + comprobante viewer (all payment statuses)
+│   │   │       ├── CrearSuscripcionModal.tsx     # 3-step admin modal to create a subscription on behalf of an athlete
 │   │   │       └── index.ts
 │   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
 │   │   │       ├── PerfilPage.tsx
@@ -200,7 +201,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useValidarSuscripcion.ts
 │   │           ├── useComprobanteViewer.ts    # Signed-URL generation for comprobante_path (TTL 300s)
 │   │           ├── useEditarSuscripcion.ts   # Form state + plans fetch + date validation for full-field edit
-│   │           └── useEliminarSuscripcion.ts  # Confirmation + delete action for permanent deletion
+│   │           ├── useEliminarSuscripcion.ts  # Confirmation + delete action for permanent deletion
+│   │           └── useCrearSuscripcion.ts    # 3-step form state for admin-initiated subscription creation
 │   │       └── perfil/
 │   │           └── usePerfil.ts
 │   │       └── mis-suscripciones-y-pagos/

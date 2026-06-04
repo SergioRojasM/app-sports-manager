@@ -78,11 +78,47 @@ export interface EditarSuscripcionFormValues {
   comentarios: string | null;
 }
 
+/** Payload for admin-initiated subscription creation. */
+export interface CrearSuscripcionAdminPayload {
+  tenant_id: string;
+  atleta_id: string;
+  plan_id: string;
+  plan_tipo_id: string | null;
+  clases_plan: number | null;
+  clases_restantes: number | null;
+  estado: 'pendiente' | 'activa';
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  comentarios: string | null;
+  validado_por: string | null;
+  pago: {
+    monto: number;
+    metodo_pago_id: string;
+    estado: 'pendiente' | 'validado';
+  } | null;
+}
+
+/** Form state for the 3-step admin subscription creation modal. */
+export interface CrearSuscripcionAdminFormValues {
+  atleta_id: string;
+  plan_id: string;
+  plan_tipo_id: string | null;
+  estado: 'pendiente' | 'activa';
+  fecha_inicio: string;
+  fecha_fin: string;
+  clases_restantes: number | null;
+  comentarios: string;
+  crearPago: boolean;
+  monto: string;
+  metodo_pago_id: string;
+  estado_pago: 'pendiente' | 'validado';
+}
+
 /** Service-level error with typed code. */
 export class GestionSuscripcionesServiceError extends Error {
-  readonly code: 'forbidden' | 'unknown';
+  readonly code: 'forbidden' | 'unknown' | 'pago_failed';
 
-  constructor(code: 'forbidden' | 'unknown', message: string) {
+  constructor(code: 'forbidden' | 'unknown' | 'pago_failed', message: string) {
     super(message);
     this.code = code;
     this.name = 'GestionSuscripcionesServiceError';
