@@ -123,7 +123,9 @@ export function useReservas({ tenantId, entrenamientoId, role }: UseReservasOpti
       setBookingRejection(null);
 
       try {
-        const result = await reservasService.create(input);
+        const enrichedInput: CreateReservaInput =
+          role === 'administrador' ? { ...input, bypass_restrictions: true } : input;
+        const result = await reservasService.create(enrichedInput);
         if ('ok' in result && !result.ok) {
           setBookingRejection(result);
           return false;
@@ -135,7 +137,7 @@ export function useReservas({ tenantId, entrenamientoId, role }: UseReservasOpti
         return false;
       }
     },
-    [loadReservas],
+    [role, loadReservas],
   );
 
   const updateReserva = useCallback(

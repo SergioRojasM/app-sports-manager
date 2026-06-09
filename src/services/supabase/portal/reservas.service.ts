@@ -615,27 +615,29 @@ async function isEntrenamientoPast(
 // ─────────────────────────────────────────────
 
 async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
-  // 0. Past-date guard
-  const past = await isEntrenamientoPast(input.entrenamiento_id, input.tenant_id);
-  if (past) {
-    return {
-      ok: false,
-      code: 'ENTRENAMIENTO_PASADO',
-      message: 'No puedes reservar un entrenamiento que ya ha finalizado.',
-    };
-  }
+  if (!input.bypass_restrictions) {
+    // 0. Past-date guard
+    const past = await isEntrenamientoPast(input.entrenamiento_id, input.tenant_id);
+    if (past) {
+      return {
+        ok: false,
+        code: 'ENTRENAMIENTO_PASADO',
+        message: 'No puedes reservar un entrenamiento que ya ha finalizado.',
+      };
+    }
 
-  // 1. Booking restriction check
-  const restrictionResult = await validateBookingRestrictions(
-    input.entrenamiento_id,
-    input.atleta_id,
-    input.tenant_id,
-  );
-  if (!restrictionResult.ok) return restrictionResult;
+    // 1. Booking restriction check
+    const restrictionResult = await validateBookingRestrictions(
+      input.entrenamiento_id,
+      input.atleta_id,
+      input.tenant_id,
+    );
+    if (!restrictionResult.ok) return restrictionResult;
+  }
 
   const supabase = createClient();
 
-  // 0b. Find subscription to charge (if plan-restricted training)
+  // 0b. Find subscription to charge (if plan-restricted training) — always runs
   let suscripcionId: string | null = null;
 
   const { data: restricciones } = await supabase
@@ -654,7 +656,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       restricciones.plan_id as string,
     );
 
-    if (chargeResult.exhausted) {
+    if (chargeResult.exhausted && !input.bypass_restrictions) {
       return {
         ok: false,
         code: 'CLASES_AGOTADAS',
@@ -665,16 +667,18 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     suscripcionId = chargeResult.suscripcionId;
   }
 
-  // 1. Capacity check
-  const capacidad = await getCapacidad(input.tenant_id, input.entrenamiento_id);
-  if (!capacidad.disponible) {
-    throw new ReservaServiceError(
-      'capacity_exceeded',
-      'No hay cupos disponibles para este entrenamiento.',
-    );
+  if (!input.bypass_restrictions) {
+    // 1. Capacity check
+    const capacidad = await getCapacidad(input.tenant_id, input.entrenamiento_id);
+    if (!capacidad.disponible) {
+      throw new ReservaServiceError(
+        'capacity_exceeded',
+        'No hay cupos disponibles para este entrenamiento.',
+      );
+    }
   }
 
-  // 2. Duplicate check
+  // 2. Duplicate check — always runs
   const existing = await getMyReserva(input.tenant_id, input.entrenamiento_id, input.atleta_id);
   if (existing) {
     throw new ReservaServiceError(
@@ -683,8 +687,8 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     );
   }
 
-  // 3. Per-category capacity check
-  if (input.entrenamiento_categoria_id) {
+  // 3. Per-category capacity check — skipped for admin override
+  if (input.entrenamiento_categoria_id && !input.bypass_restrictions) {
     const supabaseCheck = createClient();
     const { data: catRow, error: catCheckErr } = await supabaseCheck
       .from('entrenamiento_categorias')
