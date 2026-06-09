@@ -36,8 +36,8 @@
 
 ## 6. Commit & Pull Request
 
-- [ ] 6.1 Stage changes: `git add src/types/portal/reservas.types.ts src/services/supabase/portal/reservas.service.ts src/hooks/portal/entrenamientos/reservas/useReservas.ts`
-- [ ] 6.2 Commit with message: `feat: admin booking bypass — skip guards for past/full/restricted trainings, keep deduction and duplicate check`
+- [x] 6.1 Stage changes: `git add src/types/portal/reservas.types.ts src/services/supabase/portal/reservas.service.ts src/hooks/portal/entrenamientos/reservas/useReservas.ts`
+- [x] 6.2 Commit with message: `feat: admin booking bypass — skip guards for past/full/restricted trainings, keep deduction and duplicate check`
 - [ ] 6.3 Create pull request with description:
   ```
   ## Summary
