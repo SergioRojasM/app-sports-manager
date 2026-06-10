@@ -70,8 +70,8 @@
 ## 10. Documentation and Commit
 
 - [x] 10.1 Update `projectspec/03-project-structure.md`: add `servicios/` feature slice under `components/portal/`, add `useServicios.ts`, `useServicioForm.ts`, `usePlanTipoServicios.ts` under hooks, add `servicios.service.ts` under services, add `servicios.types.ts` under types, add `gestion-servicios/` page under `(administrador)/`
-- [ ] 10.2 Create a commit with message: `feat: services catalog and plan tipo service assignments (US-0062)`
-- [ ] 10.3 Write pull request description:
+- [x] 10.2 Create a commit with message: `feat: services catalog and plan tipo service assignments (US-0062)`
+- [x] 10.3 Write pull request description:
   - **Title**: `feat: Services catalog and plan tipo service assignments`
   - **Summary**: Introduces `servicios` catalog table and `plan_tipos_servicios` join table; full CRUD admin page at `/gestion-servicios`; adds Services section to `PlanFormModal` plan tipo sub-form.
   - **Out of scope**: data migration of `clases_incluidas`, deduction logic update, subscription service tracking.

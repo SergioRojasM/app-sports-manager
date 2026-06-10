@@ -25,6 +25,7 @@ type PlanTipoRow = {
   activo: boolean;
   created_at: string;
   updated_at: string;
+  plan_tipos_servicios: { servicio_id: string; unidades: number | null; servicios: { nombre: string } | null }[];
 };
 
 type PlanRow = {
@@ -63,7 +64,14 @@ function mapPlanRow(row: PlanRow): PlanWithDisciplinas {
     created_at: row.created_at,
     updated_at: row.updated_at,
     disciplinas: (row.planes_disciplina ?? []).map((pd) => pd.disciplina_id),
-    plan_tipos: (row.plan_tipos ?? []) as PlanTipo[],
+    plan_tipos: (row.plan_tipos ?? []).map((t) => ({
+      ...t,
+      servicios: (t.plan_tipos_servicios ?? []).map((s) => ({
+        servicioId: s.servicio_id,
+        unidades: s.unidades,
+        servicioNombre: s.servicios?.nombre,
+      })),
+    })) as PlanTipo[],
   };
 }
 
@@ -93,7 +101,7 @@ export const planesService = {
 
     const { data, error } = await supabase
       .from('planes')
-      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id), plan_tipos(*)')
+      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id), plan_tipos(*, plan_tipos_servicios(servicio_id, unidades, servicios(nombre)))')
       .eq('tenant_id', tenantId)
       .order('nombre');
 
@@ -276,15 +284,26 @@ export const planesService = {
     if (input.clases_incluidas !== undefined) payload.clases_incluidas = input.clases_incluidas;
     if (input.activo !== undefined) payload.activo = input.activo;
 
-    const { data, error } = await supabase
-      .from('plan_tipos')
-      .update(payload)
-      .eq('id', id)
-      .select('*')
-      .single();
+    let updated: PlanTipo;
 
-    if (error || !data) {
-      throw mapPostgrestError(error);
+    if (Object.keys(payload).length === 0) {
+      // No column changes — fetch current row without a PATCH (avoids PostgREST 406)
+      const { data, error } = await supabase
+        .from('plan_tipos')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error || !data) throw mapPostgrestError(error);
+      updated = data as PlanTipo;
+    } else {
+      const { data, error } = await supabase
+        .from('plan_tipos')
+        .update(payload)
+        .eq('id', id)
+        .select('*')
+        .single();
+      if (error || !data) throw mapPostgrestError(error);
+      updated = data as PlanTipo;
     }
 
     // Sync service assignments if provided
@@ -292,7 +311,7 @@ export const planesService = {
       await serviciosService.syncPlanTipoServicios(id, input.servicios);
     }
 
-    return data as PlanTipo;
+    return updated;
   },
 
   async deletePlanTipo(id: string): Promise<{ deleted: boolean; deactivated: boolean }> {

@@ -51,7 +51,7 @@ export type PlanTipoServicio = {
   id: string;
   plan_tipo_id: string;
   servicio_id: string;
-  unidades: number;
+  unidades: number | null;
   created_at: string;
   updated_at: string;
   // Joined field
@@ -61,7 +61,10 @@ export type PlanTipoServicio = {
 /** Lightweight row used in form state and sync operations */
 export type PlanTipoServicioRow = {
   servicioId: string;
-  unidades: number;
+  /** null means unlimited */
+  unidades: number | null;
+  /** Populated when loaded from DB; absent in form-only state */
+  servicioNombre?: string;
 };
 
 export type SyncPlanTipoServiciosInput = {

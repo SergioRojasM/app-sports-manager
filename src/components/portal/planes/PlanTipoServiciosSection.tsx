@@ -79,15 +79,21 @@ export function PlanTipoServiciosSection({
                   type="number"
                   min="1"
                   step="1"
-                  value={row.unidades}
+                  value={row.unidades ?? ''}
                   onChange={(e) => {
-                    const val = parseInt(e.target.value, 10);
-                    onUpdateRow(rowIndex, { unidades: isNaN(val) || val < 1 ? 1 : val });
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      onUpdateRow(rowIndex, { unidades: null });
+                    } else {
+                      const val = parseInt(raw, 10);
+                      onUpdateRow(rowIndex, { unidades: isNaN(val) || val < 1 ? null : val });
+                    }
                   }}
                   disabled={isSubmitting}
-                  placeholder="Unidades"
+                  placeholder="∞"
+                  title="Dejar en blanco para ilimitado"
                   aria-label={`Unidades servicio ${rowIndex + 1}`}
-                  className="w-20 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-xs text-slate-200 outline-none transition focus:border-turquoise focus:ring-1 focus:ring-turquoise/35"
+                  className="w-20 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-xs text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-1 focus:ring-turquoise/35"
                 />
                 <button
                   type="button"

@@ -393,7 +393,7 @@ export function PlanFormModal({
                         isSubmitting={isSubmitting}
                         onAddRow={() => {
                           const current = tiposServiceRows[index] ?? [];
-                          onUpdateTipoServiceRows(index, [...current, { servicioId: '', unidades: 1 }]);
+                          onUpdateTipoServiceRows(index, [...current, { servicioId: '', unidades: null }]);
                         }}
                         onUpdateRow={(rowIndex, partial) => {
                           const current = [...(tiposServiceRows[index] ?? [])];

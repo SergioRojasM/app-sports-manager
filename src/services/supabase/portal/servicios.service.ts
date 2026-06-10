@@ -122,7 +122,7 @@ export const serviciosService = {
       id: string;
       plan_tipo_id: string;
       servicio_id: string;
-      unidades: number;
+      unidades: number | null;
       created_at: string;
       updated_at: string;
       servicios: { nombre: string } | null;

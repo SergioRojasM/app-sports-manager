@@ -31,7 +31,7 @@ type UsePlanesResult = PlanesViewModel & {
   tiposGlobalError: ReturnType<typeof usePlanForm>['tiposGlobalError'];
   tiposServiceRows: ReturnType<typeof usePlanForm>['tiposServiceRows'];
   openCreateModal: () => void;
-  openEditModal: (plan: PlanWithDisciplinas) => void;
+  openEditModal: (plan: PlanWithDisciplinas) => Promise<void>;
   openDuplicateModal: (plan: PlanWithDisciplinas) => void;
   deletePlan: (plan: PlanWithDisciplinas) => Promise<void>;
   closeModal: () => void;
@@ -164,14 +164,24 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     setSubmitError(null);
   }, [form]);
 
-  const openEditModal = useCallback((plan: PlanWithDisciplinas) => {
+  const openEditModal = useCallback(async (plan: PlanWithDisciplinas) => {
     setModalMode('edit');
     setSelectedPlan(plan);
-    form.setFormFromPlan(plan);
-    form.setTiposFromPlan(plan);
     setModalOpen(true);
     setSuccessMessage(null);
     setSubmitError(null);
+
+    // Fetch full plan tipos with services before populating form
+    try {
+      const tiposWithServices = await planesService.getPlanTiposByPlan(plan.id);
+      const planWithServices: PlanWithDisciplinas = { ...plan, plan_tipos: tiposWithServices };
+      form.setFormFromPlan(planWithServices);
+      form.setTiposFromPlan(planWithServices);
+    } catch {
+      // Fall back to list data (services won't be pre-filled)
+      form.setFormFromPlan(plan);
+      form.setTiposFromPlan(plan);
+    }
   }, [form]);
 
   const openDuplicateModal = useCallback((plan: PlanWithDisciplinas) => {
