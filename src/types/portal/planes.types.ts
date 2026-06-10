@@ -1,3 +1,5 @@
+import type { PlanTipoServicioRow } from './servicios.types';
+
 export type PlanModalidad = 'virtual' | 'presencial' | 'mixto';
 
 // --- Plan Tipo (subtype) entity types ---
@@ -14,6 +16,8 @@ export type PlanTipo = {
   activo: boolean;
   created_at: string;
   updated_at: string;
+  // Loaded service assignments (optional — only populated when explicitly fetched)
+  servicios?: PlanTipoServicioRow[];
 };
 
 export type CreatePlanTipoInput = {

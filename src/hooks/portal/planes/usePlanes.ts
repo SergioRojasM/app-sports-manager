@@ -29,6 +29,7 @@ type UsePlanesResult = PlanesViewModel & {
   tiposForm: ReturnType<typeof usePlanForm>['tiposForm'];
   tiposErrors: ReturnType<typeof usePlanForm>['tiposErrors'];
   tiposGlobalError: ReturnType<typeof usePlanForm>['tiposGlobalError'];
+  tiposServiceRows: ReturnType<typeof usePlanForm>['tiposServiceRows'];
   openCreateModal: () => void;
   openEditModal: (plan: PlanWithDisciplinas) => void;
   openDuplicateModal: (plan: PlanWithDisciplinas) => void;
@@ -38,6 +39,7 @@ type UsePlanesResult = PlanesViewModel & {
   addTipo: ReturnType<typeof usePlanForm>['addTipo'];
   updateTipo: ReturnType<typeof usePlanForm>['updateTipo'];
   removeTipo: ReturnType<typeof usePlanForm>['removeTipo'];
+  updateTipoServiceRows: ReturnType<typeof usePlanForm>['updateTipoServiceRows'];
   submit: () => Promise<boolean>;
   refresh: () => Promise<void>;
 };
@@ -322,6 +324,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     tiposForm: form.tiposForm,
     tiposErrors: form.tiposErrors,
     tiposGlobalError: form.tiposGlobalError,
+    tiposServiceRows: form.tiposServiceRows,
     openCreateModal,
     openEditModal,
     openDuplicateModal,
@@ -331,6 +334,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     addTipo: form.addTipo,
     updateTipo: form.updateTipo,
     removeTipo: form.removeTipo,
+    updateTipoServiceRows: form.updateTipoServiceRows,
     submit,
     refresh: loadData,
   };

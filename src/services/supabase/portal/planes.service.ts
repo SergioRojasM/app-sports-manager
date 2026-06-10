@@ -1,4 +1,5 @@
 import { createClient } from '@/services/supabase/client';
+import { serviciosService } from '@/services/supabase/portal/servicios.service';
 import {
   PlanServiceError,
   type CreatePlanInput,
@@ -10,6 +11,7 @@ import {
   type UpdatePlanInput,
   type UpdatePlanTipoInput,
 } from '@/types/portal/planes.types';
+import type { PlanTipoServicioRow } from '@/types/portal/servicios.types';
 
 type PlanTipoRow = {
   id: string;
@@ -217,10 +219,23 @@ export const planesService = {
       throw mapPostgrestError(error);
     }
 
-    return (data ?? []) as PlanTipo[];
+    const tipos = (data ?? []) as PlanTipo[];
+
+    // Populate servicios for each plan tipo
+    const withServicios = await Promise.all(
+      tipos.map(async (tipo) => {
+        const servicios = await serviciosService.getPlanTipoServicios(tipo.id);
+        return {
+          ...tipo,
+          servicios: servicios.map((s) => ({ servicioId: s.servicio_id, unidades: s.unidades })),
+        };
+      }),
+    );
+
+    return withServicios;
   },
 
-  async createPlanTipo(input: CreatePlanTipoInput): Promise<PlanTipo> {
+  async createPlanTipo(input: CreatePlanTipoInput & { servicios?: PlanTipoServicioRow[] }): Promise<PlanTipo> {
     const supabase = createClient();
 
     const { data, error } = await supabase
@@ -242,10 +257,15 @@ export const planesService = {
       throw mapPostgrestError(error);
     }
 
+    // Sync service assignments if provided
+    if (input.servicios !== undefined) {
+      await serviciosService.syncPlanTipoServicios(data.id, input.servicios);
+    }
+
     return data as PlanTipo;
   },
 
-  async updatePlanTipo(id: string, input: UpdatePlanTipoInput): Promise<PlanTipo> {
+  async updatePlanTipo(id: string, input: UpdatePlanTipoInput & { servicios?: PlanTipoServicioRow[] }): Promise<PlanTipo> {
     const supabase = createClient();
 
     const payload: Record<string, unknown> = {};
@@ -265,6 +285,11 @@ export const planesService = {
 
     if (error || !data) {
       throw mapPostgrestError(error);
+    }
+
+    // Sync service assignments if provided
+    if (input.servicios !== undefined) {
+      await serviciosService.syncPlanTipoServicios(id, input.servicios);
     }
 
     return data as PlanTipo;

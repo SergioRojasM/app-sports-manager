@@ -38,6 +38,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
 │   │               │   ├── gestion-organizacion/page.tsx
+│   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
 │   │               ├── (atleta)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-usuario users to /portal/orgs/[tenant_id]
@@ -108,9 +109,15 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PlanesTable.tsx         # Props: onEdit, onDuplicate?, onDelete?, renderRowAction?
 │   │   │       ├── PlanesHeaderFilters.tsx
 │   │   │       ├── PlanFormModal.tsx        # mode: 'create' | 'edit' | 'duplicate'
+│   │   │       ├── PlanTipoServiciosSection.tsx  # Services assignment rows inside plan tipo sub-form (US-0062)
 │   │   │       ├── PlanesViewPage.tsx
 │   │   │       ├── PlanesRolePage.tsx
 │   │   │       ├── SuscripcionModal.tsx
+│   │   │       └── index.ts
+│   │   │   └── servicios/                # Feature slice (portal/servicios — US-0062)
+│   │   │       ├── ServiciosPage.tsx      # Admin CRUD page for tenant services catalog
+│   │   │       ├── ServiciosTable.tsx     # Table: nombre, descripcion, activo badge, edit/delete actions
+│   │   │       ├── ServicioFormModal.tsx  # Right-side slide modal for create/edit service
 │   │   │       └── index.ts
 │   │   │   └── gestion-equipo/            # Feature slice (portal/gestion-equipo)
 │   │   │       ├── EquipoPage.tsx
@@ -184,10 +191,14 @@ Following structure reflects the current implementation and the target scalable 
 │               │   ├── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
 │               │   └── useAsistencias.ts  # Attendance map keyed by reserva_id; isEnabled guard skips fetch for atleta role
 │   │       └── planes/
-│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal
-│   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate
+│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal; includes tiposServiceRows + updateTipoServiceRows (US-0062)
+│   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate; manages tiposServiceRows parallel array (US-0062)
+│   │           ├── usePlanTipoServicios.ts # Manages service rows state for plan tipo service assignment (US-0062)
 │   │           ├── usePlanesView.ts
 │   │           └── useSuscripcion.ts
+│   │       └── servicios/            # Feature hooks for services catalog (US-0062)
+│   │           ├── useServicios.ts       # List + CRUD + modal coordination for servicios
+│   │           └── useServicioForm.ts    # Controlled form state for ServicioFormModal
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
 │   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
@@ -223,7 +234,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── entrenamientos.service.ts
 │   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions, validateCancellationRestriction, findSubscriptionToCharge; create() and cancel() include isEntrenamientoPast guard (blocks athletes from booking/cancelling past sessions) and delegate to SECURITY DEFINER RPCs book_and_deduct_class / cancel_and_restore_class for atomic class deduction/restoration; reservas.suscripcion_id FK tracks which subscription was charged
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
-│   │       │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard)
+│   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
+│   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
 │   │       │   └── suscripciones.service.ts
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
@@ -250,7 +262,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamientos.types.ts
 │   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
-│   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput
+│   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)
+│   │       └── servicios.types.ts        # Servicio, CreateServicioInput, UpdateServicioInput, ServicioFormValues, ServicioServiceError, PlanTipoServicio, PlanTipoServicioRow, SyncPlanTipoServiciosInput (US-0062)
 │   │       └── suscripciones.types.ts
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
