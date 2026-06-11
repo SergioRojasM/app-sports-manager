@@ -50,7 +50,7 @@
 
 ## 7. Commit and PR
 
-- [ ] 7.1 Stage all changes and create a commit with message:
+- [x] 7.1 Stage all changes and create a commit with message:
   ```
   feat(subscriptions): add per-service unit ledger on subscription creation (US-0063)
 
