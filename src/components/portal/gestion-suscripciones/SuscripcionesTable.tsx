@@ -62,7 +62,6 @@ export function SuscripcionesTable({
             <th scope="col" className="px-4 py-3">Plan</th>
             <th scope="col" className="px-4 py-3">Suscripción / Pago</th>
             <th scope="col" className="px-4 py-3">Inicio / Fin</th>
-            <th scope="col" className="px-4 py-3">Clases</th>
             <th scope="col" className="px-4 py-3">Monto</th>
             <th scope="col" className="px-4 py-3">Validación</th>
             <th scope="col" className="px-4 py-3 text-right">Acciones</th>
@@ -88,11 +87,6 @@ export function SuscripcionesTable({
               <td className="px-4 py-3 text-slate-300">
                 <div>{formatDate(row.fecha_inicio)}</div>
                 <div className="text-xs text-slate-400">{formatDate(row.fecha_fin)}</div>
-              </td>
-              <td className="px-4 py-3 text-slate-300">
-                {row.clases_restantes === null && row.clases_plan === null
-                  ? 'Ilimitado'
-                  : `${cell(row.clases_restantes)} / ${cell(row.clases_plan)}`}
               </td>
               <td className="px-4 py-3 text-slate-300">
                 {row.pago ? `$${row.pago.monto.toLocaleString()}` : '—'}

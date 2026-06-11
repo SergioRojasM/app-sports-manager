@@ -134,8 +134,6 @@ export async function fetchMisSuscripciones(
       estado,
       fecha_inicio,
       fecha_fin,
-      clases_restantes,
-      clases_plan,
       planes ( nombre ),
       tenants!suscripciones_tenant_id_fkey ( nombre ),
       pagos ( estado )
@@ -163,8 +161,6 @@ export async function fetchMisSuscripciones(
       estado: row.estado as string,
       fecha_inicio: row.fecha_inicio,
       fecha_fin: row.fecha_fin,
-      clases_restantes: row.clases_restantes,
-      clases_plan: row.clases_plan,
       pago_estado: ultimoPago?.estado ?? null,
     };
   });

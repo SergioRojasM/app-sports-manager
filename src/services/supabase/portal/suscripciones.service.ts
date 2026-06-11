@@ -12,12 +12,11 @@ export const suscripcionesService = {
         atleta_id: payload.atleta_id,
         plan_id: payload.plan_id,
         plan_tipo_id: payload.plan_tipo_id ?? null,
-        clases_plan: payload.clases_plan,
         comentarios: payload.comentarios,
         estado: payload.estado,
       })
       .select(
-        'id, tenant_id, atleta_id, plan_id, plan_tipo_id, fecha_inicio, fecha_fin, clases_restantes, clases_plan, comentarios, estado, created_at',
+        'id, tenant_id, atleta_id, plan_id, plan_tipo_id, fecha_inicio, fecha_fin, comentarios, estado, created_at',
       )
       .single();
 

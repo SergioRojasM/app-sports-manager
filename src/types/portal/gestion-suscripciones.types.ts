@@ -37,14 +37,11 @@ export interface SuscripcionAdminRow {
   plan_tipo_id: string | null;
   plan_tipo_nombre: string | null;
   plan_tipo_vigencia_dias: number | null;
-  plan_tipo_clases_incluidas: number | null;
   atleta_id: string;
   atleta_nombre: string;
   atleta_email: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   estado: SuscripcionEstado;
   comentarios: string | null;
   validado_por: string | null;
@@ -64,7 +61,6 @@ export interface SuscripcionesAdminStats {
 export interface ValidarSuscripcionFormValues {
   fecha_inicio: string;
   fecha_fin: string;
-  clases_restantes: number | null;
 }
 
 /** Form values for the full-field edit modal. */
@@ -73,8 +69,6 @@ export interface EditarSuscripcionFormValues {
   estado: SuscripcionEstado;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   comentarios: string | null;
 }
 
@@ -84,8 +78,6 @@ export interface CrearSuscripcionAdminPayload {
   atleta_id: string;
   plan_id: string;
   plan_tipo_id: string | null;
-  clases_plan: number | null;
-  clases_restantes: number | null;
   estado: 'pendiente' | 'activa';
   fecha_inicio: string | null;
   fecha_fin: string | null;
@@ -106,7 +98,6 @@ export interface CrearSuscripcionAdminFormValues {
   estado: 'pendiente' | 'activa';
   fecha_inicio: string;
   fecha_fin: string;
-  clases_restantes: number | null;
   comentarios: string;
   crearPago: boolean;
   monto: string;

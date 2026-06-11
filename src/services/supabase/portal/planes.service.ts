@@ -21,7 +21,6 @@ type PlanTipoRow = {
   descripcion: string | null;
   precio: number;
   vigencia_dias: number;
-  clases_incluidas: number | null;
   activo: boolean;
   created_at: string;
   updated_at: string;
@@ -255,7 +254,6 @@ export const planesService = {
         descripcion: input.descripcion?.trim() || null,
         precio: input.precio,
         vigencia_dias: input.vigencia_dias,
-        clases_incluidas: input.clases_incluidas,
         activo: input.activo ?? true,
       })
       .select('*')
@@ -281,7 +279,6 @@ export const planesService = {
     if (input.descripcion !== undefined) payload.descripcion = input.descripcion?.trim() || null;
     if (input.precio !== undefined) payload.precio = input.precio;
     if (input.vigencia_dias !== undefined) payload.vigencia_dias = input.vigencia_dias;
-    if (input.clases_incluidas !== undefined) payload.clases_incluidas = input.clases_incluidas;
     if (input.activo !== undefined) payload.activo = input.activo;
 
     let updated: PlanTipo;

@@ -19,10 +19,8 @@ function formatDate(iso: string): string {
 }
 
 export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCardProps) {
-  const { plan_nombre, estado, fecha_inicio, fecha_fin, clases_restantes, clases_plan, pago } =
+  const { plan_nombre, estado, fecha_inicio, fecha_fin, pago } =
     suscripcion;
-
-  const showClases = clases_restantes != null && clases_plan != null;
 
   return (
     <div className="glass-card rounded-md p-4 border border-white/5 hover:border-primary/20 transition-all">
@@ -42,11 +40,6 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
           <span className="text-slate-500">Fin:</span>{' '}
           {fecha_fin ? formatDate(fecha_fin) : '—'}
         </span>
-        {showClases && (
-          <span>
-            <span className="text-slate-500">Clases:</span> {clases_restantes} / {clases_plan}
-          </span>
-        )}
       </div>
 
       {/* Payment section */}

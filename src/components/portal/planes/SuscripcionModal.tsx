@@ -180,8 +180,6 @@ export function SuscripcionModal({
                     : tipo.vigencia_dias === 30
                       ? '1 mes'
                       : `${tipo.vigencia_dias} días`;
-                const tipoClases =
-                  tipo.clases_incluidas != null ? `${tipo.clases_incluidas} clases` : 'Ilimitadas';
 
                 return (
                   <button
@@ -206,10 +204,6 @@ export function SuscripcionModal({
                       <span>
                         <span className="font-medium text-slate-400">Vigencia:</span>{' '}
                         {tipoVigencia}
-                      </span>
-                      <span>
-                        <span className="font-medium text-slate-400">Clases:</span>{' '}
-                        {tipoClases}
                       </span>
                     </div>
                   </button>
@@ -257,14 +251,6 @@ export function SuscripcionModal({
                       : selectedTipo.vigencia_dias === 30
                         ? '1 mes'
                         : `${selectedTipo.vigencia_dias} días`
-                    : '—'}
-                </div>
-                <div>
-                  <span className="block font-medium text-slate-400">Clases</span>
-                  {selectedTipo
-                    ? selectedTipo.clases_incluidas != null
-                      ? `${selectedTipo.clases_incluidas} clases`
-                      : 'Ilimitadas'
                     : '—'}
                 </div>
               </div>
