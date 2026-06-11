@@ -119,6 +119,17 @@ export function InicioSuscripciones({
                 {paymentBadge(s.pago_estado)}
               </div>
 
+              {s.servicios.length > 0 ? (
+                <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-400">
+                  {s.servicios.map((srv, idx) => (
+                    <span key={srv.servicio_id}>
+                      {srv.servicio_nombre}: {srv.unidades_restantes ?? '∞'}/{srv.unidades_incluidas ?? '∞'}
+                      {idx < s.servicios.length - 1 ? ' ·' : ''}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+
             </div>
           ))}
         </div>

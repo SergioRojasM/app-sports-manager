@@ -48,6 +48,7 @@ export interface SuscripcionAdminRow {
   validado_por_nombre: string | null;
   created_at: string;
   pago: PagoAdminRow | null;
+  servicios: import('@/types/portal/suscripciones.types').SuscripcionServicioDisplay[];
 }
 
 /** Aggregate statistics derived in-memory from the subscription list. */
