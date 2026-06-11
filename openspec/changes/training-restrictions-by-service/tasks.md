@@ -66,5 +66,5 @@
 
 ## 9. Commit and PR
 
-- [ ] 9.1 Stage all changes and create commit with message: `feat: replace plan/discipline booking restrictions with service-based model (US-0064)` — include summary of migration, new RPCs, updated service logic, and UI changes in the commit body
-- [ ] 9.2 Write PR description: title `feat: Training restrictions by service (US-0064)`, body covering motivation (align restrictions with service-unit entitlement model), breaking changes (`book_and_deduct_class` replaced, `clases_restantes` no longer decremented), migration notes (legacy columns kept, admin must reconfigure existing rules), and testing checklist
+- [x] 9.1 Stage all changes and create commit with message: `feat: replace plan/discipline booking restrictions with service-based model (US-0064)` — include summary of migration, new RPCs, updated service logic, and UI changes in the commit body
+- [x] 9.2 Write PR description: title `feat: Training restrictions by service (US-0064)`, body covering motivation (align restrictions with service-unit entitlement model), breaking changes (`book_and_deduct_class` replaced, `clases_restantes` no longer decremented), migration notes (legacy columns kept, admin must reconfigure existing rules), and testing checklist
