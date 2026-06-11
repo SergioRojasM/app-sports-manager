@@ -4,16 +4,16 @@
 US-0066
 
 ## Name
-Show Services and Remaining/Included Units in All Subscription UI Views
+Show Services and Units in All Subscription UI Views and in the Plan Acquisition Modal
 
 ## As a
 User (athlete) or Administrator
 
 ## I Want
-Every place in the UI that shows a subscription to also display the services included in that subscription together with their current remaining and total included units
+Every place in the UI that shows a subscription to also display the services included in that subscription together with their current remaining and total included units; and, when selecting a plan subtype to acquire, to see the services and their unit caps for each option before confirming
 
 ## So That
-I can see at a glance how many units I (or an athlete) have left per service without navigating to a separate screen
+I can see at a glance how many units I (or an athlete) have left per service without navigating to a separate screen, and I can make an informed decision about which plan subtype to acquire based on the services and unit limits it includes
 
 ---
 
@@ -24,10 +24,12 @@ US-0063 introduced the `suscripcion_servicios` table, which stores one row per (
 
 After US-0065 lands, subscription cards and the admin table display no unit or capacity information at all — neither the old class count (removed) nor the new per-service units (not yet implemented). The data exists in the database but is never fetched or rendered.
 
-There are three distinct UI locations that show subscriptions:
+There are four distinct UI locations affected by this story:
 
 | View | Component | Route |
 |------|-----------|-------|
+| Plan acquisition modal — step 1 | `SuscripcionModal` | `/portal/orgs/[tenant_id]/(shared)/gestion-planes` |
+| Plan acquisition modal — step 2 | `SuscripcionModal` | `/portal/orgs/[tenant_id]/(shared)/gestion-planes` |
 | Home dashboard | `InicioSuscripciones` | `/portal/inicio` |
 | Athlete self-service view | `SuscripcionCard` | `/portal/orgs/[tenant_id]/(atleta)/mis-suscripciones-y-pagos` |
 | Admin management table | `SuscripcionesTable` | `/portal/orgs/[tenant_id]/(administrador)/gestion-suscripciones` |
@@ -73,6 +75,22 @@ Extend the `select` query identically and populate `servicios` in the `mapRow` f
 Extend the `select` query identically, update `RawSuscripcionRow` with the new nested shape, and populate `servicios` in `mapRawRow`.
 
 #### Component Updates
+
+**`SuscripcionModal.tsx`** (plan acquisition modal)
+
+`SuscripcionModal` receives a `PlanWithDisciplinas` as the `plan` prop. `getActiveTipos(plan)` returns `PlanTipo[]`, and each `PlanTipo` already has `servicios?: PlanTipoServicioRow[]` populated by `planesService.getPlanes` (which joins `plan_tipos_servicios(servicio_id, unidades, servicios(nombre))` and maps the result). No service-layer changes are required for this view.
+
+`PlanTipoServicioRow` has shape `{ servicioId: string; unidades: number | null; servicioNombre?: string }`.
+
+**Step 1 — subtype selection cards**: Inside each `tipo` button card, after the existing price/vigencia row, add a services summary:
+- If `tipo.servicios` is undefined, empty, or has length 0, render nothing.
+- If `tipo.servicios.length > 0`, render a compact row of tags/chips (one per service):
+  - Format: `{servicioNombre}: {unidades} uds` — when `unidades` is `null` render `∞`.
+  - Style: `text-[10px] text-slate-400 flex flex-wrap gap-1 mt-1`; each chip: `bg-navy-deep/40 rounded px-1.5 py-0.5`.
+
+**Step 2 — plan/subtype summary box**: The existing summary box shows precio and vigencia for the `selectedTipo`. Add a third row (or a sub-section below) for services:
+- If `selectedTipo?.servicios` is undefined, empty, or has length 0, render nothing extra.
+- If `selectedTipo.servicios.length > 0`, add a `"Servicios"` label and a list of `{servicioNombre}: {unidades}` (null → `∞`) inside the summary box, using the same compact chip style as Step 1.
 
 **`InicioSuscripciones.tsx`**
 After the dates/payment badge line, if `s.servicios.length > 0`, render a compact services row:
@@ -129,6 +147,7 @@ Each function fetches `suscripcion_servicios` with a nested join to `servicios(n
 | Service | `src/services/supabase/portal/inicio.service.ts` | Extend query + mapper in `fetchMisSuscripciones` |
 | Service | `src/services/supabase/portal/mis-suscripciones.service.ts` | Extend `RawRow`, query, and `mapRow` in `fetchMisSuscripcionesTenant` |
 | Service | `src/services/supabase/portal/gestion-suscripciones.service.ts` | Extend `RawSuscripcionRow`, query, and `mapRawRow` in `fetchSuscripcionesAdmin` |
+| Component | `src/components/portal/planes/SuscripcionModal.tsx` | Add services chips to Step 1 tipo cards and Step 2 summary box |
 | Component | `src/components/portal/inicio/InicioSuscripciones.tsx` | Replace legacy class-progress block with per-service units row |
 | Component | `src/components/portal/mis-suscripciones-y-pagos/SuscripcionCard.tsx` | Replace `showClases` block with services section + mini progress bars |
 | Component | `src/components/portal/gestion-suscripciones/SuscripcionesTable.tsx` | Replace "Clases" column with "Servicios" column |
@@ -137,16 +156,19 @@ Each function fetches `suscripcion_servicios` with a nested join to `servicios(n
 
 ## Acceptance Criteria
 
-1. A subscription that has service assignments shows one entry per service in every subscription view (home dashboard, athlete view, admin table), displaying the service name, remaining units, and total units.
-2. When `unidades_incluidas` is `null` (unlimited), the display shows `∞` instead of a number (e.g. `Natación: ∞`).
-3. When `unidades_restantes` is `0`, the unit display is highlighted in red/rose in both the athlete card and the admin table cell.
-4. A subscription with no service assignments (empty `suscripcion_servicios` for that `suscripcion_id`) shows no services section in the athlete card, shows `"—"` in the admin table Servicios column, and shows nothing for services in the home dashboard card.
-5. The admin table "Clases" column no longer exists; it is replaced by "Servicios".
-6. The athlete `SuscripcionCard` no longer shows the legacy `clases_restantes / clases_plan` counter; it is replaced by the services section (or nothing, if no services).
-7. The home dashboard `InicioSuscripciones` no longer shows the legacy class progress bar; services are shown in compact inline format.
-8. No additional network requests are made when filters change in `MisSuscripcionesFilters` or `SuscripcionesHeaderFilters` — service data is fetched once with the subscription list.
-9. When a subscription has more than 3 services, the admin table cell shows the first 3 and appends `+N más` (e.g. `+2 más`) to avoid cell overflow.
-10. All three views compile without TypeScript errors after the changes.
+1. In the plan acquisition modal Step 1 (subtype selection), each subtype card that has service assignments shows a compact list of services with their unit caps (`{nombre}: {unidades} uds` or `∞`).
+2. In the plan acquisition modal Step 2 (payment form), the plan/subtype summary box shows the services section for the selected subtype when it has service assignments.
+3. A subscription that has service assignments shows one entry per service in every subscription view (home dashboard, athlete view, admin table), displaying the service name, remaining units, and total units.
+4. When `unidades_incluidas` is `null` (unlimited), the display shows `∞` instead of a number (e.g. `Natación: ∞`) — both in the modal and in the subscription views.
+5. A plan subtype with no service assignments shows no services row inside its Step 1 card and no services section in the Step 2 summary.
+6. When `unidades_restantes` is `0`, the unit display is highlighted in red/rose in both the athlete card and the admin table cell.
+7. A subscription with no service assignments (empty `suscripcion_servicios` for that `suscripcion_id`) shows no services section in the athlete card, shows `"—"` in the admin table Servicios column, and shows nothing for services in the home dashboard card.
+8. The admin table "Clases" column no longer exists; it is replaced by "Servicios".
+9. The athlete `SuscripcionCard` no longer shows the legacy `clases_restantes / clases_plan` counter; it is replaced by the services section (or nothing, if no services).
+10. The home dashboard `InicioSuscripciones` no longer shows the legacy class progress bar; services are shown in compact inline format.
+11. No additional network requests are made when filters change in `MisSuscripcionesFilters` or `SuscripcionesHeaderFilters` — service data is fetched once with the subscription list.
+12. When a subscription has more than 3 services, the admin table cell shows the first 3 and appends `+N más` (e.g. `+2 más`) to avoid cell overflow.
+13. All four views compile without TypeScript errors after the changes.
 
 ---
 
@@ -160,11 +182,12 @@ Each function fetches `suscripcion_servicios` with a nested join to `servicios(n
 - [ ] Update `fetchMisSuscripciones` in `inicio.service.ts`: extend select + update `RawRow` type + map `servicios`
 - [ ] Update `fetchMisSuscripcionesTenant` in `mis-suscripciones.service.ts`: extend select + update `RawRow` type + map `servicios`
 - [ ] Update `fetchSuscripcionesAdmin` in `gestion-suscripciones.service.ts`: extend select + update `RawSuscripcionRow` + map `servicios` in `mapRawRow`
+- [ ] Update `SuscripcionModal.tsx`: add services chips to Step 1 tipo cards and Step 2 summary box (no service-layer changes needed — `tipo.servicios` is already populated by `getPlanes`)
 - [ ] Update `InicioSuscripciones.tsx`: remove legacy class-progress block, add compact services row
 - [ ] Update `SuscripcionCard.tsx`: replace `showClases` block with services section + mini progress bars
 - [ ] Update `SuscripcionesTable.tsx`: replace "Clases" column with "Servicios" column
 - [ ] Run `tsc --noEmit` to verify no TypeScript errors
-- [ ] Test manually: subscription with services, subscription without services, subscription with unlimited service, subscription with 0 remaining units
+- [ ] Test manually: plan subtype with services in modal step 1, step 2 summary, subscription with services, subscription without services, subscription with unlimited service, subscription with 0 remaining units
 
 ---
 
