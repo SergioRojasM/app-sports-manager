@@ -24,3 +24,12 @@ export type SuscripcionInsert = {
   comentarios: string | null;
   estado: 'pendiente';
 };
+
+export type SuscripcionServicio = {
+  id: string;
+  suscripcion_id: string;
+  servicio_id: string;
+  unidades_incluidas: number | null;
+  unidades_restantes: number | null;
+  created_at: string;
+};

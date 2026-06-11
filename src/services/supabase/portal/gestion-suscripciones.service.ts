@@ -313,6 +313,20 @@ export const gestionSuscripcionesService = {
       throw mapPostgrestError(suscripcionError);
     }
 
+    if (payload.plan_tipo_id) {
+      const { error: rpcError } = await supabase.rpc('populate_suscripcion_servicios', {
+        p_suscripcion_id: suscripcionData.id,
+        p_plan_tipo_id: payload.plan_tipo_id,
+      });
+
+      if (rpcError) {
+        throw new GestionSuscripcionesServiceError(
+          'populate_servicios_failed',
+          'La suscripción fue creada, pero no se pudo registrar las unidades por servicio.',
+        );
+      }
+    }
+
     if (payload.pago !== null) {
       const { error: pagoError } = await supabase
         .from('pagos')
