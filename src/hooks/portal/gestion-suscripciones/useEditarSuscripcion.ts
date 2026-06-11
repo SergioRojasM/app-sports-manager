@@ -38,8 +38,6 @@ export function useEditarSuscripcion({
     estado: 'pendiente',
     fecha_inicio: null,
     fecha_fin: null,
-    clases_restantes: null,
-    clases_plan: null,
     comentarios: null,
   });
 
@@ -56,8 +54,6 @@ export function useEditarSuscripcion({
       estado: row.estado,
       fecha_inicio: row.fecha_inicio,
       fecha_fin: row.fecha_fin,
-      clases_restantes: row.clases_restantes,
-      clases_plan: row.clases_plan,
       comentarios: row.comentarios,
     });
     setError(null);

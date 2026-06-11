@@ -6,8 +6,6 @@ type RawRow = {
   id: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   estado: string;
   plan: { nombre: string };
   pagos: Array<{
@@ -44,8 +42,6 @@ function mapRow(row: RawRow): MiSuscripcionRow {
     estado: row.estado as SuscripcionEstado,
     fecha_inicio: row.fecha_inicio,
     fecha_fin: row.fecha_fin,
-    clases_restantes: row.clases_restantes,
-    clases_plan: row.clases_plan,
     pago,
   };
 }
@@ -59,7 +55,7 @@ export async function fetchMisSuscripcionesTenant(
     .from('suscripciones')
     .select(
       `
-      id, fecha_inicio, fecha_fin, clases_restantes, clases_plan, estado,
+      id, fecha_inicio, fecha_fin, estado,
       plan:planes!suscripciones_plan_id_fkey(nombre),
       pagos(
         id, monto, estado, fecha_pago, comprobante_path,

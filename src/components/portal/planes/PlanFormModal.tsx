@@ -352,27 +352,6 @@ export function PlanFormModal({
                           ) : null}
                         </div>
 
-                        <div>
-                          <input
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={tipo.clases_incluidas}
-                            onChange={(e) => onUpdateTipo(index, { clases_incluidas: e.target.value })}
-                            disabled={isSubmitting}
-                            placeholder="Sin límite (dejar vacío)"
-                            className={[
-                              'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-1',
-                              getError('clases_incluidas')
-                                ? 'border-rose-400/80 focus:ring-rose-300/35'
-                                : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-                            ].join(' ')}
-                          />
-                          {getError('clases_incluidas') ? (
-                            <p className="mt-0.5 text-xs text-rose-300">{getError('clases_incluidas')}</p>
-                          ) : null}
-                        </div>
-
                         <div className="col-span-2">
                           <input
                             type="text"

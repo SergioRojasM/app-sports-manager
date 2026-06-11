@@ -27,7 +27,6 @@ const EMPTY_TIPO_FORM: PlanTipoFormValues = {
   descripcion: '',
   precio: '',
   vigencia_dias: '',
-  clases_incluidas: '',
   activo: true,
 };
 
@@ -51,7 +50,6 @@ function planTipoToFormEntry(t: PlanTipo): TipoFormEntry {
     descripcion: t.descripcion ?? '',
     precio: String(t.precio),
     vigencia_dias: String(t.vigencia_dias),
-    clases_incluidas: t.clases_incluidas != null ? String(t.clases_incluidas) : '',
     activo: t.activo,
   };
 }
@@ -202,13 +200,6 @@ export function usePlanForm() {
       } else if (tipoVigencia < 1 || !Number.isInteger(tipoVigencia)) {
         tErrors.push({ index: i, field: 'vigencia_dias', message: 'La vigencia debe ser al menos 1 día.' });
       }
-
-      if (tipo.clases_incluidas.trim() !== '') {
-        const tipoClases = parseInt(tipo.clases_incluidas, 10);
-        if (isNaN(tipoClases) || tipoClases < 0 || !Number.isInteger(tipoClases)) {
-          tErrors.push({ index: i, field: 'clases_incluidas', message: 'Debe ser un número entero mayor o igual a 0.' });
-        }
-      }
     });
 
     if (tiposForm.length === 0) {
@@ -246,7 +237,6 @@ export function usePlanForm() {
           descripcion: entry.descripcion.trim() || null,
           precio: parseFloat(entry.precio),
           vigencia_dias: parseInt(entry.vigencia_dias, 10),
-          clases_incluidas: entry.clases_incluidas.trim() !== '' ? parseInt(entry.clases_incluidas, 10) : null,
           activo: entry.activo,
           servicios: tiposServiceRows[i] ?? [],
         });
@@ -265,7 +255,6 @@ export function usePlanForm() {
       if ((entry.descripcion.trim() || null) !== (original.descripcion.trim() || null)) changes.descripcion = entry.descripcion.trim() || null;
       if (entry.precio !== original.precio) changes.precio = parseFloat(entry.precio);
       if (entry.vigencia_dias !== original.vigencia_dias) changes.vigencia_dias = parseInt(entry.vigencia_dias, 10);
-      if (entry.clases_incluidas !== original.clases_incluidas) changes.clases_incluidas = entry.clases_incluidas.trim() !== '' ? parseInt(entry.clases_incluidas, 10) : null;
       if (entry.activo !== original.activo) changes.activo = entry.activo;
 
       // Always include servicios for existing types (sync ensures current state is persisted)

@@ -19,8 +19,6 @@ type RawSuscripcionRow = {
   atleta_id: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   estado: string;
   comentarios: string | null;
   validado_por: string | null;
@@ -40,7 +38,6 @@ type RawSuscripcionRow = {
   plan_tipo: {
     nombre: string;
     vigencia_dias: number;
-    clases_incluidas: number | null;
   } | null;
   pagos: Array<{
     id: string;
@@ -78,14 +75,11 @@ function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
     plan_tipo_id: row.plan_tipo_id,
     plan_tipo_nombre: row.plan_tipo?.nombre ?? null,
     plan_tipo_vigencia_dias: row.plan_tipo?.vigencia_dias ?? null,
-    plan_tipo_clases_incluidas: row.plan_tipo?.clases_incluidas ?? null,
     atleta_id: row.atleta_id,
     atleta_nombre: `${row.atleta.nombre ?? ''} ${row.atleta.apellido ?? ''}`.trim(),
     atleta_email: row.atleta.email,
     fecha_inicio: row.fecha_inicio,
     fecha_fin: row.fecha_fin,
-    clases_restantes: row.clases_restantes,
-    clases_plan: row.clases_plan,
     estado: row.estado as SuscripcionAdminRow['estado'],
     comentarios: row.comentarios,
     validado_por: row.validado_por,
@@ -149,12 +143,12 @@ export const gestionSuscripcionesService = {
       .select(
         `
         id, tenant_id, plan_id, plan_tipo_id, atleta_id,
-        fecha_inicio, fecha_fin, clases_restantes, clases_plan,
+        fecha_inicio, fecha_fin,
         estado, comentarios, validado_por, created_at,
         validador_suscripcion:usuarios!suscripciones_validado_por_fkey(nombre, apellido),
         atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
         plan:planes!suscripciones_plan_id_fkey(nombre),
-        plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias, clases_incluidas),
+        plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias),
         pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo))
         `,
       )
@@ -218,7 +212,6 @@ export const gestionSuscripcionesService = {
         estado: 'activa',
         fecha_inicio: values.fecha_inicio,
         fecha_fin: values.fecha_fin,
-        clases_restantes: values.clases_restantes,
         validado_por: validadoPor,
       };
     } else {
@@ -251,8 +244,6 @@ export const gestionSuscripcionesService = {
         estado: values.estado,
         fecha_inicio: values.fecha_inicio,
         fecha_fin: values.fecha_fin,
-        clases_restantes: values.clases_restantes,
-        clases_plan: values.clases_plan,
         comentarios: values.comentarios,
       })
       .eq('id', suscripcionId);
@@ -291,8 +282,6 @@ export const gestionSuscripcionesService = {
       atleta_id: payload.atleta_id,
       plan_id: payload.plan_id,
       plan_tipo_id: payload.plan_tipo_id,
-      clases_plan: payload.clases_plan,
-      clases_restantes: payload.clases_restantes,
       estado: payload.estado,
       fecha_inicio: payload.fecha_inicio,
       fecha_fin: payload.fecha_fin,

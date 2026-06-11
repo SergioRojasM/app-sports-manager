@@ -26,8 +26,6 @@ export interface InicioSuscripcion {
   estado: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   pago_estado: string | null;
 }
 

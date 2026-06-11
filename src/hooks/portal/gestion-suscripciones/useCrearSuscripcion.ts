@@ -68,8 +68,6 @@ type UseCrearSuscripcionResult = {
   setFechaInicio: (v: string) => void;
   fechaFin: string;
   setFechaFin: (v: string) => void;
-  clasesRestantes: number | null;
-  setClasesRestantes: (v: number | null) => void;
   comentarios: string;
   setComentarios: (v: string) => void;
 
@@ -133,7 +131,6 @@ export function useCrearSuscripcion({
   const [estado, setEstado] = useState<'pendiente' | 'activa'>('activa');
   const [fechaInicio, setFechaInicio] = useState(todayIso);
   const [fechaFin, setFechaFin] = useState('');
-  const [clasesRestantes, setClasesRestantes] = useState<number | null>(null);
   const [comentarios, setComentarios] = useState('');
 
   /* ── Payment ── */
@@ -244,9 +241,6 @@ export function useCrearSuscripcion({
     if (tipo.vigencia_dias && fechaInicio) {
       setFechaFin(addDays(fechaInicio, tipo.vigencia_dias));
     }
-    if (tipo.clases_incluidas !== null && tipo.clases_incluidas !== undefined) {
-      setClasesRestantes(tipo.clases_incluidas);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planTipoId]);
 
@@ -324,8 +318,6 @@ export function useCrearSuscripcion({
         atleta_id: atletaId,
         plan_id: planId,
         plan_tipo_id: planTipoId,
-        clases_plan: selectedTipo?.clases_incluidas ?? null,
-        clases_restantes: selectedTipo?.clases_incluidas != null ? clasesRestantes : null,
         estado,
         fecha_inicio: estado === 'activa' ? fechaInicio : null,
         fecha_fin: estado === 'activa' ? fechaFin : null,
@@ -365,7 +357,7 @@ export function useCrearSuscripcion({
     planId,
     planTipoId,
     activeTipos,
-    clasesRestantes,
+
     estado,
     fechaInicio,
     fechaFin,
@@ -387,7 +379,6 @@ export function useCrearSuscripcion({
     setEstado('activa');
     setFechaInicio(todayIso());
     setFechaFin('');
-    setClasesRestantes(null);
     setComentarios('');
     setCrearPago(false);
     setMonto('');
@@ -420,8 +411,6 @@ export function useCrearSuscripcion({
     setFechaInicio,
     fechaFin,
     setFechaFin,
-    clasesRestantes,
-    setClasesRestantes,
     comentarios,
     setComentarios,
     crearPago,

@@ -89,7 +89,7 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, onDuplicate, ren
                             >
                               <span className="font-medium text-slate-100">{t.nombre}</span>
                               <span className="ml-2 text-slate-400">
-                                {formatCurrency(t.precio)} · {t.vigencia_dias}d · {t.clases_incluidas != null ? `${t.clases_incluidas} cls` : '∞'}
+                                {formatCurrency(t.precio)} · {t.vigencia_dias}d
                               </span>
                             </div>
                           ))}

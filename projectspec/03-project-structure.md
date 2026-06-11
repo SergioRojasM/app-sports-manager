@@ -243,7 +243,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
-│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_clases_incluidas / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure
+│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
@@ -273,7 +273,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS), BookingResult
-│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_clases_incluidas, plan_tipo_vigencia_dias
+│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias
 │   │       └── mis-suscripciones-y-pagos.types.ts  # MiSuscripcionRow, MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces
