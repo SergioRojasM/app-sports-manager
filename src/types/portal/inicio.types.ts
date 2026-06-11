@@ -27,6 +27,7 @@ export interface InicioSuscripcion {
   fecha_inicio: string | null;
   fecha_fin: string | null;
   pago_estado: string | null;
+  servicios: import('@/types/portal/suscripciones.types').SuscripcionServicioDisplay[];
 }
 
 export interface InicioPagoPendiente {

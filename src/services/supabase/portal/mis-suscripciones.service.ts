@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { MiSuscripcionRow, MiPagoRow } from '@/types/portal/mis-suscripciones-y-pagos.types';
 import type { PagoEstado, SuscripcionEstado } from '@/types/portal/gestion-suscripciones.types';
+import type { SuscripcionServicioDisplay } from '@/types/portal/suscripciones.types';
 
 type RawRow = {
   id: string;
@@ -19,6 +20,12 @@ type RawRow = {
       tipo: string;
     } | null;
   }>;
+  suscripcion_servicios: Array<{
+    servicio_id: string;
+    unidades_incluidas: number | null;
+    unidades_restantes: number | null;
+    servicio: { nombre: string } | null;
+  }>;
 };
 
 function mapRow(row: RawRow): MiSuscripcionRow {
@@ -36,6 +43,13 @@ function mapRow(row: RawRow): MiSuscripcionRow {
       }
     : null;
 
+  const servicios: SuscripcionServicioDisplay[] = (row.suscripcion_servicios ?? []).map((s) => ({
+    servicio_id: s.servicio_id,
+    servicio_nombre: s.servicio?.nombre ?? '',
+    unidades_incluidas: s.unidades_incluidas,
+    unidades_restantes: s.unidades_restantes,
+  }));
+
   return {
     id: row.id,
     plan_nombre: row.plan.nombre,
@@ -43,6 +57,7 @@ function mapRow(row: RawRow): MiSuscripcionRow {
     fecha_inicio: row.fecha_inicio,
     fecha_fin: row.fecha_fin,
     pago,
+    servicios,
   };
 }
 
@@ -60,6 +75,10 @@ export async function fetchMisSuscripcionesTenant(
       pagos(
         id, monto, estado, fecha_pago, comprobante_path,
         metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(nombre, tipo)
+      ),
+      suscripcion_servicios(
+        servicio_id, unidades_incluidas, unidades_restantes,
+        servicio:servicios!suscripcion_servicios_servicio_id_fkey(nombre)
       )
       `,
     )

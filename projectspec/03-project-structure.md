@@ -66,7 +66,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   ├── InicioStatsCards.tsx
 │   │   │   │   ├── InicioFeaturedTraining.tsx
 │   │   │   │   ├── InicioProximosEntrenamientos.tsx
-│   │   │   │   ├── InicioSuscripciones.tsx  # "use client" — filter chips
+│   │   │   │   ├── InicioSuscripciones.tsx  # "use client" — filter chips; shows per-service unit row (US-0066)
 │   │   │   │   ├── InicioOrganizaciones.tsx
 │   │   │   │   ├── InicioQuickActions.tsx
 │   │   │   │   ├── InicioPagosPendientesAlert.tsx
@@ -138,7 +138,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       └── SolicitudesTab.tsx
 │   │   │   └── gestion-suscripciones/     # Feature slice (portal/gestion-suscripciones)
 │   │   │       ├── GestionSuscripcionesPage.tsx
-│   │   │       ├── SuscripcionesTable.tsx
+│   │   │       ├── SuscripcionesTable.tsx  # "Servicios" column (US-0066) shows per-service unidades_restantes/unidades_incluidas; replaces legacy Clases column
 │   │   │       ├── SuscripcionesStatsCards.tsx
 │   │   │       ├── SuscripcionesHeaderFilters.tsx
 │   │   │       ├── SuscripcionEstadoBadge.tsx
@@ -159,7 +159,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── mis-suscripciones-y-pagos/  # Feature slice (portal/mis-suscripciones-y-pagos — user subscription & payment view)
 │   │   │       ├── MisSuscripcionesYPagosPage.tsx  # List container with filters, empty states
 │   │   │       ├── MisSuscripcionesFilters.tsx     # Chip filter bar (subscription status + payment status)
-│   │   │       ├── SuscripcionCard.tsx              # Subscription card with plan info + SuscripcionEstadoBadge
+│   │   │       ├── SuscripcionCard.tsx              # Subscription card with plan info + SuscripcionEstadoBadge + per-service unit section with mini progress bars (US-0066)
 │   │   │       ├── PagoCard.tsx                     # Payment info, comprobante viewer, upload trigger
 │   │   │       └── index.ts
 │   │   └── ui/
@@ -243,13 +243,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
-│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure
+│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; joins suscripcion_servicios→servicios for per-service unit display (US-0066); crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
-│   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
+│   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries; fetchMisSuscripciones joins suscripcion_servicios for per-service unit display (US-0066)
 │   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket
-│   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripcionesTenant — user's subscriptions with plan + pago joins, scoped by atleta_id + tenant_id
+│   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripcionesTenant — user's subscriptions with plan + pago joins + suscripcion_servicios for per-service unit display (US-0066), scoped by atleta_id + tenant_id
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
@@ -264,7 +264,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)
 │   │       └── servicios.types.ts        # Servicio, CreateServicioInput, UpdateServicioInput, ServicioFormValues, ServicioServiceError, PlanTipoServicio, PlanTipoServicioRow, SyncPlanTipoServiciosInput (US-0062)
-│   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063)
+│   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063), SuscripcionServicioDisplay (servicio_id, servicio_nombre, unidades_incluidas, unidades_restantes — US-0066)
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
 │   │       └── reglas-suspension.types.ts # ReglaSuspension, ReglaSuspensionCreatePayload, ReglaSuspensionUpdatePayload, ReglaSuspensionFormValues
@@ -273,7 +273,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS), BookingResult
-│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias
+│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias, servicios: SuscripcionServicioDisplay[] (US-0066)
 │   │       └── mis-suscripciones-y-pagos.types.ts  # MiSuscripcionRow, MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces

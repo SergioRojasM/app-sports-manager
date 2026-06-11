@@ -30,3 +30,10 @@ export type SuscripcionServicio = {
   unidades_restantes: number | null;
   created_at: string;
 };
+
+export interface SuscripcionServicioDisplay {
+  servicio_id: string;
+  servicio_nombre: string;
+  unidades_incluidas: number | null;
+  unidades_restantes: number | null;
+}

@@ -8,6 +8,7 @@ import {
   type ValidarSuscripcionFormValues,
   type EditarSuscripcionFormValues,
 } from '@/types/portal/gestion-suscripciones.types';
+import type { SuscripcionServicioDisplay } from '@/types/portal/suscripciones.types';
 
 /* ────────── Raw row shape returned by Supabase join ────────── */
 
@@ -39,6 +40,12 @@ type RawSuscripcionRow = {
     nombre: string;
     vigencia_dias: number;
   } | null;
+  suscripcion_servicios: Array<{
+    servicio_id: string;
+    unidades_incluidas: number | null;
+    unidades_restantes: number | null;
+    servicio: { nombre: string } | null;
+  }>;
   pagos: Array<{
     id: string;
     monto: number;
@@ -105,6 +112,12 @@ function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
           created_at: latestPago.created_at,
         } satisfies PagoAdminRow)
       : null,
+    servicios: (row.suscripcion_servicios ?? []).map((s): SuscripcionServicioDisplay => ({
+      servicio_id: s.servicio_id,
+      servicio_nombre: s.servicio?.nombre ?? '',
+      unidades_incluidas: s.unidades_incluidas,
+      unidades_restantes: s.unidades_restantes,
+    })),
   };
 }
 
@@ -149,7 +162,11 @@ export const gestionSuscripcionesService = {
         atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
         plan:planes!suscripciones_plan_id_fkey(nombre),
         plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias),
-        pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo))
+        pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo)),
+        suscripcion_servicios(
+          servicio_id, unidades_incluidas, unidades_restantes,
+          servicio:servicios!suscripcion_servicios_servicio_id_fkey(nombre)
+        )
         `,
       )
       .eq('tenant_id', tenantId)
