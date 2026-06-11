@@ -39,8 +39,8 @@
 
 ## 7. Commit and PR
 
-- [ ] 7.1 Stage all changes and create commit: `git add -A && git commit -m "feat: display subscription service units across all UI views and plan acquisition modal"`
-- [ ] 7.2 Create PR description:
+- [x] 7.1 Stage all changes and create commit: `git add -A && git commit -m "feat: display subscription service units across all UI views and plan acquisition modal"`
+- [x] 7.2 Create PR description:
   ```
   ## Summary
   Displays per-service unit allocations (`unidades_incluidas` / `unidades_restantes`) in all
