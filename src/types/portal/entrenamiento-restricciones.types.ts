@@ -90,7 +90,8 @@ export type BookingRejectionCode =
   | 'CLASES_AGOTADAS'
   | 'UNIDADES_AGOTADAS'
   | 'SERVICIO_REQUERIDO'
-  | 'ENTRENAMIENTO_PASADO';
+  | 'ENTRENAMIENTO_PASADO'
+  | 'ADMIN_CONFIRM_NO_UNITS';
 
 export type BookingRejection = {
   ok: false;

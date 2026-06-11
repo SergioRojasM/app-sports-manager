@@ -36,6 +36,7 @@ export type CreateReservaInput = {
   entrenamiento_categoria_id?: string | null;
   notas?: string;
   bypass_restrictions?: boolean;
+  confirmed_no_units?: boolean;
 };
 
 export type UpdateReservaInput = {

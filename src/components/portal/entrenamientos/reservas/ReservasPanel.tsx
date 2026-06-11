@@ -141,8 +141,9 @@ export function ReservasPanel({
       if (success) {
         onMutationComplete?.();
         void reservasHook.refetchCategorias();
+        setFormModalOpen(false);
       }
-      setFormModalOpen(false);
+      // On failure keep modal open so errors/warnings are visible
       return success;
     },
     onUpdateReserva: async (id, input) => {
@@ -630,7 +631,20 @@ export function ReservasPanel({
         onClose={() => {
           setFormModalOpen(false);
           reservaForm.reset();
+          reservasHook.cancelAdminConfirmation();
         }}
+        adminConfirmPending={reservasHook.adminConfirmPending}
+        isConfirmingAdminBooking={reservasHook.isConfirmingAdminBooking}
+        onConfirmAdminBooking={async () => {
+          const success = await reservasHook.confirmAdminBooking();
+          if (success) {
+            onMutationComplete?.();
+            void reservasHook.refetchCategorias();
+            setFormModalOpen(false);
+            reservaForm.reset();
+          }
+        }}
+        onCancelAdminConfirmation={reservasHook.cancelAdminConfirmation}
       />
     </>
   );

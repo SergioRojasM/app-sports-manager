@@ -640,6 +640,60 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
 
   const supabase = createClient();
 
+  // 1b. Admin: resolve matchedRow by evaluating only service slots (OR rows, AND slots within row)
+  if (input.bypass_restrictions) {
+    const { data: restricciones } = await supabase
+      .from('entrenamiento_restricciones')
+      .select('*')
+      .eq('entrenamiento_id', input.entrenamiento_id)
+      .eq('tenant_id', input.tenant_id)
+      .order('orden', { ascending: true });
+
+    if (restricciones && restricciones.length > 0) {
+      // Build active service entitlement set for this athlete
+      const { data: servicioRows } = await supabase
+        .from('suscripcion_servicios')
+        .select('servicio_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado)')
+        .eq('suscripciones.tenant_id', input.tenant_id)
+        .eq('suscripciones.atleta_id', input.atleta_id)
+        .eq('suscripciones.estado', 'activa');
+
+      const activeServicioIds = new Set<string>(
+        (servicioRows ?? [])
+          .filter((r) => {
+            const unidades = r.unidades_restantes as number | null;
+            return unidades === null || unidades > 0;
+          })
+          .map((r) => r.servicio_id as string),
+      );
+
+      // Find first row where all service slots are covered
+      for (const row of restricciones as EntrenamientoRestriccion[]) {
+        const slots = [row.servicio_1_id, row.servicio_2_id, row.servicio_3_id, row.servicio_4_id].filter(
+          (s): s is string => s != null,
+        );
+        if (slots.length === 0 || slots.every((s) => activeServicioIds.has(s))) {
+          matchedRow = row;
+          break;
+        }
+      }
+
+      // No row matched — athlete has no units. Ask admin to confirm.
+      if (!matchedRow && !input.confirmed_no_units) {
+        const hasServiceSlots = (restricciones as EntrenamientoRestriccion[]).some(
+          (r) => r.servicio_1_id != null || r.servicio_2_id != null || r.servicio_3_id != null || r.servicio_4_id != null,
+        );
+        if (hasServiceSlots) {
+          return {
+            ok: false,
+            code: 'ADMIN_CONFIRM_NO_UNITS',
+            message: 'El atleta no tiene unidades disponibles en los servicios requeridos. ¿Deseas crear la reserva de todas formas sin descontar unidades?',
+          };
+        }
+      }
+    }
+  }
+
   // 2. Resolve deductions from matched restriction row service slots
   const serviceSlots = matchedRow
     ? [matchedRow.servicio_1_id, matchedRow.servicio_2_id, matchedRow.servicio_3_id, matchedRow.servicio_4_id].filter(
@@ -649,7 +703,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
 
   let deductions: Array<{ suscripcion_id: string | null; servicio_id: string }> = [];
 
-  if (serviceSlots.length > 0 && !input.bypass_restrictions) {
+  if (serviceSlots.length > 0) {
     const chargeEntries = await findServiceSubscriptionsToCharge(
       input.tenant_id,
       input.atleta_id,
