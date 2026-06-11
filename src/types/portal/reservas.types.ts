@@ -1,5 +1,13 @@
 export type ReservaEstado = 'pendiente' | 'confirmada' | 'cancelada' | 'completada';
 
+export type ReservaServicio = {
+  id: string;
+  reserva_id: string;
+  suscripcion_id: string | null;
+  servicio_id: string;
+  created_at: string;
+};
+
 export type Reserva = {
   id: string;
   tenant_id: string;

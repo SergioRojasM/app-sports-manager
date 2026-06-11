@@ -102,7 +102,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     toggleCategorias,
     updateCategoriasCupos,
     // Restrictions
-    planes,
+    servicios,
     restricciones,
     reservaAntelacionHoras,
     cancelacionAntelacionHoras,
@@ -360,7 +360,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         categoriasError={categoriasError}
         onToggleCategorias={toggleCategorias}
         onUpdateCategoriasCupos={updateCategoriasCupos}
-        planes={planes}
+        servicios={servicios}
         restricciones={restricciones}
         reservaAntelacionHoras={reservaAntelacionHoras}
         cancelacionAntelacionHoras={cancelacionAntelacionHoras}

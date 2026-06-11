@@ -8,7 +8,7 @@ import type {
   UpdateReservaInput,
   ReservaReportRow,
 } from '@/types/portal/reservas.types';
-import type { BookingResult } from '@/types/portal/entrenamiento-restricciones.types';
+import type { BookingResult, EntrenamientoRestriccion } from '@/types/portal/entrenamiento-restricciones.types';
 
 // ─────────────────────────────────────────────
 // Error class
@@ -286,7 +286,7 @@ async function validateBookingRestrictions(
   entrenamientoId: string,
   atletaId: string,
   tenantId: string,
-): Promise<BookingResult> {
+): Promise<{ result: BookingResult; matchedRow: EntrenamientoRestriccion | null }> {
   const supabase = createClient();
 
   // 1. Load training record (timing + fecha_hora + disciplina)
@@ -310,9 +310,12 @@ async function validateBookingRestrictions(
     const cutoff = new Date(new Date(fechaHora).getTime() - reservaAntelacion * 3600000);
     if (new Date() > cutoff) {
       return {
-        ok: false,
-        code: 'TIMING_RESERVA',
-        message: `Solo puedes reservar con al menos ${reservaAntelacion} h de antelación. El entrenamiento comienza el ${formatFechaHora(fechaHora)}.`,
+        result: {
+          ok: false,
+          code: 'TIMING_RESERVA',
+          message: `Solo puedes reservar con al menos ${reservaAntelacion} h de antelación. El entrenamiento comienza el ${formatFechaHora(fechaHora)}.`,
+        },
+        matchedRow: null,
       };
     }
   }
@@ -329,7 +332,7 @@ async function validateBookingRestrictions(
 
   // Zero rows = unrestricted
   if (!restricciones || restricciones.length === 0) {
-    return { ok: true };
+    return { result: { ok: true }, matchedRow: null };
   }
 
   // 4. Pre-fetch athlete data needed for evaluation
@@ -342,27 +345,24 @@ async function validateBookingRestrictions(
     .single();
   const miembroEstado = (miembro?.estado as string) ?? null;
 
-  // 4b. Active subscriptions
-  const { data: suscripciones } = await supabase
-    .from('suscripciones')
-    .select('plan_id')
-    .eq('tenant_id', tenantId)
-    .eq('atleta_id', atletaId)
-    .eq('estado', 'activa');
-  const activePlanIds = new Set((suscripciones ?? []).map((s) => s.plan_id as string));
+  // 4b. Active service entitlements — set of servicio_id with available units
+  const { data: servicioRows } = await supabase
+    .from('suscripcion_servicios')
+    .select('servicio_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado)')
+    .eq('suscripciones.tenant_id', tenantId)
+    .eq('suscripciones.atleta_id', atletaId)
+    .eq('suscripciones.estado', 'activa');
 
-  // 4c. Plan-discipline mapping for active plans
-  const activePlanArray = [...activePlanIds];
-  let activeDisciplinaIds = new Set<string>();
-  if (activePlanArray.length > 0) {
-    const { data: pd } = await supabase
-      .from('planes_disciplina')
-      .select('disciplina_id')
-      .in('plan_id', activePlanArray);
-    activeDisciplinaIds = new Set((pd ?? []).map((r) => r.disciplina_id as string));
-  }
+  const activeServicioIds = new Set<string>(
+    (servicioRows ?? [])
+      .filter((r) => {
+        const unidades = r.unidades_restantes as number | null;
+        return unidades === null || unidades > 0;
+      })
+      .map((r) => r.servicio_id as string),
+  );
 
-  // 4d. Athlete's level for the training's discipline (if needed)
+  // 4c. Athlete's level for the training's discipline (if needed)
   const needsLevel = restricciones.some((r) => r.validar_nivel_disciplina);
   let atletaNivelOrden: number | null = null;
   if (needsLevel) {
@@ -384,7 +384,7 @@ async function validateBookingRestrictions(
     }
   }
 
-  // 4e. Training category level (minimum level for this training)
+  // 4d. Training category level (minimum level for this training)
   let entrenamientoNivelOrden: number | null = null;
   let entrenamientoNivelNombre: string | null = null;
   if (needsLevel) {
@@ -405,7 +405,7 @@ async function validateBookingRestrictions(
   // 5. Evaluate OR rows
   let firstRowRejection: BookingResult | null = null;
 
-  for (const row of restricciones) {
+  for (const row of restricciones as EntrenamientoRestriccion[]) {
     let rowPasses = true;
     let firstFailCode: BookingResult | null = null;
 
@@ -428,43 +428,31 @@ async function validateBookingRestrictions(
       }
     }
 
-    // 5b. plan_id
-    if (row.plan_id && rowPasses) {
-      if (!activePlanIds.has(row.plan_id as string)) {
-        const { data: plan } = await supabase
-          .from('planes')
+    // 5b. servicio_1_id … servicio_4_id (AND — all non-null slots must be in the entitlement set)
+    const serviceSlots = [row.servicio_1_id, row.servicio_2_id, row.servicio_3_id, row.servicio_4_id].filter(
+      (s): s is string => s != null,
+    );
+
+    for (const servicioId of serviceSlots) {
+      if (!rowPasses) break;
+      if (!activeServicioIds.has(servicioId)) {
+        // Fetch service name for a friendly message
+        const { data: svc } = await supabase
+          .from('servicios')
           .select('nombre')
-          .eq('id', row.plan_id)
+          .eq('id', servicioId)
           .single();
-        const planName = (plan?.nombre as string | null) ?? 'el plan requerido';
+        const svcName = (svc?.nombre as string | null) ?? 'el servicio requerido';
         rowPasses = false;
         firstFailCode ??= {
           ok: false,
-          code: 'PLAN_REQUERIDO',
-          message: `Este entrenamiento requiere una suscripción activa al plan ${planName}.`,
+          code: 'SERVICIO_REQUERIDO',
+          message: `Este entrenamiento requiere una suscripción activa con unidades disponibles en el servicio: ${svcName}.`,
         };
       }
     }
 
-    // 5c. disciplina_id
-    if (row.disciplina_id && rowPasses) {
-      if (!activeDisciplinaIds.has(row.disciplina_id as string)) {
-        const { data: disc } = await supabase
-          .from('disciplinas')
-          .select('nombre')
-          .eq('id', row.disciplina_id)
-          .single();
-        const discName = (disc?.nombre as string | null) ?? 'la disciplina requerida';
-        rowPasses = false;
-        firstFailCode ??= {
-          ok: false,
-          code: 'DISCIPLINA_REQUERIDA',
-          message: `Este entrenamiento requiere una suscripción activa que incluya la disciplina ${discName}.`,
-        };
-      }
-    }
-
-    // 5d. validar_nivel_disciplina
+    // 5c. validar_nivel_disciplina
     if (row.validar_nivel_disciplina && rowPasses) {
       if (entrenamientoNivelOrden != null) {
         if (atletaNivelOrden == null || atletaNivelOrden < entrenamientoNivelOrden) {
@@ -486,7 +474,7 @@ async function validateBookingRestrictions(
     }
 
     if (rowPasses) {
-      return { ok: true };
+      return { result: { ok: true }, matchedRow: row };
     }
 
     // Capture first row's rejection for the final result
@@ -494,10 +482,13 @@ async function validateBookingRestrictions(
   }
 
   // No row passed — return rejection from first row
-  return firstRowRejection ?? {
-    ok: false,
-    code: 'PLAN_REQUERIDO',
-    message: 'No cumples los requisitos de acceso para este entrenamiento.',
+  return {
+    result: firstRowRejection ?? {
+      ok: false,
+      code: 'SERVICIO_REQUERIDO',
+      message: 'No cumples los requisitos de acceso para este entrenamiento.',
+    },
+    matchedRow: null,
   };
 }
 
@@ -538,56 +529,65 @@ async function validateCancellationRestriction(
 }
 
 // ─────────────────────────────────────────────
-// Subscription class deduction helper
+// Service subscription deduction helpers
 // ─────────────────────────────────────────────
 
-async function findSubscriptionToCharge(
+type ServiceChargeEntry = {
+  suscripcionId: string | null;
+  servicioId: string;
+  exhausted: boolean;
+};
+
+async function findServiceSubscriptionsToCharge(
   tenantId: string,
   atletaId: string,
-  planId: string,
-): Promise<{ suscripcionId: string | null; exhausted: boolean }> {
+  servicioIds: string[],
+): Promise<ServiceChargeEntry[]> {
+  if (servicioIds.length === 0) return [];
+
   const supabase = createClient();
+  const results: ServiceChargeEntry[] = [];
 
-  // Only consider subscriptions with available classes (>0) or unlimited (null)
-  const { data, error } = await supabase
-    .from('suscripciones')
-    .select('id, clases_restantes')
-    .eq('tenant_id', tenantId)
-    .eq('atleta_id', atletaId)
-    .eq('plan_id', planId)
-    .eq('estado', 'activa')
-    .or('clases_restantes.gt.0,clases_restantes.is.null')
-    .order('clases_restantes', { ascending: true, nullsFirst: false })
-    .limit(1)
-    .maybeSingle();
+  for (const servicioId of servicioIds) {
+    // Find the active subscription entry with available units (lowest first)
+    const { data, error } = await supabase
+      .from('suscripcion_servicios')
+      .select('id, suscripcion_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado)')
+      .eq('servicio_id', servicioId)
+      .eq('suscripciones.tenant_id', tenantId)
+      .eq('suscripciones.atleta_id', atletaId)
+      .eq('suscripciones.estado', 'activa')
+      .or('unidades_restantes.gt.0,unidades_restantes.is.null')
+      .order('unidades_restantes', { ascending: true, nullsFirst: false })
+      .limit(1)
+      .maybeSingle();
 
-  if (error) {
-    throw mapServiceError(error);
-  }
+    if (error) throw mapServiceError(error);
 
-  if (data) {
-    // NULL clases_restantes = unlimited plan — no deduction needed
-    if (data.clases_restantes === null) {
-      return { suscripcionId: null, exhausted: false };
+    if (data) {
+      const unidades = data.unidades_restantes as number | null;
+      // NULL = unlimited — include in log but no deduction needed
+      results.push({
+        suscripcionId: unidades === null ? null : data.suscripcion_id as string,
+        servicioId,
+        exhausted: false,
+      });
+    } else {
+      // No subscription with available units — check if any exhausted row exists
+      const { count } = await supabase
+        .from('suscripcion_servicios')
+        .select('id', { count: 'exact', head: true })
+        .eq('servicio_id', servicioId)
+        .eq('suscripciones.tenant_id', tenantId)
+        .eq('suscripciones.atleta_id', atletaId)
+        .eq('suscripciones.estado', 'activa')
+        .eq('unidades_restantes', 0);
+
+      results.push({ suscripcionId: null, servicioId, exhausted: (count ?? 0) > 0 });
     }
-    return { suscripcionId: data.id as string, exhausted: false };
   }
 
-  // No subscription with available classes — check if any exhausted (0) exist
-  const { count, error: countError } = await supabase
-    .from('suscripciones')
-    .select('id', { count: 'exact', head: true })
-    .eq('tenant_id', tenantId)
-    .eq('atleta_id', atletaId)
-    .eq('plan_id', planId)
-    .eq('estado', 'activa')
-    .eq('clases_restantes', 0);
-
-  if (countError) {
-    throw mapServiceError(countError);
-  }
-
-  return { suscripcionId: null, exhausted: (count ?? 0) > 0 };
+  return results;
 }
 
 // ─────────────────────────────────────────────
@@ -615,6 +615,8 @@ async function isEntrenamientoPast(
 // ─────────────────────────────────────────────
 
 async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
+  let matchedRow: EntrenamientoRestriccion | null = null;
+
   if (!input.bypass_restrictions) {
     // 0. Past-date guard
     const past = await isEntrenamientoPast(input.entrenamiento_id, input.tenant_id);
@@ -627,48 +629,50 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     }
 
     // 1. Booking restriction check
-    const restrictionResult = await validateBookingRestrictions(
+    const { result: restrictionResult, matchedRow: row } = await validateBookingRestrictions(
       input.entrenamiento_id,
       input.atleta_id,
       input.tenant_id,
     );
     if (!restrictionResult.ok) return restrictionResult;
+    matchedRow = row;
   }
 
   const supabase = createClient();
 
-  // 0b. Find subscription to charge (if plan-restricted training) — always runs
-  let suscripcionId: string | null = null;
+  // 2. Resolve deductions from matched restriction row service slots
+  const serviceSlots = matchedRow
+    ? [matchedRow.servicio_1_id, matchedRow.servicio_2_id, matchedRow.servicio_3_id, matchedRow.servicio_4_id].filter(
+        (s): s is string => s != null,
+      )
+    : [];
 
-  const { data: restricciones } = await supabase
-    .from('entrenamiento_restricciones')
-    .select('plan_id')
-    .eq('entrenamiento_id', input.entrenamiento_id)
-    .eq('tenant_id', input.tenant_id)
-    .not('plan_id', 'is', null)
-    .limit(1)
-    .maybeSingle();
+  let deductions: Array<{ suscripcion_id: string | null; servicio_id: string }> = [];
 
-  if (restricciones?.plan_id) {
-    const chargeResult = await findSubscriptionToCharge(
+  if (serviceSlots.length > 0 && !input.bypass_restrictions) {
+    const chargeEntries = await findServiceSubscriptionsToCharge(
       input.tenant_id,
       input.atleta_id,
-      restricciones.plan_id as string,
+      serviceSlots,
     );
 
-    if (chargeResult.exhausted && !input.bypass_restrictions) {
+    const exhaustedEntry = chargeEntries.find((e) => e.exhausted);
+    if (exhaustedEntry) {
       return {
         ok: false,
-        code: 'CLASES_AGOTADAS',
-        message: 'No te quedan clases disponibles en tu suscripción al plan requerido. Contacta al administrador para renovar o ampliar tu plan.',
+        code: 'UNIDADES_AGOTADAS',
+        message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
       };
     }
 
-    suscripcionId = chargeResult.suscripcionId;
+    deductions = chargeEntries.map((e) => ({
+      suscripcion_id: e.suscripcionId,
+      servicio_id: e.servicioId,
+    }));
   }
 
   if (!input.bypass_restrictions) {
-    // 1. Capacity check
+    // 3. Capacity check
     const capacidad = await getCapacidad(input.tenant_id, input.entrenamiento_id);
     if (!capacidad.disponible) {
       throw new ReservaServiceError(
@@ -678,7 +682,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     }
   }
 
-  // 2. Duplicate check — always runs
+  // 4. Duplicate check — always runs
   const existing = await getMyReserva(input.tenant_id, input.entrenamiento_id, input.atleta_id);
   if (existing) {
     throw new ReservaServiceError(
@@ -687,7 +691,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     );
   }
 
-  // 3. Per-category capacity check — skipped for admin override
+  // 5. Per-category capacity check — skipped for admin override
   if (input.entrenamiento_categoria_id && !input.bypass_restrictions) {
     const supabaseCheck = createClient();
     const { data: catRow, error: catCheckErr } = await supabaseCheck
@@ -727,23 +731,23 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     }
   }
 
-  // 4. Insert via atomic RPC (deducts class + inserts reservation)
-  const { data, error } = await supabase.rpc('book_and_deduct_class', {
+  // 6. Insert via atomic RPC (deducts service units + inserts reservation)
+  const { data, error } = await supabase.rpc('book_and_deduct_service_units', {
     p_tenant_id: input.tenant_id,
     p_atleta_id: input.atleta_id,
     p_entrenamiento_id: input.entrenamiento_id,
     p_entrenamiento_categoria_id: input.entrenamiento_categoria_id ?? null,
     p_notas: input.notas?.trim() || null,
-    p_suscripcion_id: suscripcionId,
+    p_deductions: deductions,
   });
 
   if (error) {
-    // Concurrent race: another booking consumed the last class
-    if (error.code === 'P0001' && error.message?.includes('CLASES_AGOTADAS')) {
+    // Concurrent race: another booking consumed the last unit
+    if (error.code === 'P0001' && error.message?.includes('UNIDADES_AGOTADAS')) {
       return {
         ok: false,
-        code: 'CLASES_AGOTADAS',
-        message: 'No te quedan clases disponibles en tu suscripción al plan requerido. Contacta al administrador para renovar o ampliar tu plan.',
+        code: 'UNIDADES_AGOTADAS',
+        message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
       };
     }
     throw mapServiceError(error);
@@ -819,24 +823,11 @@ async function cancel(
     if (!cancResult.ok) return cancResult;
   }
 
-  // Fetch suscripcion_id from the reservation for class restoration
+  // Cancel via atomic RPC (updates status + restores service units from reserva_servicios ledger)
   const supabase = createClient();
-  const { data: reserva, error: fetchErr } = await supabase
-    .from('reservas')
-    .select('suscripcion_id')
-    .eq('id', id)
-    .eq('tenant_id', tenantId)
-    .single();
-
-  if (fetchErr || !reserva) {
-    throw new ReservaServiceError('not_found', 'La reserva no fue encontrada.');
-  }
-
-  // Cancel via atomic RPC (updates status + restores class if applicable)
-  const { data, error } = await supabase.rpc('cancel_and_restore_class', {
+  const { data, error } = await supabase.rpc('cancel_and_restore_service_units', {
     p_reserva_id: id,
     p_tenant_id: tenantId,
-    p_suscripcion_id: (reserva.suscripcion_id as string | null) ?? null,
   });
 
   if (error) {

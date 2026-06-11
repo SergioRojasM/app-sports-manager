@@ -422,10 +422,13 @@ export const entrenamientosService = {
           tenant_id: input.tenantId,
           entrenamiento_id: unicoData.id,
           usuario_estado: r.usuario_estado ?? null,
-          plan_id: r.plan_id ?? null,
-          disciplina_id: r.disciplina_id ?? null,
           validar_nivel_disciplina: r.validar_nivel_disciplina,
           orden: r.orden ?? i + 1,
+          descripcion: r.descripcion ?? null,
+          servicio_1_id: r.servicio_1_id ?? null,
+          servicio_2_id: r.servicio_2_id ?? null,
+          servicio_3_id: r.servicio_3_id ?? null,
+          servicio_4_id: r.servicio_4_id ?? null,
         }));
         const { error: restError } = await supabase
           .from('entrenamiento_restricciones')
@@ -497,10 +500,13 @@ export const entrenamientosService = {
         tenant_id: input.tenantId,
         entrenamiento_grupo_id: group.id,
         usuario_estado: r.usuario_estado ?? null,
-        plan_id: r.plan_id ?? null,
-        disciplina_id: r.disciplina_id ?? null,
         validar_nivel_disciplina: r.validar_nivel_disciplina,
         orden: r.orden ?? i + 1,
+        descripcion: r.descripcion ?? null,
+        servicio_1_id: r.servicio_1_id ?? null,
+        servicio_2_id: r.servicio_2_id ?? null,
+        servicio_3_id: r.servicio_3_id ?? null,
+        servicio_4_id: r.servicio_4_id ?? null,
       }));
       const { error: grError } = await supabase
         .from('entrenamiento_grupo_restricciones')
@@ -513,10 +519,13 @@ export const entrenamientosService = {
           tenant_id: input.tenantId,
           entrenamiento_id: inst.id,
           usuario_estado: r.usuario_estado ?? null,
-          plan_id: r.plan_id ?? null,
-          disciplina_id: r.disciplina_id ?? null,
           validar_nivel_disciplina: r.validar_nivel_disciplina,
           orden: r.orden ?? i + 1,
+          descripcion: r.descripcion ?? null,
+          servicio_1_id: r.servicio_1_id ?? null,
+          servicio_2_id: r.servicio_2_id ?? null,
+          servicio_3_id: r.servicio_3_id ?? null,
+          servicio_4_id: r.servicio_4_id ?? null,
         }));
         const { error: irError } = await supabase
           .from('entrenamiento_restricciones')
@@ -1153,6 +1162,26 @@ export const entrenamientosService = {
     return (data ?? []).map((row) => ({
       id: row.id as string,
       label: (row.nombre as string | null) ?? 'Plan',
+    }));
+  },
+
+  async listServicioOptions(tenantId: string): Promise<SelectOption[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('servicios')
+      .select('id, nombre')
+      .eq('tenant_id', tenantId)
+      .eq('activo', true)
+      .order('nombre', { ascending: true });
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+
+    return (data ?? []).map((row) => ({
+      id: row.id as string,
+      label: (row.nombre as string | null) ?? 'Servicio',
     }));
   },
 };
