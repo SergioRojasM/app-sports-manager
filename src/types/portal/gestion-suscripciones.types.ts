@@ -116,9 +116,9 @@ export interface CrearSuscripcionAdminFormValues {
 
 /** Service-level error with typed code. */
 export class GestionSuscripcionesServiceError extends Error {
-  readonly code: 'forbidden' | 'unknown' | 'pago_failed';
+  readonly code: 'forbidden' | 'unknown' | 'pago_failed' | 'populate_servicios_failed';
 
-  constructor(code: 'forbidden' | 'unknown' | 'pago_failed', message: string) {
+  constructor(code: 'forbidden' | 'unknown' | 'pago_failed' | 'populate_servicios_failed', message: string) {
     super(message);
     this.code = code;
     this.name = 'GestionSuscripcionesServiceError';

@@ -95,7 +95,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by visibilidad; includes public/private legend
 │   │   │       ├── EntrenamientoFormModal.tsx   # Includes visibilidad radio group (publico/privado, default 'privado')
 │   │   │       ├── EntrenamientoCategoriasSection.tsx  # Optional per-level capacity allocation step
-│   │   │       ├── EntrenamientoRestriccionesSection.tsx  # Collapsible restriction-row editor (timing + access conditions)
+│   │   │       ├── EntrenamientoRestriccionesSection.tsx  # Collapsible restriction-row editor (timing + service-based access conditions, AND/OR per row)
 │   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row
 │   │   │       └── reservas/              # Sub-feature slice (booking)
 │   │   │           ├── ReservasPanel.tsx
@@ -232,7 +232,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions, validateCancellationRestriction, findSubscriptionToCharge; create() and cancel() include isEntrenamientoPast guard (blocks athletes from booking/cancelling past sessions) and delegate to SECURITY DEFINER RPCs book_and_deduct_class / cancel_and_restore_class for atomic class deduction/restoration; reservas.suscripcion_id FK tracks which subscription was charged
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
 │   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
@@ -272,7 +272,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
-│   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion, restriction inputs, BookingRejection, BookingResult
+│   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS), BookingResult
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_clases_incluidas, plan_tipo_vigencia_dias
 │   │       └── mis-suscripciones-y-pagos.types.ts  # MiSuscripcionRow, MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
@@ -364,8 +364,8 @@ Supabase (database)
 
 | Function | Purpose | Trigger |
 |----------|---------|---------|
-| `book_and_deduct_class(...)` | Atomic booking + class deduction | Called via RPC from `reservas.service.ts` |
-| `cancel_and_restore_class(...)` | Atomic cancellation + class restoration | Called via RPC from `reservas.service.ts` |
+| `book_and_deduct_service_units(...)` | Atomic booking + multi-service unit deduction via JSONB deductions array | Called via RPC from `reservas.service.ts` |
+| `cancel_and_restore_service_units(...)` | Atomic cancellation + service unit restoration from `reserva_servicios` ledger | Called via RPC from `reservas.service.ts` |
 | `populate_suscripcion_servicios(p_suscripcion_id, p_plan_tipo_id)` | Inserts `suscripcion_servicios` rows from `plan_tipos_servicios` at subscription creation time; idempotent via `ON CONFLICT DO NOTHING` (US-0063) | Called via RPC from `suscripciones.service.ts` and `gestion-suscripciones.service.ts` |
 | `evaluar_suspensiones_cron()` | Evaluates active members against assigned suspension rules; suspends those exceeding absence thresholds, logs `miembros_tenant_novedades` (tipo `inasistencias_acumuladas`), and marks processed absences (`validacion_suspension = true`) | pg_cron daily schedule |
 | `reactivar_suspensiones_expiradas()` | Reactivates members whose temporary suspension (`duracion > 0`) has elapsed; logs novedad (tipo `reactivacion`) | pg_cron daily schedule |
