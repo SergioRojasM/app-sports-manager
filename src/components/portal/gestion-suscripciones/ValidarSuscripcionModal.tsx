@@ -16,7 +16,6 @@ export function ValidarSuscripcionModal({ row, adminUserId, onClose, onSuccess }
     formValues,
     setFechaInicio,
     setFechaFin,
-    setClasesRestantes,
     isSubmitting,
     error,
     approve,
@@ -81,27 +80,6 @@ export function ValidarSuscripcionModal({ row, adminUserId, onClose, onSuccess }
               <p className="mt-1 text-xs text-slate-500">
                 Auto-calculada: inicio + {row.plan_tipo_vigencia_dias ?? '—'} día(s). Puedes modificarla.
               </p>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-slate-400">Clases Restantes</label>
-              <input
-                type="number"
-                min={0}
-                value={formValues.clases_restantes ?? ''}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setClasesRestantes(v === '' ? null : Number(v));
-                }}
-                disabled={isSubmitting}
-                className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 outline-none focus:border-turquoise/50 focus:ring-1 focus:ring-turquoise/30 disabled:opacity-50"
-              />
-              {row.plan_tipo_clases_incluidas !== null && (
-                <p className="mt-1 text-xs text-slate-500">
-                  {row.plan_tipo_nombre
-                    ? `El subtipo "${row.plan_tipo_nombre}" incluye ${row.plan_tipo_clases_incluidas} clases.`
-                    : `Incluye ${row.plan_tipo_clases_incluidas} clases.`}
-                </p>
-              )}
             </div>
           </div>
         )}

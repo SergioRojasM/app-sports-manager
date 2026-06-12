@@ -8,8 +8,6 @@ export type Suscripcion = {
   plan_tipo_id: string | null;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   comentarios: string | null;
   estado: SuscripcionEstado;
   created_at: string;
@@ -20,7 +18,22 @@ export type SuscripcionInsert = {
   atleta_id: string;
   plan_id: string;
   plan_tipo_id?: string | null;
-  clases_plan: number | null;
   comentarios: string | null;
   estado: 'pendiente';
 };
+
+export type SuscripcionServicio = {
+  id: string;
+  suscripcion_id: string;
+  servicio_id: string;
+  unidades_incluidas: number | null;
+  unidades_restantes: number | null;
+  created_at: string;
+};
+
+export interface SuscripcionServicioDisplay {
+  servicio_id: string;
+  servicio_nombre: string;
+  unidades_incluidas: number | null;
+  unidades_restantes: number | null;
+}

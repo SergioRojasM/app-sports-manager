@@ -9,6 +9,8 @@ import type {
   PlanTipoFormValues,
 } from '@/types/portal/planes.types';
 import type { TipoFieldErrors } from '@/hooks/portal/planes/usePlanForm';
+import type { Servicio, PlanTipoServicioRow } from '@/types/portal/servicios.types';
+import { PlanTipoServiciosSection } from './PlanTipoServiciosSection';
 
 type TipoFormEntry = PlanTipoFormValues & { _id?: string };
 
@@ -23,12 +25,15 @@ type PlanFormModalProps = {
   tiposForm: TipoFormEntry[];
   tiposErrors: TipoFieldErrors;
   tiposGlobalError: string | null;
+  tiposServiceRows: PlanTipoServicioRow[][];
+  availableServices: Servicio[];
   onClose: () => void;
   onSubmit: () => Promise<boolean>;
   onChangeField: (field: PlanFormField | 'activo', value: string | boolean | string[]) => void;
   onAddTipo: () => void;
   onUpdateTipo: (index: number, values: Partial<PlanTipoFormValues>) => void;
   onRemoveTipo: (index: number) => void;
+  onUpdateTipoServiceRows: (index: number, rows: PlanTipoServicioRow[]) => void;
 };
 
 export function PlanFormModal({
@@ -42,12 +47,15 @@ export function PlanFormModal({
   tiposForm,
   tiposErrors,
   tiposGlobalError,
+  tiposServiceRows,
+  availableServices,
   onClose,
   onSubmit,
   onChangeField,
   onAddTipo,
   onUpdateTipo,
   onRemoveTipo,
+  onUpdateTipoServiceRows,
 }: PlanFormModalProps) {
   useEffect(() => {
     if (!open) return;
@@ -344,27 +352,6 @@ export function PlanFormModal({
                           ) : null}
                         </div>
 
-                        <div>
-                          <input
-                            type="number"
-                            min="0"
-                            step="1"
-                            value={tipo.clases_incluidas}
-                            onChange={(e) => onUpdateTipo(index, { clases_incluidas: e.target.value })}
-                            disabled={isSubmitting}
-                            placeholder="Sin límite (dejar vacío)"
-                            className={[
-                              'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-1',
-                              getError('clases_incluidas')
-                                ? 'border-rose-400/80 focus:ring-rose-300/35'
-                                : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-                            ].join(' ')}
-                          />
-                          {getError('clases_incluidas') ? (
-                            <p className="mt-0.5 text-xs text-rose-300">{getError('clases_incluidas')}</p>
-                          ) : null}
-                        </div>
-
                         <div className="col-span-2">
                           <input
                             type="text"
@@ -376,6 +363,27 @@ export function PlanFormModal({
                           />
                         </div>
                       </div>
+
+                      {/* Services section for this plan tipo */}
+                      <PlanTipoServiciosSection
+                        index={index}
+                        serviceRows={tiposServiceRows[index] ?? []}
+                        availableServices={availableServices}
+                        isSubmitting={isSubmitting}
+                        onAddRow={() => {
+                          const current = tiposServiceRows[index] ?? [];
+                          onUpdateTipoServiceRows(index, [...current, { servicioId: '', unidades: null }]);
+                        }}
+                        onUpdateRow={(rowIndex, partial) => {
+                          const current = [...(tiposServiceRows[index] ?? [])];
+                          current[rowIndex] = { ...current[rowIndex], ...partial };
+                          onUpdateTipoServiceRows(index, current);
+                        }}
+                        onRemoveRow={(rowIndex) => {
+                          const current = (tiposServiceRows[index] ?? []).filter((_, i) => i !== rowIndex);
+                          onUpdateTipoServiceRows(index, current);
+                        }}
+                      />
                     </div>
                   );
                 })}

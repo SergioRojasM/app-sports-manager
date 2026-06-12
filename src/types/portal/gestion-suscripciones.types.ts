@@ -37,20 +37,18 @@ export interface SuscripcionAdminRow {
   plan_tipo_id: string | null;
   plan_tipo_nombre: string | null;
   plan_tipo_vigencia_dias: number | null;
-  plan_tipo_clases_incluidas: number | null;
   atleta_id: string;
   atleta_nombre: string;
   atleta_email: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   estado: SuscripcionEstado;
   comentarios: string | null;
   validado_por: string | null;
   validado_por_nombre: string | null;
   created_at: string;
   pago: PagoAdminRow | null;
+  servicios: import('@/types/portal/suscripciones.types').SuscripcionServicioDisplay[];
 }
 
 /** Aggregate statistics derived in-memory from the subscription list. */
@@ -64,7 +62,14 @@ export interface SuscripcionesAdminStats {
 export interface ValidarSuscripcionFormValues {
   fecha_inicio: string;
   fecha_fin: string;
-  clases_restantes: number | null;
+}
+
+/** Per-service unit entry used in the edit modal form. */
+export interface EditarServicioUnidades {
+  servicio_id: string;
+  servicio_nombre: string;
+  unidades_incluidas: number | null;  // read-only snapshot; null = unlimited
+  unidades_restantes: number | null;  // editable; null = unlimited
 }
 
 /** Form values for the full-field edit modal. */
@@ -73,9 +78,8 @@ export interface EditarSuscripcionFormValues {
   estado: SuscripcionEstado;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   comentarios: string | null;
+  servicios: EditarServicioUnidades[];
 }
 
 /** Payload for admin-initiated subscription creation. */
@@ -84,8 +88,6 @@ export interface CrearSuscripcionAdminPayload {
   atleta_id: string;
   plan_id: string;
   plan_tipo_id: string | null;
-  clases_plan: number | null;
-  clases_restantes: number | null;
   estado: 'pendiente' | 'activa';
   fecha_inicio: string | null;
   fecha_fin: string | null;
@@ -106,7 +108,6 @@ export interface CrearSuscripcionAdminFormValues {
   estado: 'pendiente' | 'activa';
   fecha_inicio: string;
   fecha_fin: string;
-  clases_restantes: number | null;
   comentarios: string;
   crearPago: boolean;
   monto: string;
@@ -116,9 +117,9 @@ export interface CrearSuscripcionAdminFormValues {
 
 /** Service-level error with typed code. */
 export class GestionSuscripcionesServiceError extends Error {
-  readonly code: 'forbidden' | 'unknown' | 'pago_failed';
+  readonly code: 'forbidden' | 'unknown' | 'pago_failed' | 'populate_servicios_failed';
 
-  constructor(code: 'forbidden' | 'unknown' | 'pago_failed', message: string) {
+  constructor(code: 'forbidden' | 'unknown' | 'pago_failed' | 'populate_servicios_failed', message: string) {
     super(message);
     this.code = code;
     this.name = 'GestionSuscripcionesServiceError';

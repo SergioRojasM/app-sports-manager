@@ -92,7 +92,7 @@ type UseEntrenamientosResult = {
   instanciaCategorias: EntrenamientoCategoria[];
   instanciaCategoriasLoading: boolean;
   // Restrictions
-  planes: SelectOption[];
+  servicios: SelectOption[];
   restricciones: ReturnType<typeof useEntrenamientoForm>['restricciones'];
   reservaAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['reservaAntelacionHoras'];
   cancelacionAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['cancelacionAntelacionHoras'];
@@ -342,7 +342,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [disciplinas, setDisciplinas] = useState<SelectOption[]>([]);
   const [escenarios, setEscenarios] = useState<SelectOption[]>([]);
   const [entrenadores, setEntrenadores] = useState<SelectOption[]>([]);
-  const [planes, setPlanes] = useState<SelectOption[]>([]);
+  const [servicios, setServicios] = useState<SelectOption[]>([]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -375,20 +375,20 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         throw new Error('No active session');
       }
 
-      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, planesData] = await Promise.all([
+      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData] = await Promise.all([
         entrenamientosService.listTrainingGroupsByTenant(tenantId),
         entrenamientosService.listTrainingInstancesByTenantAndRange(tenantId, calendar.range.from, calendar.range.to),
         entrenamientosService.listDisciplineOptions(tenantId),
         entrenamientosService.listScenarioOptions(tenantId),
         entrenamientosService.listTrainerOptions(tenantId),
-        entrenamientosService.listPlanOptions(tenantId),
+        entrenamientosService.listServicioOptions(tenantId),
       ]);
 
       setGroups(groupsData);
       setDisciplinas(disciplinasData);
       setEscenarios(escenariosData);
       setEntrenadores(entrenadoresData);
-      setPlanes(planesData);
+      setServicios(serviciosData);
 
       // Enrich instances with reservas_activas count (batch, not N+1)
       const capacidades = await Promise.all(
@@ -557,6 +557,11 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             disciplina_id: r.disciplina_id as string | null,
             validar_nivel_disciplina: r.validar_nivel_disciplina as boolean,
             orden: i + 1,
+            descripcion: (r as { descripcion?: string | null }).descripcion ?? null,
+            servicio_1_id: (r as { servicio_1_id?: string | null }).servicio_1_id ?? null,
+            servicio_2_id: (r as { servicio_2_id?: string | null }).servicio_2_id ?? null,
+            servicio_3_id: (r as { servicio_3_id?: string | null }).servicio_3_id ?? null,
+            servicio_4_id: (r as { servicio_4_id?: string | null }).servicio_4_id ?? null,
           })),
         );
       }).catch(() => form.setRestricciones([]));
@@ -618,6 +623,11 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
               disciplina_id: r.disciplina_id as string | null,
               validar_nivel_disciplina: r.validar_nivel_disciplina as boolean,
               orden: i + 1,
+              descripcion: (r as { descripcion?: string | null }).descripcion ?? null,
+              servicio_1_id: (r as { servicio_1_id?: string | null }).servicio_1_id ?? null,
+              servicio_2_id: (r as { servicio_2_id?: string | null }).servicio_2_id ?? null,
+              servicio_3_id: (r as { servicio_3_id?: string | null }).servicio_3_id ?? null,
+              servicio_4_id: (r as { servicio_4_id?: string | null }).servicio_4_id ?? null,
             })),
           );
         }).catch(() => form.setRestricciones([]));
@@ -675,6 +685,11 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
               disciplina_id: r.disciplina_id as string | null,
               validar_nivel_disciplina: r.validar_nivel_disciplina as boolean,
               orden: i + 1,
+              descripcion: (r as { descripcion?: string | null }).descripcion ?? null,
+              servicio_1_id: (r as { servicio_1_id?: string | null }).servicio_1_id ?? null,
+              servicio_2_id: (r as { servicio_2_id?: string | null }).servicio_2_id ?? null,
+              servicio_3_id: (r as { servicio_3_id?: string | null }).servicio_3_id ?? null,
+              servicio_4_id: (r as { servicio_4_id?: string | null }).servicio_4_id ?? null,
             })),
           );
         }).catch(() => form.setRestricciones([]));
@@ -826,6 +841,11 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
                 disciplina_id: r.disciplina_id,
                 validar_nivel_disciplina: r.validar_nivel_disciplina,
                 orden: r.orden,
+                descripcion: r.descripcion,
+                servicio_1_id: r.servicio_1_id,
+                servicio_2_id: r.servicio_2_id,
+                servicio_3_id: r.servicio_3_id,
+                servicio_4_id: r.servicio_4_id,
               }))
             : undefined;
 
@@ -875,6 +895,11 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
                   disciplina_id: r.disciplina_id,
                   validar_nivel_disciplina: r.validar_nivel_disciplina,
                   orden: r.orden,
+                  descripcion: r.descripcion,
+                  servicio_1_id: r.servicio_1_id,
+                  servicio_2_id: r.servicio_2_id,
+                  servicio_3_id: r.servicio_3_id,
+                  servicio_4_id: r.servicio_4_id,
                 }))
               : undefined;
 
@@ -969,7 +994,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     instanciaCategorias: instanciaCategorias.categorias,
     instanciaCategoriasLoading: instanciaCategorias.loading,
     // Restrictions
-    planes,
+    servicios,
     restricciones: form.restricciones,
     reservaAntelacionHoras: form.reservaAntelacionHoras,
     cancelacionAntelacionHoras: form.cancelacionAntelacionHoras,

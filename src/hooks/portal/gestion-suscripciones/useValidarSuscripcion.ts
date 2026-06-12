@@ -18,7 +18,6 @@ type UseValidarSuscripcionResult = {
   formValues: ValidarSuscripcionFormValues;
   setFechaInicio: (v: string) => void;
   setFechaFin: (v: string) => void;
-  setClasesRestantes: (v: number | null) => void;
   isSubmitting: boolean;
   error: string | null;
   approve: () => Promise<void>;
@@ -42,9 +41,8 @@ function computeDefaults(row: SuscripcionAdminRow): ValidarSuscripcionFormValues
   const fechaInicio = row.fecha_inicio ?? toISODate(today);
   const start = new Date(fechaInicio);
   const fechaFin = row.fecha_fin ?? (row.plan_tipo_vigencia_dias != null ? toISODate(addDays(start, row.plan_tipo_vigencia_dias)) : toISODate(start));
-  const clasesRestantes = row.clases_restantes ?? row.plan_tipo_clases_incluidas;
 
-  return { fecha_inicio: fechaInicio, fecha_fin: fechaFin, clases_restantes: clasesRestantes };
+  return { fecha_inicio: fechaInicio, fecha_fin: fechaFin };
 }
 
 /* ────────── Hook ────────── */
@@ -54,11 +52,10 @@ export function useValidarSuscripcion({
   adminUserId,
   onSuccess,
 }: UseValidarSuscripcionOptions): UseValidarSuscripcionResult {
-  const defaults = useMemo(() => (row ? computeDefaults(row) : { fecha_inicio: '', fecha_fin: '', clases_restantes: null }), [row]);
+  const defaults = useMemo(() => (row ? computeDefaults(row) : { fecha_inicio: '', fecha_fin: '' }), [row]);
 
   const [fechaInicio, setFechaInicio] = useState(defaults.fecha_inicio);
   const [fechaFin, setFechaFin] = useState(defaults.fecha_fin);
-  const [clasesRestantes, setClasesRestantes] = useState<number | null>(defaults.clases_restantes);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +66,6 @@ export function useValidarSuscripcion({
       const d = computeDefaults(row);
       setFechaInicio(d.fecha_inicio);
       setFechaFin(d.fecha_fin);
-      setClasesRestantes(d.clases_restantes);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row?.id]);
@@ -77,7 +73,6 @@ export function useValidarSuscripcion({
   const formValues: ValidarSuscripcionFormValues = {
     fecha_inicio: fechaInicio,
     fecha_fin: fechaFin,
-    clases_restantes: clasesRestantes,
   };
 
   const approve = useCallback(async () => {
@@ -88,7 +83,6 @@ export function useValidarSuscripcion({
       await gestionSuscripcionesService.updateSuscripcionEstado(row.id, 'aprobar', adminUserId, {
         fecha_inicio: fechaInicio,
         fecha_fin: fechaFin,
-        clases_restantes: clasesRestantes,
       });
       onSuccess();
     } catch (err) {
@@ -100,7 +94,7 @@ export function useValidarSuscripcion({
     } finally {
       setIsSubmitting(false);
     }
-  }, [row, fechaInicio, fechaFin, clasesRestantes, adminUserId, onSuccess]);
+  }, [row, fechaInicio, fechaFin, adminUserId, onSuccess]);
 
   const cancel = useCallback(async () => {
     if (!row) return;
@@ -124,7 +118,6 @@ export function useValidarSuscripcion({
     formValues,
     setFechaInicio,
     setFechaFin,
-    setClasesRestantes,
     isSubmitting,
     error,
     approve,

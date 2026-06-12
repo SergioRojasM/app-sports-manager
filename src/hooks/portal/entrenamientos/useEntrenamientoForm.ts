@@ -19,6 +19,11 @@ const EMPTY_RESTRICCION: EntrenamientoRestriccionInput = {
   disciplina_id: null,
   validar_nivel_disciplina: false,
   orden: 1,
+  descripcion: null,
+  servicio_1_id: null,
+  servicio_2_id: null,
+  servicio_3_id: null,
+  servicio_4_id: null,
 };
 
 const EMPTY_RULE: TrainingWizardRuleFormValue = {

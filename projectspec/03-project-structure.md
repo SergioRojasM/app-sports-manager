@@ -38,6 +38,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
 │   │               │   ├── gestion-organizacion/page.tsx
+│   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
 │   │               ├── (atleta)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-usuario users to /portal/orgs/[tenant_id]
@@ -94,7 +95,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by visibilidad; includes public/private legend
 │   │   │       ├── EntrenamientoFormModal.tsx   # Includes visibilidad radio group (publico/privado, default 'privado')
 │   │   │       ├── EntrenamientoCategoriasSection.tsx  # Optional per-level capacity allocation step
-│   │   │       ├── EntrenamientoRestriccionesSection.tsx  # Collapsible restriction-row editor (timing + access conditions)
+│   │   │       ├── EntrenamientoRestriccionesSection.tsx  # Collapsible restriction-row editor (timing + service-based access conditions, AND/OR per row)
 │   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row
 │   │   │       └── reservas/              # Sub-feature slice (booking)
 │   │   │           ├── ReservasPanel.tsx
@@ -108,9 +109,15 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PlanesTable.tsx         # Props: onEdit, onDuplicate?, onDelete?, renderRowAction?
 │   │   │       ├── PlanesHeaderFilters.tsx
 │   │   │       ├── PlanFormModal.tsx        # mode: 'create' | 'edit' | 'duplicate'
+│   │   │       ├── PlanTipoServiciosSection.tsx  # Services assignment rows inside plan tipo sub-form (US-0062)
 │   │   │       ├── PlanesViewPage.tsx
 │   │   │       ├── PlanesRolePage.tsx
 │   │   │       ├── SuscripcionModal.tsx
+│   │   │       └── index.ts
+│   │   │   └── servicios/                # Feature slice (portal/servicios — US-0062)
+│   │   │       ├── ServiciosPage.tsx      # Admin CRUD page for tenant services catalog
+│   │   │       ├── ServiciosTable.tsx     # Table: nombre, descripcion, activo badge, edit/delete actions
+│   │   │       ├── ServicioFormModal.tsx  # Right-side slide modal for create/edit service
 │   │   │       └── index.ts
 │   │   │   └── gestion-equipo/            # Feature slice (portal/gestion-equipo)
 │   │   │       ├── EquipoPage.tsx
@@ -141,6 +148,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EditarSuscripcionModal.tsx    # Full-field edit modal for existing subscriptions
 │   │   │       ├── EliminarSuscripcionModal.tsx  # Confirmation dialog for permanent deletion
 │   │   │       ├── VerDetallePagoModal.tsx       # Read-only modal: full payment details + comprobante viewer (all payment statuses)
+│   │   │       ├── VerServiciosModal.tsx          # Read-only modal: all service unit balances for a subscription (US-0067)
 │   │   │       ├── CrearSuscripcionModal.tsx     # 3-step admin modal to create a subscription on behalf of an athlete
 │   │   │       └── index.ts
 │   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
@@ -184,10 +192,14 @@ Following structure reflects the current implementation and the target scalable 
 │               │   ├── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
 │               │   └── useAsistencias.ts  # Attendance map keyed by reserva_id; isEnabled guard skips fetch for atleta role
 │   │       └── planes/
-│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal
-│   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate
+│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal; includes tiposServiceRows + updateTipoServiceRows (US-0062)
+│   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate; manages tiposServiceRows parallel array (US-0062)
+│   │           ├── usePlanTipoServicios.ts # Manages service rows state for plan tipo service assignment (US-0062)
 │   │           ├── usePlanesView.ts
 │   │           └── useSuscripcion.ts
+│   │       └── servicios/            # Feature hooks for services catalog (US-0062)
+│   │           ├── useServicios.ts       # List + CRUD + modal coordination for servicios
+│   │           └── useServicioForm.ts    # Controlled form state for ServicioFormModal
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
 │   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
@@ -221,17 +233,18 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions, validateCancellationRestriction, findSubscriptionToCharge; create() and cancel() include isEntrenamientoPast guard (blocks athletes from booking/cancelling past sessions) and delegate to SECURITY DEFINER RPCs book_and_deduct_class / cancel_and_restore_class for atomic class deduction/restoration; reservas.suscripcion_id FK tracks which subscription was charged
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
-│   │       │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard)
-│   │       │   └── suscripciones.service.ts
+│   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
+│   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
+│   │       │   └── suscripciones.service.ts  # createSuscripcion (calls populate_suscripcion_servicios RPC when plan_tipo_id is set — US-0063), hasPendingSuscripcion, getSuscripcionServicios (returns SuscripcionServicio[] for a given suscripcion_id)
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
 │   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests)
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
-│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_clases_incluidas / plan_tipo_vigencia_dias
+│   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
@@ -250,8 +263,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamientos.types.ts
 │   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
-│   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput
-│   │       └── suscripciones.types.ts
+│   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)
+│   │       └── servicios.types.ts        # Servicio, CreateServicioInput, UpdateServicioInput, ServicioFormValues, ServicioServiceError, PlanTipoServicio, PlanTipoServicioRow, SyncPlanTipoServiciosInput (US-0062)
+│   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063)
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
 │   │       └── reglas-suspension.types.ts # ReglaSuspension, ReglaSuspensionCreatePayload, ReglaSuspensionUpdatePayload, ReglaSuspensionFormValues
@@ -259,8 +273,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
-│   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion, restriction inputs, BookingRejection, BookingResult
-│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_clases_incluidas, plan_tipo_vigencia_dias
+│   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS), BookingResult
+│   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias
 │   │       └── mis-suscripciones-y-pagos.types.ts  # MiSuscripcionRow, MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
 │   │       └── inicio.types.ts            # Dashboard view model interfaces
@@ -351,8 +365,9 @@ Supabase (database)
 
 | Function | Purpose | Trigger |
 |----------|---------|---------|
-| `book_and_deduct_class(...)` | Atomic booking + class deduction | Called via RPC from `reservas.service.ts` |
-| `cancel_and_restore_class(...)` | Atomic cancellation + class restoration | Called via RPC from `reservas.service.ts` |
+| `book_and_deduct_service_units(...)` | Atomic booking + multi-service unit deduction via JSONB deductions array | Called via RPC from `reservas.service.ts` |
+| `cancel_and_restore_service_units(...)` | Atomic cancellation + service unit restoration from `reserva_servicios` ledger | Called via RPC from `reservas.service.ts` |
+| `populate_suscripcion_servicios(p_suscripcion_id, p_plan_tipo_id)` | Inserts `suscripcion_servicios` rows from `plan_tipos_servicios` at subscription creation time; idempotent via `ON CONFLICT DO NOTHING` (US-0063) | Called via RPC from `suscripciones.service.ts` and `gestion-suscripciones.service.ts` |
 | `evaluar_suspensiones_cron()` | Evaluates active members against assigned suspension rules; suspends those exceeding absence thresholds, logs `miembros_tenant_novedades` (tipo `inasistencias_acumuladas`), and marks processed absences (`validacion_suspension = true`) | pg_cron daily schedule |
 | `reactivar_suspensiones_expiradas()` | Reactivates members whose temporary suspension (`duracion > 0`) has elapsed; logs novedad (tipo `reactivacion`) | pg_cron daily schedule |
 

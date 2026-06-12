@@ -180,8 +180,6 @@ export function SuscripcionModal({
                     : tipo.vigencia_dias === 30
                       ? '1 mes'
                       : `${tipo.vigencia_dias} días`;
-                const tipoClases =
-                  tipo.clases_incluidas != null ? `${tipo.clases_incluidas} clases` : 'Ilimitadas';
 
                 return (
                   <button
@@ -207,11 +205,19 @@ export function SuscripcionModal({
                         <span className="font-medium text-slate-400">Vigencia:</span>{' '}
                         {tipoVigencia}
                       </span>
-                      <span>
-                        <span className="font-medium text-slate-400">Clases:</span>{' '}
-                        {tipoClases}
-                      </span>
                     </div>
+                    {tipo.servicios && tipo.servicios.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {tipo.servicios.map((s) => (
+                          <span
+                            key={s.servicioId}
+                            className="bg-navy-deep/40 rounded px-1.5 py-0.5 text-[10px] text-slate-400"
+                          >
+                            {s.servicioNombre ?? s.servicioId}: {s.unidades ?? '∞'} uds
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                   </button>
                 );
               })}
@@ -259,15 +265,22 @@ export function SuscripcionModal({
                         : `${selectedTipo.vigencia_dias} días`
                     : '—'}
                 </div>
-                <div>
-                  <span className="block font-medium text-slate-400">Clases</span>
-                  {selectedTipo
-                    ? selectedTipo.clases_incluidas != null
-                      ? `${selectedTipo.clases_incluidas} clases`
-                      : 'Ilimitadas'
-                    : '—'}
-                </div>
               </div>
+              {selectedTipo?.servicios && selectedTipo.servicios.length > 0 ? (
+                <div className="mt-2">
+                  <span className="block text-xs font-medium text-slate-400 mb-1">Servicios</span>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedTipo.servicios.map((s) => (
+                      <span
+                        key={s.servicioId}
+                        className="bg-navy-deep/40 rounded px-1.5 py-0.5 text-[10px] text-slate-400"
+                      >
+                        {s.servicioNombre ?? s.servicioId}: {s.unidades ?? '∞'} uds
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             {/* Form fields */}

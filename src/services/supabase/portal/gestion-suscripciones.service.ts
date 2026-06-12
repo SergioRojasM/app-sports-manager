@@ -8,6 +8,7 @@ import {
   type ValidarSuscripcionFormValues,
   type EditarSuscripcionFormValues,
 } from '@/types/portal/gestion-suscripciones.types';
+import type { SuscripcionServicioDisplay } from '@/types/portal/suscripciones.types';
 
 /* ────────── Raw row shape returned by Supabase join ────────── */
 
@@ -19,8 +20,6 @@ type RawSuscripcionRow = {
   atleta_id: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   estado: string;
   comentarios: string | null;
   validado_por: string | null;
@@ -40,8 +39,13 @@ type RawSuscripcionRow = {
   plan_tipo: {
     nombre: string;
     vigencia_dias: number;
-    clases_incluidas: number | null;
   } | null;
+  suscripcion_servicios: Array<{
+    servicio_id: string;
+    unidades_incluidas: number | null;
+    unidades_restantes: number | null;
+    servicio: { nombre: string } | null;
+  }>;
   pagos: Array<{
     id: string;
     monto: number;
@@ -78,14 +82,11 @@ function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
     plan_tipo_id: row.plan_tipo_id,
     plan_tipo_nombre: row.plan_tipo?.nombre ?? null,
     plan_tipo_vigencia_dias: row.plan_tipo?.vigencia_dias ?? null,
-    plan_tipo_clases_incluidas: row.plan_tipo?.clases_incluidas ?? null,
     atleta_id: row.atleta_id,
     atleta_nombre: `${row.atleta.nombre ?? ''} ${row.atleta.apellido ?? ''}`.trim(),
     atleta_email: row.atleta.email,
     fecha_inicio: row.fecha_inicio,
     fecha_fin: row.fecha_fin,
-    clases_restantes: row.clases_restantes,
-    clases_plan: row.clases_plan,
     estado: row.estado as SuscripcionAdminRow['estado'],
     comentarios: row.comentarios,
     validado_por: row.validado_por,
@@ -111,6 +112,12 @@ function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
           created_at: latestPago.created_at,
         } satisfies PagoAdminRow)
       : null,
+    servicios: (row.suscripcion_servicios ?? []).map((s): SuscripcionServicioDisplay => ({
+      servicio_id: s.servicio_id,
+      servicio_nombre: s.servicio?.nombre ?? '',
+      unidades_incluidas: s.unidades_incluidas,
+      unidades_restantes: s.unidades_restantes,
+    })),
   };
 }
 
@@ -149,13 +156,17 @@ export const gestionSuscripcionesService = {
       .select(
         `
         id, tenant_id, plan_id, plan_tipo_id, atleta_id,
-        fecha_inicio, fecha_fin, clases_restantes, clases_plan,
+        fecha_inicio, fecha_fin,
         estado, comentarios, validado_por, created_at,
         validador_suscripcion:usuarios!suscripciones_validado_por_fkey(nombre, apellido),
         atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
         plan:planes!suscripciones_plan_id_fkey(nombre),
-        plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias, clases_incluidas),
-        pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo))
+        plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias),
+        pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo)),
+        suscripcion_servicios(
+          servicio_id, unidades_incluidas, unidades_restantes,
+          servicio:servicios!suscripcion_servicios_servicio_id_fkey(nombre)
+        )
         `,
       )
       .eq('tenant_id', tenantId)
@@ -218,7 +229,6 @@ export const gestionSuscripcionesService = {
         estado: 'activa',
         fecha_inicio: values.fecha_inicio,
         fecha_fin: values.fecha_fin,
-        clases_restantes: values.clases_restantes,
         validado_por: validadoPor,
       };
     } else {
@@ -251,8 +261,6 @@ export const gestionSuscripcionesService = {
         estado: values.estado,
         fecha_inicio: values.fecha_inicio,
         fecha_fin: values.fecha_fin,
-        clases_restantes: values.clases_restantes,
-        clases_plan: values.clases_plan,
         comentarios: values.comentarios,
       })
       .eq('id', suscripcionId);
@@ -291,8 +299,6 @@ export const gestionSuscripcionesService = {
       atleta_id: payload.atleta_id,
       plan_id: payload.plan_id,
       plan_tipo_id: payload.plan_tipo_id,
-      clases_plan: payload.clases_plan,
-      clases_restantes: payload.clases_restantes,
       estado: payload.estado,
       fecha_inicio: payload.fecha_inicio,
       fecha_fin: payload.fecha_fin,
@@ -313,6 +319,20 @@ export const gestionSuscripcionesService = {
       throw mapPostgrestError(suscripcionError);
     }
 
+    if (payload.plan_tipo_id) {
+      const { error: rpcError } = await supabase.rpc('populate_suscripcion_servicios', {
+        p_suscripcion_id: suscripcionData.id,
+        p_plan_tipo_id: payload.plan_tipo_id,
+      });
+
+      if (rpcError) {
+        throw new GestionSuscripcionesServiceError(
+          'populate_servicios_failed',
+          'La suscripción fue creada, pero no se pudo registrar las unidades por servicio.',
+        );
+      }
+    }
+
     if (payload.pago !== null) {
       const { error: pagoError } = await supabase
         .from('pagos')
@@ -331,6 +351,29 @@ export const gestionSuscripcionesService = {
           'La suscripción fue creada, pero no se pudo registrar el pago. Puedes agregarlo desde la tabla.',
         );
       }
+    }
+  },
+
+  /**
+   * Admin override for suscripcion_servicios.unidades_restantes.
+   * Calls the admin_update_suscripcion_servicio_unidades SECURITY DEFINER RPC.
+   * Pass null for unidades_restantes to set the service as unlimited.
+   */
+  async adminUpdateServicioUnidades(
+    suscripcionId: string,
+    servicioId: string,
+    unidadesRestantes: number | null,
+  ): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase.rpc('admin_update_suscripcion_servicio_unidades', {
+      p_suscripcion_id: suscripcionId,
+      p_servicio_id: servicioId,
+      p_unidades_restantes: unidadesRestantes,
+    });
+
+    if (error) {
+      throw mapPostgrestError(error);
     }
   },
 };

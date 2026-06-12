@@ -37,6 +37,10 @@ type UseReservasResult = {
   deleteReserva: (id: string) => Promise<boolean>;
   refetchCategorias: () => Promise<void>;
   refresh: () => Promise<void>;
+  adminConfirmPending: boolean;
+  isConfirmingAdminBooking: boolean;
+  confirmAdminBooking: () => Promise<boolean>;
+  cancelAdminConfirmation: () => void;
 };
 
 // ─────────────────────────────────────────────
@@ -62,6 +66,9 @@ export function useReservas({ tenantId, entrenamientoId, role }: UseReservasOpti
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookingRejection, setBookingRejection] = useState<BookingRejection | null>(null);
+  const [adminConfirmPending, setAdminConfirmPending] = useState(false);
+  const [isConfirmingAdminBooking, setIsConfirmingAdminBooking] = useState(false);
+  const pendingBookingInputRef = useRef<CreateReservaInput | null>(null);
 
   // Keep latest refs for optimistic rollback
   const reservasRef = useRef<ReservaView[]>([]);
@@ -127,6 +134,11 @@ export function useReservas({ tenantId, entrenamientoId, role }: UseReservasOpti
           role === 'administrador' ? { ...input, bypass_restrictions: true } : input;
         const result = await reservasService.create(enrichedInput);
         if ('ok' in result && !result.ok) {
+          if (result.code === 'ADMIN_CONFIRM_NO_UNITS') {
+            pendingBookingInputRef.current = enrichedInput;
+            setAdminConfirmPending(true);
+            return false;
+          }
           setBookingRejection(result);
           return false;
         }
@@ -139,6 +151,36 @@ export function useReservas({ tenantId, entrenamientoId, role }: UseReservasOpti
     },
     [role, loadReservas],
   );
+
+  const confirmAdminBooking = useCallback(async (): Promise<boolean> => {
+    const savedInput = pendingBookingInputRef.current;
+    if (!savedInput) return false;
+
+    setIsConfirmingAdminBooking(true);
+    setError(null);
+
+    try {
+      const result = await reservasService.create({ ...savedInput, confirmed_no_units: true });
+      if ('ok' in result && !result.ok) {
+        setBookingRejection(result);
+        return false;
+      }
+      pendingBookingInputRef.current = null;
+      setAdminConfirmPending(false);
+      await loadReservas();
+      return true;
+    } catch (caughtError) {
+      setError(mapReservaError(caughtError, 'No fue posible crear la reserva.'));
+      return false;
+    } finally {
+      setIsConfirmingAdminBooking(false);
+    }
+  }, [loadReservas]);
+
+  const cancelAdminConfirmation = useCallback(() => {
+    pendingBookingInputRef.current = null;
+    setAdminConfirmPending(false);
+  }, []);
 
   const updateReserva = useCallback(
     async (id: string, input: UpdateReservaInput): Promise<boolean> => {
@@ -265,5 +307,9 @@ export function useReservas({ tenantId, entrenamientoId, role }: UseReservasOpti
     deleteReserva: deleteReservaAction,
     refetchCategorias,
     refresh: loadReservas,
+    adminConfirmPending,
+    isConfirmingAdminBooking,
+    confirmAdminBooking,
+    cancelAdminConfirmation,
   };
 }

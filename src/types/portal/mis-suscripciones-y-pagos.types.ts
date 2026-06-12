@@ -18,7 +18,6 @@ export interface MiSuscripcionRow {
   estado: SuscripcionEstado;
   fecha_inicio: string | null;
   fecha_fin: string | null;
-  clases_restantes: number | null;
-  clases_plan: number | null;
   pago: MiPagoRow | null;
+  servicios: import('@/types/portal/suscripciones.types').SuscripcionServicioDisplay[];
 }

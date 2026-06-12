@@ -134,11 +134,13 @@ export async function fetchMisSuscripciones(
       estado,
       fecha_inicio,
       fecha_fin,
-      clases_restantes,
-      clases_plan,
       planes ( nombre ),
       tenants!suscripciones_tenant_id_fkey ( nombre ),
-      pagos ( estado )
+      pagos ( estado ),
+      suscripcion_servicios(
+        servicio_id, unidades_incluidas, unidades_restantes,
+        servicio:servicios!suscripcion_servicios_servicio_id_fkey(nombre)
+      )
     `)
     .eq('atleta_id', userId)
     .in('estado', ['activa', 'pendiente'])
@@ -154,6 +156,12 @@ export async function fetchMisSuscripciones(
     const tenant = row.tenants as unknown as { nombre: string } | null;
     const pagos = row.pagos as unknown as Array<{ estado: string }> | null;
     const ultimoPago = pagos?.length ? pagos[pagos.length - 1] : null;
+    const rawServicios = row.suscripcion_servicios as unknown as Array<{
+      servicio_id: string;
+      unidades_incluidas: number | null;
+      unidades_restantes: number | null;
+      servicio: { nombre: string } | null;
+    }> | null;
 
     return {
       id: row.id,
@@ -163,9 +171,13 @@ export async function fetchMisSuscripciones(
       estado: row.estado as string,
       fecha_inicio: row.fecha_inicio,
       fecha_fin: row.fecha_fin,
-      clases_restantes: row.clases_restantes,
-      clases_plan: row.clases_plan,
       pago_estado: ultimoPago?.estado ?? null,
+      servicios: (rawServicios ?? []).map((s) => ({
+        servicio_id: s.servicio_id,
+        servicio_nombre: s.servicio?.nombre ?? '',
+        unidades_incluidas: s.unidades_incluidas,
+        unidades_restantes: s.unidades_restantes,
+      })),
     };
   });
 }

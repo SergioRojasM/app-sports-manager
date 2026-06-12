@@ -41,6 +41,11 @@ type ReservaFormModalProps = {
   onUpdateField: (field: 'atleta_id' | 'entrenamiento_categoria_id' | 'notas' | 'estado', value: string) => void;
   onSubmit: () => Promise<boolean>;
   onClose: () => void;
+  /** Admin-only: true when athlete has no units and admin must confirm */
+  adminConfirmPending?: boolean;
+  isConfirmingAdminBooking?: boolean;
+  onConfirmAdminBooking?: () => Promise<void>;
+  onCancelAdminConfirmation?: () => void;
 };
 
 // ─────────────────────────────────────────────
@@ -71,6 +76,10 @@ export function ReservaFormModal({
   onUpdateField,
   onSubmit,
   onClose,
+  adminConfirmPending = false,
+  isConfirmingAdminBooking = false,
+  onConfirmAdminBooking,
+  onCancelAdminConfirmation,
 }: ReservaFormModalProps) {
   const [atletaOptions, setAtletaOptions] = useState<AtletaOption[]>([]);
   const [loadingAtletas, setLoadingAtletas] = useState(false);
@@ -402,27 +411,54 @@ export function ReservaFormModal({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
-            >
-              {isSubmitting
-                ? 'Guardando...'
-                : mode === 'create'
-                  ? 'Crear Reserva'
-                  : 'Guardar Cambios'}
-            </button>
-          </div>
+          {adminConfirmPending ? (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+                <p className="font-medium">Sin unidades disponibles</p>
+                <p className="mt-1 text-amber-300/80">El atleta no tiene unidades disponibles en los servicios requeridos. ¿Deseas crear la reserva de todas formas sin descontar unidades?</p>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onCancelAdminConfirmation}
+                  disabled={isConfirmingAdminBooking}
+                  className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={onConfirmAdminBooking}
+                  disabled={isConfirmingAdminBooking}
+                  className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-400 disabled:opacity-50"
+                >
+                  {isConfirmingAdminBooking ? 'Creando...' : 'Confirmar de todas formas'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
+              >
+                {isSubmitting
+                  ? 'Guardando...'
+                  : mode === 'create'
+                    ? 'Crear Reserva'
+                    : 'Guardar Cambios'}
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>
