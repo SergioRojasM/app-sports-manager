@@ -64,6 +64,14 @@ export interface ValidarSuscripcionFormValues {
   fecha_fin: string;
 }
 
+/** Per-service unit entry used in the edit modal form. */
+export interface EditarServicioUnidades {
+  servicio_id: string;
+  servicio_nombre: string;
+  unidades_incluidas: number | null;  // read-only snapshot; null = unlimited
+  unidades_restantes: number | null;  // editable; null = unlimited
+}
+
 /** Form values for the full-field edit modal. */
 export interface EditarSuscripcionFormValues {
   plan_id: string;
@@ -71,6 +79,7 @@ export interface EditarSuscripcionFormValues {
   fecha_inicio: string | null;
   fecha_fin: string | null;
   comentarios: string | null;
+  servicios: EditarServicioUnidades[];
 }
 
 /** Payload for admin-initiated subscription creation. */

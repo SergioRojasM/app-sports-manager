@@ -14,7 +14,7 @@ type UseGestionSuscripcionesOptions = {
   tenantId: string;
 };
 
-type ModalType = 'pago' | 'suscripcion' | 'editar' | 'eliminar' | 'verDetalle' | 'crear' | null;
+type ModalType = 'pago' | 'suscripcion' | 'editar' | 'eliminar' | 'verDetalle' | 'crear' | 'verServicios' | null;
 
 type UseGestionSuscripcionesResult = {
   /** Full unfiltered list */
@@ -50,6 +50,7 @@ type UseGestionSuscripcionesResult = {
   openEditarModal: (row: SuscripcionAdminRow) => void;
   openEliminarModal: (row: SuscripcionAdminRow) => void;
   openVerDetalleModal: (row: SuscripcionAdminRow) => void;
+  openVerServiciosModal: (row: SuscripcionAdminRow) => void;
   openCrearModal: () => void;
   closeModal: () => void;
 
@@ -196,6 +197,11 @@ export function useGestionSuscripciones({
     setModalType('verDetalle');
   }, []);
 
+  const openVerServiciosModal = useCallback((row: SuscripcionAdminRow) => {
+    setSelectedRow(row);
+    setModalType('verServicios');
+  }, []);
+
   const openCrearModal = useCallback(() => {
     setSelectedRow(null);
     setModalType('crear');
@@ -231,6 +237,7 @@ export function useGestionSuscripciones({
     openEditarModal,
     openEliminarModal,
     openVerDetalleModal,
+    openVerServiciosModal,
     openCrearModal,
     closeModal,
     refresh: loadData,

@@ -353,4 +353,27 @@ export const gestionSuscripcionesService = {
       }
     }
   },
+
+  /**
+   * Admin override for suscripcion_servicios.unidades_restantes.
+   * Calls the admin_update_suscripcion_servicio_unidades SECURITY DEFINER RPC.
+   * Pass null for unidades_restantes to set the service as unlimited.
+   */
+  async adminUpdateServicioUnidades(
+    suscripcionId: string,
+    servicioId: string,
+    unidadesRestantes: number | null,
+  ): Promise<void> {
+    const supabase = createClient();
+
+    const { error } = await supabase.rpc('admin_update_suscripcion_servicio_unidades', {
+      p_suscripcion_id: suscripcionId,
+      p_servicio_id: servicioId,
+      p_unidades_restantes: unidadesRestantes,
+    });
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+  },
 };
