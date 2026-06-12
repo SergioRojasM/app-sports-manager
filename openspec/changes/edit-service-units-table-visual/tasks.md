@@ -83,6 +83,6 @@
 
 ## 12. Documentation and Commit
 
-- [ ] 12.1 Update `projectspec/03-project-structure.md` if `VerServiciosModal` or new hook methods need to be listed under the `gestion-suscripciones` feature slice entries
-- [ ] 12.2 Create a commit with message: `feat(gestion-suscripciones): edit service unit balances + table visual refactor (US-0067)`
-- [ ] 12.3 Write a pull request description summarising: new `admin_update_suscripcion_servicio_unidades` RPC, editable service units in edit modal, 6 visual column changes in SuscripcionesTable, new VerServiciosModal
+- [x] 12.1 Update `projectspec/03-project-structure.md` if `VerServiciosModal` or new hook methods need to be listed under the `gestion-suscripciones` feature slice entries
+- [x] 12.2 Create a commit with message: `feat(gestion-suscripciones): edit service unit balances + table visual refactor (US-0067)`
+- [x] 12.3 Write a pull request description summarising: new `admin_update_suscripcion_servicio_unidades` RPC, editable service units in edit modal, 6 visual column changes in SuscripcionesTable, new VerServiciosModal

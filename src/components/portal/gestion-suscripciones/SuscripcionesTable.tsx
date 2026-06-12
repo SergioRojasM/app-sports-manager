@@ -86,7 +86,7 @@ export function SuscripcionesTable({
               className="transition-colors hover:bg-white/[0.02]"
             >
               {/* ATLETA — compact with truncation */}
-              <td className="max-w-[130px] px-2 py-3">
+              <td className="max-w-[180px] px-2 py-3">
                 <div className="truncate font-medium text-slate-100" title={row.atleta_nombre || undefined}>{row.atleta_nombre || '—'}</div>
                 <div className="truncate text-xs text-slate-400" title={row.atleta_email}>{row.atleta_email}</div>
               </td>
@@ -147,9 +147,12 @@ export function SuscripcionesTable({
                   )}
                 </div>
               </td>
-              {/* ACCIONES — icon buttons with SVG */}
-              <td className="whitespace-nowrap px-4 py-3 text-right">
-                <div className="flex items-center justify-end gap-1">
+              {/* ACCIONES — icon buttons row + validation badges row */}
+              <td className="px-4 py-3">
+                <div className="flex flex-col items-end gap-1">
+                  {/* Row 1: icon buttons */}
+                  <div className="flex items-center gap-1">
+                  {/* Icon: Ver pago */}
                   {row.pago !== null && (
                     <button
                       type="button"
@@ -164,33 +167,7 @@ export function SuscripcionesTable({
                       </svg>
                     </button>
                   )}
-                  {row.pago?.estado === 'pendiente' && (
-                    <button
-                      type="button"
-                      onClick={() => onValidarPago(row)}
-                      title="Validar pago"
-                      aria-label={`Validar pago de ${row.atleta_nombre}`}
-                      className="rounded p-1 text-sky-300 transition-colors hover:bg-sky-900/40"
-                    >
-                      <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-                        <circle cx="8" cy="8" r="6"/>
-                        <path d="m5.5 8 2 2 3-3"/>
-                      </svg>
-                    </button>
-                  )}
-                  {row.estado === 'pendiente' && (
-                    <button
-                      type="button"
-                      onClick={() => onValidarSuscripcion(row)}
-                      title="Validar suscripción"
-                      aria-label={`Validar suscripción de ${row.atleta_nombre}`}
-                      className="rounded p-1 text-emerald-300 transition-colors hover:bg-emerald-900/40"
-                    >
-                      <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-                        <path d="M8 1.5 9.5 6h4.5l-3.5 2.5 1.5 4.5L8 10.5 4 13l1.5-4.5L2 6h4.5Z"/>
-                      </svg>
-                    </button>
-                  )}
+                  {/* Icon: Cancelar suscripción (when activa) */}
                   {row.estado === 'activa' && (
                     <button
                       type="button"
@@ -205,6 +182,7 @@ export function SuscripcionesTable({
                       </svg>
                     </button>
                   )}
+                  {/* Icon: Editar */}
                   <button
                     type="button"
                     onClick={() => onEditar(row)}
@@ -216,6 +194,7 @@ export function SuscripcionesTable({
                       <path d="M10.5 2.5a1.414 1.414 0 0 1 2 2l-8 8-2.5.5.5-2.5 8-8Z"/>
                     </svg>
                   </button>
+                  {/* Icon: Eliminar */}
                   <button
                     type="button"
                     onClick={() => onEliminar(row)}
@@ -227,6 +206,34 @@ export function SuscripcionesTable({
                       <path d="M2.5 4.5h11M6 4.5V3h4v1.5M5.5 4.5v8a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-8M7 7v4M9 7v4"/>
                     </svg>
                   </button>
+                  </div>
+                  {/* Row 2: validation badges (only when pending) */}
+                  {(row.pago?.estado === 'pendiente' || row.estado === 'pendiente') && (
+                    <div className="flex items-center gap-1">
+                      {row.pago?.estado === 'pendiente' && (
+                        <button
+                          type="button"
+                          onClick={() => onValidarPago(row)}
+                          title="Validar pago"
+                          aria-label={`Validar pago de ${row.atleta_nombre}`}
+                          className="rounded-full border border-sky-700/50 bg-sky-900/40 px-2 py-0.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-900/70"
+                        >
+                          Validar pago
+                        </button>
+                      )}
+                      {row.estado === 'pendiente' && (
+                        <button
+                          type="button"
+                          onClick={() => onValidarSuscripcion(row)}
+                          title="Validar suscripción"
+                          aria-label={`Validar suscripción de ${row.atleta_nombre}`}
+                          className="rounded-full border border-emerald-700/50 bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-900/70"
+                        >
+                          Validar suscr.
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </td>
             </tr>
