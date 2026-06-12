@@ -42,8 +42,6 @@ export function CrearSuscripcionModal({
     setFechaInicio,
     fechaFin,
     setFechaFin,
-    clasesRestantes,
-    setClasesRestantes,
     comentarios,
     setComentarios,
     /* Payment */
@@ -267,7 +265,6 @@ export function CrearSuscripcionModal({
                   <span className="text-sm font-medium text-slate-100">{t.nombre}</span>
                   <span className="ml-2 text-xs text-slate-400">
                     {t.vigencia_dias} días
-                    {t.clases_incluidas != null ? ` · ${t.clases_incluidas} clases` : ''}
                   </span>
                 </div>
               </label>
@@ -278,12 +275,6 @@ export function CrearSuscripcionModal({
       )}
     </div>
   );
-
-  // ─────── Render Step 3: Config + payment ───────
-  const selectedPlanTipo = activeTipos.find((t) => t.id === planTipoId) ?? null;
-  const hasClasesLimit =
-    selectedPlanTipo?.clases_incluidas != null ||
-    planes.find((p) => p.id === planId)?.plan_tipos?.some((t) => t.clases_incluidas != null);
 
   const renderStep3 = () => (
     <div className="space-y-4">
@@ -333,23 +324,6 @@ export function CrearSuscripcionModal({
           {errors.fecha_fin && <p className={errorClass}>{errors.fecha_fin}</p>}
         </div>
       </div>
-
-      {/* Clases restantes */}
-      {hasClasesLimit && (
-        <div>
-          <label className={labelClass}>Clases restantes</label>
-          <input
-            type="number"
-            min={0}
-            value={clasesRestantes ?? ''}
-            onChange={(e) =>
-              setClasesRestantes(e.target.value === '' ? null : parseInt(e.target.value, 10))
-            }
-            disabled={isSubmitting}
-            className={inputClass}
-          />
-        </div>
-      )}
 
       {/* Comentarios */}
       <div>

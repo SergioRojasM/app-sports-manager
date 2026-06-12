@@ -15,6 +15,7 @@ type SuscripcionesTableProps = {
   onValidarSuscripcion: (row: SuscripcionAdminRow) => void;
   onEditar: (row: SuscripcionAdminRow) => void;
   onEliminar: (row: SuscripcionAdminRow) => void;
+  onVerServicios: (row: SuscripcionAdminRow) => void;
 };
 
 const PAGE_SIZE_OPTIONS: (20 | 50 | 100)[] = [20, 50, 100];
@@ -48,6 +49,7 @@ export function SuscripcionesTable({
   onValidarSuscripcion,
   onEditar,
   onEliminar,
+  onVerServicios,
 }: SuscripcionesTableProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalFiltered);
@@ -58,118 +60,185 @@ export function SuscripcionesTable({
       <table className="w-full text-left text-sm">
         <thead className="glass border-b border-portal-border text-xs uppercase tracking-wider text-slate-400">
           <tr>
-            <th scope="col" className="px-4 py-3">Atleta</th>
-            <th scope="col" className="px-4 py-3">Plan</th>
+            <th scope="col" className="px-2 py-3">Atleta</th>
+            <th scope="col" className="px-2 py-3">Plan</th>
             <th scope="col" className="px-4 py-3">Suscripción / Pago</th>
             <th scope="col" className="px-4 py-3">Inicio / Fin</th>
-            <th scope="col" className="px-4 py-3">Clases</th>
+            <th scope="col" className="min-w-[180px] px-4 py-3">Servicios</th>
             <th scope="col" className="px-4 py-3">Monto</th>
             <th scope="col" className="px-4 py-3">Validación</th>
             <th scope="col" className="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-portal-border">
-          {rows.map((row) => (
+          {rows.map((row) => {
+            const sortedServicios = [...row.servicios].sort((a, b) => {
+              const aFinite = a.unidades_incluidas !== null ? 0 : 1;
+              const bFinite = b.unidades_incluidas !== null ? 0 : 1;
+              return aFinite - bFinite;
+            });
+            const visibleServicios = sortedServicios.slice(0, 2);
+            const extraCount = sortedServicios.length - visibleServicios.length;
+
+            return (
             <tr
               key={row.id}
               className="transition-colors hover:bg-white/[0.02]"
             >
-              <td className="whitespace-nowrap px-4 py-3">
-                <div className="font-medium text-slate-100">{row.atleta_nombre || '—'}</div>
-                <div className="text-xs text-slate-400">{row.atleta_email}</div>
+              {/* ATLETA — compact with truncation */}
+              <td className="max-w-[180px] px-2 py-3">
+                <div className="truncate font-medium text-slate-100" title={row.atleta_nombre || undefined}>{row.atleta_nombre || '—'}</div>
+                <div className="truncate text-xs text-slate-400" title={row.atleta_email}>{row.atleta_email}</div>
               </td>
-              <td className="px-4 py-3 text-slate-300">{row.plan_nombre}</td>
+              {/* PLAN — compact with truncation */}
+              <td className="max-w-[110px] px-2 py-3">
+                <span className="block truncate text-slate-300" title={row.plan_nombre}>{row.plan_nombre}</span>
+              </td>
               <td className="px-4 py-3">
                 <div className="flex flex-col gap-1">
                   <SuscripcionEstadoBadge estado={row.estado} />
                   {row.pago ? <PagoEstadoBadge estado={row.pago.estado} /> : null}
                 </div>
               </td>
-              <td className="px-4 py-3 text-slate-300">
-                <div>{formatDate(row.fecha_inicio)}</div>
+              {/* INICIO/FIN — both text-xs, different colors */}
+              <td className="px-4 py-3">
+                <div className="text-xs text-slate-300">{formatDate(row.fecha_inicio)}</div>
                 <div className="text-xs text-slate-400">{formatDate(row.fecha_fin)}</div>
               </td>
-              <td className="px-4 py-3 text-slate-300">
-                {row.clases_restantes === null && row.clases_plan === null
-                  ? 'Ilimitado'
-                  : `${cell(row.clases_restantes)} / ${cell(row.clases_plan)}`}
+              {/* SERVICIOS — wider, max 2, finite-unit first, +X more button */}
+              <td className="min-w-[180px] px-4 py-3 text-xs">
+                {visibleServicios.length === 0 ? (
+                  <span className="text-slate-400">—</span>
+                ) : (
+                  <ul className="list-none m-0 space-y-0.5 p-0">
+                    {visibleServicios.map((srv) => (
+                      <li key={srv.servicio_id} className="text-slate-300">
+                        {srv.servicio_nombre}: {srv.unidades_restantes ?? '∞'}/{srv.unidades_incluidas ?? '∞'}
+                      </li>
+                    ))}
+                    {extraCount > 0 && (
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => onVerServicios(row)}
+                          className="text-turquoise/70 hover:text-turquoise transition-colors underline-offset-2 hover:underline"
+                        >
+                          +{extraCount} más
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                )}
               </td>
               <td className="px-4 py-3 text-slate-300">
                 {row.pago ? `$${row.pago.monto.toLocaleString()}` : '—'}
               </td>
-              <td className="px-4 py-3 text-slate-300">
+              {/* VALIDACIÓN — both names text-xs */}
+              <td className="px-4 py-3">
                 <div className="flex flex-col gap-0.5">
                   {row.validado_por_nombre && (
-                    <span title="Validó suscripción">{row.validado_por_nombre}</span>
+                    <span className="text-xs text-slate-400" title="Validó suscripción">{row.validado_por_nombre}</span>
                   )}
                   {row.pago?.validado_por_nombre && (
                     <span className="text-xs text-slate-400" title="Validó pago">{row.pago.validado_por_nombre}</span>
                   )}
-                  {!row.validado_por_nombre && !row.pago?.validado_por_nombre && '—'}
+                  {!row.validado_por_nombre && !row.pago?.validado_por_nombre && (
+                    <span className="text-xs text-slate-500">—</span>
+                  )}
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-right">
-                <div className="flex items-center justify-end gap-1">
+              {/* ACCIONES — icon buttons row + validation badges row */}
+              <td className="px-4 py-3">
+                <div className="flex flex-col items-end gap-1">
+                  {/* Row 1: icon buttons */}
+                  <div className="flex items-center gap-1">
+                  {/* Icon: Ver pago */}
                   {row.pago !== null && (
                     <button
                       type="button"
                       onClick={() => onVerDetallePago(row)}
-                      className="rounded border border-slate-500/30 px-2 py-1 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700/30"
-                      aria-label={`Ver detalle de pago de ${row.atleta_nombre}`}
+                      title="Ver pago"
+                      aria-label={`Ver pago de ${row.atleta_nombre}`}
+                      className="rounded p-1 text-slate-300 transition-colors hover:bg-slate-700/40"
                     >
-                      Ver Pago
+                      <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                        <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h9A1.5 1.5 0 0 1 14 4.5v7A1.5 1.5 0 0 1 12.5 13h-9A1.5 1.5 0 0 1 2 11.5v-7Z"/>
+                        <path d="M2 6.5h12M5 10h2M9 10h2"/>
+                      </svg>
                     </button>
                   )}
-                  {row.pago?.estado === 'pendiente' && (
-                    <button
-                      type="button"
-                      onClick={() => onValidarPago(row)}
-                      className="rounded border border-sky-400/30 px-2 py-1 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-900/30"
-                      aria-label={`Validar pago de ${row.atleta_nombre}`}
-                    >
-                      Validar Pago
-                    </button>
-                  )}
-                  {row.estado === 'pendiente' && (
-                    <button
-                      type="button"
-                      onClick={() => onValidarSuscripcion(row)}
-                      className="rounded border border-emerald-400/30 px-2 py-1 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-900/30"
-                      aria-label={`Validar suscripción de ${row.atleta_nombre}`}
-                    >
-                      Validar Suscripción
-                    </button>
-                  )}
+                  {/* Icon: Cancelar suscripción (when activa) */}
                   {row.estado === 'activa' && (
                     <button
                       type="button"
                       onClick={() => onValidarSuscripcion(row)}
-                      className="rounded border border-rose-400/30 px-2 py-1 text-xs font-medium text-rose-300 transition-colors hover:bg-rose-900/30"
+                      title="Cancelar suscripción"
                       aria-label={`Cancelar suscripción de ${row.atleta_nombre}`}
+                      className="rounded p-1 text-rose-300 transition-colors hover:bg-rose-900/40"
                     >
-                      Cancelar
+                      <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                        <circle cx="8" cy="8" r="6"/>
+                        <path d="m5.5 5.5 5 5M10.5 5.5l-5 5"/>
+                      </svg>
                     </button>
                   )}
+                  {/* Icon: Editar */}
                   <button
                     type="button"
                     onClick={() => onEditar(row)}
-                    className="rounded border border-amber-400/30 px-2 py-1 text-xs font-medium text-amber-300 transition-colors hover:bg-amber-900/30"
+                    title="Editar"
                     aria-label={`Editar suscripción de ${row.atleta_nombre}`}
+                    className="rounded p-1 text-amber-300 transition-colors hover:bg-amber-900/40"
                   >
-                    Editar
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                      <path d="M10.5 2.5a1.414 1.414 0 0 1 2 2l-8 8-2.5.5.5-2.5 8-8Z"/>
+                    </svg>
                   </button>
+                  {/* Icon: Eliminar */}
                   <button
                     type="button"
                     onClick={() => onEliminar(row)}
-                    className="rounded border border-rose-500/30 px-2 py-1 text-xs font-medium text-rose-400 transition-colors hover:bg-rose-900/30"
+                    title="Eliminar"
                     aria-label={`Eliminar suscripción de ${row.atleta_nombre}`}
+                    className="rounded p-1 text-rose-400 transition-colors hover:bg-rose-900/40"
                   >
-                    Eliminar
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                      <path d="M2.5 4.5h11M6 4.5V3h4v1.5M5.5 4.5v8a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-8M7 7v4M9 7v4"/>
+                    </svg>
                   </button>
+                  </div>
+                  {/* Row 2: validation badges (only when pending) */}
+                  {(row.pago?.estado === 'pendiente' || row.estado === 'pendiente') && (
+                    <div className="flex items-center gap-1">
+                      {row.pago?.estado === 'pendiente' && (
+                        <button
+                          type="button"
+                          onClick={() => onValidarPago(row)}
+                          title="Validar pago"
+                          aria-label={`Validar pago de ${row.atleta_nombre}`}
+                          className="rounded-full border border-sky-700/50 bg-sky-900/40 px-2 py-0.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-900/70"
+                        >
+                          Validar pago
+                        </button>
+                      )}
+                      {row.estado === 'pendiente' && (
+                        <button
+                          type="button"
+                          onClick={() => onValidarSuscripcion(row)}
+                          title="Validar suscripción"
+                          aria-label={`Validar suscripción de ${row.atleta_nombre}`}
+                          className="rounded-full border border-emerald-700/50 bg-emerald-900/40 px-2 py-0.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-900/70"
+                        >
+                          Validar suscr.
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

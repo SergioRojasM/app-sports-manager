@@ -1,5 +1,5 @@
 import { createClient } from '@/services/supabase/client';
-import type { Suscripcion, SuscripcionInsert } from '@/types/portal/suscripciones.types';
+import type { Suscripcion, SuscripcionInsert, SuscripcionServicio } from '@/types/portal/suscripciones.types';
 
 export const suscripcionesService = {
   async createSuscripcion(payload: SuscripcionInsert): Promise<Suscripcion> {
@@ -12,17 +12,27 @@ export const suscripcionesService = {
         atleta_id: payload.atleta_id,
         plan_id: payload.plan_id,
         plan_tipo_id: payload.plan_tipo_id ?? null,
-        clases_plan: payload.clases_plan,
         comentarios: payload.comentarios,
         estado: payload.estado,
       })
       .select(
-        'id, tenant_id, atleta_id, plan_id, plan_tipo_id, fecha_inicio, fecha_fin, clases_restantes, clases_plan, comentarios, estado, created_at',
+        'id, tenant_id, atleta_id, plan_id, plan_tipo_id, fecha_inicio, fecha_fin, comentarios, estado, created_at',
       )
       .single();
 
     if (error || !data) {
       throw new Error(error?.message ?? 'No fue posible crear la suscripción.');
+    }
+
+    if (payload.plan_tipo_id) {
+      const { error: rpcError } = await supabase.rpc('populate_suscripcion_servicios', {
+        p_suscripcion_id: data.id,
+        p_plan_tipo_id: payload.plan_tipo_id,
+      });
+
+      if (rpcError) {
+        throw new Error(rpcError.message ?? 'No fue posible registrar las unidades por servicio.');
+      }
     }
 
     return data as Suscripcion;
@@ -45,5 +55,20 @@ export const suscripcionesService = {
     }
 
     return data !== null;
+  },
+
+  async getSuscripcionServicios(suscripcionId: string): Promise<SuscripcionServicio[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('suscripcion_servicios')
+      .select('id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at')
+      .eq('suscripcion_id', suscripcionId);
+
+    if (error) {
+      throw new Error(error.message ?? 'No fue posible obtener las unidades por servicio.');
+    }
+
+    return (data ?? []) as SuscripcionServicio[];
   },
 };

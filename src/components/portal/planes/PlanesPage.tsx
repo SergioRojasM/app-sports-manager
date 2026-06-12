@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { usePlanes } from '@/hooks/portal/planes/usePlanes';
+import { serviciosService } from '@/services/supabase/portal/servicios.service';
 import { PlanFormModal } from './PlanFormModal';
 import { PlanesHeaderFilters } from './PlanesHeaderFilters';
 import { PlanesTable } from './PlanesTable';
+import type { Servicio } from '@/types/portal/servicios.types';
 
 type PlanesPageProps = {
   tenantId: string;
@@ -26,6 +29,15 @@ function EmptyState() {
 }
 
 export function PlanesPage({ tenantId }: PlanesPageProps) {
+  const [availableServices, setAvailableServices] = useState<Servicio[]>([]);
+
+  useEffect(() => {
+    serviciosService
+      .getServiciosActivosByTenant(tenantId)
+      .then(setAvailableServices)
+      .catch(() => setAvailableServices([]));
+  }, [tenantId]);
+
   const {
     loading,
     error,
@@ -40,6 +52,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
     tiposForm,
     tiposErrors,
     tiposGlobalError,
+    tiposServiceRows,
     submitError,
     successMessage,
     isSubmitting,
@@ -52,6 +65,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
     addTipo,
     updateTipo,
     removeTipo,
+    updateTipoServiceRows,
     submit,
     refresh,
   } = usePlanes({ tenantId });
@@ -120,12 +134,15 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
         tiposForm={tiposForm}
         tiposErrors={tiposErrors}
         tiposGlobalError={tiposGlobalError}
+        tiposServiceRows={tiposServiceRows}
+        availableServices={availableServices}
         onClose={closeModal}
         onSubmit={submit}
         onChangeField={updateField}
         onAddTipo={addTipo}
         onUpdateTipo={updateTipo}
         onRemoveTipo={removeTipo}
+        onUpdateTipoServiceRows={updateTipoServiceRows}
       />
     </section>
   );

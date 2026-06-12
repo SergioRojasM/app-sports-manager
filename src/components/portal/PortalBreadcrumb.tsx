@@ -13,6 +13,7 @@ const SLUG_LABELS: Record<string, string> = {
   'gestion-organizacion': 'Organización',
   'gestion-escenarios': 'Escenarios',
   'gestion-disciplinas': 'Disciplinas',
+  'gestion-servicios': 'Servicios',
   'gestion-entrenamientos': 'Entrenamientos',
   'gestion-planes': 'Planes',
   'entrenamientos-disponibles': 'Entrenamientos Disponibles',

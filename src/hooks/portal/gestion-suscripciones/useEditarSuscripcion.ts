@@ -5,6 +5,7 @@ import { planesService } from '@/services/supabase/portal/planes.service';
 import { gestionSuscripcionesService } from '@/services/supabase/portal/gestion-suscripciones.service';
 import {
   GestionSuscripcionesServiceError,
+  type EditarServicioUnidades,
   type EditarSuscripcionFormValues,
   type SuscripcionAdminRow,
   type SuscripcionEstado,
@@ -21,6 +22,7 @@ type UseEditarSuscripcionOptions = {
 type UseEditarSuscripcionResult = {
   formValues: EditarSuscripcionFormValues;
   setField: <K extends keyof EditarSuscripcionFormValues>(key: K, value: EditarSuscripcionFormValues[K]) => void;
+  setServicioUnidades: (servicioId: string, value: number | null) => void;
   planes: PlanOption[];
   isLoadingPlanes: boolean;
   isSubmitting: boolean;
@@ -38,9 +40,8 @@ export function useEditarSuscripcion({
     estado: 'pendiente',
     fecha_inicio: null,
     fecha_fin: null,
-    clases_restantes: null,
-    clases_plan: null,
     comentarios: null,
+    servicios: [],
   });
 
   const [planes, setPlanes] = useState<PlanOption[]>([]);
@@ -56,9 +57,13 @@ export function useEditarSuscripcion({
       estado: row.estado,
       fecha_inicio: row.fecha_inicio,
       fecha_fin: row.fecha_fin,
-      clases_restantes: row.clases_restantes,
-      clases_plan: row.clases_plan,
       comentarios: row.comentarios,
+      servicios: row.servicios.map((s): EditarServicioUnidades => ({
+        servicio_id: s.servicio_id,
+        servicio_nombre: s.servicio_nombre,
+        unidades_incluidas: s.unidades_incluidas,
+        unidades_restantes: s.unidades_restantes,
+      })),
     });
     setError(null);
   }, [row]);
@@ -92,6 +97,15 @@ export function useEditarSuscripcion({
     [],
   );
 
+  const setServicioUnidades = useCallback((servicioId: string, value: number | null) => {
+    setFormValues((prev) => ({
+      ...prev,
+      servicios: prev.servicios.map((s) =>
+        s.servicio_id === servicioId ? { ...s, unidades_restantes: value } : s,
+      ),
+    }));
+  }, []);
+
   const submit = useCallback(async () => {
     if (!row) return;
 
@@ -107,6 +121,19 @@ export function useEditarSuscripcion({
     setError(null);
     try {
       await gestionSuscripcionesService.editarSuscripcion(row.id, formValues);
+
+      // Update only the service unit rows that changed
+      for (const srv of formValues.servicios) {
+        const original = row.servicios.find((s) => s.servicio_id === srv.servicio_id);
+        if (original && original.unidades_restantes !== srv.unidades_restantes) {
+          await gestionSuscripcionesService.adminUpdateServicioUnidades(
+            row.id,
+            srv.servicio_id,
+            srv.unidades_restantes,
+          );
+        }
+      }
+
       onSuccess();
     } catch (err) {
       const msg =
@@ -122,6 +149,7 @@ export function useEditarSuscripcion({
   return {
     formValues,
     setField,
+    setServicioUnidades,
     planes,
     isLoadingPlanes,
     isSubmitting,
@@ -129,3 +157,4 @@ export function useEditarSuscripcion({
     submit,
   };
 }
+

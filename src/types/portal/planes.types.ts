@@ -1,3 +1,5 @@
+import type { PlanTipoServicioRow } from './servicios.types';
+
 export type PlanModalidad = 'virtual' | 'presencial' | 'mixto';
 
 // --- Plan Tipo (subtype) entity types ---
@@ -10,10 +12,11 @@ export type PlanTipo = {
   descripcion: string | null;
   precio: number;
   vigencia_dias: number;
-  clases_incluidas: number | null;
   activo: boolean;
   created_at: string;
   updated_at: string;
+  // Loaded service assignments (optional — only populated when explicitly fetched)
+  servicios?: PlanTipoServicioRow[];
 };
 
 export type CreatePlanTipoInput = {
@@ -23,7 +26,6 @@ export type CreatePlanTipoInput = {
   descripcion?: string | null;
   precio: number;
   vigencia_dias: number;
-  clases_incluidas: number | null;
   activo?: boolean;
 };
 
@@ -32,7 +34,6 @@ export type UpdatePlanTipoInput = {
   descripcion?: string | null;
   precio?: number;
   vigencia_dias?: number;
-  clases_incluidas?: number | null;
   activo?: boolean;
 };
 
@@ -41,7 +42,6 @@ export type PlanTipoFormValues = {
   descripcion: string;
   precio: string;           // string for controlled input
   vigencia_dias: string;    // string for controlled input
-  clases_incluidas: string; // string for controlled input
   activo: boolean;
 };
 

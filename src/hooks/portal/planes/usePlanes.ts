@@ -29,8 +29,9 @@ type UsePlanesResult = PlanesViewModel & {
   tiposForm: ReturnType<typeof usePlanForm>['tiposForm'];
   tiposErrors: ReturnType<typeof usePlanForm>['tiposErrors'];
   tiposGlobalError: ReturnType<typeof usePlanForm>['tiposGlobalError'];
+  tiposServiceRows: ReturnType<typeof usePlanForm>['tiposServiceRows'];
   openCreateModal: () => void;
-  openEditModal: (plan: PlanWithDisciplinas) => void;
+  openEditModal: (plan: PlanWithDisciplinas) => Promise<void>;
   openDuplicateModal: (plan: PlanWithDisciplinas) => void;
   deletePlan: (plan: PlanWithDisciplinas) => Promise<void>;
   closeModal: () => void;
@@ -38,6 +39,7 @@ type UsePlanesResult = PlanesViewModel & {
   addTipo: ReturnType<typeof usePlanForm>['addTipo'];
   updateTipo: ReturnType<typeof usePlanForm>['updateTipo'];
   removeTipo: ReturnType<typeof usePlanForm>['removeTipo'];
+  updateTipoServiceRows: ReturnType<typeof usePlanForm>['updateTipoServiceRows'];
   submit: () => Promise<boolean>;
   refresh: () => Promise<void>;
 };
@@ -162,14 +164,24 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     setSubmitError(null);
   }, [form]);
 
-  const openEditModal = useCallback((plan: PlanWithDisciplinas) => {
+  const openEditModal = useCallback(async (plan: PlanWithDisciplinas) => {
     setModalMode('edit');
     setSelectedPlan(plan);
-    form.setFormFromPlan(plan);
-    form.setTiposFromPlan(plan);
     setModalOpen(true);
     setSuccessMessage(null);
     setSubmitError(null);
+
+    // Fetch full plan tipos with services before populating form
+    try {
+      const tiposWithServices = await planesService.getPlanTiposByPlan(plan.id);
+      const planWithServices: PlanWithDisciplinas = { ...plan, plan_tipos: tiposWithServices };
+      form.setFormFromPlan(planWithServices);
+      form.setTiposFromPlan(planWithServices);
+    } catch {
+      // Fall back to list data (services won't be pre-filled)
+      form.setFormFromPlan(plan);
+      form.setTiposFromPlan(plan);
+    }
   }, [form]);
 
   const openDuplicateModal = useCallback((plan: PlanWithDisciplinas) => {
@@ -322,6 +334,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     tiposForm: form.tiposForm,
     tiposErrors: form.tiposErrors,
     tiposGlobalError: form.tiposGlobalError,
+    tiposServiceRows: form.tiposServiceRows,
     openCreateModal,
     openEditModal,
     openDuplicateModal,
@@ -331,6 +344,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     addTipo: form.addTipo,
     updateTipo: form.updateTipo,
     removeTipo: form.removeTipo,
+    updateTipoServiceRows: form.updateTipoServiceRows,
     submit,
     refresh: loadData,
   };

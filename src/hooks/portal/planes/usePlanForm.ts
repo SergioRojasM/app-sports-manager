@@ -11,6 +11,7 @@ import type {
   CreatePlanTipoInput,
   UpdatePlanTipoInput,
 } from '@/types/portal/planes.types';
+import type { PlanTipoServicioRow } from '@/types/portal/servicios.types';
 
 const EMPTY_FORM: PlanFormValues = {
   nombre: '',
@@ -26,7 +27,6 @@ const EMPTY_TIPO_FORM: PlanTipoFormValues = {
   descripcion: '',
   precio: '',
   vigencia_dias: '',
-  clases_incluidas: '',
   activo: true,
 };
 
@@ -50,14 +50,13 @@ function planTipoToFormEntry(t: PlanTipo): TipoFormEntry {
     descripcion: t.descripcion ?? '',
     precio: String(t.precio),
     vigencia_dias: String(t.vigencia_dias),
-    clases_incluidas: t.clases_incluidas != null ? String(t.clases_incluidas) : '',
     activo: t.activo,
   };
 }
 
 export type TiposDiff = {
-  toCreate: Omit<CreatePlanTipoInput, 'plan_id' | 'tenant_id'>[];
-  toUpdate: { id: string; input: UpdatePlanTipoInput }[];
+  toCreate: (Omit<CreatePlanTipoInput, 'plan_id' | 'tenant_id'> & { servicios: PlanTipoServicioRow[] })[];
+  toUpdate: { id: string; input: UpdatePlanTipoInput & { servicios: PlanTipoServicioRow[] } }[];
   toDelete: string[];
 };
 
@@ -69,6 +68,8 @@ export function usePlanForm() {
   const [tiposForm, setTiposForm] = useState<TipoFormEntry[]>([]);
   const [tiposErrors, setTiposErrors] = useState<TipoFieldErrors>([]);
   const [tiposGlobalError, setTiposGlobalError] = useState<string | null>(null);
+  // Parallel array of service rows per tipo (same index as tiposForm)
+  const [tiposServiceRows, setTiposServiceRows] = useState<PlanTipoServicioRow[][]>([]);
   const initialTipos = useRef<TipoFormEntry[]>([]);
 
   const resetForm = useCallback(() => {
@@ -77,6 +78,7 @@ export function usePlanForm() {
     setTiposForm([]);
     setTiposErrors([]);
     setTiposGlobalError(null);
+    setTiposServiceRows([]);
     initialTipos.current = [];
   }, []);
 
@@ -87,6 +89,8 @@ export function usePlanForm() {
     setTiposForm(entries);
     setTiposErrors([]);
     setTiposGlobalError(null);
+    // Pre-fill service rows from plan_tipos.servicios if available
+    setTiposServiceRows(entries.map((_, i) => (plan.plan_tipos ?? [])[i]?.servicios ?? []));
     initialTipos.current = entries.map((e) => ({ ...e }));
   }, []);
 
@@ -101,6 +105,7 @@ export function usePlanForm() {
     setTiposForm(entries);
     setTiposErrors([]);
     setTiposGlobalError(null);
+    setTiposServiceRows(entries.map((_, i) => (plan.plan_tipos ?? [])[i]?.servicios ?? []));
     initialTipos.current = [];
   }, []);
 
@@ -118,6 +123,7 @@ export function usePlanForm() {
 
   const addTipo = useCallback(() => {
     setTiposForm((current) => [...current, { ...EMPTY_TIPO_FORM }]);
+    setTiposServiceRows((current) => [...current, []]);
     setTiposGlobalError(null);
   }, []);
 
@@ -133,6 +139,7 @@ export function usePlanForm() {
 
   const removeTipo = useCallback((index: number) => {
     setTiposForm((current) => current.filter((_, i) => i !== index));
+    setTiposServiceRows((current) => current.filter((_, i) => i !== index));
     setTiposErrors((current) =>
       current
         .filter((e) => e.index !== index)
@@ -145,7 +152,17 @@ export function usePlanForm() {
     setTiposForm(entries);
     setTiposErrors([]);
     setTiposGlobalError(null);
+    setTiposServiceRows(entries.map((_, i) => (plan.plan_tipos ?? [])[i]?.servicios ?? []));
     initialTipos.current = entries.map((e) => ({ ...e }));
+  }, []);
+
+  /** Update service rows for a specific tipo index */
+  const updateTipoServiceRows = useCallback((index: number, rows: PlanTipoServicioRow[]) => {
+    setTiposServiceRows((current) => {
+      const next = [...current];
+      next[index] = rows;
+      return next;
+    });
   }, []);
 
   // --- Validation ---
@@ -183,13 +200,6 @@ export function usePlanForm() {
       } else if (tipoVigencia < 1 || !Number.isInteger(tipoVigencia)) {
         tErrors.push({ index: i, field: 'vigencia_dias', message: 'La vigencia debe ser al menos 1 día.' });
       }
-
-      if (tipo.clases_incluidas.trim() !== '') {
-        const tipoClases = parseInt(tipo.clases_incluidas, 10);
-        if (isNaN(tipoClases) || tipoClases < 0 || !Number.isInteger(tipoClases)) {
-          tErrors.push({ index: i, field: 'clases_incluidas', message: 'Debe ser un número entero mayor o igual a 0.' });
-        }
-      }
     });
 
     if (tiposForm.length === 0) {
@@ -219,21 +229,23 @@ export function usePlanForm() {
     const toDelete: string[] = [];
 
     // New entries (no _id)
-    for (const entry of tiposForm) {
+    for (let i = 0; i < tiposForm.length; i++) {
+      const entry = tiposForm[i];
       if (!entry._id) {
         toCreate.push({
           nombre: entry.nombre.trim(),
           descripcion: entry.descripcion.trim() || null,
           precio: parseFloat(entry.precio),
           vigencia_dias: parseInt(entry.vigencia_dias, 10),
-          clases_incluidas: entry.clases_incluidas.trim() !== '' ? parseInt(entry.clases_incluidas, 10) : null,
           activo: entry.activo,
+          servicios: tiposServiceRows[i] ?? [],
         });
       }
     }
 
     // Updated entries
-    for (const entry of tiposForm) {
+    for (let i = 0; i < tiposForm.length; i++) {
+      const entry = tiposForm[i];
       if (!entry._id) continue;
       const original = initialTipos.current.find((t) => t._id === entry._id);
       if (!original) continue;
@@ -243,12 +255,10 @@ export function usePlanForm() {
       if ((entry.descripcion.trim() || null) !== (original.descripcion.trim() || null)) changes.descripcion = entry.descripcion.trim() || null;
       if (entry.precio !== original.precio) changes.precio = parseFloat(entry.precio);
       if (entry.vigencia_dias !== original.vigencia_dias) changes.vigencia_dias = parseInt(entry.vigencia_dias, 10);
-      if (entry.clases_incluidas !== original.clases_incluidas) changes.clases_incluidas = entry.clases_incluidas.trim() !== '' ? parseInt(entry.clases_incluidas, 10) : null;
       if (entry.activo !== original.activo) changes.activo = entry.activo;
 
-      if (Object.keys(changes).length > 0) {
-        toUpdate.push({ id: entry._id, input: changes });
-      }
+      // Always include servicios for existing types (sync ensures current state is persisted)
+      toUpdate.push({ id: entry._id, input: { ...changes, servicios: tiposServiceRows[i] ?? [] } });
     }
 
     // Deleted entries (in initial but not in current)
@@ -259,7 +269,7 @@ export function usePlanForm() {
     }
 
     return { toCreate, toUpdate, toDelete };
-  }, [tiposForm]);
+  }, [tiposForm, tiposServiceRows]);
 
   return {
     formValues,
@@ -267,6 +277,7 @@ export function usePlanForm() {
     tiposForm,
     tiposErrors,
     tiposGlobalError,
+    tiposServiceRows,
     resetForm,
     setFormFromPlan,
     setFormForDuplicate,
@@ -274,6 +285,7 @@ export function usePlanForm() {
     addTipo,
     updateTipo,
     removeTipo,
+    updateTipoServiceRows,
     setTiposFromPlan,
     validate,
     computeTiposDiff,

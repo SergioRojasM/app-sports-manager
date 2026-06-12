@@ -145,7 +145,6 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           atleta_id: user.id,
           plan_id: selectedPlan.id,
           plan_tipo_id: selectedTipo?.id ?? null,
-          clases_plan: selectedTipo?.clases_incluidas ?? null,
           comentarios: data.comentarios.trim() || null,
           estado: 'pendiente',
         });

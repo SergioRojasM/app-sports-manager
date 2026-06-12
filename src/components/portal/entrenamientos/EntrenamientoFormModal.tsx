@@ -44,7 +44,7 @@ type EntrenamientoFormModalProps = {
   onToggleCategorias: (enabled: boolean) => void;
   onUpdateCategoriasCupos: (nivelId: string, cupos: number) => void;
   // Restrictions
-  planes: SelectOption[];
+  servicios: SelectOption[];
   restricciones: EntrenamientoRestriccionInput[];
   reservaAntelacionHoras: number | null;
   cancelacionAntelacionHoras: number | null;
@@ -84,7 +84,7 @@ export function EntrenamientoFormModal({
   categoriasError,
   onToggleCategorias,
   onUpdateCategoriasCupos,
-  planes,
+  servicios,
   restricciones,
   reservaAntelacionHoras,
   cancelacionAntelacionHoras,
@@ -187,8 +187,7 @@ export function EntrenamientoFormModal({
           <div className="mt-6">
             <EntrenamientoRestriccionesSection
               restricciones={restricciones}
-              planes={planes}
-              disciplinas={disciplinas}
+              servicios={servicios}
               reservaAntelacionHoras={reservaAntelacionHoras}
               cancelacionAntelacionHoras={cancelacionAntelacionHoras}
               onSetReservaAntelacion={onSetReservaAntelacion}
