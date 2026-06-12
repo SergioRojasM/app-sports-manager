@@ -24,7 +24,7 @@ export function EditarSuscripcionModal({
   onClose,
   onSuccess,
 }: EditarSuscripcionModalProps) {
-  const { formValues, setField, planes, isLoadingPlanes, isSubmitting, error, submit } =
+  const { formValues, setField, setServicioUnidades, planes, isLoadingPlanes, isSubmitting, error, submit } =
     useEditarSuscripcion({ row, tenantId, onSuccess });
 
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -134,6 +134,74 @@ export function EditarSuscripcionModal({
               className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 outline-none focus:border-turquoise/50 focus:ring-1 focus:ring-turquoise/30 disabled:opacity-50"
             />
           </div>
+
+          {/* Unidades por Servicio */}
+          {formValues.servicios.length > 0 && (
+            <div>
+              <p className="mb-2 text-xs font-medium text-slate-400">Unidades por Servicio</p>
+              <div className="space-y-2">
+                {formValues.servicios.map((srv) => {
+                  const isIlimitado = srv.unidades_restantes === null;
+                  const checkboxId = `ilimitado-${srv.servicio_id}`;
+                  return (
+                    <div
+                      key={srv.servicio_id}
+                      className="flex items-center gap-3 rounded-lg border border-portal-border bg-white/[0.02] px-3 py-2"
+                    >
+                      {/* Service name */}
+                      <span className="min-w-0 flex-1 truncate text-xs text-slate-200">
+                        {srv.servicio_nombre}
+                      </span>
+                      {/* Included units badge */}
+                      <span className="shrink-0 text-xs text-slate-500">
+                        / {srv.unidades_incluidas ?? '∞'}
+                      </span>
+                      {/* Ilimitado checkbox */}
+                      <label
+                        htmlFor={checkboxId}
+                        className="flex shrink-0 cursor-pointer items-center gap-1 text-xs text-slate-400"
+                        aria-label={`Ilimitado para ${srv.servicio_nombre}`}
+                      >
+                        <input
+                          id={checkboxId}
+                          type="checkbox"
+                          checked={isIlimitado}
+                          disabled={isSubmitting}
+                          onChange={(e) =>
+                            setServicioUnidades(
+                              srv.servicio_id,
+                              e.target.checked ? null : (srv.unidades_incluidas ?? 0),
+                            )
+                          }
+                          className="accent-turquoise"
+                        />
+                        ∞
+                      </label>
+                      {/* Remaining units input */}
+                      {!isIlimitado && (
+                        <input
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={srv.unidades_restantes ?? 0}
+                          disabled={isSubmitting}
+                          aria-label={`Unidades restantes para ${srv.servicio_nombre}`}
+                          onChange={(e) => {
+                            const parsed = parseInt(e.target.value, 10);
+                            setServicioUnidades(
+                              srv.servicio_id,
+                              Number.isNaN(parsed) ? 0 : Math.max(0, parsed),
+                            );
+                          }}
+                          className="w-16 rounded border border-portal-border bg-navy-deep px-2 py-1 text-xs text-slate-100 outline-none focus:border-turquoise/50 disabled:opacity-50"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {error && (
@@ -164,3 +232,4 @@ export function EditarSuscripcionModal({
     </div>
   );
 }
+

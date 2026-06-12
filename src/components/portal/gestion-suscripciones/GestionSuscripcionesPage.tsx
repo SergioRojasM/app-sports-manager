@@ -11,6 +11,7 @@ import { ValidarSuscripcionModal } from './ValidarSuscripcionModal';
 import { EditarSuscripcionModal } from './EditarSuscripcionModal';
 import { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
 import { VerDetallePagoModal } from './VerDetallePagoModal';
+import { VerServiciosModal } from './VerServiciosModal';
 import { CrearSuscripcionModal } from './CrearSuscripcionModal';
 
 type GestionSuscripcionesPageProps = {
@@ -58,6 +59,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
     openEditarModal,
     openEliminarModal,
     openVerDetalleModal,
+    openVerServiciosModal,
     openCrearModal,
     closeModal,
     refresh,
@@ -143,6 +145,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
           onEditar={openEditarModal}
           onEliminar={openEliminarModal}
           onVerDetallePago={openVerDetalleModal}
+          onVerServicios={openVerServiciosModal}
         />
       ) : null}
 
@@ -184,6 +187,13 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
 
       {selectedRow && modalType === 'verDetalle' && (
         <VerDetallePagoModal
+          row={selectedRow}
+          onClose={closeModal}
+        />
+      )}
+
+      {selectedRow && modalType === 'verServicios' && (
+        <VerServiciosModal
           row={selectedRow}
           onClose={closeModal}
         />
