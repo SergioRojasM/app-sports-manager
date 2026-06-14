@@ -282,6 +282,12 @@ function formatFechaHora(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function toLocalDateString(iso: string | null): string {
+  const d = iso ? new Date(iso) : new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 async function validateBookingRestrictions(
   entrenamientoId: string,
   atletaId: string,
@@ -345,21 +351,14 @@ async function validateBookingRestrictions(
     .single();
   const miembroEstado = (miembro?.estado as string) ?? null;
 
-  // 4b. Active service entitlements — set of servicio_id with available units
-  const { data: servicioRows } = await supabase
-    .from('suscripcion_servicios')
-    .select('servicio_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado)')
-    .eq('suscripciones.tenant_id', tenantId)
-    .eq('suscripciones.atleta_id', atletaId)
-    .eq('suscripciones.estado', 'activa');
+  // 4b. Active service entitlements — set of servicio_id with available units, as of the training's date
+  const referenceDate = toLocalDateString(fechaHora);
+  const entitlements = await getServicioEntitlements(tenantId, atletaId, referenceDate);
 
   const activeServicioIds = new Set<string>(
-    (servicioRows ?? [])
-      .filter((r) => {
-        const unidades = r.unidades_restantes as number | null;
-        return unidades === null || unidades > 0;
-      })
-      .map((r) => r.servicio_id as string),
+    Array.from(entitlements.entries())
+      .filter(([, entries]) => entries.some((e) => e.unidadesRestantes === null || e.unidadesRestantes > 0))
+      .map(([servicioId]) => servicioId),
   );
 
   // 4c. Athlete's level for the training's discipline (if needed)
@@ -538,52 +537,88 @@ type ServiceChargeEntry = {
   exhausted: boolean;
 };
 
+type ServicioEntitlement = {
+  suscripcionId: string;
+  unidadesRestantes: number | null;
+};
+
+async function getServicioEntitlements(
+  tenantId: string,
+  atletaId: string,
+  referenceDate: string,
+): Promise<Map<string, ServicioEntitlement[]>> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('suscripcion_servicios')
+    .select(
+      'servicio_id, suscripcion_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado, fecha_inicio, fecha_fin)',
+    )
+    .eq('suscripciones.tenant_id', tenantId)
+    .eq('suscripciones.atleta_id', atletaId)
+    .neq('suscripciones.estado', 'cancelada');
+
+  if (error) throw mapServiceError(error);
+
+  const entitlements = new Map<string, ServicioEntitlement[]>();
+
+  for (const row of data ?? []) {
+    const suscripcion = row.suscripciones as unknown as { fecha_inicio: string | null; fecha_fin: string | null };
+    const fechaInicio = suscripcion.fecha_inicio;
+    const fechaFin = suscripcion.fecha_fin;
+
+    const covers =
+      (fechaInicio === null || fechaInicio <= referenceDate) &&
+      (fechaFin === null || fechaFin >= referenceDate);
+
+    if (!covers) continue;
+
+    const servicioId = row.servicio_id as string;
+    const list = entitlements.get(servicioId) ?? [];
+    list.push({
+      suscripcionId: row.suscripcion_id as string,
+      unidadesRestantes: row.unidades_restantes as number | null,
+    });
+    entitlements.set(servicioId, list);
+  }
+
+  for (const list of entitlements.values()) {
+    list.sort((a, b) => {
+      if (a.unidadesRestantes === b.unidadesRestantes) return 0;
+      if (a.unidadesRestantes === null) return 1;
+      if (b.unidadesRestantes === null) return -1;
+      return a.unidadesRestantes - b.unidadesRestantes;
+    });
+  }
+
+  return entitlements;
+}
+
 async function findServiceSubscriptionsToCharge(
   tenantId: string,
   atletaId: string,
   servicioIds: string[],
+  referenceDate: string,
 ): Promise<ServiceChargeEntry[]> {
   if (servicioIds.length === 0) return [];
 
-  const supabase = createClient();
+  const entitlements = await getServicioEntitlements(tenantId, atletaId, referenceDate);
   const results: ServiceChargeEntry[] = [];
 
   for (const servicioId of servicioIds) {
-    // Find the active subscription entry with available units (lowest first)
-    const { data, error } = await supabase
-      .from('suscripcion_servicios')
-      .select('id, suscripcion_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado)')
-      .eq('servicio_id', servicioId)
-      .eq('suscripciones.tenant_id', tenantId)
-      .eq('suscripciones.atleta_id', atletaId)
-      .eq('suscripciones.estado', 'activa')
-      .or('unidades_restantes.gt.0,unidades_restantes.is.null')
-      .order('unidades_restantes', { ascending: true, nullsFirst: false })
-      .limit(1)
-      .maybeSingle();
+    const entries = entitlements.get(servicioId) ?? [];
+    const available = entries.find((e) => e.unidadesRestantes === null || e.unidadesRestantes > 0);
 
-    if (error) throw mapServiceError(error);
-
-    if (data) {
-      const unidades = data.unidades_restantes as number | null;
+    if (available) {
       // NULL = unlimited — include in log but no deduction needed
       results.push({
-        suscripcionId: unidades === null ? null : data.suscripcion_id as string,
+        suscripcionId: available.unidadesRestantes === null ? null : available.suscripcionId,
         servicioId,
         exhausted: false,
       });
     } else {
-      // No subscription with available units — check if any exhausted row exists
-      const { count } = await supabase
-        .from('suscripcion_servicios')
-        .select('id', { count: 'exact', head: true })
-        .eq('servicio_id', servicioId)
-        .eq('suscripciones.tenant_id', tenantId)
-        .eq('suscripciones.atleta_id', atletaId)
-        .eq('suscripciones.estado', 'activa')
-        .eq('unidades_restantes', 0);
-
-      results.push({ suscripcionId: null, servicioId, exhausted: (count ?? 0) > 0 });
+      const exhausted = entries.some((e) => e.unidadesRestantes === 0);
+      results.push({ suscripcionId: null, servicioId, exhausted });
     }
   }
 
@@ -610,12 +645,31 @@ async function isEntrenamientoPast(
   return new Date(data.fecha_hora) < new Date();
 }
 
+async function getEntrenamientoFechaHora(
+  entrenamientoId: string,
+  tenantId: string,
+): Promise<string | null> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('entrenamientos')
+    .select('fecha_hora')
+    .eq('id', entrenamientoId)
+    .eq('tenant_id', tenantId)
+    .single();
+
+  return (data?.fecha_hora as string | null) ?? null;
+}
+
 // ─────────────────────────────────────────────
 // Mutations
 // ─────────────────────────────────────────────
 
 async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
   let matchedRow: EntrenamientoRestriccion | null = null;
+
+  // Reference date for service-entitlement eligibility — the training's date, or today if unscheduled
+  const fechaHora = await getEntrenamientoFechaHora(input.entrenamiento_id, input.tenant_id);
+  const referenceDate = toLocalDateString(fechaHora);
 
   if (!input.bypass_restrictions) {
     // 0. Past-date guard
@@ -650,21 +704,13 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       .order('orden', { ascending: true });
 
     if (restricciones && restricciones.length > 0) {
-      // Build active service entitlement set for this athlete
-      const { data: servicioRows } = await supabase
-        .from('suscripcion_servicios')
-        .select('servicio_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado)')
-        .eq('suscripciones.tenant_id', input.tenant_id)
-        .eq('suscripciones.atleta_id', input.atleta_id)
-        .eq('suscripciones.estado', 'activa');
+      // Build active service entitlement set for this athlete, as of the training's date
+      const entitlements = await getServicioEntitlements(input.tenant_id, input.atleta_id, referenceDate);
 
       const activeServicioIds = new Set<string>(
-        (servicioRows ?? [])
-          .filter((r) => {
-            const unidades = r.unidades_restantes as number | null;
-            return unidades === null || unidades > 0;
-          })
-          .map((r) => r.servicio_id as string),
+        Array.from(entitlements.entries())
+          .filter(([, entries]) => entries.some((e) => e.unidadesRestantes === null || e.unidadesRestantes > 0))
+          .map(([servicioId]) => servicioId),
       );
 
       // Find first row where all service slots are covered
@@ -708,6 +754,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       input.tenant_id,
       input.atleta_id,
       serviceSlots,
+      referenceDate,
     );
 
     const exhaustedEntry = chargeEntries.find((e) => e.exhausted);
