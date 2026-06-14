@@ -435,6 +435,11 @@ export function useEntrenamientoForm() {
     setCategoriasError(null);
   }, []);
 
+  const setCategoriasFormFromExternal = useCallback((value: CategoriasFormState) => {
+    setCategoriasForm(value);
+    setCategoriasError(null);
+  }, []);
+
   // Restriction handlers
   const addRestriccion = useCallback(() => {
     setRestricciones((prev) => [
@@ -595,6 +600,7 @@ export function useEntrenamientoForm() {
     checkDisciplinaHasNiveles,
     toggleCategorias,
     updateCategoriasCupos,
+    setCategoriasFormFromExternal,
     validateCategorias,
     // Restrictions
     restricciones,

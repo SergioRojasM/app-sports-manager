@@ -816,6 +816,11 @@ export const entrenamientosService = {
           disciplina_id: r.disciplina_id ?? null,
           validar_nivel_disciplina: r.validar_nivel_disciplina,
           orden: r.orden ?? i + 1,
+          descripcion: r.descripcion ?? null,
+          servicio_1_id: r.servicio_1_id ?? null,
+          servicio_2_id: r.servicio_2_id ?? null,
+          servicio_3_id: r.servicio_3_id ?? null,
+          servicio_4_id: r.servicio_4_id ?? null,
         }));
         const { error: insRestErr } = await supabase
           .from('entrenamiento_grupo_restricciones')
@@ -888,6 +893,11 @@ export const entrenamientosService = {
             disciplina_id: r.disciplina_id ?? null,
             validar_nivel_disciplina: r.validar_nivel_disciplina,
             orden: r.orden ?? i + 1,
+            descripcion: r.descripcion ?? null,
+            servicio_1_id: r.servicio_1_id ?? null,
+            servicio_2_id: r.servicio_2_id ?? null,
+            servicio_3_id: r.servicio_3_id ?? null,
+            servicio_4_id: r.servicio_4_id ?? null,
           }));
           const { error: insErr } = await supabase
             .from('entrenamiento_restricciones')

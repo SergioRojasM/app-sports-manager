@@ -38,6 +38,14 @@ export function EntrenamientoRestriccionesSection({
 }: Props) {
   const hasContent = restricciones.length > 0 || reservaAntelacionHoras != null || cancelacionAntelacionHoras != null;
   const [open, setOpen] = useState(hasContent);
+  const [prevHasContent, setPrevHasContent] = useState(hasContent);
+
+  if (hasContent !== prevHasContent) {
+    setPrevHasContent(hasContent);
+    if (hasContent) {
+      setOpen(true);
+    }
+  }
 
   return (
     <section className="space-y-3 rounded-xl border border-portal-border bg-navy-deep/45 p-4">
