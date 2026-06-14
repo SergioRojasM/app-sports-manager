@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
 import { entrenamientoCategoriasService } from '@/services/supabase/portal/entrenamiento-categorias.service';
+import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { useEntrenamientoForm } from './useEntrenamientoForm';
 import { useEntrenamientoScope } from './useEntrenamientoScope';
@@ -23,7 +24,7 @@ import {
 } from '@/types/portal/entrenamientos.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import type { EntrenamientoCategoria } from '@/types/portal/entrenamiento-categorias.types';
-import type { EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
+import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 import type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido } from '@/types/portal/entrenamiento-plantillas.types';
 
 type UseEntrenamientosOptions = {
@@ -36,6 +37,14 @@ type EditTarget = {
   trainingGroupId?: string;
   trainingId?: string;
   effectiveFrom?: string;
+};
+
+export type ViewTarget = {
+  instance: TrainingInstance;
+  relatedGroup: TrainingGroupWithDetails | null;
+  categorias: EntrenamientoCategoria[];
+  restricciones: EntrenamientoRestriccion[];
+  niveles: NivelDisciplina[];
 };
 
 type UseEntrenamientosResult = {
@@ -120,6 +129,13 @@ type UseEntrenamientosResult = {
   guardarPlantilla: (nombre: string, descripcion: string | null) => Promise<boolean>;
   aplicarPlantilla: (contenido: EntrenamientoPlantillaContenido) => void;
   eliminarPlantilla: (id: string) => Promise<boolean>;
+  onOpenGuardarPlantillaModalFromView: () => void;
+  // Detail view
+  viewTarget: ViewTarget | null;
+  isViewModalOpen: boolean;
+  viewLoading: boolean;
+  requestViewInstance: (instance: TrainingInstance) => void;
+  closeViewModal: () => void;
 };
 
 const EMPTY_SUCCESS: string | null = null;
@@ -229,6 +245,46 @@ function toCategoriasFormState(rows: { nivel_id: string; cupos_asignados: number
     items[row.nivel_id] = row.cupos_asignados;
   });
   return { enabled: rows.length > 0, items };
+}
+
+function buildPlantillaContenidoFromInstance(
+  instance: TrainingInstance,
+  categorias: EntrenamientoCategoria[],
+  restricciones: EntrenamientoRestriccion[],
+): EntrenamientoPlantillaContenido {
+  return {
+    version: 1,
+    nombre: instance.nombre,
+    descripcion: instance.descripcion ?? '',
+    punto_encuentro: instance.punto_encuentro ?? '',
+    formulario_externo: instance.formulario_externo ?? '',
+    disciplina_id: instance.disciplina_id,
+    escenario_id: instance.escenario_id,
+    entrenador_id: instance.entrenador_id ?? '',
+    duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
+    cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
+    visibilidad: instance.visibilidad ?? 'privado',
+    categorias: {
+      enabled: categorias.length > 0,
+      items: categorias.map((c) => ({ nivel_id: c.nivel_id, cupos_asignados: c.cupos_asignados })),
+    },
+    restricciones: {
+      reserva_antelacion_horas: instance.reserva_antelacion_horas,
+      cancelacion_antelacion_horas: instance.cancelacion_antelacion_horas,
+      items: restricciones.map((r, i) => ({
+        usuario_estado: r.usuario_estado,
+        plan_id: r.plan_id,
+        disciplina_id: r.disciplina_id,
+        validar_nivel_disciplina: r.validar_nivel_disciplina,
+        orden: i + 1,
+        descripcion: r.descripcion,
+        servicio_1_id: r.servicio_1_id,
+        servicio_2_id: r.servicio_2_id,
+        servicio_3_id: r.servicio_3_id,
+        servicio_4_id: r.servicio_4_id,
+      })),
+    },
+  };
 }
 
 function toTrainingCalendarItem(instance: TrainingInstance, groupsById: Map<string, TrainingGroupWithDetails>): TrainingCalendarItem {
@@ -377,8 +433,13 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [isUniqueTypeLocked, setIsUniqueTypeLocked] = useState(false);
   const [selectedInstanceId, setSelectedInstanceId] = useState<string | null>(null);
 
+  const [viewTarget, setViewTarget] = useState<ViewTarget | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewLoading, setViewLoading] = useState(false);
+
   const supabase = useMemo(() => createClient(), []);
   const skipNextCategoriasResetRef = useRef(false);
+  const plantillaContenidoSourceRef = useRef<'form' | 'view'>('form');
   const form = useEntrenamientoForm();
   const scope = useEntrenamientoScope();
   const calendar = useEntrenamientosCalendar();
@@ -549,19 +610,61 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     setSubmitError(null);
   }, [isSubmitting]);
 
+  const requestViewInstance = useCallback(
+    (instance: TrainingInstance) => {
+      const relatedGroup = instance.entrenamiento_grupo_id ? groupsById.get(instance.entrenamiento_grupo_id) ?? null : null;
+
+      setViewTarget({ instance, relatedGroup, categorias: [], restricciones: [], niveles: [] });
+      setIsViewModalOpen(true);
+      setViewLoading(true);
+
+      Promise.all([
+        entrenamientoCategoriasService.getEntrenamientoCategorias(instance.id).catch(() => []),
+        entrenamientosService.getInstanceRestrictions(tenantId, instance.id).catch(() => []),
+        nivelDisciplinaService.getNivelesDisciplina(tenantId, instance.disciplina_id).catch(() => []),
+      ]).then(([categorias, restricciones, niveles]) => {
+        setViewTarget((current) =>
+          current && current.instance.id === instance.id
+            ? { ...current, categorias: categorias as EntrenamientoCategoria[], restricciones: restricciones as EntrenamientoRestriccion[], niveles }
+            : current,
+        );
+        setViewLoading(false);
+      });
+    },
+    [groupsById, tenantId],
+  );
+
+  const closeViewModal = useCallback(() => {
+    setIsViewModalOpen(false);
+    setViewTarget(null);
+  }, []);
+
   const openPlantillasListModal = useCallback(() => {
     plantillas.openListModal();
     void plantillas.loadPlantillas(tenantId);
   }, [plantillas, tenantId]);
 
+  const openGuardarPlantillaModal = useCallback(() => {
+    plantillaContenidoSourceRef.current = 'form';
+    plantillas.openSaveModal();
+  }, [plantillas]);
+
+  const onOpenGuardarPlantillaModalFromView = useCallback(() => {
+    plantillaContenidoSourceRef.current = 'view';
+    plantillas.openSaveModal();
+  }, [plantillas]);
+
   const guardarPlantilla = useCallback(async (nombre: string, descripcion: string | null): Promise<boolean> => {
-    const contenido = form.buildPlantillaContenido();
+    const contenido =
+      plantillaContenidoSourceRef.current === 'view' && viewTarget
+        ? buildPlantillaContenidoFromInstance(viewTarget.instance, viewTarget.categorias, viewTarget.restricciones)
+        : form.buildPlantillaContenido();
     const success = await plantillas.createPlantilla({ tenantId, nombre, descripcion, contenido });
     if (success) {
       plantillas.closeSaveModal();
     }
     return success;
-  }, [form, plantillas, tenantId]);
+  }, [form, plantillas, tenantId, viewTarget]);
 
   const aplicarPlantilla = useCallback((contenido: EntrenamientoPlantillaContenido) => {
     skipNextCategoriasResetRef.current = contenido.disciplina_id !== form.formValues.disciplina_id;
@@ -1088,12 +1191,19 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     openPlantillasListModal,
     closePlantillasListModal: plantillas.closeListModal,
     isGuardarPlantillaModalOpen: plantillas.isSaveModalOpen,
-    openGuardarPlantillaModal: plantillas.openSaveModal,
+    openGuardarPlantillaModal,
     closeGuardarPlantillaModal: plantillas.closeSaveModal,
     isSavingPlantilla: plantillas.isSaving,
     guardarPlantillaError: plantillas.saveError,
     guardarPlantilla,
     aplicarPlantilla,
     eliminarPlantilla,
+    onOpenGuardarPlantillaModalFromView,
+    // Detail view
+    viewTarget,
+    isViewModalOpen,
+    viewLoading,
+    requestViewInstance,
+    closeViewModal,
   };
 }
