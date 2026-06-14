@@ -112,6 +112,20 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     updateRestriccion,
     setReservaAntelacionHoras,
     setCancelacionAntelacionHoras,
+    plantillas,
+    plantillasLoading,
+    plantillasError,
+    isPlantillasListModalOpen,
+    openPlantillasListModal,
+    closePlantillasListModal,
+    isGuardarPlantillaModalOpen,
+    openGuardarPlantillaModal,
+    closeGuardarPlantillaModal,
+    isSavingPlantilla,
+    guardarPlantillaError,
+    guardarPlantilla,
+    aplicarPlantilla,
+    eliminarPlantilla,
   } = useEntrenamientos({ tenantId });
 
   const instanceMap = useMemo(() => new Map(instances.map((instance) => [instance.id, instance])), [instances]);
@@ -370,6 +384,20 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         onUpdateRestriccion={updateRestriccion}
         onSetReservaAntelacion={setReservaAntelacionHoras}
         onSetCancelacionAntelacion={setCancelacionAntelacionHoras}
+        plantillas={plantillas}
+        plantillasLoading={plantillasLoading}
+        plantillasError={plantillasError}
+        isPlantillasListModalOpen={isPlantillasListModalOpen}
+        onOpenPlantillasListModal={openPlantillasListModal}
+        onClosePlantillasListModal={closePlantillasListModal}
+        isGuardarPlantillaModalOpen={isGuardarPlantillaModalOpen}
+        onOpenGuardarPlantillaModal={openGuardarPlantillaModal}
+        onCloseGuardarPlantillaModal={closeGuardarPlantillaModal}
+        isSavingPlantilla={isSavingPlantilla}
+        guardarPlantillaError={guardarPlantillaError}
+        onGuardarPlantilla={guardarPlantilla}
+        onAplicarPlantilla={aplicarPlantilla}
+        onEliminarPlantilla={eliminarPlantilla}
       />
 
       <EntrenamientoScopeModal

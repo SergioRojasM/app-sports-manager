@@ -12,7 +12,10 @@ import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import { EntrenamientoWizard } from './EntrenamientoWizard';
 import { EntrenamientoCategoriasSection } from './EntrenamientoCategoriasSection';
 import { EntrenamientoRestriccionesSection } from './EntrenamientoRestriccionesSection';
+import { GuardarPlantillaModal } from './GuardarPlantillaModal';
+import { PlantillasListModal } from './PlantillasListModal';
 import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
+import type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido } from '@/types/portal/entrenamiento-plantillas.types';
 
 type EntrenamientoFormModalProps = {
   open: boolean;
@@ -54,6 +57,21 @@ type EntrenamientoFormModalProps = {
   onDuplicateRestriccion: (index: number) => void;
   onRemoveRestriccion: (index: number) => void;
   onUpdateRestriccion: (index: number, patch: Partial<EntrenamientoRestriccionInput>) => void;
+  // Templates
+  plantillas: EntrenamientoPlantilla[];
+  plantillasLoading: boolean;
+  plantillasError: string | null;
+  isPlantillasListModalOpen: boolean;
+  onOpenPlantillasListModal: () => void;
+  onClosePlantillasListModal: () => void;
+  isGuardarPlantillaModalOpen: boolean;
+  onOpenGuardarPlantillaModal: () => void;
+  onCloseGuardarPlantillaModal: () => void;
+  isSavingPlantilla: boolean;
+  guardarPlantillaError: string | null;
+  onGuardarPlantilla: (nombre: string, descripcion: string | null) => Promise<boolean>;
+  onAplicarPlantilla: (contenido: EntrenamientoPlantillaContenido) => void;
+  onEliminarPlantilla: (id: string) => Promise<boolean>;
 };
 
 export function EntrenamientoFormModal({
@@ -94,6 +112,20 @@ export function EntrenamientoFormModal({
   onDuplicateRestriccion,
   onRemoveRestriccion,
   onUpdateRestriccion,
+  plantillas,
+  plantillasLoading,
+  plantillasError,
+  isPlantillasListModalOpen,
+  onOpenPlantillasListModal,
+  onClosePlantillasListModal,
+  isGuardarPlantillaModalOpen,
+  onOpenGuardarPlantillaModal,
+  onCloseGuardarPlantillaModal,
+  isSavingPlantilla,
+  guardarPlantillaError,
+  onGuardarPlantilla,
+  onAplicarPlantilla,
+  onEliminarPlantilla,
 }: EntrenamientoFormModalProps) {
   useEffect(() => {
     if (!open) return;
@@ -130,9 +162,24 @@ export function EntrenamientoFormModal({
       >
         <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">
-              {mode === 'create' ? 'Crear entrenamiento' : 'Editar entrenamiento'}
-            </h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-slate-100">
+                {mode === 'create' ? 'Crear entrenamiento' : 'Editar entrenamiento'}
+              </h2>
+              {mode === 'create' ? (
+                <button
+                  type="button"
+                  aria-label="Ver plantillas guardadas"
+                  onClick={onOpenPlantillasListModal}
+                  className="inline-flex items-center gap-1 rounded-lg border border-portal-border bg-navy-deep/70 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-turquoise/70"
+                >
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">
+                    bookmark
+                  </span>
+                  Ver plantillas
+                </button>
+              ) : null}
+            </div>
             <p className="mt-1 text-xs text-slate-400">
               {isEditingSingleInstance
                 ? 'Editando solo esta instancia con datos propios del entrenamiento.'
@@ -207,6 +254,21 @@ export function EntrenamientoFormModal({
         </div>
 
         <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+          {mode === 'create' ? (
+            <button
+              type="button"
+              aria-label="Guardar configuración como plantilla"
+              onClick={onOpenGuardarPlantillaModal}
+              disabled={isSubmitting || !values.disciplina_id || !values.escenario_id}
+              className="inline-flex items-center gap-2 rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-turquoise/70 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span className="material-symbols-outlined text-base" aria-hidden="true">
+                bookmark_add
+              </span>
+              Guardar como plantilla
+            </button>
+          ) : null}
+          <div className="flex-1" />
           <button
             type="button"
             onClick={onClose}
@@ -228,6 +290,27 @@ export function EntrenamientoFormModal({
           </button>
         </footer>
       </aside>
+
+      {mode === 'create' ? (
+        <>
+          <GuardarPlantillaModal
+            open={isGuardarPlantillaModalOpen}
+            isSaving={isSavingPlantilla}
+            error={guardarPlantillaError}
+            onClose={onCloseGuardarPlantillaModal}
+            onSave={onGuardarPlantilla}
+          />
+          <PlantillasListModal
+            open={isPlantillasListModalOpen}
+            plantillas={plantillas}
+            isLoading={plantillasLoading}
+            error={plantillasError}
+            onClose={onClosePlantillasListModal}
+            onUsePlantilla={onAplicarPlantilla}
+            onDeletePlantilla={onEliminarPlantilla}
+          />
+        </>
+      ) : null}
     </div>
   );
 }

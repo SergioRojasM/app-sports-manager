@@ -11,6 +11,7 @@ import type {
 } from '@/types/portal/entrenamientos.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
+import type { EntrenamientoPlantillaContenido } from '@/types/portal/entrenamiento-plantillas.types';
 import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 
 const EMPTY_RESTRICCION: EntrenamientoRestriccionInput = {
@@ -400,9 +401,11 @@ export function useEntrenamientoForm() {
     return max > 0 && totalAsignado > max;
   }, [categoriasForm.enabled, formValues.cupo_maximo, totalAsignado]);
 
-  const checkDisciplinaHasNiveles = useCallback(async (disciplinaId: string, tenantId: string) => {
-    setCategoriasForm({ enabled: false, items: {} });
-    setCategoriasError(null);
+  const checkDisciplinaHasNiveles = useCallback(async (disciplinaId: string, tenantId: string, options?: { resetCategorias?: boolean }) => {
+    if (options?.resetCategorias ?? true) {
+      setCategoriasForm({ enabled: false, items: {} });
+      setCategoriasError(null);
+    }
     if (!disciplinaId) {
       setDisciplinaHasNiveles(false);
       setActiveNiveles([]);
@@ -465,6 +468,95 @@ export function useEntrenamientoForm() {
     [],
   );
 
+  // Templates: build a snapshot of Section 1 + categories + restrictions (excludes Section 2 scheduling fields)
+  const buildPlantillaContenido = useCallback((): EntrenamientoPlantillaContenido => {
+    return {
+      version: 1,
+      nombre: formValues.nombre,
+      descripcion: formValues.descripcion,
+      punto_encuentro: formValues.punto_encuentro,
+      formulario_externo: formValues.formulario_externo,
+      disciplina_id: formValues.disciplina_id,
+      escenario_id: formValues.escenario_id,
+      entrenador_id: formValues.entrenador_id,
+      duracion_minutos: formValues.duracion_minutos,
+      cupo_maximo: formValues.cupo_maximo,
+      visibilidad: formValues.visibilidad,
+      categorias: {
+        enabled: categoriasForm.enabled,
+        items: Object.entries(categoriasForm.items).map(([nivel_id, cupos_asignados]) => ({
+          nivel_id,
+          cupos_asignados,
+        })),
+      },
+      restricciones: {
+        reserva_antelacion_horas: reservaAntelacionHoras,
+        cancelacion_antelacion_horas: cancelacionAntelacionHoras,
+        items: restricciones.map((item) => ({
+          usuario_estado: item.usuario_estado,
+          plan_id: item.plan_id,
+          disciplina_id: item.disciplina_id,
+          validar_nivel_disciplina: item.validar_nivel_disciplina,
+          orden: item.orden,
+          descripcion: item.descripcion,
+          servicio_1_id: item.servicio_1_id,
+          servicio_2_id: item.servicio_2_id,
+          servicio_3_id: item.servicio_3_id,
+          servicio_4_id: item.servicio_4_id,
+        })),
+      },
+    };
+  }, [formValues, categoriasForm, restricciones, reservaAntelacionHoras, cancelacionAntelacionHoras]);
+
+  // Templates: apply a saved snapshot, overwriting Section 1 + categories + restrictions
+  // while leaving Section 2 (tipo/fechas/dias_semana/reglas) untouched
+  const applyPlantillaContenido = useCallback((contenido: EntrenamientoPlantillaContenido) => {
+    setFormValues((current) => ({
+      ...current,
+      nombre: contenido.nombre,
+      descripcion: contenido.descripcion,
+      punto_encuentro: contenido.punto_encuentro,
+      formulario_externo: contenido.formulario_externo,
+      disciplina_id: contenido.disciplina_id,
+      escenario_id: contenido.escenario_id,
+      entrenador_id: contenido.entrenador_id,
+      duracion_minutos: contenido.duracion_minutos,
+      cupo_maximo: contenido.cupo_maximo,
+      visibilidad: contenido.visibilidad,
+    }));
+
+    setFieldErrors((current) => {
+      const next = { ...current };
+      const overwrittenFields: (keyof TrainingFieldErrors)[] = [
+        'nombre',
+        'descripcion',
+        'punto_encuentro',
+        'formulario_externo',
+        'disciplina_id',
+        'escenario_id',
+        'entrenador_id',
+        'duracion_minutos',
+        'cupo_maximo',
+        'visibilidad',
+      ];
+      overwrittenFields.forEach((field) => delete next[field]);
+      return next;
+    });
+
+    setCategoriasForm({
+      enabled: contenido.categorias.enabled,
+      items: contenido.categorias.items.reduce<Record<string, number>>((items, item) => {
+        items[item.nivel_id] = item.cupos_asignados;
+        return items;
+      }, {}),
+    });
+    setCategoriasError(null);
+
+    setRestricciones(contenido.restricciones.items.map((item, index) => ({ ...item, orden: index + 1 })));
+    setReservaAntelacionHoras(contenido.restricciones.reserva_antelacion_horas);
+    setCancelacionAntelacionHoras(contenido.restricciones.cancelacion_antelacion_horas);
+  }, []);
+
   const validateCategorias = useCallback((): boolean => {
     if (!categoriasForm.enabled) return true;
     const max = Number(formValues.cupo_maximo) || 0;
@@ -515,5 +607,8 @@ export function useEntrenamientoForm() {
     duplicateRestriccion,
     removeRestriccion,
     updateRestriccion,
+    // Templates
+    buildPlantillaContenido,
+    applyPlantillaContenido,
   };
 }
