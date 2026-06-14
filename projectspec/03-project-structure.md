@@ -94,6 +94,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EntrenamientosPage.tsx
 │   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by visibilidad; includes public/private legend
 │   │   │       ├── EntrenamientoFormModal.tsx   # Includes visibilidad radio group (publico/privado, default 'privado')
+│   │   │       ├── EntrenamientoDetalleModal.tsx  # Read-only "Ver detalle" view (incl. past trainings); includes "Guardar como plantilla"
 │   │   │       ├── EntrenamientoCategoriasSection.tsx  # Optional per-level capacity allocation step
 │   │   │       ├── EntrenamientoRestriccionesSection.tsx  # Collapsible restriction-row editor (timing + service-based access conditions, AND/OR per row)
 │   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row
@@ -183,7 +184,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── nivel-disciplina/
 │   │           └── useNivelesDisciplina.ts    # List + CRUD state for discipline levels
 │   │       └── entrenamientos/
-│   │           ├── useEntrenamientos.ts
+│   │           ├── useEntrenamientos.ts   # Also exposes detail-view state (viewTarget, isViewModalOpen, viewLoading, requestViewInstance, closeViewModal) and buildPlantillaContenidoFromInstance for "Guardar como plantilla" from the detail view
 │   │           ├── useEntrenamientoForm.ts  # Includes restriction row state (add/remove/duplicate/update) and timing fields
 │   │           ├── useEntrenamientoScope.ts
 │   │           ├── useEntrenamientoCategorias.ts  # Fetch categories for a selected training instance
