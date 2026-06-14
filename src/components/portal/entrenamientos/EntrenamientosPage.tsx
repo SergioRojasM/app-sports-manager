@@ -6,6 +6,7 @@ import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { useState } from 'react';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
 import { EntrenamientoFormModal } from './EntrenamientoFormModal';
+import { EntrenamientoDetalleModal } from './EntrenamientoDetalleModal';
 import { EntrenamientoScopeModal } from './EntrenamientoScopeModal';
 import { EntrenamientoActionModal } from './EntrenamientoActionModal';
 import { EntrenamientosCalendar } from './EntrenamientosCalendar';
@@ -126,6 +127,12 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     guardarPlantilla,
     aplicarPlantilla,
     eliminarPlantilla,
+    onOpenGuardarPlantillaModalFromView,
+    viewTarget,
+    isViewModalOpen,
+    viewLoading,
+    requestViewInstance,
+    closeViewModal,
   } = useEntrenamientos({ tenantId });
 
   const instanceMap = useMemo(() => new Map(instances.map((instance) => [instance.id, instance])), [instances]);
@@ -165,6 +172,20 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
       return accumulator;
     }, {});
   }, [escenarios]);
+
+  const entrenadorNameById = useMemo(() => {
+    return entrenadores.reduce<Record<string, string>>((accumulator, item) => {
+      accumulator[item.id] = item.label;
+      return accumulator;
+    }, {});
+  }, [entrenadores]);
+
+  const servicioNameById = useMemo(() => {
+    return servicios.reduce<Record<string, string>>((accumulator, item) => {
+      accumulator[item.id] = item.label;
+      return accumulator;
+    }, {});
+  }, [servicios]);
 
   const selectedActionContext = useMemo(() => {
     if (!selectedInstanceForAction) {
@@ -316,6 +337,13 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         editDisabledReason={selectedActionContext.editDisabledReason}
         deleteDisabledReason={selectedActionContext.deleteDisabledReason}
         onClose={closeActionModal}
+        onViewDetail={() => {
+          if (!selectedInstanceForAction) {
+            return;
+          }
+          requestViewInstance(selectedInstanceForAction);
+          closeActionModal();
+        }}
         onEdit={() => {
           if (!selectedInstanceForAction || !selectedActionContext.canEdit) {
             return;
@@ -398,6 +426,24 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         onGuardarPlantilla={guardarPlantilla}
         onAplicarPlantilla={aplicarPlantilla}
         onEliminarPlantilla={eliminarPlantilla}
+      />
+
+      <EntrenamientoDetalleModal
+        open={isViewModalOpen}
+        viewTarget={viewTarget}
+        viewLoading={viewLoading}
+        canManage={canManage}
+        disciplineNameById={disciplineNameById}
+        scenarioNameById={scenarioNameById}
+        entrenadorNameById={entrenadorNameById}
+        servicioNameById={servicioNameById}
+        onClose={closeViewModal}
+        isGuardarPlantillaModalOpen={isGuardarPlantillaModalOpen}
+        isSavingPlantilla={isSavingPlantilla}
+        guardarPlantillaError={guardarPlantillaError}
+        onOpenGuardarPlantillaModal={onOpenGuardarPlantillaModalFromView}
+        onCloseGuardarPlantillaModal={closeGuardarPlantillaModal}
+        onGuardarPlantilla={guardarPlantilla}
       />
 
       <EntrenamientoScopeModal

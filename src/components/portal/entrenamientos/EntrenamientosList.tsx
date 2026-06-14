@@ -1,6 +1,6 @@
 import type { TrainingCalendarItem, TrainingVisibility } from '@/types/portal/entrenamientos.types';
 
-function VisibilidadBadge({ visibilidad }: { visibilidad: TrainingVisibility }) {
+export function VisibilidadBadge({ visibilidad }: { visibilidad: TrainingVisibility }) {
   if (visibilidad === 'publico') {
     return (
       <span className="rounded-md border border-turquoise/40 bg-turquoise/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-turquoise">
