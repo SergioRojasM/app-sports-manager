@@ -1,7 +1,9 @@
 import type { EntrenamientoCategoriaInput, EntrenamientoGrupoCategoria, EntrenamientoCategoria } from './entrenamiento-categorias.types';
 import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccion, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
+import type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido } from './entrenamiento-plantillas.types';
 
 export type { EntrenamientoGrupoCategoria, EntrenamientoCategoria };
+export type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido };
 
 export type TrainingType = 'unico' | 'recurrente';
 export type TrainingScope = 'single' | 'future' | 'series';
