@@ -44,5 +44,5 @@
 
 ## 7. Commit and Pull Request
 
-- [ ] 7.1 Create a commit with a message summarizing the fix (e.g., `fix(entrenamientos): hydrate categorias and auto-expand restrictions on edit`).
+- [x] 7.1 Create a commit with a message summarizing the fix (e.g., `fix(entrenamientos): hydrate categorias and auto-expand restrictions on edit`).
 - [ ] 7.2 Write a pull request description covering: the two root causes, the fix for each (categorias hydration + `skipNextCategoriasResetRef` reuse; restrictions section auto-expand), files changed, and the manual test steps from section 5.
