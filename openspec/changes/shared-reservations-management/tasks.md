@@ -46,4 +46,4 @@
 ## 9. Commit & PR
 
 - [x] 9.1 Create a commit with message summarizing the implementation of US-0073 shared reservations management
-- [ ] 9.2 Create a pull request with description covering: summary of changes, files created/modified, and test plan
+- [x] 9.2 Create a pull request with description covering: summary of changes, files created/modified, and test plan
