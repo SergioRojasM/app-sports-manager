@@ -89,3 +89,15 @@ export type ReservaReportRow = {
   observaciones_asistencia: string | null;
   validado_por_email: string | null;
 };
+
+export type ReservasManagementAsistencia = 'asistio' | 'no_asistio' | 'sin_registrar';
+
+export type ReservasManagementFilters = {
+  tenantId: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  atletaSearch?: string;
+  asistencia?: ReservasManagementAsistencia;
+  disciplinaNombre?: string;
+  limit?: number;
+};
