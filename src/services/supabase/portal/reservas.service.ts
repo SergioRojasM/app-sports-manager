@@ -546,17 +546,25 @@ async function getServicioEntitlements(
   tenantId: string,
   atletaId: string,
   referenceDate: string,
+  { includeVencidas = false }: { includeVencidas?: boolean } = {},
 ): Promise<Map<string, ServicioEntitlement[]>> {
   const supabase = createClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('suscripcion_servicios')
     .select(
       'servicio_id, suscripcion_id, unidades_restantes, suscripciones!inner(tenant_id, atleta_id, estado, fecha_inicio, fecha_fin)',
     )
     .eq('suscripciones.tenant_id', tenantId)
-    .eq('suscripciones.atleta_id', atletaId)
-    .neq('suscripciones.estado', 'cancelada');
+    .eq('suscripciones.atleta_id', atletaId);
+
+  if (includeVencidas) {
+    query = query.in('suscripciones.estado', ['activa', 'vencida']);
+  } else {
+    query = query.eq('suscripciones.estado', 'activa');
+  }
+
+  const { data, error } = await query;
 
   if (error) throw mapServiceError(error);
 
@@ -599,10 +607,11 @@ async function findServiceSubscriptionsToCharge(
   atletaId: string,
   servicioIds: string[],
   referenceDate: string,
+  { includeVencidas = false }: { includeVencidas?: boolean } = {},
 ): Promise<ServiceChargeEntry[]> {
   if (servicioIds.length === 0) return [];
 
-  const entitlements = await getServicioEntitlements(tenantId, atletaId, referenceDate);
+  const entitlements = await getServicioEntitlements(tenantId, atletaId, referenceDate, { includeVencidas });
   const results: ServiceChargeEntry[] = [];
 
   for (const servicioId of servicioIds) {
@@ -705,7 +714,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
 
     if (restricciones && restricciones.length > 0) {
       // Build active service entitlement set for this athlete, as of the training's date
-      const entitlements = await getServicioEntitlements(input.tenant_id, input.atleta_id, referenceDate);
+      const entitlements = await getServicioEntitlements(input.tenant_id, input.atleta_id, referenceDate, { includeVencidas: true });
 
       const activeServicioIds = new Set<string>(
         Array.from(entitlements.entries())
@@ -755,6 +764,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       input.atleta_id,
       serviceSlots,
       referenceDate,
+      { includeVencidas: !!input.bypass_restrictions },
     );
 
     const exhaustedEntry = chargeEntries.find((e) => e.exhausted);
@@ -843,7 +853,13 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
   });
 
   if (error) {
-    // Concurrent race: another booking consumed the last unit
+    if (error.code === 'P0001' && error.message?.includes('SUSCRIPCION_INACTIVA')) {
+      return {
+        ok: false,
+        code: 'SERVICIO_REQUERIDO',
+        message: 'La suscripción utilizada ya no está activa. No es posible completar la reserva.',
+      };
+    }
     if (error.code === 'P0001' && error.message?.includes('UNIDADES_AGOTADAS')) {
       return {
         ok: false,
