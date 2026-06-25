@@ -55,21 +55,30 @@ export function InicioProximosEntrenamientos({
             <Link
               key={e.reserva_id}
               href={`/portal/orgs/${e.tenant_id}/gestion-entrenamientos`}
-              className="flex items-center gap-4 p-4 rounded-md bg-slate-700/30 border border-white/5 hover:border-primary/30 transition-all group"
+              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-md bg-slate-700/30 border border-white/5 hover:border-primary/30 transition-all group"
               aria-label={`Ver entrenamiento ${e.nombre}`}
             >
-              {/* Discipline icon */}
-              <div className="size-10 rounded-md bg-secondary/10 flex items-center justify-center text-secondary flex-shrink-0">
-                <span className="material-symbols-outlined text-lg">
-                  {e.disciplina_nombre ? 'exercise' : 'exercise'}
-                </span>
+              <div className="flex items-center gap-3 sm:contents">
+                {/* Discipline icon */}
+                <div className="size-10 rounded-md bg-secondary/10 flex items-center justify-center text-secondary flex-shrink-0">
+                  <span className="material-symbols-outlined text-lg">
+                    {e.disciplina_nombre ? 'exercise' : 'exercise'}
+                  </span>
+                </div>
+
+                <div className="flex-1 min-w-0 sm:hidden">
+                  <p className="text-sm font-semibold text-secondary truncate">{e.nombre}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{formatFecha(e.fecha_hora)}</p>
+                </div>
+
+                <div className="flex-shrink-0 sm:hidden">{statusBadge(e.reserva_estado)}</div>
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-secondary truncate">{e.nombre}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{formatFecha(e.fecha_hora)}</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                <p className="text-sm font-semibold text-secondary truncate hidden sm:block">{e.nombre}</p>
+                <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">{formatFecha(e.fecha_hora)}</p>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:mt-1">
                   {e.escenario_nombre && (
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-xs">location_on</span>
@@ -87,8 +96,8 @@ export function InicioProximosEntrenamientos({
                 </div>
               </div>
 
-              {/* Status badge */}
-              <div className="flex-shrink-0">{statusBadge(e.reserva_estado)}</div>
+              {/* Status badge — desktop only (mobile badge is above) */}
+              <div className="flex-shrink-0 hidden sm:block">{statusBadge(e.reserva_estado)}</div>
             </Link>
           ))}
         </div>
