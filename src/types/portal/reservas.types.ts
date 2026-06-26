@@ -66,6 +66,7 @@ export type ReservaReportRow = {
   reserva_id: string;
   tenant_id: string;
   entrenamiento_id: string;
+  atleta_id: string;
   reserva_estado: string;
   fecha_reserva: string | null;
   fecha_cancelacion: string | null;
@@ -88,4 +89,26 @@ export type ReservaReportRow = {
   fecha_asistencia: string | null;
   observaciones_asistencia: string | null;
   validado_por_email: string | null;
+};
+
+export type ReservasManagementAsistencia = 'asistio' | 'no_asistio' | 'sin_registrar';
+
+export type ReservasManagementFilters = {
+  tenantId: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  atletaSearch?: string;
+  asistencia?: ReservasManagementAsistencia;
+  disciplinaNombre?: string;
+  limit?: number;
+};
+
+export type MisReservasFilters = {
+  tenantId: string;
+  atletaId: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
+  asistencia?: ReservasManagementAsistencia;
+  disciplinaNombre?: string;
+  limit?: number;
 };

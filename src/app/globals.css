@@ -4,6 +4,7 @@
 :root {
   --background: #0f172a;
   --foreground: #171717;
+  color-scheme: dark;
 }
 
 @theme inline {

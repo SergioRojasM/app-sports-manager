@@ -43,14 +43,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │               ├── (atleta)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-usuario users to /portal/orgs/[tenant_id]
 │   │               │   ├── entrenamientos-disponibles/page.tsx
-│   │               │   └── mis-suscripciones-y-pagos/page.tsx  # Usuario: view own subscriptions + upload comprobante
+│   │               │   ├── mis-suscripciones-y-pagos/page.tsx  # Usuario: view own subscriptions + upload comprobante
+│   │               │   └── mis-reservas/page.tsx               # Usuario: personal reservation history with server-side filtering (US-0074)
 │   │               ├── (entrenador)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-entrenador users to /portal/orgs/[tenant_id]
 │   │               │   └── atletas/page.tsx
 │   │               └── (shared)/
 │   │                   ├── layout.tsx        # Membership guard: any valid role allowed
 │   │                   ├── gestion-entrenamientos/page.tsx
-│   │                   └── gestion-planes/page.tsx
+│   │                   ├── gestion-planes/page.tsx
+│   │                   └── gestion-reservas/page.tsx        # Shared: cross-training reservations management with server-side filtering (US-0073)
 │   │
 │   ├── components/                       # Presentation layer
 │   │   ├── auth/
@@ -152,6 +154,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── VerServiciosModal.tsx          # Read-only modal: all service unit balances for a subscription (US-0067)
 │   │   │       ├── CrearSuscripcionModal.tsx     # 3-step admin modal to create a subscription on behalf of an athlete
 │   │   │       └── index.ts
+│   │   │   └── gestion-reservas/           # Feature slice (portal/gestion-reservas — US-0073)
+│   │   │       ├── GestionReservasPage.tsx        # Main page: filters, table, banner, CSV export
+│   │   │       ├── ReservasFiltersPanel.tsx        # Server-side filter panel: date range, athlete search, attendance, discipline
+│   │   │       ├── ReservasManagementTable.tsx     # Data table with two-line athlete cell, badges, client-side pagination
+│   │   │       ├── ReservaEstadoBadge.tsx          # Colored badge for reservation status
+│   │   │       └── index.ts
 │   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
 │   │   │       ├── PerfilPage.tsx
 │   │   │       ├── PerfilHeader.tsx
@@ -163,6 +171,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── MisSuscripcionesFilters.tsx     # Chip filter bar (subscription status + payment status)
 │   │   │       ├── SuscripcionCard.tsx              # Subscription card with plan info + SuscripcionEstadoBadge
 │   │   │       ├── PagoCard.tsx                     # Payment info, comprobante viewer, upload trigger
+│   │   │       └── index.ts
+│   │   │   └── mis-reservas/               # Feature slice (portal/mis-reservas — athlete personal reservation history, US-0074)
+│   │   │       ├── MisReservasPage.tsx             # Main page: filters, table, banner, CSV export (athlete-scoped)
+│   │   │       ├── MisReservasFiltersPanel.tsx     # Server-side filter panel: date range, attendance, discipline (no athlete search)
+│   │   │       ├── MisReservasTable.tsx            # Data table without athlete column, badges, client-side pagination
 │   │   │       └── index.ts
 │   │   └── ui/
 │   │
@@ -208,6 +221,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── gestion-solicitudes/
 │   │           ├── useSolicitudesAdmin.ts    # Admin: load pending, accept/reject actions
 │   │           └── useSolicitudRequest.ts   # User: submit request, track history/blocked state
+│   │       └── gestion-reservas/
+│   │           └── useGestionReservas.ts     # Filter state, loading, pagination, CSV export; delegates to reservasService.getReservasManagement (US-0073)
 │   │       └── gestion-suscripciones/
 │   │           ├── useGestionSuscripciones.ts
 │   │           ├── useValidarPago.ts
@@ -221,6 +236,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── mis-suscripciones-y-pagos/
 │   │           ├── useMisSuscripciones.ts      # Client-side filter state (subscription + payment status) with AND logic
 │   │           └── useSubirComprobante.ts     # File validation (MIME, 5 MB), upload with upsert, comprobante_path update
+│   │       └── mis-reservas/
+│   │           └── useMisReservas.ts          # Filter state, loading, pagination, CSV export; delegates to reservasService.getMisReservas (US-0074)
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -234,7 +251,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
 │   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
@@ -262,7 +279,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts
-│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export)
+│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export, includes atleta_id), ReservasManagementFilters (server-side filter input — US-0073), MisReservasFilters (athlete-scoped filter input — US-0074)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)
 │   │       └── servicios.types.ts        # Servicio, CreateServicioInput, UpdateServicioInput, ServicioFormValues, ServicioServiceError, PlanTipoServicio, PlanTipoServicioRow, SyncPlanTipoServiciosInput (US-0062)
