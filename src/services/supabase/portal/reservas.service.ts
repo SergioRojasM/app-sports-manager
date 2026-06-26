@@ -8,6 +8,7 @@ import type {
   UpdateReservaInput,
   ReservaReportRow,
   ReservasManagementFilters,
+  MisReservasFilters,
 } from '@/types/portal/reservas.types';
 import type { BookingResult, EntrenamientoRestriccion } from '@/types/portal/entrenamiento-restricciones.types';
 
@@ -1077,6 +1078,63 @@ async function getReservasManagement(
 }
 
 // ─────────────────────────────────────────────
+// Athlete personal reservations (US-0074)
+// ─────────────────────────────────────────────
+
+async function getMisReservas(
+  filters: MisReservasFilters,
+): Promise<ReservaReportRow[]> {
+  const supabase = createClient();
+
+  let query = supabase
+    .from('reservas_reporte_view')
+    .select('*')
+    .eq('tenant_id', filters.tenantId)
+    .eq('atleta_id', filters.atletaId);
+
+  if (filters.fechaDesde) {
+    query = query.gte('entrenamiento_fecha', filters.fechaDesde);
+  }
+
+  if (filters.fechaHasta) {
+    query = query.lte('entrenamiento_fecha', `${filters.fechaHasta}T23:59:59`);
+  }
+
+  if (filters.asistencia === 'asistio') {
+    query = query.eq('asistio', true);
+  } else if (filters.asistencia === 'no_asistio') {
+    query = query.eq('asistio', false);
+  } else if (filters.asistencia === 'sin_registrar') {
+    query = query.is('asistio', null);
+  }
+
+  if (filters.disciplinaNombre) {
+    query = query.eq('disciplina', filters.disciplinaNombre);
+  }
+
+  query = query.order('entrenamiento_fecha', { ascending: false, nullsFirst: false });
+
+  const hasActiveFilters = !!(
+    filters.fechaDesde ||
+    filters.fechaHasta ||
+    filters.asistencia ||
+    filters.disciplinaNombre
+  );
+
+  if (!hasActiveFilters) {
+    query = query.limit(filters.limit ?? 100);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw mapServiceError(error);
+  }
+
+  return (data ?? []) as ReservaReportRow[];
+}
+
+// ─────────────────────────────────────────────
 // Service export
 // ─────────────────────────────────────────────
 
@@ -1088,6 +1146,7 @@ export const reservasService = {
   getAtletaNivelId,
   getReservasReport,
   getReservasManagement,
+  getMisReservas,
   validateBookingRestrictions,
   validateCancellationRestriction,
   create,
