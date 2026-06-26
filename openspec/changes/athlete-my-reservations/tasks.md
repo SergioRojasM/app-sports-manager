@@ -49,5 +49,5 @@
 
 ## 11. Commit and PR
 
-- [ ] 11.1 Create a commit with message describing the feature implementation
-- [ ] 11.2 Create a pull request with title and description summarizing the change, acceptance criteria, and test plan
+- [x] 11.1 Create a commit with message describing the feature implementation
+- [ ] 11.2 Create a pull request with title and description summarizing the change, acceptance criteria, and test plan (blocked: no GitHub auth configured)
