@@ -303,9 +303,8 @@ Following structure reflects the current implementation and the target scalable 
 │       ├── csv.ts                           # RFC 4180 CSV generation (toCsvString, downloadTextFile) — used by ReservasPanel CSV export
 │       ├── validators.ts
 │       └── portal/
-│           └── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
-│       └── portal/
-│           └── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
+│           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
+│           └── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
 │
 ├── public/                      # Static assets
 │   ├── images/
