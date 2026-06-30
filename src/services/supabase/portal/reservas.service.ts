@@ -1,4 +1,5 @@
 import { createClient } from '@/services/supabase/client';
+import { bogotaDayStartIso, bogotaDayEndIso } from '@/lib/portal/bogota-date';
 import type {
   Reserva,
   ReservaView,
@@ -1028,11 +1029,11 @@ async function getReservasManagement(
     .eq('tenant_id', filters.tenantId);
 
   if (filters.fechaDesde) {
-    query = query.gte('entrenamiento_fecha', filters.fechaDesde);
+    query = query.gte('entrenamiento_fecha', bogotaDayStartIso(filters.fechaDesde));
   }
 
   if (filters.fechaHasta) {
-    query = query.lte('entrenamiento_fecha', `${filters.fechaHasta}T23:59:59`);
+    query = query.lte('entrenamiento_fecha', bogotaDayEndIso(filters.fechaHasta));
   }
 
   if (filters.atletaSearch) {
@@ -1093,11 +1094,11 @@ async function getMisReservas(
     .eq('atleta_id', filters.atletaId);
 
   if (filters.fechaDesde) {
-    query = query.gte('entrenamiento_fecha', filters.fechaDesde);
+    query = query.gte('entrenamiento_fecha', bogotaDayStartIso(filters.fechaDesde));
   }
 
   if (filters.fechaHasta) {
-    query = query.lte('entrenamiento_fecha', `${filters.fechaHasta}T23:59:59`);
+    query = query.lte('entrenamiento_fecha', bogotaDayEndIso(filters.fechaHasta));
   }
 
   if (filters.asistencia === 'asistio') {
