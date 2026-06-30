@@ -1,5 +1,6 @@
 import { createClient } from '@/services/supabase/client';
 import { PUBLIC_TENANT_ID } from '@/lib/constants';
+import { bogotaDayStartIso, bogotaDayEndIso } from '@/lib/portal/bogota-date';
 import {
   TrainingServiceError,
   type CreateTrainingSeriesInput,
@@ -357,11 +358,11 @@ export const entrenamientosService = {
       .order('fecha_hora', { ascending: true, nullsFirst: false });
 
     if (from) {
-      query = query.gte('fecha_hora', `${from}T00:00:00.000Z`);
+      query = query.gte('fecha_hora', bogotaDayStartIso(from));
     }
 
     if (to) {
-      query = query.lte('fecha_hora', `${to}T23:59:59.999Z`);
+      query = query.lte('fecha_hora', bogotaDayEndIso(to));
     }
 
     const { data, error } = await query;
