@@ -148,8 +148,9 @@ body {
 
   .landing-hero-overlay {
     background:
-      linear-gradient(90deg, rgba(7, 17, 31, 0.96) 0%, rgba(7, 17, 31, 0.82) 42%, rgba(7, 17, 31, 0.55) 66%, rgba(7, 17, 31, 0.86) 100%),
-      linear-gradient(180deg, rgba(7, 17, 31, 0.48) 0%, rgba(7, 17, 31, 0.82) 100%);
+      radial-gradient(circle at 18% 42%, rgba(7, 17, 31, 0.56) 0%, rgba(7, 17, 31, 0.32) 24%, rgba(7, 17, 31, 0.08) 50%, rgba(7, 17, 31, 0) 70%),
+      linear-gradient(90deg, rgba(7, 17, 31, 0.38) 0%, rgba(7, 17, 31, 0.22) 34%, rgba(7, 17, 31, 0.06) 62%, rgba(7, 17, 31, 0.28) 100%),
+      linear-gradient(180deg, rgba(7, 17, 31, 0.08) 0%, rgba(7, 17, 31, 0.38) 100%);
   }
 
   .landing-hero-glow {
