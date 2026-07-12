@@ -8,7 +8,7 @@ export default function TrustedBySection() {
   ];
 
   return (
-    <section className="py-12 border-y border-white/5 bg-white/[0.02]">
+    <section id="trusted-by" className="py-12 border-y border-white/5 bg-white/[0.02]">
       <p className="text-center text-slate-500 text-xs font-bold uppercase tracking-[0.3em] mb-10">
         Confían en nuestra tecnología
       </p>
