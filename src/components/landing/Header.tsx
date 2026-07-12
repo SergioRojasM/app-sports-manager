@@ -1,38 +1,48 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
+const navItems = [
+  { label: 'Plataforma', href: '#hero' },
+  { label: 'Funciones', href: '#features' },
+  { label: 'Para equipos', href: '#trusted-by' },
+  { label: 'Precios', href: '#pricing' },
+  { label: 'Recursos', href: '#footer' },
+];
+
 export default function Header() {
   return (
-    <nav className="sticky top-0 z-50 w-full glass border-b border-white/10 px-6 py-4">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="size-12 align-middle relative">
-          <Image
-            src="/icono_2.png"
-            alt="Wolfpack Logo"
-            fill
-            className="object-contain"
-          />
-        </div>
-          <h2 className="text-white text-xl font-black tracking-tighter italic">GRIT Arena</h2>
+    <nav className="absolute inset-x-0 top-0 z-40 px-5 py-5 md:px-8 lg:px-10">
+      <div className="landing-panel mx-auto flex w-full max-w-[1280px] items-center justify-between rounded-full px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center">
+          <div className="relative h-[31px] w-[136px] sm:h-[35px] sm:w-[156px] lg:h-[40px] lg:w-[176px]">
+            <Image
+              src="/landing/logo-navbar.png"
+              alt="GRIT Arena"
+              fill
+              priority
+              sizes="(max-width: 639px) 136px, (max-width: 1023px) 156px, 176px"
+              className="object-contain"
+            />
+          </div>
         </Link>
-        
-        <div className="hidden md:flex items-center gap-10">
-          <a className="text-white/70 hover:text-accent-teal text-sm font-medium transition-colors" href="#features">
-            Funciones
-          </a>
-          <a className="text-white/70 hover:text-accent-teal text-sm font-medium transition-colors" href="#pricing">
-            Planes
-          </a>
-          <a className="text-white/70 hover:text-accent-teal text-sm font-medium transition-colors" href="#">
-            Empresa
-          </a>
+
+        <div className="hidden lg:flex items-center gap-8 xl:gap-10">
+          {navItems.map((item) => (
+            <a
+              key={item.label}
+              className="landing-nav-link font-landing-display text-base font-semibold tracking-[0.04em]"
+              href={item.href}
+            >
+              {item.label}
+            </a>
+          ))}
         </div>
-        
-        <Link href="/auth/login">
-          <button className="bg-brand-gradient text-white px-6 py-2.5 rounded-full text-sm font-bold tracking-tight hover:scale-105 transition-transform">
-            Comenzar ahora
-          </button>
+
+        <Link
+          href="/auth/login"
+          className="landing-primary-button font-landing-display inline-flex items-center justify-center px-4 py-2 text-sm font-bold tracking-[0.04em] sm:px-5 sm:py-2.5 sm:text-base"
+        >
+          Iniciar sesión
         </Link>
       </div>
     </nav>

@@ -1,51 +1,60 @@
 import Link from 'next/link';
+import Image from 'next/image';
+import HeroValueProps from '@/components/landing/HeroValueProps';
 
 export default function HeroSection() {
   return (
-    <section id="hero" className="relative overflow-hidden pt-20 pb-32">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-turquoise/10 blur-[120px] rounded-full -z-10"></div>
-      
-      <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
-        <div className="flex flex-col gap-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 w-fit">
-            <span className="flex h-2 w-2 rounded-full bg-accent-teal"></span>
-            <span className="text-xs font-medium text-white/80 uppercase tracking-widest">
-              Novedad: Modo Táctico 2.0
-            </span>
-          </div>
-          
-          <h1 className="text-white text-5xl md:text-7xl font-black leading-[1.1] tracking-tight">
-            Eleva el <span className="text-brand-gradient italic">rendimiento</span> de tu equipo
-          </h1>
-          
-          <p className="text-slate-400 text-lg md:text-xl leading-relaxed max-w-lg">
-            La plataforma definitiva para la gestión profesional de equipos deportivos. 
-            Centraliza entrenamientos, comunicación y estadísticas en un solo lugar.
+    <section id="hero" className="relative overflow-hidden pb-16 pt-24 sm:pt-28 lg:pb-20 lg:pt-32">
+      <div className="absolute inset-0">
+        <Image
+          src="/landing/landing-hero-background.png"
+          alt="Athletes training in a high-performance environment"
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="landing-hero-overlay absolute inset-0" />
+        <div className="landing-hero-glow absolute -left-24 top-28 h-[420px] w-[420px] rounded-full blur-3xl" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[rgba(7,17,31,0.98)]" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-[680px] w-full max-w-[1280px] flex-col justify-center gap-8 px-5 sm:min-h-[700px] sm:px-8 lg:min-h-[780px] lg:gap-10 lg:px-10">
+        <div className="max-w-[680px]">
+          <p className="font-landing-display text-sm font-semibold uppercase tracking-[0.28em] text-landing-primary-light">
+            Sport Tech para alto rendimiento
           </p>
-          
-          <div className="flex flex-wrap gap-4">
-            <Link href="/auth/login">
-              <button className="bg-brand-gradient text-white px-8 py-4 rounded-full text-lg font-bold brand-glow transition-all flex items-center gap-2">
-                Comenzar ahora
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
+
+          <h1 className="font-landing-display mt-6 text-[52px] font-bold italic leading-[0.95] tracking-[-0.02em] text-landing-text sm:text-[64px] lg:text-[72px]">
+            Donde el <span className="text-landing-primary">deporte</span> evoluciona
+          </h1>
+
+          <div className="landing-divider mt-8" />
+
+          <p className="font-landing-body mt-8 max-w-[620px] text-base leading-8 text-landing-text-secondary sm:text-lg sm:leading-8">
+            La plataforma que impulsa a atletas y equipos a alcanzar su máximo potencial a través de tecnología, comunidad y conocimiento.
+          </p>
+
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+            <Link
+              href="/auth/login"
+              className="landing-primary-button font-landing-display inline-flex items-center justify-center gap-2 px-6 py-4 text-lg font-bold tracking-[0.04em] sm:px-8"
+            >
+              Comenzar ahora
+              <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
             </Link>
-            
-            <button className="glass text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-white/10 transition-all">
-              Ver Demo
-            </button>
+
+            <a
+              href="#features"
+              className="landing-secondary-button font-landing-display inline-flex items-center justify-center px-6 py-4 text-lg font-bold tracking-[0.04em] sm:px-8"
+            >
+              Conocer más
+            </a>
           </div>
         </div>
-        
-        <div className="relative flex justify-center lg:justify-end">
-          <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-2 shadow-2xl overflow-hidden glass max-w-2xl w-full">
-            <div
-              className="w-full bg-center bg-no-repeat aspect-[16/10] bg-cover rounded-xl"
-              style={{
-                backgroundImage: 'url("/app-demo.png")'
-              }}
-            />
-          </div>
+
+        <div className="mt-8 lg:mt-10">
+          <HeroValueProps />
         </div>
       </div>
     </section>
