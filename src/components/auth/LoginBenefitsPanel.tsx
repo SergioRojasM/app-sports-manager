@@ -6,15 +6,15 @@ export function LoginBenefitsPanel() {
       <div className="pointer-events-none absolute inset-0 radial-glow" />
 
       <div className="relative z-10 flex h-full flex-col pt-1 pl-3 md:pt-1 md:pl-8">
-        <header className="xl-6 flex items-center gap-3">
-          <div className="size-30 align-middle relative">
+        <header className="mb-8 flex items-center gap-3">
+          <div className="relative h-10 w-40 align-middle">
             <Image
-                src="/icono_2.png"
-              alt="Logo de Qbop Sports Manager"
-                fill
-                className="object-contain"
+              src="/logo-navbar.png"
+              alt="Logo de GRIT Arena"
+              fill
+              className="object-contain"
             />
-            </div>
+          </div>
         </header>
 
         <div className="max-w-lg">

@@ -1,20 +1,20 @@
 import Header from '@/components/landing/Header';
 import HeroSection from '@/components/landing/HeroSection';
-import TrustedBySection from '@/components/landing/TrustedBySection';
-import FeaturesSection from '@/components/landing/FeaturesSection';
-import ShowcaseSection from '@/components/landing/ShowcaseSection';
+import ProblemSolutionSection from '@/components/landing/ProblemSolutionSection';
+import OperationSection from '@/components/landing/operation';
+import AdministrationSection from '@/components/landing/administration';
 import PricingSection from '@/components/landing/PricingSection';
 import Footer from '@/components/landing/Footer';
 
 export default function Home() {
   return (
-    <div className="bg-navy-deep font-display text-slate-100 selection:bg-turquoise selection:text-navy-deep">
+    <div className="landing-shell selection:bg-[var(--landing-primary)] selection:text-slate-950">
       <Header />
       <HeroSection />
-      <TrustedBySection />
-      <FeaturesSection />
-      {/* <ShowcaseSection /> */}
-      {/* <PricingSection /> */}
+      <ProblemSolutionSection />
+      <OperationSection />
+      <AdministrationSection />
+      <PricingSection />
       <Footer />
     </div>
   );

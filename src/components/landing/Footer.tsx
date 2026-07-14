@@ -1,40 +1,39 @@
+import Image from 'next/image';
+
+const footerWhatsappUrl =
+  'https://wa.me/573224399865?text=' + encodeURIComponent('Quiero mas informacion de GRIT Arena');
+const footerEmailUrl = 'mailto:contacto@grit-arena.com';
+
 export default function Footer() {
   return (
-    <footer className="bg-navy-deep py-20 border-t border-white/5">
+    <footer id="footer" className="bg-navy-deep py-20 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
         {/* Brand Column */}
         <div className="col-span-1 md:col-span-1 flex flex-col gap-6">
-          <div className="flex items-center gap-2">
-            <div className="size-6 bg-brand-gradient flex items-center justify-center rounded-sm">
-              <span className="material-symbols-outlined text-white text-xs font-bold">
-                exercise
-              </span>
-            </div>
-            <h2 className="text-white text-lg font-black italic">GRIT Arena</h2>
+          <div className="relative h-8 w-36">
+            <Image src="/logo-navbar.png" alt="GRIT Arena" fill className="object-contain" />
           </div>
-          
+
           <p className="text-slate-500 text-sm leading-relaxed">
             Transformando el ADN de los equipos deportivos a través de datos y tecnología de élite.
           </p>
-          
+
           <div className="flex gap-4">
             <a
-              href="#"
+              href={footerWhatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Escribir por WhatsApp"
               className="size-10 rounded-full glass flex items-center justify-center text-white/60 hover:text-accent-teal transition-colors"
             >
-              <span className="material-symbols-outlined">public</span>
+              <span className="material-symbols-outlined" aria-hidden="true">chat</span>
             </a>
             <a
-              href="#"
+              href={footerEmailUrl}
+              aria-label="Enviar correo a contacto@grit-arena.com"
               className="size-10 rounded-full glass flex items-center justify-center text-white/60 hover:text-accent-teal transition-colors"
             >
-              <span className="material-symbols-outlined">video_library</span>
-            </a>
-            <a
-              href="#"
-              className="size-10 rounded-full glass flex items-center justify-center text-white/60 hover:text-accent-teal transition-colors"
-            >
-              <span className="material-symbols-outlined">alternate_email</span>
+              <span className="material-symbols-outlined" aria-hidden="true">mail</span>
             </a>
           </div>
         </div>
@@ -44,23 +43,23 @@ export default function Footer() {
           <h4 className="text-white font-bold mb-6">Producto</h4>
           <ul className="flex flex-col gap-4 text-slate-500 text-sm">
             <li>
-              <a className="hover:text-white transition-colors" href="#">
+              <a className="hover:text-white transition-colors" href="#hero">
+                Plataforma
+              </a>
+            </li>
+            <li>
+              <a className="hover:text-white transition-colors" href="#operacion">
                 Funcionalidades
               </a>
             </li>
             <li>
-              <a className="hover:text-white transition-colors" href="#">
-                Casos de éxito
+              <a className="hover:text-white transition-colors" href="#solucion">
+                Para equipos
               </a>
             </li>
             <li>
-              <a className="hover:text-white transition-colors" href="#">
+              <a className="hover:text-white transition-colors" href="#pricing">
                 Precios
-              </a>
-            </li>
-            <li>
-              <a className="hover:text-white transition-colors" href="#">
-                Seguridad
               </a>
             </li>
           </ul>
@@ -71,12 +70,12 @@ export default function Footer() {
           <h4 className="text-white font-bold mb-6">Compañía</h4>
           <ul className="flex flex-col gap-4 text-slate-500 text-sm">
             <li>
-              <a className="hover:text-white transition-colors" href="#">
+              <a className="hover:text-white transition-colors" href="#hero">
                 Sobre nosotros
               </a>
             </li>
             <li>
-              <a className="hover:text-white transition-colors" href="#">
+              <a className="hover:text-white transition-colors" href={footerEmailUrl}>
                 Contacto
               </a>
             </li>
