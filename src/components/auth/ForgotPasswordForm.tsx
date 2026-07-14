@@ -33,9 +33,9 @@ export function ForgotPasswordForm() {
   return (
     <div>
       <div className="mb-6 text-center md:text-left">
-        <div className="mb-4 flex justify-center md:justify-start">
-          <div className="relative h-14 w-14">
-            <Image src="/icono_2.png" alt="Logo de Qbop Sports Manager" fill className="object-contain" />
+        <div className="mb-8 flex justify-center md:justify-start">
+          <div className="relative h-10 w-40">
+            <Image src="/logo-navbar.png" alt="Logo de GRIT Arena" fill className="object-contain" />
           </div>
         </div>
         <h2 className="mb-2 text-3xl font-bold text-slate-100">

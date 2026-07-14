@@ -16,7 +16,7 @@ export default function Header() {
         <Link href="/" className="flex items-center">
           <div className="relative h-[31px] w-[136px] sm:h-[35px] sm:w-[156px] lg:h-[40px] lg:w-[176px]">
             <Image
-              src="/landing/logo-navbar.png"
+              src="/logo-navbar.png"
               alt="GRIT Arena"
               fill
               priority
