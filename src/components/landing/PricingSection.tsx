@@ -1,108 +1,207 @@
+'use client';
+
+import { useScrollReveal } from '@/hooks/landing/useScrollReveal';
+
+const whatsappPhone = '573224399865';
+
+function buildWhatsappUrl(message: string) {
+  return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
+}
+
+const baseModules = [
+  'Entrenamientos',
+  'Espacios deportivos',
+  'Atletas y entrenadores',
+  'Planes y suscripciones',
+  'Reportes e indicadores',
+  'Autogestión del atleta',
+];
+
+const plans = [
+  {
+    name: 'Gratis',
+    price: 'Gratis',
+    period: null,
+    popular: false,
+    limits: [
+      { icon: 'group', label: '0-10 atletas' },
+      { icon: 'admin_panel_settings', label: '1 Admin' },
+      { icon: 'sports', label: '1 Entrenador' },
+    ],
+    modules: baseModules,
+    extras: [],
+    ctaLabel: 'Comenzar gratis',
+    whatsappMessage: 'Hola, quiero comenzar gratis con GRIT Arena para mi club deportivo.',
+  },
+  {
+    name: 'Básico',
+    price: 'COP $110.000',
+    period: '/mes',
+    popular: false,
+    limits: [
+      { icon: 'group', label: 'Hasta 50 atletas' },
+      { icon: 'admin_panel_settings', label: '1 Admin' },
+      { icon: 'sports', label: '1 Entrenador' },
+    ],
+    modules: baseModules,
+    extras: [],
+    ctaLabel: 'Elegir plan',
+    whatsappMessage: 'Hola, quiero más información sobre el plan Básico de GRIT Arena para mi club deportivo.',
+  },
+  {
+    name: 'Intermedio',
+    price: 'COP $180.000',
+    period: '/mes',
+    popular: true,
+    limits: [
+      { icon: 'group', label: 'Hasta 100 atletas' },
+      { icon: 'admin_panel_settings', label: '1 Admin' },
+      { icon: 'sports', label: '3 Entrenadores' },
+    ],
+    modules: baseModules,
+    extras: [],
+    ctaLabel: 'Elegir plan',
+    whatsappMessage: 'Hola, quiero más información sobre el plan Intermedio de GRIT Arena para mi club deportivo.',
+  },
+  {
+    name: 'Pro',
+    price: 'COP $250.000',
+    period: '/mes',
+    popular: false,
+    limits: [
+      { icon: 'group', label: 'Atletas ilimitados' },
+      { icon: 'admin_panel_settings', label: 'Hasta 3 Administradores' },
+      { icon: 'sports', label: 'Hasta 5 Entrenadores' },
+    ],
+    modules: baseModules,
+    extras: ['Soporte prioritario', 'Exportación avanzada de reportes'],
+    ctaLabel: 'Elegir plan',
+    whatsappMessage: 'Hola, quiero más información sobre el plan Pro de GRIT Arena para mi club deportivo.',
+  },
+];
+
+function revealClasses(isVisible: boolean) {
+  return `landing-reveal ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`;
+}
+
 export default function PricingSection() {
-  const plans = [
-    {
-      name: 'Básico',
-      description: 'Ideal para equipos locales y startups deportivas.',
-      price: '$29',
-      period: '/mes',
-      features: [
-        'Gestión de hasta 20 jugadores',
-        'Calendario básico',
-        'Chat de equipo'
-      ],
-      buttonText: 'Seleccionar',
-      popular: false
-    },
-    {
-      name: 'Pro',
-      description: 'Gestión avanzada para clubes profesionales.',
-      price: '$79',
-      period: '/mes',
-      features: [
-        'Jugadores ilimitados',
-        'Estadísticas en tiempo real',
-        'Módulo de prevención de lesiones',
-        'Video análisis integrado'
-      ],
-      buttonText: 'Seleccionar Pro',
-      popular: true
-    },
-    {
-      name: 'Elite',
-      description: 'Para federaciones y organizaciones nacionales.',
-      price: '$199',
-      period: '/mes',
-      features: [
-        'Todo lo de Pro',
-        'Marca blanca (Custom App)',
-        'API y Webhooks',
-        'Soporte 24/7 dedicado'
-      ],
-      buttonText: 'Contactar',
-      popular: false
-    }
-  ];
+  const { ref: headerRef, isVisible: headerVisible } = useScrollReveal<HTMLDivElement>();
+  const { ref: gridRef, isVisible: gridVisible } = useScrollReveal<HTMLDivElement>();
 
   return (
-    <section id="pricing" className="py-32 max-w-7xl mx-auto px-6">
-      <div className="text-center mb-20">
-        <h2 className="text-white text-4xl md:text-5xl font-black tracking-tight mb-4 uppercase">
-          Planes para cada nivel
-        </h2>
-        <p className="text-slate-400">Escala tus herramientas según el crecimiento de tu club.</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-        {plans.map((plan, index) => (
-          <div
-            key={index}
-            className={`p-10 rounded-3xl flex flex-col h-full ${
-              plan.popular
-                ? 'bg-navy-medium border-2 border-transparent bg-clip-border relative scale-105 shadow-[0_0_40px_rgba(0,229,196,0.15)]'
-                : 'bg-card-dark border border-white/5'
-            }`}
-            style={
-              plan.popular
-                ? { borderImage: 'linear-gradient(135deg, #00e5c4 0%, #00b8a9 100%) 1' }
-                : undefined
-            }
-          >
-            {plan.popular && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-gradient text-white text-[10px] font-black uppercase tracking-tighter px-4 py-1 rounded-full">
-                Más popular
-              </div>
-            )}
-            
-            <h3 className="text-white text-xl font-bold mb-2">{plan.name}</h3>
-            <p className="text-slate-500 text-sm mb-8">{plan.description}</p>
-            
-            <div className="mb-8">
-              <span className="text-white text-4xl font-black">{plan.price}</span>
-              <span className="text-slate-500">{plan.period}</span>
-            </div>
-            
-            <ul className="flex flex-col gap-4 mb-10 flex-grow">
-              {plan.features.map((feature, featureIndex) => (
-                <li key={featureIndex} className="flex items-center gap-3 text-slate-300 text-sm">
-                  <span className="material-symbols-outlined text-accent-teal text-sm">
-                    check_circle
+    <section id="pricing" className="overflow-x-clip px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-14">
+        <div ref={headerRef} className={`${revealClasses(headerVisible)} mx-auto max-w-[720px] text-center`}>
+          <p className="font-landing-display text-sm font-semibold uppercase tracking-[0.28em] text-landing-primary">
+            Precios
+          </p>
+
+          <h2 className="font-landing-display mt-6 text-[40px] font-bold italic leading-[1.08] tracking-[-0.02em] sm:text-[48px]">
+            <span className="block text-landing-text">Un plan que crece</span>
+            <span className="block text-landing-primary">con tu club</span>
+          </h2>
+
+          <p className="font-landing-body mt-4 text-base leading-7 text-landing-text-secondary sm:text-lg">
+            Elige el plan que se ajuste al tamaño de tu club y escala cuando lo necesites. Precios en pesos
+            colombianos (COP).
+          </p>
+        </div>
+
+        <div
+          ref={gridRef}
+          className={`${revealClasses(gridVisible)} grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4`}
+          style={{ transitionDelay: gridVisible ? '120ms' : '0ms' }}
+        >
+          {plans.map((plan) => (
+            <div key={plan.name} className="flex flex-col">
+              {plan.popular ? (
+                <span className="mb-2 inline-flex self-center rounded-full bg-landing-primary px-4 py-1.5 font-landing-body text-[10.5px] font-bold uppercase tracking-wide text-[#07111F]">
+                  Más elegido
+                </span>
+              ) : (
+                <div className="mb-2 hidden h-[26px] lg:block" />
+              )}
+
+              <div
+                className={`flex h-full flex-col gap-4 rounded-2xl border bg-landing-surface-card p-7 ${
+                  plan.popular ? 'border-2 border-landing-primary' : 'border-landing-border'
+                }`}
+              >
+                <p
+                  className={`font-landing-body text-[13px] font-bold uppercase tracking-wide ${
+                    plan.popular ? 'text-landing-primary' : 'text-landing-text-muted'
+                  }`}
+                >
+                  {plan.name}
+                </p>
+
+                <div className="flex items-end gap-1.5">
+                  <span className="font-landing-display text-[34px] font-bold text-landing-text">
+                    {plan.price}
                   </span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            
-            <button
-              className={`w-full py-4 rounded-full font-bold transition-all ${
-                plan.popular
-                  ? 'bg-brand-gradient text-white hover:scale-[1.02]'
-                  : 'border border-white/10 text-white hover:bg-white/5'
-              }`}
-            >
-              {plan.buttonText}
-            </button>
-          </div>
-        ))}
+                  {plan.period && (
+                    <span className="font-landing-body text-sm font-medium text-landing-text-muted">
+                      {plan.period}
+                    </span>
+                  )}
+                </div>
+
+                <div className="border-t border-landing-divider" />
+
+                <div className="flex flex-col gap-2.5">
+                  {plan.limits.map((limit) => (
+                    <div key={limit.label} className="flex items-center gap-2">
+                      <span aria-hidden="true" className="material-symbols-outlined text-[15px] text-landing-primary">
+                        {limit.icon}
+                      </span>
+                      <span className="font-landing-body text-[13.5px] font-medium text-landing-text-secondary">
+                        {limit.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-landing-divider" />
+
+                <p className="font-landing-body text-[10.5px] font-bold uppercase tracking-wide text-landing-text-muted">
+                  Módulos incluidos
+                </p>
+
+                <div className="flex flex-col gap-2">
+                  {plan.modules.map((module) => (
+                    <div key={module} className="flex items-center gap-2">
+                      <span aria-hidden="true" className="material-symbols-outlined text-[14px] text-landing-primary">
+                        check_circle
+                      </span>
+                      <span className="font-landing-body text-[12.5px] text-landing-text">{module}</span>
+                    </div>
+                  ))}
+                  {plan.extras.map((extra) => (
+                    <div key={extra} className="flex items-center gap-2">
+                      <span aria-hidden="true" className="material-symbols-outlined text-[14px] text-[#F5B942]">
+                        star
+                      </span>
+                      <span className="font-landing-body text-[12.5px] text-landing-text">{extra}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <a
+                  href={buildWhatsappUrl(plan.whatsappMessage)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`mt-auto flex w-full items-center justify-center rounded-[10px] py-3.5 text-center font-landing-body text-sm font-bold transition-colors ${
+                    plan.popular
+                      ? 'bg-landing-primary text-[#07111F] hover:bg-landing-primary-light'
+                      : 'border border-landing-border text-landing-text hover:border-landing-primary/60'
+                  }`}
+                >
+                  {plan.ctaLabel}
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

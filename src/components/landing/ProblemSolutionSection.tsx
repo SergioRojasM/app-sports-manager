@@ -1,81 +1,91 @@
-const solutionItems = [
+'use client';
+
+import { useScrollReveal } from '@/hooks/landing/useScrollReveal';
+
+const roleItems = [
   {
-    icon: 'person',
-    title: 'Atleta',
-    description: 'Reserva según su plan, consulta sesiones y mantiene claridad sobre su actividad.',
+    icon: 'group',
+    title: 'Atletas y entrenadores',
+    description:
+      'Reservas, entrenamientos y seguimiento deportivo desde un solo flujo, dentro y fuera de tu equipo.',
   },
   {
-    icon: 'calendar_month',
-    title: 'Entrenador',
-    description: 'Gestiona entrenamientos, grupos y seguimiento deportivo desde un flujo ordenado.',
+    icon: 'bar_chart',
+    title: 'Operación y dirección',
+    description:
+      'Pagos, asistencia y métricas conectadas para decisiones más rápidas y visibilidad total del negocio.',
   },
   {
-    icon: 'query_stats',
-    title: 'Operación',
-    description: 'Automatiza pagos, reservas, asistencia y comunicación sin depender de procesos sueltos.',
-  },
-  {
-    icon: 'shield',
-    title: 'Dirección',
-    description: 'Obtiene visibilidad del negocio y decisiones más rápidas con información trazable.',
-  },
-  {
-    icon: 'groups',
+    icon: 'diversity_3',
     title: 'Comunidad',
-    description: 'Crea comunidad publicando entrenamientos y dando acceso a atletas fuera de tu equipo.',
+    description: 'Publica entrenamientos y da acceso a atletas fuera de tu equipo para hacer crecer tu comunidad.',
   },
 ];
 
+function revealClasses(isVisible: boolean) {
+  return `landing-reveal ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`;
+}
+
 export default function ProblemSolutionSection() {
+  const { ref: contentRef, isVisible: contentVisible } = useScrollReveal<HTMLDivElement>();
+
   return (
-    <section id="trusted-by" className="px-5 py-10 sm:px-8 lg:px-10 lg:py-14">
-      <div className="mx-auto flex w-full max-w-[1280px] flex-col">
-        <div className="landing-problem-solution-surface landing-problem-solution-accent px-6 py-8 sm:px-8 lg:px-12 lg:py-12">
-          <div className="grid gap-10 lg:grid-cols-[0.96fr_1.04fr] lg:items-start">
-            <div className="max-w-[560px]">
-              <p className="font-landing-display text-base font-semibold uppercase tracking-[0.08em] text-landing-primary">
-                Solución
-              </p>
-              <div className="landing-divider mt-4" />
+    <section id="solucion" className="overflow-x-clip px-5 py-16 sm:px-8 lg:px-10 lg:py-20">
+      <div
+        ref={contentRef}
+        className={`${revealClasses(contentVisible)} mx-auto grid w-full max-w-[1280px] gap-10 lg:grid-cols-[1fr_1.3fr] lg:items-start lg:gap-20`}
+      >
+        <div className="max-w-[520px]">
+          <p className="font-landing-display text-sm font-semibold uppercase tracking-[0.28em] text-landing-primary">
+            Solución
+          </p>
+          <div className="landing-divider mt-4" />
 
-              <h2 className="font-landing-display mt-6 max-w-[14ch] text-[40px] font-bold italic leading-[1] tracking-[-0.02em] text-landing-text sm:text-[48px] lg:text-[58px]">
-                Un sistema pensado para <span className="text-landing-primary">profesionalizar</span> la gestión deportiva
-              </h2>
+          <h2 className="font-landing-display mt-6 text-[40px] font-bold italic leading-[1.05] tracking-[-0.02em] sm:text-[48px] lg:text-[56px]">
+            <span className="block text-landing-text">Un sistema</span>
+            <span className="block text-landing-text">pensado para</span>
+            <span className="block">
+              <span className="text-landing-primary">profesionalizar</span>
+              <span className="text-landing-text"> la</span>
+            </span>
+            <span className="block text-landing-text">gestión deportiva</span>
+          </h2>
 
-              <p className="font-landing-body mt-6 max-w-[56ch] text-base leading-8 text-landing-text-secondary sm:text-lg">
-                La plataforma conecta la operación administrativa, comercial y deportiva en un solo flujo.
-              </p>
-            </div>
+          <p className="font-landing-body mt-6 text-base leading-8 text-landing-text-secondary sm:text-lg">
+            La plataforma conecta la operación administrativa, comercial y deportiva en un solo flujo.
+          </p>
+        </div>
 
-            <div className="flex flex-col gap-4">
-              <div className="landing-solution-flow flex flex-col gap-2.5 sm:gap-3">
-                {solutionItems.map((item) => (
-                  <article
-                    key={item.title}
-                    className="landing-panel grid gap-2.5 rounded-[18px] px-3.5 py-3.5 sm:grid-cols-[64px_1fr] sm:items-center sm:px-4 sm:py-3.5"
-                  >
-                    <div className="landing-solution-node">
-                      <span className="material-symbols-outlined text-[26px] text-landing-primary">{item.icon}</span>
-                    </div>
+        <div>
+          <div className="divide-y divide-landing-divider border-y border-landing-divider">
+            {roleItems.map((item) => (
+              <div key={item.title} className="flex items-center gap-5 py-6">
+                <div className="flex size-14 shrink-0 items-center justify-center rounded-full border border-landing-primary/20 bg-landing-primary/10">
+                  <span aria-hidden="true" className="material-symbols-outlined text-[28px] text-landing-primary">
+                    {item.icon}
+                  </span>
+                </div>
 
-                    <div className="sm:text-left">
-                      <h3 className="font-landing-display text-[18px] font-bold uppercase tracking-[0.05em] text-landing-primary sm:text-[19px]">
-                        {item.title}
-                      </h3>
-                      <p className="font-landing-body mt-1 max-w-[44ch] text-[14px] leading-6 text-landing-text-secondary sm:text-[15px] sm:leading-6">
-                        {item.description}
-                      </p>
-                    </div>
-                  </article>
-                ))}
+                <div>
+                  <h3 className="font-landing-display text-[20px] font-bold italic text-landing-text">
+                    {item.title}
+                  </h3>
+                  <p className="font-landing-body mt-1.5 text-[15px] leading-relaxed text-landing-text-secondary">
+                    {item.description}
+                  </p>
+                </div>
               </div>
+            ))}
+          </div>
 
-              <div className="landing-summary-badge mx-auto">
-                <span className="material-symbols-outlined text-[22px] text-landing-primary">verified</span>
-                <span className="font-landing-display text-lg font-bold uppercase tracking-[0.05em] text-landing-primary">
-                  Todo conectado. Todo bajo control.
-                </span>
-              </div>
+          <div className="mt-7 flex justify-center">
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-landing-primary px-7 py-3.5">
+              <span aria-hidden="true" className="material-symbols-outlined text-[18px] text-landing-primary">
+                verified
+              </span>
+              <span className="font-landing-display text-[13px] font-bold uppercase tracking-[0.05em] text-landing-primary">
+                Todo conectado. Todo bajo control.
+              </span>
             </div>
           </div>
         </div>

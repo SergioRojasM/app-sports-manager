@@ -1,7 +1,8 @@
 import Header from '@/components/landing/Header';
 import HeroSection from '@/components/landing/HeroSection';
 import ProblemSolutionSection from '@/components/landing/ProblemSolutionSection';
-import FeaturesSection from '@/components/landing/FeaturesSection';
+import OperationSection from '@/components/landing/operation';
+import AdministrationSection from '@/components/landing/administration';
 import PricingSection from '@/components/landing/PricingSection';
 import Footer from '@/components/landing/Footer';
 
@@ -11,7 +12,8 @@ export default function Home() {
       <Header />
       <HeroSection />
       <ProblemSolutionSection />
-      <FeaturesSection />
+      <OperationSection />
+      <AdministrationSection />
       <PricingSection />
       <Footer />
     </div>

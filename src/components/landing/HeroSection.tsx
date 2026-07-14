@@ -2,7 +2,7 @@ import Image from 'next/image';
 import HeroValueProps from '@/components/landing/HeroValueProps';
 
 const demoWhatsappUrl =
-  'https://wa.me/2334399865?text=Hola%2C%20quiero%20solicitar%20una%20demo%20de%20GRIT%20Arena%20para%20mi%20club%20deportivo.';
+  'https://wa.me/573224399865?text=Hola%2C%20quiero%20solicitar%20una%20demo%20de%20GRIT%20Arena%20para%20mi%20club%20deportivo.';
 
 export default function HeroSection() {
   return (
@@ -49,7 +49,7 @@ export default function HeroSection() {
             </a>
 
             <a
-              href="#features"
+              href="#operacion"
               className="landing-secondary-button font-landing-display inline-flex items-center justify-center px-6 py-4 text-lg font-bold tracking-[0.04em] sm:px-8"
             >
               Ver cómo funciona
