@@ -28,7 +28,7 @@ export default function HeroSection() {
           </p>
 
           <h1 className="font-landing-display mt-6 text-[52px] font-bold italic leading-[0.95] tracking-[-0.02em] text-landing-text sm:text-[64px] lg:text-[72px]">
-            Gestiona todo tu club deportivo desde una sola plataforma
+            La plataforma donde el deporte evoluciona
           </h1>
 
           <div className="landing-divider mt-8" />
