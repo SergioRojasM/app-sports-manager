@@ -17,13 +17,10 @@ export function PortalHeader({ profile, role }: PortalHeaderProps) {
     <header className="relative z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-portal-border bg-navy-deep/95 px-6 backdrop-blur-md">
       {/* Left: logo + nav menu */}
       <div className="flex items-center gap-4">
-        <Link href="/portal" className="flex items-center gap-2.5">
-          <div className="relative h-8 w-8">
-            <Image src="/icono_2.png" alt="qbop sports" fill className="object-contain" />
+        <Link href="/portal" className="flex items-center">
+          <div className="relative h-8 w-32">
+            <Image src="/logo-navbar.png" alt="GRIT Arena" fill className="object-contain" />
           </div>
-          <span className="font-display text-sm font-semibold text-slate-100">
-            GRIT <span className="text-turquoise"> Arena</span>
-          </span>
         </Link>
         <div className="h-5 w-px bg-portal-border" />
         <PortalNavMenu role={role} />
