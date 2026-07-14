@@ -3,8 +3,8 @@ import Image from 'next/image';
 
 const navItems = [
   { label: 'Plataforma', href: '#hero' },
-  { label: 'Funciones', href: '#features' },
-  { label: 'Para equipos', href: '#trusted-by' },
+  { label: 'Funciones', href: '#operacion' },
+  { label: 'Para equipos', href: '#solucion' },
   { label: 'Precios', href: '#pricing' },
   { label: 'Recursos', href: '#footer' },
 ];
