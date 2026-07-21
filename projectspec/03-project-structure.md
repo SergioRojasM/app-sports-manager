@@ -37,6 +37,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-disciplinas/page.tsx
 │   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
+│   │               │   ├── gestion-formularios/page.tsx  # Admin: form templates + field schema CRUD (US-0084)
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
@@ -121,6 +122,14 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── ServiciosPage.tsx      # Admin CRUD page for tenant services catalog
 │   │   │       ├── ServiciosTable.tsx     # Table: nombre, descripcion, activo badge, edit/delete actions
 │   │   │       ├── ServicioFormModal.tsx  # Right-side slide modal for create/edit service
+│   │   │       └── index.ts
+│   │   │   └── formularios/               # Feature slice (portal/formularios — US-0084)
+│   │   │       ├── FormulariosPage.tsx           # Admin CRUD page for tenant form templates
+│   │   │       ├── FormulariosTable.tsx          # Table: nombre, descripcion, field count, activo badge; expandable rows
+│   │   │       ├── FormularioFormModal.tsx       # Right-side slide modal for create/edit plantilla
+│   │   │       ├── FormularioCamposPanel.tsx     # Expandable per-row panel: campos CRUD + move up/down reorder
+│   │   │       ├── FormularioCampoFormModal.tsx  # Right-side slide modal for create/edit campo; conditional lista_valores + campo_nombre auto-slug
+│   │   │       ├── FormularioTipoCampoBadge.tsx  # Badge mapping campo_tipo to label/icon
 │   │   │       └── index.ts
 │   │   │   └── gestion-equipo/            # Feature slice (portal/gestion-equipo)
 │   │   │       ├── EquipoPage.tsx
@@ -214,6 +223,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── servicios/            # Feature hooks for services catalog (US-0062)
 │   │           ├── useServicios.ts       # List + CRUD + modal coordination for servicios
 │   │           └── useServicioForm.ts    # Controlled form state for ServicioFormModal
+│   │       └── formularios/          # Feature hooks for form templates (US-0084)
+│   │           ├── useFormularios.ts         # List + CRUD + modal coordination for plantillas
+│   │           ├── useFormularioForm.ts      # Controlled form state for FormularioFormModal
+│   │           ├── useFormularioEsquema.ts   # List + CRUD + reorder for a plantilla's campos
+│   │           └── useFormularioCampoForm.ts # Controlled form state for FormularioCampoFormModal; campo_etiqueta → campo_nombre auto-slugify
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
 │   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
@@ -255,6 +269,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
 │   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
+│   │   │   └── formularios.service.ts  # CRUD for formularios_plantillas + formulario_plantilla_esquema, reorderCampos (US-0084)
 │   │       │   └── suscripciones.service.ts  # createSuscripcion (calls populate_suscripcion_servicios RPC when plan_tipo_id is set — US-0063), hasPendingSuscripcion, getSuscripcionServicios (returns SuscripcionServicio[] for a given suscripcion_id)
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
@@ -283,6 +298,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)
 │   │       └── servicios.types.ts        # Servicio, CreateServicioInput, UpdateServicioInput, ServicioFormValues, ServicioServiceError, PlanTipoServicio, PlanTipoServicioRow, SyncPlanTipoServiciosInput (US-0062)
+│   │       └── formularios.types.ts      # FormularioPlantilla, FormularioCampo, FormularioTipoCampo union, FormularioPlantillaConCampos, FormularioPlantillaListItem, Create/Update input types, form-values types, FormularioServiceError (US-0084)
 │   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063)
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
