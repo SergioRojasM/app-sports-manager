@@ -1,9 +1,14 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useFormularios } from '@/hooks/portal/formularios/useFormularios';
+import { formulariosService } from '@/services/supabase/portal/formularios.service';
+import { FormularioServiceError } from '@/types/portal/formularios.types';
 import { FormularioFormModal } from './FormularioFormModal';
 import { FormulariosTable } from './FormulariosTable';
-import type { FormularioPlantillaListItem, FormularioPlantillaFormValues } from '@/types/portal/formularios.types';
+import { FormularioPreviewModal } from './FormularioPreviewModal';
+import type { FormularioPlantillaListItem, FormularioPlantillaFormValues, FormularioSeccion } from '@/types/portal/formularios.types';
 
 type FormulariosPageProps = {
   tenantId: string;
@@ -32,47 +37,61 @@ function EmptyState() {
 }
 
 export function FormulariosPage({ tenantId }: FormulariosPageProps) {
+  const router = useRouter();
   const {
     plantillas,
     isLoading,
     error,
     isModalOpen,
-    editingPlantilla,
     submitError,
-    successMessage,
     deleteError,
     openCreateModal,
-    openEditModal,
     closeModal,
     createPlantilla,
-    updatePlantilla,
     deletePlantilla,
     clearDeleteError,
     refresh,
   } = useFormularios({ tenantId });
 
-  const handleSubmit = async (values: FormularioPlantillaFormValues): Promise<boolean> => {
-    if (editingPlantilla) {
-      return updatePlantilla(editingPlantilla.id, {
-        nombre: values.nombre,
-        descripcion: values.descripcion.trim() || null,
-        activo: values.activo,
-      });
-    }
-    return createPlantilla({
+  const [previewPlantilla, setPreviewPlantilla] = useState<FormularioPlantillaListItem | null>(null);
+  const [previewSecciones, setPreviewSecciones] = useState<FormularioSeccion[]>([]);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  const handleCreate = async (values: FormularioPlantillaFormValues): Promise<boolean> => {
+    const created = await createPlantilla({
       tenant_id: tenantId,
       nombre: values.nombre,
       descripcion: values.descripcion.trim() || null,
     });
+    if (created) {
+      router.push(`/portal/orgs/${tenantId}/gestion-formularios/${created.id}`);
+      return true;
+    }
+    return false;
   };
 
   const handleDelete = (plantilla: FormularioPlantillaListItem) => {
     clearDeleteError();
     const confirmed = window.confirm(
-      `¿Seguro que quieres eliminar la plantilla "${plantilla.nombre}"? Se eliminarán también todos sus campos. Esta acción no se puede deshacer.`,
+      `¿Seguro que quieres eliminar la plantilla "${plantilla.nombre}"? Se eliminarán también todas sus secciones. Esta acción no se puede deshacer.`,
     );
     if (!confirmed) return;
     void deletePlantilla(plantilla.id);
+  };
+
+  const handlePreview = async (plantilla: FormularioPlantillaListItem) => {
+    setPreviewPlantilla(plantilla);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    try {
+      const data = await formulariosService.getPlantillaConSecciones(plantilla.id);
+      setPreviewSecciones(data.secciones);
+    } catch (err) {
+      setPreviewError(err instanceof FormularioServiceError ? err.message : 'No fue posible cargar la vista previa.');
+    } finally {
+      setPreviewLoading(false);
+    }
   };
 
   return (
@@ -93,15 +112,6 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
           Nueva plantilla
         </button>
       </header>
-
-      {successMessage ? (
-        <div
-          className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200"
-          role="status"
-        >
-          {successMessage}
-        </div>
-      ) : null}
 
       {deleteError ? (
         <div
@@ -130,16 +140,18 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
       {!isLoading && !error && plantillas.length === 0 ? <EmptyState /> : null}
 
       {!isLoading && !error && plantillas.length > 0 ? (
-        <FormulariosTable rows={plantillas} onEdit={openEditModal} onDelete={handleDelete} />
+        <FormulariosTable tenantId={tenantId} rows={plantillas} onPreview={(p) => void handlePreview(p)} onDelete={handleDelete} />
       ) : null}
 
-      <FormularioFormModal
-        open={isModalOpen}
-        mode={editingPlantilla ? 'edit' : 'create'}
-        editingPlantilla={editingPlantilla}
-        submitError={submitError}
-        onClose={closeModal}
-        onSubmit={handleSubmit}
+      <FormularioFormModal open={isModalOpen} submitError={submitError} onClose={closeModal} onSubmit={handleCreate} />
+
+      <FormularioPreviewModal
+        open={previewPlantilla !== null}
+        plantillaNombre={previewPlantilla?.nombre ?? ''}
+        secciones={previewSecciones}
+        loading={previewLoading}
+        error={previewError}
+        onClose={() => setPreviewPlantilla(null)}
       />
     </section>
   );

@@ -1,29 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { FormularioPlantilla, FormularioPlantillaFormValues } from '@/types/portal/formularios.types';
+import type { FormularioPlantillaFormValues } from '@/types/portal/formularios.types';
 import { useFormularioForm } from '@/hooks/portal/formularios/useFormularioForm';
 
 type FormularioFormModalProps = {
   open: boolean;
-  mode: 'create' | 'edit';
-  editingPlantilla: FormularioPlantilla | null;
   submitError: string | null;
   onClose: () => void;
   onSubmit: (values: FormularioPlantillaFormValues) => Promise<boolean>;
 };
 
-export function FormularioFormModal({
-  open,
-  mode,
-  editingPlantilla,
-  submitError,
-  onClose,
-  onSubmit,
-}: FormularioFormModalProps) {
-  const { values, setField, reset, isSubmitting, fieldError, handleSubmit } = useFormularioForm({
-    initialValues: editingPlantilla,
-  });
+export function FormularioFormModal({ open, submitError, onClose, onSubmit }: FormularioFormModalProps) {
+  const { values, setField, reset, isSubmitting, fieldError, handleSubmit } = useFormularioForm();
 
   const [visible, setVisible] = useState(false);
 
@@ -32,8 +21,9 @@ export function FormularioFormModal({
       requestAnimationFrame(() => setVisible(true));
     } else {
       setVisible(false);
+      reset();
     }
-  }, [open]);
+  }, [open, reset]);
 
   useEffect(() => {
     if (!open) return;
@@ -47,12 +37,7 @@ export function FormularioFormModal({
   if (!open) return null;
 
   const handleFormSubmit = async () => {
-    const success = await handleSubmit(async (vals) => {
-      const ok = await onSubmit(vals);
-      if (ok) reset();
-      return ok;
-    });
-    if (success) onClose();
+    await handleSubmit(async (vals) => onSubmit(vals));
   };
 
   return (
@@ -71,7 +56,7 @@ export function FormularioFormModal({
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label={mode === 'create' ? 'Nueva plantilla' : 'Editar plantilla'}
+        aria-label="Nueva plantilla"
         className={[
           'absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out',
           visible ? 'translate-x-0' : 'translate-x-full',
@@ -79,11 +64,9 @@ export function FormularioFormModal({
       >
         <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">
-              {mode === 'create' ? 'Nueva plantilla' : 'Editar plantilla'}
-            </h2>
+            <h2 className="text-lg font-semibold text-slate-100">Nueva plantilla</h2>
             <p className="mt-1 text-xs text-slate-400">
-              Configura la plantilla de formulario para esta organización.
+              Dale un nombre a tu plantilla; luego podrás construirla sección por sección.
             </p>
           </div>
           <button
@@ -146,21 +129,6 @@ export function FormularioFormModal({
             />
           </div>
 
-          {/* Activo */}
-          <div className="flex items-center gap-2">
-            <input
-              id="plantilla-activo"
-              type="checkbox"
-              checked={values.activo}
-              onChange={(e) => setField('activo', e.target.checked)}
-              disabled={isSubmitting}
-              className="rounded border-slate-600 bg-navy-deep"
-            />
-            <label htmlFor="plantilla-activo" className="text-sm text-slate-200">
-              Plantilla activa
-            </label>
-          </div>
-
           {submitError ? (
             <div
               className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
@@ -186,11 +154,7 @@ export function FormularioFormModal({
             disabled={isSubmitting}
             className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
           >
-            {isSubmitting
-              ? 'Guardando...'
-              : mode === 'create'
-                ? 'Crear plantilla'
-                : 'Guardar cambios'}
+            {isSubmitting ? 'Creando...' : 'Crear plantilla'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">save</span>
           </button>
         </footer>

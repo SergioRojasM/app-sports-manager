@@ -37,7 +37,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-disciplinas/page.tsx
 │   │               │   ├── gestion-equipo/page.tsx
 │   │               │   ├── gestion-escenarios/page.tsx
-│   │               │   ├── gestion-formularios/page.tsx  # Admin: form templates + field schema CRUD (US-0084)
+│   │               │   ├── gestion-formularios/page.tsx  # Admin: form templates list (US-0084/US-0085)
+│   │               │   ├── gestion-formularios/[formulario]/page.tsx  # Admin: Google-Forms-style section builder for one template (US-0085)
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
@@ -123,13 +124,17 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── ServiciosTable.tsx     # Table: nombre, descripcion, activo badge, edit/delete actions
 │   │   │       ├── ServicioFormModal.tsx  # Right-side slide modal for create/edit service
 │   │   │       └── index.ts
-│   │   │   └── formularios/               # Feature slice (portal/formularios — US-0084)
-│   │   │       ├── FormulariosPage.tsx           # Admin CRUD page for tenant form templates
-│   │   │       ├── FormulariosTable.tsx          # Table: nombre, descripcion, field count, activo badge; expandable rows
-│   │   │       ├── FormularioFormModal.tsx       # Right-side slide modal for create/edit plantilla
-│   │   │       ├── FormularioCamposPanel.tsx     # Expandable per-row panel: campos CRUD + move up/down reorder
-│   │   │       ├── FormularioCampoFormModal.tsx  # Right-side slide modal for create/edit campo; conditional lista_valores + campo_nombre auto-slug
-│   │   │       ├── FormularioTipoCampoBadge.tsx  # Badge mapping campo_tipo to label/icon
+│   │   │   └── formularios/               # Feature slice (portal/formularios — US-0084/US-0085)
+│   │   │       ├── FormulariosPage.tsx             # List page: create (redirects into editor) + delete + lazy preview
+│   │   │       ├── FormulariosTable.tsx            # Table: nombre, descripcion, section count, activo badge; icon actions (Previsualizar/Editar/Eliminar)
+│   │   │       ├── FormularioFormModal.tsx         # Right-side slide modal, create-only (nombre + descripcion)
+│   │   │       ├── FormularioEditorPage.tsx        # Dedicated per-template editor: auto-saving header + section builder + vista previa
+│   │   │       ├── FormularioSeccionesBuilder.tsx  # Ordered list of section cards + pinned "Añadir sección de formulario" button
+│   │   │       ├── FormularioSeccionCard.tsx       # Collapsed (per-tipo render) / expanded (live type-driven edit form) section card; collapse = save
+│   │   │       ├── FormularioSeccionContent.tsx    # Shared per-seccion_tipo renderer (título/subtítulo/texto/datos), used by card + preview
+│   │   │       ├── FormularioCampoPreviewInput.tsx # Disabled input preview matching a "Datos" section's campo_tipo
+│   │   │       ├── FormularioPreviewModal.tsx      # Read-only render of all secciones in order, no submit control
+│   │   │       ├── FormularioTipoCampoBadge.tsx    # Badge mapping campo_tipo to label/icon
 │   │   │       └── index.ts
 │   │   │   └── gestion-equipo/            # Feature slice (portal/gestion-equipo)
 │   │   │       ├── EquipoPage.tsx
@@ -223,11 +228,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── servicios/            # Feature hooks for services catalog (US-0062)
 │   │           ├── useServicios.ts       # List + CRUD + modal coordination for servicios
 │   │           └── useServicioForm.ts    # Controlled form state for ServicioFormModal
-│   │       └── formularios/          # Feature hooks for form templates (US-0084)
-│   │           ├── useFormularios.ts         # List + CRUD + modal coordination for plantillas
-│   │           ├── useFormularioForm.ts      # Controlled form state for FormularioFormModal
-│   │           ├── useFormularioEsquema.ts   # List + CRUD + reorder for a plantilla's campos
-│   │           └── useFormularioCampoForm.ts # Controlled form state for FormularioCampoFormModal; campo_etiqueta → campo_nombre auto-slugify
+│   │       └── formularios/          # Feature hooks for form templates (US-0084/US-0085)
+│   │           ├── useFormularios.ts            # List + create + delete for plantillas (list page)
+│   │           ├── useFormularioForm.ts         # Controlled form state for FormularioFormModal (create-only: nombre + descripcion)
+│   │           ├── useFormularioEditor.ts       # Loads plantilla + secciones; header auto-save; addSeccion/saveSeccion (create-or-update by persisted id)/deleteSeccion/reorderSecciones; computes campo_nombre via slugify + collision suffix
+│   │           ├── useFormularioSeccionForm.ts  # Controlled state for one section card's edit mode; validation branches by seccion_tipo
+│   │           └── useFormularioPlantillaName.ts # Fetches a plantilla's nombre by id (breadcrumb, mirrors useTenantName)
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
 │   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
@@ -269,7 +275,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
 │   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
-│   │   │   └── formularios.service.ts  # CRUD for formularios_plantillas + formulario_plantilla_esquema, reorderCampos (US-0084)
+│   │   │   └── formularios.service.ts  # CRUD for formularios_plantillas + formulario_plantilla_esquema "secciones" (getPlantillaConSecciones, getSeccionesByPlantilla, createSeccion/updateSeccion — write seccion_tipo/seccion_descripcion and null out the other branch's campo_* columns —, deleteSeccion, reorderSecciones); US-0084/US-0085
 │   │       │   └── suscripciones.service.ts  # createSuscripcion (calls populate_suscripcion_servicios RPC when plan_tipo_id is set — US-0063), hasPendingSuscripcion, getSuscripcionServicios (returns SuscripcionServicio[] for a given suscripcion_id)
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
@@ -298,7 +304,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)
 │   │       └── servicios.types.ts        # Servicio, CreateServicioInput, UpdateServicioInput, ServicioFormValues, ServicioServiceError, PlanTipoServicio, PlanTipoServicioRow, SyncPlanTipoServiciosInput (US-0062)
-│   │       └── formularios.types.ts      # FormularioPlantilla, FormularioCampo, FormularioTipoCampo union, FormularioPlantillaConCampos, FormularioPlantillaListItem, Create/Update input types, form-values types, FormularioServiceError (US-0084)
+│   │       └── formularios.types.ts      # FormularioPlantilla, FormularioSeccion (seccion_tipo: titulo|subtitulo|texto|datos + seccion_descripcion; campo_* nullable), FormularioTipoCampo union, FormularioPlantillaConSecciones, FormularioPlantillaListItem (seccionesCount), Create/UpdateSeccionInput, form-values types, FormularioServiceError (US-0084/US-0085)
 │   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063)
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
@@ -317,6 +323,7 @@ Following structure reflects the current implementation and the target scalable 
 │       ├── utils.ts
        ├── constants.ts                      # PUBLIC_TENANT_ID: well-known UUID for the system-level public tenant (used by resolveVisiblePara in entrenamientos.service.ts)
 │       ├── csv.ts                           # RFC 4180 CSV generation (toCsvString, downloadTextFile) — used by ReservasPanel CSV export
+│       ├── slugify.ts                        # slugify(value): snake_case key (diacritics stripped, leading digits trimmed) — used to auto-compute campo_nombre for "Datos" sections (US-0085)
 │       ├── validators.ts
 │       └── portal/
 │           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
