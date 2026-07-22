@@ -186,6 +186,22 @@ export function EntrenamientosList({
                       >
                         Formulario externo
                       </a>
+                      {item.instance.formulario_obligatorio ? ' · Obligatorio' : ''}
+                    </p>
+                  ) : null}
+                  {item.instance.formulario_id ? (
+                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
+                      <span
+                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
+                        style={{ fontSize: '14px' }}
+                        aria-hidden="true"
+                      >
+                        description
+                      </span>
+                      <span className="font-medium text-slate-300">
+                        Formulario: {item.instance.formulario_plantilla?.nombre ?? 'Plantilla'}
+                      </span>
+                      {item.instance.formulario_obligatorio ? ' · Obligatorio' : ''}
                     </p>
                   ) : null}
                 </div>

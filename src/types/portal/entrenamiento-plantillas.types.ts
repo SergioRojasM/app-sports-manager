@@ -1,4 +1,4 @@
-import type { TrainingVisibility } from './entrenamientos.types';
+import type { TrainingFormularioTipo, TrainingVisibility } from './entrenamientos.types';
 import type { EntrenamientoRestriccionInput } from './entrenamiento-restricciones.types';
 
 // ─────────────────────────────────────────────
@@ -27,6 +27,8 @@ export type EntrenamientoPlantillaContenido = {
   descripcion: string;
   punto_encuentro: string;
   formulario_externo: string;
+  formulario_tipo?: TrainingFormularioTipo;
+  formulario_obligatorio?: boolean;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string;

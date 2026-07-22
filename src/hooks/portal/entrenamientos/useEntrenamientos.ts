@@ -6,6 +6,7 @@ import { entrenamientosService } from '@/services/supabase/portal/entrenamientos
 import { entrenamientoCategoriasService } from '@/services/supabase/portal/entrenamiento-categorias.service';
 import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
+import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import { useEntrenamientoForm } from './useEntrenamientoForm';
 import { useEntrenamientoScope } from './useEntrenamientoScope';
 import { useEntrenamientosCalendar } from './useEntrenamientosCalendar';
@@ -16,12 +17,14 @@ import {
   type CategoriasFormState,
   type SelectOption,
   type TrainingCalendarItem,
+  type TrainingFormularioFormState,
   type TrainingGroupRule,
   type TrainingGroupWithDetails,
   type TrainingInstance,
   type TrainingScope,
   type TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
+import type { FormularioPlantillaListItem } from '@/types/portal/formularios.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
 import type { EntrenamientoCategoria } from '@/types/portal/entrenamiento-categorias.types';
 import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
@@ -114,6 +117,12 @@ type UseEntrenamientosResult = {
   updateRestriccion: ReturnType<typeof useEntrenamientoForm>['updateRestriccion'];
   setReservaAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['setReservaAntelacionHoras'];
   setCancelacionAntelacionHoras: ReturnType<typeof useEntrenamientoForm>['setCancelacionAntelacionHoras'];
+  // Formulario
+  formulariosPlantillas: FormularioPlantillaListItem[];
+  formularioForm: ReturnType<typeof useEntrenamientoForm>['formularioForm'];
+  setFormularioTipo: ReturnType<typeof useEntrenamientoForm>['setFormularioTipo'];
+  setFormularioPlantillaId: ReturnType<typeof useEntrenamientoForm>['setFormularioPlantillaId'];
+  setFormularioObligatorio: ReturnType<typeof useEntrenamientoForm>['setFormularioObligatorio'];
   // Templates
   plantillas: EntrenamientoPlantilla[];
   plantillasLoading: boolean;
@@ -150,6 +159,20 @@ function mapServiceErrorToMessage(error: unknown, fallback: string): string {
 function toNullable(value: string): string | null {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function resolveFormularioFormFromSource(source: {
+  formulario_id: string | null;
+  formulario_externo: string | null;
+  formulario_obligatorio: boolean;
+}): TrainingFormularioFormState {
+  if (source.formulario_id) {
+    return { tipo: 'interno', formulario_id: source.formulario_id, obligatorio: source.formulario_obligatorio };
+  }
+  if (source.formulario_externo) {
+    return { tipo: 'externo', formulario_id: '', obligatorio: source.formulario_obligatorio };
+  }
+  return { tipo: 'ninguno', formulario_id: '', obligatorio: false };
 }
 
 function parsePositiveInt(value: string): number | null {
@@ -257,7 +280,9 @@ function buildPlantillaContenidoFromInstance(
     nombre: instance.nombre,
     descripcion: instance.descripcion ?? '',
     punto_encuentro: instance.punto_encuentro ?? '',
-    formulario_externo: instance.formulario_externo ?? '',
+    formulario_externo: instance.formulario_id ? '' : instance.formulario_externo ?? '',
+    formulario_tipo: resolveFormularioFormFromSource(instance).tipo,
+    formulario_obligatorio: instance.formulario_obligatorio,
     disciplina_id: instance.disciplina_id,
     escenario_id: instance.escenario_id,
     entrenador_id: instance.entrenador_id ?? '',
@@ -304,9 +329,18 @@ function toTrainingCalendarItem(instance: TrainingInstance, groupsById: Map<stri
   };
 }
 
-function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
+function resolveFormularioFieldsForSubmit(values: TrainingWizardValues, formularioForm: TrainingFormularioFormState) {
+  return {
+    formulario_externo: formularioForm.tipo === 'externo' ? toNullable(values.formulario_externo) : null,
+    formulario_id: formularioForm.tipo === 'interno' ? formularioForm.formulario_id || null : null,
+    formulario_obligatorio: formularioForm.tipo === 'ninguno' ? false : formularioForm.obligatorio,
+  };
+}
+
+function toCreatePayload(tenantId: string, values: TrainingWizardValues, formularioForm: TrainingFormularioFormState) {
   const duration = parsePositiveInt(values.duracion_minutos);
   const capacity = parsePositiveInt(values.cupo_maximo);
+  const formularioFields = resolveFormularioFieldsForSubmit(values, formularioForm);
 
   if (values.tipo === 'unico') {
     const uniqueDateTime = toBogotaIsoFromLocalInput(values.fecha_hora_unico);
@@ -320,7 +354,7 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
         nombre: values.nombre.trim() || 'Entrenamiento único',
         descripcion: toNullable(values.descripcion),
         punto_encuentro: toNullable(values.punto_encuentro),
-        formulario_externo: toNullable(values.formulario_externo),
+        ...formularioFields,
         disciplina_id: values.disciplina_id,
         escenario_id: values.escenario_id,
         entrenador_id: toNullable(values.entrenador_id),
@@ -361,7 +395,7 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
       nombre: values.nombre.trim() || 'Serie de entrenamiento',
       descripcion: toNullable(values.descripcion),
       punto_encuentro: toNullable(values.punto_encuentro),
-      formulario_externo: toNullable(values.formulario_externo),
+      ...formularioFields,
       disciplina_id: values.disciplina_id,
       escenario_id: values.escenario_id,
       entrenador_id: toNullable(values.entrenador_id),
@@ -374,12 +408,12 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues) {
   };
 }
 
-function toUpdatePatch(values: TrainingWizardValues) {
+function toUpdatePatch(values: TrainingWizardValues, formularioForm: TrainingFormularioFormState) {
   return {
     nombre: values.nombre.trim(),
     descripcion: toNullable(values.descripcion),
     punto_encuentro: toNullable(values.punto_encuentro),
-    formulario_externo: toNullable(values.formulario_externo),
+    ...resolveFormularioFieldsForSubmit(values, formularioForm),
     disciplina_id: values.disciplina_id,
     escenario_id: values.escenario_id,
     entrenador_id: toNullable(values.entrenador_id),
@@ -426,6 +460,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [escenarios, setEscenarios] = useState<SelectOption[]>([]);
   const [entrenadores, setEntrenadores] = useState<SelectOption[]>([]);
   const [servicios, setServicios] = useState<SelectOption[]>([]);
+  const [formulariosPlantillas, setFormulariosPlantillas] = useState<FormularioPlantillaListItem[]>([]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -465,13 +500,14 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         throw new Error('No active session');
       }
 
-      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData] = await Promise.all([
+      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData, formulariosPlantillasData] = await Promise.all([
         entrenamientosService.listTrainingGroupsByTenant(tenantId),
         entrenamientosService.listTrainingInstancesByTenantAndRange(tenantId, calendar.range.from, calendar.range.to),
         entrenamientosService.listDisciplineOptions(tenantId),
         entrenamientosService.listScenarioOptions(tenantId),
         entrenamientosService.listTrainerOptions(tenantId),
         entrenamientosService.listServicioOptions(tenantId),
+        formulariosService.getPlantillasByTenant(tenantId).catch(() => []),
       ]);
 
       setGroups(groupsData);
@@ -479,6 +515,12 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       setEscenarios(escenariosData);
       setEntrenadores(entrenadoresData);
       setServicios(serviciosData);
+      setFormulariosPlantillas(
+        formulariosPlantillasData
+          .filter((plantilla) => plantilla.activo)
+          .slice()
+          .sort((a, b) => a.nombre.localeCompare(b.nombre)),
+      );
 
       // Enrich instances with reservas_activas count (batch, not N+1)
       const capacidades = await Promise.all(
@@ -706,6 +748,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
 
       skipNextCategoriasResetRef.current = true;
       form.setFormValuesFromExternal(values);
+      form.setFormularioFormFromExternal(resolveFormularioFormFromSource(group));
 
       // Hydrate restriction state from group
       form.setReservaAntelacionHoras(group.reserva_antelacion_horas);
@@ -778,6 +821,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
 
         skipNextCategoriasResetRef.current = true;
         form.setFormValuesFromExternal(values);
+        form.setFormularioFormFromExternal(resolveFormularioFormFromSource(instance));
 
         // Hydrate restriction state from instance
         form.setReservaAntelacionHoras(instance.reserva_antelacion_horas);
@@ -844,6 +888,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
 
       skipNextCategoriasResetRef.current = true;
       form.setFormValuesFromExternal(values);
+      form.setFormularioFormFromExternal(resolveFormularioFormFromSource(instance));
 
       // Hydrate restriction state from group (series/future scope)
       const sourceGroup = relatedGroup;
@@ -972,7 +1017,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     setSubmitError(null);
     setSuccessMessage(null);
 
-    const validation = form.validate(form.formValues);
+    const validation = form.validate(form.formValues, form.formularioForm);
     if (!validation.valid) {
       return false;
     }
@@ -993,7 +1038,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
 
     try {
       if (formMode === 'create') {
-        const payload = toCreatePayload(tenantId, form.formValues);
+        const payload = toCreatePayload(tenantId, form.formValues, form.formularioForm);
         await entrenamientosService.createTrainingSeries({
           ...payload,
           categorias: categoriasPayload,
@@ -1035,7 +1080,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           visibilidad: form.formValues.visibilidad,
           effectiveFrom: editTarget.effectiveFrom,
           groupPatch: {
-            ...toUpdatePatch(form.formValues),
+            ...toUpdatePatch(form.formValues, form.formularioForm),
             fecha_inicio: form.formValues.fecha_inicio,
             fecha_fin: form.formValues.tipo === 'recurrente' ? form.formValues.fecha_fin || null : null,
           },
@@ -1057,7 +1102,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             scope: 'single',
             visibilidad: form.formValues.visibilidad,
             patch: {
-              ...toUpdatePatch(form.formValues),
+              ...toUpdatePatch(form.formValues, form.formularioForm),
               fecha_hora: form.formValues.fecha_hora_unico ? toBogotaIsoFromLocalInput(form.formValues.fecha_hora_unico) : null,
             },
             categorias: categoriasPayload,
@@ -1089,7 +1134,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             visibilidad: form.formValues.visibilidad,
             effectiveFrom: editTarget.effectiveFrom,
             groupPatch: {
-              ...toUpdatePatch(form.formValues),
+              ...toUpdatePatch(form.formValues, form.formularioForm),
               fecha_inicio: form.formValues.fecha_inicio,
               fecha_fin: form.formValues.tipo === 'recurrente' ? form.formValues.fecha_fin || null : null,
             },
@@ -1183,6 +1228,12 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     updateRestriccion: form.updateRestriccion,
     setReservaAntelacionHoras: form.setReservaAntelacionHoras,
     setCancelacionAntelacionHoras: form.setCancelacionAntelacionHoras,
+    // Formulario
+    formulariosPlantillas,
+    formularioForm: form.formularioForm,
+    setFormularioTipo: form.setFormularioTipo,
+    setFormularioPlantillaId: form.setFormularioPlantillaId,
+    setFormularioObligatorio: form.setFormularioObligatorio,
     // Templates
     plantillas: plantillas.plantillas,
     plantillasLoading: plantillas.isLoading,

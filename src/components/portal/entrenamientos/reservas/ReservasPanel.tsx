@@ -12,8 +12,11 @@ import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
 import { AsistenciaFormModal } from './AsistenciaFormModal';
+import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
+import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import type { UserRole } from '@/types/portal.types';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
+import type { FormularioSeccion } from '@/types/portal/formularios.types';
 import type { ReservaView } from '@/types/portal/reservas.types';
 
 // ─────────────────────────────────────────────
@@ -59,6 +62,10 @@ export function ReservasPanel({
   const [savingAsistencia, setSavingAsistencia] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [restrictionLabels, setRestrictionLabels] = useState<string[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewSecciones, setPreviewSecciones] = useState<FormularioSeccion[]>([]);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
   const isPast = !!instance?.fecha_hora && new Date(instance.fecha_hora) < new Date();
@@ -291,6 +298,18 @@ export function ReservasPanel({
     }
   };
 
+  const handleOpenFormularioPreview = () => {
+    if (!instance?.formulario_id) return;
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    formulariosService
+      .getPlantillaConSecciones(instance.formulario_id)
+      .then((plantilla) => setPreviewSecciones(plantilla.secciones))
+      .catch(() => setPreviewError('No fue posible cargar el formulario.'))
+      .finally(() => setPreviewLoading(false));
+  };
+
   if (!open || !instance) {
     return null;
   }
@@ -373,7 +392,29 @@ export function ReservasPanel({
               >
                 Formulario externo
               </a>
+              {instance.formulario_obligatorio && (
+                <span className="text-xs font-medium text-amber-300">Obligatorio</span>
+              )}
             </div>
+          )}
+          {instance.formulario_id && (
+            <div className="mt-2 flex items-center gap-2 text-sm">
+              <span className="material-symbols-outlined text-base text-slate-400" aria-hidden="true">description</span>
+              <span className="font-medium text-slate-300">{instance.formulario_plantilla?.nombre ?? 'Plantilla de formulario'}</span>
+              <button
+                type="button"
+                onClick={handleOpenFormularioPreview}
+                className="font-medium text-turquoise hover:underline"
+              >
+                Ver formulario
+              </button>
+              {instance.formulario_obligatorio && (
+                <span className="text-xs font-medium text-amber-300">Obligatorio</span>
+              )}
+            </div>
+          )}
+          {instance.formulario_obligatorio && (instance.formulario_externo || instance.formulario_id) && (
+            <p className="mt-1 text-xs text-slate-400">Debes completar este formulario antes de reservar.</p>
           )}
 
           {/* Per-category capacity breakdown */}
@@ -645,6 +686,15 @@ export function ReservasPanel({
           }
         }}
         onCancelAdminConfirmation={reservasHook.cancelAdminConfirmation}
+      />
+
+      <FormularioPreviewModal
+        open={previewOpen}
+        plantillaNombre={instance.formulario_plantilla?.nombre ?? 'Formulario'}
+        secciones={previewSecciones}
+        loading={previewLoading}
+        error={previewError}
+        onClose={() => setPreviewOpen(false)}
       />
     </>
   );

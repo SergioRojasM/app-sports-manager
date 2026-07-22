@@ -55,16 +55,16 @@
 
 ## 9. Verification
 
-- [ ] 9.1 Verify RLS policies in local Supabase Studio for `servicios` and `plan_tipos_servicios`
-- [ ] 9.2 Manual test: navigate to `/gestion-servicios` as admin → create a service → confirm it appears in the table
-- [ ] 9.3 Manual test: edit a service → confirm changes saved
-- [ ] 9.4 Manual test: attempt to delete a service referenced by a plan tipo → confirm error toast is shown
-- [ ] 9.5 Manual test: delete an unreferenced service → confirm it is removed
-- [ ] 9.6 Manual test: create a service with a duplicate name in the same tenant → confirm "Ya existe un servicio con este nombre." error
-- [ ] 9.7 Manual test: open Plan Form Modal → add service rows to a plan tipo → save → confirm rows in `plan_tipos_servicios`
-- [ ] 9.8 Manual test: reopen plan form in edit mode → confirm service rows are pre-filled
-- [ ] 9.9 Manual test: remove all service rows from a plan tipo and save → confirm `plan_tipos_servicios` rows deleted
-- [ ] 9.10 Manual test: `clases_incluidas` field still saves and loads correctly after all changes
+- [x] 9.1 Verify RLS policies in local Supabase Studio for `servicios` and `plan_tipos_servicios`
+- [x] 9.2 Manual test: navigate to `/gestion-servicios` as admin → create a service → confirm it appears in the table
+- [x] 9.3 Manual test: edit a service → confirm changes saved
+- [x] 9.4 Manual test: attempt to delete a service referenced by a plan tipo → confirm error toast is shown
+- [x] 9.5 Manual test: delete an unreferenced service → confirm it is removed
+- [x] 9.6 Manual test: create a service with a duplicate name in the same tenant → confirm "Ya existe un servicio con este nombre." error
+- [x] 9.7 Manual test: open Plan Form Modal → add service rows to a plan tipo → save → confirm rows in `plan_tipos_servicios`
+- [x] 9.8 Manual test: reopen plan form in edit mode → confirm service rows are pre-filled
+- [x] 9.9 Manual test: remove all service rows from a plan tipo and save → confirm `plan_tipos_servicios` rows deleted
+- [x] 9.10 Manual test: `clases_incluidas` field still saves and loads correctly after all changes
 - [x] 9.11 Check no TypeScript errors: `npx tsc --noEmit`
 
 ## 10. Documentation and Commit
