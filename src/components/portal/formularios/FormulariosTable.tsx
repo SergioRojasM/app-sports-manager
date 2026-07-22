@@ -1,16 +1,14 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import Link from 'next/link';
 import type { FormularioPlantillaListItem } from '@/types/portal/formularios.types';
-import { FormularioCamposPanel } from './FormularioCamposPanel';
 
 type FormulariosTableProps = {
+  tenantId: string;
   rows: FormularioPlantillaListItem[];
-  onEdit: (plantilla: FormularioPlantillaListItem) => void;
+  onPreview: (plantilla: FormularioPlantillaListItem) => void;
   onDelete: (plantilla: FormularioPlantillaListItem) => void;
 };
-
-const COLUMN_COUNT = 6;
 
 function ActiveBadge({ activo }: { activo: boolean }) {
   return activo ? (
@@ -26,19 +24,16 @@ function ActiveBadge({ activo }: { activo: boolean }) {
   );
 }
 
-export function FormulariosTable({ rows, onEdit, onDelete }: FormulariosTableProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
+export function FormulariosTable({ tenantId, rows, onPreview, onDelete }: FormulariosTableProps) {
   return (
     <div className="glass overflow-hidden rounded-xl border border-portal-border">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-portal-border text-left text-sm">
           <thead className="bg-navy-medium/80">
             <tr>
-              <th className="w-10 py-4 pl-4 pr-0" />
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Nombre</th>
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Descripción</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Campos</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Secciones</th>
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Estado</th>
               <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
                 Acciones
@@ -46,56 +41,45 @@ export function FormulariosTable({ rows, onEdit, onDelete }: FormulariosTablePro
             </tr>
           </thead>
           <tbody className="divide-y divide-portal-border bg-navy-deep/50">
-            {rows.map((plantilla) => {
-              const isExpanded = expandedId === plantilla.id;
-              return (
-                <Fragment key={plantilla.id}>
-                  <tr className="transition-colors hover:bg-navy-medium/50">
-                    <td className="py-4 pl-4 pr-0">
-                      <button
-                        type="button"
-                        onClick={() => setExpandedId(isExpanded ? null : plantilla.id)}
-                        className="rounded p-1 text-slate-400 transition hover:text-slate-200"
-                        aria-label={isExpanded ? 'Colapsar campos' : 'Expandir campos'}
-                      >
-                        <span className="material-symbols-outlined text-base" aria-hidden="true">
-                          {isExpanded ? 'expand_less' : 'expand_more'}
-                        </span>
-                      </button>
-                    </td>
-                    <td className="px-4 py-4 font-medium text-slate-200">{plantilla.nombre}</td>
-                    <td className="px-4 py-4 text-slate-400">
-                      {plantilla.descripcion ?? <span className="italic text-slate-600">Sin descripción</span>}
-                    </td>
-                    <td className="px-4 py-4 text-slate-300">{plantilla.camposCount}</td>
-                    <td className="px-4 py-4">
-                      <ActiveBadge activo={plantilla.activo} />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onEdit(plantilla)}
-                          className="rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-turquoise/50 hover:text-turquoise"
-                          aria-label={`Editar plantilla ${plantilla.nombre}`}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onDelete(plantilla)}
-                          className="rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-rose-400/50 hover:text-rose-300"
-                          aria-label={`Eliminar plantilla ${plantilla.nombre}`}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  {isExpanded ? <FormularioCamposPanel plantillaId={plantilla.id} colSpan={COLUMN_COUNT} /> : null}
-                </Fragment>
-              );
-            })}
+            {rows.map((plantilla) => (
+              <tr key={plantilla.id} className="transition-colors hover:bg-navy-medium/50">
+                <td className="px-4 py-4 font-medium text-slate-200">{plantilla.nombre}</td>
+                <td className="px-4 py-4 text-slate-400">
+                  {plantilla.descripcion ?? <span className="italic text-slate-600">Sin descripción</span>}
+                </td>
+                <td className="px-4 py-4 text-slate-300">{plantilla.seccionesCount}</td>
+                <td className="px-4 py-4">
+                  <ActiveBadge activo={plantilla.activo} />
+                </td>
+                <td className="px-4 py-4">
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onPreview(plantilla)}
+                      aria-label={`Previsualizar plantilla ${plantilla.nombre}`}
+                      className="rounded-lg p-2 text-slate-400 transition hover:bg-navy-medium hover:text-turquoise"
+                    >
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">visibility</span>
+                    </button>
+                    <Link
+                      href={`/portal/orgs/${tenantId}/gestion-formularios/${plantilla.id}`}
+                      aria-label={`Editar plantilla ${plantilla.nombre}`}
+                      className="rounded-lg p-2 text-slate-400 transition hover:bg-navy-medium hover:text-turquoise"
+                    >
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">edit</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(plantilla)}
+                      aria-label={`Eliminar plantilla ${plantilla.nombre}`}
+                      className="rounded-lg p-2 text-slate-400 transition hover:bg-navy-medium hover:text-rose-300"
+                    >
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

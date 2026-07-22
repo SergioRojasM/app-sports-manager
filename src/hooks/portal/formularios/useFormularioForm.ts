@@ -1,35 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type { FormularioPlantilla, FormularioPlantillaFormValues } from '@/types/portal/formularios.types';
+import { useCallback, useState } from 'react';
+import type { FormularioPlantillaFormValues } from '@/types/portal/formularios.types';
 
 const EMPTY_FORM: FormularioPlantillaFormValues = {
   nombre: '',
   descripcion: '',
-  activo: true,
 };
 
-type UseFormularioFormOptions = {
-  initialValues?: FormularioPlantilla | null;
-};
-
-export function useFormularioForm({ initialValues }: UseFormularioFormOptions = {}) {
+export function useFormularioForm() {
   const [values, setValues] = useState<FormularioPlantillaFormValues>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (initialValues) {
-      setValues({
-        nombre: initialValues.nombre,
-        descripcion: initialValues.descripcion ?? '',
-        activo: initialValues.activo,
-      });
-    } else {
-      setValues(EMPTY_FORM);
-    }
-    setFieldError(null);
-  }, [initialValues]);
 
   const setField = useCallback(
     <K extends keyof FormularioPlantillaFormValues>(field: K, value: FormularioPlantillaFormValues[K]) => {

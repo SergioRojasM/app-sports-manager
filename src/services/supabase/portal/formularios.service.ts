@@ -2,13 +2,13 @@ import { createClient } from '@/services/supabase/client';
 import {
   FormularioServiceError,
   type FormularioPlantilla,
-  type FormularioPlantillaConCampos,
+  type FormularioPlantillaConSecciones,
   type FormularioPlantillaListItem,
-  type FormularioCampo,
+  type FormularioSeccion,
   type CreatePlantillaInput,
   type UpdatePlantillaInput,
-  type CreateCampoInput,
-  type UpdateCampoInput,
+  type CreateSeccionInput,
+  type UpdateSeccionInput,
 } from '@/types/portal/formularios.types';
 
 type PostgrestError = { code?: string; message?: string };
@@ -40,7 +40,38 @@ function mapFormularioError(error: PostgrestError | null): FormularioServiceErro
     return new FormularioServiceError('forbidden', 'No tienes permisos para realizar esta acción.');
   }
 
+  if (error.code === '23514') {
+    return new FormularioServiceError('invalid_seccion', 'Completa los datos requeridos para esta sección.');
+  }
+
   return new FormularioServiceError('unknown', 'No fue posible completar la operación.');
+}
+
+/** Builds the full conditional column set for a section, based on its `seccion_tipo`. */
+function buildSeccionColumns(input: CreateSeccionInput | (UpdateSeccionInput & { seccion_tipo: NonNullable<UpdateSeccionInput['seccion_tipo']> })) {
+  if (input.seccion_tipo === 'datos') {
+    return {
+      seccion_tipo: input.seccion_tipo,
+      seccion_descripcion: null,
+      campo_etiqueta: input.campo_etiqueta?.trim() ?? null,
+      campo_nombre: input.campo_nombre?.trim() ?? null,
+      campo_tipo: input.campo_tipo ?? null,
+      campo_lista_valores: input.campo_tipo === 'lista' ? input.campo_lista_valores?.trim() || null : null,
+      campo_obligatorio: input.campo_obligatorio ?? false,
+      campo_placeholder: input.campo_placeholder?.trim() || null,
+    };
+  }
+
+  return {
+    seccion_tipo: input.seccion_tipo,
+    seccion_descripcion: input.seccion_descripcion?.trim() || null,
+    campo_etiqueta: null,
+    campo_nombre: null,
+    campo_tipo: null,
+    campo_lista_valores: null,
+    campo_obligatorio: false,
+    campo_placeholder: null,
+  };
 }
 
 export const formulariosService = {
@@ -64,12 +95,12 @@ export const formulariosService = {
       const { formulario_plantilla_esquema, ...plantilla } = row;
       return {
         ...plantilla,
-        camposCount: formulario_plantilla_esquema?.[0]?.count ?? 0,
+        seccionesCount: formulario_plantilla_esquema?.[0]?.count ?? 0,
       };
     });
   },
 
-  async getPlantillaConCampos(plantillaId: string): Promise<FormularioPlantillaConCampos> {
+  async getPlantillaConSecciones(plantillaId: string): Promise<FormularioPlantillaConSecciones> {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('formularios_plantillas')
@@ -81,12 +112,12 @@ export const formulariosService = {
     if (error || !data) throw mapFormularioError(error);
 
     const { formulario_plantilla_esquema, ...plantilla } = data as FormularioPlantilla & {
-      formulario_plantilla_esquema: FormularioCampo[];
+      formulario_plantilla_esquema: FormularioSeccion[];
     };
 
     return {
       ...(plantilla as FormularioPlantilla),
-      campos: formulario_plantilla_esquema ?? [],
+      secciones: formulario_plantilla_esquema ?? [],
     };
   },
 
@@ -136,10 +167,10 @@ export const formulariosService = {
   },
 
   // -----------------------------------------------------------------------
-  // Campos (esquema) CRUD
+  // Secciones (esquema) CRUD
   // -----------------------------------------------------------------------
 
-  async getCamposByPlantilla(plantillaId: string): Promise<FormularioCampo[]> {
+  async getSeccionesByPlantilla(plantillaId: string): Promise<FormularioSeccion[]> {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('formulario_plantilla_esquema')
@@ -148,43 +179,45 @@ export const formulariosService = {
       .order('orden', { ascending: true });
 
     if (error) throw mapFormularioError(error);
-    return (data ?? []) as FormularioCampo[];
+    return (data ?? []) as FormularioSeccion[];
   },
 
-  async createCampo(input: CreateCampoInput): Promise<FormularioCampo> {
+  async createSeccion(input: CreateSeccionInput): Promise<FormularioSeccion> {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('formulario_plantilla_esquema')
       .insert({
         formulario_plantilla_id: input.formulario_plantilla_id,
-        campo_etiqueta: input.campo_etiqueta.trim(),
-        campo_nombre: input.campo_nombre.trim(),
-        campo_tipo: input.campo_tipo,
-        campo_lista_valores: input.campo_tipo === 'lista' ? input.campo_lista_valores?.trim() || null : null,
-        campo_obligatorio: input.campo_obligatorio ?? false,
-        campo_placeholder: input.campo_placeholder?.trim() || null,
         orden: input.orden,
+        ...buildSeccionColumns(input),
       })
       .select('*')
       .single();
 
     if (error || !data) throw mapFormularioError(error);
-    return data as FormularioCampo;
+    return data as FormularioSeccion;
   },
 
-  async updateCampo(id: string, input: UpdateCampoInput): Promise<FormularioCampo> {
+  async updateSeccion(id: string, input: UpdateSeccionInput): Promise<FormularioSeccion> {
     const supabase = createClient();
-    const payload: Record<string, unknown> = {};
-    if (input.campo_etiqueta !== undefined) payload.campo_etiqueta = input.campo_etiqueta.trim();
-    if (input.campo_nombre !== undefined) payload.campo_nombre = input.campo_nombre.trim();
-    if (input.campo_tipo !== undefined) {
-      payload.campo_tipo = input.campo_tipo;
-      payload.campo_lista_valores = input.campo_tipo === 'lista' ? input.campo_lista_valores?.trim() || null : null;
-    } else if (input.campo_lista_valores !== undefined) {
-      payload.campo_lista_valores = input.campo_lista_valores?.trim() || null;
+    const payload: Record<string, unknown> = input.seccion_tipo
+      ? buildSeccionColumns({ ...input, seccion_tipo: input.seccion_tipo })
+      : {};
+
+    if (!input.seccion_tipo) {
+      if (input.campo_etiqueta !== undefined) payload.campo_etiqueta = input.campo_etiqueta.trim();
+      if (input.campo_nombre !== undefined) payload.campo_nombre = input.campo_nombre.trim();
+      if (input.campo_tipo !== undefined) {
+        payload.campo_tipo = input.campo_tipo;
+        payload.campo_lista_valores = input.campo_tipo === 'lista' ? input.campo_lista_valores?.trim() || null : null;
+      } else if (input.campo_lista_valores !== undefined) {
+        payload.campo_lista_valores = input.campo_lista_valores?.trim() || null;
+      }
+      if (input.campo_obligatorio !== undefined) payload.campo_obligatorio = input.campo_obligatorio;
+      if (input.campo_placeholder !== undefined) payload.campo_placeholder = input.campo_placeholder?.trim() || null;
+      if (input.seccion_descripcion !== undefined) payload.seccion_descripcion = input.seccion_descripcion?.trim() || null;
     }
-    if (input.campo_obligatorio !== undefined) payload.campo_obligatorio = input.campo_obligatorio;
-    if (input.campo_placeholder !== undefined) payload.campo_placeholder = input.campo_placeholder?.trim() || null;
+
     if (input.orden !== undefined) payload.orden = input.orden;
     if (input.activo !== undefined) payload.activo = input.activo;
 
@@ -196,10 +229,10 @@ export const formulariosService = {
       .single();
 
     if (error || !data) throw mapFormularioError(error);
-    return data as FormularioCampo;
+    return data as FormularioSeccion;
   },
 
-  async deleteCampo(id: string): Promise<void> {
+  async deleteSeccion(id: string): Promise<void> {
     const supabase = createClient();
     const { error } = await supabase
       .from('formulario_plantilla_esquema')
@@ -209,7 +242,7 @@ export const formulariosService = {
     if (error) throw mapFormularioError(error);
   },
 
-  async reorderCampos(_plantillaId: string, orderedIds: string[]): Promise<void> {
+  async reorderSecciones(_plantillaId: string, orderedIds: string[]): Promise<void> {
     const supabase = createClient();
 
     for (let i = 0; i < orderedIds.length; i += 1) {

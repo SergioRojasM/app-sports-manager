@@ -22,6 +22,22 @@ export const FORMULARIO_TIPO_CAMPO_LABELS: Record<FormularioTipoCampo, string> =
   lista: 'Lista',
 };
 
+export type FormularioSeccionTipo = 'titulo' | 'subtitulo' | 'texto' | 'datos';
+
+export const FORMULARIO_SECCION_TIPOS: readonly FormularioSeccionTipo[] = [
+  'titulo',
+  'subtitulo',
+  'texto',
+  'datos',
+] as const;
+
+export const FORMULARIO_SECCION_TIPO_LABELS: Record<FormularioSeccionTipo, string> = {
+  titulo: 'Título',
+  subtitulo: 'Subtítulo',
+  texto: 'Texto',
+  datos: 'Datos',
+};
+
 export type FormularioPlantilla = {
   id: string;
   tenant_id: string;
@@ -33,12 +49,14 @@ export type FormularioPlantilla = {
   updated_at: string;
 };
 
-export type FormularioCampo = {
+export type FormularioSeccion = {
   id: string;
   formulario_plantilla_id: string;
-  campo_etiqueta: string;
-  campo_nombre: string;
-  campo_tipo: FormularioTipoCampo;
+  seccion_tipo: FormularioSeccionTipo;
+  seccion_descripcion: string | null;
+  campo_etiqueta: string | null;
+  campo_nombre: string | null;
+  campo_tipo: FormularioTipoCampo | null;
   campo_lista_valores: string | null;
   campo_obligatorio: boolean;
   campo_placeholder: string | null;
@@ -48,13 +66,13 @@ export type FormularioCampo = {
   updated_at: string;
 };
 
-export type FormularioPlantillaConCampos = FormularioPlantilla & {
-  campos: FormularioCampo[];
+export type FormularioPlantillaConSecciones = FormularioPlantilla & {
+  secciones: FormularioSeccion[];
 };
 
-/** List-row shape: plantilla metadata plus its field count (for the table's "Campos" column). */
+/** List-row shape: plantilla metadata plus its section count (for the table's "Secciones" column). */
 export type FormularioPlantillaListItem = FormularioPlantilla & {
-  camposCount: number;
+  seccionesCount: number;
 };
 
 // =============================================
@@ -74,18 +92,22 @@ export type UpdatePlantillaInput = {
   activo?: boolean;
 };
 
-export type CreateCampoInput = {
+export type CreateSeccionInput = {
   formulario_plantilla_id: string;
-  campo_etiqueta: string;
-  campo_nombre: string;
-  campo_tipo: FormularioTipoCampo;
+  seccion_tipo: FormularioSeccionTipo;
+  seccion_descripcion?: string | null;
+  campo_etiqueta?: string;
+  campo_nombre?: string;
+  campo_tipo?: FormularioTipoCampo;
   campo_lista_valores?: string | null;
   campo_obligatorio?: boolean;
   campo_placeholder?: string | null;
   orden: number;
 };
 
-export type UpdateCampoInput = {
+export type UpdateSeccionInput = {
+  seccion_tipo?: FormularioSeccionTipo;
+  seccion_descripcion?: string | null;
   campo_etiqueta?: string;
   campo_nombre?: string;
   campo_tipo?: FormularioTipoCampo;
@@ -103,25 +125,29 @@ export type UpdateCampoInput = {
 export type FormularioPlantillaFormValues = {
   nombre: string;
   descripcion: string;
-  activo: boolean;
 };
 
 export type FormularioPlantillaFormField = 'nombre' | 'descripcion';
 
 export type FormularioPlantillaFieldErrors = Partial<Record<FormularioPlantillaFormField, string>>;
 
-export type FormularioCampoFormValues = {
+export type FormularioSeccionFormValues = {
+  seccion_tipo: FormularioSeccionTipo;
+  seccion_descripcion: string;
   campo_etiqueta: string;
-  campo_nombre: string;
   campo_tipo: FormularioTipoCampo;
   campo_lista_valores: string;
+  campo_placeholder: string;
   campo_obligatorio: boolean;
-  orden: string;
 };
 
-export type FormularioCampoFormField = 'campo_etiqueta' | 'campo_nombre' | 'campo_tipo' | 'campo_lista_valores' | 'orden';
+export type FormularioSeccionFormField =
+  | 'seccion_descripcion'
+  | 'campo_etiqueta'
+  | 'campo_tipo'
+  | 'campo_lista_valores';
 
-export type FormularioCampoFieldErrors = Partial<Record<FormularioCampoFormField, string>>;
+export type FormularioSeccionFieldErrors = Partial<Record<FormularioSeccionFormField, string>>;
 
 // =============================================
 // Service error
@@ -132,6 +158,7 @@ export type FormularioServiceErrorCode =
   | 'duplicate_campo_nombre'
   | 'fk_dependency'
   | 'forbidden'
+  | 'invalid_seccion'
   | 'unknown';
 
 export class FormularioServiceError extends Error {

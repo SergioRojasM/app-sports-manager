@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { useTenantName } from '@/hooks/portal/tenant/useTenantName';
+import { useFormularioPlantillaName } from '@/hooks/portal/formularios/useFormularioPlantillaName';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -14,6 +15,7 @@ const SLUG_LABELS: Record<string, string> = {
   'gestion-escenarios': 'Escenarios',
   'gestion-disciplinas': 'Disciplinas',
   'gestion-servicios': 'Servicios',
+  'gestion-formularios': 'Formularios',
   'gestion-entrenamientos': 'Entrenamientos',
   'gestion-planes': 'Planes',
   'entrenamientos-disponibles': 'Entrenamientos Disponibles',
@@ -38,10 +40,20 @@ export function PortalBreadcrumb() {
 
   const tenantName = useTenantName(tenantId);
 
+  // Any UUID segment after the tenant id (e.g. a plantilla id under gestion-formularios/{id}) is
+  // resolved separately so it isn't mislabeled with the tenant's name.
+  const secondaryUuidId = useMemo(() => {
+    const uuidParts = pathname.split('/').filter((part) => UUID_RE.test(part));
+    return uuidParts.length > 1 ? uuidParts[1] : undefined;
+  }, [pathname]);
+
+  const plantillaName = useFormularioPlantillaName(secondaryUuidId);
+
   const segments = useMemo((): BreadcrumbSegment[] => {
     const parts = pathname.split('/').filter(Boolean);
     const result: BreadcrumbSegment[] = [];
     let accumulated = '';
+    let uuidsSeen = 0;
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
@@ -51,14 +63,16 @@ export function PortalBreadcrumb() {
       if (i === 0 && part === 'portal') {
         result.push({ label: 'Inicio', href: '/portal', isLast });
       } else if (UUID_RE.test(part)) {
-        result.push({ label: tenantName ?? '…', href: accumulated, isLast });
+        uuidsSeen += 1;
+        const label = uuidsSeen === 1 ? tenantName : plantillaName;
+        result.push({ label: label ?? '…', href: accumulated, isLast });
       } else {
         result.push({ label: SLUG_LABELS[part] ?? part, href: accumulated, isLast });
       }
     }
 
     return result;
-  }, [pathname, tenantName]);
+  }, [pathname, tenantName, plantillaName]);
 
   // Only render when there is more than the root "Inicio"
   if (segments.length <= 1) return null;
