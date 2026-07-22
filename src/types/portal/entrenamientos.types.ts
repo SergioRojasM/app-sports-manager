@@ -12,6 +12,18 @@ export type TrainingVisibility = 'publico' | 'privado';
 export type TrainingGroupStatus = 'activo' | 'cancelado' | 'finalizado';
 export type TrainingInstanceStatus = 'pendiente' | 'confirmado' | 'cancelado' | string;
 
+export type TrainingFormularioTipo = 'ninguno' | 'externo' | 'interno';
+
+export type TrainingFormularioPlantillaRef = {
+  nombre: string;
+};
+
+export type TrainingFormularioFormState = {
+  tipo: TrainingFormularioTipo;
+  formulario_id: string;
+  obligatorio: boolean;
+};
+
 export type TrainingGroup = {
   id: string;
   tenant_id: string;
@@ -20,6 +32,9 @@ export type TrainingGroup = {
   descripcion: string | null;
   punto_encuentro: string | null;
   formulario_externo: string | null;
+  formulario_id: string | null;
+  formulario_obligatorio: boolean;
+  formulario_plantilla?: TrainingFormularioPlantillaRef | null;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string | null;
@@ -62,6 +77,9 @@ export type TrainingInstance = {
   descripcion: string | null;
   punto_encuentro: string | null;
   formulario_externo: string | null;
+  formulario_id: string | null;
+  formulario_obligatorio: boolean;
+  formulario_plantilla?: TrainingFormularioPlantillaRef | null;
   disciplina_id: string;
   escenario_id: string;
   entrenador_id: string | null;
@@ -140,7 +158,9 @@ export type TrainingField =
   | 'repetir_cada_semanas'
   | 'descripcion'
   | 'punto_encuentro'
-  | 'formulario_externo';
+  | 'formulario_externo'
+  | 'formulario_tipo'
+  | 'formulario_id';
 
 export type TrainingRuleField = 'tipo_bloque' | 'hora_inicio' | 'hora_fin' | 'horas_especificas';
 
@@ -171,6 +191,8 @@ export type CreateTrainingSeriesInput = {
     descripcion?: string | null;
     punto_encuentro?: string | null;
     formulario_externo?: string | null;
+    formulario_id?: string | null;
+    formulario_obligatorio?: boolean;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id?: string | null;
@@ -230,6 +252,8 @@ export type UpdateTrainingSeriesInput = {
     descripcion: string | null;
     punto_encuentro: string | null;
     formulario_externo: string | null;
+    formulario_id: string | null;
+    formulario_obligatorio: boolean;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id: string | null;
@@ -258,6 +282,8 @@ export type UpdateTrainingInstanceInput = {
     descripcion: string | null;
     punto_encuentro: string | null;
     formulario_externo: string | null;
+    formulario_id: string | null;
+    formulario_obligatorio: boolean;
     disciplina_id: string;
     escenario_id: string;
     entrenador_id: string | null;

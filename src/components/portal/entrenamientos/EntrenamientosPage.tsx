@@ -113,6 +113,12 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     updateRestriccion,
     setReservaAntelacionHoras,
     setCancelacionAntelacionHoras,
+    // Formulario
+    formulariosPlantillas,
+    formularioForm,
+    setFormularioTipo,
+    setFormularioPlantillaId,
+    setFormularioObligatorio,
     plantillas,
     plantillasLoading,
     plantillasError,
@@ -412,6 +418,13 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         onUpdateRestriccion={updateRestriccion}
         onSetReservaAntelacion={setReservaAntelacionHoras}
         onSetCancelacionAntelacion={setCancelacionAntelacionHoras}
+        tenantId={tenantId}
+        role={role}
+        formularioForm={formularioForm}
+        formulariosPlantillas={formulariosPlantillas}
+        onChangeFormularioTipo={setFormularioTipo}
+        onChangeFormularioPlantillaId={setFormularioPlantillaId}
+        onChangeFormularioObligatorio={setFormularioObligatorio}
         plantillas={plantillas}
         plantillasLoading={plantillasLoading}
         plantillasError={plantillasError}

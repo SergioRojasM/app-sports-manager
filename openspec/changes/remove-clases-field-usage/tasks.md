@@ -44,8 +44,8 @@
 
 ## 7. Documentation
 
-- [ ] 7.1 Update `projectspec/03-project-structure.md`: remove any mention of `clases_incluidas` in `plan_tipos` descriptions and `clases_restantes` / `clases_plan` from subscription service/type descriptions
+- [x] 7.1 Update `projectspec/03-project-structure.md`: remove any mention of `clases_incluidas` in `plan_tipos` descriptions and `clases_restantes` / `clases_plan` from subscription service/type descriptions
 
 ## 8. Commit
 
-- [ ] 8.1 Stage all changes and commit with message: `feat: remove clases_incluidas and clases_restantes from application layer (US-0065)` — body should note that DB columns are preserved, all unit tracking now via suscripcion_servicios
+- [x] 8.1 Stage all changes and commit with message: `feat: remove clases_incluidas and clases_restantes from application layer (US-0065)` — body should note that DB columns are preserved, all unit tracking now via suscripcion_servicios

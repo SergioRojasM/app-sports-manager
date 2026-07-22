@@ -80,6 +80,9 @@ function mapTrainingGroup(row: TrainingGroupRow): TrainingGroup {
     descripcion: row.descripcion,
     punto_encuentro: row.punto_encuentro ?? null,
     formulario_externo: row.formulario_externo ?? null,
+    formulario_id: (row as Record<string, unknown>).formulario_id as string | null ?? null,
+    formulario_obligatorio: (row as Record<string, unknown>).formulario_obligatorio as boolean | null ?? false,
+    formulario_plantilla: (row as Record<string, unknown>).formulario_plantilla as { nombre: string } | null ?? null,
     disciplina_id: row.disciplina_id,
     escenario_id: row.escenario_id,
     entrenador_id: row.entrenador_id,
@@ -108,6 +111,9 @@ function mapTrainingInstance(row: TrainingInstanceRow): TrainingInstance {
     descripcion: row.descripcion,
     punto_encuentro: row.punto_encuentro ?? null,
     formulario_externo: row.formulario_externo ?? null,
+    formulario_id: (row as Record<string, unknown>).formulario_id as string | null ?? null,
+    formulario_obligatorio: (row as Record<string, unknown>).formulario_obligatorio as boolean | null ?? false,
+    formulario_plantilla: (row as Record<string, unknown>).formulario_plantilla as { nombre: string } | null ?? null,
     disciplina_id: row.disciplina_id,
     escenario_id: row.escenario_id,
     entrenador_id: row.entrenador_id,
@@ -313,7 +319,7 @@ export const entrenamientosService = {
       supabase
         .from('entrenamientos_grupo')
         .select(
-          'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
+          'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
         )
         .eq('tenant_id', tenantId)
         .order('created_at', { ascending: false }),
@@ -324,7 +330,7 @@ export const entrenamientosService = {
         .order('created_at', { ascending: true }),
       supabase
         .from('entrenamientos')
-        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
+        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
         .eq('tenant_id', tenantId),
     ]);
 
@@ -333,9 +339,9 @@ export const entrenamientosService = {
     }
 
     const rules = (rulesData ?? []) as TrainingRuleRow[];
-    const instances = ((instancesData ?? []) as TrainingInstanceRow[]).map(mapTrainingInstance);
+    const instances = ((instancesData ?? []) as unknown as TrainingInstanceRow[]).map(mapTrainingInstance);
 
-    return ((groupsData ?? []) as TrainingGroupRow[]).map((row) => {
+    return ((groupsData ?? []) as unknown as TrainingGroupRow[]).map((row) => {
       const group = mapTrainingGroup(row);
       const groupRules = rules.filter((rule) => rule.entrenamiento_grupo_id === group.id);
       const instancesCount = instances.filter((instance) => instance.entrenamiento_grupo_id === group.id).length;
@@ -353,7 +359,7 @@ export const entrenamientosService = {
 
     let query = supabase
       .from('entrenamientos')
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
       .eq('tenant_id', tenantId)
       .order('fecha_hora', { ascending: true, nullsFirst: false });
 
@@ -371,7 +377,7 @@ export const entrenamientosService = {
       throw mapServiceError(error);
     }
 
-    return ((data ?? []) as TrainingInstanceRow[]).map(mapTrainingInstance);
+    return ((data ?? []) as unknown as TrainingInstanceRow[]).map(mapTrainingInstance);
   },
 
   async createTrainingSeries(input: CreateTrainingSeriesInput): Promise<TrainingGroup | null> {
@@ -391,6 +397,8 @@ export const entrenamientosService = {
           descripcion: toNullable(input.group.descripcion),
           punto_encuentro: toNullable(input.group.punto_encuentro),
           formulario_externo: toNullable(input.group.formulario_externo),
+          formulario_id: input.group.formulario_id ?? null,
+          formulario_obligatorio: input.group.formulario_obligatorio ?? false,
           disciplina_id: input.group.disciplina_id,
           escenario_id: input.group.escenario_id,
           entrenador_id: input.group.entrenador_id ?? null,
@@ -449,6 +457,8 @@ export const entrenamientosService = {
         descripcion: toNullable(input.group.descripcion),
         punto_encuentro: toNullable(input.group.punto_encuentro),
         formulario_externo: toNullable(input.group.formulario_externo),
+        formulario_id: input.group.formulario_id ?? null,
+        formulario_obligatorio: input.group.formulario_obligatorio ?? false,
         disciplina_id: input.group.disciplina_id,
         escenario_id: input.group.escenario_id,
         entrenador_id: input.group.entrenador_id ?? null,
@@ -462,7 +472,7 @@ export const entrenamientosService = {
         cancelacion_antelacion_horas: input.cancelacion_antelacion_horas ?? null,
       })
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
       )
       .single();
 
@@ -470,7 +480,7 @@ export const entrenamientosService = {
       throw mapServiceError(error);
     }
 
-    const group = mapTrainingGroup(data as TrainingGroupRow);
+    const group = mapTrainingGroup(data as unknown as TrainingGroupRow);
 
     const rules = await this.upsertTrainingGroupRules({
       tenantId: input.tenantId,
@@ -601,6 +611,8 @@ export const entrenamientosService = {
         descripcion: input.trainingGroup.descripcion,
         punto_encuentro: input.trainingGroup.punto_encuentro ?? null,
         formulario_externo: input.trainingGroup.formulario_externo ?? null,
+        formulario_id: input.trainingGroup.formulario_id ?? null,
+        formulario_obligatorio: input.trainingGroup.formulario_obligatorio ?? false,
         disciplina_id: input.trainingGroup.disciplina_id,
         escenario_id: input.trainingGroup.escenario_id,
         entrenador_id: input.trainingGroup.entrenador_id,
@@ -642,6 +654,8 @@ export const entrenamientosService = {
               descripcion: input.trainingGroup.descripcion,
               punto_encuentro: input.trainingGroup.punto_encuentro ?? null,
               formulario_externo: input.trainingGroup.formulario_externo ?? null,
+              formulario_id: input.trainingGroup.formulario_id ?? null,
+              formulario_obligatorio: input.trainingGroup.formulario_obligatorio ?? false,
               disciplina_id: input.trainingGroup.disciplina_id,
               escenario_id: input.trainingGroup.escenario_id,
               entrenador_id: input.trainingGroup.entrenador_id,
@@ -667,13 +681,13 @@ export const entrenamientosService = {
     const { data, error } = await supabase
       .from('entrenamientos')
       .insert(rows)
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at');
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at');
 
     if (error) {
       throw mapServiceError(error);
     }
 
-    return ((data ?? []) as TrainingInstanceRow[]).map(mapTrainingInstance);
+    return ((data ?? []) as unknown as TrainingInstanceRow[]).map(mapTrainingInstance);
   },
 
   async updateTrainingSeries(input: UpdateTrainingSeriesInput): Promise<TrainingGroup> {
@@ -686,6 +700,8 @@ export const entrenamientosService = {
         descripcion: input.groupPatch.descripcion,
         punto_encuentro: input.groupPatch.punto_encuentro,
         formulario_externo: input.groupPatch.formulario_externo,
+        formulario_id: input.groupPatch.formulario_id,
+        formulario_obligatorio: input.groupPatch.formulario_obligatorio,
         disciplina_id: input.groupPatch.disciplina_id,
         escenario_id: input.groupPatch.escenario_id,
         entrenador_id: input.groupPatch.entrenador_id,
@@ -700,7 +716,7 @@ export const entrenamientosService = {
       .eq('id', input.trainingGroupId)
       .eq('tenant_id', input.tenantId)
       .select(
-        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
+        'id, tenant_id, tipo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, duracion_minutos, cupo_maximo, timezone, fecha_inicio, fecha_fin, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at',
       )
       .single();
 
@@ -708,7 +724,7 @@ export const entrenamientosService = {
       throw mapServiceError(error);
     }
 
-    const group = mapTrainingGroup(data as TrainingGroupRow);
+    const group = mapTrainingGroup(data as unknown as TrainingGroupRow);
     const mutationFromIso = input.scope === 'future' ? resolveFutureCutoffIso(input.effectiveFrom) : new Date().toISOString();
 
     const syncGroupPatchToInstances = async () => {
@@ -717,6 +733,8 @@ export const entrenamientosService = {
         descripcion: group.descripcion,
         punto_encuentro: group.punto_encuentro,
         formulario_externo: group.formulario_externo,
+        formulario_id: group.formulario_id,
+        formulario_obligatorio: group.formulario_obligatorio,
         disciplina_id: group.disciplina_id,
         escenario_id: group.escenario_id,
         entrenador_id: group.entrenador_id,

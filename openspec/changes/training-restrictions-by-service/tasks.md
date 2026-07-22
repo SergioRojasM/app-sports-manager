@@ -49,16 +49,16 @@
 
 ## 7. Validation and Testing
 
-- [ ] 7.1 Verify migration applied cleanly locally: confirm new columns exist on both restriction tables and `reserva_servicios` table is created
-- [ ] 7.2 Test admin creates training with 2 restriction rows: row 1 requires service A; row 2 requires service B + service C
-- [ ] 7.3 Test athlete with only service A → passes row 1, `unidades_restantes` for A decremented, `reserva_servicios` row inserted
-- [ ] 7.4 Test athlete with service B (units) + service C (units) → passes row 2, both B and C decremented, two `reserva_servicios` rows inserted
-- [ ] 7.5 Test athlete with service B (1 unit) + service C (0 units) → rejected with `UNIDADES_AGOTADAS`, no write occurs
-- [ ] 7.6 Test athlete with neither service → rejected with `SERVICIO_REQUERIDO`
-- [ ] 7.7 Test athlete with unlimited service A (`unidades_restantes IS NULL`) → passes, no decrement, `reserva_servicios` row with `suscripcion_id = NULL` inserted
-- [ ] 7.8 Test cancellation: `unidades_restantes` restored for finite services; unlimited row skipped; `reserva_servicios` rows deleted
-- [ ] 7.9 Test admin bypass (`bypass_restrictions = true`) → booking created, no deduction
-- [ ] 7.10 Test training with zero restriction rows → booking created freely, no deduction
+- [x] 7.1 Verify migration applied cleanly locally: confirm new columns exist on both restriction tables and `reserva_servicios` table is created
+- [x] 7.2 Test admin creates training with 2 restriction rows: row 1 requires service A; row 2 requires service B + service C
+- [x] 7.3 Test athlete with only service A → passes row 1, `unidades_restantes` for A decremented, `reserva_servicios` row inserted
+- [x] 7.4 Test athlete with service B (units) + service C (units) → passes row 2, both B and C decremented, two `reserva_servicios` rows inserted
+- [x] 7.5 Test athlete with service B (1 unit) + service C (0 units) → rejected with `UNIDADES_AGOTADAS`, no write occurs
+- [x] 7.6 Test athlete with neither service → rejected with `SERVICIO_REQUERIDO`
+- [x] 7.7 Test athlete with unlimited service A (`unidades_restantes IS NULL`) → passes, no decrement, `reserva_servicios` row with `suscripcion_id = NULL` inserted
+- [x] 7.8 Test cancellation: `unidades_restantes` restored for finite services; unlimited row skipped; `reserva_servicios` rows deleted
+- [x] 7.9 Test admin bypass (`bypass_restrictions = true`) → booking created, no deduction
+- [x] 7.10 Test training with zero restriction rows → booking created freely, no deduction
 
 ## 8. Documentation
 
