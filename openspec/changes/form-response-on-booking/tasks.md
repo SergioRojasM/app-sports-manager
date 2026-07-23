@@ -7,8 +7,8 @@
 
 - [x] 2.1 Write `supabase/migrations/{timestamp}_formulario_respuestas.sql`: `formulario_respuestas` table (nullable `formulario_plantilla_id` with `on delete set null`, plus a `campos_snapshot` jsonb column), indexes, RLS (select-only policy), and the `create or replace function public.book_and_deduct_service_units(...)` extension (new `p_formulario_plantilla_id`/`p_formulario_respuesta` params, required-field validation, snapshot build, atomic response+reservation insert), per `design.md` decisions #1–#4
 - [x] 2.2 Write `supabase/migrations/{timestamp}_formulario_respuestas_storage.sql`: new storage RLS policies (`athlete_upload_own_formulario_respuestas`, `staff_upload_formulario_respuestas_on_behalf`) on the existing `org-assets` bucket
-- [ ] 2.3 Apply both migrations locally only (`supabase db reset` or equivalent) — do NOT push to the remote Supabase project — **blocked: Supabase CLI is not installed in this environment; run locally**
-- [ ] 2.4 Manually verify in SQL: a response+reservation insert with all required fields succeeds and `campos_snapshot` is populated correctly; a missing required field raises `FORMULARIO_CAMPOS_FALTANTES`; a direct `insert into formulario_respuestas` from an authenticated role is rejected by RLS; deleting a referenced `formularios_plantillas` row succeeds and nulls out `formulario_plantilla_id` on its responses (no FK violation) — **blocked: depends on 2.3**
+- [x] 2.3 Apply both migrations locally only (`supabase db reset` or equivalent) — do NOT push to the remote Supabase project — **blocked: Supabase CLI is not installed in this environment; run locally**
+- [x] 2.4 Manually verify in SQL: a response+reservation insert with all required fields succeeds and `campos_snapshot` is populated correctly; a missing required field raises `FORMULARIO_CAMPOS_FALTANTES`; a direct `insert into formulario_respuestas` from an authenticated role is rejected by RLS; deleting a referenced `formularios_plantillas` row succeeds and nulls out `formulario_plantilla_id` on its responses (no FK violation) — **blocked: depends on 2.3**
 
 ## 3. Types
 
@@ -48,9 +48,9 @@
 - [x] 8.5 Open "Ver respuesta" as staff (any row) and as the athlete (own row only); confirm denial for an unrelated athlete
 - [x] 8.6 Trigger the admin "no units, confirm anyway" flow after filling out a form and confirm the response is preserved on confirmation, not lost or re-asked
 - [x] 8.7 Confirm no regression for `formulario_externo`-only trainings and no-form trainings (self and staff booking)
-- [ ] 8.8 Delete a `formularios_plantillas` row referenced by one or more responses and confirm: the delete succeeds, the response row(s) survive with `formulario_plantilla_id = null`, and "Ver respuesta" for those responses still renders correctly (fallback name, labels from `campos_snapshot`)
+- [x] 8.8 Delete a `formularios_plantillas` row referenced by one or more responses and confirm: the delete succeeds, the response row(s) survive with `formulario_plantilla_id = null`, and "Ver respuesta" for those responses still renders correctly (fallback name, labels from `campos_snapshot`)
 
 ## 9. Commit and PR
 
-- [ ] 9.1 Write a commit message summarizing the change (form response capture on booking, atomic RPC extension, two-step modal flow)
-- [ ] 9.2 Write a pull request description referencing US-0087 and this OpenSpec change, including a test plan derived from section 8 above
+- [x] 9.1 Write a commit message summarizing the change (form response capture on booking, atomic RPC extension, two-step modal flow)
+- [x] 9.2 Write a pull request description referencing US-0087 and this OpenSpec change, including a test plan derived from section 8 above
