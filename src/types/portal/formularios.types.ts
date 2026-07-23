@@ -150,6 +150,20 @@ export type FormularioSeccionFormField =
 export type FormularioSeccionFieldErrors = Partial<Record<FormularioSeccionFormField, string>>;
 
 // =============================================
+// Formulario respuesta (US-0087)
+// =============================================
+
+export type FormularioRespuesta = {
+  id: string;
+  tenant_id: string;
+  formulario_plantilla_id: string;
+  atleta_id: string;
+  entrenamiento_id: string;
+  respuesta: Record<string, string>;
+  created_at: string;
+};
+
+// =============================================
 // Service error
 // =============================================
 

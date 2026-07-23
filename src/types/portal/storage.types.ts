@@ -27,6 +27,17 @@ export function buildReceiptPath(
   return `orgs/${tenantId}/users/${userId}/receipts/${pagoId}.${ext}`;
 }
 
+/** Form response image path: orgs/{tenantId}/users/{atletaId}/formularios/{formularioPlantillaId}/{campoNombre}-{timestamp}.{ext} */
+export function buildFormularioRespuestaFilePath(
+  tenantId: string,
+  atletaId: string,
+  formularioPlantillaId: string,
+  campoNombre: string,
+  ext: string,
+): string {
+  return `orgs/${tenantId}/users/${atletaId}/formularios/${formularioPlantillaId}/${campoNombre}-${Date.now()}.${ext}`;
+}
+
 // ─── Result types ───
 
 export type StorageUploadResult = {

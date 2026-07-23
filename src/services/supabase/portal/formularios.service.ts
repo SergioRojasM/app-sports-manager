@@ -5,6 +5,7 @@ import {
   type FormularioPlantillaConSecciones,
   type FormularioPlantillaListItem,
   type FormularioSeccion,
+  type FormularioRespuesta,
   type CreatePlantillaInput,
   type UpdatePlantillaInput,
   type CreateSeccionInput,
@@ -253,5 +254,21 @@ export const formulariosService = {
 
       if (error) throw mapFormularioError(error);
     }
+  },
+
+  // -----------------------------------------------------------------------
+  // Respuestas (US-0087) — RLS-gated read: owning athlete or tenant staff
+  // -----------------------------------------------------------------------
+
+  async getRespuestaById(id: string): Promise<FormularioRespuesta | null> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('formulario_respuestas')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw mapFormularioError(error);
+    return (data as FormularioRespuesta | null) ?? null;
   },
 };

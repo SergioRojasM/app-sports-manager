@@ -5,13 +5,17 @@ import { createClient } from '@/services/supabase/client';
 import { useReservas } from '@/hooks/portal/entrenamientos/reservas/useReservas';
 import { useReservaForm } from '@/hooks/portal/entrenamientos/reservas/useReservaForm';
 import { useAsistencias } from '@/hooks/portal/entrenamientos/reservas/useAsistencias';
+import { useFormularioRespuestaForm } from '@/hooks/portal/entrenamientos/reservas/useFormularioRespuestaForm';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
+import { storageService } from '@/services/supabase/portal/storage.service';
 import { toCsvString, downloadTextFile } from '@/lib/csv';
 import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
 import { AsistenciaFormModal } from './AsistenciaFormModal';
+import { FormularioRespuestaModal } from './FormularioRespuestaModal';
+import { FormularioRespuestaViewerModal } from './FormularioRespuestaViewerModal';
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import type { UserRole } from '@/types/portal.types';
@@ -67,6 +71,19 @@ export function ReservasPanel({
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewSecciones, setPreviewSecciones] = useState<FormularioSeccion[]>([]);
 
+  // Formulario fill-out step (US-0087)
+  const [formularioRespuestaModalOpen, setFormularioRespuestaModalOpen] = useState(false);
+  const [formularioTargetAtletaId, setFormularioTargetAtletaId] = useState<string | null>(null);
+
+  // "Ver respuesta" viewer (US-0087)
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerLoading, setViewerLoading] = useState(false);
+  const [viewerError, setViewerError] = useState<string | null>(null);
+  const [viewerPlantillaNombre, setViewerPlantillaNombre] = useState('');
+  const [viewerSecciones, setViewerSecciones] = useState<FormularioSeccion[]>([]);
+  const [viewerRespuesta, setViewerRespuesta] = useState<Record<string, string>>({});
+  const [viewerImageUrls, setViewerImageUrls] = useState<Record<string, string>>({});
+
   const isAdmin = role === 'administrador' || role === 'entrenador';
   const isPast = !!instance?.fecha_hora && new Date(instance.fecha_hora) < new Date();
 
@@ -88,6 +105,8 @@ export function ReservasPanel({
   useEffect(() => {
     if (!open) {
       reservasHook.clearRejection();
+      setFormularioRespuestaModalOpen(false);
+      setViewerOpen(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -149,8 +168,10 @@ export function ReservasPanel({
         onMutationComplete?.();
         void reservasHook.refetchCategorias();
         setFormModalOpen(false);
+        setFormularioRespuestaModalOpen(false);
+        formularioRespuestaForm.reset();
       }
-      // On failure keep modal open so errors/warnings are visible
+      // On failure keep modal(s) open so errors/warnings are visible
       return success;
     },
     onUpdateReserva: async (id, input) => {
@@ -162,6 +183,25 @@ export function ReservasPanel({
       return success;
     },
   });
+
+  // Formulario fill-out step (US-0087): loads the attached template's sections and
+  // manages the collected answers once the user has moved past ReservaFormModal.
+  const formularioRespuestaForm = useFormularioRespuestaForm({
+    formularioPlantillaId: instance?.formulario_id ?? null,
+    tenantId,
+    atletaId: formularioTargetAtletaId,
+  });
+
+  // If a staff booking with a submitted form triggers the "no units, confirm anyway"
+  // flow, hand control back to ReservaFormModal (which already renders that branch)
+  // instead of leaving FormularioRespuestaModal open — the collected answers stay
+  // intact in pendingBookingInputRef and are replayed as-is on confirmation.
+  useEffect(() => {
+    if (reservasHook.adminConfirmPending && formularioRespuestaModalOpen) {
+      setFormularioRespuestaModalOpen(false);
+      setFormModalOpen(true);
+    }
+  }, [reservasHook.adminConfirmPending, formularioRespuestaModalOpen]);
 
   // My active booking (for atleta view)
   const myReserva = useMemo(() => {
@@ -217,6 +257,83 @@ export function ReservasPanel({
       estado: reserva.estado,
     });
     setFormModalOpen(true);
+  };
+
+  // ── Formulario fill-out step (US-0087) ──────────────────────────────────
+
+  const handleRequireFormulario = () => {
+    if (!reservaForm.validateBase()) return;
+    setFormularioTargetAtletaId(reservaForm.form.atleta_id);
+    setFormModalOpen(false);
+    setFormularioRespuestaModalOpen(true);
+  };
+
+  const handleFormularioGuardarYReservar = async () => {
+    if (!instance?.formulario_id) return;
+    if (!formularioRespuestaForm.validate()) return;
+    const respuesta = formularioRespuestaForm.buildRespuesta();
+    await reservaForm.submitCreate({
+      formulario_plantilla_id: instance.formulario_id,
+      formulario_respuesta: respuesta,
+    });
+    // onCreateReserva closes both modals and resets formularioRespuestaForm on success;
+    // on failure the modal stays open with submitError/errors visible.
+  };
+
+  const handleFormularioSkip = async () => {
+    await reservaForm.submitCreate();
+  };
+
+  const handleCloseFormularioRespuesta = () => {
+    setFormularioRespuestaModalOpen(false);
+    formularioRespuestaForm.reset();
+    reservaForm.reset();
+    reservasHook.cancelAdminConfirmation();
+  };
+
+  // ── "Ver respuesta" viewer (US-0087) ────────────────────────────────────
+
+  const handleOpenRespuestaViewer = async (reserva: ReservaView) => {
+    if (!reserva.formulario_respuesta_id) return;
+    setViewerOpen(true);
+    setViewerLoading(true);
+    setViewerError(null);
+    try {
+      const respuestaRow = await formulariosService.getRespuestaById(reserva.formulario_respuesta_id);
+      if (!respuestaRow) {
+        throw new Error('not_found');
+      }
+      const plantilla = await formulariosService.getPlantillaConSecciones(respuestaRow.formulario_plantilla_id);
+      setViewerPlantillaNombre(plantilla.nombre);
+      setViewerSecciones(plantilla.secciones);
+      setViewerRespuesta(respuestaRow.respuesta);
+
+      const imagenSecciones = plantilla.secciones.filter(
+        (s) => s.seccion_tipo === 'datos' && s.campo_tipo === 'imagen' && s.campo_nombre,
+      );
+      if (imagenSecciones.length > 0) {
+        const supabase = createClient();
+        const urls: Record<string, string> = {};
+        await Promise.all(
+          imagenSecciones.map(async (s) => {
+            const path = respuestaRow.respuesta[s.campo_nombre as string];
+            if (!path) return;
+            try {
+              urls[s.campo_nombre as string] = await storageService.getSignedUrl(supabase, path);
+            } catch {
+              // Non-critical — image link shows "Sin respuesta" fallback
+            }
+          }),
+        );
+        setViewerImageUrls(urls);
+      } else {
+        setViewerImageUrls({});
+      }
+    } catch {
+      setViewerError('No fue posible cargar la respuesta.');
+    } finally {
+      setViewerLoading(false);
+    }
   };
 
   const handleExportCsv = async () => {
@@ -535,6 +652,7 @@ export function ReservasPanel({
                   (reserva.estado === 'confirmada' || reserva.estado === 'cancelada') &&
                   isAdmin;
                 const canEdit = isAdmin;
+                const canViewRespuesta = !!reserva.formulario_respuesta_id && (isAdmin || isOwn);
 
                 return (
                   <li
@@ -583,8 +701,17 @@ export function ReservasPanel({
                     )}
 
                     {/* Row actions */}
-                    {(canEdit || canCancel || canDelete) && (
+                    {(canEdit || canCancel || canDelete || canViewRespuesta) && (
                       <div className="mt-3 flex items-center gap-2">
+                        {canViewRespuesta && (
+                          <button
+                            type="button"
+                            onClick={() => void handleOpenRespuestaViewer(reserva)}
+                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise"
+                          >
+                            Ver respuesta
+                          </button>
+                        )}
                         {canEdit && (
                           <button
                             type="button"
@@ -683,9 +810,45 @@ export function ReservasPanel({
             void reservasHook.refetchCategorias();
             setFormModalOpen(false);
             reservaForm.reset();
+            formularioRespuestaForm.reset();
           }
         }}
         onCancelAdminConfirmation={reservasHook.cancelAdminConfirmation}
+        hasFormularioInterno={!!instance.formulario_id}
+        formularioNombre={instance.formulario_plantilla?.nombre ?? null}
+        formularioObligatorio={instance.formulario_obligatorio}
+        onRequireFormulario={handleRequireFormulario}
+      />
+
+      <FormularioRespuestaModal
+        open={formularioRespuestaModalOpen}
+        plantillaNombre={formularioRespuestaForm.plantillaNombre || instance.formulario_plantilla?.nombre || 'Formulario'}
+        secciones={formularioRespuestaForm.secciones}
+        values={formularioRespuestaForm.values}
+        errors={formularioRespuestaForm.errors}
+        loading={formularioRespuestaForm.loading}
+        loadError={formularioRespuestaForm.loadError}
+        uploadingCampoNombre={formularioRespuestaForm.uploadingCampoNombre}
+        uploadError={formularioRespuestaForm.uploadError}
+        allowSkip={isAdmin || !instance.formulario_obligatorio}
+        isSubmitting={reservaForm.isSubmitting}
+        submitError={reservaForm.submitError}
+        onUpdateValue={formularioRespuestaForm.updateValue}
+        onUploadImage={formularioRespuestaForm.uploadImage}
+        onSubmit={handleFormularioGuardarYReservar}
+        onSkip={handleFormularioSkip}
+        onClose={handleCloseFormularioRespuesta}
+      />
+
+      <FormularioRespuestaViewerModal
+        open={viewerOpen}
+        plantillaNombre={viewerPlantillaNombre}
+        secciones={viewerSecciones}
+        respuesta={viewerRespuesta}
+        imageUrls={viewerImageUrls}
+        loading={viewerLoading}
+        error={viewerError}
+        onClose={() => setViewerOpen(false)}
       />
 
       <FormularioPreviewModal
