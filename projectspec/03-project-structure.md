@@ -104,11 +104,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EntrenamientoFormularioSection.tsx  # Formulario attachment: none/externo/interno toggle, plantilla picker (role-gated "crear nueva"), obligatorio checkbox (US-0086)
 │   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row; shows attached formulario (externo link or interno plantilla name) + Obligatorio tag
 │   │   │       └── reservas/              # Sub-feature slice (booking)
-│   │   │           ├── ReservasPanel.tsx
-│   │   │           ├── ReservaFormModal.tsx
+│   │   │           ├── ReservasPanel.tsx        # Two-step booking flow when training has an internal formulario (US-0087): ReservaFormModal → FormularioRespuestaModal; "Ver respuesta" row action opens FormularioRespuestaViewerModal
+│   │   │           ├── ReservaFormModal.tsx     # Shows "Formulario adjunto" banner + signals parent (onRequireFormulario) instead of submitting directly when training has formulario_id (US-0087)
 │   │   │           ├── ReservaStatusBadge.tsx
 │   │   │           ├── AsistenciaStatusBadge.tsx  # Inline badge: Sin registrar / Asistió / No asistió
 │   │   │           ├── AsistenciaFormModal.tsx    # Create/edit/delete attendance record (admin/coach only)
+│   │   │           ├── FormularioRespuestaModal.tsx        # Fill-out step: editable inputs per campo_tipo (incl. imagen upload), "Guardar y reservar" + conditional "Reservar sin formulario" skip (US-0087)
+│   │   │           ├── FormularioRespuestaViewerModal.tsx  # Read-only "Ver respuesta" viewer — labels + submitted values, signed-URL images (US-0087)
 │   │   │           └── index.ts
 │   │   │   └── planes/                   # Feature slice (portal/planes)
 │   │   │       ├── PlanesPage.tsx
@@ -218,7 +220,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useEntrenamientoCategorias.ts  # Fetch categories for a selected training instance
 │               └── reservas/              # Sub-feature hooks (booking + attendance)
 │               │   ├── useReservas.ts     # Loads reservas, capacidad, categorias; exposes refetchCategorias
-│               │   ├── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId
+│               │   ├── useReservaForm.ts  # Form state with entrenamiento_categoria_id, auto-select via getAtletaNivelId; exposes validateBase(); submitCreate() accepts an optional { formulario_plantilla_id, formulario_respuesta } payload (US-0087)
+│               │   ├── useFormularioRespuestaForm.ts  # Loads attached plantilla's secciones, manages fill-out values/errors/per-field image upload, validate()/buildRespuesta() (US-0087)
 │               │   └── useAsistencias.ts  # Attendance map keyed by reserva_id; isEnabled guard skips fetch for atleta role
 │   │       └── planes/
 │   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal; includes tiposServiceRows + updateTipoServiceRows (US-0062)
@@ -272,11 +275,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts  # entrenamientos/entrenamientos_grupo select/insert/update all carry formulario_id, formulario_obligatorio, and a formulario_plantilla:formularios_plantillas(nombre) embed for display (US-0086)
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking; create() also forwards p_formulario_plantilla_id/p_formulario_respuesta and maps FORMULARIO_CAMPOS_FALTANTES (US-0087)
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
 │   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
-│   │   │   └── formularios.service.ts  # CRUD for formularios_plantillas + formulario_plantilla_esquema "secciones" (getPlantillaConSecciones, getSeccionesByPlantilla, createSeccion/updateSeccion — write seccion_tipo/seccion_descripcion and null out the other branch's campo_* columns —, deleteSeccion, reorderSecciones); US-0084/US-0085
+│   │   │   └── formularios.service.ts  # CRUD for formularios_plantillas + formulario_plantilla_esquema "secciones" (getPlantillaConSecciones, getSeccionesByPlantilla, createSeccion/updateSeccion — write seccion_tipo/seccion_descripcion and null out the other branch's campo_* columns —, deleteSeccion, reorderSecciones); US-0084/US-0085; getRespuestaById reads a submitted formulario_respuestas row, RLS-gated to owning athlete or tenant staff (US-0087)
 │   │       │   └── suscripciones.service.ts  # createSuscripcion (calls populate_suscripcion_servicios RPC when plan_tipo_id is set — US-0063), hasPendingSuscripcion, getSuscripcionServicios (returns SuscripcionServicio[] for a given suscripcion_id)
 │   │       │   └── pagos.service.ts
 │   │       │   └── equipo.service.ts
@@ -289,7 +292,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
-│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket
+│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket; uploadFormularioRespuestaImage uploads a "imagen"-type form-response file under the booking athlete's own users/{atletaId}/formularios/ path (US-0087)
 │   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripcionesTenant — user's subscriptions with plan + pago joins, scoped by atleta_id + tenant_id
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
@@ -301,11 +304,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts   # TrainingFormularioTipo (ninguno/externo/interno), TrainingFormularioFormState, TrainingGroup/TrainingInstance carry formulario_id/formulario_obligatorio/formulario_plantilla (US-0086)
-│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export, includes atleta_id), ReservasManagementFilters (server-side filter input — US-0073), MisReservasFilters (athlete-scoped filter input — US-0074)
+│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export, includes atleta_id), ReservasManagementFilters (server-side filter input — US-0073), MisReservasFilters (athlete-scoped filter input — US-0074); Reserva.formulario_respuesta_id, CreateReservaInput.formulario_plantilla_id/formulario_respuesta (US-0087)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)
 │   │       └── servicios.types.ts        # Servicio, CreateServicioInput, UpdateServicioInput, ServicioFormValues, ServicioServiceError, PlanTipoServicio, PlanTipoServicioRow, SyncPlanTipoServiciosInput (US-0062)
-│   │       └── formularios.types.ts      # FormularioPlantilla, FormularioSeccion (seccion_tipo: titulo|subtitulo|texto|datos + seccion_descripcion; campo_* nullable), FormularioTipoCampo union, FormularioPlantillaConSecciones, FormularioPlantillaListItem (seccionesCount), Create/UpdateSeccionInput, form-values types, FormularioServiceError (US-0084/US-0085)
+│   │       └── formularios.types.ts      # FormularioPlantilla, FormularioSeccion (seccion_tipo: titulo|subtitulo|texto|datos + seccion_descripcion; campo_* nullable), FormularioTipoCampo union, FormularioPlantillaConSecciones, FormularioPlantillaListItem (seccionesCount), Create/UpdateSeccionInput, form-values types, FormularioServiceError (US-0084/US-0085); FormularioRespuesta (id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta jsonb — US-0087)
 │   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063)
 │   │       └── pagos.types.ts
 │   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
@@ -406,7 +409,7 @@ Supabase (database)
 
 | Function | Purpose | Trigger |
 |----------|---------|---------|
-| `book_and_deduct_service_units(...)` | Atomic booking + multi-service unit deduction via JSONB deductions array | Called via RPC from `reservas.service.ts` |
+| `book_and_deduct_service_units(...)` | Atomic booking + multi-service unit deduction via JSONB deductions array; optionally validates required "datos" fields and inserts a linked `formulario_respuestas` row atomically when `p_formulario_plantilla_id`/`p_formulario_respuesta` are provided (US-0087) | Called via RPC from `reservas.service.ts` |
 | `cancel_and_restore_service_units(...)` | Atomic cancellation + service unit restoration from `reserva_servicios` ledger | Called via RPC from `reservas.service.ts` |
 | `populate_suscripcion_servicios(p_suscripcion_id, p_plan_tipo_id)` | Inserts `suscripcion_servicios` rows from `plan_tipos_servicios` at subscription creation time; idempotent via `ON CONFLICT DO NOTHING` (US-0063) | Called via RPC from `suscripciones.service.ts` and `gestion-suscripciones.service.ts` |
 | `evaluar_suspensiones_cron()` | Evaluates active members against assigned suspension rules; suspends those exceeding absence thresholds, logs `miembros_tenant_novedades` (tipo `inasistencias_acumuladas`), and marks processed absences (`validacion_suspension = true`) | pg_cron daily schedule |

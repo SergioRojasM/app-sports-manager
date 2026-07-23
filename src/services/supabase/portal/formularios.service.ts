@@ -5,6 +5,8 @@ import {
   type FormularioPlantillaConSecciones,
   type FormularioPlantillaListItem,
   type FormularioSeccion,
+  type FormularioRespuesta,
+  type FormularioRespuestaReportRow,
   type CreatePlantillaInput,
   type UpdatePlantillaInput,
   type CreateSeccionInput,
@@ -38,6 +40,14 @@ function mapFormularioError(error: PostgrestError | null): FormularioServiceErro
 
   if (error.code === '42501') {
     return new FormularioServiceError('forbidden', 'No tienes permisos para realizar esta acción.');
+  }
+
+  // Deleting a plantilla still marked "obligatorio" on a training: the ON DELETE SET NULL
+  // on entrenamientos(_grupo).formulario_id nulls the FK, but that then violates the
+  // sibling *_formulario_obligatorio_ck check constraint (US-0086) — surface a clear,
+  // specific message instead of falling into the generic "invalid_seccion" branch below.
+  if (error.code === '23514' && error.message?.includes('formulario_obligatorio_ck')) {
+    return new FormularioServiceError('in_use', 'Esta plantilla está siendo usada en algún entrenamiento.');
   }
 
   if (error.code === '23514') {
@@ -253,5 +263,65 @@ export const formulariosService = {
 
       if (error) throw mapFormularioError(error);
     }
+  },
+
+  // -----------------------------------------------------------------------
+  // Respuestas (US-0087) — RLS-gated read: owning athlete or tenant staff
+  // -----------------------------------------------------------------------
+
+  async getRespuestaById(id: string): Promise<FormularioRespuesta | null> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('formulario_respuestas')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) throw mapFormularioError(error);
+    return (data as FormularioRespuesta | null) ?? null;
+  },
+
+  /** Every response submitted for a training, regardless of its booking's current status — used by the "Descargar Respuestas Formulario" export. */
+  async getRespuestasByEntrenamiento(tenantId: string, entrenamientoId: string): Promise<FormularioRespuestaReportRow[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('formulario_respuestas')
+      .select(`
+        id,
+        tenant_id,
+        formulario_plantilla_id,
+        atleta_id,
+        entrenamiento_id,
+        respuesta,
+        campos_snapshot,
+        created_at,
+        usuarios!formulario_respuestas_atleta_id_fkey (
+          nombre,
+          apellido,
+          email
+        )
+      `)
+      .eq('tenant_id', tenantId)
+      .eq('entrenamiento_id', entrenamientoId)
+      .order('created_at', { ascending: true });
+
+    if (error) throw mapFormularioError(error);
+
+    return (data ?? []).map((row) => {
+      const usuario = row.usuarios as unknown as { nombre: string | null; apellido: string | null; email: string } | null;
+      return {
+        id: row.id,
+        tenant_id: row.tenant_id,
+        formulario_plantilla_id: row.formulario_plantilla_id,
+        atleta_id: row.atleta_id,
+        entrenamiento_id: row.entrenamiento_id,
+        respuesta: row.respuesta,
+        campos_snapshot: row.campos_snapshot,
+        created_at: row.created_at,
+        atleta_nombre: usuario?.nombre ?? null,
+        atleta_apellido: usuario?.apellido ?? null,
+        atleta_email: usuario?.email ?? '',
+      } as FormularioRespuestaReportRow;
+    });
   },
 };

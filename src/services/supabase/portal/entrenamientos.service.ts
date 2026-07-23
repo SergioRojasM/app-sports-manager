@@ -1213,4 +1213,32 @@ export const entrenamientosService = {
       label: (row.nombre as string | null) ?? 'Servicio',
     }));
   },
+
+  /**
+   * Detaches a formulario template from every training that references it
+   * (formulario_id -> null, formulario_obligatorio -> false on both entrenamientos and
+   * entrenamientos_grupo) so the template can then be hard-deleted without violating
+   * the *_formulario_obligatorio_ck check constraints (US-0086/US-0087).
+   */
+  async detachFormularioPlantilla(plantillaId: string): Promise<void> {
+    const supabase = createClient();
+
+    const { error: instanceError } = await supabase
+      .from('entrenamientos')
+      .update({ formulario_id: null, formulario_obligatorio: false })
+      .eq('formulario_id', plantillaId);
+
+    if (instanceError) {
+      throw mapServiceError(instanceError);
+    }
+
+    const { error: groupError } = await supabase
+      .from('entrenamientos_grupo')
+      .update({ formulario_id: null, formulario_obligatorio: false })
+      .eq('formulario_id', plantillaId);
+
+    if (groupError) {
+      throw mapServiceError(groupError);
+    }
+  },
 };

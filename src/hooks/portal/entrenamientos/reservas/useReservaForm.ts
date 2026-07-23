@@ -33,6 +33,12 @@ type UseReservaFormOptions = {
   onUpdateReserva: (id: string, input: { estado?: ReservaEstado; notas?: string }) => Promise<boolean>;
 };
 
+/** Optional collected form-response payload merged into the CreateReservaInput on submit. */
+type FormularioRespuestaPayload = {
+  formulario_plantilla_id: string;
+  formulario_respuesta: Record<string, string>;
+};
+
 type UseReservaFormResult = {
   form: ReservaFormValues;
   errors: ReservaFormErrors;
@@ -41,7 +47,9 @@ type UseReservaFormResult = {
   isSubmitting: boolean;
   submitError: string | null;
   updateField: (field: keyof ReservaFormValues, value: string) => void;
-  submitCreate: () => Promise<boolean>;
+  /** Runs the same field validation submitCreate uses, without submitting. */
+  validateBase: () => boolean;
+  submitCreate: (formularioPayload?: FormularioRespuestaPayload) => Promise<boolean>;
   submitUpdate: () => Promise<boolean>;
   openCreate: (defaultAtletaId?: string) => Promise<void>;
   openEdit: (reservaId: string, values: Partial<ReservaFormValues>) => void;
@@ -85,7 +93,7 @@ export function useReservaForm({
     setSubmitError(null);
   }, []);
 
-  const validate = useCallback((): boolean => {
+  const validateBase = useCallback((): boolean => {
     const newErrors: ReservaFormErrors = {};
 
     if (mode === 'create' && !form.atleta_id.trim()) {
@@ -101,8 +109,8 @@ export function useReservaForm({
     return !hasErrors;
   }, [form, mode, categorias]);
 
-  const submitCreate = useCallback(async (): Promise<boolean> => {
-    if (!validate()) return false;
+  const submitCreate = useCallback(async (formularioPayload?: FormularioRespuestaPayload): Promise<boolean> => {
+    if (!validateBase()) return false;
 
     setIsSubmitting(true);
     setSubmitError(null);
@@ -114,6 +122,12 @@ export function useReservaForm({
         entrenamiento_id: entrenamientoId,
         entrenamiento_categoria_id: form.entrenamiento_categoria_id ?? undefined,
         notas: form.notas.trim() || undefined,
+        ...(formularioPayload
+          ? {
+              formulario_plantilla_id: formularioPayload.formulario_plantilla_id,
+              formulario_respuesta: formularioPayload.formulario_respuesta,
+            }
+          : {}),
       };
 
       const success = await onCreateReserva(input);
@@ -127,7 +141,7 @@ export function useReservaForm({
     } finally {
       setIsSubmitting(false);
     }
-  }, [validate, tenantId, entrenamientoId, form, onCreateReserva]);
+  }, [validateBase, tenantId, entrenamientoId, form, onCreateReserva]);
 
   const submitUpdate = useCallback(async (): Promise<boolean> => {
     if (!editingReservaId) return false;
@@ -210,6 +224,7 @@ export function useReservaForm({
     isSubmitting,
     submitError,
     updateField,
+    validateBase,
     submitCreate,
     submitUpdate,
     openCreate,
