@@ -173,6 +173,13 @@ export type FormularioRespuesta = {
   created_at: string;
 };
 
+/** One row of the "Descargar Respuestas Formulario" export — a response plus its athlete's identity. */
+export type FormularioRespuestaReportRow = FormularioRespuesta & {
+  atleta_nombre: string | null;
+  atleta_apellido: string | null;
+  atleta_email: string;
+};
+
 // =============================================
 // Service error
 // =============================================

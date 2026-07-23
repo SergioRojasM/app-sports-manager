@@ -10,6 +10,7 @@ import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import { toCsvString, downloadTextFile } from '@/lib/csv';
+import { downloadExcelWorkbook, type ExcelCellValue } from '@/lib/excel';
 import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
@@ -65,6 +66,7 @@ export function ReservasPanel({
   const [selectedReservaForAsistencia, setSelectedReservaForAsistencia] = useState<ReservaView | null>(null);
   const [savingAsistencia, setSavingAsistencia] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingFormulario, setIsExportingFormulario] = useState(false);
   const [restrictionLabels, setRestrictionLabels] = useState<string[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -431,6 +433,89 @@ export function ReservasPanel({
     }
   };
 
+  const handleExportFormularioRespuestas = async () => {
+    if (!instance) return;
+    setIsExportingFormulario(true);
+    try {
+      const respuestas = await formulariosService.getRespuestasByEntrenamiento(tenantId, instance.id);
+
+      if (respuestas.length === 0) {
+        window.alert('No hay respuestas de formulario para este entrenamiento.');
+        return;
+      }
+
+      const formatDate = (iso: string | null): string => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
+      // Union of every campo_nombre across all responses' snapshots, ordered by orden.
+      const camposMap = new Map<string, { etiqueta: string; tipo: string; orden: number }>();
+      for (const r of respuestas) {
+        for (const [campoNombre, meta] of Object.entries(r.campos_snapshot)) {
+          camposMap.set(campoNombre, meta);
+        }
+      }
+      const camposOrdenados = Array.from(camposMap.entries()).sort((a, b) => a[1].orden - b[1].orden);
+
+      // Resolve every unique "imagen" path to a signed URL once, up front.
+      const imagenPaths = new Set<string>();
+      for (const [campoNombre, meta] of camposOrdenados) {
+        if (meta.tipo !== 'imagen') continue;
+        for (const r of respuestas) {
+          const path = r.respuesta[campoNombre];
+          if (path) imagenPaths.add(path);
+        }
+      }
+      const supabase = createClient();
+      const signedUrlMap = new Map<string, string>();
+      await Promise.all(
+        Array.from(imagenPaths).map(async (path) => {
+          try {
+            signedUrlMap.set(path, await storageService.getSignedUrl(supabase, path));
+          } catch {
+            // Left unresolved — rendered as a "not available" label below
+          }
+        }),
+      );
+
+      const headers = ['Atleta', 'Apellido', 'Email', 'Fecha de respuesta', ...camposOrdenados.map(([, meta]) => meta.etiqueta)];
+
+      const rows: ExcelCellValue[][] = respuestas.map((r) => {
+        const fixedCells: ExcelCellValue[] = [
+          r.atleta_nombre ?? '',
+          r.atleta_apellido ?? '',
+          r.atleta_email,
+          formatDate(r.created_at),
+        ];
+        const dynamicCells: ExcelCellValue[] = camposOrdenados.map(([campoNombre, meta]) => {
+          const value = r.respuesta[campoNombre];
+          if (!value) return null;
+          if (meta.tipo === 'imagen') {
+            const signedUrl = signedUrlMap.get(value);
+            return signedUrl ? { text: 'Ver imagen', hyperlink: signedUrl } : 'Ver imagen (no disponible)';
+          }
+          return value;
+        });
+        return [...fixedCells, ...dynamicCells];
+      });
+
+      const slug = instance.nombre.toLowerCase().replace(/\s+/g, '_');
+      const dateStr = instance.fecha_hora ? instance.fecha_hora.slice(0, 10) : 'sin-fecha';
+      const filename = `respuestas_formulario_${slug}_${dateStr}.xlsx`;
+
+      await downloadExcelWorkbook('Respuestas', headers, rows, filename);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al exportar las respuestas del formulario';
+      window.alert(message);
+    } finally {
+      setIsExportingFormulario(false);
+    }
+  };
+
   const handleOpenFormularioPreview = () => {
     if (!instance?.formulario_id) return;
     setPreviewOpen(true);
@@ -469,35 +554,50 @@ export function ReservasPanel({
         aria-label={`Reservas: ${instance.nombre}`}
       >
         {/* Header */}
-        <header className="flex items-start justify-between border-b border-portal-border px-6 py-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-lg font-semibold text-slate-100">{instance.nombre}</h2>
-            <p className="mt-1 text-sm text-slate-400">Reservas del entrenamiento</p>
-          </div>
-          <div className="ml-4 flex flex-shrink-0 items-center gap-1">
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={handleExportCsv}
-                disabled={isExporting}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
-                title="Descargar CSV"
-              >
-                <span className="material-symbols-outlined text-base" aria-hidden="true">
-                  {isExporting ? 'hourglass_empty' : 'download'}
-                </span>
-                <span>{isExporting ? 'Exportando...' : 'Descargar CSV'}</span>
-              </button>
-            )}
+        <header className="border-b border-portal-border px-6 py-4">
+          <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-lg font-semibold text-slate-100">{instance.nombre}</h2>
+              <p className="mt-1 text-sm text-slate-400">Reservas del entrenamiento</p>
+            </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-slate-400 hover:bg-slate-700/40 hover:text-slate-200"
+              className="ml-4 flex-shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-700/40 hover:text-slate-200"
             >
               <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
               <span className="sr-only">Cerrar panel</span>
             </button>
           </div>
+
+          {isAdmin && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                disabled={isExporting}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
+                title="Descargar Reservas"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">
+                  {isExporting ? 'hourglass_empty' : 'download'}
+                </span>
+                <span>{isExporting ? 'Exportando...' : 'Descargar Reservas'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleExportFormularioRespuestas()}
+                disabled={isExportingFormulario}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
+                title="Descargar Respuestas Formulario"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">
+                  {isExportingFormulario ? 'hourglass_empty' : 'summarize'}
+                </span>
+                <span>{isExportingFormulario ? 'Exportando...' : 'Descargar Respuestas Formulario'}</span>
+              </button>
+            </div>
+          )}
         </header>
 
         {/* Capacity indicator */}
