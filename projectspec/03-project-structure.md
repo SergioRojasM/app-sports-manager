@@ -27,6 +27,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── page.tsx
 │   │       │   └── loading.tsx
 │   │       ├── perfil/page.tsx           # User profile (global, not tenant-scoped)
+│   │       ├── entrenamientos-publicos/page.tsx  # Public Training Marketplace (non-tenant-scoped, render-only) — cross-tenant discovery of published trainings (US-0089)
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users)
 │   │           └── [tenant_id]/
@@ -95,14 +96,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── NivelesDisciplinaPanel.tsx   # Collapsible panel per discipline row for level CRUD
 │   │   │       └── NivelDisciplinaFormModal.tsx  # Right-side modal for create/edit level
 │   │   │   └── entrenamientos/           # Feature slice (portal/entrenamientos)
-│   │   │       ├── EntrenamientosPage.tsx
+│   │   │       ├── EntrenamientosPage.tsx  # Computes canPublish/publishDisabledReason (servicio-restriction pre-publish gate) alongside selectedActionContext; wires PublicarEntrenamientoModal (US-0089)
 │   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by visibilidad; includes public/private legend
-│   │   │       ├── EntrenamientoFormModal.tsx   # Includes visibilidad radio group (publico/privado, default 'privado')
+│   │   │       ├── EntrenamientoFormModal.tsx   # Visibilidad is now a read-only info row (always 'privado' on create) — publishing happens via the "Publicar" action instead (US-0089)
 │   │   │       ├── EntrenamientoDetalleModal.tsx  # Read-only "Ver detalle" view (incl. past trainings); includes "Guardar como plantilla"
 │   │   │       ├── EntrenamientoCategoriasSection.tsx  # Optional per-level capacity allocation step
 │   │   │       ├── EntrenamientoRestriccionesSection.tsx  # Collapsible restriction-row editor (timing + service-based access conditions, AND/OR per row)
 │   │   │       ├── EntrenamientoFormularioSection.tsx  # Formulario attachment: none/externo/interno toggle, plantilla picker (role-gated "crear nueva"), obligatorio checkbox (US-0086)
 │   │   │       ├── EntrenamientosList.tsx       # Renders VisibilidadBadge per row; shows attached formulario (externo link or interno plantilla name) + Obligatorio tag
+│   │   │       ├── EntrenamientoActionModal.tsx  # Options menu; admin-only "Publicar"/"Gestionar publicación" entry, disabled when historical or servicio-restricted (US-0089)
+│   │   │       ├── PublicarEntrenamientoModal.tsx  # Publish/manage-publication slide-over: live PublicTrainingCard preview + editable nombre/descripcion/precio/banner, "Despublicar" (US-0089)
 │   │   │       └── reservas/              # Sub-feature slice (booking)
 │   │   │           ├── ReservasPanel.tsx        # Two-step booking flow when training has an internal formulario (US-0087): ReservaFormModal → FormularioRespuestaModal; "Ver respuesta" row action opens FormularioRespuestaViewerModal
 │   │   │           ├── ReservaFormModal.tsx     # Shows "Formulario adjunto" banner + signals parent (onRequireFormulario) instead of submitting directly when training has formulario_id (US-0087)
@@ -194,6 +197,14 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── MisReservasFiltersPanel.tsx     # Server-side filter panel: date range, attendance, discipline (no athlete search)
 │   │   │       ├── MisReservasTable.tsx            # Data table without athlete column, badges, client-side pagination
 │   │   │       └── index.ts
+│   │   │   └── entrenamientos-publicos/     # Feature slice (portal/entrenamientos-publicos — cross-tenant marketplace, US-0089)
+│   │   │       ├── EntrenamientosPublicosPage.tsx  # Top-level container: filters + grid + widget, styled per grit-arena.pen node ql3Ij using the existing landing-* Tailwind tokens
+│   │   │       ├── PublicTrainingFilters.tsx        # Date chips, visual-only current-month calendar, "Organización" dropdown, search
+│   │   │       ├── PublicTrainingCard.tsx           # Shared card (marketplace grid AND PublicarEntrenamientoModal's live preview), driven by PublicTrainingCardData
+│   │   │       ├── PublicTrainingsGrid.tsx          # Responsive grid; most-recently-published listing gets the Featured treatment; empty state
+│   │   │       ├── PublicTrainingReservaModal.tsx   # Thin wrapper reusing the EXISTING ReservaFormModal/FormularioRespuestaModal for a cross-tenant booking — no reservations list/export/asistencias
+│   │   │       ├── SessionsAvailableWidget.tsx      # Floating glass widget: active listings within the current week
+│   │   │       └── index.ts
 │   │   └── ui/
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -214,7 +225,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── nivel-disciplina/
 │   │           └── useNivelesDisciplina.ts    # List + CRUD state for discipline levels
 │   │       └── entrenamientos/
-│   │           ├── useEntrenamientos.ts   # Also exposes detail-view state (viewTarget, isViewModalOpen, viewLoading, requestViewInstance, closeViewModal), buildPlantillaContenidoFromInstance for "Guardar como plantilla" from the detail view, formulariosPlantillas (active, tenant-scoped) fetched alongside other selects, and formularioForm state/setters (US-0086)
+│   │           ├── useEntrenamientos.ts   # Also exposes detail-view state (viewTarget, isViewModalOpen, viewLoading, requestViewInstance, closeViewModal), buildPlantillaContenidoFromInstance for "Guardar como plantilla" from the detail view, formulariosPlantillas (active, tenant-scoped) fetched alongside other selects, and formularioForm state/setters (US-0086); fetches publishedEntrenamientoIds alongside the rest of loadAll's Promise.all (US-0089)
 │   │           ├── useEntrenamientoForm.ts  # Includes restriction row state (add/remove/duplicate/update), timing fields, and a formularioForm slice (tipo ninguno/externo/interno, formulario_id, obligatorio) kept separate from TrainingWizardValues (US-0086)
 │   │           ├── useEntrenamientoScope.ts
 │   │           ├── useEntrenamientoCategorias.ts  # Fetch categories for a selected training instance
@@ -262,6 +273,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useSubirComprobante.ts     # File validation (MIME, 5 MB), upload with upsert, comprobante_path update
 │   │       └── mis-reservas/
 │   │           └── useMisReservas.ts          # Filter state, loading, pagination, CSV export; delegates to reservasService.getMisReservas (US-0074)
+│   │       └── entrenamientos-publicos/       # Feature hooks for the public marketplace (US-0089)
+│   │           ├── usePublicarEntrenamiento.ts        # Publish/manage-publication modal state: prefill, banner upload/validation (mirrors useOrgBannerUpload), submit (upsert), despublicar
+│   │           ├── useEntrenamientosPublicosMarketplace.ts  # Fetches listPublicTrainings + listPublicTenantOptions; client-side dateChip/search/tenant filters; "this week" count independent of active filters
+│   │           └── usePublicTrainingReserva.ts        # Thin composition of the EXISTING useReservaForm/useFormularioRespuestaForm for a cross-tenant booking; fetches formulario_id/formulario_externo directly from the source entrenamientos row (never duplicated)
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -275,6 +290,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts  # entrenamientos/entrenamientos_grupo select/insert/update all carry formulario_id, formulario_obligatorio, and a formulario_plantilla:formularios_plantillas(nombre) embed for display (US-0086)
+│   │       │   └── entrenamientos-publicos.service.ts  # hasServicioRestrictions (pre-publish gate), getPublicacionByEntrenamientoId, listPublishedEntrenamientoIds, publicarEntrenamiento (upsert by entrenamiento_id, snapshots reserva/cancelacion_antelacion_horas from source for display), despublicarEntrenamiento (soft, activo=false), listPublicTrainings (cross-tenant, enriches via reservasService.getCapacidad), listPublicTenantOptions (US-0089)
 │   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking; create() also forwards p_formulario_plantilla_id/p_formulario_respuesta and maps FORMULARIO_CAMPOS_FALTANTES (US-0087)
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)
@@ -292,18 +308,19 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
-│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket; uploadFormularioRespuestaImage uploads a "imagen"-type form-response file under the booking athlete's own users/{atletaId}/formularios/ path (US-0087)
+│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option), getSignedUrl — wraps Supabase Storage API for org-assets bucket; uploadFormularioRespuestaImage uploads a "imagen"-type form-response file under the booking athlete's own users/{atletaId}/formularios/ path (US-0087); uploadEntrenamientoPublicoBanner uploads to orgs/{tenantId}/entrenamientos-publicos/{entrenamientoId}.{ext}, readable by any authenticated user via the public_training_banner_read storage policy (US-0089)
 │   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripcionesTenant — user's subscriptions with plan + pago joins, scoped by atleta_id + tenant_id
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
 │   ├── types/                            # Domain & contracts
 │   │   ├── auth.types.ts
-│   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, resolvePortalMenu, etc.)
+│   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089)
 │   │   └── portal/
 │   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url)
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts   # TrainingFormularioTipo (ninguno/externo/interno), TrainingFormularioFormState, TrainingGroup/TrainingInstance carry formulario_id/formulario_obligatorio/formulario_plantilla (US-0086)
+│   │       └── entrenamientos-publicos.types.ts  # EntrenamientoPublico, PublicarEntrenamientoInput, PublicTrainingListItem, PublicTrainingFilters (dateChip/search/tenantId), EntrenamientoPublicoServiceError (codes incl. 'servicio_restriction') (US-0089)
 │   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export, includes atleta_id), ReservasManagementFilters (server-side filter input — US-0073), MisReservasFilters (athlete-scoped filter input — US-0074); Reserva.formulario_respuesta_id, CreateReservaInput.formulario_plantilla_id/formulario_respuesta (US-0087)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062)

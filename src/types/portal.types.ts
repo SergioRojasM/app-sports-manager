@@ -44,6 +44,12 @@ const BASE_MENU_ITEM: MenuItem = {
   icon: 'corporate_fare',
 };
 
+const PUBLIC_TRAININGS_MENU_ITEM: MenuItem = {
+  label: 'Entrenamientos Públicos',
+  href: '/portal/entrenamientos-publicos',
+  icon: 'public',
+};
+
 const SHARED_TENANT_ITEMS: Array<{ label: string; path: string; icon: string }> = [
   // { label: 'Perfil', path: 'perfil', icon: 'person' },
 ];
@@ -77,7 +83,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
 
 export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[] {
   if (!tenantId) {
-    return [INICIO_MENU_ITEM, BASE_MENU_ITEM];
+    return [INICIO_MENU_ITEM, BASE_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM];
   }
 
   const tenantPrefix = `/portal/orgs/${tenantId}`;
