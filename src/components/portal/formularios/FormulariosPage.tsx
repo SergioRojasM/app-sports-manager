@@ -49,6 +49,7 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
     closeModal,
     createPlantilla,
     deletePlantilla,
+    forceDeletePlantilla,
     clearDeleteError,
     refresh,
   } = useFormularios({ tenantId });
@@ -71,13 +72,23 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
     return false;
   };
 
-  const handleDelete = (plantilla: FormularioPlantillaListItem) => {
+  const handleDelete = async (plantilla: FormularioPlantillaListItem) => {
     clearDeleteError();
     const confirmed = window.confirm(
       `¿Seguro que quieres eliminar la plantilla "${plantilla.nombre}"? Se eliminarán también todas sus secciones. Esta acción no se puede deshacer.`,
     );
     if (!confirmed) return;
-    void deletePlantilla(plantilla.id);
+
+    const result = await deletePlantilla(plantilla.id);
+    if (result.ok || result.code !== 'in_use') return;
+
+    // Still referenced by one or more trainings' formulario_id — offer to detach and retry.
+    const confirmedForce = window.confirm(
+      'Esta plantilla está siendo usada en algún entrenamiento. ¿Deseas eliminarla de todas formas? Se quitará el formulario de esos entrenamientos.',
+    );
+    if (!confirmedForce) return;
+
+    await forceDeletePlantilla(plantilla.id);
   };
 
   const handlePreview = async (plantilla: FormularioPlantillaListItem) => {

@@ -7,16 +7,22 @@
 create table if not exists public.formulario_respuestas (
   id                      uuid          primary key default gen_random_uuid(),
   tenant_id               uuid          not null,
-  formulario_plantilla_id uuid          not null,
+  -- Nullable: a deleted formularios_plantillas row detaches (on delete set null) rather
+  -- than blocking the delete — the template can always be removed, the response survives.
+  formulario_plantilla_id uuid,
   atleta_id               uuid          not null,
   entrenamiento_id        uuid          not null,
   respuesta               jsonb         not null default '{}'::jsonb,
+  -- Snapshot of { [campo_nombre]: { etiqueta, tipo, orden } } for every active "datos"
+  -- section, taken at submission time. Lets "Ver respuesta" keep showing the original
+  -- labels/types even if the template is later edited or hard-deleted.
+  campos_snapshot         jsonb         not null default '{}'::jsonb,
   created_at              timestamptz   not null default timezone('utc', now()),
 
   constraint formulario_respuestas_tenant_id_fkey
     foreign key (tenant_id) references public.tenants(id) on delete cascade,
   constraint formulario_respuestas_formulario_plantilla_id_fkey
-    foreign key (formulario_plantilla_id) references public.formularios_plantillas(id) on delete restrict,
+    foreign key (formulario_plantilla_id) references public.formularios_plantillas(id) on delete set null,
   constraint formulario_respuestas_atleta_id_fkey
     foreign key (atleta_id) references public.usuarios(id) on delete restrict,
   constraint formulario_respuestas_entrenamiento_id_fkey
@@ -92,6 +98,7 @@ declare
   v_rows         int;
   v_respuesta_id uuid;
   v_missing_row  record;
+  v_snapshot     jsonb;
 begin
   -- ── Formulario respuesta: validate required "datos" fields, then insert ────
   if p_formulario_respuesta is not null then
@@ -117,10 +124,25 @@ begin
         using errcode = 'P0001', detail = v_missing_row.campo_nombre;
     end if;
 
+    -- Snapshot each active "datos" field's label/type/order as it exists right now,
+    -- so the answer stays human-readable even after the template is edited or deleted.
+    select coalesce(
+        jsonb_object_agg(
+          campo_nombre,
+          jsonb_build_object('etiqueta', campo_etiqueta, 'tipo', campo_tipo, 'orden', orden)
+        ),
+        '{}'::jsonb
+      )
+      into v_snapshot
+      from public.formulario_plantilla_esquema
+     where formulario_plantilla_id = p_formulario_plantilla_id
+       and seccion_tipo = 'datos'
+       and activo = true;
+
     insert into public.formulario_respuestas (
-      tenant_id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta
+      tenant_id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta, campos_snapshot
     ) values (
-      p_tenant_id, p_formulario_plantilla_id, p_atleta_id, p_entrenamiento_id, p_formulario_respuesta
+      p_tenant_id, p_formulario_plantilla_id, p_atleta_id, p_entrenamiento_id, p_formulario_respuesta, v_snapshot
     )
     returning id into v_respuesta_id;
   end if;

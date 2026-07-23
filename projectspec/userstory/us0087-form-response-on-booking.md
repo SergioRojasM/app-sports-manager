@@ -30,9 +30,9 @@ All three prerequisite user stories are **fully implemented in the codebase toda
 ### Proposed Changes
 
 #### 1. Data model
-- New table **`public.formulario_respuestas`**: one row per submitted answer set — `id`, `tenant_id`, `formulario_plantilla_id` (FK, `on delete restrict` — see Notes below), `atleta_id` (FK), `entrenamiento_id` (FK, denormalized from the booking for simple reporting without joining through `reservas`), `respuesta` (`jsonb`, keyed by each `datos` section's `campo_nombre`), `created_at`.
+- New table **`public.formulario_respuestas`**: one row per submitted answer set — `id`, `tenant_id`, `formulario_plantilla_id` (FK, nullable, `on delete set null` — an admin must always be able to delete a template, even a used one, and the response must survive that; see Notes below), `atleta_id` (FK), `entrenamiento_id` (FK, denormalized from the booking for simple reporting without joining through `reservas`), `respuesta` (`jsonb`, keyed by each `datos` section's `campo_nombre`), `campos_snapshot` (`jsonb`, `{ [campo_nombre]: { etiqueta, tipo, orden } }` for every active `datos` section **as it existed at submission time** — since template deletion cascades to `formulario_plantilla_esquema` per US-0084, this snapshot is what keeps "Ver respuesta" readable after the template is edited or gone), `created_at`.
 - New column **`public.reservas.formulario_respuesta_id`** (nullable `uuid`, FK to `formulario_respuestas.id`, `on delete set null`, `unique` — one response belongs to at most one reservation).
-- The **existing** `book_and_deduct_service_units` RPC (defined in `20260625000100_validar_suscripcion_activa_en_reserva.sql`) is extended (via `create or replace function`, same name, two new trailing optional params) to, atomically in the same transaction as the reservation insert: **(a)** server-side validate that every active `datos` section marked `campo_obligatorio = true` has a non-empty value in the submitted JSON — raising `FORMULARIO_CAMPOS_FALTANTES` if not — **(b)** insert the `formulario_respuestas` row, **(c)** insert the `reservas` row with `formulario_respuesta_id` pointing at it. This guarantees a response can never exist without its paired reservation, and vice versa, without a two-step client-side write race.
+- The **existing** `book_and_deduct_service_units` RPC (defined in `20260625000100_validar_suscripcion_activa_en_reserva.sql`) is extended (via `create or replace function`, same name, two new trailing optional params) to, atomically in the same transaction as the reservation insert: **(a)** server-side validate that every active `datos` section marked `campo_obligatorio = true` has a non-empty value in the submitted JSON — raising `FORMULARIO_CAMPOS_FALTANTES` if not — **(b)** build `campos_snapshot` from the template's current `formulario_plantilla_esquema` rows and insert the `formulario_respuestas` row — **(c)** insert the `reservas` row with `formulario_respuesta_id` pointing at it. This guarantees a response can never exist without its paired reservation, and vice versa, without a two-step client-side write race.
 - `formulario_obligatorio` remains **purely informational / client-gated**, exactly as US-0086 already decided — it is intentionally **not** enforced at the DB layer here either, because (per the design decisions below) staff bookings are always allowed to skip the form regardless of this flag. The DB only ever validates the *shape* of a response that **is** submitted (required fields present), never whether a response exists at all.
 
 #### 2. Design decisions (confirmed with the requester before writing this spec)
@@ -40,7 +40,8 @@ All three prerequisite user stories are **fully implemented in the codebase toda
 2. **Self-booking (athlete) with `formulario_obligatorio = true`**: the fill-form modal has **no skip option** — the athlete must complete all `campo_obligatorio` fields before "Reservar" succeeds.
 3. **Self-booking with `formulario_obligatorio = false`**, and **any staff-created booking** (admin/entrenador using "Nueva reserva" in `ReservasPanel`, regardless of the flag): the fill-form modal always offers a **"Reservar sin formulario"** secondary action that skips straight to booking with `formulario_respuesta_id = null`. This mirrors the existing precedent where admin/entrenador bookings already bypass other restrictions (`bypass_restrictions`).
 4. **`campo_tipo = 'imagen'` fields are supported now**, not deferred: the fill modal uploads the file to Supabase Storage (`org-assets` bucket, new path segment) immediately on selection and stores the resulting **storage path** (not a signed URL — signed URLs expire) as that field's string value in the `respuesta` JSON.
-5. **A basic read-only "Ver respuesta" viewer is included** for admin/entrenador, reusing the template's section metadata to label each answer, so the captured data isn't otherwise unreachable from the UI.
+5. **A basic read-only "Ver respuesta" viewer is included** for admin/entrenador, rendering answers from the response's own `campos_snapshot` (not by re-fetching the live template), so the captured data isn't otherwise unreachable from the UI and stays legible even after the template is edited or deleted.
+6. **Template deletion is never blocked by response history.** An admin can delete a `formularios_plantillas` row regardless of how many `formulario_respuestas` reference it — those rows survive with `formulario_plantilla_id` nulled out; `campos_snapshot` is what keeps them displayable afterward.
 
 #### 3. Booking flow — `ReservasPanel` / `ReservaFormModal` / `useReservaForm` / `useReservas`
 Today, clicking "Reservar" (self-book, `handleSelfBook`, `ReservasPanel.tsx:200-204`) or "Nueva reserva" (staff, `handleAdminCreate`, `ReservasPanel.tsx:206-209`) opens `ReservaFormModal` directly; its submit button calls `reservaForm.submitCreate()` (or `submitUpdate` in edit mode), which builds a `CreateReservaInput` and calls `onCreateReserva` → `reservasHook.createReserva` → `reservasService.create()` → the RPC.
@@ -58,7 +59,7 @@ This becomes a **two-step modal flow** whenever `instance.formulario_id` is set:
 - If `instance.formulario_id` is **not** set (tipo `ninguno` or `externo`), the flow is **byte-for-byte unchanged** from today — no second modal, no new state touched.
 
 #### 4. Viewing a submitted response
-A new **"Ver respuesta"** action (icon button, only rendered when `reserva.formulario_respuesta_id` is set) is added to each reservation row in `ReservasPanel.tsx`'s reservation list, visible to admin/entrenador and to the athlete on their own row. It opens a new read-only `FormularioRespuestaViewerModal`: fetches the response (`formulariosService.getRespuestaById`) and its template's sections (`getPlantillaConSecciones`), then renders each `datos` section's `campo_etiqueta` next to the submitted value; for `imagen` fields, the stored path is resolved into a signed URL (`storageService.getSignedUrl`) and shown as a thumbnail/link, matching the existing comprobante-viewer pattern (`useComprobanteViewer.ts`).
+A new **"Ver respuesta"** action (icon button, only rendered when `reserva.formulario_respuesta_id` is set) is added to each reservation row in `ReservasPanel.tsx`'s reservation list, visible to admin/entrenador and to the athlete on their own row. It opens a new read-only `FormularioRespuestaViewerModal`: fetches the response (`formulariosService.getRespuestaById`) and builds its display list **directly from `respuesta` joined with `campos_snapshot`** — it does **not** re-fetch the live template's sections to determine labels/types, so the viewer renders identically whether the template still exists unchanged, was edited since submission, or was deleted entirely. The template's *current* `nombre` is fetched only as a cosmetic header (best-effort; falls back to "Formulario eliminado" if the template is gone). For `imagen` fields, the stored path is resolved into a signed URL (`storageService.getSignedUrl`) and shown as a thumbnail/link, matching the existing comprobante-viewer pattern (`useComprobanteViewer.ts`). One trade-off: since `campos_snapshot` only captures `datos` fields, the viewer no longer re-renders the template's `titulo`/`subtitulo`/`texto` headings — it's a flat list of answered questions, not a full form replay.
 
 #### Out of Scope
 - Editing or re-submitting a response after the reservation is created.
@@ -82,16 +83,22 @@ New migration file: `supabase/migrations/{timestamp}_formulario_respuestas.sql`
 create table if not exists public.formulario_respuestas (
   id                      uuid          primary key default gen_random_uuid(),
   tenant_id               uuid          not null,
-  formulario_plantilla_id uuid          not null,
+  -- Nullable: a deleted formularios_plantillas row detaches (on delete set null) rather
+  -- than blocking the delete — the template can always be removed, the response survives.
+  formulario_plantilla_id uuid,
   atleta_id               uuid          not null,
   entrenamiento_id        uuid          not null,
   respuesta               jsonb         not null default '{}'::jsonb,
+  -- Snapshot of { [campo_nombre]: { etiqueta, tipo, orden } } for every active "datos"
+  -- section, taken at submission time. Lets "Ver respuesta" keep showing the original
+  -- labels/types even if the template is later edited or hard-deleted.
+  campos_snapshot         jsonb         not null default '{}'::jsonb,
   created_at              timestamptz   not null default timezone('utc', now()),
 
   constraint formulario_respuestas_tenant_id_fkey
     foreign key (tenant_id) references public.tenants(id) on delete cascade,
   constraint formulario_respuestas_formulario_plantilla_id_fkey
-    foreign key (formulario_plantilla_id) references public.formularios_plantillas(id) on delete restrict,
+    foreign key (formulario_plantilla_id) references public.formularios_plantillas(id) on delete set null,
   constraint formulario_respuestas_atleta_id_fkey
     foreign key (atleta_id) references public.usuarios(id) on delete restrict,
   constraint formulario_respuestas_entrenamiento_id_fkey
@@ -167,6 +174,7 @@ declare
   v_rows         int;
   v_respuesta_id uuid;
   v_missing_row  record;
+  v_snapshot     jsonb;
 begin
   -- ── Formulario respuesta: validate required "datos" fields, then insert ────
   if p_formulario_respuesta is not null then
@@ -192,10 +200,25 @@ begin
         using errcode = 'P0001', detail = v_missing_row.campo_nombre;
     end if;
 
+    -- Snapshot each active "datos" field's label/type/order as it exists right now,
+    -- so the answer stays human-readable even after the template is edited or deleted.
+    select coalesce(
+        jsonb_object_agg(
+          campo_nombre,
+          jsonb_build_object('etiqueta', campo_etiqueta, 'tipo', campo_tipo, 'orden', orden)
+        ),
+        '{}'::jsonb
+      )
+      into v_snapshot
+      from public.formulario_plantilla_esquema
+     where formulario_plantilla_id = p_formulario_plantilla_id
+       and seccion_tipo = 'datos'
+       and activo = true;
+
     insert into public.formulario_respuestas (
-      tenant_id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta
+      tenant_id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta, campos_snapshot
     ) values (
-      p_tenant_id, p_formulario_plantilla_id, p_atleta_id, p_entrenamiento_id, p_formulario_respuesta
+      p_tenant_id, p_formulario_plantilla_id, p_atleta_id, p_entrenamiento_id, p_formulario_respuesta, v_snapshot
     )
     returning id into v_respuesta_id;
   end if;
@@ -328,7 +351,7 @@ create policy staff_upload_formulario_respuestas_on_behalf on storage.objects
 ```
 
 **Notes / flagged trade-offs**:
-- `formulario_respuestas.formulario_plantilla_id` uses `on delete restrict` (not `set null`, unlike `entrenamientos.formulario_id`): a template that has ever been used to collect real athlete data cannot be hard-deleted, protecting historical submissions from becoming unreadable (their `campo_nombre` → label mapping would be lost). This means US-0084's "delete is always a hard delete" behavior now has one exception; flag this for review if unrestricted template deletion is preferred over protecting response history — the alternative would be `on delete set null` plus storing a denormalized snapshot of the template's labels inside `formulario_respuestas` at submission time, which is more work and out of scope here.
+- `formulario_respuestas.formulario_plantilla_id` uses `on delete set null` (same posture as `entrenamientos.formulario_id`): US-0084's "delete is always a hard delete" behavior is preserved with **zero exceptions** — an admin can delete any template at any time, even one with submitted responses. What protects the response's readability isn't blocking the delete, it's `campos_snapshot`: a copy of each field's `etiqueta`/`tipo`/`orden` taken at submission time, stored on the response row itself. Once the template (and its cascaded `formulario_plantilla_esquema` rows) is gone, the response no longer has a live label source to fall back on — `campos_snapshot` *is* that source, permanently.
 - `formulario_obligatorio` is **not** enforced by any new check constraint — see design decision #3. The DB only validates the shape of a response that is actually submitted.
 - The storage path for a form-response image is `orgs/{tenantId}/users/{atletaId}/formularios/{formularioPlantillaId}/{campoNombre}-{timestamp}.{ext}` — note the folder is always the **athlete's own** user id (`atletaId`), even when a staff member uploads it on their behalf, so the existing `org_member_read` SELECT policy and per-athlete storage quota reasoning stay consistent with the existing receipts pattern.
 - Run `supabase db reset` (or the local equivalent) to confirm both migrations apply cleanly on top of `20260722010000_entrenamientos_formulario_plantilla.sql` and `20260324000100_create_org_assets_bucket.sql`.
@@ -367,7 +390,7 @@ All operations remain direct Supabase-client calls from the service layer — no
 | Migration | `supabase/migrations/{timestamp}_formulario_respuestas_storage.sql` | New storage RLS policies for the `formularios` path segment |
 | Types | `src/types/portal/reservas.types.ts` | Add `formulario_respuesta_id: string \| null` to `Reserva`; add `formulario_plantilla_id?: string \| null` and `formulario_respuesta?: Record<string, string> \| null` to `CreateReservaInput`; add `'formulario_campos_faltantes'` to `ReservaServiceErrorCode` |
 | Types | `src/types/portal/entrenamiento-restricciones.types.ts` | Add `'FORMULARIO_CAMPOS_FALTANTES'` to `BookingRejectionCode` |
-| Types | `src/types/portal/formularios.types.ts` | Add `FormularioRespuesta` type (`id, tenant_id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta: Record<string, string>, created_at`) |
+| Types | `src/types/portal/formularios.types.ts` | Add `FormularioRespuesta` type (`id, tenant_id, formulario_plantilla_id: string \| null, atleta_id, entrenamiento_id, respuesta: Record<string, string>, campos_snapshot: Record<string, { etiqueta, tipo, orden }>, created_at`) |
 | Types | `src/types/portal/storage.types.ts` | Add `buildFormularioRespuestaFilePath(tenantId, atletaId, formularioPlantillaId, campoNombre, ext)` |
 | Service | `src/services/supabase/portal/formularios.service.ts` | Add `getRespuestaById` |
 | Service | `src/services/supabase/portal/reservas.service.ts` | Extend `create()` per API table above |
@@ -375,7 +398,7 @@ All operations remain direct Supabase-client calls from the service layer — no
 | Hook | `src/hooks/portal/entrenamientos/reservas/useReservaForm.ts` | Expose `validateBase()` (extracted from existing `validate()`); extend `submitCreate` to accept an optional `{ formulario_plantilla_id, formulario_respuesta }` payload merged into the built `CreateReservaInput` |
 | Hook | `src/hooks/portal/entrenamientos/reservas/useFormularioRespuestaForm.ts` | **New** — loads `getPlantillaConSecciones(formularioId)`; holds `values: Record<string, string>` keyed by `campo_nombre`, per-field errors, per-field upload-in-progress state; `updateValue`, `uploadImage`, `validate()` (checks every active `campo_obligatorio` `datos` section has a non-empty value), `buildRespuesta()` |
 | Component | `src/components/portal/entrenamientos/reservas/FormularioRespuestaModal.tsx` | **New** — step-2 fill-out modal described in Proposed Changes §3; renders editable inputs per `campo_tipo`; "Guardar y reservar" + conditional "Reservar sin formulario" |
-| Component | `src/components/portal/entrenamientos/reservas/FormularioRespuestaViewerModal.tsx` | **New** — read-only "Ver respuesta" modal described in §4 |
+| Component | `src/components/portal/entrenamientos/reservas/FormularioRespuestaViewerModal.tsx` | **New** — read-only "Ver respuesta" modal described in §4; renders purely from `campos_snapshot` + `respuesta`, no live template fetch for labels |
 | Component | `src/components/portal/entrenamientos/reservas/ReservaFormModal.tsx` | Add a "Formulario adjunto" banner (name + obligatorio/opcional); when a template is attached, submit no longer calls `onSubmit` directly — it signals the parent to open the fill-out step instead (new prop, e.g. `onRequireFormulario: () => void`, used instead of `onSubmit` when `hasFormularioInterno` is true) |
 | Component | `src/components/portal/entrenamientos/reservas/ReservasPanel.tsx` | New state for the fill-out/viewer modals; wires the two-step flow and the admin-confirm interplay described in §3; adds the "Ver respuesta" row action described in §4 |
 | Component | `src/components/portal/formularios/FormularioSeccionContent.tsx` | No changes — reused as-is for the static (`titulo`/`subtitulo`/`texto`) sections inside the new fill-out modal |
@@ -388,15 +411,15 @@ All operations remain direct Supabase-client calls from the service layer — no
 2. Self-booking a training with an internal template and `formulario_obligatorio = true`: after submitting `ReservaFormModal`, a fill-out modal opens showing the template's sections; the reservation is only created once every `campo_obligatorio` `datos` field has a value; there is **no** way to skip the form in this case.
 3. Self-booking a training with an internal template and `formulario_obligatorio = false`: the same fill-out modal opens, but a "Reservar sin formulario" action is visible and, when clicked, creates the reservation immediately with `formulario_respuesta_id = null`.
 4. Staff (`administrador`/`entrenador`) creating a booking on behalf of an athlete for a training with an internal template always sees the fill-out modal with the "Reservar sin formulario" skip option available, **regardless of `formulario_obligatorio`**.
-5. Submitting the fill-out modal persists a `formulario_respuestas` row (`tenant_id`, `formulario_plantilla_id`, `atleta_id`, `entrenamiento_id`, `respuesta` keyed by each field's `campo_nombre`) and the created `reservas` row's `formulario_respuesta_id` points at it — verified directly in SQL and via the reservation list after booking.
+5. Submitting the fill-out modal persists a `formulario_respuestas` row (`tenant_id`, `formulario_plantilla_id`, `atleta_id`, `entrenamiento_id`, `respuesta` keyed by each field's `campo_nombre`, `campos_snapshot` keyed by the same `campo_nombre`s with each field's `etiqueta`/`tipo`/`orden`) and the created `reservas` row's `formulario_respuesta_id` points at it — verified directly in SQL and via the reservation list after booking.
 6. A `datos` field of type `imagen`, when a file is selected, uploads immediately to `org-assets` at `orgs/{tenantId}/users/{atletaId}/formularios/{formularioPlantillaId}/{campoNombre}-{timestamp}.{ext}`; the resulting storage path (not a signed URL) is what gets stored in the `respuesta` JSON for that field.
 7. Attempting to submit the fill-out modal with a required `datos` field empty is blocked client-side with an inline error and never reaches the server.
 8. A direct SQL insert into `formulario_respuestas` bypassing the RPC, or a direct client-side `insert` call against the table, is rejected — the table has no `INSERT` policy for `authenticated` (writes only succeed via the `SECURITY DEFINER` RPC).
 9. A direct SQL call to `book_and_deduct_service_units` with `p_formulario_plantilla_id` set and `p_formulario_respuesta` missing a value for a `campo_obligatorio = true` field raises `FORMULARIO_CAMPOS_FALTANTES`; the TS service layer maps this to a friendly, non-crashing inline error in the fill-out modal.
 10. Reading a `formulario_respuestas` row as: (a) the athlete who owns it — succeeds; (b) an admin/entrenador of the same tenant — succeeds; (c) any other authenticated user (different tenant, different athlete, non-staff) — RLS denies the read.
-11. "Ver respuesta" is visible on a reservation row only when `formulario_respuesta_id` is set, for admin/entrenador on any row and for an athlete on their own row; clicking it opens a read-only modal listing each answered field's label and value, with `imagen` fields rendered as a thumbnail/link resolved via a signed URL.
+11. "Ver respuesta" is visible on a reservation row only when `formulario_respuesta_id` is set, for admin/entrenador on any row and for an athlete on their own row; clicking it opens a read-only modal listing each answered field's label and value (sourced from `campos_snapshot`, not the live template), with `imagen` fields rendered as a thumbnail/link resolved via a signed URL.
 12. When the admin "no units, confirm anyway" flow is triggered (`ADMIN_CONFIRM_NO_UNITS`) after a staff booking submitted a filled-out form, confirming the booking still creates the `formulario_respuestas` row and links it correctly — the previously-collected answers are not lost or resubmitted empty.
-13. Deleting a `formularios_plantillas` row that already has one or more `formulario_respuestas` referencing it fails at the DB layer (`on delete restrict`), with a friendly error surfaced instead of a raw Postgres error, if attempted from the existing `gestion-formularios` delete action.
+13. Deleting a `formularios_plantillas` row that has one or more `formulario_respuestas` referencing it **succeeds** (per US-0084's existing hard-delete behavior, with zero new exceptions); every referencing response row survives with `formulario_plantilla_id` set to `null`, and "Ver respuesta" for that response still renders correctly (fallback name "Formulario eliminado", fields labeled from `campos_snapshot`).
 14. No regression in `formulario_externo`-only trainings, in bookings for trainings with no form at all, or in the existing admin "no units" confirmation flow for trainings with restrictions but no attached form.
 15. No existing menu item, route, or admin/booking page regresses — verified by loading `gestion-formularios`, `gestion-entrenamientos`, and booking (self and staff) for a training with each of the three `formulario_tipo` states.
 

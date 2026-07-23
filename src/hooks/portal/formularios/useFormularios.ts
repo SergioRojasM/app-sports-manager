@@ -2,16 +2,22 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
+import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
 import {
   FormularioServiceError,
   type FormularioPlantilla,
   type FormularioPlantillaListItem,
+  type FormularioServiceErrorCode,
   type CreatePlantillaInput,
 } from '@/types/portal/formularios.types';
 
 type UseFormulariosOptions = {
   tenantId: string;
 };
+
+export type DeletePlantillaResult =
+  | { ok: true }
+  | { ok: false; code: FormularioServiceErrorCode; message: string };
 
 export function useFormularios({ tenantId }: UseFormulariosOptions) {
   const [plantillas, setPlantillas] = useState<FormularioPlantillaListItem[]>([]);
@@ -65,19 +71,44 @@ export function useFormularios({ tenantId }: UseFormulariosOptions) {
   }, []);
 
   const deletePlantilla = useCallback(
-    async (id: string): Promise<boolean> => {
+    async (id: string): Promise<DeletePlantillaResult> => {
       setDeleteError(null);
       try {
         await formulariosService.deletePlantilla(id);
         await loadPlantillas();
-        return true;
+        return { ok: true };
       } catch (err) {
-        if (err instanceof FormularioServiceError) {
-          setDeleteError(err.message);
-        } else {
-          setDeleteError('No fue posible eliminar la plantilla. Intenta de nuevo.');
-        }
-        return false;
+        const message =
+          err instanceof FormularioServiceError ? err.message : 'No fue posible eliminar la plantilla. Intenta de nuevo.';
+        const code: FormularioServiceErrorCode = err instanceof FormularioServiceError ? err.code : 'unknown';
+        setDeleteError(message);
+        return { ok: false, code, message };
+      }
+    },
+    [loadPlantillas],
+  );
+
+  /**
+   * Detaches this plantilla from every training that references it (formulario_id ->
+   * null, formulario_obligatorio -> false), then deletes it. Used as the "delete anyway"
+   * follow-up when deletePlantilla fails with code 'in_use'.
+   */
+  const forceDeletePlantilla = useCallback(
+    async (id: string): Promise<DeletePlantillaResult> => {
+      setDeleteError(null);
+      try {
+        await entrenamientosService.detachFormularioPlantilla(id);
+        await formulariosService.deletePlantilla(id);
+        await loadPlantillas();
+        return { ok: true };
+      } catch (err) {
+        const message =
+          err instanceof FormularioServiceError || err instanceof Error
+            ? err.message
+            : 'No fue posible eliminar la plantilla. Intenta de nuevo.';
+        const code: FormularioServiceErrorCode = err instanceof FormularioServiceError ? err.code : 'unknown';
+        setDeleteError(message);
+        return { ok: false, code, message };
       }
     },
     [loadPlantillas],
@@ -96,6 +127,7 @@ export function useFormularios({ tenantId }: UseFormulariosOptions) {
     closeModal,
     createPlantilla,
     deletePlantilla,
+    forceDeletePlantilla,
     clearDeleteError,
     refresh: loadPlantillas,
   };

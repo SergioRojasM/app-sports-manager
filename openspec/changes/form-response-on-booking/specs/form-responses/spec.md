@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Formulario respuesta persisted atomically with its reservation
-The system SHALL persist a submitted form answer set as one row in `public.formulario_respuestas` (`tenant_id`, `formulario_plantilla_id`, `atleta_id`, `entrenamiento_id`, `respuesta` jsonb keyed by `campo_nombre`) in the same database transaction that creates the `reservas` row it belongs to, via the `book_and_deduct_service_units` RPC. No code path SHALL insert a `formulario_respuestas` row without also creating its linked reservation in the same call.
+The system SHALL persist a submitted form answer set as one row in `public.formulario_respuestas` (`tenant_id`, `formulario_plantilla_id`, `atleta_id`, `entrenamiento_id`, `respuesta` jsonb keyed by `campo_nombre`, `campos_snapshot` jsonb keyed by `campo_nombre` capturing each active "datos" field's `{ etiqueta, tipo, orden }` at submission time) in the same database transaction that creates the `reservas` row it belongs to, via the `book_and_deduct_service_units` RPC. No code path SHALL insert a `formulario_respuestas` row without also creating its linked reservation in the same call.
 
 #### Scenario: Response and reservation are created together
 - **WHEN** `book_and_deduct_service_units` is called with a non-null `p_formulario_respuesta`
@@ -67,24 +67,28 @@ When a `datos` section has `campo_tipo = 'imagen'`, selecting a file SHALL immed
 - **WHEN** `FormularioRespuestaViewerModal` renders a submitted `imagen` field
 - **THEN** it calls `storageService.getSignedUrl` on the stored path and displays the result as a thumbnail/link, never the raw path
 
-### Requirement: Formulario plantilla deletion is blocked when responses exist
-`formulario_respuestas.formulario_plantilla_id` SHALL reference `formularios_plantillas(id)` with `on delete restrict`. Attempting to delete a template that has one or more linked responses SHALL fail at the database layer; the service layer SHALL map this into a friendly, non-crashing error.
+### Requirement: Formulario plantilla deletion always succeeds; responses are preserved
+`formulario_respuestas.formulario_plantilla_id` SHALL reference `formularios_plantillas(id)` with `on delete set null`. Deleting a template SHALL always succeed regardless of how many `formulario_respuestas` rows reference it — those rows are never deleted, updated, or blocked by the delete; only their `formulario_plantilla_id` is nulled out.
 
-#### Scenario: Deleting a used template is blocked
-- **WHEN** an admin attempts to delete a `formularios_plantillas` row that has at least one `formulario_respuestas` row referencing it
-- **THEN** the delete fails with a foreign-key violation, and `gestion-formularios`'s delete action shows a friendly message instead of a raw Postgres error
+#### Scenario: Deleting a used template succeeds
+- **WHEN** an admin deletes a `formularios_plantillas` row that has one or more `formulario_respuestas` rows referencing it
+- **THEN** the delete succeeds (still cascades to `formulario_plantilla_esquema`, per US-0084), and every referencing `formulario_respuestas` row survives with `formulario_plantilla_id` set to `null`
 
 #### Scenario: Deleting an unused template still works
 - **WHEN** an admin deletes a `formularios_plantillas` row that has zero linked `formulario_respuestas`
-- **THEN** the delete succeeds exactly as it did before this change (still cascades to `formulario_plantilla_esquema`, per US-0084)
+- **THEN** the delete succeeds exactly as it did before this change
 
-### Requirement: Response viewer renders answers using the template's field labels
-`FormularioRespuestaViewerModal` SHALL fetch both the response (`getRespuestaById`) and its template's sections (`getPlantillaConSecciones`), and render each `datos` section's `campo_etiqueta` next to the corresponding value from `respuesta[campo_nombre]`. Sections with no corresponding key in `respuesta` (e.g., added to the template after this response was submitted) SHALL render as "Sin respuesta" rather than crashing.
+### Requirement: Response viewer renders answers from the submission-time snapshot, not the live template
+`FormularioRespuestaViewerModal` SHALL render each answered field using `formulario_respuestas.campos_snapshot` (`etiqueta`, `tipo`, `orden` per `campo_nombre`) joined with `respuesta[campo_nombre]` for the value — it SHALL NOT fetch or depend on the template's current `formulario_plantilla_esquema` rows to render labels. This SHALL produce identical output whether the template still exists unchanged, has since been edited, or has been deleted entirely.
 
-#### Scenario: All answered fields are labeled correctly
-- **WHEN** the viewer opens for a response whose `respuesta` JSON has a value for every current `datos` section
-- **THEN** each section renders its `campo_etiqueta` next to its submitted value, in the template's `orden`
+#### Scenario: All snapshotted fields render with their original labels
+- **WHEN** the viewer opens for a response
+- **THEN** each field in `campos_snapshot` renders its `etiqueta` next to `respuesta[campo_nombre]` (or "Sin respuesta" if absent/blank), ordered by `orden`
 
-#### Scenario: A field added after submission shows "Sin respuesta"
-- **WHEN** the viewer opens for a response whose `respuesta` JSON lacks a key for a `datos` section that was added to the template after the response was submitted
-- **THEN** that section renders with the label "Sin respuesta" instead of an empty value or a crash
+#### Scenario: Viewer works after the template is edited
+- **WHEN** an admin renames a field's `campo_etiqueta` on the still-existing template after a response was submitted
+- **THEN** the viewer continues to show the field's original label from `campos_snapshot`, unaffected by the rename
+
+#### Scenario: Viewer works after the template is deleted
+- **WHEN** the template referenced by a response is deleted (`formulario_plantilla_id` becomes `null`)
+- **THEN** the viewer still renders every field correctly from `campos_snapshot`, showing a fallback name (e.g. "Formulario eliminado") in place of the template's live `nombre`

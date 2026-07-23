@@ -41,6 +41,14 @@ function mapFormularioError(error: PostgrestError | null): FormularioServiceErro
     return new FormularioServiceError('forbidden', 'No tienes permisos para realizar esta acción.');
   }
 
+  // Deleting a plantilla still marked "obligatorio" on a training: the ON DELETE SET NULL
+  // on entrenamientos(_grupo).formulario_id nulls the FK, but that then violates the
+  // sibling *_formulario_obligatorio_ck check constraint (US-0086) — surface a clear,
+  // specific message instead of falling into the generic "invalid_seccion" branch below.
+  if (error.code === '23514' && error.message?.includes('formulario_obligatorio_ck')) {
+    return new FormularioServiceError('in_use', 'Esta plantilla está siendo usada en algún entrenamiento.');
+  }
+
   if (error.code === '23514') {
     return new FormularioServiceError('invalid_seccion', 'Completa los datos requeridos para esta sección.');
   }

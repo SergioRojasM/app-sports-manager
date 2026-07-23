@@ -153,13 +153,23 @@ export type FormularioSeccionFieldErrors = Partial<Record<FormularioSeccionFormF
 // Formulario respuesta (US-0087)
 // =============================================
 
+/** Label/type/order snapshot for one "datos" field, taken at submission time. */
+export type FormularioRespuestaCampoSnapshot = {
+  etiqueta: string;
+  tipo: FormularioTipoCampo;
+  orden: number;
+};
+
 export type FormularioRespuesta = {
   id: string;
   tenant_id: string;
-  formulario_plantilla_id: string;
+  /** Null once the template has been deleted (on delete set null) — the response itself is never deleted. */
+  formulario_plantilla_id: string | null;
   atleta_id: string;
   entrenamiento_id: string;
   respuesta: Record<string, string>;
+  /** Keyed by campo_nombre; survives template edits/deletion so answers stay readable. */
+  campos_snapshot: Record<string, FormularioRespuestaCampoSnapshot>;
   created_at: string;
 };
 
@@ -173,6 +183,8 @@ export type FormularioServiceErrorCode =
   | 'fk_dependency'
   | 'forbidden'
   | 'invalid_seccion'
+  /** Deleting a plantilla still referenced by one or more trainings' formulario_id. */
+  | 'in_use'
   | 'unknown';
 
 export class FormularioServiceError extends Error {

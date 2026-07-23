@@ -1,16 +1,21 @@
 'use client';
 
-import type { FormularioSeccion } from '@/types/portal/formularios.types';
-import { FormularioSeccionContent } from '@/components/portal/formularios/FormularioSeccionContent';
+import type { FormularioTipoCampo } from '@/types/portal/formularios.types';
+
+/** One answered "datos" field, resolved from the response's campos_snapshot (survives template edits/deletion). */
+export type FormularioRespuestaViewerCampo = {
+  campoNombre: string;
+  etiqueta: string;
+  tipo: FormularioTipoCampo;
+  value: string | undefined;
+  /** Resolved signed URL, only set for tipo === 'imagen' with a stored path. */
+  imageUrl?: string;
+};
 
 type FormularioRespuestaViewerModalProps = {
   open: boolean;
   plantillaNombre: string;
-  secciones: FormularioSeccion[];
-  /** Submitted answers keyed by campo_nombre. */
-  respuesta: Record<string, string>;
-  /** Resolved signed URLs for "imagen" fields, keyed by campo_nombre. */
-  imageUrls: Record<string, string>;
+  campos: FormularioRespuestaViewerCampo[];
   loading: boolean;
   error: string | null;
   onClose: () => void;
@@ -20,9 +25,7 @@ type FormularioRespuestaViewerModalProps = {
 export function FormularioRespuestaViewerModal({
   open,
   plantillaNombre,
-  secciones,
-  respuesta,
-  imageUrls,
+  campos,
   loading,
   error,
   onClose,
@@ -62,42 +65,36 @@ export function FormularioRespuestaViewerModal({
             </div>
           )}
 
+          {!loading && !error && campos.length === 0 && (
+            <p className="text-sm text-slate-400">Esta respuesta no tiene campos registrados.</p>
+          )}
+
           {!loading &&
             !error &&
-            secciones.map((seccion) => {
-              if (seccion.seccion_tipo !== 'datos') {
-                return <FormularioSeccionContent key={seccion.id} seccion={seccion} />;
-              }
-
-              const campoNombre = seccion.campo_nombre ?? '';
-              const rawValue = respuesta[campoNombre];
-              const imageUrl = imageUrls[campoNombre];
-
-              return (
-                <div key={seccion.id}>
-                  <p className="mb-1 text-sm font-medium text-slate-300">{seccion.campo_etiqueta}</p>
-                  {seccion.campo_tipo === 'imagen' ? (
-                    imageUrl ? (
-                      <a
-                        href={imageUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-turquoise hover:underline"
-                      >
-                        <span className="material-symbols-outlined text-base" aria-hidden="true">image</span>
-                        Ver imagen
-                      </a>
-                    ) : (
-                      <p className="text-sm italic text-slate-500">Sin respuesta</p>
-                    )
-                  ) : rawValue && rawValue.trim() !== '' ? (
-                    <p className="whitespace-pre-wrap text-sm text-slate-100">{rawValue}</p>
+            campos.map((campo) => (
+              <div key={campo.campoNombre}>
+                <p className="mb-1 text-sm font-medium text-slate-300">{campo.etiqueta}</p>
+                {campo.tipo === 'imagen' ? (
+                  campo.imageUrl ? (
+                    <a
+                      href={campo.imageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-turquoise hover:underline"
+                    >
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">image</span>
+                      Ver imagen
+                    </a>
                   ) : (
                     <p className="text-sm italic text-slate-500">Sin respuesta</p>
-                  )}
-                </div>
-              );
-            })}
+                  )
+                ) : campo.value && campo.value.trim() !== '' ? (
+                  <p className="whitespace-pre-wrap text-sm text-slate-100">{campo.value}</p>
+                ) : (
+                  <p className="text-sm italic text-slate-500">Sin respuesta</p>
+                )}
+              </div>
+            ))}
         </div>
       </div>
     </div>

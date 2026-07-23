@@ -15,7 +15,7 @@ import { ReservaFormModal } from './ReservaFormModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
 import { AsistenciaFormModal } from './AsistenciaFormModal';
 import { FormularioRespuestaModal } from './FormularioRespuestaModal';
-import { FormularioRespuestaViewerModal } from './FormularioRespuestaViewerModal';
+import { FormularioRespuestaViewerModal, type FormularioRespuestaViewerCampo } from './FormularioRespuestaViewerModal';
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import type { UserRole } from '@/types/portal.types';
@@ -75,14 +75,13 @@ export function ReservasPanel({
   const [formularioRespuestaModalOpen, setFormularioRespuestaModalOpen] = useState(false);
   const [formularioTargetAtletaId, setFormularioTargetAtletaId] = useState<string | null>(null);
 
-  // "Ver respuesta" viewer (US-0087)
+  // "Ver respuesta" viewer (US-0087) — rendered from the response's campos_snapshot,
+  // never from the live template, so it keeps working after the template is edited/deleted.
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerLoading, setViewerLoading] = useState(false);
   const [viewerError, setViewerError] = useState<string | null>(null);
   const [viewerPlantillaNombre, setViewerPlantillaNombre] = useState('');
-  const [viewerSecciones, setViewerSecciones] = useState<FormularioSeccion[]>([]);
-  const [viewerRespuesta, setViewerRespuesta] = useState<Record<string, string>>({});
-  const [viewerImageUrls, setViewerImageUrls] = useState<Record<string, string>>({});
+  const [viewerCampos, setViewerCampos] = useState<FormularioRespuestaViewerCampo[]>([]);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
   const isPast = !!instance?.fecha_hora && new Date(instance.fecha_hora) < new Date();
@@ -303,31 +302,48 @@ export function ReservasPanel({
       if (!respuestaRow) {
         throw new Error('not_found');
       }
-      const plantilla = await formulariosService.getPlantillaConSecciones(respuestaRow.formulario_plantilla_id);
-      setViewerPlantillaNombre(plantilla.nombre);
-      setViewerSecciones(plantilla.secciones);
-      setViewerRespuesta(respuestaRow.respuesta);
 
-      const imagenSecciones = plantilla.secciones.filter(
-        (s) => s.seccion_tipo === 'datos' && s.campo_tipo === 'imagen' && s.campo_nombre,
-      );
-      if (imagenSecciones.length > 0) {
+      // The template's current name is a nice-to-have; the response itself never
+      // depends on the template still existing — campos_snapshot carries the labels.
+      let nombre = 'Formulario eliminado';
+      if (respuestaRow.formulario_plantilla_id) {
+        try {
+          const plantilla = await formulariosService.getPlantillaConSecciones(respuestaRow.formulario_plantilla_id);
+          nombre = plantilla.nombre;
+        } catch {
+          // Keep the fallback label — the snapshot below still renders correctly
+        }
+      }
+      setViewerPlantillaNombre(nombre);
+
+      const campos: FormularioRespuestaViewerCampo[] = Object.entries(respuestaRow.campos_snapshot)
+        .map(([campoNombre, meta]) => ({
+          campoNombre,
+          etiqueta: meta.etiqueta,
+          tipo: meta.tipo,
+          value: respuestaRow.respuesta[campoNombre],
+        }))
+        .sort(
+          (a, b) =>
+            respuestaRow.campos_snapshot[a.campoNombre].orden - respuestaRow.campos_snapshot[b.campoNombre].orden,
+        );
+
+      const imagenCampos = campos.filter((c) => c.tipo === 'imagen' && c.value);
+      if (imagenCampos.length > 0) {
         const supabase = createClient();
         const urls: Record<string, string> = {};
         await Promise.all(
-          imagenSecciones.map(async (s) => {
-            const path = respuestaRow.respuesta[s.campo_nombre as string];
-            if (!path) return;
+          imagenCampos.map(async (c) => {
             try {
-              urls[s.campo_nombre as string] = await storageService.getSignedUrl(supabase, path);
+              urls[c.campoNombre] = await storageService.getSignedUrl(supabase, c.value as string);
             } catch {
               // Non-critical — image link shows "Sin respuesta" fallback
             }
           }),
         );
-        setViewerImageUrls(urls);
+        setViewerCampos(campos.map((c) => ({ ...c, imageUrl: urls[c.campoNombre] })));
       } else {
-        setViewerImageUrls({});
+        setViewerCampos(campos);
       }
     } catch {
       setViewerError('No fue posible cargar la respuesta.');
@@ -843,9 +859,7 @@ export function ReservasPanel({
       <FormularioRespuestaViewerModal
         open={viewerOpen}
         plantillaNombre={viewerPlantillaNombre}
-        secciones={viewerSecciones}
-        respuesta={viewerRespuesta}
-        imageUrls={viewerImageUrls}
+        campos={viewerCampos}
         loading={viewerLoading}
         error={viewerError}
         onClose={() => setViewerOpen(false)}
