@@ -92,5 +92,5 @@ Static verification performed instead this session (no browser/dev server): `npx
 
 ## 13. Commit & Pull Request
 
-- [ ] 13.1 Commit the changes with a message summarizing the public training marketplace feature (migration, publish/despublish flow, servicio-restriction gate, marketplace page, reused booking pipeline)
-- [ ] 13.2 Write the pull request description: summary of changes, test plan referencing section 12's manual verification steps, and a note that the migration was applied locally only (not pushed to the remote Supabase project)
+- [x] 13.1 Committed on `feat/us0089-public-training-marketplace` (commit `efd5e84`): migration, publish/despublish flow, servicio-restriction gate, marketplace page, reused booking pipeline, docs.
+- [x] 13.2 PR description drafted (see chat) — pushing the branch and opening the PR were intentionally NOT done automatically; that requires explicit user confirmation since it's a remote/visible-to-others action.
