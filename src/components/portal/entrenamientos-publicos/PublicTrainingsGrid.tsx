@@ -40,7 +40,7 @@ export function PublicTrainingsGrid({ featuredItem, standardItems, onReservar }:
   }
 
   return (
-    <div className="grid flex-1 grid-cols-1 items-start gap-5 sm:grid-cols-2">
+    <div className="grid flex-1 grid-cols-1 items-start gap-5 sm:grid-cols-3">
       {featuredItem && (
         <PublicTrainingCard data={toCardData(featuredItem)} featured onReservar={() => onReservar(featuredItem)} />
       )}

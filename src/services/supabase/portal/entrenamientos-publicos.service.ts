@@ -200,7 +200,7 @@ export const entrenamientosPublicosService = {
       )
       .eq('activo', true)
       .gte('fecha_hora', new Date().toISOString())
-      .order('created_at', { ascending: false });
+      .order('fecha_hora', { ascending: true });
 
     if (error) {
       throw mapServiceError(error);

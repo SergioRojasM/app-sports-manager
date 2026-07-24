@@ -91,28 +91,28 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
           <p className="line-clamp-2 font-landing-body text-sm text-landing-text-secondary">{data.descripcion}</p>
         )}
 
-        <div className="grid grid-cols-3 gap-2 font-landing-body text-xs text-landing-text-secondary">
-          <div className="flex flex-col gap-0.5">
-            <span className="flex items-center gap-1 font-semibold text-landing-text">
-              <span className="material-symbols-outlined text-[13px] text-landing-primary" aria-hidden="true">
+        <div className="grid grid-cols-3 gap-1 font-landing-body text-[10px] text-landing-text-secondary">
+          <div className="flex flex-col gap-0">
+            <span className="flex items-center gap-0.5 font-semibold text-landing-text">
+              <span className="material-symbols-outlined text-[11px] text-landing-primary" aria-hidden="true">
                 calendar_month
               </span>
               {formatDateLabel(data.fechaHora)}
             </span>
             <span>{formatTimeLabel(data.fechaHora)}</span>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="flex items-center gap-1 font-semibold text-landing-text">
-              <span className="material-symbols-outlined text-[13px] text-landing-primary" aria-hidden="true">
+          <div className="flex flex-col gap-0">
+            <span className="flex items-center gap-0.5 font-semibold text-landing-text">
+              <span className="material-symbols-outlined text-[11px] text-landing-primary" aria-hidden="true">
                 location_on
               </span>
               {data.escenarioNombre}
             </span>
             <span>{data.escenarioUbicacion ?? ''}</span>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="flex items-center gap-1 font-semibold text-landing-text">
-              <span className="material-symbols-outlined text-[13px] text-landing-primary" aria-hidden="true">
+          <div className="flex flex-col gap-0">
+            <span className="flex items-center gap-0.5 font-semibold text-landing-text">
+              <span className="material-symbols-outlined text-[11px] text-landing-primary" aria-hidden="true">
                 groups
               </span>
               {data.reservasActivas}/{cupoMaximo || '—'}

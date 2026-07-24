@@ -198,12 +198,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── MisReservasTable.tsx            # Data table without athlete column, badges, client-side pagination
 │   │   │       └── index.ts
 │   │   │   └── entrenamientos-publicos/     # Feature slice (portal/entrenamientos-publicos — cross-tenant marketplace, US-0089)
-│   │   │       ├── EntrenamientosPublicosPage.tsx  # Top-level container: filters + grid + widget, styled per grit-arena.pen node ql3Ij using the existing landing-* Tailwind tokens
-│   │   │       ├── PublicTrainingFilters.tsx        # Date chips, visual-only current-month calendar, "Organización" dropdown, search
-│   │   │       ├── PublicTrainingCard.tsx           # Shared card (marketplace grid AND PublicarEntrenamientoModal's live preview), driven by PublicTrainingCardData
-│   │   │       ├── PublicTrainingsGrid.tsx          # Responsive grid; most-recently-published listing gets the Featured treatment; empty state
+│   │   │       ├── EntrenamientosPublicosPage.tsx  # Sticky floating header (title + subtitle + widget + "Filtrar" button) above a full-width grid, styled per grit-arena.pen node ql3Ij using the existing landing-* Tailwind tokens
+│   │   │       ├── PublicTrainingFiltersDrawer.tsx  # Right-side drawer (opened via the header's "Filtrar" button): date chips, visual-only current-month calendar, "Organización" dropdown, search
+│   │   │       ├── PublicTrainingCard.tsx           # Shared card (marketplace grid AND PublicarEntrenamientoModal's live preview), driven by PublicTrainingCardData; shows tenantNombre
+│   │   │       ├── PublicTrainingsGrid.tsx          # Responsive 1/2-col grid (never more than 2 cols — cards max out at half the column width); "Próximo" badge on the most-recently-published listing; empty state
 │   │   │       ├── PublicTrainingReservaModal.tsx   # Thin wrapper reusing the EXISTING ReservaFormModal/FormularioRespuestaModal for a cross-tenant booking — no reservations list/export/asistencias
-│   │   │       ├── SessionsAvailableWidget.tsx      # Floating glass widget: active listings within the current week
+│   │   │       ├── SessionsAvailableWidget.tsx      # Compact one-line stat ("N entrenamientos disponibles esta semana"), placed under the header subtitle
 │   │   │       └── index.ts
 │   │   └── ui/
 │   │
