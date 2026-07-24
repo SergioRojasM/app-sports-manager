@@ -7,6 +7,7 @@ import { entrenamientoCategoriasService } from '@/services/supabase/portal/entre
 import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
+import { entrenamientosPublicosService } from '@/services/supabase/portal/entrenamientos-publicos.service';
 import { useEntrenamientoForm } from './useEntrenamientoForm';
 import { useEntrenamientoScope } from './useEntrenamientoScope';
 import { useEntrenamientosCalendar } from './useEntrenamientosCalendar';
@@ -145,6 +146,8 @@ type UseEntrenamientosResult = {
   viewLoading: boolean;
   requestViewInstance: (instance: TrainingInstance) => void;
   closeViewModal: () => void;
+  // Public training marketplace publishing
+  publishedEntrenamientoIds: Set<string>;
 };
 
 const EMPTY_SUCCESS: string | null = null;
@@ -461,6 +464,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [entrenadores, setEntrenadores] = useState<SelectOption[]>([]);
   const [servicios, setServicios] = useState<SelectOption[]>([]);
   const [formulariosPlantillas, setFormulariosPlantillas] = useState<FormularioPlantillaListItem[]>([]);
+  const [publishedEntrenamientoIds, setPublishedEntrenamientoIds] = useState<Set<string>>(new Set());
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -500,7 +504,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         throw new Error('No active session');
       }
 
-      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData, formulariosPlantillasData] = await Promise.all([
+      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData, formulariosPlantillasData, publishedIdsData] = await Promise.all([
         entrenamientosService.listTrainingGroupsByTenant(tenantId),
         entrenamientosService.listTrainingInstancesByTenantAndRange(tenantId, calendar.range.from, calendar.range.to),
         entrenamientosService.listDisciplineOptions(tenantId),
@@ -508,6 +512,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenamientosService.listTrainerOptions(tenantId),
         entrenamientosService.listServicioOptions(tenantId),
         formulariosService.getPlantillasByTenant(tenantId).catch(() => []),
+        entrenamientosPublicosService.listPublishedEntrenamientoIds(tenantId).catch(() => new Set<string>()),
       ]);
 
       setGroups(groupsData);
@@ -521,6 +526,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           .slice()
           .sort((a, b) => a.nombre.localeCompare(b.nombre)),
       );
+      setPublishedEntrenamientoIds(publishedIdsData);
 
       // Enrich instances with reservas_activas count (batch, not N+1)
       const capacidades = await Promise.all(
@@ -1256,5 +1262,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     viewLoading,
     requestViewInstance,
     closeViewModal,
+    // Public training marketplace publishing
+    publishedEntrenamientoIds,
   };
 }

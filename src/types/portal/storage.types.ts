@@ -38,6 +38,15 @@ export function buildFormularioRespuestaFilePath(
   return `orgs/${tenantId}/users/${atletaId}/formularios/${formularioPlantillaId}/${campoNombre}-${Date.now()}.${ext}`;
 }
 
+/** Public training publication banner path: orgs/{tenantId}/entrenamientos-publicos/{entrenamientoId}.{ext} */
+export function buildEntrenamientoPublicoBannerPath(
+  tenantId: string,
+  entrenamientoId: string,
+  ext: string,
+): string {
+  return `orgs/${tenantId}/entrenamientos-publicos/${entrenamientoId}.${ext}`;
+}
+
 // ─── Result types ───
 
 export type StorageUploadResult = {
@@ -59,5 +68,11 @@ export type UploadPaymentProofInput = {
   tenantId: string;
   userId: string;
   pagoId: string;
+  file: File;
+};
+
+export type UploadEntrenamientoPublicoBannerInput = {
+  tenantId: string;
+  entrenamientoId: string;
   file: File;
 };
