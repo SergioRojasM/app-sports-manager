@@ -29,12 +29,17 @@ export function PublicTrainingReservaModal({
 }: PublicTrainingReservaModalProps) {
   const reserva = usePublicTrainingReserva({ tenantId, entrenamientoId, disciplinaId });
 
+  // Re-runs once currentUserId resolves (it starts null while supabase.auth.getUser()
+  // is in flight) — otherwise openBooking's `if (currentUserId)` guard would skip
+  // reservaForm.openCreate(currentUserId) forever, leaving form.atleta_id empty and
+  // silently failing validateBase() on submit (its error is only rendered when
+  // showAtletaPicker is true, which it never is here).
   useEffect(() => {
     if (open) {
       void reserva.openBooking();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, entrenamientoId]);
+  }, [open, entrenamientoId, reserva.currentUserId]);
 
   if (!open) {
     return null;
