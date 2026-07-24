@@ -1,0 +1,4554 @@
+{
+  "version": "2.14",
+  "children": [
+    {
+      "type": "frame",
+      "id": "ql3Ij",
+      "x": 0,
+      "y": 0,
+      "name": "Public Training Marketplace",
+      "clip": true,
+      "width": 1536,
+      "height": 1024,
+      "fill": "$bg-navy",
+      "layout": "none",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "fqz6x",
+          "layoutPosition": "absolute",
+          "x": 1100,
+          "y": -200,
+          "name": "BG Glow Top Right",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#14DBC433",
+                "position": 0
+              },
+              {
+                "color": "#14DBC400",
+                "position": 1
+              }
+            ]
+          },
+          "width": 900,
+          "height": 900
+        },
+        {
+          "type": "ellipse",
+          "id": "lTQuU",
+          "layoutPosition": "absolute",
+          "x": -300,
+          "y": 600,
+          "name": "BG Glow Bottom Left",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0FA3AB2E",
+                "position": 0
+              },
+              {
+                "color": "#0FA3AB00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 800,
+          "height": 800
+        },
+        {
+          "type": "path",
+          "id": "gWIgr",
+          "layoutPosition": "absolute",
+          "x": -60,
+          "y": 820,
+          "name": "Diagonal Line 1",
+          "geometry": "M0 300l700-300",
+          "viewBox": [
+            0,
+            0,
+            700,
+            300
+          ],
+          "width": 700,
+          "height": 300,
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 180,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#14DBC4CC",
+                "position": 0
+              },
+              {
+                "color": "#14DBC400",
+                "position": 1
+              }
+            ]
+          },
+          "strokeWidth": 3
+        },
+        {
+          "type": "path",
+          "id": "N6tz4",
+          "layoutPosition": "absolute",
+          "x": -100,
+          "y": 900,
+          "name": "Diagonal Line 2",
+          "geometry": "M0 200l500-200",
+          "viewBox": [
+            0,
+            0,
+            500,
+            200
+          ],
+          "width": 500,
+          "height": 200,
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 180,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0FA3AB99",
+                "position": 0
+              },
+              {
+                "color": "#0FA3AB00",
+                "position": 1
+              }
+            ]
+          },
+          "strokeWidth": 2
+        },
+        {
+          "type": "frame",
+          "id": "jkpfg",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "Content",
+          "width": 1536,
+          "height": 1024,
+          "gap": 32,
+          "padding": [
+            46,
+            48
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "NmxIH",
+              "name": "Left Column",
+              "width": 400,
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "IzIJQ",
+                  "name": "Eyebrow Row",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zUIpJ",
+                      "name": "Eyebrow",
+                      "fill": "$accent-cyan",
+                      "content": "ENTRENAMIENTOS",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "600",
+                      "letterSpacing": 2
+                    },
+                    {
+                      "type": "text",
+                      "id": "ylrmn",
+                      "name": "Eyebrow Dot",
+                      "fill": "$accent-cyan",
+                      "content": "●",
+                      "fontFamily": "$font-body",
+                      "fontSize": 8,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PH3Z4",
+                  "name": "Title Block",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n0y6x1",
+                      "name": "Title Line 1",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Public",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-title",
+                      "fontSize": 56,
+                      "fontWeight": "700",
+                      "fontStyle": "italic"
+                    },
+                    {
+                      "type": "text",
+                      "id": "B0l1At",
+                      "name": "Title Line 2",
+                      "fill": "$accent-cyan",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Trainings",
+                      "lineHeight": 1.05,
+                      "fontFamily": "$font-title",
+                      "fontSize": 56,
+                      "fontWeight": "700",
+                      "fontStyle": "italic"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "McYy4",
+                  "name": "Subtitle",
+                  "fill": "$text-subtext",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Discover and reserve upcoming training sessions from your club.",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "u2ypcW",
+                  "name": "Filter Panel",
+                  "width": "fill_container",
+                  "fill": "$glass-fill",
+                  "cornerRadius": 16,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "blur",
+                    "radius": 0
+                  },
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "V9rOpy",
+                      "name": "Date Chips Row",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "qssDt",
+                          "name": "Chip Today",
+                          "width": "fill_container",
+                          "fill": "#0B1826",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            8,
+                            14
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "wmoW1",
+                              "name": "Today Label",
+                              "fill": "$text-subtext",
+                              "content": "Today",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "FOnac",
+                          "name": "Chip Tomorrow",
+                          "width": "fill_container",
+                          "fill": "#0B1826",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            8,
+                            14
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "xC7lO",
+                              "name": "Tomorrow Label",
+                              "fill": "$text-subtext",
+                              "content": "Tomorrow",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "x5XIm",
+                          "name": "Chip This Week",
+                          "width": "fill_container",
+                          "fill": "$accent-cyan",
+                          "cornerRadius": 10,
+                          "stroke": "$accent-cyan",
+                          "strokeWidth": 1,
+                          "padding": [
+                            8,
+                            14
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "NE97D",
+                              "name": "This Week Label",
+                              "fill": "#07111F",
+                              "content": "This Week",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "SaUZZ",
+                          "name": "Chip Weekend",
+                          "width": "fill_container",
+                          "fill": "#0B1826",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            8,
+                            14
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mKyg2",
+                              "name": "Weekend Label",
+                              "fill": "$text-subtext",
+                              "content": "Weekend",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "YpdT4",
+                      "name": "Divider 1",
+                      "fill": "$glass-border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "X09RUj",
+                      "name": "Calendar",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "pDZYO",
+                          "name": "Calendar Header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "u0qB8T",
+                              "name": "Prev Arrow",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "chevron-left",
+                              "library": "lucide",
+                              "fill": "$text-subtext"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ph2Xb",
+                              "name": "Month Label",
+                              "fill": "$text-primary",
+                              "content": "May 2024",
+                              "fontFamily": "$font-body",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "lVyYv",
+                              "name": "Next Arrow",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "chevron-right",
+                              "library": "lucide",
+                              "fill": "$text-subtext"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "BDiV7",
+                          "name": "Day of Week Row",
+                          "width": "fill_container",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "f8QmhW",
+                              "name": "DOW L",
+                              "width": "fill_container",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "wsgHp",
+                                  "name": "L Label",
+                                  "fill": "$text-subtext",
+                                  "content": "L",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "i0clN",
+                              "name": "DOW M",
+                              "width": "fill_container",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "gzZ2P",
+                                  "name": "M Label",
+                                  "fill": "$text-subtext",
+                                  "content": "M",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "yW2GI",
+                              "name": "DOW X",
+                              "width": "fill_container",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "u30uN",
+                                  "name": "X Label",
+                                  "fill": "$text-subtext",
+                                  "content": "X",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "z7wF4P",
+                              "name": "DOW J",
+                              "width": "fill_container",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "VZjKB",
+                                  "name": "J Label",
+                                  "fill": "$text-subtext",
+                                  "content": "J",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "EskuB",
+                              "name": "DOW V",
+                              "width": "fill_container",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "tOEsG",
+                                  "name": "V Label",
+                                  "fill": "$text-subtext",
+                                  "content": "V",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "k7Vog",
+                              "name": "DOW S",
+                              "width": "fill_container",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Eqzf6",
+                                  "name": "S Label",
+                                  "fill": "$text-subtext",
+                                  "content": "S",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "pxNKr",
+                              "name": "DOW D",
+                              "width": "fill_container",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "z4WcQD",
+                                  "name": "D Label",
+                                  "fill": "$text-subtext",
+                                  "content": "D",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Pg8XO",
+                          "name": "Week Row 0",
+                          "width": "fill_container",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "ydcEr",
+                              "name": "Day 29-0",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CMeG7",
+                                  "name": "Day Label 29-0",
+                                  "fill": "#4A5A6A",
+                                  "content": "29",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ABPFO",
+                              "name": "Day 30-0",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ksPdg",
+                                  "name": "Day Label 30-0",
+                                  "fill": "#4A5A6A",
+                                  "content": "30",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "WrWaM",
+                              "name": "Day 1-0",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "eemev",
+                                  "name": "Day Label 1-0",
+                                  "fill": "$text-primary",
+                                  "content": "1",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "f8Izu4",
+                              "name": "Day 2-0",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "rZv1M",
+                                  "name": "Day Label 2-0",
+                                  "fill": "$text-primary",
+                                  "content": "2",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "LgkFH",
+                              "name": "Day 3-0",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "T1GKE",
+                                  "name": "Day Label 3-0",
+                                  "fill": "$text-primary",
+                                  "content": "3",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "vpQd4",
+                              "name": "Day 4-0",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "F3IAsg",
+                                  "name": "Day Label 4-0",
+                                  "fill": "$text-primary",
+                                  "content": "4",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ngl7h",
+                              "name": "Day 5-0",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ev2ZE",
+                                  "name": "Day Label 5-0",
+                                  "fill": "$text-primary",
+                                  "content": "5",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "b3gm8C",
+                          "name": "Week Row 1",
+                          "width": "fill_container",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "MMB5b",
+                              "name": "Day 6-1",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "WkEeP",
+                                  "name": "Day Label 6-1",
+                                  "fill": "$text-primary",
+                                  "content": "6",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "hjB6F",
+                              "name": "Day 7-1",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "nlGNE",
+                                  "name": "Day Label 7-1",
+                                  "fill": "$text-primary",
+                                  "content": "7",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "FiQQ9",
+                              "name": "Day 8-1",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "orSyN",
+                                  "name": "Day Label 8-1",
+                                  "fill": "$text-primary",
+                                  "content": "8",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "u9Jo9z",
+                              "name": "Day 9-1",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "$accent-cyan",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "HG2Wl",
+                                  "name": "Day Label 9-1",
+                                  "fill": "#07111F",
+                                  "content": "9",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "v1zrQu",
+                              "name": "Day 10-1",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "k1NnE",
+                                  "name": "Day Label 10-1",
+                                  "fill": "$text-primary",
+                                  "content": "10",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "RUox0",
+                              "name": "Day 11-1",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "KSRRX",
+                                  "name": "Day Label 11-1",
+                                  "fill": "$text-primary",
+                                  "content": "11",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "TfOVg",
+                              "name": "Day 12-1",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "SAPS1",
+                                  "name": "Day Label 12-1",
+                                  "fill": "$text-primary",
+                                  "content": "12",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "X0X3W",
+                          "name": "Week Row 2",
+                          "width": "fill_container",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "AiXea",
+                              "name": "Day 13-2",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Khzzo",
+                                  "name": "Day Label 13-2",
+                                  "fill": "$text-primary",
+                                  "content": "13",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "aiym6",
+                              "name": "Day 14-2",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "uQnh3",
+                                  "name": "Day Label 14-2",
+                                  "fill": "$text-primary",
+                                  "content": "14",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "xFdV4",
+                              "name": "Day 15-2",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "vktKL",
+                                  "name": "Day Label 15-2",
+                                  "fill": "$text-primary",
+                                  "content": "15",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "L5VHi",
+                              "name": "Day 16-2",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "g9ZKk",
+                                  "name": "Day Label 16-2",
+                                  "fill": "$text-primary",
+                                  "content": "16",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "SezHO",
+                              "name": "Day 17-2",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "p82LO",
+                                  "name": "Day Label 17-2",
+                                  "fill": "$text-primary",
+                                  "content": "17",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ALwwm",
+                              "name": "Day 18-2",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "NFvMD",
+                                  "name": "Day Label 18-2",
+                                  "fill": "$text-primary",
+                                  "content": "18",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "IVNvr",
+                              "name": "Day 19-2",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "LskGp",
+                                  "name": "Day Label 19-2",
+                                  "fill": "$text-primary",
+                                  "content": "19",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wKpLM",
+                          "name": "Week Row 3",
+                          "width": "fill_container",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "DQ2up",
+                              "name": "Day 20-3",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "AkPB1",
+                                  "name": "Day Label 20-3",
+                                  "fill": "$text-primary",
+                                  "content": "20",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "iD93p",
+                              "name": "Day 21-3",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "F9nSQq",
+                                  "name": "Day Label 21-3",
+                                  "fill": "$text-primary",
+                                  "content": "21",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "cW4jM",
+                              "name": "Day 22-3",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "TGods",
+                                  "name": "Day Label 22-3",
+                                  "fill": "$text-primary",
+                                  "content": "22",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "eHbUf",
+                              "name": "Day 23-3",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "R0obmR",
+                                  "name": "Day Label 23-3",
+                                  "fill": "$text-primary",
+                                  "content": "23",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "J0Ef9",
+                              "name": "Day 24-3",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "dQR2Z",
+                                  "name": "Day Label 24-3",
+                                  "fill": "$text-primary",
+                                  "content": "24",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "z2ywZ",
+                              "name": "Day 25-3",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "B60Lj",
+                                  "name": "Day Label 25-3",
+                                  "fill": "$text-primary",
+                                  "content": "25",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ZyMDE",
+                              "name": "Day 26-3",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "qv9v6",
+                                  "name": "Day Label 26-3",
+                                  "fill": "$text-primary",
+                                  "content": "26",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "QjZuw",
+                          "name": "Week Row 4",
+                          "width": "fill_container",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "l3e10X",
+                              "name": "Day 27-4",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "u3dTl",
+                                  "name": "Day Label 27-4",
+                                  "fill": "$text-primary",
+                                  "content": "27",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "xeKJr",
+                              "name": "Day 28-4",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "m6AUW",
+                                  "name": "Day Label 28-4",
+                                  "fill": "$text-primary",
+                                  "content": "28",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "UV3wK",
+                              "name": "Day 29-4",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "BjaDd",
+                                  "name": "Day Label 29-4",
+                                  "fill": "$text-primary",
+                                  "content": "29",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "h0PGg",
+                              "name": "Day 30-4",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "FIRO2",
+                                  "name": "Day Label 30-4",
+                                  "fill": "$text-primary",
+                                  "content": "30",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "lmNhk",
+                              "name": "Day 31-4",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "iE1ZK",
+                                  "name": "Day Label 31-4",
+                                  "fill": "$text-primary",
+                                  "content": "31",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "GobwU",
+                              "name": "Day 1-4",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CIwJr",
+                                  "name": "Day Label 1-4",
+                                  "fill": "#4A5A6A",
+                                  "content": "1",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "EHkUV",
+                              "name": "Day 2-4",
+                              "width": "fill_container",
+                              "height": 26,
+                              "fill": "#00000000",
+                              "cornerRadius": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "YgX97",
+                                  "name": "Day Label 2-4",
+                                  "fill": "#4A5A6A",
+                                  "content": "2",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "kUs1c",
+                      "name": "Divider 2",
+                      "fill": "$glass-border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "U154sW",
+                      "name": "Team Section",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "acmuP",
+                          "name": "Team Label",
+                          "fill": "$text-subtext",
+                          "content": "Team",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "iloLR",
+                          "name": "Team Dropdown",
+                          "width": "fill_container",
+                          "fill": "#0B1826",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            10,
+                            12
+                          ],
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Aa8cl",
+                              "name": "Team Left",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "CtXVR",
+                                  "name": "Team Icon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "users",
+                                  "library": "lucide",
+                                  "fill": "$text-subtext"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "zb0AR",
+                                  "name": "Team Value",
+                                  "fill": "$text-primary",
+                                  "content": "All Teams",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "icon",
+                              "id": "fM3RO",
+                              "name": "Team Chevron",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "chevron-down",
+                              "library": "lucide",
+                              "fill": "$text-subtext"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lvGeR",
+                      "name": "Search Section",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "weroO",
+                          "name": "Search Label",
+                          "fill": "$text-subtext",
+                          "content": "Search training",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Idl2c",
+                          "name": "Search Field",
+                          "width": "fill_container",
+                          "fill": "#0B1826",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "gap": 8,
+                          "padding": [
+                            10,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Qo3vu",
+                              "name": "Search Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "search",
+                              "library": "lucide",
+                              "fill": "$text-subtext"
+                            },
+                            {
+                              "type": "text",
+                              "id": "W30Mr",
+                              "name": "Search Placeholder",
+                              "fill": "$text-subtext",
+                              "content": "Search training...",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dcMUA",
+              "name": "Right Column",
+              "width": 1017,
+              "height": 862,
+              "layout": "vertical",
+              "gap": 16,
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "c5fRJT",
+                  "name": "Row 1",
+                  "width": "fill_container",
+                  "gap": 32,
+                  "children": [
+                    {
+                      "id": "f0xiy",
+                      "type": "ref",
+                      "ref": "Ahzx4",
+                      "name": "Featured Card",
+                      "width": "fill_container",
+                      "stroke": "$accent-cyan",
+                      "strokeWidth": 1.5,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#14DBC455",
+                        "blur": 28
+                      },
+                      "height": "fit_content",
+                      "flipX": false,
+                      "flipY": false,
+                      "x": 0,
+                      "y": 0,
+                      "descendants": {
+                        "m5DNz": {
+                          "type": "frame",
+                          "id": "z3psg8",
+                          "name": "Cover Image",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 400,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "id": "QIcWC",
+                              "layoutPosition": "absolute",
+                              "x": 0,
+                              "y": 0,
+                              "name": "Cover Image Fill",
+                              "metadata": {
+                                "type": "unsplash",
+                                "username": "clementproust",
+                                "link": "https://unsplash.com/@clementproust",
+                                "author": "clement proust"
+                              },
+                              "fill": {
+                                "type": "image",
+                                "enabled": true,
+                                "url": "https://images.unsplash.com/photo-1770739526679-a1e8a7a2cb43?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODQ4NDIxOTF8&ixlib=rb-4.1.0&q=80&w=1080",
+                                "mode": "fill"
+                              },
+                              "width": 488,
+                              "height": 400
+                            },
+                            {
+                              "type": "frame",
+                              "id": "FORvA",
+                              "x": 367,
+                              "y": 359,
+                              "name": "Sport Badge",
+                              "fill": "#07111FCC",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 6,
+                              "padding": [
+                                6,
+                                10
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "QNxK6",
+                                  "name": "Sport Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "activity",
+                                  "library": "lucide",
+                                  "fill": "$accent-cyan"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "oo55P",
+                                  "name": "Sport Label",
+                                  "fill": "$text-primary",
+                                  "content": "Swimming",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "XoTu2": {
+                          "content": "Open Water Technique",
+                          "fontSize": 26
+                        },
+                        "nyoBa": {
+                          "content": "Improve your swim technique and build endurance in high-performance open water sessions."
+                        },
+                        "F2jIO": {
+                          "content": "11 May"
+                        },
+                        "LtiFa": {
+                          "content": "07:00 AM"
+                        },
+                        "MSqjw": {
+                          "content": "Olympic Pool"
+                        },
+                        "Iz2Eb": {
+                          "content": "Lane 6"
+                        },
+                        "n6Qbh": {
+                          "content": "12/20"
+                        },
+                        "NUhpa": {
+                          "content": "spots"
+                        },
+                        "clyTE": {
+                          "content": "60%"
+                        },
+                        "OVZ4j": {
+                          "width": 151
+                        }
+                      }
+                    },
+                    {
+                      "id": "e0SmAc",
+                      "type": "ref",
+                      "ref": "Ahzx4",
+                      "name": "Running Card",
+                      "width": "fill_container",
+                      "height": 642,
+                      "flipX": false,
+                      "flipY": false,
+                      "x": 524.5,
+                      "y": 0,
+                      "descendants": {
+                        "m5DNz": {
+                          "height": 400
+                        },
+                        "gc3Lv": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1691675996849-78a298efe96a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODQ4NDIxMzB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "height": 400,
+                          "width": 488,
+                          "flipX": false,
+                          "flipY": false,
+                          "x": 0,
+                          "y": 0
+                        },
+                        "U37Yyo": {
+                          "justifyContent": "center",
+                          "alignItems": "start",
+                          "layout": "horizontal",
+                          "x": 399.5,
+                          "y": 16
+                        },
+                        "V0e03": {
+                          "content": "Running"
+                        },
+                        "XoTu2": {
+                          "content": "Speed Intervals"
+                        },
+                        "nyoBa": {
+                          "content": "Interval session to boost your speed and cardiovascular capacity."
+                        },
+                        "F2jIO": {
+                          "content": "10 May"
+                        },
+                        "LtiFa": {
+                          "content": "06:30 AM"
+                        },
+                        "MSqjw": {
+                          "content": "Central Park"
+                        },
+                        "Iz2Eb": {
+                          "content": "Track 1"
+                        },
+                        "n6Qbh": {
+                          "content": "18/25"
+                        },
+                        "NUhpa": {
+                          "content": "spots"
+                        },
+                        "clyTE": {
+                          "content": "72%"
+                        },
+                        "OVZ4j": {
+                          "width": 150
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FjEe9",
+          "layoutPosition": "absolute",
+          "x": 1254,
+          "y": 1,
+          "name": "Sessions Widget",
+          "fill": "$glass-fill",
+          "cornerRadius": 14,
+          "stroke": "$glass-border",
+          "strokeWidth": 1,
+          "gap": 8,
+          "padding": [
+            6,
+            14
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "vAZXy",
+              "name": "Widget Icon Wrap",
+              "width": 28,
+              "height": 28,
+              "fill": "#14DBC422",
+              "cornerRadius": 8,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "TFKdd",
+                  "name": "Widget Icon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "users",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "emyyT",
+              "name": "Widget Text",
+              "layout": "vertical",
+              "gap": 2,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "n1I3BZ",
+                  "name": "Widget Value",
+                  "fill": "$text-primary",
+                  "content": "24 Training Sessions",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Yry8h",
+                  "name": "Widget Sub",
+                  "fill": "$text-subtext",
+                  "content": "Available This Week",
+                  "fontFamily": "$font-body",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Ahzx4",
+      "x": 0,
+      "y": 1104,
+      "name": "Training Card",
+      "reusable": true,
+      "clip": true,
+      "width": 360,
+      "fill": "$card-fill",
+      "cornerRadius": 16,
+      "stroke": "$glass-border",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "m5DNz",
+          "name": "Cover Image",
+          "clip": true,
+          "width": "fill_container",
+          "height": 140,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "gc3Lv",
+              "layoutPosition": "absolute",
+              "x": 0,
+              "y": 0,
+              "name": "Cover Image Fill",
+              "metadata": {
+                "type": "unsplash",
+                "username": "balderromey",
+                "link": "https://unsplash.com/@balderromey",
+                "author": "Jeromey Balderrama"
+              },
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "https://images.unsplash.com/photo-1779134456845-b9366857e982?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3ODQ4NDE3OTR8&ixlib=rb-4.1.0&q=80&w=1080",
+                "mode": "fill"
+              },
+              "width": 360,
+              "height": 140
+            },
+            {
+              "type": "frame",
+              "id": "U37Yyo",
+              "layoutPosition": "absolute",
+              "x": 200,
+              "y": 16,
+              "name": "Sport Badge",
+              "fill": "#07111FCC",
+              "cornerRadius": 8,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "gap": 6,
+              "padding": [
+                6,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Mfk7q",
+                  "name": "Sport Icon",
+                  "width": 13,
+                  "height": 13,
+                  "icon": "activity",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                },
+                {
+                  "type": "text",
+                  "id": "V0e03",
+                  "name": "Sport Label",
+                  "fill": "$text-primary",
+                  "content": "Running",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "BdsWK",
+          "name": "Card Body",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "XoTu2",
+              "name": "Card Title",
+              "fill": "$text-primary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Tempo Run",
+              "fontFamily": "$font-title",
+              "fontSize": 20,
+              "fontWeight": "700",
+              "fontStyle": "italic"
+            },
+            {
+              "type": "text",
+              "id": "nyoBa",
+              "name": "Card Description",
+              "fill": "$text-subtext",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Interval session to boost your speed and cardiovascular capacity.",
+              "lineHeight": 1.4,
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "xAibh",
+              "name": "Info Row",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "S1kje",
+                  "name": "Info Item",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "M31WyA",
+                      "name": "Info Head",
+                      "width": "fill_container",
+                      "gap": 5,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "Aaaga",
+                          "name": "Info Icon",
+                          "width": 11,
+                          "height": 11,
+                          "icon": "calendar",
+                          "library": "lucide",
+                          "fill": "$accent-cyan"
+                        },
+                        {
+                          "type": "text",
+                          "id": "F2jIO",
+                          "name": "Info Top",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Fri, 10 May",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "LtiFa",
+                      "name": "Info Bottom",
+                      "fill": "$text-subtext",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "06:30 AM",
+                      "fontFamily": "$font-body",
+                      "fontSize": 10,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "P32ShA",
+                  "name": "Info Item",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "uk1eF",
+                      "name": "Info Head",
+                      "width": "fill_container",
+                      "gap": 5,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "QZxPV",
+                          "name": "Info Icon",
+                          "width": 11,
+                          "height": 11,
+                          "icon": "map-pin",
+                          "library": "lucide",
+                          "fill": "$accent-cyan"
+                        },
+                        {
+                          "type": "text",
+                          "id": "MSqjw",
+                          "name": "Info Top",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Central Park",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Iz2Eb",
+                      "name": "Info Bottom",
+                      "fill": "$text-subtext",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Track 1",
+                      "fontFamily": "$font-body",
+                      "fontSize": 10,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AD2MW",
+                  "name": "Info Item",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "aMHeP",
+                      "name": "Info Head",
+                      "width": "fill_container",
+                      "gap": 5,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "i7StH",
+                          "name": "Info Icon",
+                          "width": 11,
+                          "height": 11,
+                          "icon": "users",
+                          "library": "lucide",
+                          "fill": "$accent-cyan"
+                        },
+                        {
+                          "type": "text",
+                          "id": "n6Qbh",
+                          "name": "Info Top",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "18/25",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "NUhpa",
+                      "name": "Info Bottom",
+                      "fill": "$text-subtext",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "spots",
+                      "fontFamily": "$font-body",
+                      "fontSize": 10,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "OpIVv",
+              "name": "Occupancy Section",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "rWuhh",
+                  "name": "Occupancy Header",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "V1vELc",
+                      "name": "Occupancy Label",
+                      "fill": "$text-subtext",
+                      "content": "Occupancy",
+                      "fontFamily": "$font-body",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "clyTE",
+                      "name": "Occupancy Value",
+                      "fill": "$accent-cyan",
+                      "content": "72%",
+                      "fontFamily": "$font-body",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "L171rT",
+                  "name": "Progress Track",
+                  "width": "fill_container",
+                  "height": 6,
+                  "fill": "#16283A",
+                  "cornerRadius": 3,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 3,
+                      "id": "OVZ4j",
+                      "layoutPosition": "absolute",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Progress Fill",
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 0,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#0FA3AB",
+                            "position": 0
+                          },
+                          {
+                            "color": "#14DBC4",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "width": 259,
+                      "height": 6
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "J9bPkC",
+              "name": "Reserve Button",
+              "width": "fill_container",
+              "fill": "$accent-cyan",
+              "cornerRadius": 10,
+              "padding": [
+                12,
+                0
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PBvpx",
+                  "name": "Reserve Label",
+                  "fill": "#07111F",
+                  "content": "Reserve",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "d41rX5",
+      "x": 1616,
+      "y": 0,
+      "name": "Athlete Trainings Schedule",
+      "clip": true,
+      "width": 1536,
+      "height": 964,
+      "fill": "$bg-navy",
+      "layout": "none",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "e5dmt",
+          "x": 1100,
+          "y": -200,
+          "name": "BG Glow Top Right",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#14DBC433",
+                "position": 0
+              },
+              {
+                "color": "#14DBC400",
+                "position": 1
+              }
+            ]
+          },
+          "width": 900,
+          "height": 900
+        },
+        {
+          "type": "ellipse",
+          "id": "m70r7",
+          "x": -300,
+          "y": 700,
+          "name": "BG Glow Bottom Left",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0FA3AB2E",
+                "position": 0
+              },
+              {
+                "color": "#0FA3AB00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 800,
+          "height": 800
+        },
+        {
+          "type": "frame",
+          "id": "qdmbL",
+          "x": 0,
+          "y": 0,
+          "name": "Content",
+          "width": 1536,
+          "height": 1049,
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "O20PU",
+              "name": "Navbar",
+              "width": "fill_container",
+              "stroke": "$glass-border",
+              "strokeWidth": {
+                "bottom": 1
+              },
+              "padding": [
+                18,
+                48
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "M8CcoM",
+                  "name": "Nav Left",
+                  "gap": 40,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ytCbZ",
+                      "name": "Logo Group",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "OyKCw",
+                          "name": "Logo Icon Wrap",
+                          "width": 34,
+                          "height": 34,
+                          "fill": "$accent-cyan",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "pXtBZ",
+                              "name": "Logo Icon",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "zap",
+                              "library": "lucide",
+                              "fill": "#07111F"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kk4Zs",
+                          "name": "Logo Text",
+                          "layout": "vertical",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "i1Q3C",
+                              "name": "Logo Title",
+                              "fill": "$text-primary",
+                              "content": "GRIT",
+                              "lineHeight": 1,
+                              "fontFamily": "$font-title",
+                              "fontSize": 18,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "CEvKe",
+                              "name": "Logo Sub",
+                              "fill": "$accent-cyan",
+                              "content": "ARENA",
+                              "lineHeight": 1,
+                              "fontFamily": "$font-body",
+                              "fontSize": 10,
+                              "fontWeight": "600",
+                              "letterSpacing": 2
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VEhcd",
+                      "name": "Menu Dropdown",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "s6oTE",
+                          "name": "Menu Icon",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "layout-grid",
+                          "library": "lucide",
+                          "fill": "$text-subtext"
+                        },
+                        {
+                          "type": "text",
+                          "id": "blYZr",
+                          "name": "Menu Label",
+                          "fill": "$text-subtext",
+                          "content": "Menú",
+                          "fontFamily": "$font-body",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "PuNuw",
+                          "name": "Menu Chevron",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$text-subtext"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "RytYA",
+                      "name": "Breadcrumb",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "lM7Sv",
+                          "name": "Crumb Inicio",
+                          "fill": "$text-subtext",
+                          "content": "Inicio",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "pW0VG",
+                          "name": "Crumb Sep",
+                          "fill": "$text-subtext",
+                          "content": "›",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "a7xCF",
+                          "name": "Crumb Orgs",
+                          "fill": "$text-subtext",
+                          "content": "Orgs",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "WlkBA",
+                          "name": "Crumb Sep",
+                          "fill": "$text-subtext",
+                          "content": "›",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "L2G9ha",
+                          "name": "Crumb Wolfpack",
+                          "fill": "$text-subtext",
+                          "content": "Wolfpack",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "EzAcm",
+                          "name": "Crumb Sep",
+                          "fill": "$text-subtext",
+                          "content": "›",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "PhptM",
+                          "name": "Crumb Entrenamientos",
+                          "fill": "$text-primary",
+                          "content": "Entrenamientos",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NIUyM",
+                  "name": "Nav Right",
+                  "gap": 14,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "FwhJ6",
+                      "name": "Bell Wrap",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "$glass-fill",
+                      "cornerRadius": 18,
+                      "stroke": "$glass-border",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "fM8Aw",
+                          "name": "Bell Icon",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "bell",
+                          "library": "lucide",
+                          "fill": "$text-subtext"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "KLfMB",
+                      "name": "Avatar",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "$accent-cyan",
+                      "cornerRadius": 18,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "mASDH",
+                          "name": "Avatar Letter",
+                          "fill": "#07111F",
+                          "content": "S",
+                          "fontFamily": "$font-body",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MCA7z",
+              "name": "Body",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 28,
+              "padding": [
+                32,
+                48,
+                36,
+                48
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "aapRK",
+                  "name": "Header Row",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "fDpIu",
+                      "name": "Header Left",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uKu0H",
+                          "name": "Page Title",
+                          "fill": "$text-primary",
+                          "content": "Entrenamientos",
+                          "fontFamily": "$font-title",
+                          "fontSize": 38,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "wDhdx",
+                          "name": "Page Subtitle",
+                          "fill": "$text-subtext",
+                          "content": "Descubre y reserva entrenamientos disponibles esta semana.",
+                          "fontFamily": "$font-body",
+                          "fontSize": 15,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IGHVK",
+                      "name": "Sessions Widget",
+                      "fill": "$glass-fill",
+                      "cornerRadius": 14,
+                      "stroke": "$accent-cyan",
+                      "strokeWidth": 1,
+                      "gap": 14,
+                      "padding": [
+                        14,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "q5ixf6",
+                          "name": "Widget Icon Wrap",
+                          "width": 36,
+                          "height": 36,
+                          "fill": "#14DBC422",
+                          "cornerRadius": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "l2SR8",
+                              "name": "Widget Icon",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "users",
+                              "library": "lucide",
+                              "fill": "$accent-cyan"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "d6xys9",
+                          "name": "Widget Text",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "vtvDK",
+                              "name": "Widget Value",
+                              "fill": "$text-primary",
+                              "content": "24 entrenamientos",
+                              "fontFamily": "$font-body",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Q0RkLm",
+                              "name": "Widget Sub",
+                              "fill": "$text-subtext",
+                              "content": "disponibles esta semana",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "D4sUVN",
+                  "name": "Main Row",
+                  "width": "fill_container",
+                  "gap": 32,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "WKs3w",
+                      "name": "Calendar Column",
+                      "width": "fill_container",
+                      "fill": "$glass-fill",
+                      "cornerRadius": 16,
+                      "stroke": "$glass-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 20,
+                      "padding": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "be5We",
+                          "name": "Date Nav Row",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "MSjKU",
+                              "name": "Date Nav Left",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "c94cpQ",
+                                  "name": "Back Button",
+                                  "width": 36,
+                                  "height": 36,
+                                  "cornerRadius": 18,
+                                  "stroke": "$glass-border",
+                                  "strokeWidth": 1,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "P0gsKC",
+                                      "name": "Back Icon",
+                                      "width": 16,
+                                      "height": 16,
+                                      "icon": "arrow-left",
+                                      "library": "lucide",
+                                      "fill": "$text-subtext"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "hWvau",
+                                  "name": "Date Pill",
+                                  "cornerRadius": 10,
+                                  "stroke": "$glass-border",
+                                  "strokeWidth": 1,
+                                  "gap": 8,
+                                  "padding": [
+                                    9,
+                                    14
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "xNUlM",
+                                      "name": "Date Icon",
+                                      "width": 14,
+                                      "height": 14,
+                                      "icon": "calendar",
+                                      "library": "lucide",
+                                      "fill": "$accent-cyan"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "TSDaE",
+                                      "name": "Date Text",
+                                      "fill": "$text-primary",
+                                      "content": "20 – 26 mayo, 2024",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 13,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "D0HGl",
+                                  "name": "Forward Button",
+                                  "width": 36,
+                                  "height": 36,
+                                  "cornerRadius": 18,
+                                  "stroke": "$glass-border",
+                                  "strokeWidth": 1,
+                                  "justifyContent": "center",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "icon",
+                                      "id": "cUkBc",
+                                      "name": "Forward Icon",
+                                      "width": 16,
+                                      "height": 16,
+                                      "icon": "arrow-right",
+                                      "library": "lucide",
+                                      "fill": "$text-subtext"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "QzEER",
+                              "name": "Date Nav Right",
+                              "gap": 12,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "REQ30",
+                                  "name": "Hoy Button",
+                                  "cornerRadius": 10,
+                                  "stroke": "$glass-border",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    9,
+                                    16
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "vhPMm",
+                                      "name": "Hoy Label",
+                                      "fill": "$text-primary",
+                                      "content": "Hoy",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 13,
+                                      "fontWeight": "600"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "c2DXpW",
+                                  "name": "Semana Dropdown",
+                                  "cornerRadius": 10,
+                                  "stroke": "$glass-border",
+                                  "strokeWidth": 1,
+                                  "gap": 6,
+                                  "padding": [
+                                    9,
+                                    14
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "cOLiT",
+                                      "name": "Semana Label",
+                                      "fill": "$text-primary",
+                                      "content": "Semana",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 13,
+                                      "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "icon",
+                                      "id": "S8xyAw",
+                                      "name": "Semana Chevron",
+                                      "width": 12,
+                                      "height": 12,
+                                      "icon": "chevron-down",
+                                      "library": "lucide",
+                                      "fill": "$text-subtext"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "bkEu9",
+                          "name": "Week Grid",
+                          "width": "fill_container",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "j2Ubx",
+                              "name": "Day Col LUN",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 12,
+                              "padding": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "UtC4d",
+                                  "name": "Day Header",
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "Jggze",
+                                      "name": "Day Abbr",
+                                      "fill": "$text-subtext",
+                                      "content": "LUN",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 11,
+                                      "fontWeight": "600",
+                                      "letterSpacing": 1
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "ntetX",
+                                      "name": "Day Num",
+                                      "fill": "$text-primary",
+                                      "content": "20",
+                                      "fontFamily": "$font-title",
+                                      "fontSize": 20,
+                                      "fontWeight": "700"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "L0bSj",
+                                      "name": "Today Dot",
+                                      "fill": "$accent-cyan",
+                                      "content": "●",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 8,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "eGPPw",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Natación Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "waves",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "f1adW": {
+                                      "content": "Natación",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Técnica en Aguas Abiertas"
+                                    },
+                                    "jlCae": {
+                                      "content": "07:00 AM – 08:30 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Piscina Olímpica"
+                                    },
+                                    "Iqm17": {
+                                      "content": "12/20"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "cPaJq",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Ciclismo Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "bike",
+                                      "fill": "$discipline-cycle"
+                                    },
+                                    "f1adW": {
+                                      "content": "Ciclismo",
+                                      "fill": "$discipline-cycle"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Rodada de Fondo"
+                                    },
+                                    "jlCae": {
+                                      "content": "06:30 PM – 08:30 PM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Salidas Norte"
+                                    },
+                                    "Iqm17": {
+                                      "content": "15/30"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "O6R2zo",
+                              "name": "Day Col MAR",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 12,
+                              "padding": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "i7n7J",
+                                  "name": "Day Header",
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "yO1Rf",
+                                      "name": "Day Abbr",
+                                      "fill": "$text-subtext",
+                                      "content": "MAR",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 11,
+                                      "fontWeight": "600",
+                                      "letterSpacing": 1
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "m3cp02",
+                                      "name": "Day Num",
+                                      "fill": "$text-primary",
+                                      "content": "21",
+                                      "fontFamily": "$font-title",
+                                      "fontSize": 20,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "EVKkm",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Running Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "activity",
+                                      "fill": "$discipline-run"
+                                    },
+                                    "f1adW": {
+                                      "content": "Running",
+                                      "fill": "$discipline-run"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Intervalos de Velocidad"
+                                    },
+                                    "jlCae": {
+                                      "content": "06:30 AM – 07:30 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Parque Central"
+                                    },
+                                    "Iqm17": {
+                                      "content": "18/25"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "OY1do",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Fuerza Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "dumbbell",
+                                      "fill": "$discipline-strength"
+                                    },
+                                    "f1adW": {
+                                      "content": "Fuerza",
+                                      "fill": "$discipline-strength"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Fuerza Funcional"
+                                    },
+                                    "jlCae": {
+                                      "content": "05:30 PM – 06:30 PM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Box Central"
+                                    },
+                                    "Iqm17": {
+                                      "content": "10/16"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "vOJNn",
+                              "name": "Day Col MIÉ",
+                              "width": "fill_container",
+                              "fill": "#14DBC414",
+                              "cornerRadius": 12,
+                              "stroke": "$accent-cyan",
+                              "strokeWidth": 1.5,
+                              "layout": "vertical",
+                              "gap": 12,
+                              "padding": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "PLt9m",
+                                  "name": "Day Header",
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "O6txy9",
+                                      "name": "Day Abbr",
+                                      "fill": "$text-subtext",
+                                      "content": "MIÉ",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 11,
+                                      "fontWeight": "600",
+                                      "letterSpacing": 1
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "Mr5xk",
+                                      "name": "Day Num",
+                                      "fill": "$accent-cyan",
+                                      "content": "22",
+                                      "fontFamily": "$font-title",
+                                      "fontSize": 20,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "uTSZz",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Natación Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "waves",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "f1adW": {
+                                      "content": "Natación",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Potencia en el Agua"
+                                    },
+                                    "jlCae": {
+                                      "content": "08:00 AM – 09:00 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Piscina Olímpica"
+                                    },
+                                    "Iqm17": {
+                                      "content": "8/20"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "D0KUL",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Cross Training Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "flame",
+                                      "fill": "$discipline-functional"
+                                    },
+                                    "f1adW": {
+                                      "content": "Cross Training",
+                                      "fill": "$discipline-functional"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "WOD Intensivo"
+                                    },
+                                    "jlCae": {
+                                      "content": "06:00 PM – 07:00 PM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Box Central"
+                                    },
+                                    "Iqm17": {
+                                      "content": "14/20"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "l5c1wN",
+                              "name": "Day Col JUE",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 12,
+                              "padding": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "rgqzp",
+                                  "name": "Day Header",
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "w3cGO",
+                                      "name": "Day Abbr",
+                                      "fill": "$text-subtext",
+                                      "content": "JUE",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 11,
+                                      "fontWeight": "600",
+                                      "letterSpacing": 1
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "M2P8b3",
+                                      "name": "Day Num",
+                                      "fill": "$text-primary",
+                                      "content": "23",
+                                      "fontFamily": "$font-title",
+                                      "fontSize": 20,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "bQ0tA",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Ciclismo Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "bike",
+                                      "fill": "$discipline-cycle"
+                                    },
+                                    "f1adW": {
+                                      "content": "Ciclismo",
+                                      "fill": "$discipline-cycle"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Subidas en Resistencia"
+                                    },
+                                    "jlCae": {
+                                      "content": "06:30 AM – 08:00 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Salidas Norte"
+                                    },
+                                    "Iqm17": {
+                                      "content": "10/25"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "vyDbm",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Natación Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "waves",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "f1adW": {
+                                      "content": "Natación",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Técnica Avanzada"
+                                    },
+                                    "jlCae": {
+                                      "content": "06:00 PM – 07:00 PM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Piscina Olímpica"
+                                    },
+                                    "Iqm17": {
+                                      "content": "9/20"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "d9LMJh",
+                              "name": "Day Col VIE",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 12,
+                              "padding": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "Z3KTM",
+                                  "name": "Day Header",
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "H8iCV",
+                                      "name": "Day Abbr",
+                                      "fill": "$text-subtext",
+                                      "content": "VIE",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 11,
+                                      "fontWeight": "600",
+                                      "letterSpacing": 1
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "N2p5Fa",
+                                      "name": "Day Num",
+                                      "fill": "$text-primary",
+                                      "content": "24",
+                                      "fontFamily": "$font-title",
+                                      "fontSize": 20,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "OHXNj",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Running Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "activity",
+                                      "fill": "$discipline-run"
+                                    },
+                                    "f1adW": {
+                                      "content": "Running",
+                                      "fill": "$discipline-run"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Tempo Run"
+                                    },
+                                    "jlCae": {
+                                      "content": "06:30 AM – 07:30 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Parque Central"
+                                    },
+                                    "Iqm17": {
+                                      "content": "16/25"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "yHdXB",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Fuerza Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "dumbbell",
+                                      "fill": "$discipline-strength"
+                                    },
+                                    "f1adW": {
+                                      "content": "Fuerza",
+                                      "fill": "$discipline-strength"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Fuerza Superior"
+                                    },
+                                    "jlCae": {
+                                      "content": "05:30 PM – 06:30 PM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Box Central"
+                                    },
+                                    "Iqm17": {
+                                      "content": "12/16"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "d27Chm",
+                              "name": "Day Col SÁB",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 12,
+                              "padding": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "LVsdN",
+                                  "name": "Day Header",
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "dPIna",
+                                      "name": "Day Abbr",
+                                      "fill": "$text-subtext",
+                                      "content": "SÁB",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 11,
+                                      "fontWeight": "600",
+                                      "letterSpacing": 1
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "ZEWsF",
+                                      "name": "Day Num",
+                                      "fill": "$text-primary",
+                                      "content": "25",
+                                      "fontFamily": "$font-title",
+                                      "fontSize": 20,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "s3elO",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Natación Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "waves",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "f1adW": {
+                                      "content": "Natación",
+                                      "fill": "$discipline-swim"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Aguas Abiertas Largas"
+                                    },
+                                    "jlCae": {
+                                      "content": "07:00 AM – 09:00 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Playa Norte"
+                                    },
+                                    "Iqm17": {
+                                      "content": "6/15"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "wYQOJ",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Cross Training Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "flame",
+                                      "fill": "$discipline-functional"
+                                    },
+                                    "f1adW": {
+                                      "content": "Cross Training",
+                                      "fill": "$discipline-functional"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Metcon Endurance"
+                                    },
+                                    "jlCae": {
+                                      "content": "10:00 AM – 11:00 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Box Central"
+                                    },
+                                    "Iqm17": {
+                                      "content": "13/20"
+                                    }
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "b29BRa",
+                              "name": "Day Col DOM",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 12,
+                              "padding": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "h9m5J",
+                                  "name": "Day Header",
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "alWu1",
+                                      "name": "Day Abbr",
+                                      "fill": "$text-subtext",
+                                      "content": "DOM",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 11,
+                                      "fontWeight": "600",
+                                      "letterSpacing": 1
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "DyKLR",
+                                      "name": "Day Num",
+                                      "fill": "$text-primary",
+                                      "content": "26",
+                                      "fontFamily": "$font-title",
+                                      "fontSize": 20,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "id": "I4zYOm",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Ciclismo Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "bike",
+                                      "fill": "$discipline-cycle"
+                                    },
+                                    "f1adW": {
+                                      "content": "Ciclismo",
+                                      "fill": "$discipline-cycle"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Rodada Social"
+                                    },
+                                    "jlCae": {
+                                      "content": "07:00 AM – 09:00 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Salidas Norte"
+                                    },
+                                    "Iqm17": {
+                                      "content": "20/30"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "jJzSY",
+                                  "type": "ref",
+                                  "ref": "b91jku",
+                                  "name": "Movilidad Card",
+                                  "width": "fill_container",
+                                  "descendants": {
+                                    "bvD8l": {
+                                      "icon": "wind",
+                                      "fill": "$discipline-mobility"
+                                    },
+                                    "f1adW": {
+                                      "content": "Movilidad",
+                                      "fill": "$discipline-mobility"
+                                    },
+                                    "t5qbZx": {
+                                      "content": "Movilidad y Recuperación"
+                                    },
+                                    "jlCae": {
+                                      "content": "09:30 AM – 10:30 AM"
+                                    },
+                                    "dG3b6": {
+                                      "content": "Estudio Zen"
+                                    },
+                                    "Iqm17": {
+                                      "content": "14/20"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "ZbTyL",
+                          "name": "Divider",
+                          "fill": "$glass-border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dURty",
+                          "name": "No Encuentras Section",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "on1SD",
+                              "name": "No Encuentras Row",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "a1BS6",
+                                  "name": "Calendar Search Icon",
+                                  "width": 15,
+                                  "height": 15,
+                                  "icon": "calendar",
+                                  "library": "lucide",
+                                  "fill": "$text-subtext"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "znkdC",
+                                  "name": "No Encuentras Text",
+                                  "fill": "$text-subtext",
+                                  "content": "¿No encuentras lo que buscas?",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "MmmHe",
+                              "name": "Ver Mas Row",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "O8ZJN8",
+                                  "name": "Ver Mas Text",
+                                  "fill": "$accent-cyan",
+                                  "content": "Ver más entrenamientos",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "icon",
+                                  "id": "L06wz",
+                                  "name": "Ver Mas Chevron",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "chevron-right",
+                                  "library": "lucide",
+                                  "fill": "$accent-cyan"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "PHuX2",
+                      "name": "Filters Sidebar",
+                      "width": 400,
+                      "fill": "$glass-fill",
+                      "cornerRadius": 16,
+                      "stroke": "$glass-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 20,
+                      "padding": 24,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "T0y86",
+                          "name": "Filters Header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "OE6Dv",
+                              "name": "Filters Header Left",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "qCphA",
+                                  "name": "Filter Icon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "list-filter",
+                                  "library": "lucide",
+                                  "fill": "$text-primary"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "v2wUzD",
+                                  "name": "Filters Title",
+                                  "fill": "$text-primary",
+                                  "content": "Filtros",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 15,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "TU7xf",
+                              "name": "Limpiar Link",
+                              "fill": "$accent-cyan",
+                              "content": "Limpiar",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "E8kfgi",
+                          "name": "Filter Row 1",
+                          "width": "fill_container",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "QYKml",
+                              "name": "Back Button",
+                              "width": 36,
+                              "height": 36,
+                              "cornerRadius": 18,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "OMj4f",
+                                  "name": "Back Icon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "arrow-left",
+                                  "library": "lucide",
+                                  "fill": "$text-subtext"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "s9VmE",
+                              "name": "Date Range Dropdown",
+                              "width": "fill_container",
+                              "cornerRadius": 10,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 6,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "tLaB3",
+                                  "name": "Date Range Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "calendar",
+                                  "library": "lucide",
+                                  "fill": "$text-subtext"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "d4ocu",
+                                  "name": "Date Range Text",
+                                  "fill": "$text-primary",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "20 - 26 mayo",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12.5,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Rvvy6",
+                              "name": "Forward Button",
+                              "width": 36,
+                              "height": 36,
+                              "cornerRadius": 18,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "QqAHb",
+                                  "name": "Forward Icon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "arrow-right",
+                                  "library": "lucide",
+                                  "fill": "$text-subtext"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kU0Fe",
+                          "name": "Discipline Dropdown",
+                          "width": "fill_container",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            10,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "A4CrT",
+                              "name": "Discipline Icon Filter",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "activity",
+                              "library": "lucide",
+                              "fill": "$text-subtext"
+                            },
+                            {
+                              "type": "text",
+                              "id": "JoitO",
+                              "name": "Discipline Text",
+                              "fill": "$text-primary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Todas las disciplinas",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12.5,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "jp8Hq",
+                              "name": "Discipline Chevron",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "chevron-down",
+                              "library": "lucide",
+                              "fill": "$text-subtext"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dMn0b",
+                          "name": "Filter Row 2",
+                          "width": "fill_container",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "sH0Nh",
+                              "name": "Hoy Button",
+                              "cornerRadius": 10,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "padding": [
+                                9,
+                                16
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "sM7jI",
+                                  "name": "Hoy Label",
+                                  "fill": "$text-primary",
+                                  "content": "Hoy",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "eXshT",
+                              "name": "Mañana Button",
+                              "cornerRadius": 10,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "padding": [
+                                9,
+                                16
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "THyBP",
+                                  "name": "Mañana Label",
+                                  "fill": "$text-primary",
+                                  "content": "Mañana",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "jul4g",
+                          "name": "Sidebar Divider",
+                          "fill": "$glass-border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "kpdLT",
+                          "name": "Lista Heading",
+                          "fill": "$text-primary",
+                          "content": "Lista de entrenamientos",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "700",
+                          "letterSpacing": 0.5
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Ljv5D",
+                          "name": "List Wrap",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 16,
+                          "children": [
+                            {
+                              "id": "moHzC",
+                              "type": "ref",
+                              "ref": "QQNs1",
+                              "name": "Técnica en Aguas Abiertas Item",
+                              "width": "fill_container",
+                              "descendants": {
+                                "Sm6X4": {
+                                  "fill": "#14DBC422"
+                                },
+                                "Y0nV8q": {
+                                  "icon": "waves",
+                                  "fill": "$discipline-swim"
+                                },
+                                "mcBmS": {
+                                  "content": "Técnica en Aguas Abiertas"
+                                },
+                                "qMkc4": {
+                                  "content": "Natación • Lunes 20, 07:00 AM"
+                                },
+                                "DqnrH": {
+                                  "content": "Piscina Olímpica"
+                                },
+                                "TZPoZ": {
+                                  "content": "12/20"
+                                }
+                              }
+                            },
+                            {
+                              "id": "Yb1p2",
+                              "type": "ref",
+                              "ref": "QQNs1",
+                              "name": "Intervalos de Velocidad Item",
+                              "width": "fill_container",
+                              "descendants": {
+                                "Sm6X4": {
+                                  "fill": "#F2B84B22"
+                                },
+                                "Y0nV8q": {
+                                  "icon": "activity",
+                                  "fill": "$discipline-run"
+                                },
+                                "mcBmS": {
+                                  "content": "Intervalos de Velocidad"
+                                },
+                                "qMkc4": {
+                                  "content": "Running • Martes 21, 06:30 AM"
+                                },
+                                "DqnrH": {
+                                  "content": "Parque Central"
+                                },
+                                "TZPoZ": {
+                                  "content": "18/25"
+                                }
+                              }
+                            },
+                            {
+                              "id": "npcJi",
+                              "type": "ref",
+                              "ref": "QQNs1",
+                              "name": "Potencia en el Agua Item",
+                              "width": "fill_container",
+                              "descendants": {
+                                "Sm6X4": {
+                                  "fill": "#14DBC422"
+                                },
+                                "Y0nV8q": {
+                                  "icon": "waves",
+                                  "fill": "$discipline-swim"
+                                },
+                                "mcBmS": {
+                                  "content": "Potencia en el Agua"
+                                },
+                                "qMkc4": {
+                                  "content": "Natación • Miércoles 22, 08:00 AM"
+                                },
+                                "DqnrH": {
+                                  "content": "Piscina Olímpica"
+                                },
+                                "TZPoZ": {
+                                  "content": "8/20"
+                                }
+                              }
+                            },
+                            {
+                              "id": "pmCbE",
+                              "type": "ref",
+                              "ref": "QQNs1",
+                              "name": "Subidas en Resistencia Item",
+                              "width": "fill_container",
+                              "descendants": {
+                                "Sm6X4": {
+                                  "fill": "#0FA3AB22"
+                                },
+                                "Y0nV8q": {
+                                  "icon": "bike",
+                                  "fill": "$discipline-cycle"
+                                },
+                                "mcBmS": {
+                                  "content": "Subidas en Resistencia"
+                                },
+                                "qMkc4": {
+                                  "content": "Ciclismo • Jueves 23, 06:30 AM"
+                                },
+                                "DqnrH": {
+                                  "content": "Salidas Norte"
+                                },
+                                "TZPoZ": {
+                                  "content": "10/25"
+                                }
+                              }
+                            },
+                            {
+                              "id": "tS7M8",
+                              "type": "ref",
+                              "ref": "QQNs1",
+                              "name": "Tempo Run Item",
+                              "width": "fill_container",
+                              "descendants": {
+                                "Sm6X4": {
+                                  "fill": "#F2B84B22"
+                                },
+                                "Y0nV8q": {
+                                  "icon": "activity",
+                                  "fill": "$discipline-run"
+                                },
+                                "mcBmS": {
+                                  "content": "Tempo Run"
+                                },
+                                "qMkc4": {
+                                  "content": "Running • Viernes 24, 06:30 AM"
+                                },
+                                "DqnrH": {
+                                  "content": "Parque Central"
+                                },
+                                "TZPoZ": {
+                                  "content": "16/25"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kNm44",
+                          "name": "Ver Todos Row",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "F7UZ14",
+                              "name": "Ver Todos Text",
+                              "fill": "$accent-cyan",
+                              "content": "Ver todos los entrenamientos",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "ox6nB",
+                              "name": "Ver Todos Chevron",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "chevron-right",
+                              "library": "lucide",
+                              "fill": "$accent-cyan"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "b91jku",
+      "x": 1616,
+      "y": 1200,
+      "name": "Day Training Card",
+      "reusable": true,
+      "width": 150,
+      "fill": "$card-fill",
+      "cornerRadius": 10,
+      "stroke": "$glass-border",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "gap": 6,
+      "padding": 10,
+      "children": [
+        {
+          "type": "frame",
+          "id": "YdcGy",
+          "name": "Sport Row",
+          "gap": 5,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "bvD8l",
+              "name": "Sport Icon",
+              "width": 12,
+              "height": 12,
+              "icon": "waves",
+              "library": "lucide",
+              "fill": "$discipline-swim"
+            },
+            {
+              "type": "text",
+              "id": "f1adW",
+              "name": "Sport Label",
+              "fill": "$discipline-swim",
+              "content": "Natación",
+              "fontFamily": "$font-body",
+              "fontSize": 11,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "t5qbZx",
+          "name": "Card Title",
+          "fill": "$text-primary",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Técnica en Aguas Abiertas",
+          "lineHeight": 1.25,
+          "fontFamily": "$font-body",
+          "fontSize": 13,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "jlCae",
+          "name": "Card Time",
+          "fill": "$text-subtext",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "07:00 AM – 08:30 AM",
+          "fontFamily": "$font-body",
+          "fontSize": 10,
+          "fontWeight": "500"
+        },
+        {
+          "type": "text",
+          "id": "dG3b6",
+          "name": "Card Location",
+          "fill": "$text-subtext",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Piscina Olímpica",
+          "fontFamily": "$font-body",
+          "fontSize": 10,
+          "fontWeight": "500"
+        },
+        {
+          "type": "frame",
+          "id": "oIGDE",
+          "name": "Spots Pill",
+          "cornerRadius": 6,
+          "stroke": "$accent-cyan",
+          "strokeWidth": 1,
+          "padding": [
+            3,
+            8
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "Iqm17",
+              "name": "Spots Text",
+              "fill": "$accent-cyan",
+              "content": "12/20",
+              "fontFamily": "$font-body",
+              "fontSize": 10,
+              "fontWeight": "700"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "QQNs1",
+      "x": 1616,
+      "y": 1480,
+      "name": "List Training Item",
+      "reusable": true,
+      "width": 400,
+      "gap": 12,
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Sm6X4",
+          "name": "Icon Wrap",
+          "width": 36,
+          "height": 36,
+          "fill": "#14DBC422",
+          "cornerRadius": 8,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "Y0nV8q",
+              "name": "Discipline Icon",
+              "width": 16,
+              "height": 16,
+              "icon": "waves",
+              "library": "lucide",
+              "fill": "$discipline-swim"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ebl7K",
+          "name": "Text Block",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 2,
+          "children": [
+            {
+              "type": "text",
+              "id": "mcBmS",
+              "name": "Item Title",
+              "fill": "$text-primary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Técnica en Aguas Abiertas",
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "qMkc4",
+              "name": "Item Meta 1",
+              "fill": "$text-subtext",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Natación • Lunes 20, 07:00 AM",
+              "fontFamily": "$font-body",
+              "fontSize": 11,
+              "fontWeight": "500"
+            },
+            {
+              "type": "text",
+              "id": "DqnrH",
+              "name": "Item Meta 2",
+              "fill": "$text-subtext",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Piscina Olímpica",
+              "fontFamily": "$font-body",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "meLvj",
+          "name": "Right Block",
+          "layout": "vertical",
+          "gap": 6,
+          "alignItems": "end",
+          "children": [
+            {
+              "type": "frame",
+              "id": "k7u25",
+              "name": "Spots Block",
+              "layout": "vertical",
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TZPoZ",
+                  "name": "Spots Value",
+                  "fill": "$text-primary",
+                  "content": "12/20",
+                  "fontFamily": "$font-body",
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "VMpOA",
+                  "name": "Spots Label",
+                  "fill": "$text-subtext",
+                  "content": "cupos",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "WU7TE",
+              "name": "Reserve Button",
+              "fill": "$accent-cyan",
+              "cornerRadius": 8,
+              "padding": [
+                7,
+                16
+              ],
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "P4Hk9w",
+                  "name": "Reserve Label",
+                  "fill": "#07111F",
+                  "content": "Reservar",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "bg-navy": {
+      "type": "color",
+      "value": "#07111F"
+    },
+    "accent-cyan": {
+      "type": "color",
+      "value": "#14DBC4"
+    },
+    "accent-teal": {
+      "type": "color",
+      "value": "#0FA3AB"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#E6EDF3"
+    },
+    "text-subtext": {
+      "type": "color",
+      "value": "#BAC7D5"
+    },
+    "glass-fill": {
+      "type": "color",
+      "value": "#0F1F30B0"
+    },
+    "glass-border": {
+      "type": "color",
+      "value": "#14DBC440"
+    },
+    "card-fill": {
+      "type": "color",
+      "value": "#0B1826CC"
+    },
+    "font-title": {
+      "type": "string",
+      "value": "Rajdhani"
+    },
+    "font-body": {
+      "type": "string",
+      "value": "Montserrat"
+    },
+    "discipline-swim": {
+      "type": "color",
+      "value": "#14DBC4"
+    },
+    "discipline-cycle": {
+      "type": "color",
+      "value": "#0FA3AB"
+    },
+    "discipline-run": {
+      "type": "color",
+      "value": "#F2B84B"
+    },
+    "discipline-strength": {
+      "type": "color",
+      "value": "#B98AFF"
+    },
+    "discipline-functional": {
+      "type": "color",
+      "value": "#FF6B6B"
+    },
+    "discipline-mobility": {
+      "type": "color",
+      "value": "#6BCB77"
+    }
+  },
+  "fileToken": "7383298b-c471-4398-a7a2-3b55e32ed317"
+}

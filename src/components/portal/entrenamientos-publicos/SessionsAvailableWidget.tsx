@@ -4,18 +4,13 @@ type SessionsAvailableWidgetProps = {
 
 export function SessionsAvailableWidget({ count }: SessionsAvailableWidgetProps) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-landing-border bg-landing-surface-card/70 px-4 py-3 backdrop-blur">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-landing-primary/15">
-        <span className="material-symbols-outlined text-xl text-landing-primary" aria-hidden="true">
-          groups
-        </span>
-      </div>
-      <div>
-        <p className="font-landing-body text-sm font-bold leading-tight text-landing-text">
-          {count} {count === 1 ? 'entrenamiento' : 'entrenamientos'}
-        </p>
-        <p className="font-landing-body text-xs text-landing-text-secondary">Disponibles esta semana</p>
-      </div>
+    <div className="flex items-center gap-2 font-landing-body text-sm text-landing-text-secondary">
+      <span className="material-symbols-outlined text-base text-landing-primary" aria-hidden="true">
+        groups
+      </span>
+      <span>
+        <span className="font-bold text-landing-text">{count}</span> {count === 1 ? 'entrenamiento disponible' : 'entrenamientos disponibles'} esta semana
+      </span>
     </div>
   );
 }

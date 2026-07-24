@@ -2,6 +2,7 @@
 
 import type { PublicTrainingDateChip } from '@/types/portal/entrenamientos-publicos.types';
 import type { SelectOption } from '@/types/portal/entrenamientos.types';
+import { SessionsAvailableWidget } from './SessionsAvailableWidget';
 
 const DATE_CHIPS: { value: PublicTrainingDateChip; label: string }[] = [
   { value: 'today', label: 'Hoy' },
@@ -53,6 +54,7 @@ type PublicTrainingFiltersProps = {
   tenantId: string | null;
   onChangeTenantId: (tenantId: string | null) => void;
   tenantOptions: SelectOption[];
+  thisWeekCount: number;
 };
 
 export function PublicTrainingFilters({
@@ -63,13 +65,14 @@ export function PublicTrainingFilters({
   tenantId,
   onChangeTenantId,
   tenantOptions,
+  thisWeekCount,
 }: PublicTrainingFiltersProps) {
   const today = new Date();
   const monthLabel = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(today);
   const calendarDays = buildCalendarDays(today);
 
   return (
-    <div className="flex w-full flex-col gap-8 lg:w-[380px] lg:shrink-0">
+    <div className="flex w-full flex-col gap-8">
       <div>
         <p className="mb-2 font-landing-body text-xs font-semibold uppercase tracking-[0.2em] text-landing-primary">
           Entrenamientos ·
@@ -82,6 +85,9 @@ export function PublicTrainingFilters({
         <p className="mt-3 font-landing-body text-sm text-landing-text-secondary">
           Descubre y reserva entrenamientos abiertos para todos los atletas.
         </p>
+        <div className="mt-3">
+          <SessionsAvailableWidget count={thisWeekCount} />
+        </div>
       </div>
 
       <div className="flex flex-col gap-5 rounded-2xl border border-landing-border bg-landing-surface-card/70 p-5 backdrop-blur">

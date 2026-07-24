@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useEntrenamientosPublicosMarketplace } from '@/hooks/portal/entrenamientos-publicos/useEntrenamientosPublicosMarketplace';
 import { PublicTrainingFilters } from './PublicTrainingFilters';
 import { PublicTrainingsGrid } from './PublicTrainingsGrid';
-import { SessionsAvailableWidget } from './SessionsAvailableWidget';
 import { PublicTrainingReservaModal } from './PublicTrainingReservaModal';
 import type { PublicTrainingListItem } from '@/types/portal/entrenamientos-publicos.types';
 
@@ -38,20 +37,19 @@ export function EntrenamientosPublicosPage() {
         className="pointer-events-none absolute -bottom-40 -left-40 h-[420px] w-[420px] rounded-full bg-landing-primary-dark/10 blur-[120px]"
       />
 
-      <div className="relative flex justify-end">
-        <SessionsAvailableWidget count={thisWeekCount} />
-      </div>
-
-      <div className="relative mt-4 flex flex-col gap-8 lg:flex-row">
-        <PublicTrainingFilters
-          dateChip={dateChip}
-          onChangeDateChip={setDateChip}
-          search={search}
-          onChangeSearch={setSearch}
-          tenantId={tenantId}
-          onChangeTenantId={setTenantId}
-          tenantOptions={tenantOptions}
-        />
+      <div className="relative flex flex-col gap-8 lg:flex-row">
+        <div className="flex w-full flex-col gap-4 lg:w-[380px] lg:shrink-0">
+          <PublicTrainingFilters
+            dateChip={dateChip}
+            onChangeDateChip={setDateChip}
+            search={search}
+            onChangeSearch={setSearch}
+            tenantId={tenantId}
+            onChangeTenantId={setTenantId}
+            tenantOptions={tenantOptions}
+            thisWeekCount={thisWeekCount}
+          />
+        </div>
 
         <div className="flex flex-1 flex-col gap-4">
           {loading && (

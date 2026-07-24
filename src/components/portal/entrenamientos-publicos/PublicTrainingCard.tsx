@@ -1,5 +1,6 @@
 export type PublicTrainingCardData = {
   nombre: string;
+  tenantNombre?: string;
   descripcion: string | null;
   disciplinaNombre: string;
   escenarioNombre: string;
@@ -41,11 +42,11 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
 
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-2xl border bg-landing-surface-card/80 backdrop-blur transition ${
+      className={`flex flex-col overflow-hidden rounded-2xl border transition ${
         featured ? 'border-landing-primary/60 shadow-[0_0_32px_rgba(20,219,196,0.15)]' : 'border-landing-border'
       }`}
     >
-      <div className="relative h-44 w-full overflow-hidden bg-landing-surface-elevated">
+      <div className="relative h-64 w-full overflow-hidden">
         {data.bannerUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={data.bannerUrl} alt={data.nombre} className="h-full w-full object-cover" />
@@ -62,7 +63,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
             <span className="material-symbols-outlined text-xs" aria-hidden="true">
               star
             </span>
-            Destacado
+            Próximo
           </span>
         )}
 
@@ -74,8 +75,17 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4">
+      <div className="flex flex-1 flex-col gap-2 bg-landing-surface-card/80 p-3.5 backdrop-blur">
         <h3 className="font-landing-display text-lg italic font-bold text-landing-text">{data.nombre}</h3>
+
+        {data.tenantNombre && (
+          <p className="-mt-1 flex items-center gap-1 font-landing-body text-xs font-semibold text-landing-primary">
+            <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
+              shield
+            </span>
+            {data.tenantNombre}
+          </p>
+        )}
 
         {data.descripcion && (
           <p className="line-clamp-2 font-landing-body text-sm text-landing-text-secondary">{data.descripcion}</p>

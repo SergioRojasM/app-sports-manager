@@ -4,6 +4,7 @@ import type { PublicTrainingListItem } from '@/types/portal/entrenamientos-publi
 function toCardData(item: PublicTrainingListItem): PublicTrainingCardData {
   return {
     nombre: item.nombre,
+    tenantNombre: item.tenantNombre,
     descripcion: item.descripcion,
     disciplinaNombre: item.disciplinaNombre,
     escenarioNombre: item.escenarioNombre,
@@ -39,11 +40,9 @@ export function PublicTrainingsGrid({ featuredItem, standardItems, onReservar }:
   }
 
   return (
-    <div className="grid flex-1 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid flex-1 grid-cols-1 items-start gap-5 sm:grid-cols-2">
       {featuredItem && (
-        <div className="sm:col-span-2 xl:col-span-2 xl:row-span-2">
-          <PublicTrainingCard data={toCardData(featuredItem)} featured onReservar={() => onReservar(featuredItem)} />
-        </div>
+        <PublicTrainingCard data={toCardData(featuredItem)} featured onReservar={() => onReservar(featuredItem)} />
       )}
       {standardItems.map((item) => (
         <PublicTrainingCard key={item.id} data={toCardData(item)} onReservar={() => onReservar(item)} />
