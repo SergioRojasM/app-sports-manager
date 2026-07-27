@@ -279,4 +279,67 @@ export const entrenamientosPublicosService = {
       .map(([id, label]) => ({ id, label }))
       .sort((a, b) => a.label.localeCompare(b.label));
   },
+
+  async listPublicTrainingsForLanding(): Promise<PublicTrainingListItem[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('entrenamientos_publicos_view')
+      .select(
+        'id, tenant_id, entrenamiento_id, nombre, descripcion, disciplina_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, reserva_antelacion_horas, cancelacion_antelacion_horas, precio, banner_url, created_at, disciplina_nombre, escenario_nombre, escenario_ubicacion, tenant_nombre, tenant_logo_url, reservas_activas',
+      )
+      .order('fecha_hora', { ascending: true });
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+
+    const rows = (data ?? []) as unknown as Array<{
+      id: string;
+      tenant_id: string;
+      entrenamiento_id: string;
+      nombre: string | null;
+      descripcion: string | null;
+      disciplina_id: string;
+      fecha_hora: string | null;
+      duracion_minutos: number | null;
+      cupo_maximo: number | null;
+      punto_encuentro: string | null;
+      reserva_antelacion_horas: number | null;
+      cancelacion_antelacion_horas: number | null;
+      precio: number | null;
+      banner_url: string | null;
+      created_at: string;
+      disciplina_nombre: string | null;
+      escenario_nombre: string | null;
+      escenario_ubicacion: string | null;
+      tenant_nombre: string | null;
+      tenant_logo_url: string | null;
+      reservas_activas: number;
+    }>;
+
+    return rows.map((row) => ({
+      id: row.id,
+      tenantId: row.tenant_id,
+      tenantNombre: row.tenant_nombre ?? 'Organización',
+      tenantLogoUrl: row.tenant_logo_url,
+      entrenamientoId: row.entrenamiento_id,
+      nombre: row.nombre ?? 'Entrenamiento',
+      descripcion: row.descripcion,
+      disciplinaId: row.disciplina_id,
+      disciplinaNombre: row.disciplina_nombre ?? 'Disciplina',
+      escenarioNombre: row.escenario_nombre ?? 'Escenario',
+      escenarioUbicacion: row.escenario_ubicacion,
+      fechaHora: row.fecha_hora,
+      duracionMinutos: row.duracion_minutos,
+      cupoMaximo: row.cupo_maximo,
+      puntoEncuentro: row.punto_encuentro,
+      reservaAntelacionHoras: row.reserva_antelacion_horas,
+      cancelacionAntelacionHoras: row.cancelacion_antelacion_horas,
+      precio: row.precio,
+      bannerUrl: row.banner_url,
+      reservasActivas: row.reservas_activas,
+      createdAt: row.created_at,
+    }));
+  },
 };

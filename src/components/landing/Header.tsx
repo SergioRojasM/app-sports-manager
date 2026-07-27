@@ -38,12 +38,20 @@ export default function Header() {
           ))}
         </div>
 
-        <Link
-          href="/auth/login"
-          className="landing-primary-button font-landing-display inline-flex items-center justify-center px-4 py-2 text-sm font-bold tracking-[0.04em] sm:px-5 sm:py-2.5 sm:text-base"
-        >
-          Iniciar sesión
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/entrenamientos-publicos"
+            className="hidden font-landing-display text-sm font-semibold tracking-[0.04em] text-landing-text-secondary transition hover:text-landing-primary sm:inline-flex"
+          >
+            Ver entrenamientos
+          </Link>
+          <Link
+            href="/auth/login"
+            className="landing-primary-button font-landing-display inline-flex items-center justify-center px-4 py-2 text-sm font-bold tracking-[0.04em] sm:px-5 sm:py-2.5 sm:text-base"
+          >
+            Iniciar sesión
+          </Link>
+        </div>
       </div>
     </nav>
   );
