@@ -203,7 +203,7 @@ export function PublicarEntrenamientoModal({
               disabled={isSubmitting}
               className="mr-auto rounded-lg border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:border-rose-300/70 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Despublicar
+              Quitar publicación
             </button>
           )}
           <button
@@ -220,7 +220,13 @@ export function PublicarEntrenamientoModal({
             disabled={isSubmitting || isLoading || !values.nombre.trim()}
             className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Guardando...' : isPublished ? 'Guardar cambios' : 'Publicar'}
+            {isSubmitting
+              ? isPublished
+                ? 'Guardando cambios...'
+                : 'Guardando...'
+              : isPublished
+                ? 'Guardar cambios de la publicación'
+                : 'Publicar'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               {isPublished ? 'save' : 'publish'}
             </span>
