@@ -29,12 +29,7 @@ export function EntrenamientosPublicosPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   return (
-    <div className="relative min-h-[80vh] rounded-3xl bg-landing-bg px-6 pb-8 pt-3 md:px-10 md:pb-10 md:pt-4">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
-        <div className="absolute -right-32 -top-32 h-[500px] w-[500px] rounded-full bg-landing-primary/10 blur-[120px]" />
-        <div className="absolute -bottom-40 -left-40 h-[420px] w-[420px] rounded-full bg-landing-primary-dark/10 blur-[120px]" />
-      </div>
-
+    <div className="relative min-h-[80vh] px-6 pb-8 pt-3 md:px-10 md:pb-10 md:pt-4">
       <div className="sticky top-4 z-10 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-landing-bg/40 px-4 py-2 backdrop-blur">
         <div className="flex flex-wrap items-center gap-4">
           <h1 className="font-landing-display text-2xl italic font-bold leading-tight text-landing-text">
