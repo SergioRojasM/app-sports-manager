@@ -17,6 +17,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   ├── login/
 │   │   │   ├── signup/
 │   │   │   └── callback/
+│   │   ├── entrenamientos-publicos/page.tsx  # Public, unauthenticated trainings discovery page (top-level, outside /portal — not matched by middleware.ts's protectedPaths) (US-0091)
 │   │   ├── dashboard/                    # Legacy redirect entry
 │   │   └── portal/                       # Main post-login bounded context
 │   │       ├── layout.tsx                # Shared portal shell (header + nav)
@@ -60,6 +61,10 @@ Following structure reflects the current implementation and the target scalable 
 │   ├── components/                       # Presentation layer
 │   │   ├── auth/
 │   │   ├── landing/
+│   │   │   └── entrenamientos-publicos/  # Feature slice (landing/entrenamientos-publicos — public discovery page, US-0091)
+│   │   │       ├── PublicEntrenamientosLandingPage.tsx  # Page shell; reuses PublicTrainingCard/PublicTrainingsGrid from components/portal/entrenamientos-publicos as-is (no auth coupling)
+│   │   │       ├── RegistrateParaReservarModal.tsx      # "Regístrate para reservar" CTA dialog shown instead of the real booking flow for anonymous visitors
+│   │   │       └── index.ts
 │   │   ├── portal/
 │   │   │   ├── PortalHeader.tsx          # Shared portal shell components
 │   │   │   ├── PortalNavMenu.tsx
@@ -209,6 +214,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │
 │   ├── hooks/                            # Application core (use cases)
 │   │   ├── auth/
+│   │   ├── landing/
+│   │   │   └── entrenamientos-publicos/
+│   │   │       └── usePublicEntrenamientosLanding.ts  # Loads listPublicTrainingsForLanding(); exposes { items, loading, error, refetch } — no filters in v1 (US-0091)
 │   │   └── portal/
 │   │       ├── usePortalNavigation.ts    # Shared portal logic
 │   │       ├── tenant/
@@ -290,7 +298,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts  # entrenamientos/entrenamientos_grupo select/insert/update all carry formulario_id, formulario_obligatorio, and a formulario_plantilla:formularios_plantillas(nombre) embed for display (US-0086)
-│   │       │   └── entrenamientos-publicos.service.ts  # hasServicioRestrictions (pre-publish gate), getPublicacionByEntrenamientoId, listPublishedEntrenamientoIds, publicarEntrenamiento (upsert by entrenamiento_id, snapshots reserva/cancelacion_antelacion_horas from source for display), despublicarEntrenamiento (soft, activo=false), listPublicTrainings (cross-tenant, enriches via reservasService.getCapacidad), listPublicTenantOptions (US-0089)
+│   │       │   └── entrenamientos-publicos.service.ts  # hasServicioRestrictions (pre-publish gate), getPublicacionByEntrenamientoId, listPublishedEntrenamientoIds, publicarEntrenamiento (upsert by entrenamiento_id, snapshots reserva/cancelacion_antelacion_horas from source for display), despublicarEntrenamiento (soft, activo=false), listPublicTrainings (cross-tenant, enriches via reservasService.getCapacidad), listPublicTenantOptions (US-0089); listPublicTrainingsForLanding queries the anon-readable entrenamientos_publicos_view (reservas_activas precomputed in the view, no per-row getCapacidad calls) for the public /entrenamientos-publicos page (US-0091)
 │   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking; create() also forwards p_formulario_plantilla_id/p_formulario_respuesta and maps FORMULARIO_CAMPOS_FALTANTES (US-0087)
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062)

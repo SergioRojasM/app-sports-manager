@@ -32,3 +32,4 @@ rules:
     - Always refer to the specification file projectspec/03-project-structure.md for task details and requirements
     - Always create a update documentation task on projectspec/03-project-structure.md if the implementation affects the documentation
     - always create a task with the creation of a commit message and pull request description for the implementation
+    - always check type, lint, and test before creating a commit message and pull request description, but never build
