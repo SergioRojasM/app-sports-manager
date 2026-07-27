@@ -52,5 +52,5 @@
 
 ## 9. Commit & Pull Request
 
-- [ ] 9.1 Commit the migration, service/hook/component changes, and documentation update on `feat/us0091-public-entrenamientos-landing-page` with a descriptive commit message
-- [ ] 9.2 Draft a pull request description (Summary + Test plan) — do not push the branch or open the PR without explicit user confirmation
+- [x] 9.1 Committed on `feat/us0091-public-entrenamientos-landing-page` (commit `6e27f94`): migration, service/hook/component changes, Header link, documentation update.
+- [x] 9.2 PR description drafted (see chat) — pushing the branch and opening the PR were intentionally NOT done automatically; that requires explicit user confirmation since it's a remote/visible-to-others action.
