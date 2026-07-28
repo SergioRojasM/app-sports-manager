@@ -1,6 +1,6 @@
 'use client';
 
-import type { MiSuscripcionRow } from '@/types/portal/mis-suscripciones-y-pagos.types';
+import type { MiSuscripcionRow } from '@/types/portal/mis-suscripciones.types';
 import { SuscripcionEstadoBadge } from '@/components/portal/gestion-suscripciones/SuscripcionEstadoBadge';
 import { PagoCard } from './PagoCard';
 
@@ -19,7 +19,7 @@ function formatDate(iso: string): string {
 }
 
 export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCardProps) {
-  const { plan_nombre, estado, fecha_inicio, fecha_fin, pago, servicios } =
+  const { plan_nombre, tenant_nombre, estado, fecha_inicio, fecha_fin, pago, servicios } =
     suscripcion;
 
   return (
@@ -29,6 +29,14 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
         <h3 className="text-sm font-semibold text-secondary truncate">{plan_nombre}</h3>
         <SuscripcionEstadoBadge estado={estado} />
       </div>
+
+      {/* Organization */}
+      <p className="mb-1 flex items-center gap-1 text-xs text-slate-400">
+        <span className="material-symbols-outlined text-sm" aria-hidden="true">
+          corporate_fare
+        </span>
+        {tenant_nombre}
+      </p>
 
       {/* Dates */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">

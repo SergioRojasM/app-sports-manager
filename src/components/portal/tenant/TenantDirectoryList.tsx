@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { TenantIdentityCard } from '@/components/portal/tenant/TenantIdentityCard';
 import { SolicitarAccesoButton } from '@/components/portal/tenant/SolicitarAccesoButton';
+import { VerPlanesButton } from '@/components/portal/planes-publicos';
 import type { PortalTenantListItem } from '@/types/portal/tenant.types';
 import type { UserRole } from '@/types/portal.types';
 
@@ -35,6 +36,13 @@ export function TenantDirectoryList({ organizations }: TenantDirectoryListProps)
       {sortedOrganizations.map((organization) => {
         const role = organization.userMembershipRole;
 
+        const verPlanesAction = (
+          <VerPlanesButton
+            tenantId={organization.identity.tenantId}
+            tenantNombre={organization.identity.name}
+          />
+        );
+
         if (organization.canAccess && role) {
           return (
             <TenantIdentityCard
@@ -43,6 +51,7 @@ export function TenantDirectoryList({ organizations }: TenantDirectoryListProps)
               actionLabel="Ingresar"
               actionHref={getDefaultTenantPath(organization.identity.tenantId, role)}
               actionVariant="access"
+              secondaryAction={verPlanesAction}
             />
           );
         }
@@ -52,6 +61,7 @@ export function TenantDirectoryList({ organizations }: TenantDirectoryListProps)
             key={organization.identity.tenantId}
             identity={organization.identity}
             customAction={<SolicitarAccesoButton tenantId={organization.identity.tenantId} />}
+            secondaryAction={verPlanesAction}
           />
         );
       })}

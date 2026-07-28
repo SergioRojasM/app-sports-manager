@@ -35,11 +35,17 @@ type PlanRow = {
   tipo: string | null;
   beneficios: string | null;
   activo: boolean;
+  es_publico: boolean;
   created_at: string;
   updated_at: string;
   planes_disciplina: { disciplina_id: string }[];
   plan_tipos: PlanTipoRow[];
 };
+
+const PLAN_COLUMNS =
+  'id, tenant_id, nombre, descripcion, tipo, beneficios, activo, es_publico, created_at, updated_at';
+
+const PLAN_WITH_RELATIONS_COLUMNS = `${PLAN_COLUMNS}, planes_disciplina(disciplina_id), plan_tipos(*, plan_tipos_servicios(servicio_id, unidades, servicios(nombre)))`;
 
 function toNullable(value: string | null | undefined): string | null {
   const trimmed = value?.trim() ?? '';
@@ -60,6 +66,7 @@ function mapPlanRow(row: PlanRow): PlanWithDisciplinas {
     tipo: (row.tipo as PlanModalidad) ?? null,
     beneficios: row.beneficios,
     activo: row.activo,
+    es_publico: row.es_publico,
     created_at: row.created_at,
     updated_at: row.updated_at,
     disciplinas: (row.planes_disciplina ?? []).map((pd) => pd.disciplina_id),
@@ -100,8 +107,30 @@ export const planesService = {
 
     const { data, error } = await supabase
       .from('planes')
-      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at, planes_disciplina(disciplina_id), plan_tipos(*, plan_tipos_servicios(servicio_id, unidades, servicios(nombre)))')
+      .select(PLAN_WITH_RELATIONS_COLUMNS)
       .eq('tenant_id', tenantId)
+      .order('nombre');
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+
+    return ((data ?? []) as unknown as PlanRow[]).map(mapPlanRow);
+  },
+
+  /**
+   * Public catalog for a tenant: only plans flagged `es_publico` and active.
+   * Readable by non-members through the `can_read_plan` RLS policy (US-0093).
+   */
+  async getPlanesPublicos(tenantId: string): Promise<PlanWithDisciplinas[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('planes')
+      .select(PLAN_WITH_RELATIONS_COLUMNS)
+      .eq('tenant_id', tenantId)
+      .eq('es_publico', true)
+      .eq('activo', true)
       .order('nombre');
 
     if (error) {
@@ -123,8 +152,9 @@ export const planesService = {
         tipo: toNullable(input.tipo),
         beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
+        es_publico: input.esPublico ?? false,
       })
-      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at')
+      .select(PLAN_COLUMNS)
       .single();
 
     if (error || !data) {
@@ -161,10 +191,11 @@ export const planesService = {
         tipo: toNullable(input.tipo),
         beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
+        es_publico: input.esPublico ?? false,
       })
       .eq('id', input.planId)
       .eq('tenant_id', input.tenantId)
-      .select('id, tenant_id, nombre, descripcion, tipo, beneficios, activo, created_at, updated_at')
+      .select(PLAN_COLUMNS)
       .single();
 
     if (error || !data) {

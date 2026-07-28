@@ -14,6 +14,8 @@ export interface MiPagoRow {
 
 export interface MiSuscripcionRow {
   id: string;
+  tenant_id: string;
+  tenant_nombre: string;
   plan_nombre: string;
   estado: SuscripcionEstado;
   fecha_inicio: string | null;

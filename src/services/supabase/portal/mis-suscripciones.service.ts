@@ -1,13 +1,15 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { MiSuscripcionRow, MiPagoRow } from '@/types/portal/mis-suscripciones-y-pagos.types';
+import type { MiSuscripcionRow, MiPagoRow } from '@/types/portal/mis-suscripciones.types';
 import type { PagoEstado, SuscripcionEstado } from '@/types/portal/gestion-suscripciones.types';
 import type { SuscripcionServicioDisplay } from '@/types/portal/suscripciones.types';
 
 type RawRow = {
   id: string;
+  tenant_id: string;
   fecha_inicio: string | null;
   fecha_fin: string | null;
   estado: string;
+  tenant: { nombre: string | null } | null;
   plan: { nombre: string };
   pagos: Array<{
     id: string;
@@ -52,6 +54,8 @@ function mapRow(row: RawRow): MiSuscripcionRow {
 
   return {
     id: row.id,
+    tenant_id: row.tenant_id,
+    tenant_nombre: row.tenant?.nombre ?? 'Organización',
     plan_nombre: row.plan.nombre,
     estado: row.estado as SuscripcionEstado,
     fecha_inicio: row.fecha_inicio,
@@ -61,16 +65,20 @@ function mapRow(row: RawRow): MiSuscripcionRow {
   };
 }
 
-export async function fetchMisSuscripcionesTenant(
+/**
+ * Every subscription held by the user, across all organizations (US-0093).
+ * RLS (`suscripciones_select_own`) restricts rows to `atleta_id = auth.uid()`.
+ */
+export async function fetchMisSuscripciones(
   supabase: SupabaseClient,
-  tenantId: string,
   userId: string,
 ): Promise<MiSuscripcionRow[]> {
   const { data, error } = await supabase
     .from('suscripciones')
     .select(
       `
-      id, fecha_inicio, fecha_fin, estado,
+      id, tenant_id, fecha_inicio, fecha_fin, estado,
+      tenant:tenants!suscripciones_tenant_id_fkey(nombre),
       plan:planes!suscripciones_plan_id_fkey(nombre),
       pagos(
         id, monto, estado, fecha_pago, comprobante_path,
@@ -82,7 +90,6 @@ export async function fetchMisSuscripcionesTenant(
       )
       `,
     )
-    .eq('tenant_id', tenantId)
     .eq('atleta_id', userId)
     .order('created_at', { ascending: false })
     .order('created_at', { referencedTable: 'pagos', ascending: false });

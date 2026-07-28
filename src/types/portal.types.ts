@@ -50,6 +50,12 @@ const PUBLIC_TRAININGS_MENU_ITEM: MenuItem = {
   icon: 'public',
 };
 
+const MIS_SUSCRIPCIONES_MENU_ITEM: MenuItem = {
+  label: 'Mis Suscripciones',
+  href: '/portal/mis-suscripciones',
+  icon: 'receipt_long',
+};
+
 const SHARED_TENANT_ITEMS: Array<{ label: string; path: string; icon: string }> = [
   // { label: 'Perfil', path: 'perfil', icon: 'person' },
 ];
@@ -70,7 +76,6 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
   usuario: [
     { label: 'Entrenamientos Disponibles', path: 'gestion-entrenamientos', icon: 'directions_run' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
-    { label: 'Mis Suscripciones', path: 'mis-suscripciones-y-pagos', icon: 'receipt_long' },
     { label: 'Mis Reservas', path: 'mis-reservas', icon: 'event_available' },
   ],
   entrenador: [
@@ -83,7 +88,12 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
 
 export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[] {
   if (!tenantId) {
-    return [INICIO_MENU_ITEM, BASE_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM];
+    return [
+      INICIO_MENU_ITEM,
+      BASE_MENU_ITEM,
+      PUBLIC_TRAININGS_MENU_ITEM,
+      MIS_SUSCRIPCIONES_MENU_ITEM,
+    ];
   }
 
   const tenantPrefix = `/portal/orgs/${tenantId}`;
