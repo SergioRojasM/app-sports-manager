@@ -31,6 +31,21 @@ export type SuscripcionServicio = {
   created_at: string;
 };
 
+export type SuscripcionServiceErrorCode =
+  /** RLS rejected the insert: the plan is inactive, private, or no longer public (US-0093). */
+  | 'plan_unavailable'
+  | 'unknown';
+
+export class SuscripcionServiceError extends Error {
+  code: SuscripcionServiceErrorCode;
+
+  constructor(code: SuscripcionServiceErrorCode, message: string) {
+    super(message);
+    this.code = code;
+    this.name = 'SuscripcionServiceError';
+  }
+}
+
 export interface SuscripcionServicioDisplay {
   servicio_id: string;
   servicio_nombre: string;

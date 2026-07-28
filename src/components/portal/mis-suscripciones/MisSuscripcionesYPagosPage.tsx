@@ -1,19 +1,18 @@
 'use client';
 
-import type { MiSuscripcionRow } from '@/types/portal/mis-suscripciones-y-pagos.types';
-import { useMisSuscripciones } from '@/hooks/portal/mis-suscripciones-y-pagos/useMisSuscripciones';
+import Link from 'next/link';
+import type { MiSuscripcionRow } from '@/types/portal/mis-suscripciones.types';
+import { useMisSuscripciones } from '@/hooks/portal/mis-suscripciones/useMisSuscripciones';
 import { MisSuscripcionesFilters } from './MisSuscripcionesFilters';
 import { SuscripcionCard } from './SuscripcionCard';
 
 type MisSuscripcionesYPagosPageProps = {
   suscripciones: MiSuscripcionRow[];
-  tenantId: string;
   userId: string;
 };
 
 export function MisSuscripcionesYPagosPage({
   suscripciones,
-  tenantId,
   userId,
 }: MisSuscripcionesYPagosPageProps) {
   const {
@@ -21,6 +20,9 @@ export function MisSuscripcionesYPagosPage({
     setSuscripcionEstadoFilter,
     pagoEstadoFilter,
     setPagoEstadoFilter,
+    tenantFilter,
+    setTenantFilter,
+    tenantOptions,
     filteredSuscripciones,
     clearFilters,
   } = useMisSuscripciones(suscripciones);
@@ -38,14 +40,14 @@ export function MisSuscripcionesYPagosPage({
             credit_card_off
           </span>
           <p className="text-slate-400">
-            Aún no tienes suscripciones en esta organización.
+            Aún no tienes suscripciones en ninguna organización.
           </p>
-          <a
-            href={`/portal/orgs/${tenantId}/gestion-planes`}
+          <Link
+            href="/portal/orgs"
             className="mt-3 inline-block text-sm font-medium text-secondary hover:underline"
           >
-            Ver planes disponibles
-          </a>
+            Explorar organizaciones y sus planes
+          </Link>
         </div>
       </div>
     );
@@ -61,6 +63,9 @@ export function MisSuscripcionesYPagosPage({
         onSuscripcionEstadoChange={setSuscripcionEstadoFilter}
         pagoEstadoFilter={pagoEstadoFilter}
         onPagoEstadoChange={setPagoEstadoFilter}
+        tenantFilter={tenantFilter}
+        onTenantChange={setTenantFilter}
+        tenantOptions={tenantOptions}
       />
 
       {/* Filter empty state */}
@@ -81,7 +86,7 @@ export function MisSuscripcionesYPagosPage({
             <SuscripcionCard
               key={s.id}
               suscripcion={s}
-              tenantId={tenantId}
+              tenantId={s.tenant_id}
               userId={userId}
             />
           ))}

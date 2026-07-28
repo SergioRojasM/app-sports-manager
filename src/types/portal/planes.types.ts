@@ -55,6 +55,8 @@ export type Plan = {
   tipo: PlanModalidad | null;
   beneficios: string | null;
   activo: boolean;
+  /** When true, the plan is visible to and purchasable by non-members (US-0093). */
+  es_publico: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -84,6 +86,7 @@ export type CreatePlanInput = {
   tipo?: PlanModalidad | null;
   beneficios?: string | null;
   activo?: boolean;
+  esPublico?: boolean;
   disciplinaIds: string[];
 };
 
@@ -97,10 +100,11 @@ export type PlanFormValues = {
   tipo: PlanModalidad | '';       // '' = not selected
   beneficios: string[];     // each item is one benefit text; stored concatenated with '|'
   activo: boolean;
+  es_publico: boolean;
   disciplinaIds: string[];
 };
 
-export type PlanFormField = 'nombre' | 'descripcion' | 'tipo' | 'beneficios' | 'disciplinaIds';
+export type PlanFormField = 'nombre' | 'descripcion' | 'tipo' | 'beneficios' | 'es_publico' | 'disciplinaIds';
 export type PlanFieldErrors = Partial<Record<PlanFormField, string>>;
 
 export type PlanesViewModel = {

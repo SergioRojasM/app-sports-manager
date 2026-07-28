@@ -1,10 +1,10 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import type { MiPagoRow } from '@/types/portal/mis-suscripciones-y-pagos.types';
+import type { MiPagoRow } from '@/types/portal/mis-suscripciones.types';
 import { PagoEstadoBadge } from '@/components/portal/gestion-suscripciones/PagoEstadoBadge';
 import { useComprobanteViewer } from '@/hooks/portal/gestion-suscripciones/useComprobanteViewer';
-import { useSubirComprobante } from '@/hooks/portal/mis-suscripciones-y-pagos/useSubirComprobante';
+import { useSubirComprobante } from '@/hooks/portal/mis-suscripciones/useSubirComprobante';
 
 type PagoCardProps = {
   pago: MiPagoRow;

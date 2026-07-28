@@ -1,6 +1,7 @@
 'use client';
 
-import type { SuscripcionEstado, PagoEstado } from '@/types/portal/mis-suscripciones-y-pagos.types';
+import type { SuscripcionEstado, PagoEstado } from '@/types/portal/mis-suscripciones.types';
+import type { TenantOption } from '@/hooks/portal/mis-suscripciones/useMisSuscripciones';
 
 type SuscripcionFilter = SuscripcionEstado | 'all';
 type PagoFilter = PagoEstado | 'all';
@@ -10,6 +11,9 @@ type MisSuscripcionesFiltersProps = {
   onSuscripcionEstadoChange: (v: SuscripcionFilter) => void;
   pagoEstadoFilter: PagoFilter;
   onPagoEstadoChange: (v: PagoFilter) => void;
+  tenantFilter: string;
+  onTenantChange: (v: string) => void;
+  tenantOptions: TenantOption[];
 };
 
 type Chip<T> = { label: string; value: T };
@@ -51,6 +55,7 @@ function ChipGroup<T extends string>({
               key={chip.value}
               type="button"
               onClick={() => onChange(chip.value)}
+              aria-pressed={isActive}
               className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
                 isActive
                   ? 'bg-turquoise/20 text-turquoise border border-turquoise/50'
@@ -71,6 +76,9 @@ export function MisSuscripcionesFilters({
   onSuscripcionEstadoChange,
   pagoEstadoFilter,
   onPagoEstadoChange,
+  tenantFilter,
+  onTenantChange,
+  tenantOptions,
 }: MisSuscripcionesFiltersProps) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
@@ -86,6 +94,27 @@ export function MisSuscripcionesFilters({
         active={pagoEstadoFilter}
         onChange={onPagoEstadoChange}
       />
+
+      {tenantOptions.length > 1 ? (
+        <div className="space-y-1.5">
+          <label htmlFor="mis-suscripciones-tenant" className="text-xs font-medium text-slate-400">
+            Organización
+          </label>
+          <select
+            id="mis-suscripciones-tenant"
+            value={tenantFilter}
+            onChange={(event) => onTenantChange(event.target.value)}
+            className="block rounded-md border border-portal-border bg-navy-deep px-3 py-1 text-xs text-slate-200 focus:border-turquoise focus:outline-none"
+          >
+            <option value="all">Todas</option>
+            {tenantOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
     </div>
   );
 }

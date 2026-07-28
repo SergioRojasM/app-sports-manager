@@ -14,6 +14,8 @@ type TenantIdentityCardProps = {
   onActionClick?: () => void;
   actionVariant?: 'access' | 'subscribe';
   customAction?: React.ReactNode;
+  /** Rendered under the primary action / customAction (e.g. "Ver planes" — US-0093). */
+  secondaryAction?: React.ReactNode;
 };
 
 function formatDate(dateValue: string | null): string {
@@ -39,6 +41,7 @@ export function TenantIdentityCard({
   onActionClick,
   actionVariant = 'access',
   customAction,
+  secondaryAction,
 }: TenantIdentityCardProps) {
   const [logoSrc, setLogoSrc] = useState(identity.logoUrl);
   const [logoFailed, setLogoFailed] = useState(false);
@@ -167,6 +170,8 @@ export function TenantIdentityCard({
             </button>
           )
         ) : null}
+
+        {secondaryAction ?? null}
       </div>
     </article>
   );

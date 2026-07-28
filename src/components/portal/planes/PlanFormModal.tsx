@@ -456,6 +456,27 @@ export function PlanFormModal({
             </label>
           </div>
 
+          {/* Public toggle */}
+          <div>
+            <div className="flex items-center gap-2">
+              <input
+                id="plan-public"
+                type="checkbox"
+                checked={values.es_publico}
+                onChange={(event) => onChangeField('es_publico', event.target.checked)}
+                disabled={isSubmitting}
+                className="rounded border-slate-600 bg-navy-deep"
+              />
+              <label htmlFor="plan-public" className="text-sm text-slate-200">
+                Plan público
+              </label>
+            </div>
+            <p className="mt-1 pl-6 text-xs text-slate-400">
+              Los planes públicos pueden ser vistos y adquiridos por personas que no pertenecen a la
+              organización.
+            </p>
+          </div>
+
           {/* Disciplines multi-select */}
           <div>
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
