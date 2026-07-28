@@ -19,11 +19,10 @@ function mapServiceError(error: PostgrestErrorLike): EntrenamientoPublicoService
     return new EntrenamientoPublicoServiceError('unknown', 'No fue posible completar la operación de publicación.');
   }
 
-  if (error.message?.includes('restricciones de servicios')) {
-    return new EntrenamientoPublicoServiceError(
-      'servicio_restriction',
-      'Este entrenamiento tiene restricciones de servicios y no puede publicarse. Elimina las restricciones de servicio del entrenamiento para poder publicarlo.',
-    );
+  // The DB trigger is the authority on the publish rule; surface its exception
+  // as the same typed error the pre-check uses, never as a raw Postgres error.
+  if (error.message?.includes('siendo miembro de la organización')) {
+    return new EntrenamientoPublicoServiceError('membership_restriction', MEMBERSHIP_RESTRICTION_MESSAGE);
   }
 
   if (error.code === '23505') {
@@ -45,15 +44,51 @@ function mapServiceError(error: PostgrestErrorLike): EntrenamientoPublicoService
   return new EntrenamientoPublicoServiceError('unknown', 'No fue posible completar la operación de publicación.');
 }
 
-async function hasServicioRestrictions(tenantId: string, entrenamientoId: string): Promise<boolean> {
+export const MEMBERSHIP_RESTRICTION_MESSAGE =
+  'Este entrenamiento solo admite restricciones que un visitante externo nunca puede cumplir (estado de miembro o nivel de disciplina). Añade una condición basada en servicios o elimina esas restricciones para poder publicarlo.';
+
+/**
+ * True when the training cannot be booked by a non-member under ANY of its
+ * restriction rows (US-0094).
+ *
+ * Restriction rows are OR-ed at booking time and the conditions within a row are
+ * ANDed, so the rule is "no row is satisfiable without membership" — NOT "some
+ * row is membership-only", which would wrongly block a training that also has a
+ * service-only row an outsider can satisfy by buying the granting plan.
+ *
+ * Mirrors the `check_entrenamiento_publico_restricciones_membresia()` trigger,
+ * which remains the authority.
+ */
+async function getPublishRestrictionSummary(
+  tenantId: string,
+  entrenamientoId: string,
+): Promise<{ blocking: boolean; servicioIds: string[] }> {
   const restricciones = await entrenamientosService.getInstanceRestrictions(tenantId, entrenamientoId);
-  return restricciones.some(
-    (row) =>
-      (row as Record<string, unknown>).servicio_1_id != null ||
-      (row as Record<string, unknown>).servicio_2_id != null ||
-      (row as Record<string, unknown>).servicio_3_id != null ||
-      (row as Record<string, unknown>).servicio_4_id != null,
+
+  const servicioIds = Array.from(
+    new Set(
+      restricciones.flatMap((row) => {
+        const r = row as Record<string, unknown>;
+        return [r.servicio_1_id, r.servicio_2_id, r.servicio_3_id, r.servicio_4_id].filter(
+          (id): id is string => typeof id === 'string',
+        );
+      }),
+    ),
   );
+
+  const blocking =
+    restricciones.length > 0 &&
+    !restricciones.some((row) => {
+      const r = row as Record<string, unknown>;
+      return r.usuario_estado == null && r.validar_nivel_disciplina !== true;
+    });
+
+  return { blocking, servicioIds };
+}
+
+async function hasBlockingMembershipRestrictions(tenantId: string, entrenamientoId: string): Promise<boolean> {
+  const { blocking } = await getPublishRestrictionSummary(tenantId, entrenamientoId);
+  return blocking;
 }
 
 function toNullable(value: string | null | undefined): string | null {
@@ -62,7 +97,8 @@ function toNullable(value: string | null | undefined): string | null {
 }
 
 export const entrenamientosPublicosService = {
-  hasServicioRestrictions,
+  hasBlockingMembershipRestrictions,
+  getPublishRestrictionSummary,
 
   async getPublicacionByEntrenamientoId(tenantId: string, entrenamientoId: string): Promise<EntrenamientoPublico | null> {
     const supabase = createClient();
@@ -99,11 +135,8 @@ export const entrenamientosPublicosService = {
   async publicarEntrenamiento(input: PublicarEntrenamientoInput): Promise<EntrenamientoPublico> {
     const supabase = createClient();
 
-    if (await hasServicioRestrictions(input.tenantId, input.entrenamientoId)) {
-      throw new EntrenamientoPublicoServiceError(
-        'servicio_restriction',
-        'Este entrenamiento tiene restricciones de servicios y no puede publicarse. Elimina las restricciones de servicio del entrenamiento para poder publicarlo.',
-      );
+    if (await hasBlockingMembershipRestrictions(input.tenantId, input.entrenamientoId)) {
+      throw new EntrenamientoPublicoServiceError('membership_restriction', MEMBERSHIP_RESTRICTION_MESSAGE);
     }
 
     const { data: sourceTraining, error: sourceError } = await supabase
@@ -231,6 +264,25 @@ export const entrenamientosPublicosService = {
       rows.map((row) => reservasService.getCapacidad(row.tenant_id, row.entrenamiento_id).catch(() => null)),
     );
 
+    // Required-service names come from the authenticated-only view: an authenticated
+    // NON-member cannot read `servicios` directly when no public plan grants the
+    // service, which is exactly the case this must cover (US-0094). One query for the
+    // whole page — never per row — and a failure degrades to no requirements rather
+    // than failing the listing.
+    const serviciosByEntrenamiento = new Map<string, string[]>();
+    const { data: serviciosRows, error: serviciosError } = await supabase
+      .from('entrenamientos_publicos_servicios_view')
+      .select('entrenamiento_id, servicios_requeridos');
+
+    if (!serviciosError) {
+      for (const row of (serviciosRows ?? []) as unknown as Array<{
+        entrenamiento_id: string;
+        servicios_requeridos: string[] | null;
+      }>) {
+        serviciosByEntrenamiento.set(row.entrenamiento_id, row.servicios_requeridos ?? []);
+      }
+    }
+
     return rows.map((row, index) => ({
       id: row.id,
       tenantId: row.tenant_id,
@@ -252,6 +304,7 @@ export const entrenamientosPublicosService = {
       precio: row.precio,
       bannerUrl: row.banner_url,
       reservasActivas: capacidades[index]?.reservas_activas ?? 0,
+      serviciosRequeridos: serviciosByEntrenamiento.get(row.entrenamiento_id) ?? [],
       createdAt: row.created_at,
     }));
   },
@@ -339,6 +392,9 @@ export const entrenamientosPublicosService = {
       precio: row.precio,
       bannerUrl: row.banner_url,
       reservasActivas: row.reservas_activas,
+      // Deliberately empty: the anonymous landing page shows no requirements row,
+      // and this path must not query the authenticated-only view (US-0094).
+      serviciosRequeridos: [],
       createdAt: row.created_at,
     }));
   },

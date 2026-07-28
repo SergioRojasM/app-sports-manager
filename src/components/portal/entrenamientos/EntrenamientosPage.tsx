@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useEntrenamientos } from '@/hooks/portal/entrenamientos/useEntrenamientos';
 import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { usePublicarEntrenamiento } from '@/hooks/portal/entrenamientos-publicos/usePublicarEntrenamiento';
-import { entrenamientosPublicosService } from '@/services/supabase/portal/entrenamientos-publicos.service';
+import { entrenamientosPublicosService, MEMBERSHIP_RESTRICTION_MESSAGE } from '@/services/supabase/portal/entrenamientos-publicos.service';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
 import { EntrenamientoFormModal } from './EntrenamientoFormModal';
 import { EntrenamientoDetalleModal } from './EntrenamientoDetalleModal';
@@ -222,11 +222,13 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     };
   }, [currentTimestamp, selectedInstanceForAction]);
 
-  // Pre-publish validation (US-0089): a training with a servicio-based restriction
-  // can never be published, since a cross-tenant visitor can never hold a
-  // subscription/service in a tenant they don't belong to. Checked on-demand only for
-  // the currently selected training, not eagerly for the whole list.
-  const [servicioRestrictionById, setServicioRestrictionById] = useState<Record<string, boolean>>({});
+  // Pre-publish validation (US-0094): service-based restrictions no longer block —
+  // a non-member can buy a public plan that grants the service. Publication is blocked
+  // only when NO restriction row is satisfiable without membership. The same call also
+  // returns the required service ids, used for the publish preview. Checked on-demand
+  // for the currently selected training, not eagerly for the whole list.
+  const [blockingRestrictionById, setBlockingRestrictionById] = useState<Record<string, boolean>>({});
+  const [requiredServicioIdsById, setRequiredServicioIdsById] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!selectedInstanceForAction) {
@@ -237,12 +239,16 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     const trainingId = selectedInstanceForAction.id;
 
     entrenamientosPublicosService
-      .hasServicioRestrictions(tenantId, trainingId)
-      .then((result) => {
-        if (!cancelled) setServicioRestrictionById((prev) => ({ ...prev, [trainingId]: result }));
+      .getPublishRestrictionSummary(tenantId, trainingId)
+      .then((summary) => {
+        if (cancelled) return;
+        setBlockingRestrictionById((prev) => ({ ...prev, [trainingId]: summary.blocking }));
+        setRequiredServicioIdsById((prev) => ({ ...prev, [trainingId]: summary.servicioIds }));
       })
       .catch(() => {
-        if (!cancelled) setServicioRestrictionById((prev) => ({ ...prev, [trainingId]: false }));
+        if (cancelled) return;
+        setBlockingRestrictionById((prev) => ({ ...prev, [trainingId]: false }));
+        setRequiredServicioIdsById((prev) => ({ ...prev, [trainingId]: [] }));
       });
 
     return () => {
@@ -250,8 +256,8 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     };
   }, [tenantId, selectedInstanceForAction]);
 
-  const hasServicioRestriction = selectedInstanceForAction
-    ? (servicioRestrictionById[selectedInstanceForAction.id] ?? null)
+  const hasBlockingRestriction = selectedInstanceForAction
+    ? (blockingRestrictionById[selectedInstanceForAction.id] ?? null)
     : null;
 
   const isSelectedInstancePublished = selectedInstanceForAction
@@ -267,20 +273,19 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
       return { canPublish: false, publishDisabledReason: 'No se pueden publicar entrenamientos pasados.' };
     }
 
-    if (hasServicioRestriction === null) {
+    if (hasBlockingRestriction === null) {
       return { canPublish: false, publishDisabledReason: undefined };
     }
 
-    if (hasServicioRestriction) {
+    if (hasBlockingRestriction) {
       return {
         canPublish: false,
-        publishDisabledReason:
-          'Este entrenamiento tiene restricciones de servicios y no puede publicarse. Elimina las restricciones de servicio del entrenamiento para poder publicarlo.',
+        publishDisabledReason: MEMBERSHIP_RESTRICTION_MESSAGE,
       };
     }
 
     return { canPublish: true, publishDisabledReason: undefined };
-  }, [hasServicioRestriction, selectedActionContext.canEdit, selectedInstanceForAction]);
+  }, [hasBlockingRestriction, selectedActionContext.canEdit, selectedInstanceForAction]);
 
   const openActionModal = (trainingId: string) => {
     const target = instanceMap.get(trainingId);
@@ -463,6 +468,10 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         isPublished={publicarEntrenamiento.isPublished}
         isLoading={publicarEntrenamiento.isLoading}
         training={publicarEntrenamiento.training}
+        serviciosRequeridos={(requiredServicioIdsById[publicarEntrenamiento.training?.id ?? ''] ?? [])
+          .map((id) => servicioNameById[id])
+          .filter((name): name is string => Boolean(name))
+          .sort((a, b) => a.localeCompare(b))}
         disciplinaNombre={
           publicarEntrenamiento.training ? (disciplineNameById[publicarEntrenamiento.training.disciplina_id] ?? 'Disciplina') : ''
         }

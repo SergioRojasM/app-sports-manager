@@ -12,6 +12,8 @@ type PublicarEntrenamientoModalProps = {
   training: TrainingInstance | null;
   disciplinaNombre: string;
   escenarioNombre: string;
+  /** Names of the services the training requires — mirrors what a visitor sees (US-0094) */
+  serviciosRequeridos?: string[];
   values: EntrenamientoPublicoFormValues;
   existingBannerUrl: string | null;
   bannerPreviewUrl: string | null;
@@ -32,6 +34,7 @@ export function PublicarEntrenamientoModal({
   training,
   disciplinaNombre,
   escenarioNombre,
+  serviciosRequeridos = [],
   values,
   existingBannerUrl,
   bannerPreviewUrl,
@@ -74,6 +77,7 @@ export function PublicarEntrenamientoModal({
     reservaAntelacionHoras: training.reserva_antelacion_horas,
     precio: values.precio.trim() ? Number(values.precio) : null,
     bannerUrl: bannerPreviewUrl ?? existingBannerUrl,
+    serviciosRequeridos,
   };
 
   return (

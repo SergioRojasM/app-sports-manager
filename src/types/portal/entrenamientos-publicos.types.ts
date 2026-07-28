@@ -58,6 +58,8 @@ export type PublicTrainingListItem = {
   precio: number | null;
   bannerUrl: string | null;
   reservasActivas: number;
+  /** Distinct names of services the training requires, alphabetical. Empty when unrestricted (US-0094). */
+  serviciosRequeridos: string[];
   createdAt: string;
 };
 
@@ -70,7 +72,7 @@ export type PublicTrainingFilters = {
 };
 
 export type EntrenamientoPublicoServiceErrorCode =
-  | 'servicio_restriction'
+  | 'membership_restriction'
   | 'duplicate'
   | 'fk_dependency'
   | 'forbidden'
