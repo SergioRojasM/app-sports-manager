@@ -73,6 +73,12 @@ The **third branch — "caller already holds a subscription to it"** — is the 
 
 Rationale: a policy expression on `plan_tipos` that sub-queries `planes` would otherwise re-enter `planes`' own RLS, which is both a correctness hazard (recursive/self-referential policies) and a performance one. `security definer` makes the helper run as the owner, which bypasses RLS on the inspected tables. This mirrors the existing `get_admin_tenants_for_authenticated_user()` pattern already used across the schema, so it introduces no new idiom. `stable` lets Postgres cache the result within a statement.
 
+### 3b. A policy on table X must not call a STABLE function that re-queries X
+
+`can_read_plan(id)` / `can_read_servicio(id)` were originally used as the SELECT policy of `planes` and `servicios` themselves. That breaks `INSERT ... RETURNING`, which is what PostgREST emits for `.insert().select().single()`: RETURNING requires the SELECT policy to pass on the **new** row, but a `STABLE` function evaluates against the snapshot taken at the start of the statement, where that row does not exist yet. The result was `42501 new row violates row-level security policy` when an administrator created a plan or a service — while the INSERT policy itself was fine (an insert with `Prefer: return=minimal` succeeded).
+
+So a table's own SELECT policy is written over the row's **own columns**; helper functions are only used to reach **other** tables. `plan_tipos` and `planes_disciplina` keep calling `can_read_plan(plan_id)` because the parent plan always pre-exists — the snapshot problem cannot arise there. `can_read_servicio` was dropped once `servicios` stopped using it.
+
 ### 4. The public catalog reuses the plan service, not a new data source
 
 `planesService.getPlanesPublicos(tenantId)` is one PostgREST round trip embedding `plan_tipos → plan_tipos_servicios → servicios(nombre)` and `planes_disciplina`, reusing the existing `mapPlanRow` mapper and `mapPostgrestError`. Active-subtype filtering reuses the exported `getActiveTipos()` helper from `usePlanesView`.

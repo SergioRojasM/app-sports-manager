@@ -21,6 +21,9 @@
 - [x] 2.13 Add `user_read_own_files` SELECT policy so a non-member buyer can read back their own comprobante (signed URL), while `org_member_read` keeps covering administrators validating the payment
 - [x] 2.14 Verify over the Storage API: non-member upload, non-member upsert, non-member read + signed URL, administrator read, and rejection when writing into another user's folder
 
+- [x] 2.15 Create `supabase/migrations/20260728000300_fix_select_policies_returning.sql`: rewrite the `planes` and `servicios` SELECT policies over the row's own columns instead of `can_read_plan(id)` / `can_read_servicio(id)`, which broke `INSERT ... RETURNING` (a STABLE function cannot see the row its own statement is inserting) and made plan/service creation fail with `42501`; drop the now-unused `can_read_servicio`
+- [x] 2.16 Verify every write path that uses RETURNING: create plan (private/public/inactive), update plan, create plan subtype, create service, plus the `planes_disciplina` and `plan_tipos_servicios` inserts — and re-confirm the hardening still holds afterwards
+
 ## 3. Types
 
 - [x] 3.1 Add `es_publico: boolean` to `Plan`, `esPublico?: boolean` to `CreatePlanInput`/`UpdatePlanInput`, `es_publico: boolean` to `PlanFormValues`, and `'es_publico'` to the `PlanFormField` union in `src/types/portal/planes.types.ts`
@@ -68,12 +71,12 @@
 
 ## 9. Verification
 
-- [ ] 9.1 End-to-end as a non-member: browse `/portal/orgs` → "Ver planes" → search by a service name → acquire a subtype → confirm `suscripciones` (`pendiente`), `pagos` (`pendiente`) and `suscripcion_servicios` rows (null units preserved as unlimited)
+- [x] 9.1 End-to-end as a non-member: browse `/portal/orgs` → "Ver planes" → search by a service name → acquire a subtype → confirm `suscripciones` (`pendiente`), `pagos` (`pendiente`) and `suscripcion_servicios` rows (null units preserved as unlimited)
 - [x] 9.2 As the tenant administrator: confirm the non-member subscription is listed with the buyer's name and email in `gestion-suscripciones` and can be validated
-- [ ] 9.3 As the buyer: confirm the subscription and its service units appear in `/portal/mis-suscripciones` with the organization name, and that the org filter, status filters and proof upload work
+- [x] 9.3 As the buyer: confirm the subscription and its service units appear in `/portal/mis-suscripciones` with the organization name, and that the org filter, status filters and proof upload work
 - [x] 9.4 Confirm the buyer received no membership: `miembros_tenant` has no new row and the organization card still shows "Solicitar acceso"
 - [x] 9.5 Un-publish the purchased plan and confirm the buyer still sees the correct plan, subtype and service names while the plan disappears from the public catalog
-- [ ] 9.6 Regression pass over `gestion-planes` (admin CRUD + read-only view), `gestion-servicios`, plan-subtype service assignment, `gestion-suscripciones`, booking with service-unit deduction, and training restriction editing showing service names
+- [x] 9.6 Regression pass over `gestion-planes` (admin CRUD + read-only view), `gestion-servicios`, plan-subtype service assignment, `gestion-suscripciones`, booking with service-unit deduction, and training restriction editing showing service names
 - [x] 9.7 Verify the duplicate-pending guard, the tenant-staff hidden "Adquirir" case, the legacy route redirect, and the unauthenticated redirect with the correct `next`
 
 ## 10. Documentation and delivery
