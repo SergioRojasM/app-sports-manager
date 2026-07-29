@@ -154,6 +154,7 @@ export const formulariosService = {
     if (input.nombre !== undefined) payload.nombre = input.nombre.trim();
     if (input.descripcion !== undefined) payload.descripcion = input.descripcion?.trim() || null;
     if (input.activo !== undefined) payload.activo = input.activo;
+    if (input.perfil_campos_requeridos !== undefined) payload.perfil_campos_requeridos = input.perfil_campos_requeridos;
 
     const { data, error } = await supabase
       .from('formularios_plantillas')

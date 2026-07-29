@@ -47,7 +47,55 @@ export type FormularioPlantilla = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  perfil_campos_requeridos: FormularioPerfilCampo[];
 };
+
+// =============================================
+// Profile data requirements (US-0095)
+// =============================================
+
+/**
+ * Fixed catalog of profile fields a form template can request from the athlete's
+ * profile instead of re-declaring them as custom "Datos" sections.
+ * `tipo_identificacion` represents BOTH `usuarios.tipo_identificacion` and
+ * `usuarios.numero_identificacion` — one is meaningless without the other.
+ */
+export type FormularioPerfilCampo =
+  | 'nombre'
+  | 'apellido'
+  | 'telefono'
+  | 'fecha_nacimiento'
+  | 'tipo_identificacion'
+  | 'fecha_exp_identificacion'
+  | 'rh'
+  | 'peso_kg'
+  | 'altura_cm';
+
+export type FormularioPerfilCampoSource = 'usuarios' | 'perfil_deportivo';
+
+export type FormularioPerfilCampoDef = {
+  key: FormularioPerfilCampo;
+  label: string;
+  source: FormularioPerfilCampoSource;
+  /** "Datos personales" or "Datos deportivos" grouping for the checkbox grid UI. */
+  grupo: 'personal' | 'deportivo';
+};
+
+export const FORMULARIO_PERFIL_CAMPOS: readonly FormularioPerfilCampoDef[] = [
+  { key: 'nombre', label: 'Nombre', source: 'usuarios', grupo: 'personal' },
+  { key: 'apellido', label: 'Apellido', source: 'usuarios', grupo: 'personal' },
+  { key: 'telefono', label: 'Teléfono', source: 'usuarios', grupo: 'personal' },
+  { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', source: 'usuarios', grupo: 'personal' },
+  { key: 'tipo_identificacion', label: 'Identificación (tipo y número)', source: 'usuarios', grupo: 'personal' },
+  { key: 'fecha_exp_identificacion', label: 'Fecha de expedición de identificación', source: 'usuarios', grupo: 'personal' },
+  { key: 'rh', label: 'RH', source: 'usuarios', grupo: 'personal' },
+  { key: 'peso_kg', label: 'Peso (kg)', source: 'perfil_deportivo', grupo: 'deportivo' },
+  { key: 'altura_cm', label: 'Altura (cm)', source: 'perfil_deportivo', grupo: 'deportivo' },
+] as const;
+
+export const FORMULARIO_PERFIL_CAMPO_LABELS: Record<FormularioPerfilCampo, string> = Object.fromEntries(
+  FORMULARIO_PERFIL_CAMPOS.map((c) => [c.key, c.label]),
+) as Record<FormularioPerfilCampo, string>;
 
 export type FormularioSeccion = {
   id: string;
@@ -90,6 +138,7 @@ export type UpdatePlantillaInput = {
   nombre?: string;
   descripcion?: string | null;
   activo?: boolean;
+  perfil_campos_requeridos?: FormularioPerfilCampo[];
 };
 
 export type CreateSeccionInput = {

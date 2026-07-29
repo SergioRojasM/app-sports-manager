@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { FormularioSeccion } from '@/types/portal/formularios.types';
+import { FORMULARIO_PERFIL_CAMPOS, type FormularioPerfilCampo, type FormularioSeccion } from '@/types/portal/formularios.types';
 import { FormularioSeccionContent } from './FormularioSeccionContent';
 
 type FormularioPreviewModalProps = {
   open: boolean;
   plantillaNombre: string;
   secciones: FormularioSeccion[];
+  /** Profile fields this template requests (US-0095) — rendered as a read-only chip list. */
+  perfilCamposRequeridos?: FormularioPerfilCampo[];
   loading?: boolean;
   error?: string | null;
   onClose: () => void;
@@ -17,6 +19,7 @@ export function FormularioPreviewModal({
   open,
   plantillaNombre,
   secciones,
+  perfilCamposRequeridos = [],
   loading = false,
   error = null,
   onClose,
@@ -79,6 +82,24 @@ export function FormularioPreviewModal({
           </header>
 
           <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+            {!loading && !error && perfilCamposRequeridos.length > 0 ? (
+              <div>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  Datos de perfil solicitados
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {perfilCamposRequeridos.map((key) => (
+                    <span
+                      key={key}
+                      className="rounded-md border border-turquoise/30 bg-turquoise/10 px-2 py-0.5 text-xs font-medium text-turquoise"
+                    >
+                      {FORMULARIO_PERFIL_CAMPOS.find((c) => c.key === key)?.label ?? key}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             {loading ? <p className="text-sm text-slate-400">Cargando vista previa...</p> : null}
 
             {!loading && error ? (

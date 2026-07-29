@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useFormularioEditor } from '@/hooks/portal/formularios/useFormularioEditor';
 import { FormularioSeccionesBuilder } from './FormularioSeccionesBuilder';
 import { FormularioPreviewModal } from './FormularioPreviewModal';
+import { FORMULARIO_PERFIL_CAMPOS, type FormularioPerfilCampo } from '@/types/portal/formularios.types';
 
 type FormularioEditorPageProps = {
   tenantId: string;
@@ -124,6 +125,46 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
             Vista previa
           </button>
         </div>
+
+        {/* Datos de perfil requeridos (US-0095) */}
+        <div className="border-t border-portal-border pt-4">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+            Datos de perfil requeridos
+          </p>
+          <p className="mb-3 text-xs text-slate-500">
+            Selecciona los datos del perfil del atleta que este formulario necesita — evita pedirlos de nuevo como
+            secciones de &quot;Datos&quot;.
+          </p>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {(['personal', 'deportivo'] as const).map((grupo) => (
+              <div key={grupo}>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  {grupo === 'personal' ? 'Datos personales' : 'Datos deportivos'}
+                </p>
+                <div className="space-y-2">
+                  {FORMULARIO_PERFIL_CAMPOS.filter((c) => c.grupo === grupo).map((campo) => (
+                    <label key={campo.key} className="flex items-center gap-2 text-sm text-slate-200">
+                      <input
+                        type="checkbox"
+                        checked={plantilla.perfil_campos_requeridos.includes(campo.key)}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          const next: FormularioPerfilCampo[] = checked
+                            ? [...plantilla.perfil_campos_requeridos, campo.key]
+                            : plantilla.perfil_campos_requeridos.filter((k) => k !== campo.key);
+                          void updatePlantillaField({ perfil_campos_requeridos: next });
+                        }}
+                        className="rounded border-slate-600 bg-navy-deep"
+                      />
+                      {campo.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </header>
 
       <FormularioSeccionesBuilder
@@ -140,6 +181,7 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
         open={previewOpen}
         plantillaNombre={plantilla.nombre}
         secciones={secciones}
+        perfilCamposRequeridos={plantilla.perfil_campos_requeridos}
         onClose={() => setPreviewOpen(false)}
       />
     </section>

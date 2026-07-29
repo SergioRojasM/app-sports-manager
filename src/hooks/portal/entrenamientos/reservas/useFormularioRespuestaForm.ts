@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
-import type { FormularioSeccion } from '@/types/portal/formularios.types';
+import { getPerfil } from '@/services/supabase/portal/perfil.service';
+import { FORMULARIO_PERFIL_CAMPOS, type FormularioSeccion } from '@/types/portal/formularios.types';
 
 // ─────────────────────────────────────────────
 // Types
@@ -17,6 +18,12 @@ type UseFormularioRespuestaFormOptions = {
   atletaId: string | null;
 };
 
+/** One requested profile field with a value present, for the read-only summary strip. */
+export type PerfilResumenItem = { key: string; label: string; value: string };
+
+/** One requested profile field missing from the target athlete's profile. */
+export type PerfilFaltanteItem = { key: string; label: string };
+
 type UseFormularioRespuestaFormResult = {
   loading: boolean;
   loadError: string | null;
@@ -27,11 +34,66 @@ type UseFormularioRespuestaFormResult = {
   /** campo_nombre currently uploading a file, or null when none is in progress. */
   uploadingCampoNombre: string | null;
   uploadError: string | null;
+  /** Requested profile fields (US-0095) that already have a value — read-only summary. */
+  perfilResumen: PerfilResumenItem[];
+  /** Requested profile fields (US-0095) missing from the target athlete's profile. */
+  perfilFaltantes: PerfilFaltanteItem[];
+  perfilLoading: boolean;
+  refetchPerfil: () => Promise<void>;
   updateValue: (campoNombre: string, value: string) => void;
   uploadImage: (campoNombre: string, file: File) => Promise<void>;
   validate: () => boolean;
   buildRespuesta: () => Record<string, string>;
   reset: () => void;
+};
+
+// ─────────────────────────────────────────────
+// Profile completeness helpers (US-0095)
+// ─────────────────────────────────────────────
+
+function formatPerfilValue(key: string, usuario: PerfilUsuarioLike, deportivo: PerfilDeportivoLike | null): string | null {
+  switch (key) {
+    case 'nombre':
+      return usuario.nombre?.trim() || null;
+    case 'apellido':
+      return usuario.apellido?.trim() || null;
+    case 'telefono':
+      return usuario.telefono?.trim() || null;
+    case 'fecha_nacimiento':
+      return usuario.fecha_nacimiento || null;
+    case 'tipo_identificacion': {
+      const tipo = usuario.tipo_identificacion;
+      const numero = usuario.numero_identificacion?.trim();
+      if (!tipo || !numero) return null;
+      return `${tipo} ${numero}`;
+    }
+    case 'fecha_exp_identificacion':
+      return usuario.fecha_exp_identificacion || null;
+    case 'rh':
+      return usuario.rh?.trim() || null;
+    case 'peso_kg':
+      return deportivo?.peso_kg != null ? `${deportivo.peso_kg} kg` : null;
+    case 'altura_cm':
+      return deportivo?.altura_cm != null ? `${deportivo.altura_cm} cm` : null;
+    default:
+      return null;
+  }
+}
+
+type PerfilUsuarioLike = {
+  nombre: string | null;
+  apellido: string | null;
+  telefono: string | null;
+  fecha_nacimiento: string | null;
+  tipo_identificacion: string | null;
+  numero_identificacion: string | null;
+  fecha_exp_identificacion: string | null;
+  rh: string | null;
+};
+
+type PerfilDeportivoLike = {
+  peso_kg: number | null;
+  altura_cm: number | null;
 };
 
 // ─────────────────────────────────────────────
@@ -52,12 +114,21 @@ export function useFormularioRespuestaForm({
   const [uploadingCampoNombre, setUploadingCampoNombre] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Profile data requirements (US-0095)
+  const [perfilCamposRequeridos, setPerfilCamposRequeridos] = useState<string[]>([]);
+  const [perfilResumen, setPerfilResumen] = useState<PerfilResumenItem[]>([]);
+  const [perfilFaltantes, setPerfilFaltantes] = useState<PerfilFaltanteItem[]>([]);
+  const [perfilLoading, setPerfilLoading] = useState(false);
+
   useEffect(() => {
     if (!formularioPlantillaId) {
       setSecciones([]);
       setPlantillaNombre('');
       setValues({});
       setErrors({});
+      setPerfilCamposRequeridos([]);
+      setPerfilResumen([]);
+      setPerfilFaltantes([]);
       return;
     }
 
@@ -71,6 +142,7 @@ export function useFormularioRespuestaForm({
         if (cancelled) return;
         setPlantillaNombre(plantilla.nombre);
         setSecciones(plantilla.secciones.filter((s) => s.activo));
+        setPerfilCamposRequeridos(plantilla.perfil_campos_requeridos ?? []);
         setValues({});
         setErrors({});
       })
@@ -85,6 +157,51 @@ export function useFormularioRespuestaForm({
       cancelled = true;
     };
   }, [formularioPlantillaId]);
+
+  const loadPerfil = useCallback(async () => {
+    if (!atletaId || perfilCamposRequeridos.length === 0) {
+      setPerfilResumen([]);
+      setPerfilFaltantes([]);
+      return;
+    }
+
+    setPerfilLoading(true);
+    try {
+      const { usuario, deportivo } = await getPerfil(atletaId);
+      const resumen: PerfilResumenItem[] = [];
+      const faltantes: PerfilFaltanteItem[] = [];
+
+      for (const key of perfilCamposRequeridos) {
+        const campo = FORMULARIO_PERFIL_CAMPOS.find((c) => c.key === key);
+        const label = campo?.label ?? key;
+        const value = formatPerfilValue(key, usuario, deportivo);
+        if (value) {
+          resumen.push({ key, label, value });
+        } else {
+          faltantes.push({ key, label });
+        }
+      }
+
+      setPerfilResumen(resumen);
+      setPerfilFaltantes(faltantes);
+    } catch {
+      // Couldn't verify completeness — fail closed so submission stays blocked
+      // rather than silently allowing a booking with an unverified profile.
+      setPerfilResumen([]);
+      setPerfilFaltantes(
+        perfilCamposRequeridos.map((key) => ({
+          key,
+          label: FORMULARIO_PERFIL_CAMPOS.find((c) => c.key === key)?.label ?? key,
+        })),
+      );
+    } finally {
+      setPerfilLoading(false);
+    }
+  }, [atletaId, perfilCamposRequeridos]);
+
+  useEffect(() => {
+    void loadPerfil();
+  }, [loadPerfil]);
 
   const updateValue = useCallback((campoNombre: string, value: string) => {
     setValues((prev) => ({ ...prev, [campoNombre]: value }));
@@ -119,6 +236,8 @@ export function useFormularioRespuestaForm({
   );
 
   const validate = useCallback((): boolean => {
+    if (perfilFaltantes.length > 0) return false;
+
     const newErrors: Record<string, string> = {};
 
     for (const seccion of secciones) {
@@ -133,7 +252,7 @@ export function useFormularioRespuestaForm({
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [secciones, values]);
+  }, [secciones, values, perfilFaltantes]);
 
   const buildRespuesta = useCallback((): Record<string, string> => {
     const respuesta: Record<string, string> = {};
@@ -163,6 +282,10 @@ export function useFormularioRespuestaForm({
     errors,
     uploadingCampoNombre,
     uploadError,
+    perfilResumen,
+    perfilFaltantes,
+    perfilLoading,
+    refetchPerfil: loadPerfil,
     updateValue,
     uploadImage,
     validate,
