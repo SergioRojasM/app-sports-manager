@@ -5,15 +5,15 @@ import { MisReservasFiltersPanel } from './MisReservasFiltersPanel';
 import { MisReservasTable } from './MisReservasTable';
 
 type MisReservasPageProps = {
-  tenantId: string;
   atletaId: string;
 };
 
-export function MisReservasPage({ tenantId, atletaId }: MisReservasPageProps) {
+export function MisReservasPage({ atletaId }: MisReservasPageProps) {
   const {
     loading,
     error,
     disciplines,
+    tenantOptions,
     filters,
     updateFilter,
     applyFilters,
@@ -28,7 +28,7 @@ export function MisReservasPage({ tenantId, atletaId }: MisReservasPageProps) {
     paginatedRows,
     exportCsv,
     resultCount,
-  } = useMisReservas(tenantId, atletaId);
+  } = useMisReservas(atletaId);
 
   return (
     <div className="space-y-6">
@@ -37,7 +37,7 @@ export function MisReservasPage({ tenantId, atletaId }: MisReservasPageProps) {
         <div>
           <h1 className="text-xl font-semibold text-white">Mis Reservas</h1>
           <p className="text-sm text-slate-400">
-            Consulta tu historial de reservas de entrenamientos.
+            Consulta tu historial de reservas de entrenamientos en todas tus organizaciones.
           </p>
         </div>
         <button
@@ -58,6 +58,7 @@ export function MisReservasPage({ tenantId, atletaId }: MisReservasPageProps) {
         onApply={applyFilters}
         onClear={clearFilters}
         disciplines={disciplines}
+        tenantOptions={tenantOptions}
         hasActiveFilters={hasActiveFilters}
       />
 
@@ -96,7 +97,7 @@ export function MisReservasPage({ tenantId, atletaId }: MisReservasPageProps) {
       {/* Empty state */}
       {!loading && !error && resultCount === 0 && (
         <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-          No tienes reservas registradas en esta organización.
+          No tienes reservas registradas todavía.
         </div>
       )}
 

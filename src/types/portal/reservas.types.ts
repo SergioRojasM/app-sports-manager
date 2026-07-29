@@ -70,6 +70,7 @@ export type CategoriaDisponibilidad = {
 export type ReservaReportRow = {
   reserva_id: string;
   tenant_id: string;
+  tenant_nombre: string | null;
   entrenamiento_id: string;
   atleta_id: string;
   reserva_estado: string;
@@ -109,7 +110,7 @@ export type ReservasManagementFilters = {
 };
 
 export type MisReservasFilters = {
-  tenantId: string;
+  tenantId?: string;
   atletaId: string;
   fechaDesde?: string;
   fechaHasta?: string;

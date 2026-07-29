@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import type { Discipline } from '@/types/portal/disciplines.types';
-import type { MisReservasFilterState, DateRangePreset } from '@/hooks/portal/mis-reservas/useMisReservas';
+import type { MisReservasFilterState, DateRangePreset, TenantOption } from '@/hooks/portal/mis-reservas/useMisReservas';
 import type { ReservasManagementAsistencia } from '@/types/portal/reservas.types';
 
 type MisReservasFiltersPanelProps = {
@@ -10,7 +9,8 @@ type MisReservasFiltersPanelProps = {
   onFilterChange: <K extends keyof MisReservasFilterState>(key: K, value: MisReservasFilterState[K]) => void;
   onApply: () => void;
   onClear: () => void;
-  disciplines: Discipline[];
+  disciplines: string[];
+  tenantOptions: TenantOption[];
   hasActiveFilters: boolean;
 };
 
@@ -49,6 +49,7 @@ export function MisReservasFiltersPanel({
   onApply,
   onClear,
   disciplines,
+  tenantOptions,
   hasActiveFilters,
 }: MisReservasFiltersPanelProps) {
   const dateError = useMemo(() => {
@@ -157,15 +158,33 @@ export function MisReservasFiltersPanel({
           className="w-full max-w-sm rounded border border-portal-border bg-transparent px-3 py-1.5 text-sm text-slate-200 focus:border-turquoise/60 focus:outline-none"
         >
           <option value="" className="bg-slate-800">Todas las disciplinas</option>
-          {disciplines
-            .filter((d) => d.activo)
-            .map((d) => (
-              <option key={d.id} value={d.nombre} className="bg-slate-800">
-                {d.nombre}
-              </option>
-            ))}
+          {disciplines.map((nombre) => (
+            <option key={nombre} value={nombre} className="bg-slate-800">
+              {nombre}
+            </option>
+          ))}
         </select>
       </div>
+
+      {/* Organization dropdown — only shown when reservations span more than one org */}
+      {tenantOptions.length > 1 && (
+        <div className="space-y-1">
+          <label htmlFor="mis-reservas-organizacion-filter" className="text-xs font-medium text-slate-500">Organización:</label>
+          <select
+            id="mis-reservas-organizacion-filter"
+            value={filters.tenantId}
+            onChange={(e) => onFilterChange('tenantId', e.target.value)}
+            className="w-full max-w-sm rounded border border-portal-border bg-transparent px-3 py-1.5 text-sm text-slate-200 focus:border-turquoise/60 focus:outline-none"
+          >
+            <option value="" className="bg-slate-800">Todas las organizaciones</option>
+            {tenantOptions.map((option) => (
+              <option key={option.id} value={option.id} className="bg-slate-800">
+                {option.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Action buttons */}
       <div className="flex items-center gap-3 pt-1">

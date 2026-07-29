@@ -30,7 +30,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── perfil/page.tsx           # User profile (global, not tenant-scoped)
 │   │       ├── (atleta)/                 # Portal-level athlete area (US-0093) — no role gate: roles are per-tenant and public-plan buyers hold no membership; pages are self-scoped by atleta_id = auth.uid()
 │   │       │   ├── layout.tsx            # Pass-through; auth is enforced by the parent portal shell
-│   │       │   └── mis-suscripciones/page.tsx  # Cross-tenant "Mis Suscripciones" (replaces the tenant-scoped route)
+│   │       │   ├── mis-suscripciones/page.tsx  # Cross-tenant "Mis Suscripciones" (replaces the tenant-scoped route)
+│   │       │   └── mis-reservas/page.tsx       # Cross-tenant "Mis Reservas" (replaces the tenant-scoped route, US-0097)
 │   │       ├── entrenamientos-publicos/page.tsx  # Public Training Marketplace (non-tenant-scoped, render-only) — cross-tenant discovery of published trainings (US-0089)
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users)
@@ -51,7 +52,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── layout.tsx        # Role guard: redirects non-usuario users to /portal/orgs/[tenant_id]
 │   │               │   ├── entrenamientos-disponibles/page.tsx
 │   │               │   ├── mis-suscripciones-y-pagos/page.tsx  # Legacy route — redirects to /portal/mis-suscripciones (US-0093)
-│   │               │   └── mis-reservas/page.tsx               # Usuario: personal reservation history with server-side filtering (US-0074)
+│   │               │   └── mis-reservas/page.tsx               # Legacy route — redirects to /portal/mis-reservas (US-0097)
 │   │               ├── (entrenador)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-entrenador users to /portal/orgs/[tenant_id]
 │   │               │   └── atletas/page.tsx
@@ -205,10 +206,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── SuscripcionCard.tsx              # Subscription card with organization name, plan info + SuscripcionEstadoBadge
 │   │   │       ├── PagoCard.tsx                     # Payment info, comprobante viewer, upload trigger
 │   │   │       └── index.ts
-│   │   │   └── mis-reservas/               # Feature slice (portal/mis-reservas — athlete personal reservation history, US-0074)
-│   │   │       ├── MisReservasPage.tsx             # Main page: filters, table, banner, CSV export (athlete-scoped)
-│   │   │       ├── MisReservasFiltersPanel.tsx     # Server-side filter panel: date range, attendance, discipline (no athlete search)
-│   │   │       ├── MisReservasTable.tsx            # Data table without athlete column, badges, client-side pagination
+│   │   │   └── mis-reservas/               # Feature slice (portal/mis-reservas — cross-tenant athlete reservation history, US-0074, moved cross-tenant in US-0097)
+│   │   │       ├── MisReservasPage.tsx             # Main page: filters, table, banner, CSV export (atleta_id-scoped, no tenant param)
+│   │   │       ├── MisReservasFiltersPanel.tsx     # Server-side filter panel: date range, attendance, discipline (derived from loaded rows), Organización (shown only when >1 org)
+│   │   │       ├── MisReservasTable.tsx            # Data table with Organización column, badges, client-side pagination
 │   │   │       └── index.ts
 │   │   │   └── entrenamientos-publicos/     # Feature slice (portal/entrenamientos-publicos — cross-tenant marketplace, US-0089)
 │   │   │       ├── EntrenamientosPublicosPage.tsx  # Sticky floating header (title + subtitle + widget + "Filtrar" button) above a full-width grid, styled per grit-arena.pen node ql3Ij using the existing landing-* Tailwind tokens
@@ -290,7 +291,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useMisSuscripciones.ts      # Client-side filter state (subscription status + payment status + organization) with AND logic; derives tenantOptions from the loaded rows
 │   │           └── useSubirComprobante.ts     # File validation (MIME, 5 MB), upload with upsert, comprobante_path update
 │   │       └── mis-reservas/
-│   │           └── useMisReservas.ts          # Filter state, loading, pagination, CSV export; delegates to reservasService.getMisReservas (US-0074)
+│   │           └── useMisReservas.ts          # Filter state, loading, pagination, CSV export; delegates to reservasService.getMisReservas (US-0074); takes atletaId only (no tenantId), derives disciplines/tenantOptions from loaded rows, adds Organización filter (US-0097)
 │   │       └── entrenamientos-publicos/       # Feature hooks for the public marketplace (US-0089)
 │   │           ├── usePublicarEntrenamiento.ts        # Publish/manage-publication modal state: prefill, banner upload/validation (mirrors useOrgBannerUpload), submit (upsert), despublicar
 │   │           ├── useEntrenamientosPublicosMarketplace.ts  # Fetches listPublicTrainings + listPublicTenantOptions; client-side dateChip/search/tenant filters; "this week" count independent of active filters
@@ -309,7 +310,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts  # entrenamientos/entrenamientos_grupo select/insert/update all carry formulario_id, formulario_obligatorio, and a formulario_plantilla:formularios_plantillas(nombre) embed for display (US-0086)
 │   │       │   └── entrenamientos-publicos.service.ts  # getPublishRestrictionSummary/hasBlockingMembershipRestrictions (pre-publish gate — US-0094 blocks only when NO restriction row is satisfiable without membership; service restrictions no longer block), getPublicacionByEntrenamientoId, listPublishedEntrenamientoIds, publicarEntrenamiento (upsert by entrenamiento_id, snapshots reserva/cancelacion_antelacion_horas from source for display), despublicarEntrenamiento (soft, activo=false), listPublicTrainings (cross-tenant, enriches via reservasService.getCapacidad), listPublicTenantOptions (US-0089); listPublicTrainingsForLanding queries the anon-readable entrenamientos_publicos_view (reservas_activas precomputed in the view, no per-row getCapacidad calls) for the public /entrenamientos-publicos page (US-0091)
-│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking; create() also forwards p_formulario_plantilla_id/p_formulario_respuesta and maps FORMULARIO_CAMPOS_FALTANTES (US-0087); also maps PERFIL_INCOMPLETO (US-0095)
+│   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074; tenant_id filter now optional/cross-tenant, US-0097), validateBookingRestrictions (service-set based, returns matchedRow), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking; create() also forwards p_formulario_plantilla_id/p_formulario_respuesta and maps FORMULARIO_CAMPOS_FALTANTES (US-0087); also maps PERFIL_INCOMPLETO (US-0095)
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
 │   │   │   └── planes.service.ts     # CRUD for planes + plan_tipos (getPlanTiposByPlan, createPlanTipo, updatePlanTipo, deletePlanTipo with soft-deactivate guard); getPlanTiposByPlan populates servicios[] per tipo (US-0062); planes rows carry es_publico on read/insert/update and getPlanesPublicos(tenantId) returns the public+active catalog readable by non-members (US-0093)
 │   │   │   └── servicios.service.ts  # CRUD for servicios catalog + syncPlanTipoServicios (US-0062)
@@ -339,7 +340,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts   # TrainingFormularioTipo (ninguno/externo/interno), TrainingFormularioFormState, TrainingGroup/TrainingInstance carry formulario_id/formulario_obligatorio/formulario_plantilla (US-0086)
 │   │       └── entrenamientos-publicos.types.ts  # EntrenamientoPublico, PublicarEntrenamientoInput, PublicTrainingListItem, PublicTrainingFilters (dateChip/search/tenantId), EntrenamientoPublicoServiceError (codes incl. 'servicio_restriction') (US-0089)
-│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export, includes atleta_id), ReservasManagementFilters (server-side filter input — US-0073), MisReservasFilters (athlete-scoped filter input — US-0074); Reserva.formulario_respuesta_id, CreateReservaInput.formulario_plantilla_id/formulario_respuesta (US-0087)
+│   │       └── reservas.types.ts         # ReservaView, CreateReservaInput, CategoriaDisponibilidad, ReservaReportRow (flat view type for CSV export, includes atleta_id), ReservasManagementFilters (server-side filter input — US-0073), MisReservasFilters (athlete-scoped filter input — US-0074; tenantId optional/cross-tenant, US-0097), ReservaReportRow.tenant_nombre (US-0097); Reserva.formulario_respuesta_id, CreateReservaInput.formulario_plantilla_id/formulario_respuesta (US-0087)
 │   │       └── asistencias.types.ts      # Asistencia, AsistenciaFormValues, UpsertAsistenciaInput
 │   │       └── planes.types.ts           # PlanModalidad (renamed from PlanTipo union), PlanTipo (DB entity), PlanTipoFormValues, CreatePlanTipoInput, UpdatePlanTipoInput; PlanTipo.servicios? added (US-0062); Plan.es_publico, CreatePlanInput/UpdatePlanInput.esPublico, PlanFormValues.es_publico (US-0093)
 │   │       └── planes-publicos.types.ts   # PlanPublicoItem (extends PlanWithDisciplinas with beneficiosList/disciplinaNames/tipos), PlanPublicoTipoItem, PlanPublicoServicioItem, UsePlanesPublicosResult (US-0093)

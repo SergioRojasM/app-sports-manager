@@ -56,6 +56,12 @@ const MIS_SUSCRIPCIONES_MENU_ITEM: MenuItem = {
   icon: 'receipt_long',
 };
 
+const MIS_RESERVAS_MENU_ITEM: MenuItem = {
+  label: 'Mis Reservas',
+  href: '/portal/mis-reservas',
+  icon: 'event_available',
+};
+
 const SHARED_TENANT_ITEMS: Array<{ label: string; path: string; icon: string }> = [
   // { label: 'Perfil', path: 'perfil', icon: 'person' },
 ];
@@ -76,7 +82,6 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
   usuario: [
     { label: 'Entrenamientos Disponibles', path: 'gestion-entrenamientos', icon: 'directions_run' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
-    { label: 'Mis Reservas', path: 'mis-reservas', icon: 'event_available' },
   ],
   entrenador: [
     { label: 'Atletas', path: 'atletas', icon: 'groups' },
@@ -93,6 +98,7 @@ export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[]
       BASE_MENU_ITEM,
       PUBLIC_TRAININGS_MENU_ITEM,
       MIS_SUSCRIPCIONES_MENU_ITEM,
+      MIS_RESERVAS_MENU_ITEM,
     ];
   }
 
