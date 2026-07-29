@@ -220,6 +220,8 @@ export type FormularioRespuesta = {
   /** Keyed by campo_nombre; survives template edits/deletion so answers stay readable. */
   campos_snapshot: Record<string, FormularioRespuestaCampoSnapshot>;
   created_at: string;
+  /** Requested profile field values (US-0095's perfil_campos_requeridos) frozen at submission time; survives later profile edits (US-0096). */
+  perfil_snapshot: Partial<Record<FormularioPerfilCampo, string>>;
 };
 
 /** One row of the "Descargar Respuestas Formulario" export — a response plus its athlete's identity. */

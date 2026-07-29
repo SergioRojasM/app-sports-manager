@@ -12,10 +12,19 @@ export type FormularioRespuestaViewerCampo = {
   imageUrl?: string;
 };
 
+/** One requested profile field resolved from the response's perfil_snapshot (US-0096). */
+export type FormularioRespuestaViewerPerfilCampo = {
+  key: string;
+  label: string;
+  value: string;
+};
+
 type FormularioRespuestaViewerModalProps = {
   open: boolean;
   plantillaNombre: string;
   campos: FormularioRespuestaViewerCampo[];
+  /** Snapshotted profile fields (US-0096) — rendered as a "Datos de perfil" section above the "Datos" answers. */
+  perfilCampos?: FormularioRespuestaViewerPerfilCampo[];
   loading: boolean;
   error: string | null;
   onClose: () => void;
@@ -26,6 +35,7 @@ export function FormularioRespuestaViewerModal({
   open,
   plantillaNombre,
   campos,
+  perfilCampos = [],
   loading,
   error,
   onClose,
@@ -65,7 +75,23 @@ export function FormularioRespuestaViewerModal({
             </div>
           )}
 
-          {!loading && !error && campos.length === 0 && (
+          {!loading && !error && perfilCampos.length > 0 && (
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                Datos de perfil
+              </p>
+              <div className="space-y-3">
+                {perfilCampos.map((campo) => (
+                  <div key={campo.key}>
+                    <p className="mb-1 text-sm font-medium text-slate-300">{campo.label}</p>
+                    <p className="whitespace-pre-wrap text-sm text-slate-100">{campo.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!loading && !error && campos.length === 0 && perfilCampos.length === 0 && (
             <p className="text-sm text-slate-400">Esta respuesta no tiene campos registrados.</p>
           )}
 

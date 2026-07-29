@@ -295,6 +295,7 @@ export const formulariosService = {
         entrenamiento_id,
         respuesta,
         campos_snapshot,
+        perfil_snapshot,
         created_at,
         usuarios!formulario_respuestas_atleta_id_fkey (
           nombre,
@@ -318,6 +319,7 @@ export const formulariosService = {
         entrenamiento_id: row.entrenamiento_id,
         respuesta: row.respuesta,
         campos_snapshot: row.campos_snapshot,
+        perfil_snapshot: row.perfil_snapshot,
         created_at: row.created_at,
         atleta_nombre: usuario?.nombre ?? null,
         atleta_apellido: usuario?.apellido ?? null,
