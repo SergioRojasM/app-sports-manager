@@ -882,6 +882,13 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         message: 'Faltan campos obligatorios del formulario.',
       };
     }
+    if (error.code === 'P0001' && error.message?.includes('PERFIL_INCOMPLETO')) {
+      return {
+        ok: false,
+        code: 'PERFIL_INCOMPLETO',
+        message: 'Tu perfil no tiene todos los datos que requiere este formulario. Actualízalo para continuar.',
+      };
+    }
     throw mapServiceError(error);
   }
 

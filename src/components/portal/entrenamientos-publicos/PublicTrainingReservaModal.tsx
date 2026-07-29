@@ -155,6 +155,11 @@ export function PublicTrainingReservaModal({
         loadError={reserva.formularioRespuestaForm.loadError}
         uploadingCampoNombre={reserva.formularioRespuestaForm.uploadingCampoNombre}
         uploadError={reserva.formularioRespuestaForm.uploadError}
+        perfilResumen={reserva.formularioRespuestaForm.perfilResumen}
+        perfilFaltantes={reserva.formularioRespuestaForm.perfilFaltantes}
+        perfilLoading={reserva.formularioRespuestaForm.perfilLoading}
+        onRefetchPerfil={() => void reserva.formularioRespuestaForm.refetchPerfil()}
+        isSelf
         allowSkip={!reserva.formularioObligatorio}
         isSubmitting={reserva.reservaForm.isSubmitting}
         submitError={reserva.reservaForm.submitError ?? reserva.bookingRejection?.message ?? reserva.unexpectedError}

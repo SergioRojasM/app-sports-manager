@@ -2,6 +2,7 @@
 
 import type { FormularioSeccion } from '@/types/portal/formularios.types';
 import { FormularioSeccionContent } from '@/components/portal/formularios/FormularioSeccionContent';
+import type { PerfilFaltanteItem, PerfilResumenItem } from '@/hooks/portal/entrenamientos/reservas/useFormularioRespuestaForm';
 
 // ─────────────────────────────────────────────
 // Types
@@ -17,6 +18,14 @@ type FormularioRespuestaModalProps = {
   loadError: string | null;
   uploadingCampoNombre: string | null;
   uploadError: string | null;
+  /** Requested profile fields (US-0095) that already have a value — read-only summary. */
+  perfilResumen: PerfilResumenItem[];
+  /** Requested profile fields (US-0095) missing from the target athlete's profile. */
+  perfilFaltantes: PerfilFaltanteItem[];
+  perfilLoading?: boolean;
+  onRefetchPerfil: () => void;
+  /** False when a staff member is booking on behalf of another athlete — changes the warning copy. */
+  isSelf?: boolean;
   /** Whether "Reservar sin formulario" is offered (self-booking optional, or any staff booking). */
   allowSkip: boolean;
   isSubmitting: boolean;
@@ -134,6 +143,11 @@ export function FormularioRespuestaModal({
   loadError,
   uploadingCampoNombre,
   uploadError,
+  perfilResumen,
+  perfilFaltantes,
+  perfilLoading = false,
+  onRefetchPerfil,
+  isSelf = true,
   allowSkip,
   isSubmitting,
   submitError,
@@ -148,6 +162,7 @@ export function FormularioRespuestaModal({
   }
 
   const disabled = isSubmitting;
+  const perfilIncompleto = perfilFaltantes.length > 0;
 
   return (
     <div
@@ -159,6 +174,46 @@ export function FormularioRespuestaModal({
       <div className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-portal-border bg-navy-medium p-6 shadow-2xl">
         <h2 className="mb-1 text-lg font-semibold text-slate-100">{plantillaNombre}</h2>
         <p className="mb-4 text-sm text-slate-400">Completa el formulario para continuar con tu reserva.</p>
+
+        {perfilIncompleto ? (
+          <div className="mb-4 rounded-lg border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-200">
+            <p>
+              {isSelf ? 'Tu perfil' : 'El perfil del atleta'} no tiene estos datos:{' '}
+              <span className="font-semibold">{perfilFaltantes.map((f) => f.label).join(', ')}</span>.{' '}
+              {isSelf ? 'Actualízalo para continuar.' : 'Debe actualizarlo para continuar.'}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              {isSelf && (
+                <a
+                  href="/portal/perfil"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-amber-100 underline hover:text-amber-50"
+                >
+                  Actualizar perfil
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={onRefetchPerfil}
+                disabled={perfilLoading}
+                className="font-semibold text-amber-100 underline hover:text-amber-50 disabled:opacity-60"
+              >
+                {perfilLoading ? 'Verificando...' : 'Ya actualicé, verificar de nuevo'}
+              </button>
+            </div>
+          </div>
+        ) : perfilResumen.length > 0 ? (
+          <p className="mb-4 flex flex-wrap gap-x-1 rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-2 text-xs text-slate-300">
+            <span className="font-semibold text-slate-400">Perfil:</span>
+            {perfilResumen.map((item, i) => (
+              <span key={item.key}>
+                {item.value}
+                {i < perfilResumen.length - 1 ? ' · ' : ''}
+              </span>
+            ))}
+          </p>
+        ) : null}
 
         {(submitError || uploadError) && (
           <div className="mb-4 rounded-lg border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
@@ -221,7 +276,7 @@ export function FormularioRespuestaModal({
           <button
             type="button"
             onClick={() => void onSubmit()}
-            disabled={isSubmitting || loading}
+            disabled={isSubmitting || loading || perfilIncompleto}
             className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
           >
             {isSubmitting ? 'Guardando...' : 'Guardar y reservar'}

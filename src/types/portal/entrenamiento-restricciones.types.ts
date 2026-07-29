@@ -92,7 +92,8 @@ export type BookingRejectionCode =
   | 'SERVICIO_REQUERIDO'
   | 'ENTRENAMIENTO_PASADO'
   | 'ADMIN_CONFIRM_NO_UNITS'
-  | 'FORMULARIO_CAMPOS_FALTANTES';
+  | 'FORMULARIO_CAMPOS_FALTANTES'
+  | 'PERFIL_INCOMPLETO';
 
 export type BookingRejection = {
   ok: false;

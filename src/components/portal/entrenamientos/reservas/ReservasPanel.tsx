@@ -21,7 +21,7 @@ import { FormularioPreviewModal } from '@/components/portal/formularios/Formular
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import type { UserRole } from '@/types/portal.types';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
-import type { FormularioSeccion } from '@/types/portal/formularios.types';
+import type { FormularioPerfilCampo, FormularioSeccion } from '@/types/portal/formularios.types';
 import type { ReservaView } from '@/types/portal/reservas.types';
 
 // ─────────────────────────────────────────────
@@ -72,6 +72,7 @@ export function ReservasPanel({
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewSecciones, setPreviewSecciones] = useState<FormularioSeccion[]>([]);
+  const [previewPerfilCampos, setPreviewPerfilCampos] = useState<FormularioPerfilCampo[]>([]);
 
   // Formulario fill-out step (US-0087)
   const [formularioRespuestaModalOpen, setFormularioRespuestaModalOpen] = useState(false);
@@ -523,7 +524,10 @@ export function ReservasPanel({
     setPreviewError(null);
     formulariosService
       .getPlantillaConSecciones(instance.formulario_id)
-      .then((plantilla) => setPreviewSecciones(plantilla.secciones))
+      .then((plantilla) => {
+        setPreviewSecciones(plantilla.secciones);
+        setPreviewPerfilCampos(plantilla.perfil_campos_requeridos ?? []);
+      })
       .catch(() => setPreviewError('No fue posible cargar el formulario.'))
       .finally(() => setPreviewLoading(false));
   };
@@ -946,6 +950,11 @@ export function ReservasPanel({
         loadError={formularioRespuestaForm.loadError}
         uploadingCampoNombre={formularioRespuestaForm.uploadingCampoNombre}
         uploadError={formularioRespuestaForm.uploadError}
+        perfilResumen={formularioRespuestaForm.perfilResumen}
+        perfilFaltantes={formularioRespuestaForm.perfilFaltantes}
+        perfilLoading={formularioRespuestaForm.perfilLoading}
+        onRefetchPerfil={() => void formularioRespuestaForm.refetchPerfil()}
+        isSelf={formularioTargetAtletaId === currentUserId}
         allowSkip={isAdmin || !instance.formulario_obligatorio}
         isSubmitting={reservaForm.isSubmitting}
         submitError={reservaForm.submitError}
@@ -969,6 +978,7 @@ export function ReservasPanel({
         open={previewOpen}
         plantillaNombre={instance.formulario_plantilla?.nombre ?? 'Formulario'}
         secciones={previewSecciones}
+        perfilCamposRequeridos={previewPerfilCampos}
         loading={previewLoading}
         error={previewError}
         onClose={() => setPreviewOpen(false)}
