@@ -153,7 +153,9 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
               info
             </span>
             <span>
-              <span className="font-semibold">Requiere:</span> {serviciosRequeridos.join(', ')}
+              Este entrenamiento requiere una suscripción activa que incluya{' '}
+              {serviciosRequeridos.length === 1 ? 'el servicio de' : 'los servicios de'}:{' '}
+              <span className="font-semibold">{serviciosRequeridos.join(', ')}</span>
             </span>
           </p>
         ) : null}

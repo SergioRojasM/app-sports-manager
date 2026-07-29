@@ -91,7 +91,13 @@ export function PublicTrainingReservaModal({
   if (rejectionCode === 'SERVICIO_REQUERIDO' || rejectionCode === 'UNIDADES_AGOTADAS') {
     return (
       <>
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        {/* Hidden while the catalog is open: this dialog is z-50 and the catalog is z-40
+            (which must stay below SuscripcionModal's z-50), so stacking them would put the
+            catalog underneath. Closing the catalog brings this state back. */}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          hidden={planesOpen}
+        >
           <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 bg-slate-950/70" />
           <div
             role="dialog"
