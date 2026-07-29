@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
-import { disciplinesService } from '@/services/supabase/portal/disciplines.service';
 import { toCsvString, downloadTextFile } from '@/lib/csv';
 import type { ReservaReportRow, ReservasManagementAsistencia } from '@/types/portal/reservas.types';
-import type { Discipline } from '@/types/portal/disciplines.types';
 
 export type DateRangePreset = 'ultimos_7_dias' | 'ultimo_mes' | 'mes_a_la_fecha' | 'rango_personalizado' | null;
+
+export type TenantOption = { id: string; nombre: string };
 
 export type MisReservasFilterState = {
   datePreset: DateRangePreset;
@@ -15,6 +15,7 @@ export type MisReservasFilterState = {
   fechaHasta: string;
   asistencia: ReservasManagementAsistencia | null;
   disciplinaNombre: string;
+  tenantId: string;
 };
 
 const INITIAL_FILTERS: MisReservasFilterState = {
@@ -23,6 +24,7 @@ const INITIAL_FILTERS: MisReservasFilterState = {
   fechaHasta: '',
   asistencia: null,
   disciplinaNombre: '',
+  tenantId: '',
 };
 
 function computeDateRange(preset: DateRangePreset): { desde: string; hasta: string } {
@@ -53,11 +55,10 @@ function computeDateRange(preset: DateRangePreset): { desde: string; hasta: stri
 
 type PageSize = 25 | 50 | 100;
 
-export function useMisReservas(tenantId: string, atletaId: string) {
+export function useMisReservas(atletaId: string) {
   const [rows, setRows] = useState<ReservaReportRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [disciplines, setDisciplines] = useState<Discipline[]>([]);
 
   const [filters, setFilters] = useState<MisReservasFilterState>(INITIAL_FILTERS);
   const [appliedFilters, setAppliedFilters] = useState<MisReservasFilterState>(INITIAL_FILTERS);
@@ -69,9 +70,31 @@ export function useMisReservas(tenantId: string, atletaId: string) {
     return !!(
       appliedFilters.datePreset ||
       appliedFilters.asistencia ||
-      appliedFilters.disciplinaNombre
+      appliedFilters.disciplinaNombre ||
+      appliedFilters.tenantId
     );
   }, [appliedFilters]);
+
+  // Derived from the currently loaded rows — an athlete may not be a member
+  // of every tenant their reservations belong to (e.g. public-training
+  // bookings), so a tenant-scoped catalog lookup can't be used here.
+  const disciplines = useMemo(() => {
+    const unique = new Set<string>();
+    rows.forEach((r) => {
+      if (r.disciplina) unique.add(r.disciplina);
+    });
+    return [...unique].sort((a, b) => a.localeCompare(b));
+  }, [rows]);
+
+  const tenantOptions = useMemo<TenantOption[]>(() => {
+    const byId = new Map<string, string>();
+    rows.forEach((r) => {
+      if (!byId.has(r.tenant_id)) byId.set(r.tenant_id, r.tenant_nombre ?? 'Organización');
+    });
+    return [...byId.entries()]
+      .map(([id, nombre]) => ({ id, nombre }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }, [rows]);
 
   const fetchReservas = useCallback(
     async (filterState: MisReservasFilterState) => {
@@ -91,8 +114,8 @@ export function useMisReservas(tenantId: string, atletaId: string) {
         }
 
         const data = await reservasService.getMisReservas({
-          tenantId,
           atletaId,
+          tenantId: filterState.tenantId || undefined,
           fechaDesde,
           fechaHasta,
           asistencia: filterState.asistencia ?? undefined,
@@ -106,16 +129,12 @@ export function useMisReservas(tenantId: string, atletaId: string) {
         setLoading(false);
       }
     },
-    [tenantId, atletaId],
+    [atletaId],
   );
 
   useEffect(() => {
     fetchReservas(INITIAL_FILTERS);
   }, [fetchReservas]);
-
-  useEffect(() => {
-    disciplinesService.listDisciplinesByTenant(tenantId).then(setDisciplines).catch(() => {});
-  }, [tenantId]);
 
   const applyFilters = useCallback(() => {
     setAppliedFilters({ ...filters });
@@ -154,6 +173,7 @@ export function useMisReservas(tenantId: string, atletaId: string) {
     if (rows.length === 0) return;
 
     const exportRows = rows.map((r) => ({
+      Organización: r.tenant_nombre ?? '',
       Disciplina: r.disciplina ?? '',
       Entrenamiento: r.entrenamiento_nombre ?? '',
       'Fecha entrenamiento': r.entrenamiento_fecha ?? '',
@@ -179,6 +199,7 @@ export function useMisReservas(tenantId: string, atletaId: string) {
     loading,
     error,
     disciplines,
+    tenantOptions,
 
     filters,
     updateFilter,

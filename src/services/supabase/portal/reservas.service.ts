@@ -1109,8 +1109,11 @@ async function getMisReservas(
   let query = supabase
     .from('reservas_reporte_view')
     .select('*')
-    .eq('tenant_id', filters.tenantId)
     .eq('atleta_id', filters.atletaId);
+
+  if (filters.tenantId) {
+    query = query.eq('tenant_id', filters.tenantId);
+  }
 
   if (filters.fechaDesde) {
     query = query.gte('entrenamiento_fecha', bogotaDayStartIso(filters.fechaDesde));
