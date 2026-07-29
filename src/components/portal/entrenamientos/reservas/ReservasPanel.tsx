@@ -16,12 +16,16 @@ import { ReservaFormModal } from './ReservaFormModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
 import { AsistenciaFormModal } from './AsistenciaFormModal';
 import { FormularioRespuestaModal } from './FormularioRespuestaModal';
-import { FormularioRespuestaViewerModal, type FormularioRespuestaViewerCampo } from './FormularioRespuestaViewerModal';
+import {
+  FormularioRespuestaViewerModal,
+  type FormularioRespuestaViewerCampo,
+  type FormularioRespuestaViewerPerfilCampo,
+} from './FormularioRespuestaViewerModal';
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import type { UserRole } from '@/types/portal.types';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
-import type { FormularioPerfilCampo, FormularioSeccion } from '@/types/portal/formularios.types';
+import { FORMULARIO_PERFIL_CAMPOS, type FormularioPerfilCampo, type FormularioSeccion } from '@/types/portal/formularios.types';
 import type { ReservaView } from '@/types/portal/reservas.types';
 
 // ─────────────────────────────────────────────
@@ -85,6 +89,7 @@ export function ReservasPanel({
   const [viewerError, setViewerError] = useState<string | null>(null);
   const [viewerPlantillaNombre, setViewerPlantillaNombre] = useState('');
   const [viewerCampos, setViewerCampos] = useState<FormularioRespuestaViewerCampo[]>([]);
+  const [viewerPerfilCampos, setViewerPerfilCampos] = useState<FormularioRespuestaViewerPerfilCampo[]>([]);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
   const isPast = !!instance?.fecha_hora && new Date(instance.fecha_hora) < new Date();
@@ -319,6 +324,15 @@ export function ReservasPanel({
       }
       setViewerPlantillaNombre(nombre);
 
+      const perfilCampos: FormularioRespuestaViewerPerfilCampo[] = FORMULARIO_PERFIL_CAMPOS.filter(
+        (c) => respuestaRow.perfil_snapshot?.[c.key] != null,
+      ).map((c) => ({
+        key: c.key,
+        label: c.label,
+        value: respuestaRow.perfil_snapshot[c.key] as string,
+      }));
+      setViewerPerfilCampos(perfilCampos);
+
       const campos: FormularioRespuestaViewerCampo[] = Object.entries(respuestaRow.campos_snapshot)
         .map(([campoNombre, meta]) => ({
           campoNombre,
@@ -462,6 +476,16 @@ export function ReservasPanel({
       }
       const camposOrdenados = Array.from(camposMap.entries()).sort((a, b) => a[1].orden - b[1].orden);
 
+      // Union of every requested profile key across all responses' perfil_snapshot (US-0096),
+      // in FORMULARIO_PERFIL_CAMPOS catalog order.
+      const perfilKeysPresent = new Set<string>();
+      for (const r of respuestas) {
+        for (const key of Object.keys(r.perfil_snapshot ?? {})) {
+          perfilKeysPresent.add(key);
+        }
+      }
+      const perfilCamposOrdenados = FORMULARIO_PERFIL_CAMPOS.filter((c) => perfilKeysPresent.has(c.key));
+
       // Resolve every unique "imagen" path to a signed URL once, up front.
       const imagenPaths = new Set<string>();
       for (const [campoNombre, meta] of camposOrdenados) {
@@ -483,7 +507,14 @@ export function ReservasPanel({
         }),
       );
 
-      const headers = ['Atleta', 'Apellido', 'Email', 'Fecha de respuesta', ...camposOrdenados.map(([, meta]) => meta.etiqueta)];
+      const headers = [
+        'Atleta',
+        'Apellido',
+        'Email',
+        'Fecha de respuesta',
+        ...perfilCamposOrdenados.map((c) => c.label),
+        ...camposOrdenados.map(([, meta]) => meta.etiqueta),
+      ];
 
       const rows: ExcelCellValue[][] = respuestas.map((r) => {
         const fixedCells: ExcelCellValue[] = [
@@ -492,6 +523,7 @@ export function ReservasPanel({
           r.atleta_email,
           formatDate(r.created_at),
         ];
+        const perfilCells: ExcelCellValue[] = perfilCamposOrdenados.map((c) => r.perfil_snapshot?.[c.key] ?? null);
         const dynamicCells: ExcelCellValue[] = camposOrdenados.map(([campoNombre, meta]) => {
           const value = r.respuesta[campoNombre];
           if (!value) return null;
@@ -501,7 +533,7 @@ export function ReservasPanel({
           }
           return value;
         });
-        return [...fixedCells, ...dynamicCells];
+        return [...fixedCells, ...perfilCells, ...dynamicCells];
       });
 
       const slug = instance.nombre.toLowerCase().replace(/\s+/g, '_');
@@ -969,6 +1001,7 @@ export function ReservasPanel({
         open={viewerOpen}
         plantillaNombre={viewerPlantillaNombre}
         campos={viewerCampos}
+        perfilCampos={viewerPerfilCampos}
         loading={viewerLoading}
         error={viewerError}
         onClose={() => setViewerOpen(false)}
