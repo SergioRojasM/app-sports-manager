@@ -101,7 +101,12 @@ export function useEntrenamientosPublicosMarketplace() {
       .filter((item) => !tenantId || item.tenantId === tenantId)
       .filter((item) => {
         if (!needle) return true;
-        return item.nombre.toLowerCase().includes(needle) || (item.descripcion ?? '').toLowerCase().includes(needle);
+        return (
+          item.nombre.toLowerCase().includes(needle) ||
+          (item.descripcion ?? '').toLowerCase().includes(needle) ||
+          // A session is also findable by a service it requires (US-0094)
+          item.serviciosRequeridos.some((servicio) => servicio.toLowerCase().includes(needle))
+        );
       });
   }, [items, dateChip, tenantId, search]);
 

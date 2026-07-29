@@ -12,6 +12,8 @@ export type PublicTrainingCardData = {
   reservaAntelacionHoras: number | null;
   precio: number | null;
   bannerUrl: string | null;
+  /** Services the training requires. Empty on the anonymous landing page (US-0094). */
+  serviciosRequeridos?: string[];
 };
 
 type PublicTrainingCardProps = {
@@ -38,6 +40,8 @@ function formatPrecio(precio: number | null): string {
 
 export function PublicTrainingCard({ data, featured = false, onReservar, reservarDisabled = false }: PublicTrainingCardProps) {
   const cupoMaximo = data.cupoMaximo ?? 0;
+  // Empty on the anonymous landing page — that surface never receives service names (US-0094)
+  const serviciosRequeridos = data.serviciosRequeridos ?? [];
   const ocupacionRatio = cupoMaximo > 0 ? Math.min(1, data.reservasActivas / cupoMaximo) : 0;
 
   return (
@@ -142,6 +146,19 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
             />
           </div>
         </div>
+
+        {serviciosRequeridos.length > 0 ? (
+          <p className="flex items-start gap-1.5 text-xs text-landing-text-muted">
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">
+              info
+            </span>
+            <span>
+              Este entrenamiento requiere una suscripción activa que incluya{' '}
+              {serviciosRequeridos.length === 1 ? 'el servicio de' : 'los servicios de'}:{' '}
+              <span className="font-semibold">{serviciosRequeridos.join(', ')}</span>
+            </span>
+          </p>
+        ) : null}
 
         <div className="mt-auto flex items-center justify-between gap-3 pt-1">
           <span className="font-landing-display text-base font-bold text-landing-text">{formatPrecio(data.precio)}</span>

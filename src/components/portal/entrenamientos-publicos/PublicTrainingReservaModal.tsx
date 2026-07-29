@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePublicTrainingReserva } from '@/hooks/portal/entrenamientos-publicos/usePublicTrainingReserva';
 import { ReservaFormModal } from '@/components/portal/entrenamientos/reservas/ReservaFormModal';
 import { FormularioRespuestaModal } from '@/components/portal/entrenamientos/reservas/FormularioRespuestaModal';
+import { PlanesPublicosModal } from '@/components/portal/planes-publicos';
 
 type PublicTrainingReservaModalProps = {
   open: boolean;
@@ -11,6 +12,7 @@ type PublicTrainingReservaModalProps = {
   entrenamientoId: string;
   disciplinaId: string;
   trainingNombre: string;
+  tenantNombre: string;
   onClose: () => void;
 };
 
@@ -25,9 +27,17 @@ export function PublicTrainingReservaModal({
   entrenamientoId,
   disciplinaId,
   trainingNombre,
+  tenantNombre,
   onClose,
 }: PublicTrainingReservaModalProps) {
   const reserva = usePublicTrainingReserva({ tenantId, entrenamientoId, disciplinaId });
+  const [planesOpen, setPlanesOpen] = useState(false);
+  const verPlanesRef = useRef<HTMLButtonElement>(null);
+
+  const closePlanes = useCallback(() => {
+    setPlanesOpen(false);
+    verPlanesRef.current?.focus();
+  }, []);
 
   // Re-runs once currentUserId resolves (it starts null while supabase.auth.getUser()
   // is in flight) — otherwise openBooking's `if (currentUserId)` guard would skip
@@ -71,6 +81,65 @@ export function PublicTrainingReservaModal({
           </button>
         </div>
       </div>
+    );
+  }
+
+  // A missing/exhausted service cannot be fixed by editing the booking form — the only
+  // way forward is acquiring a plan that grants it, so show a dedicated state with the
+  // catalog action instead of re-rendering the form with an inline error (US-0094).
+  const rejectionCode = reserva.bookingRejection?.code;
+  if (rejectionCode === 'SERVICIO_REQUERIDO' || rejectionCode === 'UNIDADES_AGOTADAS') {
+    return (
+      <>
+        {/* Hidden while the catalog is open: this dialog is z-50 and the catalog is z-40
+            (which must stay below SuscripcionModal's z-50), so stacking them would put the
+            catalog underneath. Closing the catalog brings this state back. */}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          hidden={planesOpen}
+        >
+          <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 bg-slate-950/70" />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reserva-rechazo-title"
+            className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl"
+          >
+            <span className="material-symbols-outlined text-4xl text-amber-300" aria-hidden="true">
+              lock
+            </span>
+            <h3 id="reserva-rechazo-title" className="mt-3 text-lg font-semibold text-slate-100">
+              No puedes reservar todavía
+            </h3>
+            <p className="mt-2 text-sm text-slate-300">{reserva.bookingRejection?.message}</p>
+
+            <div className="mt-5 flex flex-col gap-2">
+              <button
+                ref={verPlanesRef}
+                type="button"
+                onClick={() => setPlanesOpen(true)}
+                className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+              >
+                Ver planes de {tenantNombre}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-portal-border px-4 py-2 text-sm font-semibold text-slate-300 transition hover:text-slate-100"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <PlanesPublicosModal
+          open={planesOpen}
+          tenantId={tenantId}
+          tenantNombre={tenantNombre}
+          onClose={closePlanes}
+        />
+      </>
     );
   }
 

@@ -16,6 +16,7 @@ function toCardData(item: PublicTrainingListItem): PublicTrainingCardData {
     reservaAntelacionHoras: item.reservaAntelacionHoras,
     precio: item.precio,
     bannerUrl: item.bannerUrl,
+    serviciosRequeridos: item.serviciosRequeridos,
   };
 }
 
