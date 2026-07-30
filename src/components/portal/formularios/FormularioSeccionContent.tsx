@@ -1,3 +1,4 @@
+import { MultilineText } from '@/components/ui';
 import type { FormularioSeccion } from '@/types/portal/formularios.types';
 import { FormularioCampoPreviewInput } from './FormularioCampoPreviewInput';
 
@@ -21,7 +22,7 @@ export function FormularioSeccionContent({ seccion }: FormularioSeccionContentPr
   }
 
   if (seccion.seccion_tipo === 'texto') {
-    return <p className="text-sm leading-relaxed text-slate-400">{seccion.seccion_descripcion}</p>;
+    return <MultilineText className="text-sm leading-relaxed text-slate-400">{seccion.seccion_descripcion}</MultilineText>;
   }
 
   return (

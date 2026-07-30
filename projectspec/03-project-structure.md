@@ -221,6 +221,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── SessionsAvailableWidget.tsx      # Compact one-line stat ("N entrenamientos disponibles esta semana"), placed under the header subtitle
 │   │   │       └── index.ts
 │   │   └── ui/
+│   │       ├── MultilineText.tsx        # Renders a string with whitespace-pre-wrap (preserves line breaks), optional maxLength truncation, `as` tag prop (p/span/div) — US-0099
+│   │       └── index.ts
 │   │
 │   ├── hooks/                            # Application core (use cases)
 │   │   ├── auth/

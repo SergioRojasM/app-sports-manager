@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MultilineText } from '@/components/ui';
 import type { ViewTarget } from '@/hooks/portal/entrenamientos/useEntrenamientos';
 import { VisibilidadBadge } from './EntrenamientosList';
 import { GuardarPlantillaModal } from './GuardarPlantillaModal';
@@ -164,7 +165,9 @@ export function EntrenamientoDetalleModal({
               <VisibilidadBadge visibilidad={instance.visibilidad} />
             </div>
 
-            {instance.descripcion ? <p className="text-sm text-slate-300">{instance.descripcion}</p> : null}
+            {instance.descripcion ? (
+              <MultilineText className="text-sm text-slate-300">{instance.descripcion}</MultilineText>
+            ) : null}
 
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
@@ -327,7 +330,9 @@ export function EntrenamientoDetalleModal({
 
                       return (
                         <div key={restriccion.id} className="rounded-lg border border-slate-700/60 bg-navy-medium/20 p-3 text-sm text-slate-200">
-                          {restriccion.descripcion ? <p className="text-xs text-slate-400">{restriccion.descripcion}</p> : null}
+                          {restriccion.descripcion ? (
+                            <MultilineText className="text-xs text-slate-400">{restriccion.descripcion}</MultilineText>
+                          ) : null}
                           <p>Estado usuario: {usuarioEstadoLabel(restriccion.usuario_estado)}</p>
                           <p>Validar nivel: {restriccion.validar_nivel_disciplina ? 'Sí' : 'No'}</p>
                           <p>Servicios requeridos: {requiredServices.length > 0 ? requiredServices.join(', ') : 'Ninguno'}</p>
