@@ -1,5 +1,6 @@
 'use client';
 
+import { MultilineText } from '@/components/ui';
 import type { Servicio } from '@/types/portal/servicios.types';
 
 type ServiciosTableProps = {
@@ -50,7 +51,9 @@ export function ServiciosTable({ rows, onEdit, onDelete }: ServiciosTableProps) 
             >
               <td className="px-4 py-3 font-medium text-slate-200">{servicio.nombre}</td>
               <td className="px-4 py-3 text-slate-400">
-                {servicio.descripcion ?? (
+                {servicio.descripcion ? (
+                  <MultilineText>{servicio.descripcion}</MultilineText>
+                ) : (
                   <span className="italic text-slate-600">Sin descripción</span>
                 )}
               </td>

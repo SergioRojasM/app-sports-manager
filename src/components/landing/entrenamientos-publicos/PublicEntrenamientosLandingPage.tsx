@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Header from '@/components/landing/Header';
 import { usePublicEntrenamientosLanding } from '@/hooks/landing/entrenamientos-publicos/usePublicEntrenamientosLanding';
 import { PublicTrainingsGrid } from '@/components/portal/entrenamientos-publicos/PublicTrainingsGrid';
 import { RegistrateParaReservarModal } from './RegistrateParaReservarModal';
@@ -16,7 +17,8 @@ export function PublicEntrenamientosLandingPage() {
 
   return (
     <div className="landing-shell min-h-screen selection:bg-[var(--landing-primary)] selection:text-slate-950">
-      <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-5 py-10 md:px-8 lg:px-10">
+      <Header />
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-5 pt-28 pb-10 sm:pt-32 md:px-8 lg:px-10 lg:pt-36">
         <Link
           href="/"
           className="inline-flex w-fit items-center gap-1 font-landing-body text-sm font-semibold text-landing-text-secondary transition hover:text-landing-primary"

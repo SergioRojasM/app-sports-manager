@@ -1,3 +1,4 @@
+import { MultilineText } from '@/components/ui';
 import type { ScenarioWithAvailability } from '@/types/portal/scenarios.types';
 
 type ScenarioCardProps = {
@@ -47,9 +48,11 @@ export function ScenarioCard({ scenario, onEdit, onDelete }: ScenarioCardProps) 
             </span>
             {scenario.ubicacion ?? 'Ubicación no definida'}
           </p>
-          <p className="mt-1 text-xs text-cyan-300">
-            {truncateText(scenario.descripcion)}
-          </p>
+          <div className="mt-1">
+            <MultilineText maxLength={50} className="text-xs text-cyan-300">
+              {scenario.descripcion ?? 'No disponible'}
+            </MultilineText>
+          </div>
         </div>
 
         <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${status.className}`}>

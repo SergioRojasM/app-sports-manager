@@ -92,7 +92,9 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
         )}
 
         {data.descripcion && (
-          <p className="line-clamp-2 font-landing-body text-sm text-landing-text-secondary">{data.descripcion}</p>
+          <p className="line-clamp-2 whitespace-pre-wrap font-landing-body text-sm text-landing-text-secondary">
+            {data.descripcion}
+          </p>
         )}
 
         <div className="grid grid-cols-3 gap-1 font-landing-body text-[10px] text-landing-text-secondary">

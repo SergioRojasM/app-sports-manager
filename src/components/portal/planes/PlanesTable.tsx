@@ -1,3 +1,4 @@
+import { MultilineText } from '@/components/ui';
 import type { PlanTableItem, PlanWithDisciplinas } from '@/types/portal/planes.types';
 import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
 
@@ -75,7 +76,9 @@ export function PlanesTable({
                   <td className="pl-8 pr-6 py-4">
                     <div className="text-sm font-semibold text-slate-100">{row.nombre}</div>
                     {row.descripcion ? (
-                      <p className="mt-1 max-w-xs truncate text-xs text-slate-400">{row.descripcion}</p>
+                      <MultilineText maxLength={60} className="mt-1 max-w-xs text-xs text-slate-400">
+                        {row.descripcion}
+                      </MultilineText>
                     ) : null}
                   </td>
                   <td className="px-6 py-4">

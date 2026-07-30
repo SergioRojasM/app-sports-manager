@@ -1,5 +1,6 @@
 'use client';
 
+import { MultilineText } from '@/components/ui';
 import type { PlanPublicoItem, PlanPublicoTipoItem } from '@/types/portal/planes-publicos.types';
 
 type PlanPublicoCardProps = {
@@ -45,7 +46,7 @@ function TipoRow({ tipo }: { tipo: PlanPublicoTipoItem }) {
       <p className="mt-1 text-xs text-slate-400">Vigencia: {formatVigencia(tipo.vigencia_dias)}</p>
 
       {tipo.descripcion ? (
-        <p className="mt-1 text-xs text-slate-400">{tipo.descripcion}</p>
+        <MultilineText className="mt-1 text-xs text-slate-400">{tipo.descripcion}</MultilineText>
       ) : null}
 
       {tipo.servicios.length > 0 ? (
@@ -76,7 +77,7 @@ export function PlanPublicoCard({
         <div>
           <h3 className="text-base font-semibold text-slate-100">{plan.nombre}</h3>
           {plan.descripcion ? (
-            <p className="mt-1 text-sm text-slate-400">{plan.descripcion}</p>
+            <MultilineText className="mt-1 text-sm text-slate-400">{plan.descripcion}</MultilineText>
           ) : null}
         </div>
 
