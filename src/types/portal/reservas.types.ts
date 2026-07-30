@@ -18,6 +18,7 @@ export type Reserva = {
   notas: string | null;
   fecha_cancelacion: string | null;
   suscripcion_id: string | null;
+  formulario_respuesta_id: string | null;
   created_at: string;
 };
 
@@ -37,6 +38,10 @@ export type CreateReservaInput = {
   notas?: string;
   bypass_restrictions?: boolean;
   confirmed_no_units?: boolean;
+  /** Internal form template attached to the training, when a response is being submitted. */
+  formulario_plantilla_id?: string | null;
+  /** Collected answers keyed by each "datos" section's campo_nombre. */
+  formulario_respuesta?: Record<string, string> | null;
 };
 
 export type UpdateReservaInput = {
@@ -65,6 +70,7 @@ export type CategoriaDisponibilidad = {
 export type ReservaReportRow = {
   reserva_id: string;
   tenant_id: string;
+  tenant_nombre: string | null;
   entrenamiento_id: string;
   atleta_id: string;
   reserva_estado: string;
@@ -104,7 +110,7 @@ export type ReservasManagementFilters = {
 };
 
 export type MisReservasFilters = {
-  tenantId: string;
+  tenantId?: string;
   atletaId: string;
   fechaDesde?: string;
   fechaHasta?: string;

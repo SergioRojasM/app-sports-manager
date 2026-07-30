@@ -6,6 +6,7 @@ import { pagosService } from '@/services/supabase/portal/pagos.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
 import { createClient } from '@/services/supabase/client';
+import { SuscripcionServiceError } from '@/types/portal/suscripciones.types';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
 import type { MetodoPago } from '@/types/portal/metodos-pago.types';
 
@@ -187,8 +188,12 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
         setSelectedPlan(null);
         setSelectedTipoId(null);
         return true;
-      } catch {
-        setError('No fue posible enviar la solicitud. Inténtalo nuevamente.');
+      } catch (err) {
+        if (err instanceof SuscripcionServiceError && err.code === 'plan_unavailable') {
+          setError(err.message);
+        } else {
+          setError('No fue posible enviar la solicitud. Inténtalo nuevamente.');
+        }
         return false;
       } finally {
         setIsSubmitting(false);

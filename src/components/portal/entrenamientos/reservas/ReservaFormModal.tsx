@@ -46,6 +46,12 @@ type ReservaFormModalProps = {
   isConfirmingAdminBooking?: boolean;
   onConfirmAdminBooking?: () => Promise<void>;
   onCancelAdminConfirmation?: () => void;
+  /** Training has an internal form template attached (US-0087). */
+  hasFormularioInterno?: boolean;
+  formularioNombre?: string | null;
+  formularioObligatorio?: boolean;
+  /** Called instead of onSubmit (create mode) when hasFormularioInterno is true and base fields are valid. */
+  onRequireFormulario?: () => void;
 };
 
 // ─────────────────────────────────────────────
@@ -80,6 +86,10 @@ export function ReservaFormModal({
   isConfirmingAdminBooking = false,
   onConfirmAdminBooking,
   onCancelAdminConfirmation,
+  hasFormularioInterno = false,
+  formularioNombre = null,
+  formularioObligatorio = false,
+  onRequireFormulario,
 }: ReservaFormModalProps) {
   const [atletaOptions, setAtletaOptions] = useState<AtletaOption[]>([]);
   const [loadingAtletas, setLoadingAtletas] = useState(false);
@@ -233,6 +243,10 @@ export function ReservaFormModal({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (mode === 'create' && hasFormularioInterno && onRequireFormulario) {
+      onRequireFormulario();
+      return;
+    }
     await onSubmit();
   };
 
@@ -246,6 +260,16 @@ export function ReservaFormModal({
         <h2 className="mb-4 text-lg font-semibold text-slate-100">
           {mode === 'create' ? 'Nueva Reserva' : 'Editar Reserva'}
         </h2>
+
+        {mode === 'create' && hasFormularioInterno && (
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            <span className="material-symbols-outlined mt-0.5 text-base" aria-hidden="true">description</span>
+            <span>
+              Este entrenamiento tiene un formulario{formularioObligatorio ? ' obligatorio' : ' opcional'} adjunto
+              {formularioNombre ? ` ("${formularioNombre}")` : ''}. Al continuar podrás completarlo antes de reservar.
+            </span>
+          </div>
+        )}
 
         {submitError && (
           <div className="mb-4 rounded-lg border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
@@ -454,7 +478,9 @@ export function ReservaFormModal({
                 {isSubmitting
                   ? 'Guardando...'
                   : mode === 'create'
-                    ? 'Crear Reserva'
+                    ? hasFormularioInterno
+                      ? 'Continuar'
+                      : 'Crear Reserva'
                     : 'Guardar Cambios'}
               </button>
             </div>

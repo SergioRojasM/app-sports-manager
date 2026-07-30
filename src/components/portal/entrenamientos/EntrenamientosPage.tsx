@@ -1,14 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useEntrenamientos } from '@/hooks/portal/entrenamientos/useEntrenamientos';
 import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
-import { useState } from 'react';
+import { usePublicarEntrenamiento } from '@/hooks/portal/entrenamientos-publicos/usePublicarEntrenamiento';
+import { entrenamientosPublicosService, MEMBERSHIP_RESTRICTION_MESSAGE } from '@/services/supabase/portal/entrenamientos-publicos.service';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
 import { EntrenamientoFormModal } from './EntrenamientoFormModal';
 import { EntrenamientoDetalleModal } from './EntrenamientoDetalleModal';
 import { EntrenamientoScopeModal } from './EntrenamientoScopeModal';
 import { EntrenamientoActionModal } from './EntrenamientoActionModal';
+import { PublicarEntrenamientoModal } from './PublicarEntrenamientoModal';
 import { EntrenamientosCalendar } from './EntrenamientosCalendar';
 import { EntrenamientosList } from './EntrenamientosList';
 import { ReservasPanel } from './reservas';
@@ -52,8 +54,10 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
   const currentTimestamp = new Date().getTime();
   const { role } = useTenantAccess(tenantId);
   const canManage = role === 'administrador' || role === 'entrenador';
+  const isAdmin = role === 'administrador';
   const [reservasPanelOpen, setReservasPanelOpen] = useState(false);
   const [reservasPanelInstance, setReservasPanelInstance] = useState<TrainingInstance | null>(null);
+  const publicarEntrenamiento = usePublicarEntrenamiento({ tenantId });
 
   const {
     loading,
@@ -113,6 +117,12 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     updateRestriccion,
     setReservaAntelacionHoras,
     setCancelacionAntelacionHoras,
+    // Formulario
+    formulariosPlantillas,
+    formularioForm,
+    setFormularioTipo,
+    setFormularioPlantillaId,
+    setFormularioObligatorio,
     plantillas,
     plantillasLoading,
     plantillasError,
@@ -133,6 +143,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     viewLoading,
     requestViewInstance,
     closeViewModal,
+    publishedEntrenamientoIds,
   } = useEntrenamientos({ tenantId });
 
   const instanceMap = useMemo(() => new Map(instances.map((instance) => [instance.id, instance])), [instances]);
@@ -211,6 +222,71 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     };
   }, [currentTimestamp, selectedInstanceForAction]);
 
+  // Pre-publish validation (US-0094): service-based restrictions no longer block —
+  // a non-member can buy a public plan that grants the service. Publication is blocked
+  // only when NO restriction row is satisfiable without membership. The same call also
+  // returns the required service ids, used for the publish preview. Checked on-demand
+  // for the currently selected training, not eagerly for the whole list.
+  const [blockingRestrictionById, setBlockingRestrictionById] = useState<Record<string, boolean>>({});
+  const [requiredServicioIdsById, setRequiredServicioIdsById] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    if (!selectedInstanceForAction) {
+      return;
+    }
+
+    let cancelled = false;
+    const trainingId = selectedInstanceForAction.id;
+
+    entrenamientosPublicosService
+      .getPublishRestrictionSummary(tenantId, trainingId)
+      .then((summary) => {
+        if (cancelled) return;
+        setBlockingRestrictionById((prev) => ({ ...prev, [trainingId]: summary.blocking }));
+        setRequiredServicioIdsById((prev) => ({ ...prev, [trainingId]: summary.servicioIds }));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setBlockingRestrictionById((prev) => ({ ...prev, [trainingId]: false }));
+        setRequiredServicioIdsById((prev) => ({ ...prev, [trainingId]: [] }));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tenantId, selectedInstanceForAction]);
+
+  const hasBlockingRestriction = selectedInstanceForAction
+    ? (blockingRestrictionById[selectedInstanceForAction.id] ?? null)
+    : null;
+
+  const isSelectedInstancePublished = selectedInstanceForAction
+    ? publishedEntrenamientoIds.has(selectedInstanceForAction.id)
+    : false;
+
+  const publishActionContext = useMemo(() => {
+    if (!selectedInstanceForAction) {
+      return { canPublish: false, publishDisabledReason: 'No hay entrenamiento seleccionado.' };
+    }
+
+    if (!selectedActionContext.canEdit) {
+      return { canPublish: false, publishDisabledReason: 'No se pueden publicar entrenamientos pasados.' };
+    }
+
+    if (hasBlockingRestriction === null) {
+      return { canPublish: false, publishDisabledReason: undefined };
+    }
+
+    if (hasBlockingRestriction) {
+      return {
+        canPublish: false,
+        publishDisabledReason: MEMBERSHIP_RESTRICTION_MESSAGE,
+      };
+    }
+
+    return { canPublish: true, publishDisabledReason: undefined };
+  }, [hasBlockingRestriction, selectedActionContext.canEdit, selectedInstanceForAction]);
+
   const openActionModal = (trainingId: string) => {
     const target = instanceMap.get(trainingId);
     if (!target) {
@@ -240,6 +316,11 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
   const openReservasPanel = (instance: TrainingInstance) => {
     setReservasPanelInstance(instance);
     setReservasPanelOpen(true);
+    closeActionModal();
+  };
+
+  const openPublicarModal = (instance: TrainingInstance) => {
+    void publicarEntrenamiento.open(instance);
     closeActionModal();
   };
 
@@ -336,6 +417,14 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         canDelete={canManage && selectedActionContext.canDelete}
         editDisabledReason={selectedActionContext.editDisabledReason}
         deleteDisabledReason={selectedActionContext.deleteDisabledReason}
+        isAdmin={isAdmin}
+        isPublished={isSelectedInstancePublished}
+        canPublish={publishActionContext.canPublish}
+        publishDisabledReason={publishActionContext.publishDisabledReason}
+        onPublicar={() => {
+          if (!selectedInstanceForAction) return;
+          openPublicarModal(selectedInstanceForAction);
+        }}
         onClose={closeActionModal}
         onViewDetail={() => {
           if (!selectedInstanceForAction) {
@@ -372,6 +461,42 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         role={role}
         onClose={closeReservasPanel}
         onMutationComplete={() => void refresh()}
+      />
+
+      <PublicarEntrenamientoModal
+        open={publicarEntrenamiento.isOpen}
+        isPublished={publicarEntrenamiento.isPublished}
+        isLoading={publicarEntrenamiento.isLoading}
+        training={publicarEntrenamiento.training}
+        serviciosRequeridos={(requiredServicioIdsById[publicarEntrenamiento.training?.id ?? ''] ?? [])
+          .map((id) => servicioNameById[id])
+          .filter((name): name is string => Boolean(name))
+          .sort((a, b) => a.localeCompare(b))}
+        disciplinaNombre={
+          publicarEntrenamiento.training ? (disciplineNameById[publicarEntrenamiento.training.disciplina_id] ?? 'Disciplina') : ''
+        }
+        escenarioNombre={
+          publicarEntrenamiento.training ? (scenarioNameById[publicarEntrenamiento.training.escenario_id] ?? 'Escenario') : ''
+        }
+        values={publicarEntrenamiento.values}
+        existingBannerUrl={publicarEntrenamiento.existingBannerUrl}
+        bannerPreviewUrl={publicarEntrenamiento.bannerPreviewUrl}
+        bannerError={publicarEntrenamiento.bannerError}
+        isSubmitting={publicarEntrenamiento.isSubmitting}
+        submitError={publicarEntrenamiento.submitError}
+        onChangeField={publicarEntrenamiento.updateField}
+        onBannerFileSelect={publicarEntrenamiento.handleBannerFileSelect}
+        onClose={publicarEntrenamiento.close}
+        onSubmit={async () => {
+          const success = await publicarEntrenamiento.submit();
+          if (success) void refresh();
+          return success;
+        }}
+        onDespublicar={async () => {
+          const success = await publicarEntrenamiento.despublicar();
+          if (success) void refresh();
+          return success;
+        }}
       />
 
       <EntrenamientoFormModal
@@ -412,6 +537,13 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         onUpdateRestriccion={updateRestriccion}
         onSetReservaAntelacion={setReservaAntelacionHoras}
         onSetCancelacionAntelacion={setCancelacionAntelacionHoras}
+        tenantId={tenantId}
+        role={role}
+        formularioForm={formularioForm}
+        formulariosPlantillas={formulariosPlantillas}
+        onChangeFormularioTipo={setFormularioTipo}
+        onChangeFormularioPlantillaId={setFormularioPlantillaId}
+        onChangeFormularioObligatorio={setFormularioObligatorio}
         plantillas={plantillas}
         plantillasLoading={plantillasLoading}
         plantillasError={plantillasError}

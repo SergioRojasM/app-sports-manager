@@ -19,6 +19,7 @@ const EMPTY_FORM: PlanFormValues = {
   tipo: '',
   beneficios: [],
   activo: true,
+  es_publico: false,
   disciplinaIds: [],
 };
 
@@ -39,6 +40,7 @@ function toFormValues(plan: PlanWithDisciplinas): PlanFormValues {
     tipo: plan.tipo ?? '',
     beneficios: plan.beneficios ? plan.beneficios.split('|').filter(Boolean) : [],
     activo: plan.activo,
+    es_publico: plan.es_publico,
     disciplinaIds: [...plan.disciplinas],
   };
 }

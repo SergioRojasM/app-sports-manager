@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { ViewTarget } from '@/hooks/portal/entrenamientos/useEntrenamientos';
 import { VisibilidadBadge } from './EntrenamientosList';
 import { GuardarPlantillaModal } from './GuardarPlantillaModal';
+import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
+import { formulariosService } from '@/services/supabase/portal/formularios.service';
+import type { FormularioSeccion } from '@/types/portal/formularios.types';
 
 type EntrenamientoDetalleModalProps = {
   open: boolean;
@@ -78,6 +81,11 @@ export function EntrenamientoDetalleModal({
   onCloseGuardarPlantillaModal,
   onGuardarPlantilla,
 }: EntrenamientoDetalleModalProps) {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewSecciones, setPreviewSecciones] = useState<FormularioSeccion[]>([]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -104,6 +112,18 @@ export function EntrenamientoDetalleModal({
 
   const hasRestricciones =
     restricciones.length > 0 || instance.reserva_antelacion_horas != null || instance.cancelacion_antelacion_horas != null;
+
+  const handleOpenPreview = () => {
+    if (!instance.formulario_id) return;
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    formulariosService
+      .getPlantillaConSecciones(instance.formulario_id)
+      .then((plantilla) => setPreviewSecciones(plantilla.secciones))
+      .catch(() => setPreviewError('No fue posible cargar el formulario.'))
+      .finally(() => setPreviewLoading(false));
+  };
 
   return (
     <div className="fixed inset-0 z-50">
@@ -179,7 +199,9 @@ export function EntrenamientoDetalleModal({
               ) : null}
               {instance.formulario_externo ? (
                 <div>
-                  <dt className="text-xs text-slate-400">Formulario externo</dt>
+                  <dt className="text-xs text-slate-400">
+                    Formulario externo{instance.formulario_obligatorio ? ' · Obligatorio' : ''}
+                  </dt>
                   <dd className="text-sm">
                     <a
                       href={instance.formulario_externo}
@@ -189,6 +211,23 @@ export function EntrenamientoDetalleModal({
                     >
                       {instance.formulario_externo}
                     </a>
+                  </dd>
+                </div>
+              ) : null}
+              {instance.formulario_id ? (
+                <div>
+                  <dt className="text-xs text-slate-400">
+                    Formulario{instance.formulario_obligatorio ? ' · Obligatorio' : ''}
+                  </dt>
+                  <dd className="text-sm text-slate-200">
+                    <span>{instance.formulario_plantilla?.nombre ?? 'Plantilla de formulario'}</span>{' '}
+                    <button
+                      type="button"
+                      onClick={handleOpenPreview}
+                      className="text-turquoise hover:underline"
+                    >
+                      Ver formulario
+                    </button>
                   </dd>
                 </div>
               ) : null}
@@ -336,6 +375,15 @@ export function EntrenamientoDetalleModal({
         error={guardarPlantillaError}
         onClose={onCloseGuardarPlantillaModal}
         onSave={onGuardarPlantilla}
+      />
+
+      <FormularioPreviewModal
+        open={previewOpen}
+        plantillaNombre={instance.formulario_plantilla?.nombre ?? 'Formulario'}
+        secciones={previewSecciones}
+        loading={previewLoading}
+        error={previewError}
+        onClose={() => setPreviewOpen(false)}
       />
     </div>
   );

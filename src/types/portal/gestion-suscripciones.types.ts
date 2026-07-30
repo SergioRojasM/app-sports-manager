@@ -6,6 +6,9 @@
 /** Allowed values for suscripciones.estado. */
 export type SuscripcionEstado = 'pendiente' | 'activa' | 'vencida' | 'cancelada';
 
+/** Admin subscription list membership tabs. */
+export type SuscripcionTab = 'miembros' | 'no_miembros';
+
 /** Allowed values for pagos.estado. */
 export type PagoEstado = 'pendiente' | 'validado' | 'rechazado';
 
@@ -49,6 +52,8 @@ export interface SuscripcionAdminRow {
   created_at: string;
   pago: PagoAdminRow | null;
   servicios: import('@/types/portal/suscripciones.types').SuscripcionServicioDisplay[];
+  /** Whether atleta_id currently holds a miembros_tenant row for tenant_id (computed at read time). */
+  es_miembro: boolean;
 }
 
 /** Aggregate statistics derived in-memory from the subscription list. */

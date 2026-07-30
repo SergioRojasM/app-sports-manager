@@ -24,6 +24,7 @@ export type ReservaServiceErrorCode =
   | 'invalid_estado'
   | 'not_found'
   | 'forbidden'
+  | 'formulario_campos_faltantes'
   | 'unknown';
 
 export class ReservaServiceError extends Error {
@@ -77,6 +78,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       notas,
       fecha_cancelacion,
       suscripcion_id,
+      formulario_respuesta_id,
       created_at,
       usuarios!reservas_atleta_id_fkey (
         nombre,
@@ -111,6 +113,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       notas: row.notas,
       fecha_cancelacion: row.fecha_cancelacion,
       suscripcion_id: (row.suscripcion_id as string | null) ?? null,
+      formulario_respuesta_id: (row.formulario_respuesta_id as string | null) ?? null,
       created_at: row.created_at,
       atleta_nombre: usuario?.nombre ?? '',
       atleta_apellido: usuario?.apellido ?? '',
@@ -853,6 +856,8 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     p_entrenamiento_categoria_id: input.entrenamiento_categoria_id ?? null,
     p_notas: input.notas?.trim() || null,
     p_deductions: deductions,
+    p_formulario_plantilla_id: input.formulario_plantilla_id ?? null,
+    p_formulario_respuesta: input.formulario_respuesta ?? null,
   });
 
   if (error) {
@@ -868,6 +873,20 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
+      };
+    }
+    if (error.code === 'P0001' && error.message?.includes('FORMULARIO_CAMPOS_FALTANTES')) {
+      return {
+        ok: false,
+        code: 'FORMULARIO_CAMPOS_FALTANTES',
+        message: 'Faltan campos obligatorios del formulario.',
+      };
+    }
+    if (error.code === 'P0001' && error.message?.includes('PERFIL_INCOMPLETO')) {
+      return {
+        ok: false,
+        code: 'PERFIL_INCOMPLETO',
+        message: 'Tu perfil no tiene todos los datos que requiere este formulario. Actualízalo para continuar.',
       };
     }
     throw mapServiceError(error);
@@ -1090,8 +1109,11 @@ async function getMisReservas(
   let query = supabase
     .from('reservas_reporte_view')
     .select('*')
-    .eq('tenant_id', filters.tenantId)
     .eq('atleta_id', filters.atletaId);
+
+  if (filters.tenantId) {
+    query = query.eq('tenant_id', filters.tenantId);
+  }
 
   if (filters.fechaDesde) {
     query = query.gte('entrenamiento_fecha', bogotaDayStartIso(filters.fechaDesde));

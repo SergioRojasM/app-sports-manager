@@ -1,17 +1,6 @@
 import Link from 'next/link';
+import { formatBogotaDateTime } from '@/lib/portal/bogota-date';
 import type { InicioEntrenamiento } from '@/types/portal/inicio.types';
-
-function formatFecha(fechaStr: string): string {
-  const date = new Date(fechaStr);
-  const day = date.toLocaleDateString('es-CO', { weekday: 'short' });
-  const dayMonth = date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
-  const time = date.toLocaleTimeString('es-CO', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
-  return `${day}, ${dayMonth} · ${time}`;
-}
 
 function statusBadge(estado: string) {
   const map: Record<string, { bg: string; text: string; label: string }> = {
@@ -68,7 +57,7 @@ export function InicioProximosEntrenamientos({
 
                 <div className="flex-1 min-w-0 sm:hidden">
                   <p className="text-sm font-semibold text-secondary truncate">{e.nombre}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{formatFecha(e.fecha_hora)}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{formatBogotaDateTime(e.fecha_hora)}</p>
                 </div>
 
                 <div className="flex-shrink-0 sm:hidden">{statusBadge(e.reserva_estado)}</div>
@@ -77,7 +66,7 @@ export function InicioProximosEntrenamientos({
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-secondary truncate hidden sm:block">{e.nombre}</p>
-                <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">{formatFecha(e.fecha_hora)}</p>
+                <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">{formatBogotaDateTime(e.fecha_hora)}</p>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:mt-1">
                   {e.escenario_nombre && (
                     <span className="flex items-center gap-1">

@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import type {
   CategoriasFormState,
   TrainingFieldErrors,
+  TrainingFormularioFormState,
+  TrainingFormularioTipo,
   TrainingRuleErrors,
   TrainingVisibility,
   TrainingWizardRuleFormValue,
@@ -32,6 +34,12 @@ const EMPTY_RULE: TrainingWizardRuleFormValue = {
   hora_inicio: '',
   hora_fin: '',
   horas_especificas: [],
+};
+
+const EMPTY_FORMULARIO_FORM: TrainingFormularioFormState = {
+  tipo: 'ninguno',
+  formulario_id: '',
+  obligatorio: false,
 };
 
 const EMPTY_FORM: TrainingWizardValues = {
@@ -142,6 +150,9 @@ export function useEntrenamientoForm() {
   const [reservaAntelacionHoras, setReservaAntelacionHoras] = useState<number | null>(null);
   const [cancelacionAntelacionHoras, setCancelacionAntelacionHoras] = useState<number | null>(null);
 
+  // Formulario (form attachment) state
+  const [formularioForm, setFormularioForm] = useState<TrainingFormularioFormState>(EMPTY_FORMULARIO_FORM);
+
   const resetForm = useCallback(() => {
     setFormValues(EMPTY_FORM);
     setFieldErrors({});
@@ -153,6 +164,7 @@ export function useEntrenamientoForm() {
     setRestricciones([]);
     setReservaAntelacionHoras(null);
     setCancelacionAntelacionHoras(null);
+    setFormularioForm(EMPTY_FORMULARIO_FORM);
   }, []);
 
   const setFormValuesFromExternal = useCallback((values: TrainingWizardValues) => {
@@ -220,10 +232,18 @@ export function useEntrenamientoForm() {
     [],
   );
 
-  const validate = useCallback((values: TrainingWizardValues) => {
+  const validate = useCallback((values: TrainingWizardValues, formulario: TrainingFormularioFormState = formularioForm) => {
     const nextFieldErrors: TrainingFieldErrors = {};
     const nextRuleErrors: TrainingRuleErrors = values.reglas.map(() => ({}));
     const todayDateKey = getTodayDateKey();
+
+    if (formulario.tipo === 'externo' && !values.formulario_externo.trim()) {
+      nextFieldErrors.formulario_externo = 'Debes indicar la URL del formulario externo.';
+    }
+
+    if (formulario.tipo === 'interno' && !formulario.formulario_id.trim()) {
+      nextFieldErrors.formulario_id = 'Debes seleccionar una plantilla de formulario.';
+    }
 
     if (!values.disciplina_id.trim()) {
       nextFieldErrors.disciplina_id = 'La disciplina es obligatoria.';
@@ -382,7 +402,7 @@ export function useEntrenamientoForm() {
       fieldErrors: nextFieldErrors,
       ruleErrors: nextRuleErrors,
     };
-  }, []);
+  }, [formularioForm]);
 
   // Categories: computed values
   const totalAsignado = useMemo(() => {
@@ -473,6 +493,49 @@ export function useEntrenamientoForm() {
     [],
   );
 
+  // Formulario handlers
+  const setFormularioTipo = useCallback((tipo: TrainingFormularioTipo) => {
+    setFormularioForm((prev) => {
+      if (tipo === 'ninguno') {
+        return { tipo, formulario_id: '', obligatorio: false };
+      }
+      if (tipo === 'externo') {
+        return { ...prev, tipo, formulario_id: '' };
+      }
+      return { ...prev, tipo };
+    });
+
+    if (tipo === 'interno') {
+      setFormValues((current) => ({ ...current, formulario_externo: '' }));
+    }
+
+    setFieldErrors((current) => {
+      if (!('formulario_externo' in current) && !('formulario_id' in current)) return current;
+      const next = { ...current };
+      delete next.formulario_externo;
+      delete next.formulario_id;
+      return next;
+    });
+  }, []);
+
+  const setFormularioPlantillaId = useCallback((formularioId: string) => {
+    setFormularioForm((prev) => ({ ...prev, formulario_id: formularioId }));
+    setFieldErrors((current) => {
+      if (!('formulario_id' in current)) return current;
+      const next = { ...current };
+      delete next.formulario_id;
+      return next;
+    });
+  }, []);
+
+  const setFormularioObligatorio = useCallback((obligatorio: boolean) => {
+    setFormularioForm((prev) => ({ ...prev, obligatorio }));
+  }, []);
+
+  const setFormularioFormFromExternal = useCallback((value: TrainingFormularioFormState) => {
+    setFormularioForm(value);
+  }, []);
+
   // Templates: build a snapshot of Section 1 + categories + restrictions (excludes Section 2 scheduling fields)
   const buildPlantillaContenido = useCallback((): EntrenamientoPlantillaContenido => {
     return {
@@ -480,7 +543,9 @@ export function useEntrenamientoForm() {
       nombre: formValues.nombre,
       descripcion: formValues.descripcion,
       punto_encuentro: formValues.punto_encuentro,
-      formulario_externo: formValues.formulario_externo,
+      formulario_externo: formularioForm.tipo === 'externo' ? formValues.formulario_externo : '',
+      formulario_tipo: formularioForm.tipo,
+      formulario_obligatorio: formularioForm.tipo === 'ninguno' ? false : formularioForm.obligatorio,
       disciplina_id: formValues.disciplina_id,
       escenario_id: formValues.escenario_id,
       entrenador_id: formValues.entrenador_id,
@@ -511,17 +576,20 @@ export function useEntrenamientoForm() {
         })),
       },
     };
-  }, [formValues, categoriasForm, restricciones, reservaAntelacionHoras, cancelacionAntelacionHoras]);
+  }, [formValues, categoriasForm, restricciones, reservaAntelacionHoras, cancelacionAntelacionHoras, formularioForm]);
 
   // Templates: apply a saved snapshot, overwriting Section 1 + categories + restrictions
   // while leaving Section 2 (tipo/fechas/dias_semana/reglas) untouched
   const applyPlantillaContenido = useCallback((contenido: EntrenamientoPlantillaContenido) => {
+    const resolvedTipo: TrainingFormularioTipo =
+      contenido.formulario_tipo ?? (contenido.formulario_externo.trim() ? 'externo' : 'ninguno');
+
     setFormValues((current) => ({
       ...current,
       nombre: contenido.nombre,
       descripcion: contenido.descripcion,
       punto_encuentro: contenido.punto_encuentro,
-      formulario_externo: contenido.formulario_externo,
+      formulario_externo: resolvedTipo === 'externo' ? contenido.formulario_externo : '',
       disciplina_id: contenido.disciplina_id,
       escenario_id: contenido.escenario_id,
       entrenador_id: contenido.entrenador_id,
@@ -530,6 +598,14 @@ export function useEntrenamientoForm() {
       visibilidad: contenido.visibilidad,
     }));
 
+    // formulario_id is intentionally never restored from a saved template (US-0086) —
+    // applying an 'interno' snapshot pre-selects the toggle but leaves the picker unselected.
+    setFormularioForm({
+      tipo: resolvedTipo,
+      formulario_id: '',
+      obligatorio: contenido.formulario_obligatorio ?? false,
+    });
+
     setFieldErrors((current) => {
       const next = { ...current };
       const overwrittenFields: (keyof TrainingFieldErrors)[] = [
@@ -537,6 +613,8 @@ export function useEntrenamientoForm() {
         'descripcion',
         'punto_encuentro',
         'formulario_externo',
+        'formulario_tipo',
+        'formulario_id',
         'disciplina_id',
         'escenario_id',
         'entrenador_id',
@@ -613,6 +691,12 @@ export function useEntrenamientoForm() {
     duplicateRestriccion,
     removeRestriccion,
     updateRestriccion,
+    // Formulario
+    formularioForm,
+    setFormularioTipo,
+    setFormularioPlantillaId,
+    setFormularioObligatorio,
+    setFormularioFormFromExternal,
     // Templates
     buildPlantillaContenido,
     applyPlantillaContenido,

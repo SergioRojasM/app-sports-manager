@@ -1,6 +1,7 @@
 import type { SuscripcionAdminRow } from '@/types/portal/gestion-suscripciones.types';
 import { SuscripcionEstadoBadge } from './SuscripcionEstadoBadge';
 import { PagoEstadoBadge } from './PagoEstadoBadge';
+import { SuscripcionTipoBadge } from './SuscripcionTipoBadge';
 
 type SuscripcionesTableProps = {
   rows: SuscripcionAdminRow[];
@@ -61,6 +62,7 @@ export function SuscripcionesTable({
         <thead className="glass border-b border-portal-border text-xs uppercase tracking-wider text-slate-400">
           <tr>
             <th scope="col" className="px-2 py-3">Atleta</th>
+            <th scope="col" className="px-2 py-3">Tipo</th>
             <th scope="col" className="px-2 py-3">Plan</th>
             <th scope="col" className="px-4 py-3">Suscripción / Pago</th>
             <th scope="col" className="px-4 py-3">Inicio / Fin</th>
@@ -89,6 +91,10 @@ export function SuscripcionesTable({
               <td className="max-w-[180px] px-2 py-3">
                 <div className="truncate font-medium text-slate-100" title={row.atleta_nombre || undefined}>{row.atleta_nombre || '—'}</div>
                 <div className="truncate text-xs text-slate-400" title={row.atleta_email}>{row.atleta_email}</div>
+              </td>
+              {/* TIPO — membership badge */}
+              <td className="px-2 py-3">
+                <SuscripcionTipoBadge esMiembro={row.es_miembro} />
               </td>
               {/* PLAN — compact with truncation */}
               <td className="max-w-[110px] px-2 py-3">

@@ -37,12 +37,12 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Verify RLS in Supabase Studio: athlete sees only own rows; admin sees tenant rows; no direct INSERT is possible from authenticated
-- [ ] 5.2 Manual test — athlete self-service flow: create a subscription for a `plan_tipo` with 2 services → verify 2 rows in `suscripcion_servicios` with correct `unidades_incluidas` and `unidades_restantes`
-- [ ] 5.3 Manual test — unlimited service: create a subscription where `plan_tipos_servicios.unidades = NULL` → verify `NULL` values in both columns
-- [ ] 5.4 Manual test — no subtype: create a subscription without `plan_tipo_id` → verify 0 rows in `suscripcion_servicios`
-- [ ] 5.5 Manual test — admin flow: repeat 5.2 via `CrearSuscripcionModal` → verify same result
-- [ ] 5.6 Verify existing booking flow still works: `book_and_deduct_class` deducts `clases_restantes` correctly and is unaffected by this change
+- [x] 5.1 Verify RLS in Supabase Studio: athlete sees only own rows; admin sees tenant rows; no direct INSERT is possible from authenticated
+- [x] 5.2 Manual test — athlete self-service flow: create a subscription for a `plan_tipo` with 2 services → verify 2 rows in `suscripcion_servicios` with correct `unidades_incluidas` and `unidades_restantes`
+- [x] 5.3 Manual test — unlimited service: create a subscription where `plan_tipos_servicios.unidades = NULL` → verify `NULL` values in both columns
+- [x] 5.4 Manual test — no subtype: create a subscription without `plan_tipo_id` → verify 0 rows in `suscripcion_servicios`
+- [x] 5.5 Manual test — admin flow: repeat 5.2 via `CrearSuscripcionModal` → verify same result
+- [x] 5.6 Verify existing booking flow still works: `book_and_deduct_class` deducts `clases_restantes` correctly and is unaffected by this change
 
 ## 6. Documentation
 
@@ -60,7 +60,7 @@
   - Add getSuscripcionServicios service function
   - Add SuscripcionServicio TypeScript type
   ```
-- [ ] 7.2 Open a Pull Request with description:
+- [x] 7.2 Open a Pull Request with description:
   ```
   ## Summary
   Adds per-service unit entitlement tracking to subscriptions (US-0063).
@@ -77,8 +77,8 @@
   - New: getSuscripcionServicios service function, SuscripcionServicio type
 
   ## Testing
-  - [ ] Manual test: athlete self-service flow with multi-service plan tipo
-  - [ ] Manual test: admin creation flow with multi-service plan tipo
-  - [ ] Manual test: plan without subtype leaves suscripcion_servicios empty
-  - [ ] Existing booking deduction flow unaffected
+  - [ok] Manual test: athlete self-service flow with multi-service plan tipo
+  - [ok] Manual test: admin creation flow with multi-service plan tipo
+  - [ok] Manual test: plan without subtype leaves suscripcion_servicios empty
+  - [k] Existing booking deduction flow unaffected
   ```

@@ -120,6 +120,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
           onEdit={openEditModal}
           onDuplicate={openDuplicateModal}
           onDelete={(plan) => void deletePlan(plan)}
+          showVisibilidad
         />
       ) : null}
 

@@ -44,6 +44,24 @@ const BASE_MENU_ITEM: MenuItem = {
   icon: 'corporate_fare',
 };
 
+const PUBLIC_TRAININGS_MENU_ITEM: MenuItem = {
+  label: 'Entrenamientos Públicos',
+  href: '/portal/entrenamientos-publicos',
+  icon: 'public',
+};
+
+const MIS_SUSCRIPCIONES_MENU_ITEM: MenuItem = {
+  label: 'Mis Suscripciones',
+  href: '/portal/mis-suscripciones',
+  icon: 'receipt_long',
+};
+
+const MIS_RESERVAS_MENU_ITEM: MenuItem = {
+  label: 'Mis Reservas',
+  href: '/portal/mis-reservas',
+  icon: 'event_available',
+};
+
 const SHARED_TENANT_ITEMS: Array<{ label: string; path: string; icon: string }> = [
   // { label: 'Perfil', path: 'perfil', icon: 'person' },
 ];
@@ -54,6 +72,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
     { label: 'Escenarios', path: 'gestion-escenarios', icon: 'stadium' },
     { label: 'Disciplinas', path: 'gestion-disciplinas', icon: 'sports' },
     { label: 'Servicios', path: 'gestion-servicios', icon: 'category' },
+    { label: 'Formularios', path: 'gestion-formularios', icon: 'description' },
     { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
     { label: 'Suscripciones', path: 'gestion-suscripciones', icon: 'subscriptions' },
@@ -63,8 +82,6 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
   usuario: [
     { label: 'Entrenamientos Disponibles', path: 'gestion-entrenamientos', icon: 'directions_run' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
-    { label: 'Mis Suscripciones', path: 'mis-suscripciones-y-pagos', icon: 'receipt_long' },
-    { label: 'Mis Reservas', path: 'mis-reservas', icon: 'event_available' },
   ],
   entrenador: [
     { label: 'Atletas', path: 'atletas', icon: 'groups' },
@@ -76,7 +93,13 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
 
 export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[] {
   if (!tenantId) {
-    return [INICIO_MENU_ITEM, BASE_MENU_ITEM];
+    return [
+      INICIO_MENU_ITEM,
+      BASE_MENU_ITEM,
+      PUBLIC_TRAININGS_MENU_ITEM,
+      MIS_SUSCRIPCIONES_MENU_ITEM,
+      MIS_RESERVAS_MENU_ITEM,
+    ];
   }
 
   const tenantPrefix = `/portal/orgs/${tenantId}`;

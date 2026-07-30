@@ -7,6 +7,12 @@ type PlanesTableProps = {
   onEdit?: (plan: PlanWithDisciplinas) => void;
   onDelete?: (plan: PlanWithDisciplinas) => void;
   onDuplicate?: (plan: PlanWithDisciplinas) => void;
+  /**
+   * Shows the "Visibilidad" column (público / privado). Administrator-only:
+   * `readOnly` cannot be used for this, since the athlete view also passes
+   * `readOnly={false}` to get its "Adquirir" action (US-0093).
+   */
+  showVisibilidad?: boolean;
   /** Optional render function for a custom action column per row */
   renderRowAction?: (plan: PlanTableItem) => React.ReactNode;
 };
@@ -32,7 +38,15 @@ function collectUniqueServices(row: PlanTableItem): { servicioId: string; nombre
   return Array.from(seen.entries()).map(([servicioId, nombre]) => ({ servicioId, nombre }));
 }
 
-export function PlanesTable({ rows, readOnly, onEdit, onDelete, onDuplicate, renderRowAction }: PlanesTableProps) {
+export function PlanesTable({
+  rows,
+  readOnly,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  showVisibilidad,
+  renderRowAction,
+}: PlanesTableProps) {
   return (
     <div className="glass overflow-hidden rounded-xl border border-portal-border">
       <div className="overflow-x-auto">
@@ -45,6 +59,9 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, onDuplicate, ren
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Servicios</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Beneficios</th>
               <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Estado</th>
+              {showVisibilidad ? (
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Visibilidad</th>
+              ) : null}
               {!readOnly ? (
                 <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Acciones</th>
               ) : null}
@@ -147,6 +164,23 @@ export function PlanesTable({ rows, readOnly, onEdit, onDelete, onDuplicate, ren
                       {row.statusLabel}
                     </span>
                   </td>
+                  {showVisibilidad ? (
+                    <td className="px-6 py-4">
+                      <span
+                        className={[
+                          'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
+                          row.es_publico
+                            ? 'border border-turquoise/40 bg-turquoise/10 text-turquoise'
+                            : 'border border-slate-500/40 bg-slate-700/40 text-slate-300',
+                        ].join(' ')}
+                      >
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">
+                          {row.es_publico ? 'public' : 'lock'}
+                        </span>
+                        {row.es_publico ? 'Público' : 'Privado'}
+                      </span>
+                    </td>
+                  ) : null}
                   {!readOnly ? (
                     <td className="pl-6 pr-8 py-4">
                       <div className="flex items-center justify-end gap-1">

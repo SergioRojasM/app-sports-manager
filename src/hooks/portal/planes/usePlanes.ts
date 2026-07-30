@@ -255,6 +255,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           tipo: form.formValues.tipo || null,
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
+          esPublico: form.formValues.es_publico,
           disciplinaIds: form.formValues.disciplinaIds,
         };
 
@@ -269,6 +270,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           tipo: form.formValues.tipo || null,
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
+          esPublico: form.formValues.es_publico,
           disciplinaIds: form.formValues.disciplinaIds,
         };
 

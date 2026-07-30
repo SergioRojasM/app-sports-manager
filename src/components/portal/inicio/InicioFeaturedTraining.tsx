@@ -1,13 +1,6 @@
 import Link from 'next/link';
+import { formatBogotaDateTime } from '@/lib/portal/bogota-date';
 import type { InicioEntrenamiento } from '@/types/portal/inicio.types';
-
-function formatFecha(fechaStr: string): string {
-  const date = new Date(fechaStr);
-  const day = date.toLocaleDateString('es-CO', { weekday: 'short' });
-  const dayMonth = date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
-  const time = date.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', hour12: true });
-  return `${day}, ${dayMonth} · ${time}`;
-}
 
 export function InicioFeaturedTraining({
   entrenamiento,
@@ -28,7 +21,7 @@ export function InicioFeaturedTraining({
     );
   }
 
-  const fecha = formatFecha(entrenamiento.fecha_hora);
+  const fecha = formatBogotaDateTime(entrenamiento.fecha_hora);
   const detailHref = `/portal/orgs/${entrenamiento.tenant_id}/gestion-entrenamientos`;
 
   return (

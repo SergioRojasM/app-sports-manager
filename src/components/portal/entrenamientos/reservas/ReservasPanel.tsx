@@ -5,15 +5,27 @@ import { createClient } from '@/services/supabase/client';
 import { useReservas } from '@/hooks/portal/entrenamientos/reservas/useReservas';
 import { useReservaForm } from '@/hooks/portal/entrenamientos/reservas/useReservaForm';
 import { useAsistencias } from '@/hooks/portal/entrenamientos/reservas/useAsistencias';
+import { useFormularioRespuestaForm } from '@/hooks/portal/entrenamientos/reservas/useFormularioRespuestaForm';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
+import { storageService } from '@/services/supabase/portal/storage.service';
 import { toCsvString, downloadTextFile } from '@/lib/csv';
+import { downloadExcelWorkbook, type ExcelCellValue } from '@/lib/excel';
 import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
 import { AsistenciaFormModal } from './AsistenciaFormModal';
+import { FormularioRespuestaModal } from './FormularioRespuestaModal';
+import {
+  FormularioRespuestaViewerModal,
+  type FormularioRespuestaViewerCampo,
+  type FormularioRespuestaViewerPerfilCampo,
+} from './FormularioRespuestaViewerModal';
+import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
+import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import type { UserRole } from '@/types/portal.types';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
+import { FORMULARIO_PERFIL_CAMPOS, type FormularioPerfilCampo, type FormularioSeccion } from '@/types/portal/formularios.types';
 import type { ReservaView } from '@/types/portal/reservas.types';
 
 // ─────────────────────────────────────────────
@@ -58,7 +70,26 @@ export function ReservasPanel({
   const [selectedReservaForAsistencia, setSelectedReservaForAsistencia] = useState<ReservaView | null>(null);
   const [savingAsistencia, setSavingAsistencia] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportingFormulario, setIsExportingFormulario] = useState(false);
   const [restrictionLabels, setRestrictionLabels] = useState<string[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewSecciones, setPreviewSecciones] = useState<FormularioSeccion[]>([]);
+  const [previewPerfilCampos, setPreviewPerfilCampos] = useState<FormularioPerfilCampo[]>([]);
+
+  // Formulario fill-out step (US-0087)
+  const [formularioRespuestaModalOpen, setFormularioRespuestaModalOpen] = useState(false);
+  const [formularioTargetAtletaId, setFormularioTargetAtletaId] = useState<string | null>(null);
+
+  // "Ver respuesta" viewer (US-0087) — rendered from the response's campos_snapshot,
+  // never from the live template, so it keeps working after the template is edited/deleted.
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerLoading, setViewerLoading] = useState(false);
+  const [viewerError, setViewerError] = useState<string | null>(null);
+  const [viewerPlantillaNombre, setViewerPlantillaNombre] = useState('');
+  const [viewerCampos, setViewerCampos] = useState<FormularioRespuestaViewerCampo[]>([]);
+  const [viewerPerfilCampos, setViewerPerfilCampos] = useState<FormularioRespuestaViewerPerfilCampo[]>([]);
 
   const isAdmin = role === 'administrador' || role === 'entrenador';
   const isPast = !!instance?.fecha_hora && new Date(instance.fecha_hora) < new Date();
@@ -81,6 +112,8 @@ export function ReservasPanel({
   useEffect(() => {
     if (!open) {
       reservasHook.clearRejection();
+      setFormularioRespuestaModalOpen(false);
+      setViewerOpen(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -142,8 +175,10 @@ export function ReservasPanel({
         onMutationComplete?.();
         void reservasHook.refetchCategorias();
         setFormModalOpen(false);
+        setFormularioRespuestaModalOpen(false);
+        formularioRespuestaForm.reset();
       }
-      // On failure keep modal open so errors/warnings are visible
+      // On failure keep modal(s) open so errors/warnings are visible
       return success;
     },
     onUpdateReserva: async (id, input) => {
@@ -155,6 +190,25 @@ export function ReservasPanel({
       return success;
     },
   });
+
+  // Formulario fill-out step (US-0087): loads the attached template's sections and
+  // manages the collected answers once the user has moved past ReservaFormModal.
+  const formularioRespuestaForm = useFormularioRespuestaForm({
+    formularioPlantillaId: instance?.formulario_id ?? null,
+    tenantId,
+    atletaId: formularioTargetAtletaId,
+  });
+
+  // If a staff booking with a submitted form triggers the "no units, confirm anyway"
+  // flow, hand control back to ReservaFormModal (which already renders that branch)
+  // instead of leaving FormularioRespuestaModal open — the collected answers stay
+  // intact in pendingBookingInputRef and are replayed as-is on confirmation.
+  useEffect(() => {
+    if (reservasHook.adminConfirmPending && formularioRespuestaModalOpen) {
+      setFormularioRespuestaModalOpen(false);
+      setFormModalOpen(true);
+    }
+  }, [reservasHook.adminConfirmPending, formularioRespuestaModalOpen]);
 
   // My active booking (for atleta view)
   const myReserva = useMemo(() => {
@@ -210,6 +264,109 @@ export function ReservasPanel({
       estado: reserva.estado,
     });
     setFormModalOpen(true);
+  };
+
+  // ── Formulario fill-out step (US-0087) ──────────────────────────────────
+
+  const handleRequireFormulario = () => {
+    if (!reservaForm.validateBase()) return;
+    setFormularioTargetAtletaId(reservaForm.form.atleta_id);
+    setFormModalOpen(false);
+    setFormularioRespuestaModalOpen(true);
+  };
+
+  const handleFormularioGuardarYReservar = async () => {
+    if (!instance?.formulario_id) return;
+    if (!formularioRespuestaForm.validate()) return;
+    const respuesta = formularioRespuestaForm.buildRespuesta();
+    await reservaForm.submitCreate({
+      formulario_plantilla_id: instance.formulario_id,
+      formulario_respuesta: respuesta,
+    });
+    // onCreateReserva closes both modals and resets formularioRespuestaForm on success;
+    // on failure the modal stays open with submitError/errors visible.
+  };
+
+  const handleFormularioSkip = async () => {
+    await reservaForm.submitCreate();
+  };
+
+  const handleCloseFormularioRespuesta = () => {
+    setFormularioRespuestaModalOpen(false);
+    formularioRespuestaForm.reset();
+    reservaForm.reset();
+    reservasHook.cancelAdminConfirmation();
+  };
+
+  // ── "Ver respuesta" viewer (US-0087) ────────────────────────────────────
+
+  const handleOpenRespuestaViewer = async (reserva: ReservaView) => {
+    if (!reserva.formulario_respuesta_id) return;
+    setViewerOpen(true);
+    setViewerLoading(true);
+    setViewerError(null);
+    try {
+      const respuestaRow = await formulariosService.getRespuestaById(reserva.formulario_respuesta_id);
+      if (!respuestaRow) {
+        throw new Error('not_found');
+      }
+
+      // The template's current name is a nice-to-have; the response itself never
+      // depends on the template still existing — campos_snapshot carries the labels.
+      let nombre = 'Formulario eliminado';
+      if (respuestaRow.formulario_plantilla_id) {
+        try {
+          const plantilla = await formulariosService.getPlantillaConSecciones(respuestaRow.formulario_plantilla_id);
+          nombre = plantilla.nombre;
+        } catch {
+          // Keep the fallback label — the snapshot below still renders correctly
+        }
+      }
+      setViewerPlantillaNombre(nombre);
+
+      const perfilCampos: FormularioRespuestaViewerPerfilCampo[] = FORMULARIO_PERFIL_CAMPOS.filter(
+        (c) => respuestaRow.perfil_snapshot?.[c.key] != null,
+      ).map((c) => ({
+        key: c.key,
+        label: c.label,
+        value: respuestaRow.perfil_snapshot[c.key] as string,
+      }));
+      setViewerPerfilCampos(perfilCampos);
+
+      const campos: FormularioRespuestaViewerCampo[] = Object.entries(respuestaRow.campos_snapshot)
+        .map(([campoNombre, meta]) => ({
+          campoNombre,
+          etiqueta: meta.etiqueta,
+          tipo: meta.tipo,
+          value: respuestaRow.respuesta[campoNombre],
+        }))
+        .sort(
+          (a, b) =>
+            respuestaRow.campos_snapshot[a.campoNombre].orden - respuestaRow.campos_snapshot[b.campoNombre].orden,
+        );
+
+      const imagenCampos = campos.filter((c) => c.tipo === 'imagen' && c.value);
+      if (imagenCampos.length > 0) {
+        const supabase = createClient();
+        const urls: Record<string, string> = {};
+        await Promise.all(
+          imagenCampos.map(async (c) => {
+            try {
+              urls[c.campoNombre] = await storageService.getSignedUrl(supabase, c.value as string);
+            } catch {
+              // Non-critical — image link shows "Sin respuesta" fallback
+            }
+          }),
+        );
+        setViewerCampos(campos.map((c) => ({ ...c, imageUrl: urls[c.campoNombre] })));
+      } else {
+        setViewerCampos(campos);
+      }
+    } catch {
+      setViewerError('No fue posible cargar la respuesta.');
+    } finally {
+      setViewerLoading(false);
+    }
   };
 
   const handleExportCsv = async () => {
@@ -291,6 +448,122 @@ export function ReservasPanel({
     }
   };
 
+  const handleExportFormularioRespuestas = async () => {
+    if (!instance) return;
+    setIsExportingFormulario(true);
+    try {
+      const respuestas = await formulariosService.getRespuestasByEntrenamiento(tenantId, instance.id);
+
+      if (respuestas.length === 0) {
+        window.alert('No hay respuestas de formulario para este entrenamiento.');
+        return;
+      }
+
+      const formatDate = (iso: string | null): string => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
+      // Union of every campo_nombre across all responses' snapshots, ordered by orden.
+      const camposMap = new Map<string, { etiqueta: string; tipo: string; orden: number }>();
+      for (const r of respuestas) {
+        for (const [campoNombre, meta] of Object.entries(r.campos_snapshot)) {
+          camposMap.set(campoNombre, meta);
+        }
+      }
+      const camposOrdenados = Array.from(camposMap.entries()).sort((a, b) => a[1].orden - b[1].orden);
+
+      // Union of every requested profile key across all responses' perfil_snapshot (US-0096),
+      // in FORMULARIO_PERFIL_CAMPOS catalog order.
+      const perfilKeysPresent = new Set<string>();
+      for (const r of respuestas) {
+        for (const key of Object.keys(r.perfil_snapshot ?? {})) {
+          perfilKeysPresent.add(key);
+        }
+      }
+      const perfilCamposOrdenados = FORMULARIO_PERFIL_CAMPOS.filter((c) => perfilKeysPresent.has(c.key));
+
+      // Resolve every unique "imagen" path to a signed URL once, up front.
+      const imagenPaths = new Set<string>();
+      for (const [campoNombre, meta] of camposOrdenados) {
+        if (meta.tipo !== 'imagen') continue;
+        for (const r of respuestas) {
+          const path = r.respuesta[campoNombre];
+          if (path) imagenPaths.add(path);
+        }
+      }
+      const supabase = createClient();
+      const signedUrlMap = new Map<string, string>();
+      await Promise.all(
+        Array.from(imagenPaths).map(async (path) => {
+          try {
+            signedUrlMap.set(path, await storageService.getSignedUrl(supabase, path));
+          } catch {
+            // Left unresolved — rendered as a "not available" label below
+          }
+        }),
+      );
+
+      const headers = [
+        'Atleta',
+        'Apellido',
+        'Email',
+        'Fecha de respuesta',
+        ...perfilCamposOrdenados.map((c) => c.label),
+        ...camposOrdenados.map(([, meta]) => meta.etiqueta),
+      ];
+
+      const rows: ExcelCellValue[][] = respuestas.map((r) => {
+        const fixedCells: ExcelCellValue[] = [
+          r.atleta_nombre ?? '',
+          r.atleta_apellido ?? '',
+          r.atleta_email,
+          formatDate(r.created_at),
+        ];
+        const perfilCells: ExcelCellValue[] = perfilCamposOrdenados.map((c) => r.perfil_snapshot?.[c.key] ?? null);
+        const dynamicCells: ExcelCellValue[] = camposOrdenados.map(([campoNombre, meta]) => {
+          const value = r.respuesta[campoNombre];
+          if (!value) return null;
+          if (meta.tipo === 'imagen') {
+            const signedUrl = signedUrlMap.get(value);
+            return signedUrl ? { text: 'Ver imagen', hyperlink: signedUrl } : 'Ver imagen (no disponible)';
+          }
+          return value;
+        });
+        return [...fixedCells, ...perfilCells, ...dynamicCells];
+      });
+
+      const slug = instance.nombre.toLowerCase().replace(/\s+/g, '_');
+      const dateStr = instance.fecha_hora ? instance.fecha_hora.slice(0, 10) : 'sin-fecha';
+      const filename = `respuestas_formulario_${slug}_${dateStr}.xlsx`;
+
+      await downloadExcelWorkbook('Respuestas', headers, rows, filename);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al exportar las respuestas del formulario';
+      window.alert(message);
+    } finally {
+      setIsExportingFormulario(false);
+    }
+  };
+
+  const handleOpenFormularioPreview = () => {
+    if (!instance?.formulario_id) return;
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    formulariosService
+      .getPlantillaConSecciones(instance.formulario_id)
+      .then((plantilla) => {
+        setPreviewSecciones(plantilla.secciones);
+        setPreviewPerfilCampos(plantilla.perfil_campos_requeridos ?? []);
+      })
+      .catch(() => setPreviewError('No fue posible cargar el formulario.'))
+      .finally(() => setPreviewLoading(false));
+  };
+
   if (!open || !instance) {
     return null;
   }
@@ -317,35 +590,50 @@ export function ReservasPanel({
         aria-label={`Reservas: ${instance.nombre}`}
       >
         {/* Header */}
-        <header className="flex items-start justify-between border-b border-portal-border px-6 py-4">
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-lg font-semibold text-slate-100">{instance.nombre}</h2>
-            <p className="mt-1 text-sm text-slate-400">Reservas del entrenamiento</p>
-          </div>
-          <div className="ml-4 flex flex-shrink-0 items-center gap-1">
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={handleExportCsv}
-                disabled={isExporting}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
-                title="Descargar CSV"
-              >
-                <span className="material-symbols-outlined text-base" aria-hidden="true">
-                  {isExporting ? 'hourglass_empty' : 'download'}
-                </span>
-                <span>{isExporting ? 'Exportando...' : 'Descargar CSV'}</span>
-              </button>
-            )}
+        <header className="border-b border-portal-border px-6 py-4">
+          <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-lg font-semibold text-slate-100">{instance.nombre}</h2>
+              <p className="mt-1 text-sm text-slate-400">Reservas del entrenamiento</p>
+            </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-slate-400 hover:bg-slate-700/40 hover:text-slate-200"
+              className="ml-4 flex-shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-700/40 hover:text-slate-200"
             >
               <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
               <span className="sr-only">Cerrar panel</span>
             </button>
           </div>
+
+          {isAdmin && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleExportCsv}
+                disabled={isExporting}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
+                title="Descargar Reservas"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">
+                  {isExporting ? 'hourglass_empty' : 'download'}
+                </span>
+                <span>{isExporting ? 'Exportando...' : 'Descargar Reservas'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleExportFormularioRespuestas()}
+                disabled={isExportingFormulario}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
+                title="Descargar Respuestas Formulario"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">
+                  {isExportingFormulario ? 'hourglass_empty' : 'summarize'}
+                </span>
+                <span>{isExportingFormulario ? 'Exportando...' : 'Descargar Respuestas Formulario'}</span>
+              </button>
+            </div>
+          )}
         </header>
 
         {/* Capacity indicator */}
@@ -373,7 +661,29 @@ export function ReservasPanel({
               >
                 Formulario externo
               </a>
+              {instance.formulario_obligatorio && (
+                <span className="text-xs font-medium text-amber-300">Obligatorio</span>
+              )}
             </div>
+          )}
+          {instance.formulario_id && (
+            <div className="mt-2 flex items-center gap-2 text-sm">
+              <span className="material-symbols-outlined text-base text-slate-400" aria-hidden="true">description</span>
+              <span className="font-medium text-slate-300">{instance.formulario_plantilla?.nombre ?? 'Plantilla de formulario'}</span>
+              <button
+                type="button"
+                onClick={handleOpenFormularioPreview}
+                className="font-medium text-turquoise hover:underline"
+              >
+                Ver formulario
+              </button>
+              {instance.formulario_obligatorio && (
+                <span className="text-xs font-medium text-amber-300">Obligatorio</span>
+              )}
+            </div>
+          )}
+          {instance.formulario_obligatorio && (instance.formulario_externo || instance.formulario_id) && (
+            <p className="mt-1 text-xs text-slate-400">Debes completar este formulario antes de reservar.</p>
           )}
 
           {/* Per-category capacity breakdown */}
@@ -494,6 +804,7 @@ export function ReservasPanel({
                   (reserva.estado === 'confirmada' || reserva.estado === 'cancelada') &&
                   isAdmin;
                 const canEdit = isAdmin;
+                const canViewRespuesta = !!reserva.formulario_respuesta_id && (isAdmin || isOwn);
 
                 return (
                   <li
@@ -542,8 +853,17 @@ export function ReservasPanel({
                     )}
 
                     {/* Row actions */}
-                    {(canEdit || canCancel || canDelete) && (
+                    {(canEdit || canCancel || canDelete || canViewRespuesta) && (
                       <div className="mt-3 flex items-center gap-2">
+                        {canViewRespuesta && (
+                          <button
+                            type="button"
+                            onClick={() => void handleOpenRespuestaViewer(reserva)}
+                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise"
+                          >
+                            Ver respuesta
+                          </button>
+                        )}
                         {canEdit && (
                           <button
                             type="button"
@@ -642,9 +962,59 @@ export function ReservasPanel({
             void reservasHook.refetchCategorias();
             setFormModalOpen(false);
             reservaForm.reset();
+            formularioRespuestaForm.reset();
           }
         }}
         onCancelAdminConfirmation={reservasHook.cancelAdminConfirmation}
+        hasFormularioInterno={!!instance.formulario_id}
+        formularioNombre={instance.formulario_plantilla?.nombre ?? null}
+        formularioObligatorio={instance.formulario_obligatorio}
+        onRequireFormulario={handleRequireFormulario}
+      />
+
+      <FormularioRespuestaModal
+        open={formularioRespuestaModalOpen}
+        plantillaNombre={formularioRespuestaForm.plantillaNombre || instance.formulario_plantilla?.nombre || 'Formulario'}
+        secciones={formularioRespuestaForm.secciones}
+        values={formularioRespuestaForm.values}
+        errors={formularioRespuestaForm.errors}
+        loading={formularioRespuestaForm.loading}
+        loadError={formularioRespuestaForm.loadError}
+        uploadingCampoNombre={formularioRespuestaForm.uploadingCampoNombre}
+        uploadError={formularioRespuestaForm.uploadError}
+        perfilResumen={formularioRespuestaForm.perfilResumen}
+        perfilFaltantes={formularioRespuestaForm.perfilFaltantes}
+        perfilLoading={formularioRespuestaForm.perfilLoading}
+        onRefetchPerfil={() => void formularioRespuestaForm.refetchPerfil()}
+        isSelf={formularioTargetAtletaId === currentUserId}
+        allowSkip={isAdmin || !instance.formulario_obligatorio}
+        isSubmitting={reservaForm.isSubmitting}
+        submitError={reservaForm.submitError}
+        onUpdateValue={formularioRespuestaForm.updateValue}
+        onUploadImage={formularioRespuestaForm.uploadImage}
+        onSubmit={handleFormularioGuardarYReservar}
+        onSkip={handleFormularioSkip}
+        onClose={handleCloseFormularioRespuesta}
+      />
+
+      <FormularioRespuestaViewerModal
+        open={viewerOpen}
+        plantillaNombre={viewerPlantillaNombre}
+        campos={viewerCampos}
+        perfilCampos={viewerPerfilCampos}
+        loading={viewerLoading}
+        error={viewerError}
+        onClose={() => setViewerOpen(false)}
+      />
+
+      <FormularioPreviewModal
+        open={previewOpen}
+        plantillaNombre={instance.formulario_plantilla?.nombre ?? 'Formulario'}
+        secciones={previewSecciones}
+        perfilCamposRequeridos={previewPerfilCampos}
+        loading={previewLoading}
+        error={previewError}
+        onClose={() => setPreviewOpen(false)}
       />
     </>
   );

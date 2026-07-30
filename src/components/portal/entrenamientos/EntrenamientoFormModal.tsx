@@ -5,13 +5,18 @@ import type {
   CategoriasFormState,
   SelectOption,
   TrainingFieldErrors,
+  TrainingFormularioFormState,
+  TrainingFormularioTipo,
   TrainingRuleErrors,
   TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
 import type { NivelDisciplina } from '@/types/portal/nivel-disciplina.types';
+import type { FormularioPlantillaListItem } from '@/types/portal/formularios.types';
+import type { UserRole } from '@/types/portal.types';
 import { EntrenamientoWizard } from './EntrenamientoWizard';
 import { EntrenamientoCategoriasSection } from './EntrenamientoCategoriasSection';
 import { EntrenamientoRestriccionesSection } from './EntrenamientoRestriccionesSection';
+import { EntrenamientoFormularioSection } from './EntrenamientoFormularioSection';
 import { GuardarPlantillaModal } from './GuardarPlantillaModal';
 import { PlantillasListModal } from './PlantillasListModal';
 import type { EntrenamientoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
@@ -57,6 +62,14 @@ type EntrenamientoFormModalProps = {
   onDuplicateRestriccion: (index: number) => void;
   onRemoveRestriccion: (index: number) => void;
   onUpdateRestriccion: (index: number, patch: Partial<EntrenamientoRestriccionInput>) => void;
+  // Formulario
+  tenantId: string;
+  role: UserRole | null;
+  formularioForm: TrainingFormularioFormState;
+  formulariosPlantillas: FormularioPlantillaListItem[];
+  onChangeFormularioTipo: (tipo: TrainingFormularioTipo) => void;
+  onChangeFormularioPlantillaId: (id: string) => void;
+  onChangeFormularioObligatorio: (value: boolean) => void;
   // Templates
   plantillas: EntrenamientoPlantilla[];
   plantillasLoading: boolean;
@@ -112,6 +125,13 @@ export function EntrenamientoFormModal({
   onDuplicateRestriccion,
   onRemoveRestriccion,
   onUpdateRestriccion,
+  tenantId,
+  role,
+  formularioForm,
+  formulariosPlantillas,
+  onChangeFormularioTipo,
+  onChangeFormularioPlantillaId,
+  onChangeFormularioObligatorio,
   plantillas,
   plantillasLoading,
   plantillasError,
@@ -243,6 +263,21 @@ export function EntrenamientoFormModal({
               onDuplicate={onDuplicateRestriccion}
               onRemove={onRemoveRestriccion}
               onUpdate={onUpdateRestriccion}
+            />
+          </div>
+
+          <div className="mt-6">
+            <EntrenamientoFormularioSection
+              tenantId={tenantId}
+              role={role}
+              values={values}
+              fieldErrors={fieldErrors}
+              formularioForm={formularioForm}
+              plantillas={formulariosPlantillas}
+              onChangeFormularioExterno={(value) => onChangeField('formulario_externo', value)}
+              onChangeTipo={onChangeFormularioTipo}
+              onChangePlantillaId={onChangeFormularioPlantillaId}
+              onChangeObligatorio={onChangeFormularioObligatorio}
             />
           </div>
 
