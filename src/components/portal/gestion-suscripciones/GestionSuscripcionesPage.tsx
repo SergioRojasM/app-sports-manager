@@ -13,6 +13,7 @@ import { EliminarSuscripcionModal } from './EliminarSuscripcionModal';
 import { VerDetallePagoModal } from './VerDetallePagoModal';
 import { VerServiciosModal } from './VerServiciosModal';
 import { CrearSuscripcionModal } from './CrearSuscripcionModal';
+import type { SuscripcionTab } from '@/types/portal/gestion-suscripciones.types';
 
 type GestionSuscripcionesPageProps = {
   tenantId: string;
@@ -26,15 +27,19 @@ function LoadingState() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ activeTab }: { activeTab: SuscripcionTab }) {
   return (
     <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-      No hay suscripciones registradas para esta organización.
+      {activeTab === 'miembros'
+        ? 'No hay suscripciones de miembros para esta organización.'
+        : 'No hay suscripciones de no miembros para esta organización.'}
     </div>
   );
 }
 
 export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageProps) {
+  const [activeTab, setActiveTab] = useState<SuscripcionTab>('miembros');
+
   const {
     loading,
     error,
@@ -52,6 +57,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
     setPageSize,
     paginatedRows,
     stats,
+    tabCounts,
     selectedRow,
     modalType,
     openPagoModal,
@@ -63,7 +69,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
     openCrearModal,
     closeModal,
     refresh,
-  } = useGestionSuscripciones({ tenantId });
+  } = useGestionSuscripciones({ tenantId, activeTab });
 
   /* ── Admin user ID for pago validation ── */
   const [adminUserId, setAdminUserId] = useState<string>('');
@@ -102,6 +108,40 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
         </div>
       </header>
 
+      {/* Tab bar */}
+      <nav className="flex gap-1 rounded-lg border border-portal-border bg-navy-deep/60 p-1">
+        <button
+          type="button"
+          onClick={() => setActiveTab('miembros')}
+          className={[
+            'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
+            activeTab === 'miembros'
+              ? 'bg-navy-soft text-slate-100'
+              : 'text-slate-400 hover:text-slate-200',
+          ].join(' ')}
+        >
+          Miembros
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-turquoise px-1.5 text-[11px] font-bold text-navy-deep">
+            {tabCounts.miembros}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('no_miembros')}
+          className={[
+            'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
+            activeTab === 'no_miembros'
+              ? 'bg-navy-soft text-slate-100'
+              : 'text-slate-400 hover:text-slate-200',
+          ].join(' ')}
+        >
+          No miembros
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-turquoise px-1.5 text-[11px] font-bold text-navy-deep">
+            {tabCounts.noMiembros}
+          </span>
+        </button>
+      </nav>
+
       {/* Stats always visible when data is loaded */}
       {!loading && !error && <SuscripcionesStatsCards stats={stats} />}
 
@@ -129,7 +169,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
         </div>
       ) : null}
 
-      {!loading && !error && totalFiltered === 0 ? <EmptyState /> : null}
+      {!loading && !error && totalFiltered === 0 ? <EmptyState activeTab={activeTab} /> : null}
 
       {!loading && !error && totalFiltered > 0 ? (
         <SuscripcionesTable

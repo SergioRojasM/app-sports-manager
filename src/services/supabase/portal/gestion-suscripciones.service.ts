@@ -71,7 +71,7 @@ type RawSuscripcionRow = {
 
 /* ────────── Mappers ────────── */
 
-function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
+function mapRawRow(row: RawSuscripcionRow, memberIds: Set<string>): SuscripcionAdminRow {
   const latestPago = row.pagos.length > 0 ? row.pagos[0] : null;
 
   return {
@@ -118,6 +118,7 @@ function mapRawRow(row: RawSuscripcionRow): SuscripcionAdminRow {
       unidades_incluidas: s.unidades_incluidas,
       unidades_restantes: s.unidades_restantes,
     })),
+    es_miembro: memberIds.has(row.atleta_id),
   };
 }
 
@@ -151,33 +152,45 @@ export const gestionSuscripcionesService = {
   async fetchSuscripcionesAdmin(tenantId: string): Promise<SuscripcionAdminRow[]> {
     const supabase = createClient();
 
-    const { data, error } = await supabase
-      .from('suscripciones')
-      .select(
-        `
-        id, tenant_id, plan_id, plan_tipo_id, atleta_id,
-        fecha_inicio, fecha_fin,
-        estado, comentarios, validado_por, created_at,
-        validador_suscripcion:usuarios!suscripciones_validado_por_fkey(nombre, apellido),
-        atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
-        plan:planes!suscripciones_plan_id_fkey(nombre),
-        plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias),
-        pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo)),
-        suscripcion_servicios(
-          servicio_id, unidades_incluidas, unidades_restantes,
-          servicio:servicios!suscripcion_servicios_servicio_id_fkey(nombre)
+    const [suscripcionesResult, miembrosResult] = await Promise.all([
+      supabase
+        .from('suscripciones')
+        .select(
+          `
+          id, tenant_id, plan_id, plan_tipo_id, atleta_id,
+          fecha_inicio, fecha_fin,
+          estado, comentarios, validado_por, created_at,
+          validador_suscripcion:usuarios!suscripciones_validado_por_fkey(nombre, apellido),
+          atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
+          plan:planes!suscripciones_plan_id_fkey(nombre),
+          plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias),
+          pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo)),
+          suscripcion_servicios(
+            servicio_id, unidades_incluidas, unidades_restantes,
+            servicio:servicios!suscripcion_servicios_servicio_id_fkey(nombre)
+          )
+          `,
         )
-        `,
-      )
-      .eq('tenant_id', tenantId)
-      .order('created_at', { ascending: false })
-      .order('created_at', { referencedTable: 'pagos', ascending: false });
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false })
+        .order('created_at', { referencedTable: 'pagos', ascending: false }),
+      supabase.from('miembros_tenant').select('usuario_id').eq('tenant_id', tenantId),
+    ]);
 
-    if (error) {
-      throw mapPostgrestError(error);
+    if (suscripcionesResult.error) {
+      throw mapPostgrestError(suscripcionesResult.error);
+    }
+    if (miembrosResult.error) {
+      throw mapPostgrestError(miembrosResult.error);
     }
 
-    return ((data ?? []) as unknown as RawSuscripcionRow[]).map(mapRawRow);
+    const memberIds = new Set(
+      (miembrosResult.data ?? []).map((m: { usuario_id: string }) => m.usuario_id),
+    );
+
+    return ((suscripcionesResult.data ?? []) as unknown as RawSuscripcionRow[]).map((row) =>
+      mapRawRow(row, memberIds),
+    );
   },
 
   /**

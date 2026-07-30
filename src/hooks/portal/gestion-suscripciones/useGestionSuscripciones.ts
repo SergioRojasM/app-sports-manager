@@ -8,10 +8,17 @@ import {
   type SuscripcionAdminRow,
   type SuscripcionEstado,
   type SuscripcionesAdminStats,
+  type SuscripcionTab,
 } from '@/types/portal/gestion-suscripciones.types';
 
 type UseGestionSuscripcionesOptions = {
   tenantId: string;
+  activeTab: SuscripcionTab;
+};
+
+type TabCounts = {
+  miembros: number;
+  noMiembros: number;
 };
 
 type ModalType = 'pago' | 'suscripcion' | 'editar' | 'eliminar' | 'verDetalle' | 'crear' | 'verServicios' | null;
@@ -41,6 +48,7 @@ type UseGestionSuscripcionesResult = {
   /** Derived data */
   paginatedRows: SuscripcionAdminRow[];
   stats: SuscripcionesAdminStats;
+  tabCounts: TabCounts;
 
   /** Modal state */
   selectedRow: SuscripcionAdminRow | null;
@@ -87,6 +95,7 @@ function computeStats(rows: SuscripcionAdminRow[]): SuscripcionesAdminStats {
 
 export function useGestionSuscripciones({
   tenantId,
+  activeTab,
 }: UseGestionSuscripcionesOptions): UseGestionSuscripcionesResult {
   const [rows, setRows] = useState<SuscripcionAdminRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,10 +134,17 @@ export function useGestionSuscripciones({
     void loadData();
   }, [loadData]);
 
+  /* ── Derived: active tab's rows ── */
+
+  const tabRows = useMemo(
+    () => rows.filter((r) => r.es_miembro === (activeTab === 'miembros')),
+    [rows, activeTab],
+  );
+
   /* ── Derived: filtered ── */
 
   const filteredRows = useMemo(() => {
-    let result = rows;
+    let result = tabRows;
 
     if (suscripcionFilter !== 'all') {
       result = result.filter((r) => r.estado === suscripcionFilter);
@@ -143,13 +159,13 @@ export function useGestionSuscripciones({
     }
 
     return result;
-  }, [rows, suscripcionFilter, pagoFilter, searchTerm]);
+  }, [tabRows, suscripcionFilter, pagoFilter, searchTerm]);
 
-  /* ── Reset page on filter change ── */
+  /* ── Reset page on filter or tab change ── */
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, suscripcionFilter, pagoFilter]);
+  }, [searchTerm, suscripcionFilter, pagoFilter, activeTab]);
 
   /* ── Pagination ── */
 
@@ -166,9 +182,21 @@ export function useGestionSuscripciones({
     setCurrentPage(1);
   }, []);
 
-  /* ── Stats (from full unfiltered list) ── */
+  /* ── Stats (from the active tab's unfiltered-by-search/chips rows) ── */
 
-  const stats = useMemo(() => computeStats(rows), [rows]);
+  const stats = useMemo(() => computeStats(tabRows), [tabRows]);
+
+  /* ── Tab counts (from the full unfiltered list, independent of search/chips) ── */
+
+  const tabCounts = useMemo<TabCounts>(() => {
+    let miembros = 0;
+    let noMiembros = 0;
+    for (const r of rows) {
+      if (r.es_miembro) miembros++;
+      else noMiembros++;
+    }
+    return { miembros, noMiembros };
+  }, [rows]);
 
   /* ── Modal actions ── */
 
@@ -230,6 +258,7 @@ export function useGestionSuscripciones({
     setPageSize,
     paginatedRows,
     stats,
+    tabCounts,
     selectedRow,
     modalType,
     openPagoModal,
