@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useState } from 'react';
+import { MultilineText } from '@/components/ui';
 import type { Discipline, DisciplineTableItem } from '@/types/portal/disciplines.types';
 import { NivelesDisciplinaPanel } from './NivelesDisciplinaPanel';
 
@@ -46,7 +47,9 @@ export function DisciplinesTable({ rows, tenantId, onEdit, onDelete }: Disciplin
                     </td>
                     <td className="pl-4 pr-6 py-4">
                   <div className="text-sm font-semibold text-slate-100">{row.nombre}</div>
-                  {row.descripcion ? <p className="mt-1 text-xs text-slate-400">{row.descripcion}</p> : null}
+                  {row.descripcion ? (
+                    <MultilineText className="mt-1 text-xs text-slate-400">{row.descripcion}</MultilineText>
+                  ) : null}
                 </td>
                 <td className="px-6 py-4">
                   <span

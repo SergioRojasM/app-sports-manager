@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { MultilineText } from '@/components/ui';
 import type { FormularioPlantillaListItem } from '@/types/portal/formularios.types';
 
 type FormulariosTableProps = {
@@ -45,7 +46,11 @@ export function FormulariosTable({ tenantId, rows, onPreview, onDelete }: Formul
               <tr key={plantilla.id} className="transition-colors hover:bg-navy-medium/50">
                 <td className="px-4 py-4 font-medium text-slate-200">{plantilla.nombre}</td>
                 <td className="px-4 py-4 text-slate-400">
-                  {plantilla.descripcion ?? <span className="italic text-slate-600">Sin descripción</span>}
+                  {plantilla.descripcion ? (
+                    <MultilineText>{plantilla.descripcion}</MultilineText>
+                  ) : (
+                    <span className="italic text-slate-600">Sin descripción</span>
+                  )}
                 </td>
                 <td className="px-4 py-4 text-slate-300">{plantilla.seccionesCount}</td>
                 <td className="px-4 py-4">

@@ -7,7 +7,7 @@ No new visual design is required: this introduces no new page, layout, or intera
 ## What Changes
 
 - Add a new shared presentational component, `MultilineText`, that renders a string with `whitespace-pre-wrap` (preserving line breaks, repeated spaces, and normal wrapping), with optional character-count truncation (`maxLength`) and an `as` tag prop (`p` | `span` | `div`, default `p`).
-- Replace ad hoc text rendering at 9 existing display sites with `MultilineText` (or an equivalent `whitespace-pre-wrap` class addition where a full component swap is unnecessary), so previously-lost line breaks are now shown:
+- Replace ad hoc text rendering at 10 existing display sites with `MultilineText` (or an equivalent `whitespace-pre-wrap` class addition where a full component swap is unnecessary), so previously-lost line breaks are now shown:
   - `ServiciosTable.tsx` (servicio `descripcion`)
   - `ScenarioCard.tsx` (escenario `descripcion` — replaces the local `truncateText` helper for this field only)
   - `DisciplinesTable.tsx` (disciplina `descripcion`)
@@ -17,6 +17,7 @@ No new visual design is required: this introduces no new page, layout, or intera
   - `EntrenamientoDetalleModal.tsx` (training `descripcion` and restriction row `descripcion`)
   - `PublicTrainingCard.tsx` (public training `descripcion`, keeping its existing `line-clamp-2` truncation)
   - `NovedadesMiembroModal.tsx` (member `notas`)
+  - `FormularioSeccionContent.tsx` (form-template `texto`-type section content — shared renderer used by the section card, `FormularioPreviewModal`, and the athlete-facing `FormularioRespuestaModal` fill-out flow; found after initial release when a user reported line breaks not showing in a "texto" section's preview/fill-out view)
 - No changes to any `<textarea>` input — `Enter` already produces a newline character natively; this change is display-only.
 
 **Non-goals**
@@ -36,7 +37,7 @@ No new visual design is required: this introduces no new page, layout, or intera
 
 ## Impact
 
-- **Affected code**: 9 display components across `servicios`, `scenarios`, `disciplines`, `planes`, `planes-publicos`, `formularios`, `entrenamientos`, `entrenamientos-publicos`, and `gestion-equipo` feature slices, plus one new shared component under `src/components/ui/`.
+- **Affected code**: 10 display components across `servicios`, `scenarios`, `disciplines`, `planes`, `planes-publicos`, `formularios`, `entrenamientos`, `entrenamientos-publicos`, and `gestion-equipo` feature slices, plus one new shared component under `src/components/ui/`.
 - **Affected APIs/services**: None.
 - **Affected dependencies**: None — uses existing Tailwind `whitespace-pre-wrap` utility already present in the project.
 - **Risk**: Low — purely additive/presentational; no data model or contract changes.

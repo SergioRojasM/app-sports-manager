@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { MultilineText } from '@/components/ui';
 import type { MiembroNovedad, MiembroTableItem } from '@/types/portal/equipo.types';
 import { EquipoStatusBadge } from './EquipoStatusBadge';
 
@@ -99,9 +100,11 @@ export function NovedadesMiembroModal({ member, isOpen, onClose, getNovedades }:
                     </span>
                     <EquipoStatusBadge estado={n.estado_resultante} />
                   </div>
-                  <p className="mt-1 text-xs text-slate-400">
-                    {n.descripcion ?? '—'}
-                  </p>
+                  {n.descripcion ? (
+                    <MultilineText className="mt-1 text-xs text-slate-400">{n.descripcion}</MultilineText>
+                  ) : (
+                    <p className="mt-1 text-xs text-slate-400">—</p>
+                  )}
                   <p className="mt-1 text-[10px] text-slate-500">
                     {formatDate(n.created_at)}
                   </p>
