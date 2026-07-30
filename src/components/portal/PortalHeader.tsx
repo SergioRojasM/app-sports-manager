@@ -14,7 +14,7 @@ type PortalHeaderProps = {
 
 export function PortalHeader({ profile, role }: PortalHeaderProps) {
   return (
-    <header className="relative z-10 flex h-16 flex-shrink-0 items-center justify-between border-b border-portal-border bg-navy-deep/95 px-6 backdrop-blur-md">
+    <header className="relative z-20 flex h-16 flex-shrink-0 items-center justify-between border-b border-portal-border bg-navy-deep/95 px-6 backdrop-blur-md">
       {/* Left: logo + nav menu */}
       <div className="flex items-center gap-4">
         <Link href="/portal" className="flex items-center">
