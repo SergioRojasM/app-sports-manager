@@ -44,6 +44,6 @@
 
 ## 8. Finalize
 
-- [ ] 8.1 Run type check, lint, and tests; fix any failures (do not run a production build)
-- [ ] 8.2 Write the commit message summarizing the migration + fullscreen viewer change
-- [ ] 8.3 Write the pull request description (summary, test plan referencing section 6's manual checks)
+- [x] 8.1 Run type check, lint, and tests; fix any failures (do not run a production build) — `tsc --noEmit` clean; `npm run lint` shows 16 pre-existing errors / 18 pre-existing warnings across the repo (baseline unrelated to this change — verified: fixing this change's own new `set-state-in-effect` violation brought the count down from 17→16 errors, i.e. this change introduces zero new lint errors); no test script exists in this project (`package.json` has no `test` script)
+- [x] 8.2 Write the commit message summarizing the migration + fullscreen viewer change
+- [x] 8.3 Write the pull request description (summary, test plan referencing section 6's manual checks)
