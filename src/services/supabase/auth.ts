@@ -36,6 +36,21 @@ export const authService = {
     };
   },
 
+  async signInWithOAuth(next?: string): Promise<{ errorMessage: string | null }> {
+    const supabase = createClient();
+    const redirectTo = next
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+      : `${window.location.origin}/auth/callback`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+
+    return { errorMessage: error ? error.message : null };
+  },
+
   async signOut(): Promise<string | null> {
     const supabase = createClient();
     const { error } = await supabase.auth.signOut();
