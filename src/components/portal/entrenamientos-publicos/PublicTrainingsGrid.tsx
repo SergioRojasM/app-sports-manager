@@ -4,6 +4,7 @@ import type { PublicTrainingListItem } from '@/types/portal/entrenamientos-publi
 function toCardData(item: PublicTrainingListItem): PublicTrainingCardData {
   return {
     nombre: item.nombre,
+    tenantId: item.tenantId,
     tenantNombre: item.tenantNombre,
     descripcion: item.descripcion,
     disciplinaNombre: item.disciplinaNombre,
@@ -17,6 +18,8 @@ function toCardData(item: PublicTrainingListItem): PublicTrainingCardData {
     precio: item.precio,
     bannerUrl: item.bannerUrl,
     serviciosRequeridos: item.serviciosRequeridos,
+    formularioId: item.formularioId,
+    formularioExterno: item.formularioExterno,
   };
 }
 

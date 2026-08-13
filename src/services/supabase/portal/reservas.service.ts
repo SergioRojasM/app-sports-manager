@@ -447,12 +447,14 @@ async function validateBookingRestrictions(
           .select('nombre')
           .eq('id', servicioId)
           .single();
-        const svcName = (svc?.nombre as string | null) ?? 'el servicio requerido';
+        const svcNameRaw = svc?.nombre as string | null;
+        const svcName = svcNameRaw ?? 'el servicio requerido';
         rowPasses = false;
         firstFailCode ??= {
           ok: false,
           code: 'SERVICIO_REQUERIDO',
           message: `Este entrenamiento requiere una suscripción activa con unidades disponibles en el servicio: ${svcName}.`,
+          ...(svcNameRaw ? { servicioNombre: svcNameRaw } : {}),
         };
       }
     }
@@ -775,10 +777,18 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
 
     const exhaustedEntry = chargeEntries.find((e) => e.exhausted);
     if (exhaustedEntry) {
+      const { data: exhaustedSvc } = await supabase
+        .from('servicios')
+        .select('nombre')
+        .eq('id', exhaustedEntry.servicioId)
+        .single();
+      const exhaustedSvcName = exhaustedSvc?.nombre as string | null;
+
       return {
         ok: false,
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
+        ...(exhaustedSvcName ? { servicioNombre: exhaustedSvcName } : {}),
       };
     }
 

@@ -34,6 +34,7 @@ export function usePublicTrainingReserva({
   const [formularioExterno, setFormularioExterno] = useState<string | null>(null);
   const [formularioObligatorio, setFormularioObligatorio] = useState(false);
   const [bookingRejection, setBookingRejection] = useState<BookingRejection | null>(null);
+  const [checkingEligibility, setCheckingEligibility] = useState(false);
   const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
   const [isFormularioStep, setIsFormularioStep] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -128,11 +129,33 @@ export function usePublicTrainingReserva({
     setSuccessMessage(null);
     setIsFormularioStep(false);
     formularioRespuestaForm.reset();
-    if (currentUserId) {
+    if (!currentUserId) return;
+
+    // Pre-check eligibility (US-0101) before opening the form — the same
+    // validateBookingRestrictions() reservasService.create() already runs as a
+    // pre-flight step, just triggered earlier. Fails open on unexpected errors: the
+    // RPC-level check at actual submit time remains the authoritative, race-safe gate
+    // regardless of this check's outcome, so a transient failure here should never
+    // permanently block a visitor from an otherwise-valid booking.
+    setCheckingEligibility(true);
+    let eligible = true;
+    try {
+      const { result } = await reservasService.validateBookingRestrictions(entrenamientoId, currentUserId, tenantId);
+      if (!result.ok) {
+        setBookingRejection(result);
+        eligible = false;
+      }
+    } catch {
+      eligible = true;
+    } finally {
+      setCheckingEligibility(false);
+    }
+
+    if (eligible) {
       await reservaForm.openCreate(currentUserId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUserId]);
+  }, [currentUserId, entrenamientoId, tenantId]);
 
   const requireFormulario = useCallback(() => {
     if (!reservaForm.validateBase()) return;
@@ -176,6 +199,7 @@ export function usePublicTrainingReserva({
     reservaForm,
     formularioRespuestaForm,
     bookingRejection,
+    checkingEligibility,
     unexpectedError,
     successMessage,
     isFormularioStep,

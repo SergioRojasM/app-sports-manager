@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import { PublicTrainingBannerModal } from './PublicTrainingBannerModal';
+import { useFormularioPreview } from '@/hooks/portal/entrenamientos-publicos/useFormularioPreview';
+import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
+import { PlanesPublicosModal } from '@/components/portal/planes-publicos';
 
 export type PublicTrainingCardData = {
   nombre: string;
+  tenantId: string;
   tenantNombre?: string;
   descripcion: string | null;
   disciplinaNombre: string;
@@ -19,6 +23,10 @@ export type PublicTrainingCardData = {
   bannerUrl: string | null;
   /** Services the training requires. Empty on the anonymous landing page (US-0094). */
   serviciosRequeridos?: string[];
+  /** Internal formulario id, for the "Vista previa" card action. Null/undefined when none or on the anonymous landing page (US-0101). */
+  formularioId?: string | null;
+  /** External formulario URL, used when no internal formulario is attached (US-0101). */
+  formularioExterno?: string | null;
 };
 
 type PublicTrainingCardProps = {
@@ -45,10 +53,16 @@ function formatPrecio(precio: number | null): string {
 
 export function PublicTrainingCard({ data, featured = false, onReservar, reservarDisabled = false }: PublicTrainingCardProps) {
   const [bannerModalOpen, setBannerModalOpen] = useState(false);
+  const [planesModalOpen, setPlanesModalOpen] = useState(false);
+  const formularioPreview = useFormularioPreview();
   const cupoMaximo = data.cupoMaximo ?? 0;
   // Empty on the anonymous landing page — that surface never receives service names (US-0094)
   const serviciosRequeridos = data.serviciosRequeridos ?? [];
   const ocupacionRatio = cupoMaximo > 0 ? Math.min(1, data.reservasActivas / cupoMaximo) : 0;
+  // Null/undefined on the anonymous landing page and (unless wired) the admin publish
+  // preview — the actions below simply don't render without this data (US-0101)
+  const hasInternalFormulario = Boolean(data.formularioId);
+  const hasExternalFormulario = !hasInternalFormulario && Boolean(data.formularioExterno);
 
   return (
     <>
@@ -185,6 +199,48 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
             </p>
           ) : null}
 
+          {(hasInternalFormulario || hasExternalFormulario || serviciosRequeridos.length > 0) && (
+            <div className="flex flex-wrap gap-2">
+              {hasInternalFormulario && (
+                <button
+                  type="button"
+                  onClick={() => data.formularioId && formularioPreview.openPreview(data.formularioId)}
+                  className="inline-flex items-center gap-1 rounded-md border border-landing-border px-2.5 py-1 font-landing-body text-[11px] font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                >
+                  <span className="material-symbols-outlined text-xs" aria-hidden="true">
+                    description
+                  </span>
+                  Vista previa
+                </button>
+              )}
+              {hasExternalFormulario && (
+                <a
+                  href={data.formularioExterno ?? undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md border border-landing-border px-2.5 py-1 font-landing-body text-[11px] font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                >
+                  <span className="material-symbols-outlined text-xs" aria-hidden="true">
+                    open_in_new
+                  </span>
+                  Ver formulario externo
+                </a>
+              )}
+              {serviciosRequeridos.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setPlanesModalOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-md border border-landing-border px-2.5 py-1 font-landing-body text-[11px] font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                >
+                  <span className="material-symbols-outlined text-xs" aria-hidden="true">
+                    card_membership
+                  </span>
+                  Adquirir plan
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="mt-auto flex items-center justify-between gap-3 pt-1">
             <span className="font-landing-display text-base font-bold text-landing-text">{formatPrecio(data.precio)}</span>
             <button
@@ -207,6 +263,28 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
           bannerUrl={data.bannerUrl}
           alt={data.nombre}
           onClose={() => setBannerModalOpen(false)}
+        />
+      )}
+
+      {hasInternalFormulario && (
+        <FormularioPreviewModal
+          open={formularioPreview.open}
+          plantillaNombre={formularioPreview.plantillaNombre}
+          secciones={formularioPreview.secciones}
+          perfilCamposRequeridos={formularioPreview.perfilCamposRequeridos}
+          loading={formularioPreview.loading}
+          error={formularioPreview.error}
+          onClose={formularioPreview.closePreview}
+        />
+      )}
+
+      {serviciosRequeridos.length > 0 && (
+        <PlanesPublicosModal
+          open={planesModalOpen}
+          tenantId={data.tenantId}
+          tenantNombre={data.tenantNombre ?? 'la organización'}
+          onClose={() => setPlanesModalOpen(false)}
+          initialSearch={serviciosRequeridos[0]}
         />
       )}
     </>
