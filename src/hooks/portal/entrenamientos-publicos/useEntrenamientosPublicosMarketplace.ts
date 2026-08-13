@@ -5,6 +5,15 @@ import { entrenamientosPublicosService } from '@/services/supabase/portal/entren
 import type { PublicTrainingDateChip, PublicTrainingListItem } from '@/types/portal/entrenamientos-publicos.types';
 import type { SelectOption } from '@/types/portal/entrenamientos.types';
 
+type CalendarMonth = { year: number; month: number };
+
+export function toDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function startOfWeek(reference: Date): Date {
   const day = reference.getDay();
   const diff = (day + 6) % 7; // Monday-based week
@@ -14,50 +23,40 @@ function startOfWeek(reference: Date): Date {
   return start;
 }
 
-function isWeekend(date: Date): boolean {
-  const day = date.getDay();
-  return day === 0 || day === 6;
+function endOfCurrentMonthKey(reference: Date): string {
+  const end = new Date(reference.getFullYear(), reference.getMonth() + 1, 0);
+  return toDateKey(end);
 }
 
-function matchesDateChip(fechaHora: string | null, dateChip: PublicTrainingDateChip | null): boolean {
-  if (!dateChip || !fechaHora) {
-    return true;
-  }
-
-  const value = new Date(fechaHora);
+export function computeChipRange(chip: PublicTrainingDateChip): { dateFrom: string; dateTo: string } {
   const now = new Date();
 
-  if (dateChip === 'today') {
-    return value.toDateString() === now.toDateString();
+  if (chip === 'today') {
+    const key = toDateKey(now);
+    return { dateFrom: key, dateTo: key };
   }
 
-  if (dateChip === 'tomorrow') {
+  if (chip === 'tomorrow') {
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return value.toDateString() === tomorrow.toDateString();
+    const key = toDateKey(tomorrow);
+    return { dateFrom: key, dateTo: key };
   }
 
-  if (dateChip === 'this_week') {
+  if (chip === 'this_week') {
     const weekStart = startOfWeek(now);
     const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-    return value >= weekStart && value < weekEnd;
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    return { dateFrom: toDateKey(weekStart), dateTo: toDateKey(weekEnd) };
   }
 
-  if (dateChip === 'weekend') {
-    return isWeekend(value);
-  }
-
-  return true;
-}
-
-function isWithinCurrentWeek(fechaHora: string | null): boolean {
-  if (!fechaHora) return false;
-  const weekStart = startOfWeek(new Date());
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 7);
-  const value = new Date(fechaHora);
-  return value >= weekStart && value < weekEnd;
+  // weekend: the Saturday/Sunday of the current week
+  const weekStart = startOfWeek(now);
+  const saturday = new Date(weekStart);
+  saturday.setDate(saturday.getDate() + 5);
+  const sunday = new Date(weekStart);
+  sunday.setDate(sunday.getDate() + 6);
+  return { dateFrom: toDateKey(saturday), dateTo: toDateKey(sunday) };
 }
 
 export function useEntrenamientosPublicosMarketplace() {
@@ -66,7 +65,12 @@ export function useEntrenamientosPublicosMarketplace() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [dateChip, setDateChip] = useState<PublicTrainingDateChip | null>('this_week');
+  const [dateFrom, setDateFrom] = useState<string | null>(() => toDateKey(new Date()));
+  const [dateTo, setDateTo] = useState<string | null>(() => endOfCurrentMonthKey(new Date()));
+  const [calendarMonth, setCalendarMonth] = useState<CalendarMonth>(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
   const [search, setSearch] = useState('');
   const [tenantId, setTenantId] = useState<string | null>(null);
 
@@ -93,11 +97,58 @@ export function useEntrenamientosPublicosMarketplace() {
     void load();
   }, [load]);
 
+  const setDateRange = useCallback((from: string | null, to: string | null) => {
+    setDateFrom(from);
+    setDateTo(to);
+  }, []);
+
+  const clearDateRange = useCallback(() => {
+    setDateFrom(null);
+    setDateTo(null);
+  }, []);
+
+  const applyDateChip = useCallback(
+    (chip: PublicTrainingDateChip) => {
+      const range = computeChipRange(chip);
+      if (dateFrom === range.dateFrom && dateTo === range.dateTo) {
+        clearDateRange();
+        return;
+      }
+      setDateRange(range.dateFrom, range.dateTo);
+    },
+    [dateFrom, dateTo, clearDateRange, setDateRange],
+  );
+
+  const goToPrevMonth = useCallback(() => {
+    setCalendarMonth((current) => {
+      const now = new Date();
+      const isCurrentRealMonth = current.year === now.getFullYear() && current.month === now.getMonth();
+      if (isCurrentRealMonth) return current;
+
+      const prev = new Date(current.year, current.month - 1, 1);
+      return { year: prev.getFullYear(), month: prev.getMonth() };
+    });
+  }, []);
+
+  const goToNextMonth = useCallback(() => {
+    setCalendarMonth((current) => {
+      const next = new Date(current.year, current.month + 1, 1);
+      return { year: next.getFullYear(), month: next.getMonth() };
+    });
+  }, []);
+
   const filteredItems = useMemo(() => {
     const needle = search.trim().toLowerCase();
 
     return items
-      .filter((item) => matchesDateChip(item.fechaHora, dateChip))
+      .filter((item) => {
+        if (!dateFrom && !dateTo) return true;
+        if (!item.fechaHora) return false;
+        const key = toDateKey(new Date(item.fechaHora));
+        if (dateFrom && key < dateFrom) return false;
+        if (dateTo && key > dateTo) return false;
+        return true;
+      })
       .filter((item) => !tenantId || item.tenantId === tenantId)
       .filter((item) => {
         if (!needle) return true;
@@ -108,9 +159,7 @@ export function useEntrenamientosPublicosMarketplace() {
           item.serviciosRequeridos.some((servicio) => servicio.toLowerCase().includes(needle))
         );
       });
-  }, [items, dateChip, tenantId, search]);
-
-  const thisWeekCount = useMemo(() => items.filter((item) => isWithinCurrentWeek(item.fechaHora)).length, [items]);
+  }, [items, dateFrom, dateTo, tenantId, search]);
 
   const featuredItem = filteredItems[0] ?? null;
   const standardItems = filteredItems.slice(1);
@@ -122,9 +171,14 @@ export function useEntrenamientosPublicosMarketplace() {
     featuredItem,
     standardItems,
     tenantOptions,
-    thisWeekCount,
-    dateChip,
-    setDateChip,
+    dateFrom,
+    dateTo,
+    calendarMonth,
+    goToPrevMonth,
+    goToNextMonth,
+    setDateRange,
+    clearDateRange,
+    applyDateChip,
     search,
     setSearch,
     tenantId,

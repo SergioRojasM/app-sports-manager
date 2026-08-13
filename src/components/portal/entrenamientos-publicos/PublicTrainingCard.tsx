@@ -210,7 +210,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
                   <span className="material-symbols-outlined text-xs" aria-hidden="true">
                     description
                   </span>
-                  Vista previa
+                  Ver formulario
                 </button>
               )}
               {hasExternalFormulario && (

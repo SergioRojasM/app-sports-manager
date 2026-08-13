@@ -70,7 +70,8 @@ export type PublicTrainingListItem = {
 export type PublicTrainingDateChip = 'today' | 'tomorrow' | 'this_week' | 'weekend';
 
 export type PublicTrainingFilters = {
-  dateChip: PublicTrainingDateChip | null;
+  dateFrom: string | null;
+  dateTo: string | null;
   search: string;
   tenantId: string | null;
 };
