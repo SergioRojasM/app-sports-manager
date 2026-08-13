@@ -10,6 +10,8 @@ export interface MiPagoRow {
   estado: PagoEstado;
   fecha_pago: string | null;
   comprobante_path: string | null;
+  /** Reason entered by the admin when estado is 'rechazado', shown to the athlete (US-0106). */
+  motivo_rechazo: string | null;
 }
 
 export interface MiSuscripcionRow {

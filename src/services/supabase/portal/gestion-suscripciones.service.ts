@@ -56,6 +56,7 @@ type RawSuscripcionRow = {
     validado_por: string | null;
     fecha_pago: string | null;
     fecha_validacion: string | null;
+    motivo_rechazo: string | null;
     created_at: string;
     validador: {
       nombre: string | null;
@@ -109,6 +110,7 @@ function mapRawRow(row: RawSuscripcionRow, memberIds: Set<string>): SuscripcionA
             : null,
           fecha_pago: latestPago.fecha_pago,
           fecha_validacion: latestPago.fecha_validacion,
+          motivo_rechazo: latestPago.motivo_rechazo,
           created_at: latestPago.created_at,
         } satisfies PagoAdminRow)
       : null,
@@ -164,7 +166,7 @@ export const gestionSuscripcionesService = {
           atleta:usuarios!suscripciones_atleta_id_fkey(nombre, apellido, email),
           plan:planes!suscripciones_plan_id_fkey(nombre),
           plan_tipo:plan_tipos!suscripciones_plan_tipo_id_fkey(nombre, vigencia_dias),
-          pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo)),
+          pagos(id, monto, metodo_pago, metodo_pago_id, comprobante_path, estado, validado_por, fecha_pago, fecha_validacion, motivo_rechazo, created_at, validador:usuarios!pagos_validado_por_fkey(nombre, apellido), metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(id, nombre, tipo)),
           suscripcion_servicios(
             servicio_id, unidades_incluidas, unidades_restantes,
             servicio:servicios!suscripcion_servicios_servicio_id_fkey(nombre)
@@ -196,12 +198,14 @@ export const gestionSuscripcionesService = {
   /**
    * Update a payment's status (approve or reject).
    *  - On approve: sets estado='validado', validado_por, and fecha_validacion.
-   *  - On reject: sets estado='rechazado'.
+   *  - On reject: sets estado='rechazado' and motivo_rechazo, then cascades the
+   *    rejection to any 'pendiente' reservation riding on the same subscription (US-0106).
    */
   async updatePagoEstado(
     id: string,
     estado: Extract<PagoEstado, 'validado' | 'rechazado'>,
     validadoPor: string,
+    motivo?: string,
   ): Promise<void> {
     const supabase = createClient();
 
@@ -210,22 +214,39 @@ export const gestionSuscripcionesService = {
     if (estado === 'validado') {
       payload.validado_por = validadoPor;
       payload.fecha_validacion = new Date().toISOString();
+    } else {
+      payload.motivo_rechazo = motivo?.trim() || null;
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('pagos')
       .update(payload)
-      .eq('id', id);
+      .eq('id', id)
+      .select('suscripcion_id')
+      .single();
 
     if (error) {
       throw mapPostgrestError(error);
+    }
+
+    if (estado === 'rechazado' && data?.suscripcion_id) {
+      const { error: cascadeError } = await supabase.rpc('reject_pending_reservas_for_suscripcion', {
+        p_suscripcion_id: data.suscripcion_id,
+        p_motivo: payload.motivo_rechazo,
+      });
+
+      if (cascadeError) {
+        throw mapPostgrestError(cascadeError);
+      }
     }
   },
 
   /**
    * Update a subscription's status.
-   *  - 'aprobar': sets estado='activa' + confirmed fecha_inicio/fecha_fin/clases_restantes.
-   *  - 'cancelar': sets estado='cancelada'.
+   *  - 'aprobar': sets estado='activa' + confirmed fecha_inicio/fecha_fin/clases_restantes,
+   *    then auto-confirms any 'pendiente' reservation riding on it (US-0106).
+   *  - 'cancelar': sets estado='cancelada'; if the subscription was still 'pendiente',
+   *    also cascades the rejection to any linked 'pendiente' reservation (US-0106).
    */
   async updateSuscripcionEstado(
     id: string,
@@ -236,6 +257,20 @@ export const gestionSuscripcionesService = {
     const supabase = createClient();
 
     let payload: Record<string, unknown>;
+    let wasPendiente = false;
+
+    if (action === 'cancelar') {
+      const { data: current, error: currentError } = await supabase
+        .from('suscripciones')
+        .select('estado')
+        .eq('id', id)
+        .single();
+
+      if (currentError) {
+        throw mapPostgrestError(currentError);
+      }
+      wasPendiente = current?.estado === 'pendiente';
+    }
 
     if (action === 'aprobar' && values) {
       payload = {
@@ -255,6 +290,25 @@ export const gestionSuscripcionesService = {
 
     if (error) {
       throw mapPostgrestError(error);
+    }
+
+    if (action === 'aprobar' && values) {
+      const { error: cascadeError } = await supabase.rpc('confirm_pending_reservas_for_suscripcion', {
+        p_suscripcion_id: id,
+      });
+
+      if (cascadeError) {
+        throw mapPostgrestError(cascadeError);
+      }
+    } else if (action === 'cancelar' && wasPendiente) {
+      const { error: cascadeError } = await supabase.rpc('reject_pending_reservas_for_suscripcion', {
+        p_suscripcion_id: id,
+        p_motivo: 'Solicitud de plan cancelada por el administrador.',
+      });
+
+      if (cascadeError) {
+        throw mapPostgrestError(cascadeError);
+      }
     }
   },
 

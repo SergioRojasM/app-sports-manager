@@ -110,6 +110,12 @@ export function PagoCard({ pago, tenantId, userId }: PagoCardProps) {
         )}
       </div>
 
+      {pago.estado === 'rechazado' && pago.motivo_rechazo && (
+        <p className="mt-1 text-xs text-rose-300">
+          <span className="font-medium">Motivo del rechazo:</span> {pago.motivo_rechazo}
+        </p>
+      )}
+
       {error && (
         <p className="mt-1 text-xs text-rose-400" role="alert" aria-live="assertive">
           {error}

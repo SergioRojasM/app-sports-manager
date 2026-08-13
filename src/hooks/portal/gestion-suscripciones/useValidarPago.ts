@@ -13,7 +13,7 @@ type UseValidarPagoResult = {
   isSubmitting: boolean;
   error: string | null;
   approve: (pagoId: string, validadoPor: string) => Promise<void>;
-  reject: (pagoId: string) => Promise<void>;
+  reject: (pagoId: string, motivo: string) => Promise<void>;
 };
 
 export function useValidarPago({ onSuccess }: UseValidarPagoOptions): UseValidarPagoResult {
@@ -21,11 +21,16 @@ export function useValidarPago({ onSuccess }: UseValidarPagoOptions): UseValidar
   const [error, setError] = useState<string | null>(null);
 
   const mutate = useCallback(
-    async (pagoId: string, estado: Extract<PagoEstado, 'validado' | 'rechazado'>, validadoPor?: string) => {
+    async (
+      pagoId: string,
+      estado: Extract<PagoEstado, 'validado' | 'rechazado'>,
+      validadoPor?: string,
+      motivo?: string,
+    ) => {
       setIsSubmitting(true);
       setError(null);
       try {
-        await gestionSuscripcionesService.updatePagoEstado(pagoId, estado, validadoPor ?? '');
+        await gestionSuscripcionesService.updatePagoEstado(pagoId, estado, validadoPor ?? '', motivo);
         onSuccess();
       } catch (err) {
         const msg =
@@ -48,8 +53,10 @@ export function useValidarPago({ onSuccess }: UseValidarPagoOptions): UseValidar
   );
 
   const reject = useCallback(
-    async (pagoId: string) => {
-      await mutate(pagoId, 'rechazado');
+    async (pagoId: string, motivo: string) => {
+      const trimmed = motivo.trim();
+      if (!trimmed) return;
+      await mutate(pagoId, 'rechazado', undefined, trimmed);
     },
     [mutate],
   );

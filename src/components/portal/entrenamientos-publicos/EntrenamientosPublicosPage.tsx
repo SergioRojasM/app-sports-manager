@@ -142,6 +142,7 @@ export function EntrenamientosPublicosPage() {
           disciplinaId={selectedForReserva.disciplinaId}
           trainingNombre={selectedForReserva.nombre}
           tenantNombre={selectedForReserva.tenantNombre}
+          omitirConfirmacionPlan={selectedForReserva.omitirConfirmacionPlan}
           onClose={() => {
             setSelectedForReserva(null);
             setGuidedOpen(false);

@@ -79,6 +79,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       fecha_cancelacion,
       suscripcion_id,
       formulario_respuesta_id,
+      motivo_rechazo,
       created_at,
       usuarios!reservas_atleta_id_fkey (
         nombre,
@@ -114,6 +115,7 @@ async function getByEntrenamiento(tenantId: string, entrenamientoId: string): Pr
       fecha_cancelacion: row.fecha_cancelacion,
       suscripcion_id: (row.suscripcion_id as string | null) ?? null,
       formulario_respuesta_id: (row.formulario_respuesta_id as string | null) ?? null,
+      motivo_rechazo: (row.motivo_rechazo as string | null) ?? null,
       created_at: row.created_at,
       atleta_nombre: usuario?.nombre ?? '',
       atleta_apellido: usuario?.apellido ?? '',
@@ -136,7 +138,7 @@ async function getMyReserva(
     .eq('tenant_id', tenantId)
     .eq('entrenamiento_id', entrenamientoId)
     .eq('atleta_id', atletaId)
-    .neq('estado', 'cancelada')
+    .not('estado', 'in', '(cancelada,rechazada)')
     .limit(1)
     .maybeSingle();
 
@@ -156,7 +158,7 @@ async function getCapacidad(tenantId: string, entrenamientoId: string): Promise<
     .select('*', { count: 'exact', head: true })
     .eq('tenant_id', tenantId)
     .eq('entrenamiento_id', entrenamientoId)
-    .neq('estado', 'cancelada');
+    .not('estado', 'in', '(cancelada,rechazada)');
 
   if (countError) {
     throw mapServiceError(countError);
@@ -224,7 +226,7 @@ async function getCategoriasConDisponibilidad(
     .select('entrenamiento_categoria_id')
     .eq('tenant_id', tenantId)
     .eq('entrenamiento_id', entrenamientoId)
-    .neq('estado', 'cancelada')
+    .not('estado', 'in', '(cancelada,rechazada)')
     .not('entrenamiento_categoria_id', 'is', null);
 
   if (resError) {
@@ -683,6 +685,7 @@ async function getEntrenamientoFechaHora(
 
 async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
   let matchedRow: EntrenamientoRestriccion | null = null;
+  let pendienteSinPlan = false;
 
   // Reference date for service-entitlement eligibility — the training's date, or today if unscheduled
   const fechaHora = await getEntrenamientoFechaHora(input.entrenamiento_id, input.tenant_id);
@@ -705,8 +708,33 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       input.atleta_id,
       input.tenant_id,
     );
-    if (!restrictionResult.ok) return restrictionResult;
-    matchedRow = row;
+    if (!restrictionResult.ok) {
+      // 1a. Skip-plan-confirmation path (US-0106): a SERVICIO_REQUERIDO/UNIDADES_AGOTADAS
+      // rejection on a public training published with omitir_confirmacion_plan = true may
+      // proceed as a 'pendiente' booking instead of blocking. Re-verified server-side —
+      // never trust input.permitir_pendiente_sin_plan alone.
+      const planFixable = restrictionResult.code === 'SERVICIO_REQUERIDO' || restrictionResult.code === 'UNIDADES_AGOTADAS';
+      if (planFixable && input.permitir_pendiente_sin_plan) {
+        const supabaseCheck = createClient();
+        const { data: publicacion } = await supabaseCheck
+          .from('entrenamientos_publicos')
+          .select('omitir_confirmacion_plan')
+          .eq('entrenamiento_id', input.entrenamiento_id)
+          .eq('tenant_id', input.tenant_id)
+          .eq('activo', true)
+          .maybeSingle();
+
+        if (publicacion?.omitir_confirmacion_plan) {
+          pendienteSinPlan = true;
+        } else {
+          return restrictionResult;
+        }
+      } else {
+        return restrictionResult;
+      }
+    } else {
+      matchedRow = row;
+    }
   }
 
   const supabase = createClient();
@@ -844,7 +872,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       .select('*', { count: 'exact', head: true })
       .eq('entrenamiento_id', input.entrenamiento_id)
       .eq('entrenamiento_categoria_id', input.entrenamiento_categoria_id)
-      .neq('estado', 'cancelada');
+      .not('estado', 'in', '(cancelada,rechazada)');
 
     if (catCountErr) {
       throw mapServiceError(catCountErr);
@@ -868,6 +896,8 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     p_deductions: deductions,
     p_formulario_plantilla_id: input.formulario_plantilla_id ?? null,
     p_formulario_respuesta: input.formulario_respuesta ?? null,
+    p_permitir_pendiente: pendienteSinPlan,
+    p_suscripcion_id: pendienteSinPlan ? input.plan_pendiente_suscripcion_id ?? null : null,
   });
 
   if (error) {

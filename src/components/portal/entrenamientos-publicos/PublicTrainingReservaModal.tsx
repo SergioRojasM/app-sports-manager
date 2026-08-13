@@ -20,6 +20,8 @@ type PublicTrainingReservaModalProps = {
   onClose: () => void;
   /** True when this modal was auto-opened from a guided booking journey (US-0103). */
   guided?: boolean;
+  /** From the publication's omitir_confirmacion_plan — lets a plan-blocked booking continue as pending (US-0106). */
+  omitirConfirmacionPlan?: boolean;
 };
 
 /**
@@ -36,8 +38,9 @@ export function PublicTrainingReservaModal({
   tenantNombre,
   onClose,
   guided = false,
+  omitirConfirmacionPlan = false,
 }: PublicTrainingReservaModalProps) {
-  const reserva = usePublicTrainingReserva({ tenantId, entrenamientoId, disciplinaId });
+  const reserva = usePublicTrainingReserva({ tenantId, entrenamientoId, disciplinaId, omitirConfirmacionPlan });
   const [planesOpen, setPlanesOpen] = useState(false);
   const verPlanesRef = useRef<HTMLButtonElement>(null);
 
@@ -149,6 +152,9 @@ export function PublicTrainingReservaModal({
   if (bookingRejection) {
     const rejectionCode = bookingRejection.code;
     const canAcquirePlan = rejectionCode === 'SERVICIO_REQUERIDO' || rejectionCode === 'UNIDADES_AGOTADAS';
+    // Skip-plan-confirmation (US-0106): this training lets the booking continue pending
+    // plan approval instead of stopping at the catalog purchase.
+    const canSkipConfirmation = canAcquirePlan && omitirConfirmacionPlan;
 
     return (
       <>
@@ -173,9 +179,13 @@ export function PublicTrainingReservaModal({
               lock
             </span>
             <h3 id="reserva-rechazo-title" className="mt-3 text-lg font-semibold text-slate-100">
-              No puedes reservar todavía
+              {canSkipConfirmation ? 'Puedes reservar mientras se aprueba tu plan' : 'No puedes reservar todavía'}
             </h3>
-            <p className="mt-2 text-sm text-slate-300">{bookingRejection.message}</p>
+            <p className="mt-2 text-sm text-slate-300">
+              {canSkipConfirmation
+                ? 'Este entrenamiento permite continuar la reserva mientras se revisa tu plan. Elige un plan para continuar: tu reserva y tu solicitud quedarán pendientes de aprobación.'
+                : bookingRejection.message}
+            </p>
 
             <div className="mt-5 flex flex-col gap-2">
               {canAcquirePlan && (
@@ -185,7 +195,7 @@ export function PublicTrainingReservaModal({
                   onClick={() => setPlanesOpen(true)}
                   className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
                 >
-                  Ver planes de {tenantNombre}
+                  {canSkipConfirmation ? 'Elegir plan y continuar' : `Ver planes de ${tenantNombre}`}
                 </button>
               )}
               <button
@@ -206,6 +216,7 @@ export function PublicTrainingReservaModal({
             tenantNombre={tenantNombre}
             onClose={closePlanes}
             initialSearch={bookingRejection.servicioNombre}
+            onSubscribed={canSkipConfirmation ? (suscripcionId) => void reserva.continueWithPendingPlan(suscripcionId) : undefined}
           />
         )}
       </>

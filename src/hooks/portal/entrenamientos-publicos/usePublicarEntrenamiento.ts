@@ -17,6 +17,7 @@ const EMPTY_VALUES: EntrenamientoPublicoFormValues = {
   nombre: '',
   descripcion: '',
   precio: '',
+  omitirConfirmacionPlan: false,
 };
 
 type UsePublicarEntrenamientoOptions = {
@@ -72,6 +73,7 @@ export function usePublicarEntrenamiento({ tenantId }: UsePublicarEntrenamientoO
             nombre: publicacion.nombre ?? target.nombre,
             descripcion: publicacion.descripcion ?? '',
             precio: publicacion.precio != null ? String(publicacion.precio) : '',
+            omitirConfirmacionPlan: publicacion.omitir_confirmacion_plan,
           });
           setExistingBannerUrl(publicacion.banner_url);
         } else {
@@ -79,6 +81,7 @@ export function usePublicarEntrenamiento({ tenantId }: UsePublicarEntrenamientoO
             nombre: target.nombre,
             descripcion: target.descripcion ?? '',
             precio: '',
+            omitirConfirmacionPlan: false,
           });
         }
       } catch (err) {
@@ -96,8 +99,12 @@ export function usePublicarEntrenamiento({ tenantId }: UsePublicarEntrenamientoO
     reset();
   }, [isSubmitting, reset]);
 
-  const updateField = useCallback((field: keyof EntrenamientoPublicoFormValues, value: string) => {
+  const updateField = useCallback((field: keyof Omit<EntrenamientoPublicoFormValues, 'omitirConfirmacionPlan'>, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const setOmitirConfirmacionPlan = useCallback((value: boolean) => {
+    setValues((prev) => ({ ...prev, omitirConfirmacionPlan: value }));
   }, []);
 
   const handleBannerFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,6 +169,7 @@ export function usePublicarEntrenamiento({ tenantId }: UsePublicarEntrenamientoO
         descripcion: values.descripcion.trim() || null,
         precio: parsedPrecio,
         banner_url: bannerUrl,
+        omitirConfirmacionPlan: values.omitirConfirmacionPlan,
       });
 
       setIsOpen(false);
@@ -205,6 +213,7 @@ export function usePublicarEntrenamiento({ tenantId }: UsePublicarEntrenamientoO
     isLoading,
     values,
     updateField,
+    setOmitirConfirmacionPlan,
     existingBannerUrl,
     bannerPreviewUrl,
     bannerError,

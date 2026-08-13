@@ -19,6 +19,14 @@ type SuscripcionSubmitData = {
 
 type UseSuscripcionOptions = {
   tenantId: string;
+  /**
+   * Fired right after the suscripcion+pago are created successfully, before the
+   * generic "el administrador revisará tu suscripción" success state is shown.
+   * Lets a caller (e.g. the skip-plan-confirmation booking flow, US-0106) chain
+   * into its own next step instead of the modal just closing. Optional — omitting
+   * it keeps today's behavior unchanged.
+   */
+  onSubscribed?: (suscripcionId: string) => void;
 };
 
 type UseSuscripcionResult = {
@@ -38,7 +46,7 @@ type UseSuscripcionResult = {
   metodosPagoError: string | null;
 };
 
-export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripcionResult {
+export function useSuscripcion({ tenantId, onSubscribed }: UseSuscripcionOptions): UseSuscripcionResult {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanWithDisciplinas | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -187,7 +195,13 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           return false;
         }
 
-        setSuccessMessage('Solicitud enviada. El administrador revisará tu suscripción.');
+        if (onSubscribed) {
+          // A caller chaining into its own next step (US-0106) — skip the generic
+          // "will be reviewed" message, it's about to show its own flow instead.
+          onSubscribed(suscripcion.id);
+        } else {
+          setSuccessMessage('Solicitud enviada. El administrador revisará tu suscripción.');
+        }
         setModalOpen(false);
         setSelectedPlan(null);
         setSelectedTipoId(null);
@@ -203,7 +217,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
         setIsSubmitting(false);
       }
     },
-    [isDuplicate, selectedPlan, selectedTipoId, tenantId],
+    [isDuplicate, selectedPlan, selectedTipoId, tenantId, onSubscribed],
   );
 
   return {
