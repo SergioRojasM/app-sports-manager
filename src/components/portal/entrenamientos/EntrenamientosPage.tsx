@@ -485,6 +485,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         isSubmitting={publicarEntrenamiento.isSubmitting}
         submitError={publicarEntrenamiento.submitError}
         onChangeField={publicarEntrenamiento.updateField}
+        onChangeOmitirConfirmacionPlan={publicarEntrenamiento.setOmitirConfirmacionPlan}
         onBannerFileSelect={publicarEntrenamiento.handleBannerFileSelect}
         onClose={publicarEntrenamiento.close}
         onSubmit={async () => {

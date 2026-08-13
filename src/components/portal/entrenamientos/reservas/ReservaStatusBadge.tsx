@@ -25,6 +25,11 @@ const BADGE_STYLES: Record<ReservaEstado, { label: string; className: string; do
     className: 'border-emerald-400/40 bg-emerald-900/25 text-emerald-200',
     dotClassName: 'bg-emerald-300',
   },
+  rechazada: {
+    label: 'Rechazada',
+    className: 'border-rose-400/40 bg-rose-900/25 text-rose-200',
+    dotClassName: 'bg-rose-300',
+  },
 };
 
 export function ReservaStatusBadge({ estado }: ReservaStatusBadgeProps) {

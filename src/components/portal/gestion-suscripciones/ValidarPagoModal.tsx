@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { SuscripcionAdminRow } from '@/types/portal/gestion-suscripciones.types';
 import { useValidarPago } from '@/hooks/portal/gestion-suscripciones/useValidarPago';
 import { useComprobanteViewer } from '@/hooks/portal/gestion-suscripciones/useComprobanteViewer';
@@ -28,6 +28,9 @@ function filenameFromPath(path: string): string {
 export function ValidarPagoModal({ row, adminUserId, onClose, onSuccess }: ValidarPagoModalProps) {
   const { isSubmitting, error, approve, reject } = useValidarPago({ onSuccess });
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [rejecting, setRejecting] = useState(false);
+  const [motivo, setMotivo] = useState('');
+  const motivoTrimmed = motivo.trim();
 
   const pago = row.pago;
   const { signedUrl, isLoading: comprobanteLoading, error: comprobanteError } =
@@ -134,6 +137,24 @@ export function ValidarPagoModal({ row, adminUserId, onClose, onSuccess }: Valid
           </div>
         )}
 
+        {/* Rejection reason */}
+        {rejecting && (
+          <div className="mt-4">
+            <label htmlFor="pago-motivo-rechazo" className="mb-1 block text-xs text-slate-300">
+              Motivo del rechazo <span className="text-rose-300">*</span>
+            </label>
+            <textarea
+              id="pago-motivo-rechazo"
+              rows={3}
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+              disabled={isSubmitting}
+              placeholder="El atleta verá este motivo para poder corregir y reenviar el pago."
+              className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
+            />
+          </div>
+        )}
+
         {/* Error */}
         {error && (
           <p className="mt-3 text-sm text-rose-300">{error}</p>
@@ -141,32 +162,58 @@ export function ValidarPagoModal({ row, adminUserId, onClose, onSuccess }: Valid
 
         {/* Actions */}
         <div className="mt-6 flex items-center justify-end gap-3">
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={onClose}
-            className="rounded-lg border border-portal-border px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 disabled:opacity-40"
-          >
-            Cerrar
-          </button>
-          {pago?.estado === 'pendiente' && (
+          {rejecting ? (
             <>
               <button
                 type="button"
                 disabled={isSubmitting}
-                onClick={() => void reject(pago.id)}
-                className="rounded-lg border border-rose-400/30 px-4 py-2 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-900/30 disabled:opacity-40"
+                onClick={() => {
+                  setRejecting(false);
+                  setMotivo('');
+                }}
+                className="rounded-lg border border-portal-border px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 disabled:opacity-40"
               >
-                {isSubmitting ? 'Procesando…' : 'Rechazar'}
+                Cancelar
               </button>
               <button
                 type="button"
-                disabled={isSubmitting}
-                onClick={() => void approve(pago.id, adminUserId)}
-                className="rounded-lg border border-emerald-400/30 bg-emerald-900/20 px-4 py-2 text-sm font-medium text-emerald-300 transition-colors hover:bg-emerald-900/40 disabled:opacity-40"
+                disabled={isSubmitting || !motivoTrimmed}
+                onClick={() => pago && void reject(pago.id, motivoTrimmed)}
+                className="rounded-lg border border-rose-400/30 px-4 py-2 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-900/30 disabled:opacity-40"
               >
-                {isSubmitting ? 'Procesando…' : 'Aprobar Pago'}
+                {isSubmitting ? 'Procesando…' : 'Confirmar rechazo'}
               </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={onClose}
+                className="rounded-lg border border-portal-border px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5 disabled:opacity-40"
+              >
+                Cerrar
+              </button>
+              {pago?.estado === 'pendiente' && (
+                <>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => setRejecting(true)}
+                    className="rounded-lg border border-rose-400/30 px-4 py-2 text-sm font-medium text-rose-300 transition-colors hover:bg-rose-900/30 disabled:opacity-40"
+                  >
+                    Rechazar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => void approve(pago.id, adminUserId)}
+                    className="rounded-lg border border-emerald-400/30 bg-emerald-900/20 px-4 py-2 text-sm font-medium text-emerald-300 transition-colors hover:bg-emerald-900/40 disabled:opacity-40"
+                  >
+                    {isSubmitting ? 'Procesando…' : 'Aprobar Pago'}
+                  </button>
+                </>
+              )}
             </>
           )}
         </div>

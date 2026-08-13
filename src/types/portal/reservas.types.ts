@@ -1,4 +1,4 @@
-export type ReservaEstado = 'pendiente' | 'confirmada' | 'cancelada' | 'completada';
+export type ReservaEstado = 'pendiente' | 'confirmada' | 'cancelada' | 'completada' | 'rechazada';
 
 export type ReservaServicio = {
   id: string;
@@ -19,6 +19,8 @@ export type Reserva = {
   fecha_cancelacion: string | null;
   suscripcion_id: string | null;
   formulario_respuesta_id: string | null;
+  /** Reason shown to the athlete when estado is 'rechazada' (US-0106). */
+  motivo_rechazo: string | null;
   created_at: string;
 };
 
@@ -42,6 +44,15 @@ export type CreateReservaInput = {
   formulario_plantilla_id?: string | null;
   /** Collected answers keyed by each "datos" section's campo_nombre. */
   formulario_respuesta?: Record<string, string> | null;
+  /**
+   * Set when the target public training has `omitir_confirmacion_plan = true` and the
+   * athlete chose to continue booking despite lacking the required plan/service — lets
+   * `create()` insert the reservation as 'pendiente' instead of rejecting it outright.
+   * Re-verified server-side against the training's publication before being honored (US-0106).
+   */
+  permitir_pendiente_sin_plan?: boolean;
+  /** The pending suscripcion created alongside this booking, linked via reservas.suscripcion_id (US-0106). */
+  plan_pendiente_suscripcion_id?: string | null;
 };
 
 export type UpdateReservaInput = {
@@ -77,6 +88,8 @@ export type ReservaReportRow = {
   fecha_reserva: string | null;
   fecha_cancelacion: string | null;
   notas_reserva: string | null;
+  /** Reason shown to the athlete when reserva_estado is 'rechazada' (US-0106). */
+  motivo_rechazo: string | null;
   created_at: string;
   atleta_nombre: string | null;
   atleta_apellido: string | null;

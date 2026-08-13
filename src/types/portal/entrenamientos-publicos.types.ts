@@ -18,6 +18,8 @@ export type EntrenamientoPublico = {
   banner_url: string | null;
   activo: boolean;
   publicado_por: string | null;
+  /** When true, a booking rejected only for a missing plan/service may proceed as pending (US-0106). */
+  omitir_confirmacion_plan: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -29,12 +31,14 @@ export type PublicarEntrenamientoInput = {
   descripcion: string | null;
   precio: number | null;
   banner_url: string | null;
+  omitirConfirmacionPlan: boolean;
 };
 
 export type EntrenamientoPublicoFormValues = {
   nombre: string;
   descripcion: string;
   precio: string;
+  omitirConfirmacionPlan: boolean;
 };
 
 export type PublicTrainingListItem = {
@@ -60,6 +64,8 @@ export type PublicTrainingListItem = {
   reservasActivas: number;
   /** Distinct names of services the training requires, alphabetical. Empty when unrestricted (US-0094). */
   serviciosRequeridos: string[];
+  /** When true, a booking rejected only for a missing plan/service may proceed as pending (US-0106). */
+  omitirConfirmacionPlan: boolean;
   createdAt: string;
   /** Source entrenamientos.formulario_id, batched in listPublicTrainings() (US-0101). Null on the anonymous landing page. */
   formularioId: string | null;

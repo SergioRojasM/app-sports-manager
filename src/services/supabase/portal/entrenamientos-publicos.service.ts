@@ -172,6 +172,7 @@ export const entrenamientosPublicosService = {
       cancelacion_antelacion_horas: sourceTraining.cancelacion_antelacion_horas,
       precio: input.precio,
       banner_url: input.banner_url,
+      omitir_confirmacion_plan: input.omitirConfirmacionPlan,
       activo: true,
     };
 
@@ -229,7 +230,7 @@ export const entrenamientosPublicosService = {
     const { data, error } = await supabase
       .from('entrenamientos_publicos')
       .select(
-        'id, tenant_id, entrenamiento_id, nombre, descripcion, disciplina_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, reserva_antelacion_horas, cancelacion_antelacion_horas, precio, banner_url, created_at, disciplina:disciplinas(nombre), escenario:escenarios(nombre, ubicacion), tenant:tenants(nombre, logo_url)',
+        'id, tenant_id, entrenamiento_id, nombre, descripcion, disciplina_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, reserva_antelacion_horas, cancelacion_antelacion_horas, precio, banner_url, omitir_confirmacion_plan, created_at, disciplina:disciplinas(nombre), escenario:escenarios(nombre, ubicacion), tenant:tenants(nombre, logo_url)',
       )
       .eq('activo', true)
       .gte('fecha_hora', new Date().toISOString())
@@ -254,6 +255,7 @@ export const entrenamientosPublicosService = {
       cancelacion_antelacion_horas: number | null;
       precio: number | null;
       banner_url: string | null;
+      omitir_confirmacion_plan: boolean;
       created_at: string;
       disciplina: { nombre: string | null } | null;
       escenario: { nombre: string | null; ubicacion: string | null } | null;
@@ -332,6 +334,7 @@ export const entrenamientosPublicosService = {
       bannerUrl: row.banner_url,
       reservasActivas: capacidades[index]?.reservas_activas ?? 0,
       serviciosRequeridos: serviciosByEntrenamiento.get(row.entrenamiento_id) ?? [],
+      omitirConfirmacionPlan: row.omitir_confirmacion_plan,
       createdAt: row.created_at,
       formularioId: formularioByEntrenamiento.get(row.entrenamiento_id)?.formularioId ?? null,
       formularioExterno: formularioByEntrenamiento.get(row.entrenamiento_id)?.formularioExterno ?? null,
@@ -424,6 +427,8 @@ export const entrenamientosPublicosService = {
       // Deliberately empty: the anonymous landing page shows no requirements row,
       // and this path must not query the authenticated-only view (US-0094).
       serviciosRequeridos: [],
+      // Deliberately false: the anonymous landing page never books (US-0106).
+      omitirConfirmacionPlan: false,
       createdAt: row.created_at,
       // Deliberately null: formulario tables are authenticated-only and the anonymous
       // landing page offers no "Vista previa" action (US-0101).

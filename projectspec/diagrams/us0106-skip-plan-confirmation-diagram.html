@@ -1,0 +1,347 @@
+<title>Reserva Pendiente de Plan</title>
+<style>
+  :root {
+    --bg: #eef1f8;
+    --surface: #ffffff;
+    --surface-2: #f4f6fb;
+    --border: rgba(15, 23, 42, 0.12);
+    --ink: #10192e;
+    --ink-dim: #55617a;
+    --ink-faint: #8592ab;
+    --accent: #049c86;
+    --accent-ink: #04705f;
+    --good: #0d8f5f;
+    --good-bg: rgba(13, 143, 95, 0.10);
+    --warn: #9a6b00;
+    --warn-bg: rgba(154, 107, 0, 0.10);
+    --bad: #c22a4d;
+    --bad-bg: rgba(194, 42, 77, 0.09);
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(15, 23, 42, 0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f172a;
+      --surface: #161e2e;
+      --surface-2: #131b2a;
+      --border: rgba(255, 255, 255, 0.09);
+      --ink: #e8edf7;
+      --ink-dim: #93a4c3;
+      --ink-faint: #5c6a89;
+      --accent: #00e5c4;
+      --accent-ink: #6ffaea;
+      --good: #34d399;
+      --good-bg: rgba(52, 211, 153, 0.12);
+      --warn: #fbbf24;
+      --warn-bg: rgba(251, 191, 36, 0.12);
+      --bad: #fb7185;
+      --bad-bg: rgba(251, 113, 133, 0.12);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 20px 48px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #161e2e;
+    --surface-2: #131b2a;
+    --border: rgba(255, 255, 255, 0.09);
+    --ink: #e8edf7;
+    --ink-dim: #93a4c3;
+    --ink-faint: #5c6a89;
+    --accent: #00e5c4;
+    --accent-ink: #6ffaea;
+    --good: #34d399;
+    --good-bg: rgba(52, 211, 153, 0.12);
+    --warn: #fbbf24;
+    --warn-bg: rgba(251, 191, 36, 0.12);
+    --bad: #fb7185;
+    --bad-bg: rgba(251, 113, 133, 0.12);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 20px 48px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 56px 20px 40px;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 1180px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--accent-ink);
+    display: inline-block;
+  }
+
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  .dek {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-dim);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  figure {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 28px clamp(12px, 3vw, 32px) 20px;
+  }
+
+  .diagram-scroll {
+    overflow-x: auto;
+  }
+
+  svg { display: block; width: 100%; height: auto; min-width: 720px; }
+
+  figcaption {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+  }
+
+  figcaption strong { color: var(--ink); font-weight: 600; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    margin-top: 14px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+  }
+
+  .swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    flex: none;
+  }
+
+  .sw-accent { background: var(--accent); }
+  .sw-good { background: var(--good); }
+  .sw-warn { background: var(--warn); }
+  .sw-bad { background: var(--bad); }
+
+  footer {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    color: var(--ink-faint);
+  }
+
+  footer a { color: var(--ink-faint); }
+
+  /* diagram text */
+  .lbl-node {
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    fill: var(--ink);
+  }
+  .lbl-node-b { font-weight: 700; }
+  .lbl-edge {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.01em;
+  }
+  .lbl-col {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .lbl-decision {
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    fill: var(--ink);
+  }
+</style>
+
+<div class="page">
+  <div>
+    <p class="eyebrow">US-0106 · app_sports_manager</p>
+    <h1>Reservar sin el plan aprobado todav&iacute;a</h1>
+    <p class="dek">
+      Cuando un atleta intenta reservar un entrenamiento p&uacute;blico sin tener el plan o
+      servicio requerido, el resultado depende de una sola decisi&oacute;n de la organizaci&oacute;n:
+      dejarlo avanzar mientras se revisa el plan, o no.
+    </p>
+  </div>
+
+  <figure>
+    <div class="diagram-scroll">
+      <svg viewBox="0 0 1160 900" role="img" aria-label="Diagrama de flujo: un atleta intenta reservar un entrenamiento sin el plan requerido. Si la organización no permite reservar mientras se aprueba el plan, la reserva queda bloqueada hasta que el atleta solicite el plan, espere su aprobación y vuelva a intentar la reserva manualmente. Si la organización sí lo permite, el atleta solicita el plan y completa la reserva en el mismo momento; ambas quedan pendientes de aprobación. Si la organización aprueba, el plan se activa y la reserva se confirma automáticamente. Si la rechaza, informa el motivo y la reserva queda cancelada, debiendo el atleta reservar de nuevo si el plan se aprueba más tarde.">
+
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-faint)" />
+          </marker>
+          <marker id="arrow-accent" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--accent)" />
+          </marker>
+          <marker id="arrow-good" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--good)" />
+          </marker>
+          <marker id="arrow-bad" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--bad)" />
+          </marker>
+        </defs>
+
+        <!-- start node -->
+        <rect x="330" y="20" width="500" height="66" rx="10" fill="var(--surface-2)" stroke="var(--border)" />
+        <text class="lbl-node lbl-node-b" x="580" y="48" text-anchor="middle">Atleta reserva un entrenamiento p&uacute;blico</text>
+        <text class="lbl-node" x="580" y="68" text-anchor="middle" fill="var(--ink-dim)">sin el plan o servicio requerido</text>
+
+        <line x1="580" y1="86" x2="580" y2="120" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow)" />
+
+        <!-- decision 1 -->
+        <polygon points="580,124 812,190 580,256 348,190" fill="var(--surface-2)" stroke="var(--border)" />
+        <text class="lbl-decision" x="580" y="184" text-anchor="middle">&iquest;La organizaci&oacute;n permite reservar</text>
+        <text class="lbl-decision" x="580" y="202" text-anchor="middle">mientras se aprueba el plan?</text>
+
+        <!-- branch: No -->
+        <line x1="392" y1="220" x2="240" y2="316" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow)" />
+        <text class="lbl-edge" x="272" y="262" fill="var(--ink-dim)">No</text>
+
+        <!-- branch: Si -->
+        <line x1="768" y1="220" x2="920" y2="316" stroke="var(--accent)" stroke-width="1.75" marker-end="url(#arrow-accent)" />
+        <text class="lbl-edge" x="836" y="262" fill="var(--accent-ink)" font-weight="700">S&iacute;</text>
+
+        <!-- COLUMN A -->
+        <text class="lbl-col" x="235" y="322" text-anchor="middle" fill="var(--ink-faint)">Sin confirmaci&oacute;n anticipada</text>
+
+        <rect x="40" y="336" width="390" height="54" rx="8" fill="var(--bad-bg)" stroke="var(--bad)" stroke-opacity="0.55" />
+        <text class="lbl-node" x="235" y="368" text-anchor="middle">Reserva bloqueada</text>
+
+        <line x1="235" y1="390" x2="235" y2="424" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow)" />
+
+        <rect x="40" y="424" width="390" height="54" rx="8" fill="var(--surface-2)" stroke="var(--border)" />
+        <text class="lbl-node" x="235" y="456" text-anchor="middle">Elige y solicita un plan</text>
+
+        <line x1="235" y1="478" x2="235" y2="512" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow)" />
+
+        <rect x="40" y="512" width="390" height="54" rx="8" fill="var(--warn-bg)" stroke="var(--warn)" stroke-opacity="0.55" />
+        <text class="lbl-node" x="235" y="544" text-anchor="middle">Espera la aprobaci&oacute;n de la organizaci&oacute;n</text>
+
+        <line x1="235" y1="566" x2="235" y2="600" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow)" />
+        <text class="lbl-edge" x="277" y="588" fill="var(--ink-dim)">se aprueba</text>
+
+        <rect x="40" y="600" width="390" height="62" rx="8" fill="var(--surface-2)" stroke="var(--border)" />
+        <text class="lbl-node" x="235" y="626" text-anchor="middle">Debe volver a intentar la reserva,</text>
+        <text class="lbl-node" x="235" y="644" text-anchor="middle">manualmente</text>
+
+        <!-- loop back to start -->
+        <path d="M40,631 C 6,631 6,53 328,53" fill="none" stroke="var(--ink-faint)" stroke-width="1.25" stroke-dasharray="3 4" marker-end="url(#arrow)" />
+        <text class="lbl-edge" x="18" y="345" fill="var(--ink-faint)" transform="rotate(-90 18 345)" text-anchor="middle">nueva reserva</text>
+
+        <!-- COLUMN B -->
+        <text class="lbl-col" x="925" y="322" text-anchor="middle" fill="var(--accent-ink)">Con confirmaci&oacute;n pendiente</text>
+
+        <rect x="730" y="336" width="390" height="54" rx="8" fill="var(--surface-2)" stroke="var(--border)" />
+        <text class="lbl-node" x="925" y="368" text-anchor="middle">Elige y solicita un plan</text>
+
+        <line x1="925" y1="390" x2="925" y2="424" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow)" />
+
+        <rect x="730" y="424" width="390" height="54" rx="8" fill="var(--surface-2)" stroke="var(--border)" />
+        <text class="lbl-node" x="925" y="456" text-anchor="middle">Completa la reserva en el mismo momento</text>
+
+        <line x1="925" y1="478" x2="925" y2="512" stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#arrow)" />
+        <text class="lbl-edge" x="1023" y="500" fill="var(--ink-dim)">ambas quedan pendientes</text>
+
+        <rect x="730" y="512" width="390" height="62" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.75" />
+        <text class="lbl-node lbl-node-b" x="925" y="538" text-anchor="middle">Reserva y solicitud de plan,</text>
+        <text class="lbl-node lbl-node-b" x="925" y="558" text-anchor="middle">ambas pendientes de aprobaci&oacute;n</text>
+
+        <line x1="925" y1="574" x2="925" y2="608" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-accent)" />
+
+        <!-- decision 2 -->
+        <polygon points="925,612 1117,672 925,732 733,672" fill="var(--surface-2)" stroke="var(--border)" />
+        <text class="lbl-decision" x="925" y="666" text-anchor="middle">&iquest;La organizaci&oacute;n aprueba</text>
+        <text class="lbl-decision" x="925" y="684" text-anchor="middle">la solicitud?</text>
+
+        <!-- good branch -->
+        <line x1="1080" y1="700" x2="1030" y2="778" stroke="var(--good)" stroke-width="1.75" marker-end="url(#arrow-good)" />
+        <text class="lbl-edge" x="1096" y="738" fill="var(--good)" font-weight="700">Aprueba</text>
+
+        <rect x="940" y="778" width="190" height="80" rx="8" fill="var(--good-bg)" stroke="var(--good)" stroke-opacity="0.6" />
+        <text class="lbl-node lbl-node-b" x="1035" y="804" text-anchor="middle" font-size="13">Plan activo</text>
+        <text class="lbl-node" x="1035" y="824" text-anchor="middle" font-size="12">la reserva se confirma</text>
+        <text class="lbl-node" x="1035" y="840" text-anchor="middle" font-size="12">autom&aacute;ticamente</text>
+
+        <!-- bad branch -->
+        <line x1="770" y1="700" x2="822" y2="778" stroke="var(--bad)" stroke-width="1.75" marker-end="url(#arrow-bad)" />
+        <text class="lbl-edge" x="748" y="738" fill="var(--bad)" font-weight="700">Rechaza</text>
+
+        <rect x="730" y="778" width="190" height="80" rx="8" fill="var(--bad-bg)" stroke="var(--bad)" stroke-opacity="0.6" />
+        <text class="lbl-node lbl-node-b" x="825" y="800" text-anchor="middle" font-size="13">Rechazo con motivo</text>
+        <text class="lbl-node" x="825" y="818" text-anchor="middle" font-size="12">reserva cancelada; debe</text>
+        <text class="lbl-node" x="825" y="834" text-anchor="middle" font-size="12">reservar de nuevo si luego</text>
+        <text class="lbl-node" x="825" y="850" text-anchor="middle" font-size="12">se aprueba el plan</text>
+
+      </svg>
+    </div>
+
+    <figcaption>
+      <strong>Lo que decide el resultado</strong> no es si el atleta tiene el plan, sino si la
+      organizaci&oacute;n permite continuar la reserva mientras ese plan se revisa. Sin ese permiso, la
+      reserva nunca llega a existir hasta que el plan est&aacute; aprobado. Con &eacute;l, la reserva y la
+      solicitud avanzan juntas, y el resultado de la revisi&oacute;n decide si la reserva se confirma sola
+      o se cancela con un motivo visible para el atleta.
+    </figcaption>
+
+    <div class="legend">
+      <span class="legend-item"><span class="swatch sw-accent"></span>Camino habilitado por US-0106</span>
+      <span class="legend-item"><span class="swatch sw-warn"></span>Estado pendiente</span>
+      <span class="legend-item"><span class="swatch sw-good"></span>Resultado aprobado</span>
+      <span class="legend-item"><span class="swatch sw-bad"></span>Resultado bloqueado o rechazado</span>
+    </div>
+  </figure>
+
+  <footer>US-0106 &middot; projectspec/userstory/us0106-skip-plan-confirmation-public-trainings.md</footer>
+</div>

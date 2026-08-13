@@ -28,6 +28,8 @@ export interface PagoAdminRow {
   validado_por_nombre: string | null;
   fecha_pago: string | null;
   fecha_validacion: string | null;
+  /** Reason entered by the admin when estado is 'rechazado', shown to the athlete (US-0106). */
+  motivo_rechazo: string | null;
   created_at: string;
 }
 

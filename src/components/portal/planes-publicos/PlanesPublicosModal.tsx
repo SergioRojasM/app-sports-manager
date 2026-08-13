@@ -15,6 +15,8 @@ type PlanesPublicosModalProps = {
   onClose: () => void;
   /** Pre-fills the catalog search on open — e.g. a required service's name (US-0101). Existing callers that omit this keep today's unfiltered behavior. */
   initialSearch?: string;
+  /** Forwarded to useSuscripcion — chains into a caller's own next step after purchase instead of the generic close (US-0106). Existing callers that omit this keep today's behavior. */
+  onSubscribed?: (suscripcionId: string) => void;
 };
 
 export function PlanesPublicosModal({
@@ -23,10 +25,11 @@ export function PlanesPublicosModal({
   tenantNombre,
   onClose,
   initialSearch,
+  onSubscribed,
 }: PlanesPublicosModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const catalog = usePlanesPublicos({ tenantId, enabled: open, initialSearch });
-  const suscripcion = useSuscripcion({ tenantId });
+  const suscripcion = useSuscripcion({ tenantId, onSubscribed });
   const { role } = useTenantAccess(open ? tenantId : undefined);
 
   // Tenant staff manage plans instead of buying them (mirrors the in-tenant rule)

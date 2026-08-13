@@ -20,7 +20,8 @@ type PublicarEntrenamientoModalProps = {
   bannerError: string | null;
   isSubmitting: boolean;
   submitError: string | null;
-  onChangeField: (field: keyof EntrenamientoPublicoFormValues, value: string) => void;
+  onChangeField: (field: keyof Omit<EntrenamientoPublicoFormValues, 'omitirConfirmacionPlan'>, value: string) => void;
+  onChangeOmitirConfirmacionPlan: (value: boolean) => void;
   onBannerFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
   onSubmit: () => Promise<boolean>;
@@ -42,6 +43,7 @@ export function PublicarEntrenamientoModal({
   isSubmitting,
   submitError,
   onChangeField,
+  onChangeOmitirConfirmacionPlan,
   onBannerFileSelect,
   onClose,
   onSubmit,
@@ -190,6 +192,26 @@ export function PublicarEntrenamientoModal({
             <div className="rounded-lg border border-portal-border bg-navy-deep/50 p-3 text-xs text-slate-400">
               <p className="mb-1 font-semibold text-slate-300">Datos fijos del entrenamiento (no editables aquí)</p>
               <p>Fecha y hora, duración, escenario y cupo se sincronizan siempre con el entrenamiento original.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <span id="omitir-confirmacion-plan-desc" className="block text-[11px] text-slate-500">
+                Cuando está activo, un atleta sin el plan/servicio requerido puede reservar de todas formas: la
+                reserva y la solicitud del plan quedan pendientes de aprobación en lugar de bloquear la reserva.
+              </span>
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  id="omitir_confirmacion_plan"
+                  name="omitir_confirmacion_plan"
+                  type="checkbox"
+                  checked={values.omitirConfirmacionPlan}
+                  onChange={(event) => onChangeOmitirConfirmacionPlan(event.target.checked)}
+                  disabled={isLoading || isSubmitting}
+                  aria-describedby="omitir-confirmacion-plan-desc"
+                  className="h-4 w-4 rounded border-slate-600 bg-navy-deep accent-turquoise disabled:opacity-50"
+                />
+                <span className="text-sm font-medium text-slate-200">Omitir confirmación de plan</span>
+              </label>
             </div>
 
             {submitError && (
