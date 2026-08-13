@@ -12,12 +12,18 @@ export function EntrenamientosPublicosPage() {
   const {
     loading,
     error,
+    items,
     featuredItem,
     standardItems,
     tenantOptions,
-    thisWeekCount,
-    dateChip,
-    setDateChip,
+    dateFrom,
+    dateTo,
+    calendarMonth,
+    goToPrevMonth,
+    goToNextMonth,
+    setDateRange,
+    clearDateRange,
+    applyDateChip,
     search,
     setSearch,
     tenantId,
@@ -35,7 +41,7 @@ export function EntrenamientosPublicosPage() {
           <h1 className="font-landing-display text-2xl italic font-bold leading-tight text-landing-text">
             Entrenamientos <span className="text-landing-primary">Públicos</span>
           </h1>
-          <SessionsAvailableWidget count={thisWeekCount} />
+          <SessionsAvailableWidget count={items.length} />
         </div>
 
         <button
@@ -82,8 +88,14 @@ export function EntrenamientosPublicosPage() {
       <PublicTrainingFiltersDrawer
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        dateChip={dateChip}
-        onChangeDateChip={setDateChip}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        calendarMonth={calendarMonth}
+        onGoToPrevMonth={goToPrevMonth}
+        onGoToNextMonth={goToNextMonth}
+        onSetDateRange={setDateRange}
+        onClearDateRange={clearDateRange}
+        onApplyDateChip={applyDateChip}
         search={search}
         onChangeSearch={setSearch}
         tenantId={tenantId}
