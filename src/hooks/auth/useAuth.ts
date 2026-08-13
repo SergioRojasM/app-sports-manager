@@ -87,6 +87,15 @@ export function useAuth() {
     []
   );
 
+  const signInWithGoogle = useCallback(
+    async (next?: string): Promise<{ errorMessage: string | null }> => {
+      const result = await authService.signInWithOAuth(next);
+      setErrorMessage(result.errorMessage);
+      return result;
+    },
+    []
+  );
+
   const signOut = useCallback(async () => {
     await setPortalCookies(null);
     const error = await authService.signOut();
@@ -115,6 +124,7 @@ export function useAuth() {
     errorMessage,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
     resetPassword,
     updatePassword,
