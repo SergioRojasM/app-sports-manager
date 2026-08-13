@@ -138,7 +138,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PlanTipoServiciosSection.tsx  # Services assignment rows inside plan tipo sub-form (US-0062)
 │   │   │       ├── PlanesViewPage.tsx
 │   │   │       ├── PlanesRolePage.tsx
-│   │   │       ├── SuscripcionModal.tsx
+│   │   │       ├── SuscripcionModal.tsx  # Two-step subtype-then-payment flow; Step 1 (subtype picker) is skipped and the modal opens directly on Step 2 when the plan has exactly one active subtype (auto-selected by useSuscripcion.openModal), tracked via hasSubtypeChoice = activeTipos.length > 1 (US-0105)
 │   │   │       └── index.ts
 │   │   │   └── servicios/                # Feature slice (portal/servicios — US-0062)
 │   │   │       ├── ServiciosPage.tsx      # Admin CRUD page for tenant services catalog
@@ -261,8 +261,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal; includes tiposServiceRows + updateTipoServiceRows (US-0062)
 │   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate; manages tiposServiceRows parallel array (US-0062)
 │   │           ├── usePlanTipoServicios.ts # Manages service rows state for plan tipo service assignment (US-0062)
-│   │           ├── usePlanesView.ts
-│   │           └── useSuscripcion.ts
+│   │           ├── usePlanesView.ts        # Exposes getActiveTipos(plan) — canonical active-plan_tipos filter/sort, reused by useSuscripcion and SuscripcionModal
+│   │           └── useSuscripcion.ts       # openModal auto-selects selectedTipoId when the plan has exactly one active subtype, via getActiveTipos (US-0105)
 │   │       └── servicios/            # Feature hooks for services catalog (US-0062)
 │   │           ├── useServicios.ts       # List + CRUD + modal coordination for servicios
 │   │           └── useServicioForm.ts    # Controlled form state for ServicioFormModal
