@@ -84,11 +84,38 @@ export function PublicTrainingReservaModal({
     );
   }
 
-  // A missing/exhausted service cannot be fixed by editing the booking form — the only
-  // way forward is acquiring a plan that grants it, so show a dedicated state with the
-  // catalog action instead of re-rendering the form with an inline error (US-0094).
-  const rejectionCode = reserva.bookingRejection?.code;
-  if (rejectionCode === 'SERVICIO_REQUERIDO' || rejectionCode === 'UNIDADES_AGOTADAS') {
+  // The upfront (or, for a race that slips past it, submit-time) restriction check can
+  // reject for any BookingRejectionCode, not just a missing/exhausted service (US-0101).
+  // Only a service-related rejection can be fixed by acquiring a plan, so the catalog
+  // action is gated to those two codes; every other code gets a message-only dialog.
+  if (reserva.checkingEligibility) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 bg-slate-950/70" />
+        <div
+          role="status"
+          aria-live="polite"
+          className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl"
+        >
+          <span className="material-symbols-outlined animate-spin text-4xl text-turquoise" aria-hidden="true">
+            progress_activity
+          </span>
+          <p className="mt-3 text-sm text-slate-300">Verificando disponibilidad…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Captured once, before the `if` below, rather than re-read afterward: TS narrows
+  // `bookingRejection` to `never` (not `null`) for any code after an `if (x) { return }`
+  // block, so a later `bookingRejection?.message` would fail to type-check.
+  const bookingRejection = reserva.bookingRejection;
+  const bookingRejectionMessage = bookingRejection?.message;
+
+  if (bookingRejection) {
+    const rejectionCode = bookingRejection.code;
+    const canAcquirePlan = rejectionCode === 'SERVICIO_REQUERIDO' || rejectionCode === 'UNIDADES_AGOTADAS';
+
     return (
       <>
         {/* Hidden while the catalog is open: this dialog is z-50 and the catalog is z-40
@@ -111,17 +138,19 @@ export function PublicTrainingReservaModal({
             <h3 id="reserva-rechazo-title" className="mt-3 text-lg font-semibold text-slate-100">
               No puedes reservar todavía
             </h3>
-            <p className="mt-2 text-sm text-slate-300">{reserva.bookingRejection?.message}</p>
+            <p className="mt-2 text-sm text-slate-300">{bookingRejection.message}</p>
 
             <div className="mt-5 flex flex-col gap-2">
-              <button
-                ref={verPlanesRef}
-                type="button"
-                onClick={() => setPlanesOpen(true)}
-                className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
-              >
-                Ver planes de {tenantNombre}
-              </button>
+              {canAcquirePlan && (
+                <button
+                  ref={verPlanesRef}
+                  type="button"
+                  onClick={() => setPlanesOpen(true)}
+                  className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+                >
+                  Ver planes de {tenantNombre}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onClose}
@@ -133,12 +162,15 @@ export function PublicTrainingReservaModal({
           </div>
         </div>
 
-        <PlanesPublicosModal
-          open={planesOpen}
-          tenantId={tenantId}
-          tenantNombre={tenantNombre}
-          onClose={closePlanes}
-        />
+        {canAcquirePlan && (
+          <PlanesPublicosModal
+            open={planesOpen}
+            tenantId={tenantId}
+            tenantNombre={tenantNombre}
+            onClose={closePlanes}
+            initialSearch={bookingRejection.servicioNombre}
+          />
+        )}
       </>
     );
   }
@@ -162,7 +194,7 @@ export function PublicTrainingReservaModal({
         isSelf
         allowSkip={!reserva.formularioObligatorio}
         isSubmitting={reserva.reservaForm.isSubmitting}
-        submitError={reserva.reservaForm.submitError ?? reserva.bookingRejection?.message ?? reserva.unexpectedError}
+        submitError={reserva.reservaForm.submitError ?? bookingRejectionMessage ?? reserva.unexpectedError}
         onUpdateValue={reserva.formularioRespuestaForm.updateValue}
         onUploadImage={reserva.formularioRespuestaForm.uploadImage}
         onSubmit={async () => {
@@ -187,7 +219,7 @@ export function PublicTrainingReservaModal({
       form={reserva.reservaForm.form}
       errors={reserva.reservaForm.errors}
       isSubmitting={reserva.reservaForm.isSubmitting}
-      submitError={reserva.reservaForm.submitError ?? reserva.bookingRejection?.message ?? reserva.unexpectedError}
+      submitError={reserva.reservaForm.submitError ?? bookingRejectionMessage ?? reserva.unexpectedError}
       onUpdateField={reserva.reservaForm.updateField}
       onSubmit={reserva.submitWithoutFormulario}
       onClose={onClose}

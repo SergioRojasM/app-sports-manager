@@ -283,6 +283,33 @@ export const entrenamientosPublicosService = {
       }
     }
 
+    // Formulario attachment lives on the source `entrenamientos` row — never duplicated
+    // onto `entrenamientos_publicos` (US-0089) — so it's fetched via one batched query for
+    // the whole visible list, never per row (US-0101).
+    const formularioByEntrenamiento = new Map<string, { formularioId: string | null; formularioExterno: string | null }>();
+    if (rows.length > 0) {
+      const { data: formularioRows, error: formularioError } = await supabase
+        .from('entrenamientos')
+        .select('id, formulario_id, formulario_externo')
+        .in(
+          'id',
+          rows.map((row) => row.entrenamiento_id),
+        );
+
+      if (!formularioError) {
+        for (const row of (formularioRows ?? []) as unknown as Array<{
+          id: string;
+          formulario_id: string | null;
+          formulario_externo: string | null;
+        }>) {
+          formularioByEntrenamiento.set(row.id, {
+            formularioId: row.formulario_id,
+            formularioExterno: row.formulario_externo,
+          });
+        }
+      }
+    }
+
     return rows.map((row, index) => ({
       id: row.id,
       tenantId: row.tenant_id,
@@ -306,6 +333,8 @@ export const entrenamientosPublicosService = {
       reservasActivas: capacidades[index]?.reservas_activas ?? 0,
       serviciosRequeridos: serviciosByEntrenamiento.get(row.entrenamiento_id) ?? [],
       createdAt: row.created_at,
+      formularioId: formularioByEntrenamiento.get(row.entrenamiento_id)?.formularioId ?? null,
+      formularioExterno: formularioByEntrenamiento.get(row.entrenamiento_id)?.formularioExterno ?? null,
     }));
   },
 
@@ -396,6 +425,10 @@ export const entrenamientosPublicosService = {
       // and this path must not query the authenticated-only view (US-0094).
       serviciosRequeridos: [],
       createdAt: row.created_at,
+      // Deliberately null: formulario tables are authenticated-only and the anonymous
+      // landing page offers no "Vista previa" action (US-0101).
+      formularioId: null,
+      formularioExterno: null,
     }));
   },
 };

@@ -66,6 +66,7 @@ export function PublicarEntrenamientoModal({
 
   const previewData: PublicTrainingCardData = {
     nombre: values.nombre || training.nombre,
+    tenantId: training.tenant_id,
     descripcion: values.descripcion || training.descripcion,
     disciplinaNombre,
     escenarioNombre,

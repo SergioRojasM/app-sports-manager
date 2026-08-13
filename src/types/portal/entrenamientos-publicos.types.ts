@@ -61,6 +61,10 @@ export type PublicTrainingListItem = {
   /** Distinct names of services the training requires, alphabetical. Empty when unrestricted (US-0094). */
   serviciosRequeridos: string[];
   createdAt: string;
+  /** Source entrenamientos.formulario_id, batched in listPublicTrainings() (US-0101). Null on the anonymous landing page. */
+  formularioId: string | null;
+  /** Source entrenamientos.formulario_externo, batched in listPublicTrainings() (US-0101). Null on the anonymous landing page. */
+  formularioExterno: string | null;
 };
 
 export type PublicTrainingDateChip = 'today' | 'tomorrow' | 'this_week' | 'weekend';

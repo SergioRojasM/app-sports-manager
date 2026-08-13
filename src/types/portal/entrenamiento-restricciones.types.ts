@@ -99,6 +99,8 @@ export type BookingRejection = {
   ok: false;
   code: BookingRejectionCode;
   message: string;
+  /** Missing/exhausted service's name, set only for SERVICIO_REQUERIDO/UNIDADES_AGOTADAS (US-0101). */
+  servicioNombre?: string;
 };
 
 export type BookingResult = { ok: true } | BookingRejection;
