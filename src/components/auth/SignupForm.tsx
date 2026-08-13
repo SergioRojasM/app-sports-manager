@@ -5,10 +5,19 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { GUIDED_SIGNUP_STEPS, parseGuidedParams } from "@/lib/portal/entrenamientos-publicos/guidedBooking";
+import { GuidedBookingStepper } from "@/components/ui/GuidedBookingStepper";
 
-export function SignupForm() {
+type SignupFormProps = {
+  nextPath?: string;
+};
+
+export function SignupForm({ nextPath }: SignupFormProps) {
   const router = useRouter();
   const { signUp, errorMessage: authErrorMessage } = useAuth();
+
+  const guidedTarget = useMemo(() => (nextPath ? parseGuidedParams(nextPath) : null), [nextPath]);
+  const loginHref = nextPath ? `/auth/login?next=${encodeURIComponent(nextPath)}` : "/auth/login";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +47,7 @@ export function SignupForm() {
     }
 
     setLoading(true);
-    const result = await signUp({ email, password });
+    const result = await signUp({ email, password }, nextPath);
 
     if (result.errorMessage) {
       setLoading(false);
@@ -46,7 +55,7 @@ export function SignupForm() {
     }
 
     if (result.session) {
-      router.push("/dashboard");
+      router.push(nextPath ?? "/dashboard");
       router.refresh();
       return;
     }
@@ -68,6 +77,14 @@ export function SignupForm() {
         </h2>
         <p className="text-sm text-slate-400">Únete a GRIT Arena y empieza a optimizar el rendimiento de tu equipo.</p>
       </div>
+
+      {guidedTarget && (
+        <GuidedBookingStepper
+          steps={GUIDED_SIGNUP_STEPS}
+          currentStep={successMessage ? 2 : 1}
+          trainingNombre={guidedTarget.nombre}
+        />
+      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {errorMessage && (
@@ -159,7 +176,7 @@ export function SignupForm() {
         ¿Ya tienes una cuenta?
         <Link
           className="ml-1 font-semibold text-turquoise decoration-2 underline-offset-4 hover:underline"
-          href="/auth/login"
+          href={loginHref}
         >
           Iniciar sesión
         </Link>

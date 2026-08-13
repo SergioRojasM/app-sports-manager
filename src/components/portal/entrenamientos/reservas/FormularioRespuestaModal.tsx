@@ -35,6 +35,8 @@ type FormularioRespuestaModalProps = {
   onSubmit: () => Promise<void>;
   onSkip: () => Promise<void>;
   onClose: () => void;
+  /** Optional content rendered below the title (e.g. a guided-booking progress indicator). */
+  headerExtra?: React.ReactNode;
 };
 
 // ─────────────────────────────────────────────
@@ -156,6 +158,7 @@ export function FormularioRespuestaModal({
   onSubmit,
   onSkip,
   onClose,
+  headerExtra,
 }: FormularioRespuestaModalProps) {
   if (!open) {
     return null;
@@ -174,6 +177,8 @@ export function FormularioRespuestaModal({
       <div className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-portal-border bg-navy-medium p-6 shadow-2xl">
         <h2 className="mb-1 text-lg font-semibold text-slate-100">{plantillaNombre}</h2>
         <p className="mb-4 text-sm text-slate-400">Completa el formulario para continuar con tu reserva.</p>
+
+        {headerExtra}
 
         {perfilIncompleto ? (
           <div className="mb-4 rounded-lg border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-200">

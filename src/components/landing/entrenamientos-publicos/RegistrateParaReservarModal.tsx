@@ -1,16 +1,34 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import { buildGuidedNextPath } from '@/lib/portal/entrenamientos-publicos/guidedBooking';
+import type { PublicTrainingListItem } from '@/types/portal/entrenamientos-publicos.types';
 
 type RegistrateParaReservarModalProps = {
   open: boolean;
-  trainingNombre: string;
+  target: PublicTrainingListItem | null;
   onClose: () => void;
 };
 
-export function RegistrateParaReservarModal({ open, trainingNombre, onClose }: RegistrateParaReservarModalProps) {
+export function RegistrateParaReservarModal({ open, target, onClose }: RegistrateParaReservarModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const trainingNombre = target?.nombre ?? '';
+
+  const guidedNext = useMemo(() => {
+    if (!target) return null;
+    return buildGuidedNextPath({
+      entrenamientoId: target.entrenamientoId,
+      tenantId: target.tenantId,
+      disciplinaId: target.disciplinaId,
+      nombre: target.nombre,
+    });
+  }, [target]);
+
+  const signupHref = guidedNext ? `/auth/signup?next=${encodeURIComponent(guidedNext)}` : '/auth/signup';
+  const loginHref = guidedNext
+    ? `/auth/login?next=${encodeURIComponent(guidedNext)}`
+    : '/auth/login?next=/portal/entrenamientos-publicos';
 
   useEffect(() => {
     if (!open) return;
@@ -57,13 +75,13 @@ export function RegistrateParaReservarModal({ open, trainingNombre, onClose }: R
 
         <div className="mt-6 flex flex-col gap-3">
           <Link
-            href="/auth/signup"
+            href={signupHref}
             className="landing-primary-button font-landing-display inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-bold tracking-[0.04em]"
           >
             Crear cuenta gratis
           </Link>
           <Link
-            href="/auth/login?next=/portal/entrenamientos-publicos"
+            href={loginHref}
             className="inline-flex items-center justify-center rounded-lg border border-landing-border px-4 py-2.5 font-landing-body text-sm font-semibold text-landing-text transition hover:border-landing-primary/50 hover:text-landing-primary"
           >
             Ya tengo cuenta

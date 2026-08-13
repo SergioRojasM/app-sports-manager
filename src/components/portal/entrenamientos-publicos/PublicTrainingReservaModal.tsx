@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePublicTrainingReserva } from '@/hooks/portal/entrenamientos-publicos/usePublicTrainingReserva';
 import { ReservaFormModal } from '@/components/portal/entrenamientos/reservas/ReservaFormModal';
 import { FormularioRespuestaModal } from '@/components/portal/entrenamientos/reservas/FormularioRespuestaModal';
+import { InlineProfileCompletionStep } from '@/components/portal/entrenamientos/reservas/InlineProfileCompletionStep';
 import { PlanesPublicosModal } from '@/components/portal/planes-publicos';
+import { GuidedBookingStepper } from '@/components/ui/GuidedBookingStepper';
+import { GUIDED_BOOKING_STEPS } from '@/lib/portal/entrenamientos-publicos/guidedBooking';
+import type { FormularioPerfilCampo } from '@/types/portal/formularios.types';
 
 type PublicTrainingReservaModalProps = {
   open: boolean;
@@ -14,6 +18,8 @@ type PublicTrainingReservaModalProps = {
   trainingNombre: string;
   tenantNombre: string;
   onClose: () => void;
+  /** True when this modal was auto-opened from a guided booking journey (US-0103). */
+  guided?: boolean;
 };
 
 /**
@@ -29,6 +35,7 @@ export function PublicTrainingReservaModal({
   trainingNombre,
   tenantNombre,
   onClose,
+  guided = false,
 }: PublicTrainingReservaModalProps) {
   const reserva = usePublicTrainingReserva({ tenantId, entrenamientoId, disciplinaId });
   const [planesOpen, setPlanesOpen] = useState(false);
@@ -65,6 +72,9 @@ export function PublicTrainingReservaModal({
           className="absolute inset-0 bg-slate-950/70"
         />
         <div className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl">
+          {guided && (
+            <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={3} trainingNombre={trainingNombre} />
+          )}
           <span className="material-symbols-outlined text-4xl text-emerald-300" aria-hidden="true">
             check_circle
           </span>
@@ -84,6 +94,27 @@ export function PublicTrainingReservaModal({
     );
   }
 
+  // Checked before eligibility on purpose (US-0103): completing missing profile data is
+  // entirely within the user's control and, once saved, never needs repeating on a retry —
+  // unlike eligibility, which can require buying a plan and waiting on manual admin
+  // approval. Gated on !perfilLoading so the initial fetch resolves before this branch (or
+  // checkingEligibility below) is evaluated, avoiding a flash of the wrong state.
+  const missingPerfilFields = reserva.formularioRespuestaForm.perfilFaltantes;
+  if (missingPerfilFields.length > 0 && !reserva.formularioRespuestaForm.perfilLoading) {
+    return (
+      <InlineProfileCompletionStep
+        missingFields={missingPerfilFields.map((f) => f.key) as FormularioPerfilCampo[]}
+        onSaved={() => void reserva.formularioRespuestaForm.refetchPerfil()}
+        onClose={onClose}
+        headerExtra={
+          guided ? (
+            <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={1} trainingNombre={trainingNombre} />
+          ) : undefined
+        }
+      />
+    );
+  }
+
   // The upfront (or, for a race that slips past it, submit-time) restriction check can
   // reject for any BookingRejectionCode, not just a missing/exhausted service (US-0101).
   // Only a service-related rejection can be fixed by acquiring a plan, so the catalog
@@ -97,6 +128,9 @@ export function PublicTrainingReservaModal({
           aria-live="polite"
           className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl"
         >
+          {guided && (
+            <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={2} trainingNombre={trainingNombre} />
+          )}
           <span className="material-symbols-outlined animate-spin text-4xl text-turquoise" aria-hidden="true">
             progress_activity
           </span>
@@ -132,6 +166,9 @@ export function PublicTrainingReservaModal({
             aria-labelledby="reserva-rechazo-title"
             className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl"
           >
+            {guided && (
+              <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={2} trainingNombre={trainingNombre} />
+            )}
             <span className="material-symbols-outlined text-4xl text-amber-300" aria-hidden="true">
               lock
             </span>
@@ -204,6 +241,11 @@ export function PublicTrainingReservaModal({
           await reserva.submitWithoutFormulario();
         }}
         onClose={onClose}
+        headerExtra={
+          guided ? (
+            <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={3} trainingNombre={trainingNombre} />
+          ) : undefined
+        }
       />
     );
   }
@@ -227,6 +269,11 @@ export function PublicTrainingReservaModal({
       formularioNombre={reserva.formularioRespuestaForm.plantillaNombre}
       formularioObligatorio={reserva.formularioObligatorio}
       onRequireFormulario={reserva.requireFormulario}
+      headerExtra={
+        guided ? (
+          <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={2} trainingNombre={trainingNombre} />
+        ) : undefined
+      }
     />
   );
 }
