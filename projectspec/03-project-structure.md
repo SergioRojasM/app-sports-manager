@@ -67,7 +67,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   ├── landing/
 │   │   │   └── entrenamientos-publicos/  # Feature slice (landing/entrenamientos-publicos — public discovery page, US-0091)
 │   │   │       ├── PublicEntrenamientosLandingPage.tsx  # Page shell; reuses PublicTrainingCard/PublicTrainingsGrid from components/portal/entrenamientos-publicos as-is (no auth coupling)
-│   │   │       ├── RegistrateParaReservarModal.tsx      # "Regístrate para reservar" CTA dialog shown instead of the real booking flow for anonymous visitors
+│   │   │       ├── RegistrateParaReservarModal.tsx      # "Regístrate para reservar" CTA dialog shown instead of the real booking flow for anonymous visitors; builds a guided booking target (buildGuidedNextPath) passed as `next` to both signup/login links, and shows GuidedBookingStepper at step 1 (US-0103)
 │   │   │       └── index.ts
 │   │   ├── portal/
 │   │   │   ├── PortalHeader.tsx          # Shared portal shell components
@@ -117,12 +117,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PublicarEntrenamientoModal.tsx  # Publish/manage-publication slide-over: live PublicTrainingCard preview + editable nombre/descripcion/precio/banner, "Despublicar" (US-0089)
 │   │   │       └── reservas/              # Sub-feature slice (booking)
 │   │   │           ├── ReservasPanel.tsx        # Two-step booking flow when training has an internal formulario (US-0087): ReservaFormModal → FormularioRespuestaModal; "Ver respuesta" row action opens FormularioRespuestaViewerModal; forwards perfilResumen/perfilFaltantes/refetchPerfil and isSelf (target athlete vs current user) to FormularioRespuestaModal, and perfil_campos_requeridos to the "Ver formulario" FormularioPreviewModal call (US-0095); handleOpenRespuestaViewer resolves perfil_snapshot into the viewer's perfilCampos via FORMULARIO_PERFIL_CAMPOS; handleExportFormularioRespuestas adds one Excel column per unique perfil_snapshot key (union across responses, catalog order) after the fixed identity columns (US-0096)
-│   │   │           ├── ReservaFormModal.tsx     # Shows "Formulario adjunto" banner + signals parent (onRequireFormulario) instead of submitting directly when training has formulario_id (US-0087)
+│   │   │           ├── ReservaFormModal.tsx     # Shows "Formulario adjunto" banner + signals parent (onRequireFormulario) instead of submitting directly when training has formulario_id (US-0087); optional `headerExtra` slot rendered below the title, used by the marketplace booking modal to inject GuidedBookingStepper (US-0103)
 │   │   │           ├── ReservaStatusBadge.tsx
 │   │   │           ├── AsistenciaStatusBadge.tsx  # Inline badge: Sin registrar / Asistió / No asistió
 │   │   │           ├── AsistenciaFormModal.tsx    # Create/edit/delete attendance record (admin/coach only)
-│   │   │           ├── FormularioRespuestaModal.tsx        # Fill-out step: editable inputs per campo_tipo (incl. imagen upload), "Guardar y reservar" + conditional "Reservar sin formulario" skip (US-0087); read-only profile summary strip / amber incomplete-profile warning (with "Actualizar perfil" + re-check) above the sections, submit disabled while any requested profile field is missing (US-0095)
+│   │   │           ├── FormularioRespuestaModal.tsx        # Fill-out step: editable inputs per campo_tipo (incl. imagen upload), "Guardar y reservar" + conditional "Reservar sin formulario" skip (US-0087); read-only profile summary strip / amber incomplete-profile warning (with "Actualizar perfil" + re-check) above the sections, submit disabled while any requested profile field is missing (US-0095); banner kept only as defense-in-depth now that the marketplace flow resolves incompleteness earlier via InlineProfileCompletionStep; optional `headerExtra` slot for GuidedBookingStepper (US-0103)
 │   │   │           ├── FormularioRespuestaViewerModal.tsx  # Read-only "Ver respuesta" viewer — labels + submitted values, signed-URL images (US-0087); optional "Datos de perfil" section above the answers, rendered from perfil_snapshot via the FORMULARIO_PERFIL_CAMPOS catalog (US-0096)
+│   │   │           ├── InlineProfileCompletionStep.tsx     # Booking-modal-embedded profile completion: wraps usePerfil() as-is, renders PerfilPersonalForm/PerfilDeportivoForm filtered via `visibleFields` to only the training's missing perfil_campos_requeridos, "Guardar y continuar" saves then calls the caller's refetchPerfil (US-0103)
 │   │   │           └── index.ts
 │   │   │   └── planes-publicos/          # Feature slice (portal/planes-publicos — US-0093)
 │   │   │       ├── VerPlanesButton.tsx     # "Ver planes" secondary action on every organization card; owns modal open state + focus restore
@@ -198,8 +199,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── perfil/                    # Feature slice (portal/perfil — user profile)
 │   │   │       ├── PerfilPage.tsx
 │   │   │       ├── PerfilHeader.tsx
-│   │   │       ├── PerfilPersonalForm.tsx
-│   │   │       ├── PerfilDeportivoForm.tsx
+│   │   │       ├── PerfilPersonalForm.tsx   # Optional `visibleFields?: FormularioPerfilCampo[]` prop filters rendered fields (numero_identificacion follows tipo_identificacion's visibility); omitted renders every field as before (US-0103)
+│   │   │       ├── PerfilDeportivoForm.tsx  # Same `visibleFields?: FormularioPerfilCampo[]` prop addition; returns null when neither peso_kg nor altura_cm is visible (US-0103)
 │   │   │       └── index.ts
 │   │   │   └── mis-suscripciones/          # Feature slice (portal/mis-suscripciones — cross-tenant subscription & payment view, renamed from mis-suscripciones-y-pagos in US-0093)
 │   │   │       ├── MisSuscripcionesYPagosPage.tsx  # List container with filters, empty states; props { suscripciones, userId } — tenant comes per row
@@ -213,16 +214,17 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── MisReservasTable.tsx            # Data table with Organización column, badges, client-side pagination
 │   │   │       └── index.ts
 │   │   │   └── entrenamientos-publicos/     # Feature slice (portal/entrenamientos-publicos — cross-tenant marketplace, US-0089)
-│   │   │       ├── EntrenamientosPublicosPage.tsx  # Sticky floating header (title + subtitle + widget + "Filtrar" button) above a full-width grid, styled per grit-arena.pen node ql3Ij using the existing landing-* Tailwind tokens
+│   │   │       ├── EntrenamientosPublicosPage.tsx  # Sticky floating header (title + subtitle + widget + "Filtrar" button) above a full-width grid, styled per grit-arena.pen node ql3Ij using the existing landing-* Tailwind tokens; parses a guided booking target from the URL (parseGuidedParams) once loaded, auto-opens PublicTrainingReservaModal for the matching training and strips the query params via router.replace (US-0103)
 │   │   │       ├── PublicTrainingFiltersDrawer.tsx  # Right-side drawer (opened via the header's "Filtrar" button): date chips (compute+apply a dateFrom/dateTo range), interactive navigable calendar (hook-owned calendarMonth, click-to-select/extend/restart range, "Limpiar fechas"), "Organización" dropdown, search (US-0102)
 │   │   │       ├── PublicTrainingCard.tsx           # Shared card (marketplace grid AND PublicarEntrenamientoModal's live preview), driven by PublicTrainingCardData; shows tenantNombre and a "Requiere: …" row from serviciosRequeridos (empty on the anonymous landing page — US-0094); "Ver" button over the banner (only when bannerUrl is set) opens PublicTrainingBannerModal fullscreen, local useState, no auth coupling (US-0100); "Vista previa" (internal formulario via useFormularioPreview + FormularioPreviewModal, or external link) and "Adquirir plan" (opens PlanesPublicosModal pre-searched to the first required service) actions, each gated on formularioId/formularioExterno/serviciosRequeridos so they're absent wherever that data isn't populated (US-0101)
 │   │   │       ├── PublicTrainingBannerModal.tsx    # Fullscreen banner viewer: backdrop + Escape + close button, modeled on FormularioPreviewModal's overlay pattern (US-0100)
 │   │   │       ├── PublicTrainingsGrid.tsx          # Responsive 1/2-col grid (never more than 2 cols — cards max out at half the column width); "Próximo" badge on the most-recently-published listing; empty state
-│   │   │       ├── PublicTrainingReservaModal.tsx   # Thin wrapper reusing the EXISTING ReservaFormModal/FormularioRespuestaModal for a cross-tenant booking — no reservations list/export/asistencias; shows a checkingEligibility loading state, then any BookingRejectionCode rejection with a message-only dialog, with the "Ver planes de {org}" action (opening PlanesPublicosModal, pre-searched to bookingRejection.servicioNombre) shown only for SERVICIO_REQUERIDO/UNIDADES_AGOTADAS (US-0094, broadened US-0101); forwards perfilResumen/perfilFaltantes/refetchPerfil (isSelf always true — marketplace is always self-booking) to FormularioRespuestaModal (US-0095)
+│   │   │       ├── PublicTrainingReservaModal.tsx   # Thin wrapper reusing the EXISTING ReservaFormModal/FormularioRespuestaModal for a cross-tenant booking — no reservations list/export/asistencias; shows a checkingEligibility loading state, then any BookingRejectionCode rejection with a message-only dialog, with the "Ver planes de {org}" action (opening PlanesPublicosModal, pre-searched to bookingRejection.servicioNombre) shown only for SERVICIO_REQUERIDO/UNIDADES_AGOTADAS (US-0094, broadened US-0101); forwards perfilResumen/perfilFaltantes/refetchPerfil (isSelf always true — marketplace is always self-booking) to FormularioRespuestaModal (US-0095); renders InlineProfileCompletionStep BEFORE the checkingEligibility branch while perfilFaltantes is non-empty; accepts `guided` prop and renders GuidedBookingStepper (steps 3-5) across its states (US-0103)
 │   │   │       ├── SessionsAvailableWidget.tsx      # Compact one-line stat ("N entrenamientos disponibles esta semana"), placed under the header subtitle
 │   │   │       └── index.ts
 │   │   └── ui/
 │   │       ├── MultilineText.tsx        # Renders a string with whitespace-pre-wrap (preserves line breaks), optional maxLength truncation, `as` tag prop (p/span/div) — US-0099
+│   │       ├── GuidedBookingStepper.tsx # 5-step progress indicator (currentStep 1-5, optional trainingNombre), role="status" aria-live="polite"; shown only during a guided public-training booking journey (US-0103)
 │   │       └── index.ts
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -373,7 +375,9 @@ Following structure reflects the current implementation and the target scalable 
 │       ├── validators.ts
 │       └── portal/
 │           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
-│           └── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
+│           ├── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
+│           └── entrenamientos-publicos/
+│               └── guidedBooking.ts         # buildGuidedNextPath()/parseGuidedParams() — single source of truth for the guided booking target carried through signup/email-confirmation/login as the `next` query param (US-0103)
 │
 ├── public/                      # Static assets
 │   ├── images/

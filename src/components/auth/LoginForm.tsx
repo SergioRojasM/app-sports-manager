@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { GUIDED_LOGIN_STEPS, parseGuidedParams } from "@/lib/portal/entrenamientos-publicos/guidedBooking";
+import { GuidedBookingStepper } from "@/components/ui/GuidedBookingStepper";
 
 type LoginFormProps = {
   nextPath: string;
@@ -14,6 +16,9 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn, errorMessage } = useAuth();
+
+  const guidedTarget = useMemo(() => parseGuidedParams(nextPath), [nextPath]);
+  const signupHref = `/auth/signup?next=${encodeURIComponent(nextPath)}`;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,6 +54,10 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         </h2>
         <p className="text-sm text-slate-400">¡Bienvenido de nuevo! Ingresa tus datos.</p>
       </div>
+
+      {guidedTarget && (
+        <GuidedBookingStepper steps={GUIDED_LOGIN_STEPS} currentStep={1} trainingNombre={guidedTarget.nombre} />
+      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {resetBannerVisible && (
@@ -161,7 +170,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         ¿No tienes una cuenta?
         <Link
           className="ml-1 font-semibold text-turquoise decoration-2 underline-offset-4 hover:underline"
-          href="/auth/signup"
+          href={signupHref}
         >
           Regístrate
         </Link>

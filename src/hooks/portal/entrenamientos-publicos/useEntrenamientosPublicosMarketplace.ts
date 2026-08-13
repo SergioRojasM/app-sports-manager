@@ -60,7 +60,7 @@ export function computeChipRange(chip: PublicTrainingDateChip): { dateFrom: stri
 }
 
 export function useEntrenamientosPublicosMarketplace() {
-  const [items, setItems] = useState<PublicTrainingListItem[]>([]);
+  const [rawItems, setRawItems] = useState<PublicTrainingListItem[]>([]);
   const [tenantOptions, setTenantOptions] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,10 +83,10 @@ export function useEntrenamientosPublicosMarketplace() {
         entrenamientosPublicosService.listPublicTrainings(),
         entrenamientosPublicosService.listPublicTenantOptions(),
       ]);
-      setItems(trainings);
+      setRawItems(trainings);
       setTenantOptions(tenants);
     } catch {
-      setItems([]);
+      setRawItems([]);
       setError('No fue posible cargar los entrenamientos públicos.');
     } finally {
       setLoading(false);
@@ -140,7 +140,7 @@ export function useEntrenamientosPublicosMarketplace() {
   const filteredItems = useMemo(() => {
     const needle = search.trim().toLowerCase();
 
-    return items
+    return rawItems
       .filter((item) => {
         if (!dateFrom && !dateTo) return true;
         if (!item.fechaHora) return false;
@@ -159,7 +159,7 @@ export function useEntrenamientosPublicosMarketplace() {
           item.serviciosRequeridos.some((servicio) => servicio.toLowerCase().includes(needle))
         );
       });
-  }, [items, dateFrom, dateTo, tenantId, search]);
+  }, [rawItems, dateFrom, dateTo, tenantId, search]);
 
   const featuredItem = filteredItems[0] ?? null;
   const standardItems = filteredItems.slice(1);
@@ -168,6 +168,8 @@ export function useEntrenamientosPublicosMarketplace() {
     loading,
     error,
     items: filteredItems,
+    /** Unfiltered listing — used to resolve a guided booking target regardless of the marketplace's currently active date/tenant/search filters (US-0103). */
+    allItems: rawItems,
     featuredItem,
     standardItems,
     tenantOptions,

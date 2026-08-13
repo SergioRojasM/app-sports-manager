@@ -79,8 +79,8 @@ export function useAuth() {
   );
 
   const signUp = useCallback(
-    async (credentials: AuthCredentials): Promise<AuthResult> => {
-      const result = await authService.signUpWithPassword(credentials);
+    async (credentials: AuthCredentials, next?: string): Promise<AuthResult> => {
+      const result = await authService.signUpWithPassword(credentials, next);
       setErrorMessage(result.errorMessage);
       return result;
     },

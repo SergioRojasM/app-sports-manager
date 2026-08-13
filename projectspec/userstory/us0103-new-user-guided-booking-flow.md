@@ -52,6 +52,22 @@ Two concrete frictions exist in the current implementation:
    modal swaps driven by `usePublicTrainingReserva`'s local state machine
    (`checkingEligibility`, `bookingRejection`, `isFormularioStep`, `successMessage`) with
    no visible progress indicator.
+3. **A brand-new user almost always fails the formulario's profile-completeness check,
+   and the current fix for that sends them away from the flow.** When a training's
+   formulario declares `perfil_campos_requeridos` (US-0095), `FormularioRespuestaModal.tsx`
+   computes `perfilFaltantes` via `useFormularioRespuestaForm.ts` and blocks "Guardar y
+   reservar" until every requested field is present. For a signup that just happened, this
+   is nearly always **all** requested fields: `handle_new_auth_user()`
+   (`supabase/migrations/20260223000100_seed_inicial.sql`) only seeds `usuarios` from
+   signup metadata (usually empty) and never creates a `perfil_deportivo` row at all, so
+   `peso_kg`/`altura_cm` start out missing too. Today's only remedy is a plain
+   `<a href="/portal/perfil" target="_blank">Actualizar perfil</a>` link
+   (`FormularioRespuestaModal.tsx` lines ~187-194) that sends the user to the **full**
+   profile page in a new tab to fill in *all* profile fields (not just the ones this
+   training's formulario actually needs), then relies on them coming back and clicking "Ya
+   actualicé, verificar de nuevo". For a guided new-user journey this defeats the entire
+   point of the story — the user is dropped outside the flow with no step indicator at
+   exactly the point they're most likely to abandon.
 
 ### Proposed Changes
 
@@ -93,7 +109,9 @@ new persistence mechanism:
 **No new persistence layer.** The step number is always *derived*, never stored:
 - Steps 1–2 (create account / confirm email) come from which page the user is on plus
   `SignupForm`'s own local `successMessage` state.
-- Steps 3–4 (eligibility/plan, formulario) come from `usePublicTrainingReserva`'s existing
+- Step 3 (profile completion) comes from `useFormularioRespuestaForm`'s `perfilFaltantes`,
+  which is already computed eagerly and independently of eligibility (see Part C).
+- Step 4–5 (eligibility/plan, formulario) come from `usePublicTrainingReserva`'s existing
   in-memory state (`checkingEligibility`, `bookingRejection`, `isFormularioStep`,
   `successMessage`) — the stepper only reads it.
 - If a user abandons the tab and later opens the app directly (not via the emailed link),
@@ -104,17 +122,73 @@ new persistence mechanism:
 
 **Part B — Visual stepper**
 
-- A new reusable stepper component renders a 4-step progress indicator: (1) Crear cuenta,
-  (2) Confirmar tu correo, (3) Verificar y reservar (covers eligibility check + optional
-  plan purchase), (4) Formulario y confirmación.
+- A new reusable stepper component renders a 5-step progress indicator: (1) Crear cuenta,
+  (2) Confirmar tu correo, (3) Completar tus datos (profile fields the formulario
+  requires — skipped/collapsed automatically when nothing is missing), (4) Verificar y
+  reservar (eligibility check + optional plan purchase), (5) Formulario y confirmación.
+  Profile completion is placed **before** eligibility on purpose: it is entirely within
+  the user's control, doesn't depend on which training they end up eligible for, and — once
+  saved — never has to be repeated on a retry, unlike the eligibility/plan step which can
+  require the user to leave and come back later (see Part C for why this is technically
+  straightforward).
 - It is shown **only** when the user is inside a guided journey that originated from the
   public landing page (i.e., a guided target is present) — an already-authenticated user
   browsing `/portal/entrenamientos-publicos` normally must never see it.
 - Rendered in: `RegistrateParaReservarModal` (step 1), `SignupForm`/`LoginForm` when
   `nextPath` carries a guided target (step 1, moving to step 2 after the "check your
-  email" message appears), and `PublicTrainingReservaModal` across its
-  `checkingEligibility`/rejection-with-plans state (step 3) and `isFormularioStep` state
-  (step 4) when it was opened automatically via the guided target.
+  email" message appears), and `PublicTrainingReservaModal` across its new inline
+  profile-completion state (step 3, Part C below), `checkingEligibility`/
+  rejection-with-plans state (step 4), and `isFormularioStep` state (step 5) when it was
+  opened automatically via the guided target.
+
+**Part C — Inline profile-completion step, checked before eligibility (replaces the "open
+a new tab" detour)**
+
+Instead of sending the user away to `/portal/perfil` to fill in *every* profile field,
+render a focused mini-form **inside the same booking modal**, asking only for the fields
+this specific training's formulario actually requires and that are actually missing
+(`perfilFaltantes`, already computed by `useFormularioRespuestaForm.ts` — no new
+"which fields are needed" logic to write).
+
+Crucially, `useFormularioRespuestaForm.ts` already computes `perfilFaltantes` **eagerly and
+independently of eligibility**: its first `useEffect` (lines 123-159) loads the plantilla
+and its `perfil_campos_requeridos` as soon as `formularioPlantillaId` resolves, and a
+second `useEffect` (lines 202-204) calls `loadPerfil()` automatically whenever that list
+changes — neither depends on `isFormularioStep` or `checkingEligibility` in any way. So the
+profile-completeness result is available (or resolving) from the moment the modal mounts,
+which is what makes checking it *before* eligibility a natural fit rather than a rewrite:
+
+- `PublicTrainingReservaModal.tsx` gets a new early render branch, ordered **before** the
+  existing `checkingEligibility`/`bookingRejection` branches: while
+  `reserva.formularioRespuestaForm.perfilFaltantes.length > 0` (and its initial
+  `perfilLoading` fetch has resolved), render the new `InlineProfileCompletionStep`.
+  Once the user saves and `perfilFaltantes` becomes empty (via the existing
+  `refetchPerfil()`), rendering falls through to the existing
+  `checkingEligibility` → `bookingRejection` → `isFormularioStep` → `ReservaFormModal`
+  sequence exactly as it works today — no new top-level state flag is needed in
+  `usePublicTrainingReserva.ts`, and the existing `isFormularioStep` branch in
+  `FormularioRespuestaModal` no longer needs its own profile-incomplete banner as the
+  primary gate (kept only as defense-in-depth, since it's the same `perfilFaltantes` value).
+- `InlineProfileCompletionStep` (new) reuses the existing `usePerfil()` hook
+  (`src/hooks/portal/perfil/usePerfil.ts`) as-is for fetch/validate/save (it already loads
+  current values, validates `nombre`/`apellido`, and saves both `usuarios` and
+  `perfil_deportivo` via `updatePerfil`/`upsertPerfilDeportivo` in parallel) — no new
+  service or hook logic to write there.
+- It renders `PerfilPersonalForm`/`PerfilDeportivoForm` (`src/components/portal/perfil/`),
+  extended with a new optional `visibleFields?: FormularioPerfilCampo[]` prop so each field
+  block can be skipped when not in the list. Passing
+  `visibleFields={perfilFaltantes.map(f => f.key)}` renders **only** the missing/required
+  fields; the prop defaults to "show all" so the existing full `/portal/perfil` page is
+  unaffected.
+- On successful save, `InlineProfileCompletionStep` calls `refetchPerfil()` (already
+  exposed by `useFormularioRespuestaForm`) so the gating check re-runs and the modal
+  advances to the eligibility check in place — no page reload, no new tab, no losing the
+  booking modal's context.
+- This step is not exclusive to the guided journey — it also replaces the current
+  new-tab-link behavior for any returning user who hits an incomplete-profile gate outside
+  the guided flow (e.g. an existing member booking a training with a newly-added
+  `perfil_campos_requeridos` field). The guided stepper (Part B) simply gives it a visible
+  step number when it happens to be part of a guided journey.
 
 ---
 
@@ -160,7 +234,10 @@ both already accept and propagate an arbitrary `next` value including its query 
 | Component | `src/components/auth/SignupForm.tsx` | Accept `nextPath` prop; send `next` on `signUp()`; redirect to `nextPath` (not hardcoded `/dashboard`) on immediate session; render stepper when `nextPath` carries a guided target |
 | Component | `src/components/auth/LoginForm.tsx` | Render stepper when `nextPath` carries a guided target |
 | Component | `src/components/portal/entrenamientos-publicos/EntrenamientosPublicosPage.tsx` | Parse guided target from URL on mount; auto-call `setSelectedForReserva`; strip params via `router.replace` afterward |
-| Component | `src/components/portal/entrenamientos-publicos/PublicTrainingReservaModal.tsx` | Accept `guided?: boolean` prop; render stepper at step 3 (`checkingEligibility`/rejection) and step 4 (`isFormularioStep`) |
+| Component | `src/components/portal/entrenamientos-publicos/PublicTrainingReservaModal.tsx` | Accept `guided?: boolean` prop; add a new early render branch — before `checkingEligibility` — showing `InlineProfileCompletionStep` (stepper step 3) while `perfilFaltantes.length > 0`; render stepper at step 4 (`checkingEligibility`/rejection) and step 5 (`isFormularioStep`) |
+| Component | `src/components/portal/entrenamientos/reservas/InlineProfileCompletionStep.tsx` | New. Wraps `usePerfil()` + filtered `PerfilPersonalForm`/`PerfilDeportivoForm`; "Guardar y continuar" calls `submit()` then the caller's `refetchPerfil()` |
+| Component | `src/components/portal/perfil/PerfilPersonalForm.tsx` | Add optional `visibleFields?: FormularioPerfilCampo[]` prop (defaults to showing all fields — no behavior change for `/portal/perfil`) |
+| Component | `src/components/portal/perfil/PerfilDeportivoForm.tsx` | Same `visibleFields?: FormularioPerfilCampo[]` prop addition |
 
 No migration files — see Database Changes.
 
@@ -183,19 +260,30 @@ No migration files — see Database Changes.
    preserves the training context end-to-end and lands the user back in the booking modal
    for the same training after login.
 5. While the booking modal is auto-opened from a guided journey, the stepper shows step 3
-   during the eligibility check / plan-purchase prompt, and step 4 while filling out the
-   training's formulario.
-6. An already-authenticated user who navigates to `/portal/entrenamientos-publicos`
+   while completing missing profile data (when applicable), step 4 during the eligibility
+   check / plan-purchase prompt, and step 5 while filling out the training's formulario.
+6. When the selected training's formulario requires profile fields the user hasn't filled
+   in yet, the booking modal shows an inline "Completar tus datos" step — **before** the
+   eligibility check runs — listing **only** the missing fields the formulario actually
+   requires (not the full profile). The user never leaves the modal or opens a new tab.
+   Saving advances automatically to the eligibility check without any extra click to
+   "re-verify."
+7. If the user's profile already satisfies the formulario's `perfil_campos_requeridos`,
+   the inline profile step is skipped entirely and the flow goes straight from step 2
+   (or step 1, if already logged in) to the eligibility check (step 4).
+8. The full `/portal/perfil` page is unaffected — visiting it directly still shows and
+   edits every profile field, not just a subset.
+9. An already-authenticated user who navigates to `/portal/entrenamientos-publicos`
    directly (no guided target in the URL) and clicks "Reservar" on any card sees the
    existing behavior with **no stepper shown** — this story must not change the flow for
    returning users.
-7. Refreshing the page at `/portal/entrenamientos-publicos` after the guided modal has
+10. Refreshing the page at `/portal/entrenamientos-publicos` after the guided modal has
    auto-opened once does not reopen it again (guided query params are cleared from the URL
    after first use).
-8. If the training referenced by the guided target no longer exists in the marketplace
+11. If the training referenced by the guided target no longer exists in the marketplace
    listing (e.g., unpublished), the page falls back silently to the normal marketplace
    view with no error shown to the user.
-9. Pending-plan-approval notification/auto-resume is explicitly **not** part of this story
+12. Pending-plan-approval notification/auto-resume is explicitly **not** part of this story
    — the existing "El administrador revisará tu suscripción" message and manual retry
    remain unchanged.
 
@@ -216,11 +304,19 @@ No migration files — see Database Changes.
 - [ ] Update `LoginForm.tsx` to render the stepper when `nextPath` carries a guided target
 - [ ] Update `EntrenamientosPublicosPage.tsx` to auto-open the booking modal from a guided
       URL target and clean up the URL afterward
-- [ ] Update `PublicTrainingReservaModal.tsx` to accept `guided` and render the stepper at
-      steps 3–4
-- [ ] Manual end-to-end test with a real test email (see Verification below)
+- [ ] Add `visibleFields?: FormularioPerfilCampo[]` prop to `PerfilPersonalForm.tsx` and
+      `PerfilDeportivoForm.tsx` (default: show all — no change for `/portal/perfil`)
+- [ ] Add `src/components/portal/entrenamientos/reservas/InlineProfileCompletionStep.tsx`
+      wrapping `usePerfil()` + the two filtered forms above
+- [ ] Update `PublicTrainingReservaModal.tsx`: add a new render branch, checked **before**
+      `checkingEligibility`, that shows `InlineProfileCompletionStep` while
+      `perfilFaltantes.length > 0`, wire its save to `refetchPerfil()`, accept `guided` and
+      render the stepper at steps 3 (profile) – 4 (eligibility) – 5 (formulario)
+- [ ] Manual end-to-end test with a real test email, using a training whose formulario has
+      `perfil_campos_requeridos` set (see Verification below)
 - [ ] Confirm no stepper/behavior change for an already-authenticated user browsing the
-      marketplace normally
+      marketplace normally, and that `/portal/perfil` still shows every field when visited
+      directly
 
 ---
 
@@ -239,6 +335,12 @@ No migration files — see Database Changes.
   uses `role="status" aria-live="polite"`).
 - **Error handling**: If the guided target's training can't be resolved (removed/expired),
   fail silently to the normal marketplace view — no toast/error banner, per Acceptance
-  Criterion 8.
+  Criterion 11. If `usePerfil()`'s save fails inside `InlineProfileCompletionStep`, surface
+  its existing error state inline (same as the full `/portal/perfil` page today) rather
+  than advancing the step.
+- **Data minimization**: `InlineProfileCompletionStep` must only *display* the fields in
+  `perfilFaltantes` (via `visibleFields`), even though the underlying `usePerfil()` save
+  call submits the full form object — this is an existing, accepted behavior of
+  `usePerfil().submit()` and out of scope to change here.
 - **Explicitly out of scope**: Automatic notification or resumption when an admin approves
   a pending plan subscription. The wait remains manual, as today.

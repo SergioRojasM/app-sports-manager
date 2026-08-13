@@ -3,6 +3,7 @@ import type {
   PerfilFormField,
   PerfilFormValues,
 } from '@/types/portal/perfil.types';
+import type { FormularioPerfilCampo } from '@/types/portal/formularios.types';
 
 const TIPO_IDENTIFICACION_OPTIONS = [
   { value: '', label: '— Selecciona —' },
@@ -31,6 +32,8 @@ type PerfilPersonalFormProps = {
   fieldErrors: PerfilFieldErrors;
   email: string;
   updateField: (field: PerfilFormField, value: string) => void;
+  /** Omit to render every field (default, used by the full `/portal/perfil` page). */
+  visibleFields?: FormularioPerfilCampo[];
 };
 
 type InputFieldProps = {
@@ -72,7 +75,30 @@ export function PerfilPersonalForm({
   fieldErrors,
   email,
   updateField,
+  visibleFields,
 }: PerfilPersonalFormProps) {
+  // `tipo_identificacion` represents both the tipo AND numero_identificacion inputs (see
+  // FormularioPerfilCampo docs) — so numero_identificacion follows tipo_identificacion's
+  // visibility rather than having its own catalog entry.
+  const isVisible = (key: FormularioPerfilCampo | 'numero_identificacion') => {
+    if (!visibleFields) return true;
+    if (key === 'numero_identificacion') return visibleFields.includes('tipo_identificacion');
+    return visibleFields.includes(key);
+  };
+
+  const PERSONAL_KEYS: FormularioPerfilCampo[] = [
+    'nombre',
+    'apellido',
+    'telefono',
+    'fecha_nacimiento',
+    'rh',
+    'tipo_identificacion',
+    'fecha_exp_identificacion',
+  ];
+  if (visibleFields && !PERSONAL_KEYS.some((key) => visibleFields.includes(key))) {
+    return null;
+  }
+
   return (
     <section className="space-y-4">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
@@ -81,153 +107,172 @@ export function PerfilPersonalForm({
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {/* Nombre */}
-        <FormField
-          id="nombre"
-          label="Nombre"
-          icon="person"
-          error={fieldErrors.nombre}
-        >
-          <input
+        {isVisible('nombre') && (
+          <FormField
             id="nombre"
-            type="text"
-            value={formValues.nombre}
-            onChange={(e) => updateField('nombre', e.target.value)}
-            placeholder="Tu nombre"
-            autoComplete="given-name"
-            className={inputClass}
-          />
-        </FormField>
+            label="Nombre"
+            icon="person"
+            error={fieldErrors.nombre}
+          >
+            <input
+              id="nombre"
+              type="text"
+              value={formValues.nombre}
+              onChange={(e) => updateField('nombre', e.target.value)}
+              placeholder="Tu nombre"
+              autoComplete="given-name"
+              className={inputClass}
+            />
+          </FormField>
+        )}
 
         {/* Apellido */}
-        <FormField
-          id="apellido"
-          label="Apellido"
-          icon="person"
-          error={fieldErrors.apellido}
-        >
-          <input
+        {isVisible('apellido') && (
+          <FormField
             id="apellido"
-            type="text"
-            value={formValues.apellido}
-            onChange={(e) => updateField('apellido', e.target.value)}
-            placeholder="Tu apellido"
-            autoComplete="family-name"
-            className={inputClass}
-          />
-        </FormField>
+            label="Apellido"
+            icon="person"
+            error={fieldErrors.apellido}
+          >
+            <input
+              id="apellido"
+              type="text"
+              value={formValues.apellido}
+              onChange={(e) => updateField('apellido', e.target.value)}
+              placeholder="Tu apellido"
+              autoComplete="family-name"
+              className={inputClass}
+            />
+          </FormField>
+        )}
 
-        {/* Correo — read-only */}
-        <FormField id="email" label="Correo Electrónico" icon="mail">
-          <input
-            id="email"
-            type="email"
-            value={email}
-            readOnly
-            disabled
-            autoComplete="email"
-            className={readonlyClass}
-            title="El correo electrónico no puede modificarse aquí"
-          />
-        </FormField>
+        {/* Correo — read-only; not part of the formulario perfil catalog, so it's only
+            shown on the full profile page (visibleFields omitted). */}
+        {!visibleFields && (
+          <FormField id="email" label="Correo Electrónico" icon="mail">
+            <input
+              id="email"
+              type="email"
+              value={email}
+              readOnly
+              disabled
+              autoComplete="email"
+              className={readonlyClass}
+              title="El correo electrónico no puede modificarse aquí"
+            />
+          </FormField>
+        )}
 
         {/* Teléfono */}
-        <FormField id="telefono" label="Teléfono" icon="phone" error={fieldErrors.telefono}>
-          <input
-            id="telefono"
-            type="tel"
-            value={formValues.telefono}
-            onChange={(e) => updateField('telefono', e.target.value)}
-            placeholder="+57 300 000 0000"
-            autoComplete="tel"
-            className={inputClass}
-          />
-        </FormField>
+        {isVisible('telefono') && (
+          <FormField id="telefono" label="Teléfono" icon="phone" error={fieldErrors.telefono}>
+            <input
+              id="telefono"
+              type="tel"
+              value={formValues.telefono}
+              onChange={(e) => updateField('telefono', e.target.value)}
+              placeholder="+57 300 000 0000"
+              autoComplete="tel"
+              className={inputClass}
+            />
+          </FormField>
+        )}
 
         {/* Fecha de Nacimiento */}
-        <FormField
-          id="fecha_nacimiento"
-          label="Fecha de Nacimiento"
-          icon="calendar_today"
-          error={fieldErrors.fecha_nacimiento}
-        >
-          <input
+        {isVisible('fecha_nacimiento') && (
+          <FormField
             id="fecha_nacimiento"
-            type="date"
-            value={formValues.fecha_nacimiento}
-            onChange={(e) => updateField('fecha_nacimiento', e.target.value)}
-            className={inputClass}
-          />
-        </FormField>
+            label="Fecha de Nacimiento"
+            icon="calendar_today"
+            error={fieldErrors.fecha_nacimiento}
+          >
+            <input
+              id="fecha_nacimiento"
+              type="date"
+              value={formValues.fecha_nacimiento}
+              onChange={(e) => updateField('fecha_nacimiento', e.target.value)}
+              className={inputClass}
+            />
+          </FormField>
+        )}
 
         {/* RH */}
-        <FormField id="rh" label="Grupo Sanguíneo (RH)" icon="water_drop" error={fieldErrors.rh}>
-          <select
-            id="rh"
-            value={formValues.rh}
-            onChange={(e) => updateField('rh', e.target.value)}
-            className={selectClass}
-          >
-            {RH_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </FormField>
+        {isVisible('rh') && (
+          <FormField id="rh" label="Grupo Sanguíneo (RH)" icon="water_drop" error={fieldErrors.rh}>
+            <select
+              id="rh"
+              value={formValues.rh}
+              onChange={(e) => updateField('rh', e.target.value)}
+              className={selectClass}
+            >
+              {RH_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+        )}
 
         {/* Tipo de Identificación */}
-        <FormField
-          id="tipo_identificacion"
-          label="Tipo de Identificación"
-          icon="badge"
-          error={fieldErrors.tipo_identificacion}
-        >
-          <select
+        {isVisible('tipo_identificacion') && (
+          <FormField
             id="tipo_identificacion"
-            value={formValues.tipo_identificacion}
-            onChange={(e) => updateField('tipo_identificacion', e.target.value)}
-            className={selectClass}
+            label="Tipo de Identificación"
+            icon="badge"
+            error={fieldErrors.tipo_identificacion}
           >
-            {TIPO_IDENTIFICACION_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </FormField>
+            <select
+              id="tipo_identificacion"
+              value={formValues.tipo_identificacion}
+              onChange={(e) => updateField('tipo_identificacion', e.target.value)}
+              className={selectClass}
+            >
+              {TIPO_IDENTIFICACION_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+        )}
 
         {/* N° Identificación */}
-        <FormField
-          id="numero_identificacion"
-          label="N° Identificación"
-          icon="badge"
-          error={fieldErrors.numero_identificacion}
-        >
-          <input
+        {isVisible('numero_identificacion') && (
+          <FormField
             id="numero_identificacion"
-            type="text"
-            value={formValues.numero_identificacion}
-            onChange={(e) => updateField('numero_identificacion', e.target.value)}
-            placeholder="Número de documento"
-            className={inputClass}
-          />
-        </FormField>
+            label="N° Identificación"
+            icon="badge"
+            error={fieldErrors.numero_identificacion}
+          >
+            <input
+              id="numero_identificacion"
+              type="text"
+              value={formValues.numero_identificacion}
+              onChange={(e) => updateField('numero_identificacion', e.target.value)}
+              placeholder="Número de documento"
+              className={inputClass}
+            />
+          </FormField>
+        )}
 
         {/* Fecha Expedición ID */}
-        <FormField
-          id="fecha_exp_identificacion"
-          label="Fecha Expedición ID"
-          icon="calendar_today"
-          error={fieldErrors.fecha_exp_identificacion}
-        >
-          <input
+        {isVisible('fecha_exp_identificacion') && (
+          <FormField
             id="fecha_exp_identificacion"
-            type="date"
-            value={formValues.fecha_exp_identificacion}
-            onChange={(e) => updateField('fecha_exp_identificacion', e.target.value)}
-            className={inputClass}
-          />
-        </FormField>
+            label="Fecha Expedición ID"
+            icon="calendar_today"
+            error={fieldErrors.fecha_exp_identificacion}
+          >
+            <input
+              id="fecha_exp_identificacion"
+              type="date"
+              value={formValues.fecha_exp_identificacion}
+              onChange={(e) => updateField('fecha_exp_identificacion', e.target.value)}
+              className={inputClass}
+            />
+          </FormField>
+        )}
       </div>
     </section>
   );
