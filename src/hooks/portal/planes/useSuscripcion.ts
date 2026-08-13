@@ -6,6 +6,7 @@ import { pagosService } from '@/services/supabase/portal/pagos.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
 import { createClient } from '@/services/supabase/client';
+import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
 import { SuscripcionServiceError } from '@/types/portal/suscripciones.types';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
 import type { MetodoPago } from '@/types/portal/metodos-pago.types';
@@ -56,7 +57,10 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
 
   const openModal = useCallback(async (plan: PlanWithDisciplinas) => {
     setSelectedPlan(plan);
-    setSelectedTipoId(null);
+    // Auto-select the plan's sole active subtype — skips the no-op Step 1 picker in
+    // SuscripcionModal when there's nothing to actually choose between (US-0105).
+    const activeTipos = getActiveTipos(plan);
+    setSelectedTipoId(activeTipos.length === 1 ? activeTipos[0].id : null);
     setError(null);
     setSuccessMessage(null);
     setIsDuplicate(false);

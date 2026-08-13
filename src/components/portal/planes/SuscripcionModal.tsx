@@ -60,19 +60,22 @@ export function SuscripcionModal({
   const [step, setStep] = useState<1 | 2>(1);
 
   const activeTipos: PlanTipo[] = plan ? getActiveTipos(plan) : [];
-  const hasSubtypes = activeTipos.length > 0;
+  // There's an actual decision to present only when more than one option exists — a
+  // single active subtype is auto-selected by useSuscripcion.openModal, so Step 1 would
+  // otherwise be a no-op click-through (US-0105).
+  const hasSubtypeChoice = activeTipos.length > 1;
 
   // Reset step when modal opens/closes
   useEffect(() => {
     if (open) {
-      setStep(hasSubtypes ? 1 : 2);
+      setStep(hasSubtypeChoice ? 1 : 2);
       setComentarios('');
       setSelectedMetodoId('');
       setFileName(null);
       setSelectedFile(null);
       setFileError(null);
     }
-  }, [open, hasSubtypes]);
+  }, [open, hasSubtypeChoice]);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFileError(null);
@@ -166,7 +169,7 @@ export function SuscripcionModal({
         ) : null}
 
         {/* ── Step 1: Subtype selection ── */}
-        {step === 1 && hasSubtypes ? (
+        {step === 1 && hasSubtypeChoice ? (
           <>
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto min-h-0 mt-4">
@@ -412,7 +415,7 @@ export function SuscripcionModal({
 
             {/* Step 2 buttons — fixed footer */}
             <div className="mt-6 flex flex-shrink-0 items-center justify-end gap-3">
-              {hasSubtypes ? (
+              {hasSubtypeChoice ? (
                 <button
                   type="button"
                   onClick={() => setStep(1)}
