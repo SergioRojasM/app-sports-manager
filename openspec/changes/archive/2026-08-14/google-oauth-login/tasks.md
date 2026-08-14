@@ -25,16 +25,16 @@
 
 ## 6. External Configuration (manual, non-code prerequisite)
 
-- [ ] 6.1 Create Google Cloud OAuth 2.0 credentials (consent screen + Web application Client ID/Secret) with redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`
-- [ ] 6.2 Enable the Google provider with those credentials in the local/dev Supabase project's Dashboard → Authentication → Providers
+- [x] 6.1 Create Google Cloud OAuth 2.0 credentials (consent screen + Web application Client ID/Secret) with redirect URI `https://<project-ref>.supabase.co/auth/v1/callback`
+- [x] 6.2 Enable the Google provider with those credentials in the local/dev Supabase project's Dashboard → Authentication → Providers
 
 ## 7. Manual Verification
 
-- [ ] 7.1 Test a brand-new Google user via `/auth/signup`: lands authenticated on the expected destination, `public.usuarios.nombre`/`foto_url` populated from Google metadata
-- [ ] 7.2 Test an existing Google user via `/auth/login`: lands authenticated on the expected destination
-- [ ] 7.3 Test that an existing password-based user's `nombre`/`foto_url` are not cleared after any subsequent login
-- [ ] 7.4 Test that a guided-booking `next` param (via `buildGuidedNextPath`) survives the full Google OAuth round trip to the correct destination
-- [ ] 7.5 Regression-test existing email/password flows (`signIn`, `signUp`, `resetPassword`, `updatePassword`) to confirm no behavior change
+- [x] 7.1 Test a brand-new Google user via `/auth/signup`: lands authenticated on the expected destination, `public.usuarios.nombre`/`foto_url` populated from Google metadata
+- [x] 7.2 Test an existing Google user via `/auth/login`: lands authenticated on the expected destination
+- [x] 7.3 Test that an existing password-based user's `nombre`/`foto_url` are not cleared after any subsequent login
+- [x] 7.4 Test that a guided-booking `next` param (via `buildGuidedNextPath`) survives the full Google OAuth round trip to the correct destination
+- [x] 7.5 Regression-test existing email/password flows (`signIn`, `signUp`, `resetPassword`, `updatePassword`) to confirm no behavior change
 
 ## 8. Documentation
 

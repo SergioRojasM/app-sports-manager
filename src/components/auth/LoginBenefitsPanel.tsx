@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export function LoginBenefitsPanel() {
   return (
-    <section className="relative flex w-full flex-col justify-between overflow-hidden bg-navy-deep p-6 md:w-1/2 md:p-10">
+    <section className="relative hidden w-full flex-col justify-between overflow-hidden bg-navy-deep p-6 md:flex md:w-1/2 md:p-10">
       <div className="pointer-events-none absolute inset-0 radial-glow" />
 
       <div className="relative z-10 flex h-full flex-col pt-1 pl-3 md:pt-1 md:pl-8">

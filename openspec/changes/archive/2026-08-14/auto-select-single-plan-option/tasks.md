@@ -17,12 +17,12 @@
 
 ## 4. Manual Verification
 
-- [ ] 4.1 Plan with exactly 1 active subtype: clicking "Adquirir" opens `SuscripcionModal` directly on Step 2 (payment), with the subtype's price/vigencia/servicios already shown and no "Volver" button
-- [ ] 4.2 Plan with exactly 1 active subtype: submitting the payment form creates the `suscripcion`/`pago` with the correct `plan_tipo_id` and `monto`
-- [ ] 4.3 Plan with 0 active subtypes: `PlanPublicoCard` still shows "Este plan no tiene opciones disponibles" and no "Adquirir" button — unchanged
-- [ ] 4.4 Plan with 2+ active subtypes: Step 1 picker still shown, "Continuar" still disabled until a card is selected, "Volver" still works from Step 2 — unchanged
-- [ ] 4.5 Repeat 4.1 across all three shared entry points: `PlanesPublicosModal` (public marketplace), `PublicTrainingReservaModal`'s "Ver planes de {tenant}" booking-rejection action, and `PlanesViewPage` (authenticated athlete)
-- [ ] 4.6 Close the modal and reopen it for a different plan (different subtype count) — confirm no stale auto-selection carries over
+- [x] 4.1 Plan with exactly 1 active subtype: clicking "Adquirir" opens `SuscripcionModal` directly on Step 2 (payment), with the subtype's price/vigencia/servicios already shown and no "Volver" button
+- [x] 4.2 Plan with exactly 1 active subtype: submitting the payment form creates the `suscripcion`/`pago` with the correct `plan_tipo_id` and `monto`
+- [x] 4.3 Plan with 0 active subtypes: `PlanPublicoCard` still shows "Este plan no tiene opciones disponibles" and no "Adquirir" button — unchanged
+- [x] 4.4 Plan with 2+ active subtypes: Step 1 picker still shown, "Continuar" still disabled until a card is selected, "Volver" still works from Step 2 — unchanged
+- [x] 4.5 Repeat 4.1 across all three shared entry points: `PlanesPublicosModal` (public marketplace), `PublicTrainingReservaModal`'s "Ver planes de {tenant}" booking-rejection action, and `PlanesViewPage` (authenticated athlete)
+- [x] 4.6 Close the modal and reopen it for a different plan (different subtype count) — confirm no stale auto-selection carries over
 
 ## 5. Documentation
 
