@@ -13,6 +13,10 @@ type PlanesPublicosModalProps = {
   tenantId: string;
   tenantNombre: string;
   onClose: () => void;
+  /** Pre-fills the catalog search on open — e.g. a required service's name (US-0101). Existing callers that omit this keep today's unfiltered behavior. */
+  initialSearch?: string;
+  /** Forwarded to useSuscripcion — chains into a caller's own next step after purchase instead of the generic close (US-0106). Existing callers that omit this keep today's behavior. */
+  onSubscribed?: (suscripcionId: string) => void;
 };
 
 export function PlanesPublicosModal({
@@ -20,10 +24,12 @@ export function PlanesPublicosModal({
   tenantId,
   tenantNombre,
   onClose,
+  initialSearch,
+  onSubscribed,
 }: PlanesPublicosModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const catalog = usePlanesPublicos({ tenantId, enabled: open });
-  const suscripcion = useSuscripcion({ tenantId });
+  const catalog = usePlanesPublicos({ tenantId, enabled: open, initialSearch });
+  const suscripcion = useSuscripcion({ tenantId, onSubscribed });
   const { role } = useTenantAccess(open ? tenantId : undefined);
 
   // Tenant staff manage plans instead of buying them (mirrors the in-tenant rule)
@@ -49,6 +55,16 @@ export function PlanesPublicosModal({
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [open, handleClose, suscripcion.modalOpen]);
+
+  // The modal isn't unmounted between opens (usePlanesPublicos's `search` state
+  // persists across `open` toggles), so re-apply initialSearch on every reopen —
+  // otherwise a later open with a different (or no) initialSearch would keep
+  // whatever term was left over from a previous open (US-0101).
+  useEffect(() => {
+    if (!open) return;
+    catalog.setSearch(initialSearch ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialSearch]);
 
   const handleAcquire = useCallback(
     (plan: PlanPublicoItem) => {

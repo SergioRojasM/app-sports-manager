@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { GUIDED_LOGIN_STEPS, parseGuidedParams } from "@/lib/portal/entrenamientos-publicos/guidedBooking";
+import { GuidedBookingStepper } from "@/components/ui/GuidedBookingStepper";
 
 type LoginFormProps = {
   nextPath: string;
@@ -13,12 +15,16 @@ type LoginFormProps = {
 export function LoginForm({ nextPath }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signIn, errorMessage } = useAuth();
+  const { signIn, signInWithGoogle, errorMessage } = useAuth();
+
+  const guidedTarget = useMemo(() => parseGuidedParams(nextPath), [nextPath]);
+  const signupHref = `/auth/signup?next=${encodeURIComponent(nextPath)}`;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [resetBannerVisible, setResetBannerVisible] = useState(
     searchParams.get("reset") === "success"
   );
@@ -36,6 +42,14 @@ export function LoginForm({ nextPath }: LoginFormProps) {
     setLoading(false);
   };
 
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    const result = await signInWithGoogle(nextPath);
+    if (result.errorMessage) {
+      setGoogleLoading(false);
+    }
+  };
+
   return (
     <div>
       <div className="mb-6 text-center md:text-left">
@@ -49,6 +63,10 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         </h2>
         <p className="text-sm text-slate-400">¡Bienvenido de nuevo! Ingresa tus datos.</p>
       </div>
+
+      {guidedTarget && (
+        <GuidedBookingStepper steps={GUIDED_LOGIN_STEPS} currentStep={1} trainingNombre={guidedTarget.nombre} />
+      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {resetBannerVisible && (
@@ -157,11 +175,39 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         </div>
       </div>
 
-      <p className="text-center text-sm text-slate-400">
+      <button
+        aria-label="Continuar con Google"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-navy-deep py-3 font-semibold text-slate-200 transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+        disabled={googleLoading}
+        onClick={handleGoogleSignIn}
+        type="button"
+      >
+        <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 48 48">
+          <path
+            d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
+            fill="#FFC107"
+          />
+          <path
+            d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+            fill="#FF3D00"
+          />
+          <path
+            d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+            fill="#4CAF50"
+          />
+          <path
+            d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
+            fill="#1976D2"
+          />
+        </svg>
+        {googleLoading ? "Redirigiendo..." : "Continuar con Google"}
+      </button>
+
+      <p className="mt-6 text-center text-sm text-slate-400">
         ¿No tienes una cuenta?
         <Link
           className="ml-1 font-semibold text-turquoise decoration-2 underline-offset-4 hover:underline"
-          href="/auth/signup"
+          href={signupHref}
         >
           Regístrate
         </Link>

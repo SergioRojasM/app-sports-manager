@@ -57,7 +57,7 @@ export function PublicEntrenamientosLandingPage() {
 
       <RegistrateParaReservarModal
         open={reservaTarget != null}
-        trainingNombre={reservaTarget?.nombre ?? ''}
+        target={reservaTarget}
         onClose={() => setReservaTarget(null)}
       />
     </div>

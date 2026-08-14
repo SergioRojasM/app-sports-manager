@@ -9,7 +9,7 @@ export function SessionsAvailableWidget({ count }: SessionsAvailableWidgetProps)
         groups
       </span>
       <span>
-        <span className="font-bold text-landing-text">{count}</span> {count === 1 ? 'entrenamiento disponible' : 'entrenamientos disponibles'} esta semana
+        <span className="font-bold text-landing-text">{count}</span> {count === 1 ? 'entrenamiento disponible' : 'entrenamientos disponibles'}
       </span>
     </div>
   );

@@ -17,6 +17,7 @@ type RawRow = {
     estado: string;
     fecha_pago: string | null;
     comprobante_path: string | null;
+    motivo_rechazo: string | null;
     metodo_pago_ref: {
       nombre: string;
       tipo: string;
@@ -42,6 +43,7 @@ function mapRow(row: RawRow): MiSuscripcionRow {
         estado: rawPago.estado as PagoEstado,
         fecha_pago: rawPago.fecha_pago,
         comprobante_path: rawPago.comprobante_path,
+        motivo_rechazo: rawPago.motivo_rechazo,
       }
     : null;
 
@@ -81,7 +83,7 @@ export async function fetchMisSuscripciones(
       tenant:tenants!suscripciones_tenant_id_fkey(nombre),
       plan:planes!suscripciones_plan_id_fkey(nombre),
       pagos(
-        id, monto, estado, fecha_pago, comprobante_path,
+        id, monto, estado, fecha_pago, comprobante_path, motivo_rechazo,
         metodo_pago_ref:tenant_metodos_pago!pagos_metodo_pago_id_fkey(nombre, tipo)
       ),
       suscripcion_servicios(

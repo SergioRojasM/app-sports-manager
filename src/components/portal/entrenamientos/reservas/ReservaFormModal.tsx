@@ -52,6 +52,8 @@ type ReservaFormModalProps = {
   formularioObligatorio?: boolean;
   /** Called instead of onSubmit (create mode) when hasFormularioInterno is true and base fields are valid. */
   onRequireFormulario?: () => void;
+  /** Optional content rendered below the title (e.g. a guided-booking progress indicator). */
+  headerExtra?: React.ReactNode;
 };
 
 // ─────────────────────────────────────────────
@@ -90,6 +92,7 @@ export function ReservaFormModal({
   formularioNombre = null,
   formularioObligatorio = false,
   onRequireFormulario,
+  headerExtra,
 }: ReservaFormModalProps) {
   const [atletaOptions, setAtletaOptions] = useState<AtletaOption[]>([]);
   const [loadingAtletas, setLoadingAtletas] = useState(false);
@@ -260,6 +263,8 @@ export function ReservaFormModal({
         <h2 className="mb-4 text-lg font-semibold text-slate-100">
           {mode === 'create' ? 'Nueva Reserva' : 'Editar Reserva'}
         </h2>
+
+        {headerExtra}
 
         {mode === 'create' && hasFormularioInterno && (
           <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">

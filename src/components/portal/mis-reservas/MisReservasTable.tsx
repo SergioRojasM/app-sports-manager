@@ -111,6 +111,9 @@ export function MisReservasTable({
                   </td>
                   <td className="px-3 py-3">
                     <ReservaEstadoBadge estado={row.reserva_estado} />
+                    {row.reserva_estado === 'rechazada' && row.motivo_rechazo && (
+                      <p className="mt-1 max-w-[16rem] text-xs text-rose-300">{row.motivo_rechazo}</p>
+                    )}
                   </td>
                   <td className="px-3 py-3">
                     <AsistenciaBadge asistio={row.asistio} />

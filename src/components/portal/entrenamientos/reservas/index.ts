@@ -5,3 +5,4 @@ export { AsistenciaFormModal } from './AsistenciaFormModal';
 export { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
 export { FormularioRespuestaModal } from './FormularioRespuestaModal';
 export { FormularioRespuestaViewerModal } from './FormularioRespuestaViewerModal';
+export { InlineProfileCompletionStep } from './InlineProfileCompletionStep';

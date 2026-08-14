@@ -6,6 +6,7 @@ import { pagosService } from '@/services/supabase/portal/pagos.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
 import { createClient } from '@/services/supabase/client';
+import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
 import { SuscripcionServiceError } from '@/types/portal/suscripciones.types';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
 import type { MetodoPago } from '@/types/portal/metodos-pago.types';
@@ -18,6 +19,14 @@ type SuscripcionSubmitData = {
 
 type UseSuscripcionOptions = {
   tenantId: string;
+  /**
+   * Fired right after the suscripcion+pago are created successfully, before the
+   * generic "el administrador revisará tu suscripción" success state is shown.
+   * Lets a caller (e.g. the skip-plan-confirmation booking flow, US-0106) chain
+   * into its own next step instead of the modal just closing. Optional — omitting
+   * it keeps today's behavior unchanged.
+   */
+  onSubscribed?: (suscripcionId: string) => void;
 };
 
 type UseSuscripcionResult = {
@@ -37,7 +46,7 @@ type UseSuscripcionResult = {
   metodosPagoError: string | null;
 };
 
-export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripcionResult {
+export function useSuscripcion({ tenantId, onSubscribed }: UseSuscripcionOptions): UseSuscripcionResult {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanWithDisciplinas | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +65,10 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
 
   const openModal = useCallback(async (plan: PlanWithDisciplinas) => {
     setSelectedPlan(plan);
-    setSelectedTipoId(null);
+    // Auto-select the plan's sole active subtype — skips the no-op Step 1 picker in
+    // SuscripcionModal when there's nothing to actually choose between (US-0105).
+    const activeTipos = getActiveTipos(plan);
+    setSelectedTipoId(activeTipos.length === 1 ? activeTipos[0].id : null);
     setError(null);
     setSuccessMessage(null);
     setIsDuplicate(false);
@@ -183,7 +195,13 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           return false;
         }
 
-        setSuccessMessage('Solicitud enviada. El administrador revisará tu suscripción.');
+        if (onSubscribed) {
+          // A caller chaining into its own next step (US-0106) — skip the generic
+          // "will be reviewed" message, it's about to show its own flow instead.
+          onSubscribed(suscripcion.id);
+        } else {
+          setSuccessMessage('Solicitud enviada. El administrador revisará tu suscripción.');
+        }
         setModalOpen(false);
         setSelectedPlan(null);
         setSelectedTipoId(null);
@@ -199,7 +217,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
         setIsSubmitting(false);
       }
     },
-    [isDuplicate, selectedPlan, selectedTipoId, tenantId],
+    [isDuplicate, selectedPlan, selectedTipoId, tenantId, onSubscribed],
   );
 
   return {

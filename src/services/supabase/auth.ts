@@ -16,13 +16,16 @@ export const authService = {
     };
   },
 
-  async signUpWithPassword(credentials: AuthCredentials): Promise<AuthResult> {
+  async signUpWithPassword(credentials: AuthCredentials, next?: string): Promise<AuthResult> {
     const supabase = createClient();
+    const emailRedirectTo = next
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+      : `${window.location.origin}/auth/callback`;
     const { data, error } = await supabase.auth.signUp({
       email: credentials.email,
       password: credentials.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo,
       },
     });
 
@@ -31,6 +34,21 @@ export const authService = {
       session: data.session,
       errorMessage: error ? error.message : null,
     };
+  },
+
+  async signInWithOAuth(next?: string): Promise<{ errorMessage: string | null }> {
+    const supabase = createClient();
+    const redirectTo = next
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+      : `${window.location.origin}/auth/callback`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+      },
+    });
+
+    return { errorMessage: error ? error.message : null };
   },
 
   async signOut(): Promise<string | null> {

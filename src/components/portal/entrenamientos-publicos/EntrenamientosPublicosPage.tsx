@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEntrenamientosPublicosMarketplace } from '@/hooks/portal/entrenamientos-publicos/useEntrenamientosPublicosMarketplace';
+import { parseGuidedParams } from '@/lib/portal/entrenamientos-publicos/guidedBooking';
 import { PublicTrainingFiltersDrawer } from './PublicTrainingFiltersDrawer';
 import { PublicTrainingsGrid } from './PublicTrainingsGrid';
 import { SessionsAvailableWidget } from './SessionsAvailableWidget';
@@ -12,12 +14,19 @@ export function EntrenamientosPublicosPage() {
   const {
     loading,
     error,
+    items,
+    allItems,
     featuredItem,
     standardItems,
     tenantOptions,
-    thisWeekCount,
-    dateChip,
-    setDateChip,
+    dateFrom,
+    dateTo,
+    calendarMonth,
+    goToPrevMonth,
+    goToNextMonth,
+    setDateRange,
+    clearDateRange,
+    applyDateChip,
     search,
     setSearch,
     tenantId,
@@ -25,8 +34,35 @@ export function EntrenamientosPublicosPage() {
     refetch,
   } = useEntrenamientosPublicosMarketplace();
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [selectedForReserva, setSelectedForReserva] = useState<PublicTrainingListItem | null>(null);
+  const [guidedOpen, setGuidedOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const guidedAttempted = useRef(false);
+
+  // Auto-open the booking modal for a training selected on the public landing page,
+  // carried here via the guided `next` query params — only attempted once, after the
+  // marketplace list has finished its initial load. Looks up `allItems` (unfiltered)
+  // rather than the currently filtered `items`, since the guided target may fall outside
+  // the marketplace's default date/tenant/search filters even though it's still published.
+  useEffect(() => {
+    if (guidedAttempted.current || loading) return;
+    guidedAttempted.current = true;
+
+    const target = parseGuidedParams(searchParams);
+    if (!target) return;
+
+    const match = allItems.find((item) => item.entrenamientoId === target.entrenamientoId);
+    if (match) {
+      setSelectedForReserva(match);
+      setGuidedOpen(true);
+    }
+
+    router.replace(pathname, { scroll: false });
+  }, [loading, allItems, searchParams, router, pathname]);
 
   return (
     <div className="relative min-h-[80vh] px-6 pb-8 pt-3 md:px-10 md:pb-10 md:pt-4">
@@ -35,7 +71,7 @@ export function EntrenamientosPublicosPage() {
           <h1 className="font-landing-display text-2xl italic font-bold leading-tight text-landing-text">
             Entrenamientos <span className="text-landing-primary">Públicos</span>
           </h1>
-          <SessionsAvailableWidget count={thisWeekCount} />
+          <SessionsAvailableWidget count={items.length} />
         </div>
 
         <button
@@ -82,8 +118,14 @@ export function EntrenamientosPublicosPage() {
       <PublicTrainingFiltersDrawer
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        dateChip={dateChip}
-        onChangeDateChip={setDateChip}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        calendarMonth={calendarMonth}
+        onGoToPrevMonth={goToPrevMonth}
+        onGoToNextMonth={goToNextMonth}
+        onSetDateRange={setDateRange}
+        onClearDateRange={clearDateRange}
+        onApplyDateChip={applyDateChip}
         search={search}
         onChangeSearch={setSearch}
         tenantId={tenantId}
@@ -94,12 +136,17 @@ export function EntrenamientosPublicosPage() {
       {selectedForReserva && (
         <PublicTrainingReservaModal
           open
+          guided={guidedOpen}
           tenantId={selectedForReserva.tenantId}
           entrenamientoId={selectedForReserva.entrenamientoId}
           disciplinaId={selectedForReserva.disciplinaId}
           trainingNombre={selectedForReserva.nombre}
           tenantNombre={selectedForReserva.tenantNombre}
-          onClose={() => setSelectedForReserva(null)}
+          omitirConfirmacionPlan={selectedForReserva.omitirConfirmacionPlan}
+          onClose={() => {
+            setSelectedForReserva(null);
+            setGuidedOpen(false);
+          }}
         />
       )}
     </div>

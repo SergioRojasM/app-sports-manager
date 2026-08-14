@@ -20,12 +20,15 @@ type UsePublicTrainingReservaOptions = {
   tenantId: string;
   entrenamientoId: string;
   disciplinaId: string;
+  /** From the publication's omitir_confirmacion_plan — lets a plan-blocked booking continue as pending (US-0106). */
+  omitirConfirmacionPlan?: boolean;
 };
 
 export function usePublicTrainingReserva({
   tenantId,
   entrenamientoId,
   disciplinaId,
+  omitirConfirmacionPlan = false,
 }: UsePublicTrainingReservaOptions) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [categorias, setCategorias] = useState<CategoriaDisponibilidad[]>([]);
@@ -34,9 +37,12 @@ export function usePublicTrainingReserva({
   const [formularioExterno, setFormularioExterno] = useState<string | null>(null);
   const [formularioObligatorio, setFormularioObligatorio] = useState(false);
   const [bookingRejection, setBookingRejection] = useState<BookingRejection | null>(null);
+  const [checkingEligibility, setCheckingEligibility] = useState(false);
   const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
   const [isFormularioStep, setIsFormularioStep] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  /** Set once the athlete completes a plan purchase from within the rejection dialog (US-0106). */
+  const [pendingPlanSuscripcionId, setPendingPlanSuscripcionId] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -101,12 +107,24 @@ export function usePublicTrainingReserva({
       setBookingRejection(null);
       setUnexpectedError(null);
       try {
-        const result = await reservasService.create(input);
+        const result = await reservasService.create(
+          pendingPlanSuscripcionId
+            ? {
+                ...input,
+                permitir_pendiente_sin_plan: true,
+                plan_pendiente_suscripcion_id: pendingPlanSuscripcionId,
+              }
+            : input,
+        );
         if ('ok' in result && !result.ok) {
           setBookingRejection(result);
           return false;
         }
-        setSuccessMessage('¡Reserva creada con éxito!');
+        setSuccessMessage(
+          pendingPlanSuscripcionId
+            ? 'Tu reserva y tu solicitud de plan quedaron pendientes de aprobación.'
+            : '¡Reserva creada con éxito!',
+        );
         return true;
       } catch {
         setUnexpectedError('No fue posible crear la reserva.');
@@ -127,10 +145,47 @@ export function usePublicTrainingReserva({
     setUnexpectedError(null);
     setSuccessMessage(null);
     setIsFormularioStep(false);
+    setPendingPlanSuscripcionId(null);
     formularioRespuestaForm.reset();
-    if (currentUserId) {
+    if (!currentUserId) return;
+
+    // Pre-check eligibility (US-0101) before opening the form — the same
+    // validateBookingRestrictions() reservasService.create() already runs as a
+    // pre-flight step, just triggered earlier. Fails open on unexpected errors: the
+    // RPC-level check at actual submit time remains the authoritative, race-safe gate
+    // regardless of this check's outcome, so a transient failure here should never
+    // permanently block a visitor from an otherwise-valid booking.
+    setCheckingEligibility(true);
+    let eligible = true;
+    try {
+      const { result } = await reservasService.validateBookingRestrictions(entrenamientoId, currentUserId, tenantId);
+      if (!result.ok) {
+        setBookingRejection(result);
+        eligible = false;
+      }
+    } catch {
+      eligible = true;
+    } finally {
+      setCheckingEligibility(false);
+    }
+
+    if (eligible) {
       await reservaForm.openCreate(currentUserId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUserId, entrenamientoId, tenantId]);
+
+  /**
+   * Called once the athlete completes a plan purchase from the rejection dialog on a
+   * training published with omitir_confirmacion_plan = true (US-0106). Stores the new
+   * suscripcion id (forwarded into the eventual reservasService.create() call) and moves
+   * straight into the normal booking form instead of ending the interaction.
+   */
+  const continueWithPendingPlan = useCallback(async (suscripcionId: string) => {
+    setPendingPlanSuscripcionId(suscripcionId);
+    setBookingRejection(null);
+    if (!currentUserId) return;
+    await reservaForm.openCreate(currentUserId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUserId]);
 
@@ -176,13 +231,17 @@ export function usePublicTrainingReserva({
     reservaForm,
     formularioRespuestaForm,
     bookingRejection,
+    checkingEligibility,
     unexpectedError,
     successMessage,
     isFormularioStep,
     hasFormularioInterno: formularioId != null,
     formularioExterno,
     formularioObligatorio,
+    omitirConfirmacionPlan,
+    pendingPlanSuscripcionId,
     openBooking,
+    continueWithPendingPlan,
     requireFormulario,
     submitWithFormulario,
     submitWithoutFormulario,

@@ -15,6 +15,8 @@ import type {
 type UsePlanesPublicosOptions = {
   tenantId: string;
   enabled?: boolean;
+  /** Seeds the search term's initial state (US-0101) — callers that need to re-apply it on every reopen (the component isn't remounted between opens) do so via setSearch. */
+  initialSearch?: string;
 };
 
 /** Lowercases and strips diacritics so "Natacion" matches "Natación". */
@@ -78,11 +80,12 @@ function matchesSearch(plan: PlanPublicoItem, term: string): boolean {
 export function usePlanesPublicos({
   tenantId,
   enabled = true,
+  initialSearch = '',
 }: UsePlanesPublicosOptions): UsePlanesPublicosResult {
   const [plans, setPlans] = useState<PlanPublicoItem[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
 
   const loadData = useCallback(async () => {
     setLoading(true);
