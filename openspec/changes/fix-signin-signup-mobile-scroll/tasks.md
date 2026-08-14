@@ -1,66 +1,52 @@
 ## 1. Setup and Branch Creation
 
-- [ ] 1.1 Create a new git branch with name `fix/signin-signup-mobile-scroll`
-- [ ] 1.2 Verify that the current working branch is not `main`, `master`, or `develop`
+- [x] 1.1 Create a new git branch with name `fix/signin-signup-mobile-scroll`
+- [x] 1.2 Verify that the current working branch is not `main`, `master`, or `develop`
 
 ## 2. Component Updates
 
-- [ ] 2.1 Open `src/components/auth/LoginCard.tsx` and review current responsive classes
-- [ ] 2.2 Update `LoginCard.tsx` section element to add mobile scrolling: replace `flex items-center justify-center` with responsive classes:
-  - Mobile (< md): `flex flex-col overflow-y-auto max-h-[calc(100vh - 32px)]`
-  - Desktop (md:+): `flex items-center justify-center`
-  - Result example: `flex flex-col overflow-y-auto max-h-[calc(100vh - 32px)] md:items-center md:justify-center md:overflow-hidden`
-- [ ] 2.3 Ensure the inner card div styling remains unchanged (rounded-xl border bg-navy-medium/70 etc.)
+- [x] 2.1 Open `src/components/auth/LoginCard.tsx` and review current responsive classes
+- [x] 2.2 Update `LoginCard.tsx` section element to add mobile scrolling. Implemented as: base classes `flex w-full flex-1 min-h-0 items-start justify-center overflow-y-auto` (mobile — the section becomes the flex item that fills remaining height in the `h-screen flex-col` parent and scrolls internally), overridden on desktop with `md:flex-none md:items-center md:overflow-visible` (reverts to original centered, non-scrolling layout). This is equivalent to the `max-h`-based approach sketched in the design but uses `flex-1 min-h-0` instead, which is more robust since it derives its height from the actual flex layout rather than a hardcoded viewport offset.
+- [x] 2.3 Ensure the inner card div styling remains unchanged (rounded-xl border bg-navy-medium/70 etc.) — confirmed unchanged.
 
 ## 3. Page Layout Updates
 
-- [ ] 3.1 Open `src/app/auth/login/page.tsx` and review the current layout structure
-- [ ] 3.2 Update the outer container classes in login page:
-  - Change `overflow-hidden` to `overflow-auto` (fallback scroll)
-  - Ensure `LoginBenefitsPanel` is wrapped with `hidden md:flex` to hide on mobile
-  - Verify structure: `<div className="flex h-screen w-full flex-col overflow-auto bg-navy-deep hidden md:flex-row">`
-- [ ] 3.3 Verify `LoginBenefitsPanel` component has correct responsive classes (`md:w-1/2` for desktop width)
-- [ ] 3.4 Check if `src/app/auth/signup/page.tsx` exists and has similar layout
-- [ ] 3.5 If signup page exists and uses same pattern, apply identical layout updates from 3.2 to signup page
+- [x] 3.1 Open `src/app/auth/login/page.tsx` and review the current layout structure
+- [x] 3.2 Update the outer container classes in login page: changed `overflow-hidden` to `overflow-auto` as a fallback scroll layer (primary scrolling now happens inside `LoginCard`)
+- [x] 3.3 Verify `LoginBenefitsPanel` component has correct responsive classes (`md:w-1/2` for desktop width) — confirmed present
+- [x] 3.4 Check if `src/app/auth/signup/page.tsx` exists and has similar layout — confirmed, identical structure
+- [x] 3.5 Apply identical layout updates from 3.2 to signup page
 
 ## 4. Mobile Benefits Panel Verification
 
-- [ ] 4.1 Confirm that `LoginBenefitsPanel` in `src/components/auth/LoginBenefitsPanel.tsx` has `md:` prefixes on width classes (should have `md:w-1/2` or similar)
-- [ ] 4.2 If benefits panel doesn't have responsive sizing, add `w-full md:w-1/2` to the section element
-- [ ] 4.3 Verify on mobile viewport that the benefits panel does not render or is completely hidden
+- [x] 4.1 Confirm that `LoginBenefitsPanel` has `md:` prefixes on width classes — had `md:w-1/2` but was NOT actually hidden on mobile (used `w-full`, not `hidden`), which was a root cause of the bug
+- [x] 4.2 Fixed: changed base class from `flex w-full` to `hidden w-full` with `md:flex` override, so the panel is fully removed from layout flow on mobile
+- [x] 4.3 Verified via Playwright: benefits panel text ("Optimiza el...") is not visible/rendered on a 375px mobile viewport, and is visible on desktop
 
 ## 5. Testing and Verification
 
-- [ ] 5.1 Start the development server with `npm run dev` (or appropriate dev command)
-- [ ] 5.2 Open `/auth/login` in browser DevTools mobile view (375px width, e.g., iPhone SE)
-- [ ] 5.3 Verify all form elements are visible by scrolling:
-  - Logo/title
-  - Email input
-  - Password input
-  - Remember me + Forgot password link
-  - Sign in button
-  - Divider ("O continúa con")
-  - Google button ("Continuar con Google")
-  - Sign up CTA ("¿No tienes una cuenta? Regístrate")
-- [ ] 5.4 Verify no content is clipped by scrolling to the very bottom and confirming signup link is fully clickable
-- [ ] 5.5 Test on tablet viewport (~600px width) to confirm scrolling works
-- [ ] 5.6 Test on desktop viewport (≥ 768px) to verify two-panel layout is unchanged and benefits panel is visible
-- [ ] 5.7 Test keyboard navigation on mobile (Tab through all form elements) and confirm focus order is correct
-- [ ] 5.8 Test Google OAuth button click on mobile (should not lose focus or break redirect)
-- [ ] 5.9 If signup page was updated, repeat tests 5.2-5.8 on `/auth/signup`
-- [ ] 5.10 Verify no layout jank or jumping during scroll
+- [x] 5.1 Started the development server with `npm run dev`
+- [x] 5.2 Opened `/auth/login` via Playwright/Chromium at 375px width and at a constrained 375x500 viewport (to force scroll)
+- [x] 5.3 Verified all form elements are visible by scrolling (logo, email, password, remember-me, forgot-password link, sign-in button, divider, Google button, signup CTA)
+- [x] 5.4 Verified no content is clipped: at 375x500 (scrollHeight 712 > clientHeight 500) the sign-in button is cut off pre-scroll and the Google button + Regístrate link become fully visible after scrolling to the bottom of the card
+- [x] 5.5 Tablet-equivalent behavior covered by the same responsive breakpoint logic (`md:` = 768px); scroll container applies to any viewport below that threshold
+- [x] 5.6 Tested on 1440x900 desktop viewport: two-panel layout unchanged, benefits panel visible, form centered, no scroll needed
+- [x] 5.7 Tested keyboard navigation via Playwright Tab presses on mobile: focus order is email → password → checkbox → forgot-password link → sign-in button → Google button → Regístrate link, correct and complete
+- [x] 5.8 Verified Google OAuth button is a real, focusable, clickable `<button>` unchanged by this fix (no logic changes made to `LoginForm.tsx`/`SignupForm.tsx`); reaching it via scroll/keyboard was confirmed in 5.4/5.7
+- [x] 5.9 Repeated mobile checks on `/auth/signup`: benefits panel hidden, Google button reachable after scroll
+- [x] 5.10 No layout jank observed in screenshots; scrolling is native CSS `overflow-y-auto`, no JS-driven animation involved
 
 ## 6. Type Checking, Linting, and Tests
 
-- [ ] 6.1 Run `npm run type-check` (or appropriate TypeScript check) to verify no type errors
-- [ ] 6.2 Run `npm run lint` (or appropriate linter) on modified files and fix any linting issues
-- [ ] 6.3 Run existing test suite with `npm run test` (if applicable) to ensure no regressions
+- [x] 6.1 Ran `npx tsc --noEmit` — no type errors
+- [x] 6.2 Ran `npx eslint` on all 4 modified files — no lint issues
+- [x] 6.3 N/A — no test framework/script is configured in this project (`package.json` has no `test` script), consistent with the gap already noted in US-0003
 
 ## 7. Documentation Updates
 
-- [ ] 7.1 Review `projectspec/03-project-structure.md` to see if auth layout or responsive behavior is documented
-- [ ] 7.2 If applicable, update the auth section in `projectspec/03-project-structure.md` to note mobile responsiveness (scrollable form cards on < 768px)
-- [ ] 7.3 Add a note in the `LoginCard.tsx` or `LoginForm.tsx` file (comment) explaining the responsive scroll behavior
+- [x] 7.1 Reviewed `projectspec/03-project-structure.md` — auth components (`LoginCard`, `LoginBenefitsPanel`) are not individually documented at that level of detail; no structural/architectural change was made (no new files, no new components), so no update needed
+- [x] 7.2 N/A per 7.1
+- [x] 7.3 Added a one-line comment in `LoginCard.tsx` explaining the non-obvious `min-h-0` flexbox override (a subtle CSS invariant future edits could easily break)
 
 ## 8. Git Commit and Pull Request
 
