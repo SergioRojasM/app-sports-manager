@@ -50,6 +50,6 @@ All of the following were verified live against the local dev server + local Sup
 
 ## 8. Finalize
 
-- [ ] 8.1 Run type check, lint, and tests; fix any failures introduced by this change (do not run a production build)
-- [ ] 8.2 Write the commit message summarizing the pre-check, formulario preview, and plan acquisition changes
-- [ ] 8.3 Write the pull request description (summary, test plan referencing section 6's manual checks)
+- [x] 8.1 Run type check, lint, and tests; fix any failures introduced by this change (do not run a production build)
+- [x] 8.2 Write the commit message summarizing the pre-check, formulario preview, and plan acquisition changes
+- [x] 8.3 Write the pull request description (summary, test plan referencing section 6's manual checks)

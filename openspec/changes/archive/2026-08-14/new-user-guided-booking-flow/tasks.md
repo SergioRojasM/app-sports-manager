@@ -45,13 +45,13 @@
 
 ## 8. Manual Verification
 
-- [ ] 8.1 Run the full guided signup journey with a real test email and a training whose formulario has `perfil_campos_requeridos` set: confirm the training context survives signup → email confirmation (ideally opened on a different device/browser) → auto-opened booking modal → inline profile step → eligibility check → formulario → success, with the stepper showing the correct step at every stage
-- [ ] 8.2 Repeat the same journey via "Ya tengo cuenta" (login) instead of signup
-- [ ] 8.3 Confirm an already-authenticated user browsing `/portal/entrenamientos-publicos` directly and clicking "Reservar" manually sees no stepper and fully unchanged existing behavior
-- [ ] 8.4 Confirm `/portal/perfil` still renders and saves every profile field when visited directly (no regression from the new `visibleFields` prop)
-- [ ] 8.5 Confirm refreshing `/portal/entrenamientos-publicos` after the guided modal has auto-opened once does not reopen it
-- [ ] 8.6 Confirm the initial `perfilLoading` fetch resolves before the profile-completion branch is evaluated, so the eligibility spinner never flashes before a real profile-completion prompt (see `design.md` Risks)
-- [ ] 8.7 Confirm a training whose formulario has no `perfil_campos_requeridos` (or no formulario at all) skips the inline profile step entirely, for both guided and non-guided bookings
+- [x] 8.1 Run the full guided signup journey with a real test email and a training whose formulario has `perfil_campos_requeridos` set: confirm the training context survives signup → email confirmation (ideally opened on a different device/browser) → auto-opened booking modal → inline profile step → eligibility check → formulario → success, with the stepper showing the correct step at every stage
+- [x] 8.2 Repeat the same journey via "Ya tengo cuenta" (login) instead of signup
+- [x] 8.3 Confirm an already-authenticated user browsing `/portal/entrenamientos-publicos` directly and clicking "Reservar" manually sees no stepper and fully unchanged existing behavior
+- [x] 8.4 Confirm `/portal/perfil` still renders and saves every profile field when visited directly (no regression from the new `visibleFields` prop)
+- [x] 8.5 Confirm refreshing `/portal/entrenamientos-publicos` after the guided modal has auto-opened once does not reopen it
+- [x] 8.6 Confirm the initial `perfilLoading` fetch resolves before the profile-completion branch is evaluated, so the eligibility spinner never flashes before a real profile-completion prompt (see `design.md` Risks)
+- [x] 8.7 Confirm a training whose formulario has no `perfil_campos_requeridos` (or no formulario at all) skips the inline profile step entirely, for both guided and non-guided bookings
 
 ## 9. Documentation
 
