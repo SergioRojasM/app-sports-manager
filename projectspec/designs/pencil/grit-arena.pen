@@ -1,5 +1,5 @@
 {
-  "version": "2.14",
+  "version": "2.17",
   "children": [
     {
       "type": "frame",
@@ -2380,6 +2380,7 @@
               "strokeWidth": {
                 "bottom": 1
               },
+              "strokeLinejoin": "round",
               "padding": [
                 18,
                 48
@@ -4476,6 +4477,1967 @@
                   "fontFamily": "$font-body",
                   "fontSize": 12,
                   "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "P43Yo",
+      "x": 3349,
+      "y": 0,
+      "name": "Formulario Preview — Ficha de Inscripción",
+      "clip": true,
+      "width": 949,
+      "height": 1816,
+      "fill": "$bg-navy",
+      "layout": "none",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "EbYMJ",
+          "x": 443,
+          "y": -181,
+          "name": "BG Glow Top Right",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#14DBC433",
+                "position": 0
+              },
+              {
+                "color": "#14DBC400",
+                "position": 1
+              }
+            ]
+          },
+          "width": 900,
+          "height": 900
+        },
+        {
+          "type": "ellipse",
+          "id": "PSLDy",
+          "x": -300,
+          "y": 1000,
+          "name": "BG Glow Bottom Left",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#0FA3AB2E",
+                "position": 0
+              },
+              {
+                "color": "#0FA3AB00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 800,
+          "height": 800
+        },
+        {
+          "type": "frame",
+          "id": "r4PwkM",
+          "x": 0,
+          "y": 0,
+          "name": "Content",
+          "width": 941,
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "SPMdv",
+              "name": "Hero",
+              "width": "fill_container",
+              "stroke": "$glass-border",
+              "strokeWidth": {
+                "bottom": 1
+              },
+              "strokeLinejoin": "round",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": [
+                40,
+                48,
+                34,
+                48
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "C6W9mm",
+                  "name": "Hero Logo Row",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "l8ONPm",
+                      "name": "Hero Logo Icon",
+                      "width": 28,
+                      "height": 28,
+                      "fill": "$accent-cyan",
+                      "cornerRadius": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "RPLbq",
+                          "name": "Hero Logo Icon Glyph",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "zap",
+                          "library": "lucide",
+                          "fill": "#07111F"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "p7jh5A",
+                      "name": "Hero Logo Text",
+                      "fill": "$accent-cyan",
+                      "content": "GRIT ARENA",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "700",
+                      "letterSpacing": 2
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WlM1c",
+                  "name": "Eyebrow Row",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "B9xff1",
+                      "name": "Eyebrow Muted",
+                      "fill": "$text-subtext",
+                      "content": "WOLFPACK ·",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "600",
+                      "letterSpacing": 2
+                    },
+                    {
+                      "type": "text",
+                      "id": "snX37",
+                      "name": "Eyebrow Accent",
+                      "fill": "$accent-cyan",
+                      "content": "FICHA DE INSCRIPCIÓN",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "700",
+                      "letterSpacing": 2
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KWJYj",
+                  "name": "Hero Title Wrap",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "lBWNH",
+                      "name": "Hero Title Line 1",
+                      "fill": "$text-primary",
+                      "content": "Ficha de Inscripción",
+                      "lineHeight": 1.05,
+                      "textAlign": "center",
+                      "fontFamily": "$font-title",
+                      "fontSize": 44,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "w4td9",
+                      "name": "Hero Title Line 2",
+                      "fill": "$accent-cyan",
+                      "content": "a Entrenamiento",
+                      "lineHeight": 1.05,
+                      "textAlign": "center",
+                      "fontFamily": "$font-title",
+                      "fontSize": 44,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "MNHAt",
+                  "name": "Accent Line",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#14DBC400",
+                        "position": 0
+                      },
+                      {
+                        "color": "$accent-cyan",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#14DBC400",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 64,
+                  "height": 2
+                },
+                {
+                  "type": "text",
+                  "id": "c08kD9",
+                  "name": "Hero Subtitle",
+                  "fill": "$text-subtext",
+                  "content": "Natación · Técnica en Aguas Abiertas — Miércoles 22 de mayo",
+                  "textAlign": "center",
+                  "fontFamily": "$font-body",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "DIwGv",
+                  "name": "Hero Badges Row",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "sZywp",
+                      "name": "Badge Miércoles 22 mayo · 08:00 AM",
+                      "cornerRadius": 10,
+                      "stroke": "$glass-border",
+                      "strokeWidth": 1,
+                      "gap": 8,
+                      "padding": [
+                        9,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "SFG6B",
+                          "name": "Badge Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "calendar",
+                          "library": "lucide",
+                          "fill": "$accent-cyan"
+                        },
+                        {
+                          "type": "text",
+                          "id": "QLNMa",
+                          "name": "Badge Label",
+                          "fill": "$text-primary",
+                          "content": "Miércoles 22 mayo · 08:00 AM",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ImVpk",
+                      "name": "Badge Piscina Olímpica",
+                      "cornerRadius": 10,
+                      "stroke": "$glass-border",
+                      "strokeWidth": 1,
+                      "gap": 8,
+                      "padding": [
+                        9,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "cgw8Z",
+                          "name": "Badge Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "map-pin",
+                          "library": "lucide",
+                          "fill": "$accent-cyan"
+                        },
+                        {
+                          "type": "text",
+                          "id": "NHeTW",
+                          "name": "Badge Label",
+                          "fill": "$text-primary",
+                          "content": "Piscina Olímpica",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "FgHiR",
+                      "name": "Badge 500m · 1K · 1.5K",
+                      "cornerRadius": 10,
+                      "stroke": "$glass-border",
+                      "strokeWidth": 1,
+                      "gap": 8,
+                      "padding": [
+                        9,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "j1tc1",
+                          "name": "Badge Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "waves",
+                          "library": "lucide",
+                          "fill": "$accent-cyan"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ym6fU",
+                          "name": "Badge Label",
+                          "fill": "$text-primary",
+                          "content": "500m · 1K · 1.5K",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "s8rmL2",
+              "name": "Body",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 28,
+              "padding": [
+                32,
+                48,
+                36,
+                48
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "qjtEf",
+                  "name": "Header Row",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "p3MgK",
+                      "name": "Header Left",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "wQGcL",
+                          "name": "Back Row",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "dsxbb",
+                              "name": "Back Icon",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "arrow-left",
+                              "library": "lucide",
+                              "fill": "$text-subtext"
+                            },
+                            {
+                              "type": "text",
+                              "id": "OUNDj",
+                              "name": "Back Label",
+                              "fill": "$text-subtext",
+                              "content": "Volver a Formularios",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BHVlK",
+                      "name": "Header Right",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "G902AF",
+                          "name": "Status Pill",
+                          "fill": "$glass-fill",
+                          "cornerRadius": 20,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "gap": 8,
+                          "padding": [
+                            8,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "ellipse",
+                              "id": "gVnqt",
+                              "name": "Status Dot",
+                              "fill": "#6BCB77",
+                              "width": 8,
+                              "height": 8
+                            },
+                            {
+                              "type": "text",
+                              "id": "Fcj5g",
+                              "name": "Status Label",
+                              "fill": "$text-primary",
+                              "content": "Activa",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "nuNjZ",
+                          "name": "Editar Button",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "gap": 8,
+                          "padding": [
+                            10,
+                            16
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "c94HT1",
+                              "name": "Edit Icon",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "pencil",
+                              "library": "lucide",
+                              "fill": "$text-primary"
+                            },
+                            {
+                              "type": "text",
+                              "id": "szzDp",
+                              "name": "Editar Label",
+                              "fill": "$text-primary",
+                              "content": "Editar plantilla",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Ds0Fe",
+                  "name": "Profile Fields Row",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ez2LI",
+                      "name": "Profile Fields Label",
+                      "fill": "$text-subtext",
+                      "content": "Datos de perfil solicitados:",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "og1rU",
+                      "name": "Chip Nombre",
+                      "cornerRadius": 20,
+                      "stroke": "$accent-cyan",
+                      "strokeWidth": 1,
+                      "padding": [
+                        5,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "sKOwF",
+                          "name": "Chip Label",
+                          "fill": "$accent-cyan",
+                          "content": "Nombre",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hXD06",
+                      "name": "Chip Teléfono",
+                      "cornerRadius": 20,
+                      "stroke": "$accent-cyan",
+                      "strokeWidth": 1,
+                      "padding": [
+                        5,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "CaZIc",
+                          "name": "Chip Label",
+                          "fill": "$accent-cyan",
+                          "content": "Teléfono",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "aJM6N",
+                      "name": "Chip Fecha de nacimiento",
+                      "cornerRadius": 20,
+                      "stroke": "$accent-cyan",
+                      "strokeWidth": 1,
+                      "padding": [
+                        5,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "jATPV",
+                          "name": "Chip Label",
+                          "fill": "$accent-cyan",
+                          "content": "Fecha de nacimiento",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IVqou",
+                      "name": "Chip Peso (kg)",
+                      "cornerRadius": 20,
+                      "stroke": "$accent-cyan",
+                      "strokeWidth": 1,
+                      "padding": [
+                        5,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "j0V4u",
+                          "name": "Chip Label",
+                          "fill": "$accent-cyan",
+                          "content": "Peso (kg)",
+                          "fontFamily": "$font-body",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "APE8P",
+                  "name": "Section 1 Tus datos",
+                  "width": "fill_container",
+                  "fill": "$glass-fill",
+                  "cornerRadius": 16,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dWaCg",
+                      "name": "Section Head",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "xe1f9",
+                          "name": "Section Badge",
+                          "width": 28,
+                          "height": 28,
+                          "fill": "$accent-cyan",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "yPYKS",
+                              "name": "Badge Num",
+                              "fill": "#07111F",
+                              "content": "1",
+                              "fontFamily": "$font-title",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "YV36x",
+                          "name": "Section Head Text",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "u3zMZ",
+                              "name": "Section Title",
+                              "fill": "$text-primary",
+                              "content": "Tus datos",
+                              "fontFamily": "$font-title",
+                              "fontSize": 19,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "z7RtxJ",
+                              "name": "Section Subtitle",
+                              "fill": "$text-subtext",
+                              "content": "Información básica del atleta",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12.5,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mK2LJ",
+                      "name": "Field Nombre completo",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "B5huY",
+                          "name": "Label Row",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "CVHMo",
+                              "name": "Label Text",
+                              "fill": "$text-subtext",
+                              "content": "Nombre completo",
+                              "fontFamily": "$font-body",
+                              "fontSize": 11.5,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.4
+                            },
+                            {
+                              "type": "text",
+                              "id": "VjZYH",
+                              "name": "Required Mark",
+                              "fill": "#FF6B6B",
+                              "content": "*",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "e8ZDnt",
+                          "name": "Field Box",
+                          "width": "fill_container",
+                          "fill": "$card-fill",
+                          "cornerRadius": 8,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "gap": 8,
+                          "padding": [
+                            10,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cEhXt",
+                              "name": "Field Placeholder",
+                              "fill": "$text-subtext",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Nombre y apellidos",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wI10q",
+                      "name": "Grid Row 1",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "lpToq",
+                          "name": "Field Documento de identidad",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "H8Qqck",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "jufve",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Documento de identidad",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "RD857",
+                                  "name": "Required Mark",
+                                  "fill": "#FF6B6B",
+                                  "content": "*",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ow2Vz",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "twOab",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "1.234.567.890",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "r4HD86",
+                          "name": "Field Fecha de nacimiento",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "E5O8ZQ",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "bb9GZ",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Fecha de nacimiento",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "OKSDf",
+                                  "name": "Required Mark",
+                                  "fill": "#FF6B6B",
+                                  "content": "*",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "liqZV",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "dfqfX",
+                                  "name": "Leading Icon",
+                                  "width": 13,
+                                  "height": 13,
+                                  "icon": "calendar",
+                                  "library": "lucide",
+                                  "fill": "$text-subtext"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "kMkfl",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "dd/mm/aaaa",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ZGPtt",
+                      "name": "Grid Row 2",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ZeaXZ",
+                          "name": "Field Teléfono",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "SgXBv",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "tQVZF",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Teléfono",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "qLFUc",
+                                  "name": "Required Mark",
+                                  "fill": "#FF6B6B",
+                                  "content": "*",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Cq1mH",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "XzBPf",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "300 000 0000",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "n0Rfc",
+                          "name": "Field Correo electrónico",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "TVDFL",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Rja5m",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Correo electrónico",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "aYyDb",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "GQ9zH",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "tu@correo.com",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "KFtTs",
+                      "name": "Grid Row 3",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "ou71m",
+                          "name": "Field Talla de camiseta",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "VmQ65",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "KFsXu",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Talla de camiseta",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "wZSML",
+                                  "name": "Required Mark",
+                                  "fill": "#FF6B6B",
+                                  "content": "*",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "nV3re",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "YBPYH",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Selecciona una opción",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "icon",
+                                  "id": "x0WkOr",
+                                  "name": "Trailing Icon",
+                                  "width": 12,
+                                  "height": 12,
+                                  "icon": "chevron-down",
+                                  "library": "lucide",
+                                  "fill": "$text-subtext"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "p3t4c",
+                          "name": "Field Ciudad",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "c67rN",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "V4YWgO",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Ciudad",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "lYhB3",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "J7ymlO",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Bogotá",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uyVl0",
+                  "name": "Section 2 Nivel de experiencia",
+                  "width": "fill_container",
+                  "fill": "$glass-fill",
+                  "cornerRadius": 16,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "O2kHz",
+                      "name": "Section Head",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "w6zg32",
+                          "name": "Section Badge",
+                          "width": 28,
+                          "height": 28,
+                          "fill": "$accent-cyan",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Twawk",
+                              "name": "Badge Num",
+                              "fill": "#07111F",
+                              "content": "2",
+                              "fontFamily": "$font-title",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "FkPNR",
+                          "name": "Section Head Text",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "V2bJos",
+                              "name": "Section Title",
+                              "fill": "$text-primary",
+                              "content": "Nivel de experiencia",
+                              "fontFamily": "$font-title",
+                              "fontSize": 19,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "qTIoY",
+                              "name": "Section Subtitle",
+                              "fill": "$text-subtext",
+                              "content": "Selecciona la opción que mejor te describe",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12.5,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "whz7r",
+                      "name": "Level Tiles Row",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "KEH23",
+                          "name": "Tile Principiante",
+                          "width": "fill_container",
+                          "fill": "$card-fill",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            18,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "SYI3v",
+                              "name": "Tile Label",
+                              "fill": "$text-primary",
+                              "content": "Principiante",
+                              "fontFamily": "$font-title",
+                              "fontSize": 18,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "d7Cqbg",
+                              "name": "Tile Desc",
+                              "fill": "$text-subtext",
+                              "content": "Menos de 1 año",
+                              "fontFamily": "$font-body",
+                              "fontSize": 10.5,
+                              "fontWeight": "500",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OFGqa",
+                          "name": "Tile Intermedio",
+                          "width": "fill_container",
+                          "fill": "#14DBC414",
+                          "cornerRadius": 10,
+                          "stroke": "$accent-cyan",
+                          "strokeWidth": 1.5,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            18,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mZUI4",
+                              "name": "Tile Label",
+                              "fill": "$accent-cyan",
+                              "content": "Intermedio",
+                              "fontFamily": "$font-title",
+                              "fontSize": 18,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "X3l6K",
+                              "name": "Tile Desc",
+                              "fill": "$text-subtext",
+                              "content": "1 a 3 años",
+                              "fontFamily": "$font-body",
+                              "fontSize": 10.5,
+                              "fontWeight": "500",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "J0TJK",
+                          "name": "Tile Avanzado",
+                          "width": "fill_container",
+                          "fill": "$card-fill",
+                          "cornerRadius": 10,
+                          "stroke": "$glass-border",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            18,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "s052Ke",
+                              "name": "Tile Label",
+                              "fill": "$text-primary",
+                              "content": "Avanzado",
+                              "fontFamily": "$font-title",
+                              "fontSize": 18,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "gjDLD",
+                              "name": "Tile Desc",
+                              "fill": "$text-subtext",
+                              "content": "Más de 3 años",
+                              "fontFamily": "$font-body",
+                              "fontSize": 10.5,
+                              "fontWeight": "500",
+                              "letterSpacing": 0.3
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mHw7Y",
+                  "name": "Section 3 Contacto de emergencia",
+                  "width": "fill_container",
+                  "fill": "$glass-fill",
+                  "cornerRadius": 16,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "HEavh",
+                      "name": "Section Head",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "wmbXu",
+                          "name": "Section Badge",
+                          "width": 28,
+                          "height": 28,
+                          "fill": "$accent-cyan",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "yPxLB",
+                              "name": "Badge Num",
+                              "fill": "#07111F",
+                              "content": "3",
+                              "fontFamily": "$font-title",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "u14YA",
+                          "name": "Section Head Text",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "K71Qbk",
+                              "name": "Section Title",
+                              "fill": "$text-primary",
+                              "content": "Contacto de emergencia",
+                              "fontFamily": "$font-title",
+                              "fontSize": 19,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "x1V6YH",
+                              "name": "Section Subtitle",
+                              "fill": "$text-subtext",
+                              "content": "Obligatorio para actividades de alto esfuerzo",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12.5,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "A22pqP",
+                      "name": "Grid Row 4",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "c42iu",
+                          "name": "Field Nombre de contacto",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "R3RczQ",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "zulZS",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Nombre de contacto",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Ku87T",
+                                  "name": "Required Mark",
+                                  "fill": "#FF6B6B",
+                                  "content": "*",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "jl4X1",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "jKNiL",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Nombre completo",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "i6oO5h",
+                          "name": "Field Teléfono de emergencia",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Tw37w",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "suAvd",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Teléfono de emergencia",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "y47wR5",
+                                  "name": "Required Mark",
+                                  "fill": "#FF6B6B",
+                                  "content": "*",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "yGSsx",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "mSLtF",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "300 000 0000",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "EAKYO",
+                      "name": "Grid Row 5",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "VCsA3",
+                          "name": "Field Parentesco",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "n0AFZ",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "yPv0t",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "Parentesco",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "gMFl9",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "yKQAt",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Pareja, madre, amigo…",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kuUMF",
+                          "name": "Field RH / Tipo de sangre",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "cpyIE",
+                              "name": "Label Row",
+                              "gap": 4,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "cKJDW",
+                                  "name": "Label Text",
+                                  "fill": "$text-subtext",
+                                  "content": "RH / Tipo de sangre",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 11.5,
+                                  "fontWeight": "600",
+                                  "letterSpacing": 0.4
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "HE35P",
+                              "name": "Field Box",
+                              "width": "fill_container",
+                              "fill": "$card-fill",
+                              "cornerRadius": 8,
+                              "stroke": "$glass-border",
+                              "strokeWidth": 1,
+                              "gap": 8,
+                              "padding": [
+                                10,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CsGu1",
+                                  "name": "Field Placeholder",
+                                  "fill": "$text-subtext",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "O+",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "HPztT",
+                  "name": "Section 4 Documento de soporte",
+                  "width": "fill_container",
+                  "fill": "$glass-fill",
+                  "cornerRadius": 16,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "yuKiQ",
+                      "name": "Section Head",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "UEOnN",
+                          "name": "Section Badge",
+                          "width": 28,
+                          "height": 28,
+                          "fill": "$accent-cyan",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Rd3TO",
+                              "name": "Badge Num",
+                              "fill": "#07111F",
+                              "content": "4",
+                              "fontFamily": "$font-title",
+                              "fontSize": 15,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "rg1uQ",
+                          "name": "Section Head Text",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "BhACZ",
+                              "name": "Section Title",
+                              "fill": "$text-primary",
+                              "content": "Documento de soporte",
+                              "fontFamily": "$font-title",
+                              "fontSize": 19,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "r7sgD",
+                              "name": "Section Subtitle",
+                              "fill": "$text-subtext",
+                              "content": "Certificado médico o consentimiento firmado",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12.5,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "KI66L",
+                      "name": "Upload Field",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "blcEa",
+                          "name": "Label Row",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "AbTcy",
+                              "name": "Label Text",
+                              "fill": "$text-subtext",
+                              "content": "Certificado médico",
+                              "fontFamily": "$font-body",
+                              "fontSize": 11.5,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.4
+                            },
+                            {
+                              "type": "text",
+                              "id": "s3eKt",
+                              "name": "Required Mark",
+                              "fill": "#FF6B6B",
+                              "content": "*",
+                              "fontFamily": "$font-body",
+                              "fontSize": 12,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "FVL6n",
+                          "name": "Upload Box",
+                          "width": "fill_container",
+                          "fill": "#14DBC414",
+                          "cornerRadius": 10,
+                          "stroke": "$accent-cyan",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": 24,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "TvV7R",
+                              "name": "Upload Icon",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "image",
+                              "library": "lucide",
+                              "fill": "$accent-cyan"
+                            },
+                            {
+                              "type": "text",
+                              "id": "J11oY",
+                              "name": "Upload Label",
+                              "fill": "$text-primary",
+                              "content": "Sube tu imagen o documento",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "JHzDC",
+                              "name": "Upload Hint",
+                              "fill": "$text-subtext",
+                              "content": "PNG, JPG o PDF",
+                              "fontFamily": "$font-body",
+                              "fontSize": 11,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ei0Rc",
+                  "name": "Footer Note",
+                  "width": "fill_container",
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BCSwx",
+                      "name": "Footer Text",
+                      "fill": "$text-subtext",
+                      "content": "Vista previa de solo lectura — el atleta completará este formulario al reservar el entrenamiento.",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    }
+                  ]
                 }
               ]
             }

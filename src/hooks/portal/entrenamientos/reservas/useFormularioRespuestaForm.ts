@@ -5,7 +5,11 @@ import { createClient } from '@/services/supabase/client';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import { getPerfil } from '@/services/supabase/portal/perfil.service';
-import { FORMULARIO_PERFIL_CAMPOS, type FormularioSeccion } from '@/types/portal/formularios.types';
+import {
+  FORMULARIO_PERFIL_CAMPOS,
+  HEADER_SECCION_TIPOS,
+  type FormularioSeccion,
+} from '@/types/portal/formularios.types';
 
 // ─────────────────────────────────────────────
 // Types
@@ -141,7 +145,11 @@ export function useFormularioRespuestaForm({
       .then((plantilla) => {
         if (cancelled) return;
         setPlantillaNombre(plantilla.nombre);
-        setSecciones(plantilla.secciones.filter((s) => s.activo));
+        setSecciones(
+          plantilla.secciones.filter(
+            (s) => s.activo && !(HEADER_SECCION_TIPOS as readonly string[]).includes(s.seccion_tipo),
+          ),
+        );
         setPerfilCamposRequeridos(plantilla.perfil_campos_requeridos ?? []);
         setValues({});
         setErrors({});
@@ -245,7 +253,10 @@ export function useFormularioRespuestaForm({
         continue;
       }
       const value = values[seccion.campo_nombre];
-      if (!value || !value.trim()) {
+      // A required checkbox must be checked ("true") — "false" is a deliberate, non-empty answer
+      // that the generic empty-string check below would otherwise accept.
+      const isMissing = seccion.campo_tipo === 'checkbox' ? value !== 'true' : !value || !value.trim();
+      if (isMissing) {
         newErrors[seccion.campo_nombre] = 'Este campo es obligatorio.';
       }
     }

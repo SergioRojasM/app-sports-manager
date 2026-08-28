@@ -1,11 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FORMULARIO_PERFIL_CAMPOS, type FormularioPerfilCampo, type FormularioSeccion } from '@/types/portal/formularios.types';
-import { FormularioSeccionContent } from './FormularioSeccionContent';
+import {
+  FORMULARIO_PERFIL_CAMPOS,
+  HEADER_SECCION_TIPOS,
+  type FormularioPerfilCampo,
+  type FormularioSeccion,
+} from '@/types/portal/formularios.types';
+import { FormularioHeaderEditor } from './FormularioHeaderEditor';
+import { FormularioSeccionesGrouped } from './FormularioSeccionesGrouped';
 
 type FormularioPreviewModalProps = {
   open: boolean;
+  tenantId: string;
   plantillaNombre: string;
   secciones: FormularioSeccion[];
   /** Profile fields this template requests (US-0095) — rendered as a read-only chip list. */
@@ -17,6 +24,7 @@ type FormularioPreviewModalProps = {
 
 export function FormularioPreviewModal({
   open,
+  tenantId,
   plantillaNombre,
   secciones,
   perfilCamposRequeridos = [],
@@ -44,6 +52,8 @@ export function FormularioPreviewModal({
   }, [onClose, open]);
 
   if (!open) return null;
+
+  const bodySecciones = secciones.filter((s) => !(HEADER_SECCION_TIPOS as readonly string[]).includes(s.seccion_tipo));
 
   return (
     <div className="fixed inset-0 z-50">
@@ -82,6 +92,8 @@ export function FormularioPreviewModal({
           </header>
 
           <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+            {!loading && !error ? <FormularioHeaderEditor tenantId={tenantId} secciones={secciones} readOnly /> : null}
+
             {!loading && !error && perfilCamposRequeridos.length > 0 ? (
               <div>
                 <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
@@ -108,13 +120,11 @@ export function FormularioPreviewModal({
               </div>
             ) : null}
 
-            {!loading && !error && secciones.length === 0 ? (
+            {!loading && !error && bodySecciones.length === 0 ? (
               <p className="text-sm text-slate-400">Esta plantilla todavía no tiene secciones.</p>
             ) : null}
 
-            {!loading && !error
-              ? secciones.map((seccion) => <FormularioSeccionContent key={seccion.id} seccion={seccion} />)
-              : null}
+            {!loading && !error && bodySecciones.length > 0 ? <FormularioSeccionesGrouped secciones={bodySecciones} /> : null}
           </div>
         </div>
       </div>

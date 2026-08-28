@@ -25,13 +25,24 @@ export function FormularioSeccionContent({ seccion }: FormularioSeccionContentPr
     return <MultilineText className="text-sm leading-relaxed text-slate-400">{seccion.seccion_descripcion}</MultilineText>;
   }
 
-  return (
-    <FormularioCampoPreviewInput
-      campoTipo={seccion.campo_tipo ?? 'texto_corto'}
-      campoEtiqueta={seccion.campo_etiqueta ?? ''}
-      campoPlaceholder={seccion.campo_placeholder}
-      campoObligatorio={seccion.campo_obligatorio}
-      campoListaValores={seccion.campo_lista_valores}
-    />
-  );
+  if (seccion.seccion_tipo === 'separador') {
+    return <hr className="border-portal-border" />;
+  }
+
+  if (seccion.seccion_tipo === 'datos') {
+    return (
+      <FormularioCampoPreviewInput
+        campoTipo={seccion.campo_tipo ?? 'texto_corto'}
+        campoEtiqueta={seccion.campo_etiqueta ?? ''}
+        campoPlaceholder={seccion.campo_placeholder}
+        campoObligatorio={seccion.campo_obligatorio}
+        campoListaValores={seccion.campo_lista_valores}
+      />
+    );
+  }
+
+  // 'seccion' (rendered as a card header by FormularioSeccionesBuilder/FormularioPreviewModal's
+  // grouping wrapper) and every 'encabezado_*' row (rendered exclusively by
+  // FormularioHeaderEditor) never reach this generic per-row renderer in normal operation.
+  return null;
 }

@@ -11,6 +11,7 @@ import type { FormularioSeccion } from '@/types/portal/formularios.types';
 
 type EntrenamientoDetalleModalProps = {
   open: boolean;
+  tenantId: string;
   viewTarget: ViewTarget | null;
   viewLoading: boolean;
   canManage: boolean;
@@ -67,6 +68,7 @@ function usuarioEstadoLabel(value: string | null): string {
 
 export function EntrenamientoDetalleModal({
   open,
+  tenantId,
   viewTarget,
   viewLoading,
   canManage,
@@ -384,6 +386,7 @@ export function EntrenamientoDetalleModal({
 
       <FormularioPreviewModal
         open={previewOpen}
+        tenantId={tenantId}
         plantillaNombre={instance.formulario_plantilla?.nombre ?? 'Formulario'}
         secciones={previewSecciones}
         loading={previewLoading}

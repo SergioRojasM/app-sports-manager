@@ -531,6 +531,9 @@ export function ReservasPanel({
             const signedUrl = signedUrlMap.get(value);
             return signedUrl ? { text: 'Ver imagen', hyperlink: signedUrl } : 'Ver imagen (no disponible)';
           }
+          if (meta.tipo === 'checkbox') {
+            return value === 'true' ? 'Sí' : 'No';
+          }
           return value;
         });
         return [...fixedCells, ...perfilCells, ...dynamicCells];
@@ -1009,6 +1012,7 @@ export function ReservasPanel({
 
       <FormularioPreviewModal
         open={previewOpen}
+        tenantId={tenantId}
         plantillaNombre={instance.formulario_plantilla?.nombre ?? 'Formulario'}
         secciones={previewSecciones}
         perfilCamposRequeridos={previewPerfilCampos}

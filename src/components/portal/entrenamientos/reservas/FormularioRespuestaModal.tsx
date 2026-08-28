@@ -2,6 +2,11 @@
 
 import type { FormularioSeccion } from '@/types/portal/formularios.types';
 import { FormularioSeccionContent } from '@/components/portal/formularios/FormularioSeccionContent';
+import {
+  buildFormularioRenderPlan,
+  firstIdOfUnit,
+  type FormularioRenderUnit,
+} from '@/lib/portal/formulario-secciones-grouping';
 import type { PerfilFaltanteItem, PerfilResumenItem } from '@/hooks/portal/entrenamientos/reservas/useFormularioRespuestaForm';
 
 // ─────────────────────────────────────────────
@@ -70,6 +75,25 @@ function FormularioCampoEditableField({
     .map((v) => v.trim())
     .filter(Boolean);
 
+  if (campoTipo === 'checkbox') {
+    return (
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
+          <input
+            type="checkbox"
+            checked={value === 'true'}
+            disabled={disabled}
+            onChange={(e) => onUpdateValue(campoNombre, e.target.checked ? 'true' : 'false')}
+            className="rounded border-slate-600 bg-navy-deep"
+          />
+          {seccion.campo_etiqueta}
+          {seccion.campo_obligatorio && <span className="text-rose-400"> *</span>}
+        </label>
+        {error && <p className="mt-1 text-xs text-rose-300">{error}</p>}
+      </div>
+    );
+  }
+
   return (
     <div>
       <label className="mb-1 block text-sm font-medium text-slate-300">
@@ -77,7 +101,31 @@ function FormularioCampoEditableField({
         {seccion.campo_obligatorio && <span className="text-rose-400"> *</span>}
       </label>
 
-      {campoTipo === 'texto_largo' ? (
+      {campoTipo === 'seleccion' ? (
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={seccion.campo_etiqueta ?? undefined}>
+          {opciones.map((opcion) => {
+            const selected = value === opcion;
+            return (
+              <button
+                key={opcion}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                disabled={disabled}
+                onClick={() => onUpdateValue(campoNombre, opcion)}
+                className={[
+                  'rounded-lg border px-3 py-2 text-sm font-medium transition',
+                  selected
+                    ? 'border-turquoise bg-turquoise/15 text-turquoise'
+                    : 'border-portal-border bg-navy-deep text-slate-300 hover:border-turquoise/50',
+                ].join(' ')}
+              >
+                {opcion}
+              </button>
+            );
+          })}
+        </div>
+      ) : campoTipo === 'texto_largo' ? (
         <textarea
           rows={3}
           value={value}
@@ -239,24 +287,60 @@ export function FormularioRespuestaModal({
             <p className="text-sm text-slate-400">Este formulario todavía no tiene secciones.</p>
           )}
 
-          {!loading &&
-            !loadError &&
-            secciones.map((seccion) =>
-              seccion.seccion_tipo === 'datos' ? (
-                <FormularioCampoEditableField
-                  key={seccion.id}
-                  seccion={seccion}
-                  value={values[seccion.campo_nombre ?? ''] ?? ''}
-                  error={seccion.campo_nombre ? errors[seccion.campo_nombre] : undefined}
-                  uploading={uploadingCampoNombre === seccion.campo_nombre}
-                  onUpdateValue={onUpdateValue}
-                  onUploadImage={onUploadImage}
-                  disabled={disabled}
-                />
-              ) : (
-                <FormularioSeccionContent key={seccion.id} seccion={seccion} />
-              ),
-            )}
+          {!loading && !loadError
+            ? (() => {
+                const renderRow = (seccion: typeof secciones[number]) =>
+                  seccion.seccion_tipo === 'datos' ? (
+                    <FormularioCampoEditableField
+                      key={seccion.id}
+                      seccion={seccion}
+                      value={values[seccion.campo_nombre ?? ''] ?? ''}
+                      error={seccion.campo_nombre ? errors[seccion.campo_nombre] : undefined}
+                      uploading={uploadingCampoNombre === seccion.campo_nombre}
+                      onUpdateValue={onUpdateValue}
+                      onUploadImage={onUploadImage}
+                      disabled={disabled}
+                    />
+                  ) : (
+                    <FormularioSeccionContent key={seccion.id} seccion={seccion} />
+                  );
+
+                const renderUnit = (unit: FormularioRenderUnit) => {
+                  if (unit.kind === 'single') return renderRow(unit.entry.seccion);
+                  return (
+                    <div key={`${unit.a.seccion.id}-${unit.b.seccion.id}`} className="flex flex-col gap-4 sm:flex-row">
+                      <div className="flex-1">{renderRow(unit.a.seccion)}</div>
+                      <div className="flex-1">{renderRow(unit.b.seccion)}</div>
+                    </div>
+                  );
+                };
+
+                const plan = buildFormularioRenderPlan(secciones);
+
+                return plan.map((item) => {
+                  if (item.kind !== 'card') return <div key={firstIdOfUnit(item)}>{renderUnit(item)}</div>;
+                  return (
+                    <div
+                      key={item.header.seccion.id}
+                      className="space-y-4 rounded-2xl border border-portal-border bg-navy-deep/40 p-4"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-turquoise text-xs font-bold text-navy-deep">
+                          {item.numero}
+                        </span>
+                        <div>
+                          <h3 className="text-sm font-bold text-slate-100">{item.header.seccion.seccion_descripcion}</h3>
+                          {item.header.seccion.seccion_subtitulo ? (
+                            <p className="text-xs text-slate-400">{item.header.seccion.seccion_subtitulo}</p>
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="space-y-4">{item.children.map((child) => renderUnit(child))}</div>
+                    </div>
+                  );
+                });
+              })()
+            : null}
         </div>
 
         <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-portal-border pt-4">

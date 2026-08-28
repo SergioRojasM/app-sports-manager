@@ -158,6 +158,7 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
 
       <FormularioPreviewModal
         open={previewPlantilla !== null}
+        tenantId={tenantId}
         plantillaNombre={previewPlantilla?.nombre ?? ''}
         secciones={previewSecciones}
         loading={previewLoading}

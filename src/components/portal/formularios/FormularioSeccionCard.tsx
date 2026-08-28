@@ -6,6 +6,7 @@ import {
   FORMULARIO_SECCION_TIPO_LABELS,
   FORMULARIO_TIPOS_CAMPO,
   FORMULARIO_TIPO_CAMPO_LABELS,
+  FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES,
   type FormularioSeccion,
   type FormularioSeccionFormValues,
 } from '@/types/portal/formularios.types';
@@ -19,13 +20,12 @@ type FormularioSeccionCardProps = {
   expanded: boolean;
   onExpand: () => void;
   onCollapse: () => void;
-  onSave: (values: FormularioSeccionFormValues) => Promise<boolean>;
+  onSave: (values: FormularioSeccionFormValues) => void;
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
   canMoveUp: boolean;
   canMoveDown: boolean;
-  submitError: string | null;
 };
 
 const inputClass =
@@ -43,15 +43,14 @@ export function FormularioSeccionCard({
   onMoveDown,
   canMoveUp,
   canMoveDown,
-  submitError,
 }: FormularioSeccionCardProps) {
-  const { values, setField, isSubmitting, fieldError, handleSubmit } = useFormularioSeccionForm({
+  const { values, setField, fieldError, handleSubmit } = useFormularioSeccionForm({
     initialValues: seccion,
   });
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
-  const handleDone = async () => {
-    const ok = await handleSubmit(async (vals) => onSave(vals));
+  const handleDone = () => {
+    const ok = handleSubmit((vals) => onSave(vals));
     if (ok) onCollapse();
   };
 
@@ -127,6 +126,11 @@ export function FormularioSeccionCard({
     );
   }
 
+  const isDatos = values.seccion_tipo === 'datos';
+  const isSeparador = values.seccion_tipo === 'separador';
+  const isSeccion = values.seccion_tipo === 'seccion';
+  const usesListaValores = FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES.includes(values.campo_tipo);
+
   return (
     <div className="rounded-xl border border-turquoise/50 bg-navy-medium/60 p-5 shadow-[0_0_0_1px_rgba(45,212,191,0.15)]">
       <div className="space-y-4">
@@ -138,7 +142,6 @@ export function FormularioSeccionCard({
             id={`seccion-tipo-${seccion.id}`}
             value={values.seccion_tipo}
             onChange={(e) => setField('seccion_tipo', e.target.value as FormularioSeccionFormValues['seccion_tipo'])}
-            disabled={isSubmitting}
             className={inputClass}
           >
             {FORMULARIO_SECCION_TIPOS.map((tipo) => (
@@ -149,22 +152,9 @@ export function FormularioSeccionCard({
           </select>
         </div>
 
-        {values.seccion_tipo !== 'datos' ? (
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`seccion-descripcion-${seccion.id}`}>
-              Descripción <span className="text-rose-400">*</span>
-            </label>
-            <textarea
-              id={`seccion-descripcion-${seccion.id}`}
-              rows={values.seccion_tipo === 'titulo' ? 2 : 3}
-              value={values.seccion_descripcion}
-              onChange={(e) => setField('seccion_descripcion', e.target.value)}
-              disabled={isSubmitting}
-              placeholder="Escribe el contenido de esta sección"
-              className={inputClass}
-            />
-          </div>
-        ) : (
+        {isSeparador ? (
+          <p className="text-sm text-slate-400">Un separador no tiene contenido — solo dibuja una línea divisoria.</p>
+        ) : isDatos ? (
           <>
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-etiqueta-${seccion.id}`}>
@@ -175,7 +165,6 @@ export function FormularioSeccionCard({
                 type="text"
                 value={values.campo_etiqueta}
                 onChange={(e) => setField('campo_etiqueta', e.target.value)}
-                disabled={isSubmitting}
                 maxLength={150}
                 placeholder="Ej: Peso (kg)"
                 className={inputClass}
@@ -190,7 +179,6 @@ export function FormularioSeccionCard({
                 id={`campo-tipo-${seccion.id}`}
                 value={values.campo_tipo}
                 onChange={(e) => setField('campo_tipo', e.target.value as FormularioSeccionFormValues['campo_tipo'])}
-                disabled={isSubmitting}
                 className={inputClass}
               >
                 {FORMULARIO_TIPOS_CAMPO.map((tipo) => (
@@ -201,7 +189,7 @@ export function FormularioSeccionCard({
               </select>
             </div>
 
-            {values.campo_tipo === 'lista' ? (
+            {usesListaValores ? (
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-lista-valores-${seccion.id}`}>
                   Valores permitidos <span className="text-rose-400">*</span>
@@ -211,7 +199,6 @@ export function FormularioSeccionCard({
                   rows={3}
                   value={values.campo_lista_valores}
                   onChange={(e) => setField('campo_lista_valores', e.target.value)}
-                  disabled={isSubmitting}
                   placeholder="Ej: Camiseta S, Camiseta M, Camiseta L"
                   className={inputClass}
                 />
@@ -219,19 +206,35 @@ export function FormularioSeccionCard({
               </div>
             ) : null}
 
+            {values.campo_tipo !== 'checkbox' ? (
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-placeholder-${seccion.id}`}>
+                  Placeholder <span className="normal-case font-normal text-slate-500">(opcional)</span>
+                </label>
+                <input
+                  id={`campo-placeholder-${seccion.id}`}
+                  type="text"
+                  value={values.campo_placeholder}
+                  onChange={(e) => setField('campo_placeholder', e.target.value)}
+                  maxLength={200}
+                  className={inputClass}
+                />
+              </div>
+            ) : null}
+
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-placeholder-${seccion.id}`}>
-                Placeholder <span className="normal-case font-normal text-slate-500">(opcional)</span>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-columna-ancho-${seccion.id}`}>
+                Ancho de columna
               </label>
-              <input
-                id={`campo-placeholder-${seccion.id}`}
-                type="text"
-                value={values.campo_placeholder}
-                onChange={(e) => setField('campo_placeholder', e.target.value)}
-                disabled={isSubmitting}
-                maxLength={200}
+              <select
+                id={`campo-columna-ancho-${seccion.id}`}
+                value={values.columna_ancho}
+                onChange={(e) => setField('columna_ancho', e.target.value as FormularioSeccionFormValues['columna_ancho'])}
                 className={inputClass}
-              />
+              >
+                <option value="completo">Completo</option>
+                <option value="mitad">Mitad (dos columnas)</option>
+              </select>
             </div>
 
             <div className="flex items-center gap-2">
@@ -240,7 +243,6 @@ export function FormularioSeccionCard({
                 type="checkbox"
                 checked={values.campo_obligatorio}
                 onChange={(e) => setField('campo_obligatorio', e.target.checked)}
-                disabled={isSubmitting}
                 className="rounded border-slate-600 bg-navy-deep"
               />
               <label htmlFor={`campo-obligatorio-${seccion.id}`} className="text-sm text-slate-200">
@@ -253,11 +255,44 @@ export function FormularioSeccionCard({
               ) : null}
             </div>
           </>
+        ) : (
+          <>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`seccion-descripcion-${seccion.id}`}>
+                {isSeccion ? 'Título de la sección' : 'Descripción'} <span className="text-rose-400">*</span>
+              </label>
+              <textarea
+                id={`seccion-descripcion-${seccion.id}`}
+                rows={isSeccion || values.seccion_tipo === 'titulo' ? 2 : 3}
+                value={values.seccion_descripcion}
+                onChange={(e) => setField('seccion_descripcion', e.target.value)}
+                placeholder={isSeccion ? 'Ej: Tus datos' : 'Escribe el contenido de esta sección'}
+                className={inputClass}
+              />
+            </div>
+
+            {isSeccion ? (
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`seccion-subtitulo-${seccion.id}`}>
+                  Subtítulo de la sección <span className="normal-case font-normal text-slate-500">(opcional)</span>
+                </label>
+                <input
+                  id={`seccion-subtitulo-${seccion.id}`}
+                  type="text"
+                  value={values.seccion_subtitulo}
+                  onChange={(e) => setField('seccion_subtitulo', e.target.value)}
+                  maxLength={200}
+                  placeholder="Ej: Información básica del atleta"
+                  className={inputClass}
+                />
+              </div>
+            ) : null}
+          </>
         )}
 
-        {(fieldError || submitError) ? (
+        {fieldError ? (
           <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
-            {fieldError ?? submitError}
+            {fieldError}
           </div>
         ) : null}
       </div>
@@ -266,18 +301,16 @@ export function FormularioSeccionCard({
         <button
           type="button"
           onClick={handleCancel}
-          disabled={isSubmitting}
           className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:border-slate-500 hover:bg-navy-deep hover:text-slate-100"
         >
           Cancelar
         </button>
         <button
           type="button"
-          onClick={() => void handleDone()}
-          disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25 disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={handleDone}
+          className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25"
         >
-          {isSubmitting ? 'Guardando...' : 'Listo'}
+          Listo
           <span className="material-symbols-outlined text-base" aria-hidden="true">check</span>
         </button>
       </div>
