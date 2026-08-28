@@ -563,6 +563,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
 
       <EntrenamientoDetalleModal
         open={isViewModalOpen}
+        tenantId={tenantId}
         viewTarget={viewTarget}
         viewLoading={viewLoading}
         canManage={canManage}

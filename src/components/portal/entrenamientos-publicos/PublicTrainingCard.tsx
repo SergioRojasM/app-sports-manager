@@ -269,6 +269,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
       {hasInternalFormulario && (
         <FormularioPreviewModal
           open={formularioPreview.open}
+          tenantId={data.tenantId}
           plantillaNombre={formularioPreview.plantillaNombre}
           secciones={formularioPreview.secciones}
           perfilCamposRequeridos={formularioPreview.perfilCamposRequeridos}

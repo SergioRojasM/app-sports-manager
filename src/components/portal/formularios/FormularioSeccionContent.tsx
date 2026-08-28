@@ -25,13 +25,35 @@ export function FormularioSeccionContent({ seccion }: FormularioSeccionContentPr
     return <MultilineText className="text-sm leading-relaxed text-slate-400">{seccion.seccion_descripcion}</MultilineText>;
   }
 
-  return (
-    <FormularioCampoPreviewInput
-      campoTipo={seccion.campo_tipo ?? 'texto_corto'}
-      campoEtiqueta={seccion.campo_etiqueta ?? ''}
-      campoPlaceholder={seccion.campo_placeholder}
-      campoObligatorio={seccion.campo_obligatorio}
-      campoListaValores={seccion.campo_lista_valores}
-    />
-  );
+  if (seccion.seccion_tipo === 'separador') {
+    return <hr className="border-portal-border" />;
+  }
+
+  if (seccion.seccion_tipo === 'datos') {
+    return (
+      <FormularioCampoPreviewInput
+        campoTipo={seccion.campo_tipo ?? 'texto_corto'}
+        campoEtiqueta={seccion.campo_etiqueta ?? ''}
+        campoPlaceholder={seccion.campo_placeholder}
+        campoObligatorio={seccion.campo_obligatorio}
+        campoListaValores={seccion.campo_lista_valores}
+      />
+    );
+  }
+
+  if (seccion.seccion_tipo === 'seccion') {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="material-symbols-outlined text-turquoise text-lg" aria-hidden="true">dashboard_customize</span>
+        <div>
+          <h3 className="text-base font-bold text-slate-100">{seccion.seccion_descripcion || 'Sección sin título'}</h3>
+          {seccion.seccion_subtitulo ? <p className="text-xs text-slate-400">{seccion.seccion_subtitulo}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
+  // Every 'encabezado_*' row is rendered exclusively by FormularioHeaderEditor and never reaches
+  // this generic per-row renderer in normal operation.
+  return null;
 }

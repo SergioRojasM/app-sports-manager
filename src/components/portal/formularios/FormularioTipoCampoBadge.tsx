@@ -8,6 +8,8 @@ const TIPO_ICONS: Record<FormularioTipoCampo, string> = {
   numerico: 'tag',
   imagen: 'image',
   lista: 'list',
+  checkbox: 'check_box',
+  seleccion: 'radio_button_checked',
 };
 
 type FormularioTipoCampoBadgeProps = {

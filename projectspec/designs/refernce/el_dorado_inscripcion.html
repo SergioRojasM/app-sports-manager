@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Dorado Open Water · Inscripción</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Barlow+Condensed:wght@400;500;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     EL DORADO OPEN WATER by WOLFPACK — prototipo de inscripción
+     ============================================================
+     >>> EDITA AQUÍ los datos del evento en el objeto CONFIG (abajo en <script>)
+     - fecha, lugar, categorías, precios, número de Nequi, imagen del QR
+  ============================================================ */
+
+  :root{
+    --negro:#0D0D0D;
+    --panel:#141414;
+    --panel-2:#1C1C1C;
+    --linea:#2A2A2A;
+    --teal:#00E5C0;      /* agua / WOLFPACK */
+    --oro:#E5B840;       /* El Dorado */
+    --oro-soft:#8a6d1f;
+    --naranja:#E8601C;   /* alertas / secundario */
+    --texto:#F4F4F2;
+    --muted:#8A8A8A;
+    --ok:#00E5C0;
+    --error:#FF6B4A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--negro);
+    color:var(--texto);
+    font-family:'Barlow',system-ui,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--oro);color:#000}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:64px 20px 48px;
+    text-align:center;
+    overflow:hidden;
+    border-bottom:1px solid var(--linea);
+    background:
+      radial-gradient(120% 90% at 50% -10%, rgba(0,229,192,.10), transparent 60%),
+      radial-gradient(80% 60% at 50% 120%, rgba(229,184,64,.10), transparent 60%),
+      var(--negro);
+  }
+  .eyebrow{
+    font-family:'Barlow Condensed',sans-serif;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+  .eyebrow b{color:var(--teal);font-weight:600}
+  h1.title{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:clamp(42px,11vw,86px);
+    line-height:.92;
+    letter-spacing:.01em;
+  }
+  h1.title .dorado{
+    background:linear-gradient(180deg,#F7E7A6,var(--oro) 55%,var(--oro-soft));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  h1.title .water{color:var(--teal)}
+  .byline{
+    font-family:'Barlow Condensed',sans-serif;
+    text-transform:uppercase;letter-spacing:.24em;
+    font-size:15px;color:var(--muted);margin-top:16px;
+  }
+  .byline span{color:var(--texto)}
+  .goldline{
+    width:72px;height:3px;margin:22px auto 0;
+    background:linear-gradient(90deg,transparent,var(--oro),transparent);
+  }
+  .factbar{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:26px;
+  }
+  .fact{
+    font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;
+    letter-spacing:.08em;font-size:14px;color:var(--texto);
+    background:var(--panel);border:1px solid var(--linea);
+    padding:8px 14px;border-radius:2px;
+  }
+  .fact b{color:var(--teal);font-weight:600}
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:680px;margin:0 auto;padding:36px 20px 80px}
+
+  .section{
+    background:var(--panel);border:1px solid var(--linea);
+    border-radius:4px;padding:24px 22px;margin-bottom:18px;
+  }
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+  .sec-num{
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;
+    color:var(--negro);background:var(--teal);
+    width:26px;height:26px;display:grid;place-items:center;border-radius:3px;
+    flex:0 0 auto;
+  }
+  .sec-title{
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+    letter-spacing:.04em;font-size:19px;
+  }
+  .sec-sub{font-size:13px;color:var(--muted);margin-top:2px}
+
+  /* ---------- FORM ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1 / -1}
+  label{
+    font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;
+    letter-spacing:.06em;font-size:13px;color:var(--muted);
+  }
+  label .req{color:var(--naranja)}
+  input,select{
+    background:var(--panel-2);border:1px solid var(--linea);
+    color:var(--texto);font-family:'Barlow',sans-serif;font-size:15px;
+    padding:11px 12px;border-radius:3px;width:100%;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  input::placeholder{color:#5a5a5a}
+  input:focus,select:focus{
+    outline:none;border-color:var(--teal);
+    box-shadow:0 0 0 3px rgba(0,229,192,.15);
+  }
+  select{appearance:none;cursor:pointer;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%238A8A8A' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;
+  }
+
+  /* categoría cards */
+  .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .cat{
+    position:relative;cursor:pointer;
+    background:var(--panel-2);border:1px solid var(--linea);border-radius:4px;
+    padding:16px 12px;text-align:center;transition:.15s;
+  }
+  .cat:hover{border-color:#3d3d3d}
+  .cat input{position:absolute;opacity:0;pointer-events:none}
+  .cat .dist{font-family:'Oswald',sans-serif;font-weight:700;font-size:26px;line-height:1}
+  .cat .u{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .cat .price{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:16px;margin-top:8px;color:var(--oro)}
+  .cat.sel{border-color:var(--teal);background:rgba(0,229,192,.06)}
+  .cat.sel .dist{color:var(--teal)}
+  .cat .tick{
+    position:absolute;top:8px;right:8px;width:16px;height:16px;border-radius:50%;
+    border:1.5px solid var(--linea);
+  }
+  .cat.sel .tick{background:var(--teal);border-color:var(--teal)}
+
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap}
+  .pill{
+    flex:1;min-width:120px;cursor:pointer;text-align:center;
+    background:var(--panel-2);border:1px solid var(--linea);border-radius:3px;
+    padding:10px;font-size:14px;transition:.15s;
+  }
+  .pill input{position:absolute;opacity:0;pointer-events:none}
+  .pill.sel{border-color:var(--teal);color:var(--teal);background:rgba(0,229,192,.06)}
+
+  /* ---------- PAGO ---------- */
+  .pay{
+    display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;
+    background:var(--panel-2);border:1px dashed var(--oro-soft);
+    border-radius:4px;padding:18px;
+  }
+  .qr{
+    width:130px;height:130px;border-radius:4px;background:#fff;
+    display:grid;place-items:center;text-align:center;
+    font-family:'Barlow Condensed',sans-serif;color:#111;font-size:12px;padding:8px;
+  }
+  .pay .monto{font-family:'Oswald',sans-serif;font-weight:700;font-size:34px;color:var(--oro);line-height:1}
+  .pay .monto small{display:block;font-size:13px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-weight:400}
+  .pay .nequi{margin-top:10px;font-size:14px}
+  .pay .nequi b{color:var(--teal)}
+  .paylink{
+    display:inline-block;margin-top:10px;font-family:'Barlow Condensed',sans-serif;
+    text-transform:uppercase;letter-spacing:.08em;font-size:14px;
+    color:var(--oro);text-decoration:none;border-bottom:1px solid var(--oro-soft);
+  }
+  .upload{
+    margin-top:14px;border:1px solid var(--linea);border-radius:3px;
+    padding:14px;background:var(--panel-2);
+  }
+  .upload input[type=file]{font-size:13px;padding:6px 0;border:none;background:none}
+  .upload input[type=file]::file-selector-button{
+    background:var(--teal);color:#000;border:none;padding:8px 14px;border-radius:3px;
+    font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;
+    font-weight:600;cursor:pointer;margin-right:12px;
+  }
+  .note-inline{font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* waiver */
+  .check{display:flex;gap:11px;align-items:flex-start;margin-top:12px;cursor:pointer}
+  .check input{width:20px;height:20px;flex:0 0 auto;accent-color:var(--teal);margin-top:1px}
+  .check span{font-size:14px;color:#cfcfcf}
+  .check b{color:var(--texto)}
+
+  /* submit */
+  .cta{
+    width:100%;margin-top:8px;cursor:pointer;
+    background:var(--teal);color:#000;border:none;border-radius:4px;
+    font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+    letter-spacing:.06em;font-size:20px;padding:16px;transition:.15s;
+  }
+  .cta:hover{background:#00ffd6;transform:translateY(-1px)}
+  .cta:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .foot-note{text-align:center;font-size:12px;color:var(--muted);margin-top:14px}
+
+  .err{color:var(--error);font-size:12px;min-height:14px}
+
+  /* ---------- CONFIRMACIÓN ---------- */
+  .done{display:none;text-align:center;padding:30px 10px}
+  .done.on{display:block;animation:pop .4s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .done .skull{font-size:46px}
+  .done h2{font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:30px;margin-top:8px}
+  .done .code{
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:24px;color:var(--oro);
+    background:var(--panel);border:1px solid var(--oro-soft);border-radius:4px;
+    display:inline-block;padding:8px 18px;margin:16px 0;letter-spacing:.1em;
+  }
+  .done p{color:#c9c9c9;font-size:15px;max-width:420px;margin:0 auto}
+  .ghost{
+    margin-top:22px;background:none;border:1px solid var(--linea);color:var(--muted);
+    font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;
+    padding:10px 18px;border-radius:3px;cursor:pointer;font-size:13px;
+  }
+
+  /* ---------- DB DEMO ---------- */
+  .dbtoggle{
+    display:block;margin:0 auto 20px;background:none;border:1px solid var(--linea);
+    color:var(--muted);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;
+    letter-spacing:.1em;font-size:13px;padding:9px 16px;border-radius:3px;cursor:pointer;
+  }
+  .db{display:none;max-width:900px;margin:0 auto 60px;padding:0 20px}
+  .db.on{display:block}
+  .db h3{font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:18px;margin-bottom:4px}
+  .db .demo-tag{font-size:12px;color:var(--naranja);margin-bottom:14px}
+  .tablewrap{overflow-x:auto;border:1px solid var(--linea);border-radius:4px}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--linea);white-space:nowrap}
+  th{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--panel)}
+  .badge{font-size:11px;padding:3px 8px;border-radius:20px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em}
+  .badge.pend{background:rgba(232,96,28,.15);color:var(--naranja)}
+  .empty{padding:26px;text-align:center;color:var(--muted);font-size:14px}
+
+  @media(max-width:560px){
+    .grid{grid-template-columns:1fr}
+    .cats{grid-template-columns:1fr}
+    .pay{grid-template-columns:1fr;text-align:center;justify-items:center}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="eyebrow">WOLFPACK · SXH — Aguas abiertas — <b>SOLO X HOY 🖤💀</b></div>
+    <h1 class="title"><span class="dorado">El Dorado</span><br><span class="water">Open Water</span></h1>
+    <div class="goldline"></div>
+    <div class="byline">by <span>WOLFPACK SXH</span></div>
+    <div class="factbar">
+      <div class="fact" id="fEvento">📅 <b>FECHA</b> por definir</div>
+      <div class="fact" id="fLugar">📍 Club Náutico El Portillo · Guatavita</div>
+      <div class="fact">🌊 1K · 2.5K · 5K</div>
+    </div>
+  </header>
+
+  <button class="dbtoggle" id="dbToggle">Ver base de datos (inscritos) · demo</button>
+
+  <section class="db" id="dbPanel">
+    <h3>Base de datos — El Dorado Open Water</h3>
+    <p class="demo-tag">DEMO: se guarda solo en este navegador. En producción → Google Sheet vía Apps Script.</p>
+    <div class="tablewrap">
+      <table id="dbTable">
+        <thead><tr>
+          <th>#</th><th>Nombre</th><th>Cédula</th><th>Cat.</th><th>Talla</th>
+          <th>Celular</th><th>Emergencia</th><th>Monto</th><th>Pago</th>
+        </tr></thead>
+        <tbody id="dbBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <form id="form" novalidate>
+
+      <!-- 1. DATOS -->
+      <div class="section">
+        <div class="sec-head">
+          <div class="sec-num">1</div>
+          <div><div class="sec-title">Tus datos</div><div class="sec-sub">Como aparecen en la cédula</div></div>
+        </div>
+        <div class="grid">
+          <div class="field full"><label>Nombre completo <span class="req">*</span></label>
+            <input name="nombre" placeholder="Nombre y apellidos" required></div>
+          <div class="field"><label>Cédula <span class="req">*</span></label>
+            <input name="cedula" inputmode="numeric" placeholder="1.234.567.890" required></div>
+          <div class="field"><label>Fecha de nacimiento <span class="req">*</span></label>
+            <input name="nacimiento" type="date" required></div>
+          <div class="field"><label>Género</label>
+            <select name="genero"><option value="">—</option><option>Femenino</option><option>Masculino</option><option>Otro</option></select></div>
+          <div class="field"><label>Celular (WhatsApp) <span class="req">*</span></label>
+            <input name="celular" inputmode="tel" placeholder="300 000 0000" required></div>
+          <div class="field"><label>Email <span class="req">*</span></label>
+            <input name="email" type="email" placeholder="tu@correo.com" required></div>
+          <div class="field"><label>Ciudad</label>
+            <input name="ciudad" placeholder="Bogotá"></div>
+          <div class="field"><label>EPS <span class="req">*</span></label>
+            <input name="eps" placeholder="Tu EPS" required></div>
+          <div class="field"><label>Talla de camiseta <span class="req">*</span></label>
+            <select name="talla" required><option value="">—</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select></div>
+        </div>
+      </div>
+
+      <!-- 2. CATEGORÍA -->
+      <div class="section">
+        <div class="sec-head">
+          <div class="sec-num">2</div>
+          <div><div class="sec-title">Tu distancia</div><div class="sec-sub">El precio cambia según la categoría</div></div>
+        </div>
+        <div class="cats" id="cats"><!-- inyectado por JS desde CONFIG --></div>
+        <div class="err" id="errCat"></div>
+        <div style="margin-top:16px">
+          <label style="display:block;margin-bottom:8px">¿Eres de la manada? <span class="req">*</span></label>
+          <div class="radio-row">
+            <label class="pill sel"><input type="radio" name="tipo" value="WOLFPACK" checked>🐺 Atleta WOLFPACK</label>
+            <label class="pill"><input type="radio" name="tipo" value="Externo">Externo / Invitado</label>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <label style="display:block;margin-bottom:8px">¿Has nadado en aguas abiertas antes?</label>
+          <div class="radio-row">
+            <label class="pill sel"><input type="radio" name="exp" value="Sí" checked>Sí</label>
+            <label class="pill"><input type="radio" name="exp" value="No">Es mi primera vez</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. SEGURIDAD -->
+      <div class="section">
+        <div class="sec-head">
+          <div class="sec-num">3</div>
+          <div><div class="sec-title">Seguridad</div><div class="sec-sub">Obligatorio para aguas abiertas</div></div>
+        </div>
+        <div class="grid">
+          <div class="field"><label>Contacto de emergencia <span class="req">*</span></label>
+            <input name="emerg_nombre" placeholder="Nombre" required></div>
+          <div class="field"><label>Celular de emergencia <span class="req">*</span></label>
+            <input name="emerg_cel" inputmode="tel" placeholder="300 000 0000" required></div>
+          <div class="field"><label>Parentesco</label>
+            <input name="emerg_par" placeholder="Pareja, madre, amigo…"></div>
+          <div class="field"><label>RH / Tipo de sangre</label>
+            <input name="rh" placeholder="O+"></div>
+        </div>
+        <label class="check">
+          <input type="checkbox" name="medico" required>
+          <span>Declaro estar en <b>condiciones físicas y médicas</b> para nadar la distancia que elegí.</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" name="waiver" required>
+          <span>Acepto la <b>exoneración de responsabilidad</b> y el reglamento del evento. <span style="color:var(--muted)">(link editable)</span></span>
+        </label>
+        <div class="err" id="errCheck"></div>
+      </div>
+
+      <!-- 4. PAGO -->
+      <div class="section">
+        <div class="sec-head">
+          <div class="sec-num">4</div>
+          <div><div class="sec-title">Pago</div><div class="sec-sub">Paga por Nequi y sube el comprobante</div></div>
+        </div>
+        <div class="pay">
+          <div class="qr" id="qr">Aquí va tu<br>imagen del<br>QR de Nequi</div>
+          <div>
+            <div class="monto"><span id="montoVal">$0</span><small>Total a pagar</small></div>
+            <div class="nequi">Nequi Negocios: <b id="nequiNum">300 000 0000</b></div>
+            <a class="paylink" id="payLink" href="#" target="_blank" rel="noopener">Abrir link de pago Nequi ↗</a>
+          </div>
+        </div>
+        <div class="upload">
+          <label style="display:block;margin-bottom:8px">Comprobante del pago <span class="req">*</span></label>
+          <input type="file" name="comprobante" accept="image/*,application/pdf">
+          <div class="note-inline">📎 En la versión real (Apps Script) esto sube a tu Google Drive automáticamente.</div>
+        </div>
+        <div class="err" id="errPay"></div>
+      </div>
+
+      <button type="submit" class="cta" id="submit">Confirmar inscripción 🏁</button>
+      <div class="foot-note">Tu cupo queda <b style="color:var(--texto)">confirmado</b> cuando verifiquemos el pago.</div>
+    </form>
+
+    <!-- CONFIRMACIÓN -->
+    <div class="done" id="done">
+      <div class="skull">🦈</div>
+      <h2>¡Estás dentro de la manada!</h2>
+      <div class="code" id="doneCode">EDOW-000</div>
+      <p id="doneMsg"></p>
+      <button class="ghost" id="resetBtn">Inscribir a otra persona</button>
+    </div>
+  </main>
+
+<script>
+/* ============================================================
+   >>>>>>>>>>  EDITA AQUÍ  <<<<<<<<<<
+   ============================================================ */
+const CONFIG = {
+  evento:   "SÁB · FECHA POR DEFINIR",              // ← fecha real
+  lugar:    "Club Náutico El Portillo · Guatavita", // ← lugar
+  nequiNum: "300 000 0000",                          // ← tu número de Nequi Negocios
+  payLink:  "https://recarga.nequi.com.co/...",     // ← tu link de pago Nequi
+  // qrImg: "URL_de_tu_imagen_QR",                   // ← descomenta y pon la URL del QR
+  categorias: [
+    { id:"1K",   dist:"1K",   precio:45000 },   // ← precios reales
+    { id:"2.5K", dist:"2.5K", precio:65000 },
+    { id:"5K",   dist:"5K",   precio:85000 },
+  ],
+  // Si quieres precio distinto para WOLFPACK vs Externo, se ajusta aquí luego.
+};
+/* ============================================================ */
+
+const money = n => "$" + (n||0).toLocaleString("es-CO");
+
+// pintar hero + pago
+document.getElementById("fEvento").innerHTML = "📅 <b>" + CONFIG.evento + "</b>";
+document.getElementById("fLugar").textContent = "📍 " + CONFIG.lugar;
+document.getElementById("nequiNum").textContent = CONFIG.nequiNum;
+document.getElementById("payLink").href = CONFIG.payLink;
+if (CONFIG.qrImg){
+  const qr = document.getElementById("qr");
+  qr.style.padding="6px";
+  qr.innerHTML = '<img src="'+CONFIG.qrImg+'" alt="QR Nequi" style="width:100%;height:100%;object-fit:contain">';
+}
+
+// pintar categorías
+const cats = document.getElementById("cats");
+CONFIG.categorias.forEach((c,i)=>{
+  const el = document.createElement("label");
+  el.className = "cat";
+  el.innerHTML = `<span class="tick"></span>
+    <input type="radio" name="categoria" value="${c.id}" data-precio="${c.precio}">
+    <div class="dist">${c.dist}</div><div class="u">km</div>
+    <div class="price">${money(c.precio)}</div>`;
+  cats.appendChild(el);
+});
+
+// selección visual categorías + monto
+let montoActual = 0;
+cats.addEventListener("change", e=>{
+  document.querySelectorAll(".cat").forEach(c=>c.classList.remove("sel"));
+  e.target.closest(".cat").classList.add("sel");
+  montoActual = +e.target.dataset.precio;
+  document.getElementById("montoVal").textContent = money(montoActual);
+});
+
+// pills (tipo / experiencia)
+document.querySelectorAll(".radio-row").forEach(row=>{
+  row.addEventListener("change", e=>{
+    row.querySelectorAll(".pill").forEach(p=>p.classList.remove("sel"));
+    e.target.closest(".pill").classList.add("sel");
+  });
+});
+
+// ---------- almacenamiento demo (window.storage) ----------
+const KEY = "edow:inscritos";
+async function getAll(){
+  try{ const r = await window.storage.get(KEY); return r ? JSON.parse(r.value) : []; }
+  catch(e){ return []; }
+}
+async function saveAll(list){
+  try{ await window.storage.set(KEY, JSON.stringify(list)); }catch(e){}
+}
+
+// ---------- validación + submit ----------
+const form = document.getElementById("form");
+form.addEventListener("submit", async e=>{
+  e.preventDefault();
+  ["errCat","errCheck","errPay"].forEach(id=>document.getElementById(id).textContent="");
+  let ok = true;
+
+  if(!form.categoria.value){ document.getElementById("errCat").textContent="Elige una distancia."; ok=false; }
+  if(!form.medico.checked || !form.waiver.checked){ document.getElementById("errCheck").textContent="Debes aceptar las dos casillas de seguridad."; ok=false; }
+  if(!form.comprobante.files.length){ document.getElementById("errPay").textContent="Sube el comprobante del pago."; ok=false; }
+
+  // campos required nativos
+  for(const el of form.querySelectorAll("[required]")){
+    if(el.type==="checkbox") continue;
+    if(!el.value.trim()){ el.focus(); ok=false; break; }
+  }
+  if(!ok) return;
+
+  const list = await getAll();
+  const code = "EDOW-" + String(list.length+1).padStart(3,"0");
+  const reg = {
+    code,
+    nombre: form.nombre.value.trim(),
+    cedula: form.cedula.value.trim(),
+    cat: form.categoria.value,
+    tipo: form.tipo.value,
+    talla: form.talla.value,
+    celular: form.celular.value.trim(),
+    email: form.email.value.trim(),
+    emergencia: form.emerg_nombre.value.trim() + " · " + form.emerg_cel.value.trim(),
+    monto: montoActual,
+    comprobante: form.comprobante.files[0]?.name || "",
+    fecha: new Date().toLocaleString("es-CO")
+  };
+  list.push(reg);
+  await saveAll(list);
+  renderDB(list);
+
+  // confirmación
+  form.style.display="none";
+  document.getElementById("doneCode").textContent = code;
+  document.getElementById("doneMsg").innerHTML =
+    `Recibimos tu inscripción para <b style="color:#00E5C0">${reg.cat}</b>. `+
+    `Verificamos tu pago de <b style="color:#E5B840">${money(reg.monto)}</b> y te confirmamos por WhatsApp. `+
+    `Nos vemos en el agua. 🖤💀`;
+  document.getElementById("done").classList.add("on");
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  form.reset();
+  document.querySelectorAll(".cat").forEach(c=>c.classList.remove("sel"));
+  montoActual=0; document.getElementById("montoVal").textContent="$0";
+  document.getElementById("done").classList.remove("on");
+  form.style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+// ---------- DB panel ----------
+const dbPanel = document.getElementById("dbPanel");
+document.getElementById("dbToggle").addEventListener("click", async ()=>{
+  dbPanel.classList.toggle("on");
+  if(dbPanel.classList.contains("on")) renderDB(await getAll());
+});
+function renderDB(list){
+  const body = document.getElementById("dbBody");
+  if(!list.length){
+    body.innerHTML = `<tr><td colspan="9" class="empty">Sin inscritos todavía. Llena el formulario para ver cómo cae el registro. 🐺</td></tr>`;
+    return;
+  }
+  body.innerHTML = list.map((r,i)=>`<tr>
+    <td style="color:#E5B840;font-family:Oswald">${r.code}</td>
+    <td>${r.nombre}</td><td>${r.cedula}</td>
+    <td><b style="color:#00E5C0">${r.cat}</b></td><td>${r.talla}</td>
+    <td>${r.celular}</td><td>${r.emergencia}</td>
+    <td>${money(r.monto)}</td>
+    <td><span class="badge pend">Por verificar</span></td>
+  </tr>`).join("");
+}
+</script>
+</body>
+</html>
