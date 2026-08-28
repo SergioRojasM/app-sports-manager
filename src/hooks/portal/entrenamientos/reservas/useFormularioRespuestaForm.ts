@@ -33,6 +33,8 @@ type UseFormularioRespuestaFormResult = {
   loadError: string | null;
   plantillaNombre: string;
   secciones: FormularioSeccion[];
+  /** The 4 fixed header rows (encabezado_*), for FormularioHeaderEditor (readOnly) at the top of the fill-out form. */
+  headerSecciones: FormularioSeccion[];
   values: Record<string, string>;
   errors: Record<string, string>;
   /** campo_nombre currently uploading a file, or null when none is in progress. */
@@ -113,6 +115,7 @@ export function useFormularioRespuestaForm({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [plantillaNombre, setPlantillaNombre] = useState('');
   const [secciones, setSecciones] = useState<FormularioSeccion[]>([]);
+  const [headerSecciones, setHeaderSecciones] = useState<FormularioSeccion[]>([]);
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingCampoNombre, setUploadingCampoNombre] = useState<string | null>(null);
@@ -127,6 +130,7 @@ export function useFormularioRespuestaForm({
   useEffect(() => {
     if (!formularioPlantillaId) {
       setSecciones([]);
+      setHeaderSecciones([]);
       setPlantillaNombre('');
       setValues({});
       setErrors({});
@@ -145,11 +149,9 @@ export function useFormularioRespuestaForm({
       .then((plantilla) => {
         if (cancelled) return;
         setPlantillaNombre(plantilla.nombre);
-        setSecciones(
-          plantilla.secciones.filter(
-            (s) => s.activo && !(HEADER_SECCION_TIPOS as readonly string[]).includes(s.seccion_tipo),
-          ),
-        );
+        const activas = plantilla.secciones.filter((s) => s.activo);
+        setSecciones(activas.filter((s) => !(HEADER_SECCION_TIPOS as readonly string[]).includes(s.seccion_tipo)));
+        setHeaderSecciones(activas.filter((s) => (HEADER_SECCION_TIPOS as readonly string[]).includes(s.seccion_tipo)));
         setPerfilCamposRequeridos(plantilla.perfil_campos_requeridos ?? []);
         setValues({});
         setErrors({});
@@ -289,6 +291,7 @@ export function useFormularioRespuestaForm({
     loadError,
     plantillaNombre,
     secciones,
+    headerSecciones,
     values,
     errors,
     uploadingCampoNombre,

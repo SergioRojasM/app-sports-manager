@@ -78,13 +78,13 @@ export function FormularioBadgeChipInput({ value, onChange, readOnly = false }: 
             maxLength={60}
             placeholder="Ej: Piscina Olímpica"
             aria-label="Nuevo badge"
-            className="flex-1 rounded-lg border border-slate-700 bg-navy-deep px-3 py-1.5 text-xs text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+            className="flex-1 rounded-[8px] border border-slate-700 bg-navy-deep px-3 py-1.5 text-xs text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
           />
           <button
             type="button"
             onClick={addBadge}
             aria-label="Añadir badge"
-            className="rounded-lg border border-portal-border bg-navy-deep/60 p-1.5 text-slate-300 transition hover:border-turquoise/50 hover:text-turquoise"
+            className="rounded-[8px] border border-portal-border bg-navy-deep/60 p-1.5 text-slate-300 transition hover:border-turquoise/50 hover:text-turquoise"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
           </button>

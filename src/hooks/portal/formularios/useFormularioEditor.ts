@@ -232,11 +232,20 @@ export function useFormularioEditor({ plantillaId }: UseFormularioEditorOptions)
     [unsavedIds],
   );
 
+  /**
+   * Reorders the rows named in `orderedIds` relative to each other, leaving every other row
+   * (notably the 4 header rows, which `FormularioSeccionesBuilder` never includes since it only
+   * ever sees the body secciones) untouched in its current array slot. `orderedIds` is a *subset*
+   * of the full draft, not the complete list — this must not assume otherwise.
+   */
   const reorderSecciones = useCallback((orderedIds: string[]): void => {
     setSecciones((prev) => {
+      const idSet = new Set(orderedIds);
       const byId = new Map(prev.map((s) => [s.id, s]));
-      const next = orderedIds.map((id) => byId.get(id)).filter((s): s is FormularioSeccion => Boolean(s));
-      return next.length === prev.length ? next : prev;
+      const queue = orderedIds.map((id) => byId.get(id)).filter((s): s is FormularioSeccion => Boolean(s));
+      if (queue.length !== orderedIds.length) return prev;
+      let i = 0;
+      return prev.map((s) => (idSet.has(s.id) ? queue[i++] : s));
     });
     setDirty(true);
   }, []);

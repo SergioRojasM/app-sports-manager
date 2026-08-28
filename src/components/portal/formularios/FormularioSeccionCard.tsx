@@ -28,8 +28,10 @@ type FormularioSeccionCardProps = {
   canMoveDown: boolean;
 };
 
+// Explicit 8px radius (not rounded-xl — overridden in this project to 3rem for the landing
+// page's pill buttons) to match the P43Yo "Field Box" reference.
 const inputClass =
-  'w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35';
+  'w-full rounded-[8px] border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35';
 
 export function FormularioSeccionCard({
   seccion,

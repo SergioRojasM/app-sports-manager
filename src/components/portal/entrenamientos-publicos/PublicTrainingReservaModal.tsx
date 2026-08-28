@@ -227,8 +227,10 @@ export function PublicTrainingReservaModal({
     return (
       <FormularioRespuestaModal
         open
+        tenantId={tenantId}
         plantillaNombre={reserva.formularioRespuestaForm.plantillaNombre}
         secciones={reserva.formularioRespuestaForm.secciones}
+        plantillaHeaderSecciones={reserva.formularioRespuestaForm.headerSecciones}
         values={reserva.formularioRespuestaForm.values}
         errors={reserva.formularioRespuestaForm.errors}
         loading={reserva.formularioRespuestaForm.loading}

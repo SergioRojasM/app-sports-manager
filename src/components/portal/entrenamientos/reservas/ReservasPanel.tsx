@@ -977,8 +977,10 @@ export function ReservasPanel({
 
       <FormularioRespuestaModal
         open={formularioRespuestaModalOpen}
+        tenantId={tenantId}
         plantillaNombre={formularioRespuestaForm.plantillaNombre || instance.formulario_plantilla?.nombre || 'Formulario'}
         secciones={formularioRespuestaForm.secciones}
+        plantillaHeaderSecciones={formularioRespuestaForm.headerSecciones}
         values={formularioRespuestaForm.values}
         errors={formularioRespuestaForm.errors}
         loading={formularioRespuestaForm.loading}

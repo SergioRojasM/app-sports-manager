@@ -55,7 +55,7 @@ export function FormularioHeaderEditor({ tenantId, secciones, onUpdateHeaderFiel
             <span className="material-symbols-outlined text-base" aria-hidden="true">bolt</span>
           </span>
         )}
-        <span className="text-[13px] font-bold tracking-[0.15em] text-turquoise">
+        <span className="text-[13px] font-bold tracking-[0.15em] text-slate-100">
           {(tenantLogo?.nombre ?? '').toUpperCase()}
         </span>
       </div>
@@ -86,7 +86,7 @@ export function FormularioHeaderEditor({ tenantId, secciones, onUpdateHeaderFiel
       )}
 
       {readOnly || !onUpdateHeaderField ? (
-        <h1 className="text-3xl font-bold leading-tight text-slate-100 sm:text-4xl">{titulo.seccion_descripcion}</h1>
+        <h1 className="text-4xl font-bold leading-tight text-slate-100 sm:text-5xl">{titulo.seccion_descripcion}</h1>
       ) : editingField === 'titulo' ? (
         <input
           autoFocus
@@ -96,13 +96,13 @@ export function FormularioHeaderEditor({ tenantId, secciones, onUpdateHeaderFiel
           onBlur={() => setEditingField(null)}
           maxLength={150}
           aria-label="Título del encabezado"
-          className={`${editableTextClass} max-w-xl text-3xl font-bold leading-tight text-slate-100 sm:text-4xl`}
+          className={`${editableTextClass} max-w-xl text-4xl font-bold leading-tight text-slate-100 sm:text-5xl`}
         />
       ) : (
         <button
           type="button"
           onClick={() => setEditingField('titulo')}
-          className="rounded-lg px-2 py-1 text-3xl font-bold leading-tight text-slate-100 transition hover:bg-navy-deep/60 sm:text-4xl"
+          className="rounded-lg px-2 py-1 text-4xl font-bold leading-tight text-slate-100 transition hover:bg-navy-deep/60 sm:text-5xl"
         >
           {titulo.seccion_descripcion || 'Añadir título'}
         </button>
