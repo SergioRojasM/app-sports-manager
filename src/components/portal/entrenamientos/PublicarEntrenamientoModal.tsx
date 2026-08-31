@@ -1,9 +1,28 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { EntrenamientoPublicoFormValues } from '@/types/portal/entrenamientos-publicos.types';
+import type { EntrenamientoPublicoFormValues, PrecioItem } from '@/types/portal/entrenamientos-publicos.types';
+import type {
+  PublicarRowErrors,
+  RowFieldKey,
+  RowListField,
+} from '@/hooks/portal/entrenamientos-publicos/usePublicarEntrenamiento';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
 import { PublicTrainingCard, type PublicTrainingCardData } from '@/components/portal/entrenamientos-publicos/PublicTrainingCard';
+
+/**
+ * Only rows with a valid amount reach the live card preview — a half-typed row
+ * must not make the preview flicker to "Gratis" or a wrong "Desde …" (US-0109).
+ */
+function toPreviewPrecio(rows: EntrenamientoPublicoFormValues['precio']): PrecioItem[] {
+  return rows
+    .filter((row) => row.precio.trim() !== '' && !Number.isNaN(Number(row.precio)) && Number(row.precio) >= 0)
+    .map((row) => ({
+      nombre: row.nombre.trim() || 'Precio general',
+      precio: Number(row.precio),
+      descripcion: row.descripcion.trim() || null,
+    }));
+}
 
 type PublicarEntrenamientoModalProps = {
   open: boolean;
@@ -20,7 +39,13 @@ type PublicarEntrenamientoModalProps = {
   bannerError: string | null;
   isSubmitting: boolean;
   submitError: string | null;
-  onChangeField: (field: keyof Omit<EntrenamientoPublicoFormValues, 'omitirConfirmacionPlan'>, value: string) => void;
+  onChangeField: (field: 'nombre' | 'descripcion' | 'descripcionLarga' | 'paginaEventoUrl', value: string) => void;
+  onAddRow: (field: RowListField) => void;
+  onRemoveRow: (field: RowListField, index: number) => void;
+  onUpdateRow: (field: RowListField, index: number, key: RowFieldKey, value: string) => void;
+  /** Per-row precio validation messages, keyed by row index (US-0109). */
+  precioErrors: PublicarRowErrors;
+  paginaEventoUrlError: string | null;
   onChangeOmitirConfirmacionPlan: (value: boolean) => void;
   onBannerFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
@@ -43,6 +68,11 @@ export function PublicarEntrenamientoModal({
   isSubmitting,
   submitError,
   onChangeField,
+  onAddRow,
+  onRemoveRow,
+  onUpdateRow,
+  precioErrors,
+  paginaEventoUrlError,
   onChangeOmitirConfirmacionPlan,
   onBannerFileSelect,
   onClose,
@@ -78,9 +108,11 @@ export function PublicarEntrenamientoModal({
     cupoMaximo: training.cupo_maximo,
     reservasActivas: training.reservas_activas ?? 0,
     reservaAntelacionHoras: training.reserva_antelacion_horas,
-    precio: values.precio.trim() ? Number(values.precio) : null,
+    precio: toPreviewPrecio(values.precio),
     bannerUrl: bannerPreviewUrl ?? existingBannerUrl,
     serviciosRequeridos,
+    // entrenamientoId deliberately omitted: the training may not be published
+    // yet, so there is no live detail URL for "Ver detalles" to point at (US-0109)
   };
 
   return (
@@ -158,21 +190,197 @@ export function PublicarEntrenamientoModal({
             </div>
 
             <div>
-              <label htmlFor="publicacion-precio" className="mb-1 block text-xs text-slate-300">
-                Precio (COP)
+              <label htmlFor="publicacion-descripcion-larga" className="mb-1 block text-xs text-slate-300">
+                Descripción larga (Markdown)
+              </label>
+              <textarea
+                id="publicacion-descripcion-larga"
+                rows={5}
+                value={values.descripcionLarga}
+                onChange={(event) => onChangeField('descripcionLarga', event.target.value)}
+                disabled={isLoading || isSubmitting}
+                className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
+                placeholder="Se admite Markdown (títulos, negritas, listas)."
+              />
+              <p className="mt-1 text-[11px] text-slate-500">
+                Se admite Markdown y se muestra en la página pública del entrenamiento.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="publicacion-pagina-evento" className="mb-1 block text-xs text-slate-300">
+                Página del evento (URL)
               </label>
               <input
-                id="publicacion-precio"
-                type="number"
-                min={0}
-                step="0.01"
-                value={values.precio}
-                onChange={(event) => onChangeField('precio', event.target.value)}
+                id="publicacion-pagina-evento"
+                type="url"
+                value={values.paginaEventoUrl}
+                onChange={(event) => onChangeField('paginaEventoUrl', event.target.value)}
                 disabled={isLoading || isSubmitting}
-                placeholder="Déjalo vacío para mostrar &quot;Gratis&quot;"
+                placeholder="https://tusitio.com/evento"
+                aria-invalid={paginaEventoUrlError ? true : undefined}
                 className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
               />
+              {paginaEventoUrlError ? (
+                <p className="mt-1 text-xs text-rose-300">{paginaEventoUrlError}</p>
+              ) : (
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Opcional. Si la defines, se muestra un botón &quot;Ver detalles oficiales&quot;.
+                </p>
+              )}
             </div>
+
+            <fieldset className="space-y-2 rounded-lg border border-portal-border p-3">
+              <legend className="px-1 text-xs font-semibold text-slate-300">Precios y opciones</legend>
+              <p className="text-[11px] text-slate-500">Sin filas se muestra &quot;Gratis&quot;.</p>
+              {values.precio.map((row, index) => (
+                <div key={index} className="space-y-1 rounded-md border border-slate-700/60 p-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      aria-label={`Nombre del precio ${index + 1}`}
+                      value={row.nombre}
+                      onChange={(event) => onUpdateRow('precio', index, 'nombre', event.target.value)}
+                      disabled={isLoading || isSubmitting}
+                      placeholder="Nombre (p. ej. Miembros)"
+                      className="w-1/2 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-sm text-slate-100"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      aria-label={`Precio ${index + 1} en COP`}
+                      aria-invalid={precioErrors[index] ? true : undefined}
+                      value={row.precio}
+                      onChange={(event) => onUpdateRow('precio', index, 'precio', event.target.value)}
+                      disabled={isLoading || isSubmitting}
+                      placeholder="COP"
+                      className="w-1/3 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-sm text-slate-100"
+                    />
+                    <button
+                      type="button"
+                      aria-label={`Eliminar precio ${index + 1}`}
+                      onClick={() => onRemoveRow('precio', index)}
+                      disabled={isLoading || isSubmitting}
+                      className="rounded-lg border border-slate-700 px-2 text-slate-300 transition hover:text-rose-300"
+                    >
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">
+                        delete
+                      </span>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    aria-label={`Descripción del precio ${index + 1}`}
+                    value={row.descripcion}
+                    onChange={(event) => onUpdateRow('precio', index, 'descripcion', event.target.value)}
+                    disabled={isLoading || isSubmitting}
+                    placeholder="Descripción (opcional)"
+                    className="w-full rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-sm text-slate-100"
+                  />
+                  {precioErrors[index] && <p className="text-xs text-rose-300">{precioErrors[index]}</p>}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => onAddRow('precio')}
+                disabled={isLoading || isSubmitting}
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-slate-500"
+              >
+                Añadir precio
+              </button>
+            </fieldset>
+
+            <fieldset className="space-y-2 rounded-lg border border-portal-border p-3">
+              <legend className="px-1 text-xs font-semibold text-slate-300">Cronograma</legend>
+              <p className="text-[11px] text-slate-500">El orden de las filas es el orden que se muestra.</p>
+              {values.cronograma.map((row, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    aria-label={`Hora del bloque ${index + 1}`}
+                    value={row.hora}
+                    onChange={(event) => onUpdateRow('cronograma', index, 'hora', event.target.value)}
+                    disabled={isLoading || isSubmitting}
+                    placeholder="7:00 am"
+                    className="w-1/3 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-sm text-slate-100"
+                  />
+                  <input
+                    type="text"
+                    aria-label={`Descripción del bloque ${index + 1}`}
+                    value={row.descripcion}
+                    onChange={(event) => onUpdateRow('cronograma', index, 'descripcion', event.target.value)}
+                    disabled={isLoading || isSubmitting}
+                    placeholder="Calentamiento"
+                    className="flex-1 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-sm text-slate-100"
+                  />
+                  <button
+                    type="button"
+                    aria-label={`Eliminar bloque ${index + 1}`}
+                    onClick={() => onRemoveRow('cronograma', index)}
+                    disabled={isLoading || isSubmitting}
+                    className="rounded-lg border border-slate-700 px-2 text-slate-300 transition hover:text-rose-300"
+                  >
+                    <span className="material-symbols-outlined text-base" aria-hidden="true">
+                      delete
+                    </span>
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => onAddRow('cronograma')}
+                disabled={isLoading || isSubmitting}
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-slate-500"
+              >
+                Añadir bloque
+              </button>
+            </fieldset>
+
+            <fieldset className="space-y-2 rounded-lg border border-portal-border p-3">
+              <legend className="px-1 text-xs font-semibold text-slate-300">¿Qué incluye?</legend>
+              {values.incluye.map((row, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    aria-label={`Título del ítem ${index + 1}`}
+                    value={row.titulo}
+                    onChange={(event) => onUpdateRow('incluye', index, 'titulo', event.target.value)}
+                    disabled={isLoading || isSubmitting}
+                    placeholder="Hidratación"
+                    className="w-1/3 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-sm text-slate-100"
+                  />
+                  <input
+                    type="text"
+                    aria-label={`Descripción del ítem ${index + 1}`}
+                    value={row.descripcion}
+                    onChange={(event) => onUpdateRow('incluye', index, 'descripcion', event.target.value)}
+                    disabled={isLoading || isSubmitting}
+                    placeholder="Bebida isotónica al finalizar"
+                    className="flex-1 rounded-lg border border-slate-700 bg-navy-deep px-2 py-1.5 text-sm text-slate-100"
+                  />
+                  <button
+                    type="button"
+                    aria-label={`Eliminar ítem ${index + 1}`}
+                    onClick={() => onRemoveRow('incluye', index)}
+                    disabled={isLoading || isSubmitting}
+                    className="rounded-lg border border-slate-700 px-2 text-slate-300 transition hover:text-rose-300"
+                  >
+                    <span className="material-symbols-outlined text-base" aria-hidden="true">
+                      delete
+                    </span>
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => onAddRow('incluye')}
+                disabled={isLoading || isSubmitting}
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-slate-500"
+              >
+                Añadir ítem
+              </button>
+            </fieldset>
 
             <div>
               <label htmlFor="publicacion-banner" className="mb-1 block text-xs text-slate-300">
