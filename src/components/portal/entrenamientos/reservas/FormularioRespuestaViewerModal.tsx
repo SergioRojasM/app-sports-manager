@@ -114,6 +114,8 @@ export function FormularioRespuestaViewerModal({
                   ) : (
                     <p className="text-sm italic text-slate-500">Sin respuesta</p>
                   )
+                ) : campo.tipo === 'checkbox' ? (
+                  <p className="text-sm text-slate-100">{campo.value === 'true' ? 'Sí' : 'No'}</p>
                 ) : campo.value && campo.value.trim() !== '' ? (
                   <p className="whitespace-pre-wrap text-sm text-slate-100">{campo.value}</p>
                 ) : (

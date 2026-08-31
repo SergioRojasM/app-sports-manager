@@ -5,7 +5,11 @@ import { createClient } from '@/services/supabase/client';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import { getPerfil } from '@/services/supabase/portal/perfil.service';
-import { FORMULARIO_PERFIL_CAMPOS, type FormularioSeccion } from '@/types/portal/formularios.types';
+import {
+  FORMULARIO_PERFIL_CAMPOS,
+  HEADER_SECCION_TIPOS,
+  type FormularioSeccion,
+} from '@/types/portal/formularios.types';
 
 // ─────────────────────────────────────────────
 // Types
@@ -29,6 +33,8 @@ type UseFormularioRespuestaFormResult = {
   loadError: string | null;
   plantillaNombre: string;
   secciones: FormularioSeccion[];
+  /** The 4 fixed header rows (encabezado_*), for FormularioHeaderEditor (readOnly) at the top of the fill-out form. */
+  headerSecciones: FormularioSeccion[];
   values: Record<string, string>;
   errors: Record<string, string>;
   /** campo_nombre currently uploading a file, or null when none is in progress. */
@@ -109,6 +115,7 @@ export function useFormularioRespuestaForm({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [plantillaNombre, setPlantillaNombre] = useState('');
   const [secciones, setSecciones] = useState<FormularioSeccion[]>([]);
+  const [headerSecciones, setHeaderSecciones] = useState<FormularioSeccion[]>([]);
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingCampoNombre, setUploadingCampoNombre] = useState<string | null>(null);
@@ -123,6 +130,7 @@ export function useFormularioRespuestaForm({
   useEffect(() => {
     if (!formularioPlantillaId) {
       setSecciones([]);
+      setHeaderSecciones([]);
       setPlantillaNombre('');
       setValues({});
       setErrors({});
@@ -141,7 +149,9 @@ export function useFormularioRespuestaForm({
       .then((plantilla) => {
         if (cancelled) return;
         setPlantillaNombre(plantilla.nombre);
-        setSecciones(plantilla.secciones.filter((s) => s.activo));
+        const activas = plantilla.secciones.filter((s) => s.activo);
+        setSecciones(activas.filter((s) => !(HEADER_SECCION_TIPOS as readonly string[]).includes(s.seccion_tipo)));
+        setHeaderSecciones(activas.filter((s) => (HEADER_SECCION_TIPOS as readonly string[]).includes(s.seccion_tipo)));
         setPerfilCamposRequeridos(plantilla.perfil_campos_requeridos ?? []);
         setValues({});
         setErrors({});
@@ -245,7 +255,10 @@ export function useFormularioRespuestaForm({
         continue;
       }
       const value = values[seccion.campo_nombre];
-      if (!value || !value.trim()) {
+      // A required checkbox must be checked ("true") — "false" is a deliberate, non-empty answer
+      // that the generic empty-string check below would otherwise accept.
+      const isMissing = seccion.campo_tipo === 'checkbox' ? value !== 'true' : !value || !value.trim();
+      if (isMissing) {
         newErrors[seccion.campo_nombre] = 'Este campo es obligatorio.';
       }
     }
@@ -278,6 +291,7 @@ export function useFormularioRespuestaForm({
     loadError,
     plantillaNombre,
     secciones,
+    headerSecciones,
     values,
     errors,
     uploadingCampoNombre,

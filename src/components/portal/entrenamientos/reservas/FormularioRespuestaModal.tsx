@@ -1,7 +1,8 @@
 'use client';
 
 import type { FormularioSeccion } from '@/types/portal/formularios.types';
-import { FormularioSeccionContent } from '@/components/portal/formularios/FormularioSeccionContent';
+import { FormularioHeaderEditor } from '@/components/portal/formularios/FormularioHeaderEditor';
+import { FormularioSeccionesGrouped } from '@/components/portal/formularios/FormularioSeccionesGrouped';
 import type { PerfilFaltanteItem, PerfilResumenItem } from '@/hooks/portal/entrenamientos/reservas/useFormularioRespuestaForm';
 
 // ─────────────────────────────────────────────
@@ -10,8 +11,11 @@ import type { PerfilFaltanteItem, PerfilResumenItem } from '@/hooks/portal/entre
 
 type FormularioRespuestaModalProps = {
   open: boolean;
+  tenantId: string;
   plantillaNombre: string;
   secciones: FormularioSeccion[];
+  /** The 4 fixed encabezado_* rows — renders the Hero header (read-only) above the fill-out fields. */
+  plantillaHeaderSecciones: FormularioSeccion[];
   values: Record<string, string>;
   errors: Record<string, string>;
   loading: boolean;
@@ -43,8 +47,10 @@ type FormularioRespuestaModalProps = {
 // Editable per-campo_tipo input
 // ─────────────────────────────────────────────
 
+// Explicit 8px radius (not rounded-lg/xl — overridden in this project to 2rem/3rem for the
+// landing page's pill buttons) to match the P43Yo "Field Box" reference.
 const inputClass =
-  'w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-turquoise focus:outline-none disabled:opacity-60';
+  'w-full rounded-[8px] border border-slate-700 bg-navy-deep/60 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-turquoise focus:outline-none disabled:opacity-60';
 
 function FormularioCampoEditableField({
   seccion,
@@ -70,6 +76,25 @@ function FormularioCampoEditableField({
     .map((v) => v.trim())
     .filter(Boolean);
 
+  if (campoTipo === 'checkbox') {
+    return (
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
+          <input
+            type="checkbox"
+            checked={value === 'true'}
+            disabled={disabled}
+            onChange={(e) => onUpdateValue(campoNombre, e.target.checked ? 'true' : 'false')}
+            className="rounded border-slate-600 bg-navy-deep/60"
+          />
+          {seccion.campo_etiqueta}
+          {seccion.campo_obligatorio && <span className="text-rose-400"> *</span>}
+        </label>
+        {error && <p className="mt-1 text-xs text-rose-300">{error}</p>}
+      </div>
+    );
+  }
+
   return (
     <div>
       <label className="mb-1 block text-sm font-medium text-slate-300">
@@ -77,7 +102,31 @@ function FormularioCampoEditableField({
         {seccion.campo_obligatorio && <span className="text-rose-400"> *</span>}
       </label>
 
-      {campoTipo === 'texto_largo' ? (
+      {campoTipo === 'seleccion' ? (
+        <div className="flex gap-3" role="radiogroup" aria-label={seccion.campo_etiqueta ?? undefined}>
+          {opciones.map((opcion) => {
+            const selected = value === opcion;
+            return (
+              <button
+                key={opcion}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                disabled={disabled}
+                onClick={() => onUpdateValue(campoNombre, opcion)}
+                className={[
+                  'flex-1 rounded-[8px] border px-4 py-4 text-center text-base font-bold transition',
+                  selected
+                    ? 'border-turquoise bg-turquoise/15 text-turquoise'
+                    : 'border-slate-700 bg-navy-deep/60 text-slate-300 hover:border-turquoise/50',
+                ].join(' ')}
+              >
+                {opcion}
+              </button>
+            );
+          })}
+        </div>
+      ) : campoTipo === 'texto_largo' ? (
         <textarea
           rows={3}
           value={value}
@@ -137,8 +186,10 @@ function FormularioCampoEditableField({
 
 export function FormularioRespuestaModal({
   open,
+  tenantId,
   plantillaNombre,
   secciones,
+  plantillaHeaderSecciones,
   values,
   errors,
   loading,
@@ -169,13 +220,20 @@ export function FormularioRespuestaModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={`Formulario: ${plantillaNombre}`}
     >
-      <div className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-portal-border bg-navy-medium p-6 shadow-2xl">
-        <h2 className="mb-1 text-lg font-semibold text-slate-100">{plantillaNombre}</h2>
+      <div className="glass flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]">
+        <div className="flex-1 overflow-y-auto">
+        {plantillaHeaderSecciones.length > 0 ? (
+          <FormularioHeaderEditor tenantId={tenantId} secciones={plantillaHeaderSecciones} readOnly />
+        ) : (
+          <h2 className="px-6 pt-6 text-lg font-semibold text-slate-100">{plantillaNombre}</h2>
+        )}
+
+        <div className="p-6 pt-4">
         <p className="mb-4 text-sm text-slate-400">Completa el formulario para continuar con tu reserva.</p>
 
         {headerExtra}
@@ -209,15 +267,19 @@ export function FormularioRespuestaModal({
             </div>
           </div>
         ) : perfilResumen.length > 0 ? (
-          <p className="mb-4 flex flex-wrap gap-x-1 rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-2 text-xs text-slate-300">
-            <span className="font-semibold text-slate-400">Perfil:</span>
-            {perfilResumen.map((item, i) => (
-              <span key={item.key}>
-                {item.value}
-                {i < perfilResumen.length - 1 ? ' · ' : ''}
-              </span>
-            ))}
-          </p>
+          <div className="mb-4 rounded-[8px] border border-portal-border bg-navy-deep/60 px-3 py-2.5">
+            <p className="mb-1.5 text-xs text-slate-400">Estos datos de tu perfil se usarán en esta reserva:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {perfilResumen.map((item) => (
+                <span
+                  key={item.key}
+                  className="inline-flex items-center gap-1 rounded-[8px] border border-turquoise/25 bg-turquoise/10 px-2 py-1 text-xs font-medium text-turquoise"
+                >
+                  <span className="text-slate-300">{item.label}:</span> {item.value}
+                </span>
+              ))}
+            </div>
+          </div>
         ) : null}
 
         {(submitError || uploadError) && (
@@ -226,7 +288,7 @@ export function FormularioRespuestaModal({
           </div>
         )}
 
-        <div className="flex-1 space-y-4 overflow-y-auto pr-1">
+        <div className="space-y-4">
           {loading && <p className="text-sm text-slate-400">Cargando formulario…</p>}
 
           {!loading && loadError && (
@@ -239,12 +301,11 @@ export function FormularioRespuestaModal({
             <p className="text-sm text-slate-400">Este formulario todavía no tiene secciones.</p>
           )}
 
-          {!loading &&
-            !loadError &&
-            secciones.map((seccion) =>
-              seccion.seccion_tipo === 'datos' ? (
+          {!loading && !loadError ? (
+            <FormularioSeccionesGrouped
+              secciones={secciones}
+              renderDatos={(seccion) => (
                 <FormularioCampoEditableField
-                  key={seccion.id}
                   seccion={seccion}
                   value={values[seccion.campo_nombre ?? ''] ?? ''}
                   error={seccion.campo_nombre ? errors[seccion.campo_nombre] : undefined}
@@ -253,13 +314,21 @@ export function FormularioRespuestaModal({
                   onUploadImage={onUploadImage}
                   disabled={disabled}
                 />
-              ) : (
-                <FormularioSeccionContent key={seccion.id} seccion={seccion} />
-              ),
-            )}
+              )}
+            />
+          ) : null}
+        </div>
+        </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-portal-border pt-4">
+        <div className="border-t border-portal-border p-6 pt-4">
+          <p className="mb-3 text-[11px] leading-relaxed text-slate-500">
+            Los datos solicitados por la organización son de uso exclusivo de la organización y son de su
+            responsabilidad. Los datos de tu perfil utilizados se tratan bajo la política de tratamiento de datos de
+            GRIT.
+          </p>
+
+          <div className="flex flex-wrap justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -286,6 +355,7 @@ export function FormularioRespuestaModal({
           >
             {isSubmitting ? 'Guardando...' : 'Guardar y reservar'}
           </button>
+          </div>
         </div>
       </div>
     </div>

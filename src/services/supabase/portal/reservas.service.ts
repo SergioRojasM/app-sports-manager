@@ -897,7 +897,21 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     p_formulario_plantilla_id: input.formulario_plantilla_id ?? null,
     p_formulario_respuesta: input.formulario_respuesta ?? null,
     p_permitir_pendiente: pendienteSinPlan,
-    p_suscripcion_id: pendienteSinPlan ? input.plan_pendiente_suscripcion_id ?? null : null,
+    p_suscripcion_id: null,
+    // US-0110: the plan purchase rides along with the booking so the RPC creates the
+    // suscripcion, its servicios, the pago and the reserva in a single transaction.
+    // Nothing was written when the athlete picked the plan, so abandoning the flow
+    // midway leaves no orphaned pending subscription blocking their next attempt.
+    p_plan_purchase:
+      pendienteSinPlan && input.plan_pendiente_compra
+        ? {
+            plan_id: input.plan_pendiente_compra.plan_id,
+            plan_tipo_id: input.plan_pendiente_compra.plan_tipo_id,
+            comentarios: input.plan_pendiente_compra.comentarios,
+            metodo_pago_id: input.plan_pendiente_compra.metodo_pago_id,
+            monto: input.plan_pendiente_compra.monto,
+          }
+        : null,
   });
 
   if (error) {
@@ -913,6 +927,22 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
+      };
+    }
+    // US-0110: the deferred plan purchase is re-validated inside the RPC, at submit time,
+    // because minutes can pass while the athlete fills in the booking form.
+    if (error.code === 'P0001' && error.message?.includes('PLAN_NO_DISPONIBLE')) {
+      return {
+        ok: false,
+        code: 'SERVICIO_REQUERIDO',
+        message: 'El plan seleccionado ya no está disponible. Elige otro plan para continuar.',
+      };
+    }
+    if (error.code === 'P0001' && error.message?.includes('SUSCRIPCION_PENDIENTE_EXISTENTE')) {
+      return {
+        ok: false,
+        code: 'SERVICIO_REQUERIDO',
+        message: 'Ya tienes una solicitud de plan pendiente de aprobación. Espera a que sea revisada antes de continuar.',
       };
     }
     if (error.code === 'P0001' && error.message?.includes('FORMULARIO_CAMPOS_FALTANTES')) {

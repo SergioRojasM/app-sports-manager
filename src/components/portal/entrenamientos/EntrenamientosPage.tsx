@@ -485,6 +485,11 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         isSubmitting={publicarEntrenamiento.isSubmitting}
         submitError={publicarEntrenamiento.submitError}
         onChangeField={publicarEntrenamiento.updateField}
+        onAddRow={publicarEntrenamiento.addRow}
+        onRemoveRow={publicarEntrenamiento.removeRow}
+        onUpdateRow={publicarEntrenamiento.updateRow}
+        precioErrors={publicarEntrenamiento.precioErrors}
+        paginaEventoUrlError={publicarEntrenamiento.paginaEventoUrlError}
         onChangeOmitirConfirmacionPlan={publicarEntrenamiento.setOmitirConfirmacionPlan}
         onBannerFileSelect={publicarEntrenamiento.handleBannerFileSelect}
         onClose={publicarEntrenamiento.close}
@@ -563,6 +568,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
 
       <EntrenamientoDetalleModal
         open={isViewModalOpen}
+        tenantId={tenantId}
         viewTarget={viewTarget}
         viewLoading={viewLoading}
         canManage={canManage}

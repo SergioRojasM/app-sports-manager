@@ -1,14 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { PublicTrainingBannerModal } from './PublicTrainingBannerModal';
 import { useFormularioPreview } from '@/hooks/portal/entrenamientos-publicos/useFormularioPreview';
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
 import { PlanesPublicosModal } from '@/components/portal/planes-publicos';
+import type { PrecioItem } from '@/types/portal/entrenamientos-publicos.types';
 
 export type PublicTrainingCardData = {
   nombre: string;
   tenantId: string;
+  /**
+   * Source entrenamientos.id, used to build the "Ver detalles" link (US-0109).
+   * Omitted in the publish modal's live preview, where the training may not be
+   * published yet and therefore has no live detail URL.
+   */
+  entrenamientoId?: string;
   tenantNombre?: string;
   descripcion: string | null;
   disciplinaNombre: string;
@@ -19,7 +28,8 @@ export type PublicTrainingCardData = {
   cupoMaximo: number | null;
   reservasActivas: number;
   reservaAntelacionHoras: number | null;
-  precio: number | null;
+  /** Pricing options. Empty means Gratis; two or more render as "Desde …" (US-0109). */
+  precio: PrecioItem[];
   bannerUrl: string | null;
   /** Services the training requires. Empty on the anonymous landing page (US-0094). */
   serviciosRequeridos?: string[];
@@ -46,15 +56,30 @@ function formatTimeLabel(fechaHora: string | null): string {
   return new Intl.DateTimeFormat('es-CO', { timeStyle: 'short' }).format(new Date(fechaHora));
 }
 
-function formatPrecio(precio: number | null): string {
-  if (precio == null) return 'Gratis';
-  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(precio);
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value);
+}
+
+/**
+ * Zero options reads as "Gratis", one shows that price outright, and two or more
+ * collapse to the cheapest as "Desde …" so the card stays a single line (US-0109).
+ */
+function formatPrecio(precio: PrecioItem[]): string {
+  if (precio.length === 0) return 'Gratis';
+  if (precio.length === 1) return formatCurrency(precio[0].precio);
+  return `Desde ${formatCurrency(Math.min(...precio.map((item) => item.precio)))}`;
 }
 
 export function PublicTrainingCard({ data, featured = false, onReservar, reservarDisabled = false }: PublicTrainingCardProps) {
   const [bannerModalOpen, setBannerModalOpen] = useState(false);
   const [planesModalOpen, setPlanesModalOpen] = useState(false);
   const formularioPreview = useFormularioPreview();
+  // Read here rather than threaded as a prop so the same card links back to
+  // whichever grid rendered it — portal marketplace or public landing (US-0109)
+  const pathname = usePathname();
+  const detalleHref = data.entrenamientoId
+    ? `/entrenamientos-publicos/${data.entrenamientoId}?from=${encodeURIComponent(pathname)}`
+    : null;
   const cupoMaximo = data.cupoMaximo ?? 0;
   // Empty on the anonymous landing page — that surface never receives service names (US-0094)
   const serviciosRequeridos = data.serviciosRequeridos ?? [];
@@ -243,16 +268,26 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
 
           <div className="mt-auto flex items-center justify-between gap-3 pt-1">
             <span className="font-landing-display text-base font-bold text-landing-text">{formatPrecio(data.precio)}</span>
-            <button
-              type="button"
-              onClick={onReservar}
-              disabled={reservarDisabled || !onReservar}
-              aria-disabled={reservarDisabled || !onReservar}
-              title={reservarDisabled ? 'No disponible' : undefined}
-              className="rounded-lg bg-landing-primary px-4 py-2 font-landing-body text-sm font-semibold text-landing-bg transition hover:bg-landing-primary-light disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Reservar
-            </button>
+            <div className="flex items-center gap-2">
+              {detalleHref && (
+                <Link
+                  href={detalleHref}
+                  className="rounded-lg border border-landing-border px-3 py-2 font-landing-body text-sm font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                >
+                  Ver detalles
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={onReservar}
+                disabled={reservarDisabled || !onReservar}
+                aria-disabled={reservarDisabled || !onReservar}
+                title={reservarDisabled ? 'No disponible' : undefined}
+                className="rounded-lg bg-landing-primary px-4 py-2 font-landing-body text-sm font-semibold text-landing-bg transition hover:bg-landing-primary-light disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Reservar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -269,6 +304,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
       {hasInternalFormulario && (
         <FormularioPreviewModal
           open={formularioPreview.open}
+          tenantId={data.tenantId}
           plantillaNombre={formularioPreview.plantillaNombre}
           secciones={formularioPreview.secciones}
           perfilCamposRequeridos={formularioPreview.perfilCamposRequeridos}

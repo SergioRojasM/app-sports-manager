@@ -2,7 +2,15 @@
 // FormularioPlantilla entity types
 // =============================================
 
-export type FormularioTipoCampo = 'fecha' | 'texto_corto' | 'texto_largo' | 'numerico' | 'imagen' | 'lista';
+export type FormularioTipoCampo =
+  | 'fecha'
+  | 'texto_corto'
+  | 'texto_largo'
+  | 'numerico'
+  | 'imagen'
+  | 'lista'
+  | 'checkbox'
+  | 'seleccion';
 
 export const FORMULARIO_TIPOS_CAMPO: readonly FormularioTipoCampo[] = [
   'fecha',
@@ -11,6 +19,8 @@ export const FORMULARIO_TIPOS_CAMPO: readonly FormularioTipoCampo[] = [
   'numerico',
   'imagen',
   'lista',
+  'checkbox',
+  'seleccion',
 ] as const;
 
 export const FORMULARIO_TIPO_CAMPO_LABELS: Record<FormularioTipoCampo, string> = {
@@ -20,15 +30,32 @@ export const FORMULARIO_TIPO_CAMPO_LABELS: Record<FormularioTipoCampo, string> =
   numerico: 'Numérico',
   imagen: 'Imagen',
   lista: 'Lista',
+  checkbox: 'Casilla de verificación',
+  seleccion: 'Selección única',
 };
 
-export type FormularioSeccionTipo = 'titulo' | 'subtitulo' | 'texto' | 'datos';
+/** campo_tipo values whose options live in campo_lista_valores (comma-separated). */
+export const FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES: readonly FormularioTipoCampo[] = ['lista', 'seleccion'] as const;
+
+export type FormularioSeccionTipo =
+  | 'titulo'
+  | 'subtitulo'
+  | 'texto'
+  | 'datos'
+  | 'encabezado_sobretitulo'
+  | 'encabezado_titulo'
+  | 'encabezado_subtitulo'
+  | 'encabezado_badges'
+  | 'seccion'
+  | 'separador';
 
 export const FORMULARIO_SECCION_TIPOS: readonly FormularioSeccionTipo[] = [
   'titulo',
   'subtitulo',
   'texto',
   'datos',
+  'seccion',
+  'separador',
 ] as const;
 
 export const FORMULARIO_SECCION_TIPO_LABELS: Record<FormularioSeccionTipo, string> = {
@@ -36,7 +63,28 @@ export const FORMULARIO_SECCION_TIPO_LABELS: Record<FormularioSeccionTipo, strin
   subtitulo: 'Subtítulo',
   texto: 'Texto',
   datos: 'Datos',
+  encabezado_sobretitulo: 'Encabezado — Sobretítulo',
+  encabezado_titulo: 'Encabezado — Título',
+  encabezado_subtitulo: 'Encabezado — Subtítulo',
+  encabezado_badges: 'Encabezado — Badges',
+  seccion: 'Sección (tarjeta)',
+  separador: 'Separador',
 };
+
+/**
+ * The 4 header pieces auto-created for every template (US-0108) — fixed at `orden` 0-3,
+ * rendered/edited exclusively through `FormularioHeaderEditor`, never selectable from the
+ * generic "Tipo de sección" picker in `FormularioSeccionCard` (hence their exclusion from
+ * `FORMULARIO_SECCION_TIPOS` above).
+ */
+export const HEADER_SECCION_TIPOS: readonly FormularioSeccionTipo[] = [
+  'encabezado_sobretitulo',
+  'encabezado_titulo',
+  'encabezado_subtitulo',
+  'encabezado_badges',
+] as const;
+
+export const FORMULARIO_HEADER_BADGES_MAX = 5;
 
 export type FormularioPlantilla = {
   id: string;
@@ -97,17 +145,23 @@ export const FORMULARIO_PERFIL_CAMPO_LABELS: Record<FormularioPerfilCampo, strin
   FORMULARIO_PERFIL_CAMPOS.map((c) => [c.key, c.label]),
 ) as Record<FormularioPerfilCampo, string>;
 
+export type FormularioColumnaAncho = 'completo' | 'mitad';
+
 export type FormularioSeccion = {
   id: string;
   formulario_plantilla_id: string;
   seccion_tipo: FormularioSeccionTipo;
   seccion_descripcion: string | null;
+  /** Optional subtítulo shown under a 'seccion' card's título — unused by every other seccion_tipo. */
+  seccion_subtitulo: string | null;
   campo_etiqueta: string | null;
   campo_nombre: string | null;
   campo_tipo: FormularioTipoCampo | null;
   campo_lista_valores: string | null;
   campo_obligatorio: boolean;
   campo_placeholder: string | null;
+  /** Two-column layout toggle — only meaningful when seccion_tipo = 'datos'; every other type is 'completo'. */
+  columna_ancho: FormularioColumnaAncho;
   orden: number;
   activo: boolean;
   created_at: string;
@@ -141,28 +195,39 @@ export type UpdatePlantillaInput = {
   perfil_campos_requeridos?: FormularioPerfilCampo[];
 };
 
+/**
+ * The editable subset of a plantilla's metadata, held as an in-memory draft by
+ * `useFormularioEditor` (US-0108) — edits accumulate here and are only persisted
+ * (via `UpdatePlantillaInput`) when the admin presses "Guardar cambios".
+ */
+export type FormularioPlantillaDraft = Pick<FormularioPlantilla, 'nombre' | 'descripcion' | 'activo' | 'perfil_campos_requeridos'>;
+
 export type CreateSeccionInput = {
   formulario_plantilla_id: string;
   seccion_tipo: FormularioSeccionTipo;
   seccion_descripcion?: string | null;
+  seccion_subtitulo?: string | null;
   campo_etiqueta?: string;
   campo_nombre?: string;
   campo_tipo?: FormularioTipoCampo;
   campo_lista_valores?: string | null;
   campo_obligatorio?: boolean;
   campo_placeholder?: string | null;
+  columna_ancho?: FormularioColumnaAncho;
   orden: number;
 };
 
 export type UpdateSeccionInput = {
   seccion_tipo?: FormularioSeccionTipo;
   seccion_descripcion?: string | null;
+  seccion_subtitulo?: string | null;
   campo_etiqueta?: string;
   campo_nombre?: string;
   campo_tipo?: FormularioTipoCampo;
   campo_lista_valores?: string | null;
   campo_obligatorio?: boolean;
   campo_placeholder?: string | null;
+  columna_ancho?: FormularioColumnaAncho;
   orden?: number;
   activo?: boolean;
 };
@@ -183,15 +248,18 @@ export type FormularioPlantillaFieldErrors = Partial<Record<FormularioPlantillaF
 export type FormularioSeccionFormValues = {
   seccion_tipo: FormularioSeccionTipo;
   seccion_descripcion: string;
+  seccion_subtitulo: string;
   campo_etiqueta: string;
   campo_tipo: FormularioTipoCampo;
   campo_lista_valores: string;
   campo_placeholder: string;
   campo_obligatorio: boolean;
+  columna_ancho: FormularioColumnaAncho;
 };
 
 export type FormularioSeccionFormField =
   | 'seccion_descripcion'
+  | 'seccion_subtitulo'
   | 'campo_etiqueta'
   | 'campo_tipo'
   | 'campo_lista_valores';

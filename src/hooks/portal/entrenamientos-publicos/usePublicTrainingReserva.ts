@@ -3,9 +3,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
+import { pagosService } from '@/services/supabase/portal/pagos.service';
+import { storageService } from '@/services/supabase/portal/storage.service';
 import { useReservaForm } from '@/hooks/portal/entrenamientos/reservas/useReservaForm';
 import { useFormularioRespuestaForm } from '@/hooks/portal/entrenamientos/reservas/useFormularioRespuestaForm';
 import type { CategoriaDisponibilidad } from '@/types/portal/reservas.types';
+import type { PendingPlanPurchaseDraft } from '@/types/portal/suscripciones.types';
 import type { BookingRejection } from '@/types/portal/entrenamiento-restricciones.types';
 
 /**
@@ -41,8 +44,13 @@ export function usePublicTrainingReserva({
   const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
   const [isFormularioStep, setIsFormularioStep] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  /** Set once the athlete completes a plan purchase from within the rejection dialog (US-0106). */
-  const [pendingPlanSuscripcionId, setPendingPlanSuscripcionId] = useState<string | null>(null);
+  /**
+   * The plan the athlete chose from within the rejection dialog (US-0106), held here and
+   * NOT yet written to the database (US-0110): it is persisted together with the reserva,
+   * in one atomic call, when the booking is finally submitted. Abandoning the flow before
+   * that leaves nothing behind to block a later retry.
+   */
+  const [pendingPlanPurchase, setPendingPlanPurchase] = useState<PendingPlanPurchaseDraft | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -108,11 +116,20 @@ export function usePublicTrainingReserva({
       setUnexpectedError(null);
       try {
         const result = await reservasService.create(
-          pendingPlanSuscripcionId
+          pendingPlanPurchase
             ? {
                 ...input,
                 permitir_pendiente_sin_plan: true,
-                plan_pendiente_suscripcion_id: pendingPlanSuscripcionId,
+                // Sent as data, not as an already-created row: the RPC creates the
+                // suscripcion, its servicios and the pago in the same transaction as
+                // this reserva (US-0110).
+                plan_pendiente_compra: {
+                  plan_id: pendingPlanPurchase.planId,
+                  plan_tipo_id: pendingPlanPurchase.planTipoId,
+                  comentarios: pendingPlanPurchase.comentarios,
+                  metodo_pago_id: pendingPlanPurchase.metodoPagoId,
+                  monto: pendingPlanPurchase.monto,
+                },
               }
             : input,
         );
@@ -120,8 +137,39 @@ export function usePublicTrainingReserva({
           setBookingRejection(result);
           return false;
         }
+
+        // Proof of payment can only be uploaded now: its storage path is keyed by the
+        // pago id, and the pago only came into existence with the booking above.
+        // Best-effort — the reservation and plan request are already committed, and an
+        // athlete whose upload fails can still attach the proof later through the
+        // existing "Resubir comprobante" flow.
+        const nuevaSuscripcionId = 'ok' in result ? null : result.suscripcion_id;
+        if (pendingPlanPurchase?.file && nuevaSuscripcionId) {
+          try {
+            const supabase = createClient();
+            const { data: pago } = await supabase
+              .from('pagos')
+              .select('id')
+              .eq('suscripcion_id', nuevaSuscripcionId)
+              .maybeSingle();
+
+            if (pago?.id) {
+              const upload = await storageService.uploadPaymentProof(
+                supabase,
+                tenantId,
+                input.atleta_id,
+                pago.id as string,
+                pendingPlanPurchase.file,
+              );
+              await pagosService.updateComprobantePath(supabase, pago.id as string, upload.path);
+            }
+          } catch {
+            // Non-blocking, by design: never fail a committed booking over its receipt.
+          }
+        }
+
         setSuccessMessage(
-          pendingPlanSuscripcionId
+          pendingPlanPurchase
             ? 'Tu reserva y tu solicitud de plan quedaron pendientes de aprobación.'
             : '¡Reserva creada con éxito!',
         );
@@ -145,7 +193,7 @@ export function usePublicTrainingReserva({
     setUnexpectedError(null);
     setSuccessMessage(null);
     setIsFormularioStep(false);
-    setPendingPlanSuscripcionId(null);
+    setPendingPlanPurchase(null);
     formularioRespuestaForm.reset();
     if (!currentUserId) return;
 
@@ -176,13 +224,14 @@ export function usePublicTrainingReserva({
   }, [currentUserId, entrenamientoId, tenantId]);
 
   /**
-   * Called once the athlete completes a plan purchase from the rejection dialog on a
-   * training published with omitir_confirmacion_plan = true (US-0106). Stores the new
-   * suscripcion id (forwarded into the eventual reservasService.create() call) and moves
-   * straight into the normal booking form instead of ending the interaction.
+   * Called once the athlete fills in a plan purchase from the rejection dialog on a
+   * training published with omitir_confirmacion_plan = true (US-0106). The purchase is
+   * only remembered here — nothing is written yet (US-0110); it travels with the eventual
+   * reservasService.create() call. Moves straight into the normal booking form instead of
+   * ending the interaction.
    */
-  const continueWithPendingPlan = useCallback(async (suscripcionId: string) => {
-    setPendingPlanSuscripcionId(suscripcionId);
+  const continueWithPendingPlan = useCallback(async (purchase: PendingPlanPurchaseDraft) => {
+    setPendingPlanPurchase(purchase);
     setBookingRejection(null);
     if (!currentUserId) return;
     await reservaForm.openCreate(currentUserId);
@@ -239,7 +288,7 @@ export function usePublicTrainingReserva({
     formularioExterno,
     formularioObligatorio,
     omitirConfirmacionPlan,
-    pendingPlanSuscripcionId,
+    pendingPlanPurchase,
     openBooking,
     continueWithPendingPlan,
     requireFormulario,

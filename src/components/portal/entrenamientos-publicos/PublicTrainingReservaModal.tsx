@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { usePublicTrainingReserva } from '@/hooks/portal/entrenamientos-publicos/usePublicTrainingReserva';
 import { ReservaFormModal } from '@/components/portal/entrenamientos/reservas/ReservaFormModal';
 import { FormularioRespuestaModal } from '@/components/portal/entrenamientos/reservas/FormularioRespuestaModal';
@@ -85,6 +86,30 @@ export function PublicTrainingReservaModal({
           <p className="mt-1 text-sm text-slate-400">
             Tu reserva para &quot;{trainingNombre}&quot; ha sido registrada.
           </p>
+
+          {/* Where to follow this up. Both destinations are the cross-tenant ones, since a
+              marketplace booker is often not a member of the organization. */}
+          <div className="mt-4 space-y-1.5 border-t border-portal-border pt-4 text-left text-sm text-slate-400">
+            <p>
+              Puedes consultar tus entrenamientos en:{' '}
+              <Link
+                href="/portal/mis-reservas"
+                className="whitespace-nowrap font-semibold text-turquoise hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-medium"
+              >
+                Mis Reservas
+              </Link>
+            </p>
+            <p>
+              Puedes consultar tus suscripciones en:{' '}
+              <Link
+                href="/portal/mis-suscripciones"
+                className="whitespace-nowrap font-semibold text-turquoise hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-medium"
+              >
+                Mis Suscripciones
+              </Link>
+            </p>
+          </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -216,7 +241,7 @@ export function PublicTrainingReservaModal({
             tenantNombre={tenantNombre}
             onClose={closePlanes}
             initialSearch={bookingRejection.servicioNombre}
-            onSubscribed={canSkipConfirmation ? (suscripcionId) => void reserva.continueWithPendingPlan(suscripcionId) : undefined}
+            onSubscribed={canSkipConfirmation ? (purchase) => void reserva.continueWithPendingPlan(purchase) : undefined}
           />
         )}
       </>
@@ -227,8 +252,10 @@ export function PublicTrainingReservaModal({
     return (
       <FormularioRespuestaModal
         open
+        tenantId={tenantId}
         plantillaNombre={reserva.formularioRespuestaForm.plantillaNombre}
         secciones={reserva.formularioRespuestaForm.secciones}
+        plantillaHeaderSecciones={reserva.formularioRespuestaForm.headerSecciones}
         values={reserva.formularioRespuestaForm.values}
         errors={reserva.formularioRespuestaForm.errors}
         loading={reserva.formularioRespuestaForm.loading}
