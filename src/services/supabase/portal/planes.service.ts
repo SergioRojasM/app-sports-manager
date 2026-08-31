@@ -140,6 +140,30 @@ export const planesService = {
     return ((data ?? []) as unknown as PlanRow[]).map(mapPlanRow);
   },
 
+  /**
+   * Catalog for a MEMBER of the tenant: every active plan of the organization, public
+   * and member-only alike. Same shape as `getPlanesPublicos`, just without the
+   * `es_publico` filter — RLS (`planes_select_authenticated`) is the real gate, so a
+   * caller whose membership check was wrong (or stale) still gets only the public rows
+   * back instead of leaking an internal plan.
+   */
+  async getPlanesMiembro(tenantId: string): Promise<PlanWithDisciplinas[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('planes')
+      .select(PLAN_WITH_RELATIONS_COLUMNS)
+      .eq('tenant_id', tenantId)
+      .eq('activo', true)
+      .order('nombre');
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+
+    return ((data ?? []) as unknown as PlanRow[]).map(mapPlanRow);
+  },
+
   async createPlan(input: CreatePlanInput): Promise<Plan> {
     const supabase = createClient();
 
