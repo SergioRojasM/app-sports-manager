@@ -5,6 +5,9 @@ function toCardData(item: PublicTrainingListItem): PublicTrainingCardData {
   return {
     nombre: item.nombre,
     tenantId: item.tenantId,
+    // Drives the card's "Ver detalles" link; both grids that render this
+    // component show published trainings, so the detail URL always exists (US-0109)
+    entrenamientoId: item.entrenamientoId,
     tenantNombre: item.tenantNombre,
     descripcion: item.descripcion,
     disciplinaNombre: item.disciplinaNombre,

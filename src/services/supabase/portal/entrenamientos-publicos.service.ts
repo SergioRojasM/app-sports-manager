@@ -1,7 +1,10 @@
 import { createClient } from '@/services/supabase/client';
 import {
   EntrenamientoPublicoServiceError,
+  type CronogramaItem,
   type EntrenamientoPublico,
+  type IncluyeItem,
+  type PrecioItem,
   type PublicarEntrenamientoInput,
   type PublicTrainingListItem,
 } from '@/types/portal/entrenamientos-publicos.types';
@@ -96,6 +99,103 @@ function toNullable(value: string | null | undefined): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+/**
+ * Mirrors the `entrenador_nombre` expression in `entrenamientos_publicos_view`
+ * (`nullif(trim(concat(nombre, ' ', apellido)), '')`) so the authenticated
+ * marketplace and the anon-safe view agree on the same display name (US-0109).
+ */
+/**
+ * NOTE: the `entrenador` embed above MUST name the FK constraint explicitly —
+ * `entrenamientos_publicos` has two foreign keys into `usuarios`
+ * (`entrenador_id` and `publicado_por`), so a bare `usuarios(...)` embed is
+ * ambiguous and makes PostgREST reject the whole query, blanking the
+ * marketplace listing rather than just omitting the name.
+ */
+function toEntrenadorNombre(entrenador: { nombre: string | null; apellido: string | null } | null): string | null {
+  if (!entrenador) return null;
+  return toNullable([entrenador.nombre ?? '', entrenador.apellido ?? ''].join(' '));
+}
+
+/**
+ * Column list read from the anon-safe `entrenamientos_publicos_view`. Shared by
+ * the landing listing and the single-training detail lookup so both surfaces
+ * always project — and map — exactly the same shape (US-0109).
+ */
+const VIEW_SELECT_COLUMNS =
+  'id, tenant_id, entrenamiento_id, nombre, descripcion, descripcion_larga, pagina_evento_url, disciplina_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, reserva_antelacion_horas, cancelacion_antelacion_horas, precio, cronograma, incluye, banner_url, omitir_confirmacion_plan, created_at, disciplina_nombre, escenario_nombre, escenario_ubicacion, tenant_nombre, tenant_logo_url, entrenador_nombre, reservas_activas';
+
+type PublicTrainingViewRow = {
+  id: string;
+  tenant_id: string;
+  entrenamiento_id: string;
+  nombre: string | null;
+  descripcion: string | null;
+  descripcion_larga: string | null;
+  pagina_evento_url: string | null;
+  disciplina_id: string;
+  fecha_hora: string | null;
+  duracion_minutos: number | null;
+  cupo_maximo: number | null;
+  punto_encuentro: string | null;
+  reserva_antelacion_horas: number | null;
+  cancelacion_antelacion_horas: number | null;
+  precio: PrecioItem[] | null;
+  cronograma: CronogramaItem[] | null;
+  incluye: IncluyeItem[] | null;
+  banner_url: string | null;
+  omitir_confirmacion_plan: boolean;
+  created_at: string;
+  disciplina_nombre: string | null;
+  escenario_nombre: string | null;
+  escenario_ubicacion: string | null;
+  tenant_nombre: string | null;
+  tenant_logo_url: string | null;
+  entrenador_nombre: string | null;
+  reservas_activas: number;
+};
+
+function mapViewRow(row: PublicTrainingViewRow): PublicTrainingListItem {
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    tenantNombre: row.tenant_nombre ?? 'Organización',
+    tenantLogoUrl: row.tenant_logo_url,
+    entrenamientoId: row.entrenamiento_id,
+    nombre: row.nombre ?? 'Entrenamiento',
+    descripcion: row.descripcion,
+    disciplinaId: row.disciplina_id,
+    disciplinaNombre: row.disciplina_nombre ?? 'Disciplina',
+    escenarioNombre: row.escenario_nombre ?? 'Escenario',
+    escenarioUbicacion: row.escenario_ubicacion,
+    fechaHora: row.fecha_hora,
+    duracionMinutos: row.duracion_minutos,
+    cupoMaximo: row.cupo_maximo,
+    puntoEncuentro: row.punto_encuentro,
+    reservaAntelacionHoras: row.reserva_antelacion_horas,
+    cancelacionAntelacionHoras: row.cancelacion_antelacion_horas,
+    // jsonb arrives already parsed from Postgrest; the `?? []` guards legacy rows
+    precio: row.precio ?? [],
+    descripcionLarga: row.descripcion_larga,
+    paginaEventoUrl: row.pagina_evento_url,
+    cronograma: row.cronograma ?? [],
+    incluye: row.incluye ?? [],
+    entrenadorNombre: row.entrenador_nombre,
+    bannerUrl: row.banner_url,
+    reservasActivas: row.reservas_activas,
+    // Deliberately empty: these surfaces must not query the authenticated-only
+    // servicios view, which an anonymous visitor cannot read (US-0094).
+    serviciosRequeridos: [],
+    // Read from the view (not hardcoded false) because the detail page books
+    // directly and passes this through to the booking modal (US-0109).
+    omitirConfirmacionPlan: row.omitir_confirmacion_plan,
+    createdAt: row.created_at,
+    // Deliberately null: formulario tables are authenticated-only, and neither the
+    // landing grid nor the detail page offers the "Vista previa" action (US-0101).
+    formularioId: null,
+    formularioExterno: null,
+  };
+}
+
 export const entrenamientosPublicosService = {
   hasBlockingMembershipRestrictions,
   getPublishRestrictionSummary,
@@ -171,6 +271,10 @@ export const entrenamientosPublicosService = {
       reserva_antelacion_horas: sourceTraining.reserva_antelacion_horas,
       cancelacion_antelacion_horas: sourceTraining.cancelacion_antelacion_horas,
       precio: input.precio,
+      descripcion_larga: toNullable(input.descripcionLarga),
+      pagina_evento_url: toNullable(input.paginaEventoUrl),
+      cronograma: input.cronograma,
+      incluye: input.incluye,
       banner_url: input.banner_url,
       omitir_confirmacion_plan: input.omitirConfirmacionPlan,
       activo: true,
@@ -230,7 +334,7 @@ export const entrenamientosPublicosService = {
     const { data, error } = await supabase
       .from('entrenamientos_publicos')
       .select(
-        'id, tenant_id, entrenamiento_id, nombre, descripcion, disciplina_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, reserva_antelacion_horas, cancelacion_antelacion_horas, precio, banner_url, omitir_confirmacion_plan, created_at, disciplina:disciplinas(nombre), escenario:escenarios(nombre, ubicacion), tenant:tenants(nombre, logo_url)',
+        'id, tenant_id, entrenamiento_id, nombre, descripcion, descripcion_larga, pagina_evento_url, disciplina_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, reserva_antelacion_horas, cancelacion_antelacion_horas, precio, cronograma, incluye, banner_url, omitir_confirmacion_plan, created_at, disciplina:disciplinas(nombre), escenario:escenarios(nombre, ubicacion), tenant:tenants(nombre, logo_url), entrenador:usuarios!entrenamientos_publicos_entrenador_id_fkey(nombre, apellido)',
       )
       .eq('activo', true)
       .gte('fecha_hora', new Date().toISOString())
@@ -246,6 +350,8 @@ export const entrenamientosPublicosService = {
       entrenamiento_id: string;
       nombre: string | null;
       descripcion: string | null;
+      descripcion_larga: string | null;
+      pagina_evento_url: string | null;
       disciplina_id: string;
       fecha_hora: string | null;
       duracion_minutos: number | null;
@@ -253,13 +359,16 @@ export const entrenamientosPublicosService = {
       punto_encuentro: string | null;
       reserva_antelacion_horas: number | null;
       cancelacion_antelacion_horas: number | null;
-      precio: number | null;
+      precio: PrecioItem[] | null;
+      cronograma: CronogramaItem[] | null;
+      incluye: IncluyeItem[] | null;
       banner_url: string | null;
       omitir_confirmacion_plan: boolean;
       created_at: string;
       disciplina: { nombre: string | null } | null;
       escenario: { nombre: string | null; ubicacion: string | null } | null;
       tenant: { nombre: string | null; logo_url: string | null } | null;
+      entrenador: { nombre: string | null; apellido: string | null } | null;
     }>;
 
     const capacidades = await Promise.all(
@@ -330,7 +439,14 @@ export const entrenamientosPublicosService = {
       puntoEncuentro: row.punto_encuentro,
       reservaAntelacionHoras: row.reserva_antelacion_horas,
       cancelacionAntelacionHoras: row.cancelacion_antelacion_horas,
-      precio: row.precio,
+      // jsonb arrives already parsed from Postgrest; the `?? []` guards legacy
+      // rows written before the columns existed (US-0109)
+      precio: row.precio ?? [],
+      descripcionLarga: row.descripcion_larga,
+      paginaEventoUrl: row.pagina_evento_url,
+      cronograma: row.cronograma ?? [],
+      incluye: row.incluye ?? [],
+      entrenadorNombre: toEntrenadorNombre(row.entrenador),
       bannerUrl: row.banner_url,
       reservasActivas: capacidades[index]?.reservas_activas ?? 0,
       serviciosRequeridos: serviciosByEntrenamiento.get(row.entrenamiento_id) ?? [],
@@ -370,70 +486,40 @@ export const entrenamientosPublicosService = {
 
     const { data, error } = await supabase
       .from('entrenamientos_publicos_view')
-      .select(
-        'id, tenant_id, entrenamiento_id, nombre, descripcion, disciplina_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, reserva_antelacion_horas, cancelacion_antelacion_horas, precio, banner_url, created_at, disciplina_nombre, escenario_nombre, escenario_ubicacion, tenant_nombre, tenant_logo_url, reservas_activas',
-      )
+      .select(VIEW_SELECT_COLUMNS)
       .order('fecha_hora', { ascending: true });
 
     if (error) {
       throw mapServiceError(error);
     }
 
-    const rows = (data ?? []) as unknown as Array<{
-      id: string;
-      tenant_id: string;
-      entrenamiento_id: string;
-      nombre: string | null;
-      descripcion: string | null;
-      disciplina_id: string;
-      fecha_hora: string | null;
-      duracion_minutos: number | null;
-      cupo_maximo: number | null;
-      punto_encuentro: string | null;
-      reserva_antelacion_horas: number | null;
-      cancelacion_antelacion_horas: number | null;
-      precio: number | null;
-      banner_url: string | null;
-      created_at: string;
-      disciplina_nombre: string | null;
-      escenario_nombre: string | null;
-      escenario_ubicacion: string | null;
-      tenant_nombre: string | null;
-      tenant_logo_url: string | null;
-      reservas_activas: number;
-    }>;
+    return ((data ?? []) as unknown as PublicTrainingViewRow[]).map(mapViewRow);
+  },
 
-    return rows.map((row) => ({
-      id: row.id,
-      tenantId: row.tenant_id,
-      tenantNombre: row.tenant_nombre ?? 'Organización',
-      tenantLogoUrl: row.tenant_logo_url,
-      entrenamientoId: row.entrenamiento_id,
-      nombre: row.nombre ?? 'Entrenamiento',
-      descripcion: row.descripcion,
-      disciplinaId: row.disciplina_id,
-      disciplinaNombre: row.disciplina_nombre ?? 'Disciplina',
-      escenarioNombre: row.escenario_nombre ?? 'Escenario',
-      escenarioUbicacion: row.escenario_ubicacion,
-      fechaHora: row.fecha_hora,
-      duracionMinutos: row.duracion_minutos,
-      cupoMaximo: row.cupo_maximo,
-      puntoEncuentro: row.punto_encuentro,
-      reservaAntelacionHoras: row.reserva_antelacion_horas,
-      cancelacionAntelacionHoras: row.cancelacion_antelacion_horas,
-      precio: row.precio,
-      bannerUrl: row.banner_url,
-      reservasActivas: row.reservas_activas,
-      // Deliberately empty: the anonymous landing page shows no requirements row,
-      // and this path must not query the authenticated-only view (US-0094).
-      serviciosRequeridos: [],
-      // Deliberately false: the anonymous landing page never books (US-0106).
-      omitirConfirmacionPlan: false,
-      createdAt: row.created_at,
-      // Deliberately null: formulario tables are authenticated-only and the anonymous
-      // landing page offers no "Vista previa" action (US-0101).
-      formularioId: null,
-      formularioExterno: null,
-    }));
+  /**
+   * Single published training for the public detail page (US-0109).
+   *
+   * Reads the anon-safe view, so it resolves identically whether the visitor is
+   * anonymous or authenticated. Returns null when no row matches — the view
+   * already filters `activo = true and fecha_hora >= now()`, so an unpublished,
+   * deactivated, or past training is indistinguishable from a bad id here, and
+   * all four render the same "not found" state.
+   */
+  async getPublicTrainingDetail(entrenamientoId: string): Promise<PublicTrainingListItem | null> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('entrenamientos_publicos_view')
+      .select(VIEW_SELECT_COLUMNS)
+      .eq('entrenamiento_id', entrenamientoId)
+      .maybeSingle();
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+
+    if (!data) return null;
+
+    return mapViewRow(data as unknown as PublicTrainingViewRow);
   },
 };

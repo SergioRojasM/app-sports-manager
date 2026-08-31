@@ -1,0 +1,1 @@
+export { PublicTrainingDetallePage } from './PublicTrainingDetallePage';
