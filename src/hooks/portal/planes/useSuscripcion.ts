@@ -7,7 +7,7 @@ import { storageService } from '@/services/supabase/portal/storage.service';
 import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
 import { createClient } from '@/services/supabase/client';
 import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
-import { SuscripcionServiceError } from '@/types/portal/suscripciones.types';
+import { SuscripcionServiceError, type PendingPlanPurchaseDraft } from '@/types/portal/suscripciones.types';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
 import type { MetodoPago } from '@/types/portal/metodos-pago.types';
 
@@ -20,13 +20,20 @@ type SuscripcionSubmitData = {
 type UseSuscripcionOptions = {
   tenantId: string;
   /**
-   * Fired right after the suscripcion+pago are created successfully, before the
-   * generic "el administrador revisará tu suscripción" success state is shown.
-   * Lets a caller (e.g. the skip-plan-confirmation booking flow, US-0106) chain
-   * into its own next step instead of the modal just closing. Optional — omitting
-   * it keeps today's behavior unchanged.
+   * Hands the filled-in plan purchase to a caller that will persist it later as part of
+   * its own flow (the skip-plan-confirmation booking, US-0106/US-0110), instead of this
+   * hook writing it right away.
+   *
+   * When provided, `submit()` creates NOTHING: no suscripcion, no pago, no proof upload.
+   * The purchase only reaches the database when the booking itself is submitted, in one
+   * atomic RPC alongside the reserva — so an athlete who abandons the flow midway isn't
+   * left with a pending subscription that blocks every retry (US-0110).
+   *
+   * Optional. Omitting it keeps the standalone catalog-purchase behavior: create the
+   * suscripcion + pago immediately and show the generic "el administrador revisará tu
+   * suscripción" message.
    */
-  onSubscribed?: (suscripcionId: string) => void;
+  onSubscribed?: (purchase: PendingPlanPurchaseDraft) => void;
 };
 
 type UseSuscripcionResult = {
@@ -137,6 +144,25 @@ export function useSuscripcion({ tenantId, onSubscribed }: UseSuscripcionOptions
         return false;
       }
 
+      // Deferred path (US-0110): a caller is chaining this purchase into its own flow and
+      // will persist it there, atomically, once that flow completes. Writing anything here
+      // is exactly the bug being fixed — an abandoned booking used to leave a 'pendiente'
+      // suscripcion behind that then blocked every retry.
+      if (onSubscribed) {
+        onSubscribed({
+          planId: selectedPlan.id,
+          planTipoId: selectedTipo?.id ?? null,
+          comentarios: data.comentarios.trim() || null,
+          metodoPagoId: data.metodo_pago_id,
+          monto: selectedTipo?.precio ?? 0,
+          file: data.file,
+        });
+        setModalOpen(false);
+        setSelectedPlan(null);
+        setSelectedTipoId(null);
+        return true;
+      }
+
       setIsSubmitting(true);
       setError(null);
       setSuccessMessage(null);
@@ -195,13 +221,9 @@ export function useSuscripcion({ tenantId, onSubscribed }: UseSuscripcionOptions
           return false;
         }
 
-        if (onSubscribed) {
-          // A caller chaining into its own next step (US-0106) — skip the generic
-          // "will be reviewed" message, it's about to show its own flow instead.
-          onSubscribed(suscripcion.id);
-        } else {
-          setSuccessMessage('Solicitud enviada. El administrador revisará tu suscripción.');
-        }
+        // Only reached when no caller is chaining this purchase (the deferred branch above
+        // returns early), so the generic review message is always the right ending here.
+        setSuccessMessage('Solicitud enviada. El administrador revisará tu suscripción.');
         setModalOpen(false);
         setSelectedPlan(null);
         setSelectedTipoId(null);

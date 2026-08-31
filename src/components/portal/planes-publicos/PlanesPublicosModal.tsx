@@ -7,6 +7,7 @@ import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { SuscripcionModal } from '@/components/portal/planes/SuscripcionModal';
 import { PlanPublicoCard } from './PlanPublicoCard';
 import type { PlanPublicoItem } from '@/types/portal/planes-publicos.types';
+import type { PendingPlanPurchaseDraft } from '@/types/portal/suscripciones.types';
 
 type PlanesPublicosModalProps = {
   open: boolean;
@@ -15,8 +16,12 @@ type PlanesPublicosModalProps = {
   onClose: () => void;
   /** Pre-fills the catalog search on open — e.g. a required service's name (US-0101). Existing callers that omit this keep today's unfiltered behavior. */
   initialSearch?: string;
-  /** Forwarded to useSuscripcion — chains into a caller's own next step after purchase instead of the generic close (US-0106). Existing callers that omit this keep today's behavior. */
-  onSubscribed?: (suscripcionId: string) => void;
+  /**
+   * Forwarded to useSuscripcion — hands the filled-in purchase to the caller instead of
+   * creating it here, so the caller can persist it as part of its own flow (US-0106/US-0110).
+   * Existing callers that omit this keep today's immediate-purchase behavior.
+   */
+  onSubscribed?: (purchase: PendingPlanPurchaseDraft) => void;
 };
 
 export function PlanesPublicosModal({

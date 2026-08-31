@@ -22,6 +22,23 @@ export type SuscripcionInsert = {
   estado: 'pendiente';
 };
 
+/**
+ * A plan purchase the athlete has filled in but that has NOT been written to the database
+ * yet (US-0110). On the skip-plan-confirmation booking path the purchase is held here, in
+ * memory, until the booking itself is submitted — at which point the suscripcion, its
+ * servicios, the pago and the reserva are all created in one atomic RPC call. Abandoning
+ * the flow before that point therefore leaves nothing behind to get stuck on.
+ */
+export type PendingPlanPurchaseDraft = {
+  planId: string;
+  planTipoId: string | null;
+  comentarios: string | null;
+  metodoPagoId: string;
+  monto: number;
+  /** Proof of payment, uploaded only after the booking succeeds (it needs the pago id). */
+  file: File | null;
+};
+
 export type SuscripcionServicio = {
   id: string;
   suscripcion_id: string;

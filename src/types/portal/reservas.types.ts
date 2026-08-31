@@ -51,8 +51,20 @@ export type CreateReservaInput = {
    * Re-verified server-side against the training's publication before being honored (US-0106).
    */
   permitir_pendiente_sin_plan?: boolean;
-  /** The pending suscripcion created alongside this booking, linked via reservas.suscripcion_id (US-0106). */
-  plan_pendiente_suscripcion_id?: string | null;
+  /**
+   * The plan purchase to create *together with* this booking, in one transaction (US-0110).
+   * Nothing has been written for it yet: the athlete picked a plan and filled in payment
+   * details, but the suscripcion/pago rows are only inserted by the booking RPC itself, so
+   * abandoning the flow before submitting leaves no orphaned pending subscription behind.
+   * The resulting subscription is linked back via `reservas.suscripcion_id`.
+   */
+  plan_pendiente_compra?: {
+    plan_id: string;
+    plan_tipo_id: string | null;
+    comentarios: string | null;
+    metodo_pago_id: string;
+    monto: number;
+  } | null;
 };
 
 export type UpdateReservaInput = {
