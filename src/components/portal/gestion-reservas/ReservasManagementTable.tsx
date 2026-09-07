@@ -1,5 +1,6 @@
 import type { ReservaReportRow } from '@/types/portal/reservas.types';
 import { ReservaEstadoBadge } from './ReservaEstadoBadge';
+import { ReservaPlanCell } from './ReservaPlanCell';
 
 type ReservasManagementTableProps = {
   rows: ReservaReportRow[];
@@ -87,6 +88,7 @@ export function ReservasManagementTable({
               <th scope="col" className="px-3 py-3">Atleta</th>
               <th scope="col" className="px-3 py-3">Disciplina</th>
               <th scope="col" className="px-3 py-3">Entrenamiento</th>
+              <th scope="col" className="px-3 py-3">Plan</th>
               <th scope="col" className="px-3 py-3">Fecha entrenamiento</th>
               <th scope="col" className="px-3 py-3">Estado</th>
               <th scope="col" className="px-3 py-3">Asistencia</th>
@@ -96,7 +98,7 @@ export function ReservasManagementTable({
           <tbody className="divide-y divide-portal-border">
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-sm text-slate-500">
+                <td colSpan={8} className="px-3 py-8 text-center text-sm text-slate-500">
                   No se encontraron reservas con los filtros seleccionados.
                 </td>
               </tr>
@@ -117,6 +119,13 @@ export function ReservasManagementTable({
                     </td>
                     <td className="px-3 py-3 text-sm text-slate-300">{row.disciplina ?? '—'}</td>
                     <td className="px-3 py-3 text-sm text-slate-300">{row.entrenamiento_nombre ?? '—'}</td>
+                    <td className="px-3 py-3">
+                      <ReservaPlanCell
+                        plan_nombre={row.plan_nombre}
+                        plan_fecha_inicio={row.plan_fecha_inicio}
+                        plan_fecha_fin={row.plan_fecha_fin}
+                      />
+                    </td>
                     <td className="px-3 py-3 text-sm text-slate-300 whitespace-nowrap">
                       {formatDateTime(row.entrenamiento_fecha)}
                     </td>

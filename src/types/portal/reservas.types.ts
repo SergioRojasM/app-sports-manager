@@ -120,6 +120,17 @@ export type ReservaReportRow = {
   fecha_asistencia: string | null;
   observaciones_asistencia: string | null;
   validado_por_email: string | null;
+  /**
+   * Plan whose service units paid for the booking, and that subscription's
+   * validity window (US-0112). All three describe the SAME subscription,
+   * resolved by the view from the reserva_servicios ledger, falling back to
+   * reservas.suscripcion_id for deferred plan purchases. NULL when the booking
+   * consumed no plan. The dates are date-only `YYYY-MM-DD` values — never parse
+   * them with a bare `new Date(iso)` in a locally-rendered component.
+   */
+  plan_nombre: string | null;
+  plan_fecha_inicio: string | null;
+  plan_fecha_fin: string | null;
 };
 
 export type ReservasManagementAsistencia = 'asistio' | 'no_asistio' | 'sin_registrar';

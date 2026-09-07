@@ -629,9 +629,14 @@ async function findServiceSubscriptionsToCharge(
     const available = entries.find((e) => e.unidadesRestantes === null || e.unidadesRestantes > 0);
 
     if (available) {
-      // NULL = unlimited — include in log but no deduction needed
+      // Always record which subscription covered the service, unlimited ones
+      // included (US-0112) — the reserva_servicios ledger is what the bookings
+      // report reads to attribute a booking to a plan. This does NOT cause a
+      // deduction: book_and_deduct_service_units independently re-reads
+      // `unidades_restantes is null` from suscripcion_servicios into
+      // v_unlimited and skips the update on that basis.
       results.push({
-        suscripcionId: available.unidadesRestantes === null ? null : available.suscripcionId,
+        suscripcionId: available.suscripcionId,
         servicioId,
         exhausted: false,
       });
