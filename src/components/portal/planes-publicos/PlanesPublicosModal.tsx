@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { usePlanesPublicos } from '@/hooks/portal/planes-publicos/usePlanesPublicos';
 import { useSuscripcion } from '@/hooks/portal/planes/useSuscripcion';
-import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { SuscripcionModal } from '@/components/portal/planes/SuscripcionModal';
 import { PlanPublicoCard } from './PlanPublicoCard';
 import type { PlanPublicoItem } from '@/types/portal/planes-publicos.types';
@@ -35,10 +34,11 @@ export function PlanesPublicosModal({
   const dialogRef = useRef<HTMLDivElement>(null);
   const catalog = usePlanesPublicos({ tenantId, enabled: open, initialSearch });
   const suscripcion = useSuscripcion({ tenantId, onSubscribed });
-  const { role } = useTenantAccess(open ? tenantId : undefined);
 
+  // Membership (and with it the role) is resolved by the catalog itself, since it also
+  // decides whether member-only plans are listed — no second access query here.
   // Tenant staff manage plans instead of buying them (mirrors the in-tenant rule)
-  const canAcquire = role !== 'administrador' && role !== 'entrenador';
+  const canAcquire = catalog.role !== 'administrador' && catalog.role !== 'entrenador';
 
   const handleClose = useCallback(() => {
     if (suscripcion.isSubmitting) return;
@@ -105,7 +105,9 @@ export function PlanesPublicosModal({
                 Planes de {tenantNombre}
               </h2>
               <p className="mt-1 text-sm text-slate-400">
-                Planes disponibles para cualquier persona, sin necesidad de pertenecer a la organización.
+                {catalog.esMiembro
+                  ? 'Eres miembro de esta organización: además de los planes públicos, aquí puedes adquirir sus planes exclusivos para miembros.'
+                  : 'Planes disponibles para cualquier persona, sin necesidad de pertenecer a la organización.'}
               </p>
             </div>
 
@@ -172,7 +174,9 @@ export function PlanesPublicosModal({
 
             {!loading && !error && plans.length === 0 ? (
               <p className="rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-                Esta organización no tiene planes públicos disponibles.
+                {catalog.esMiembro
+                  ? 'Esta organización no tiene planes activos disponibles.'
+                  : 'Esta organización no tiene planes públicos disponibles.'}
               </p>
             ) : null}
 
@@ -198,7 +202,6 @@ export function PlanesPublicosModal({
                     key={plan.id}
                     plan={plan}
                     canAcquire={canAcquire}
-                    defaultExpanded={search.trim().length > 0}
                     onAcquire={handleAcquire}
                   />
                 ))}

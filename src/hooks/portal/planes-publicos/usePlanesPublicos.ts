@@ -1,11 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createClient } from '@/services/supabase/client';
 import { planesService } from '@/services/supabase/portal/planes.service';
 import { disciplinesService } from '@/services/supabase/portal/disciplines.service';
+import { tenantService } from '@/services/supabase/portal/tenant.service';
 import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
 import type { Discipline } from '@/types/portal/disciplines.types';
 import type { PlanWithDisciplinas } from '@/types/portal/planes.types';
+import type { TenantRole } from '@/types/portal/tenant.types';
 import type {
   PlanPublicoItem,
   PlanPublicoTipoItem,
@@ -56,7 +59,32 @@ function toCatalogItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]):
       .map((id) => allDisciplines.find((discipline) => discipline.id === id)?.nombre)
       .filter((name): name is string => Boolean(name)),
     tipos,
+    esExclusivoMiembro: !plan.es_publico,
   };
+}
+
+/**
+ * Membership decides WHICH catalog query runs, so it is resolved as part of the same
+ * load instead of by a separate hook: one `loading` flag, no first paint of the
+ * public-only catalog followed by a second, wider fetch.
+ *
+ * Fails closed (`esMiembro: false` → public catalog only) on any error; RLS remains the
+ * authoritative gate on both reading and buying a member-only plan.
+ */
+async function resolveMembership(tenantId: string): Promise<{ esMiembro: boolean; role: TenantRole | null }> {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return { esMiembro: false, role: null };
+
+    const decision = await tenantService.canUserAccessTenant(supabase, user.id, tenantId);
+    return { esMiembro: decision.allowed, role: decision.role };
+  } catch {
+    return { esMiembro: false, role: null };
+  }
 }
 
 /** A plan matches when the term hits the plan itself, any subtype or any granted service. */
@@ -86,21 +114,31 @@ export function usePlanesPublicos({
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(initialSearch);
+  const [esMiembro, setEsMiembro] = useState(false);
+  const [role, setRole] = useState<TenantRole | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
+      const membership = await resolveMembership(tenantId);
+
       const [planesData, disciplinesData] = await Promise.all([
-        planesService.getPlanesPublicos(tenantId),
+        // A member of the organization gets its full active catalog — the plans that
+        // grant the service a booking is missing are often member-only (US-0111).
+        membership.esMiembro
+          ? planesService.getPlanesMiembro(tenantId)
+          : planesService.getPlanesPublicos(tenantId),
         disciplinesService.listDisciplinesByTenant(tenantId),
       ]);
 
+      setEsMiembro(membership.esMiembro);
+      setRole(membership.role);
       setPlans(planesData.map((plan) => toCatalogItem(plan, disciplinesData)));
     } catch {
       setPlans([]);
-      setError('No fue posible cargar los planes públicos de esta organización.');
+      setError('No fue posible cargar los planes de esta organización.');
     } finally {
       setLoading(false);
     }
@@ -133,6 +171,8 @@ export function usePlanesPublicos({
   return {
     loading,
     error,
+    esMiembro,
+    role,
     plans,
     filteredPlans,
     search,

@@ -6,12 +6,6 @@ import type { PlanPublicoItem, PlanPublicoTipoItem } from '@/types/portal/planes
 type PlanPublicoCardProps = {
   plan: PlanPublicoItem;
   canAcquire: boolean;
-  /**
-   * Expands the subtypes by default. The search matches service names, which live
-   * inside the collapsed section — without this, a plan matched only by a service
-   * would look like an arbitrary result.
-   */
-  defaultExpanded?: boolean;
   onAcquire: (plan: PlanPublicoItem) => void;
 };
 
@@ -65,12 +59,7 @@ function TipoRow({ tipo }: { tipo: PlanPublicoTipoItem }) {
   );
 }
 
-export function PlanPublicoCard({
-  plan,
-  canAcquire,
-  defaultExpanded = false,
-  onAcquire,
-}: PlanPublicoCardProps) {
+export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCardProps) {
   return (
     <article className="glass rounded-xl border border-portal-border p-4">
       <header className="flex flex-wrap items-start justify-between gap-2">
@@ -81,11 +70,24 @@ export function PlanPublicoCard({
           ) : null}
         </div>
 
-        {plan.tipo ? (
-          <span className="rounded-full border border-portal-border bg-navy-deep px-2.5 py-0.5 text-[11px] capitalize text-slate-300">
-            {plan.tipo}
-          </span>
-        ) : null}
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
+          {/* Only reachable when the viewer is a member — the catalog hides non-public
+              plans from everyone else — so the badge explains why it is listed. */}
+          {plan.esExclusivoMiembro ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/30 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-200">
+              <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
+                workspace_premium
+              </span>
+              Solo miembros
+            </span>
+          ) : null}
+
+          {plan.tipo ? (
+            <span className="rounded-full border border-portal-border bg-navy-deep px-2.5 py-0.5 text-[11px] capitalize text-slate-300">
+              {plan.tipo}
+            </span>
+          ) : null}
+        </div>
       </header>
 
       {plan.disciplinaNames.length > 0 ? (
@@ -114,13 +116,10 @@ export function PlanPublicoCard({
         </ul>
       ) : null}
 
+      {/* Collapsed by default: the card leads with the plan itself, and the subtype
+          list stays one click away for whoever wants the detail. */}
       {plan.tipos.length > 0 ? (
-        <details
-          /* Remount on toggle so the new default applies, while manual open/close still works */
-          key={defaultExpanded ? 'expanded' : 'collapsed'}
-          open={defaultExpanded}
-          className="group mt-3 rounded-lg border border-portal-border bg-navy-deep/40"
-        >
+        <details className="group mt-3 rounded-lg border border-portal-border bg-navy-deep/40">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-xs text-slate-300 [&::-webkit-details-marker]:hidden">
             <span className="font-medium">
               {plan.tipos.length === 1 ? '1 opción disponible' : `${plan.tipos.length} opciones disponibles`}

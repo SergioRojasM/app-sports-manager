@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePublicTrainingReserva } from '@/hooks/portal/entrenamientos-publicos/usePublicTrainingReserva';
+import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { ReservaFormModal } from '@/components/portal/entrenamientos/reservas/ReservaFormModal';
 import { FormularioRespuestaModal } from '@/components/portal/entrenamientos/reservas/FormularioRespuestaModal';
 import { InlineProfileCompletionStep } from '@/components/portal/entrenamientos/reservas/InlineProfileCompletionStep';
@@ -42,6 +43,11 @@ export function PublicTrainingReservaModal({
   omitirConfirmacionPlan = false,
 }: PublicTrainingReservaModalProps) {
   const reserva = usePublicTrainingReserva({ tenantId, entrenamientoId, disciplinaId, omitirConfirmacionPlan });
+  // A marketplace booker can perfectly well be a member of the publishing organization
+  // (its own trainings show up in the marketplace too). When they are, the plan that
+  // unlocks this booking is often a member-only one, so the rejection dialog says so
+  // before sending them to the catalog — which lists those plans for them (US-0111).
+  const { allowed: esMiembroDelTenant } = useTenantAccess(tenantId);
   const [planesOpen, setPlanesOpen] = useState(false);
   const verPlanesRef = useRef<HTMLButtonElement>(null);
 
@@ -212,6 +218,18 @@ export function PublicTrainingReservaModal({
                 : bookingRejection.message}
             </p>
 
+            {canAcquirePlan && esMiembroDelTenant ? (
+              <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-amber-300/25 bg-amber-400/10 px-3 py-2 text-left text-xs text-amber-200">
+                <span className="material-symbols-outlined text-sm" aria-hidden="true">
+                  workspace_premium
+                </span>
+                <span>
+                  Eres miembro de {tenantNombre}: además de los planes públicos, puedes adquirir sus planes
+                  exclusivos para miembros.
+                </span>
+              </p>
+            ) : null}
+
             <div className="mt-5 flex flex-col gap-2">
               {canAcquirePlan && (
                 <button
@@ -220,7 +238,11 @@ export function PublicTrainingReservaModal({
                   onClick={() => setPlanesOpen(true)}
                   className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
                 >
-                  {canSkipConfirmation ? 'Elegir plan y continuar' : `Ver planes de ${tenantNombre}`}
+                  {canSkipConfirmation
+                    ? 'Elegir plan y continuar'
+                    : esMiembroDelTenant
+                      ? `Ver planes de miembro de ${tenantNombre}`
+                      : `Ver planes de ${tenantNombre}`}
                 </button>
               )}
               <button
