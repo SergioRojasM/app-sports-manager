@@ -21,6 +21,7 @@ export function EntrenamientosPublicosPage() {
     tenantOptions,
     dateFrom,
     dateTo,
+    isDefaultDateRange,
     calendarMonth,
     goToPrevMonth,
     goToNextMonth,
@@ -85,6 +86,12 @@ export function EntrenamientosPublicosPage() {
           Filtrar
         </button>
       </div>
+
+      {isDefaultDateRange && !loading && !error && (
+        <p className="mb-6 -mt-4 font-landing-body text-xs text-landing-text-secondary">
+          Se muestran los entrenamientos de los próximos 60 días. Si quieres ver más, filtra por fechas.
+        </p>
+      )}
 
       <div className="relative">
         {loading && (

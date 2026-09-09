@@ -23,9 +23,10 @@ function startOfWeek(reference: Date): Date {
   return start;
 }
 
-function endOfCurrentMonthKey(reference: Date): string {
-  const end = new Date(reference.getFullYear(), reference.getMonth() + 1, 0);
-  return toDateKey(end);
+function addDaysKey(reference: Date, days: number): string {
+  const date = new Date(reference);
+  date.setDate(date.getDate() + days);
+  return toDateKey(date);
 }
 
 export function computeChipRange(chip: PublicTrainingDateChip): { dateFrom: string; dateTo: string } {
@@ -66,7 +67,7 @@ export function useEntrenamientosPublicosMarketplace() {
   const [error, setError] = useState<string | null>(null);
 
   const [dateFrom, setDateFrom] = useState<string | null>(() => toDateKey(new Date()));
-  const [dateTo, setDateTo] = useState<string | null>(() => endOfCurrentMonthKey(new Date()));
+  const [dateTo, setDateTo] = useState<string | null>(() => addDaysKey(new Date(), 60));
   const [calendarMonth, setCalendarMonth] = useState<CalendarMonth>(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
@@ -164,6 +165,14 @@ export function useEntrenamientosPublicosMarketplace() {
   const featuredItem = filteredItems[0] ?? null;
   const standardItems = filteredItems.slice(1);
 
+  // Recomputed from live state (not a one-way "dirty" flag) so it also turns back on
+  // if the user's own filtering happens to reproduce the exact default window (US-0113).
+  const isDefaultDateRange = useMemo(() => {
+    const defaultFrom = addDaysKey(new Date(), 0);
+    const defaultTo = addDaysKey(new Date(), 60);
+    return dateFrom === defaultFrom && dateTo === defaultTo;
+  }, [dateFrom, dateTo]);
+
   return {
     loading,
     error,
@@ -175,6 +184,7 @@ export function useEntrenamientosPublicosMarketplace() {
     tenantOptions,
     dateFrom,
     dateTo,
+    isDefaultDateRange,
     calendarMonth,
     goToPrevMonth,
     goToNextMonth,
