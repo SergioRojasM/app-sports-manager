@@ -18,6 +18,13 @@ import { NovedadesMiembroModal } from './NovedadesMiembroModal';
 import { ConfigurarSuspensionModal } from './ConfigurarSuspensionModal';
 import { SolicitudesTab } from './gestion-solicitudes/SolicitudesTab';
 import { BloqueadosTab } from './gestion-solicitudes/BloqueadosTab';
+import { AgregarMiembroModal } from './gestion-invitaciones/AgregarMiembroModal';
+import { ContrasenaTemporalModal } from './gestion-invitaciones/ContrasenaTemporalModal';
+import { InvitacionesTab } from './gestion-invitaciones/InvitacionesTab';
+import { useInvitacionesAdmin } from '@/hooks/portal/gestion-invitaciones/useInvitacionesAdmin';
+import { useAgregarMiembro } from '@/hooks/portal/gestion-invitaciones/useAgregarMiembro';
+import { useTenantEntitlements } from '@/hooks/portal/gestion-invitaciones/useTenantEntitlements';
+import type { AgregarMiembroInput, AgregarMiembroModo } from '@/types/portal/invitaciones.types';
 import type { MiembroTableItem } from '@/types/portal/equipo.types';
 import type { RolOption } from '@/types/portal/equipo.types';
 
@@ -25,7 +32,7 @@ type EquipoPageProps = {
   tenantId: string;
 };
 
-type ActiveTab = 'equipo' | 'solicitudes' | 'bloqueados';
+type ActiveTab = 'equipo' | 'solicitudes' | 'bloqueados' | 'invitaciones';
 
 function LoadingState() {
   return (
@@ -77,6 +84,10 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
 
   const solicitudesAdmin = useSolicitudesAdmin({ tenantId });
   const bloqueadosAdmin = useBloqueados({ tenantId });
+  const invitacionesAdmin = useInvitacionesAdmin({ tenantId });
+  const agregarMiembro = useAgregarMiembro({ tenantId });
+  const { entitlements } = useTenantEntitlements({ tenantId });
+  const [agregarMiembroOpen, setAgregarMiembroOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('equipo');
   const [asignarNivelTarget, setAsignarNivelTarget] = useState<string | null>(null);
@@ -85,6 +96,29 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
   const [rolChangeTarget, setRolChangeTarget] = useState<{ miembro: MiembroTableItem; nuevoRol: RolOption } | null>(null);
   const [cambiarEstadoTarget, setCambiarEstadoTarget] = useState<MiembroTableItem | null>(null);
   const [novedadesTarget, setNovedadesTarget] = useState<MiembroTableItem | null>(null);
+
+  const activeMemberEmails = useMemo(
+    () => new Set(members.filter((m) => m.estado === 'activo').map((m) => m.email.toLowerCase())),
+    [members],
+  );
+
+  const openAgregarMiembro = () => {
+    agregarMiembro.limpiarError();
+    setAgregarMiembroOpen(true);
+  };
+
+  const handleAgregarMiembro = async (modo: AgregarMiembroModo, input: AgregarMiembroInput) => {
+    const ok = await agregarMiembro.agregar(modo, input);
+    if (!ok) return false;
+    setAgregarMiembroOpen(false);
+    if (modo === 'contrasena_temporal') {
+      await refresh();
+    } else {
+      setActiveTab('invitaciones');
+      await invitacionesAdmin.refresh();
+    }
+    return true;
+  };
 
   const allMembersAsTableItems = useMemo<MiembroTableItem[]>(
     () =>
@@ -148,6 +182,23 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
         >
           Bloqueados
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('invitaciones')}
+          className={[
+            'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
+            activeTab === 'invitaciones'
+              ? 'bg-navy-soft text-slate-100'
+              : 'text-slate-400 hover:text-slate-200',
+          ].join(' ')}
+        >
+          Invitaciones
+          {invitacionesAdmin.activeCount > 0 ? (
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-turquoise px-1.5 text-[11px] font-bold text-navy-deep">
+              {invitacionesAdmin.activeCount}
+            </span>
+          ) : null}
+        </button>
       </nav>
 
       {/* Equipo tab content */}
@@ -162,9 +213,17 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
             onEstadoFilterChange={setEstadoFilter}
           />
 
-          {/* Configurar Suspensión button */}
+          {/* Agregar miembro + Configurar Suspensión buttons */}
           {!loading && !error ? (
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={openAgregarMiembro}
+                className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90"
+              >
+                <span className="material-symbols-outlined text-base">person_add</span>
+                Agregar miembro
+              </button>
               <button
                 type="button"
                 onClick={() => setSuspensionModalOpen(true)}
@@ -323,6 +382,40 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
           error={bloqueadosAdmin.error}
           desbloquear={bloqueadosAdmin.desbloquear}
           refresh={bloqueadosAdmin.refresh}
+        />
+      ) : null}
+
+      {/* Invitaciones tab content */}
+      {activeTab === 'invitaciones' ? (
+        <InvitacionesTab
+          invitaciones={invitacionesAdmin.invitaciones}
+          loading={invitacionesAdmin.loading}
+          error={invitacionesAdmin.error}
+          filtro={invitacionesAdmin.filtro}
+          onFiltroChange={invitacionesAdmin.setFiltro}
+          reenviar={invitacionesAdmin.reenviar}
+          cancelar={invitacionesAdmin.cancelar}
+          refresh={invitacionesAdmin.refresh}
+          onAgregarMiembro={openAgregarMiembro}
+        />
+      ) : null}
+
+      <AgregarMiembroModal
+        isOpen={agregarMiembroOpen}
+        roles={roles}
+        activeMemberEmails={activeMemberEmails}
+        provisioningEnabled={entitlements.aprovisionamientoAdministradoHabilitado}
+        isSubmitting={agregarMiembro.isSubmitting}
+        error={agregarMiembro.error}
+        onSubmit={handleAgregarMiembro}
+        onClose={() => setAgregarMiembroOpen(false)}
+      />
+
+      {agregarMiembro.resultadoAlta ? (
+        <ContrasenaTemporalModal
+          email={agregarMiembro.resultadoAlta.email}
+          contrasenaTemporal={agregarMiembro.resultadoAlta.contrasenaTemporal}
+          onClose={agregarMiembro.limpiarResultado}
         />
       ) : null}
     </section>

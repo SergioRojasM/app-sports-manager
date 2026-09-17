@@ -92,6 +92,13 @@ export type TenantAccessDecision = {
   tenantId: string;
   allowed: boolean;
   role: TenantRole | null;
+  /** True when the caller's membership exists but is `pendiente_activacion` (US-0114). */
+  pendingActivation: boolean;
+};
+
+/** Platform-owned per-tenant entitlements read from `admin_tenants` (US-0114). */
+export type AdminTenantEntitlements = {
+  aprovisionamientoAdministradoHabilitado: boolean;
 };
 
 export type PortalTenantListItem = {

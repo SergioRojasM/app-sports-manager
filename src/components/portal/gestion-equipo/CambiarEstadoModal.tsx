@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import type { MiembroEstado, MiembroNovedadTipo, MiembroTableItem } from '@/types/portal/equipo.types';
+import { EquipoServiceError } from '@/types/portal/equipo.types';
 import { EquipoStatusBadge } from './EquipoStatusBadge';
 
 type CambiarEstadoModalProps = {
@@ -23,6 +24,7 @@ const TIPO_OPTIONS: { value: MiembroNovedadTipo; label: string }[] = [
   { value: 'inasistencias_acumuladas', label: 'Inasistencias acumuladas' },
   { value: 'suspension_manual', label: 'Suspensión manual' },
   { value: 'reactivacion', label: 'Reactivación' },
+  { value: 'activacion_cuenta', label: 'Activación de cuenta' },
   { value: 'otro', label: 'Otro' },
 ];
 
@@ -53,8 +55,12 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
       await onConfirm(nuevoEstado, tipo, descripcion.trim() || undefined);
       resetForm();
       onClose();
-    } catch {
-      setErrorMsg('Ocurrió un error al cambiar el estado. Intenta de nuevo.');
+    } catch (err) {
+      setErrorMsg(
+        err instanceof EquipoServiceError && err.code === 'invalid_transition'
+          ? err.message
+          : 'Ocurrió un error al cambiar el estado. Intenta de nuevo.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -63,6 +69,11 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
   if (!member || !isOpen) return null;
 
   const fullName = [member.nombre, member.apellido].filter(Boolean).join(' ');
+  // A pending member can only be activated or discarded; nobody can be moved into pending.
+  const estadoOptions =
+    member.estado === 'pendiente_activacion'
+      ? ESTADO_OPTIONS.filter((o) => o.value === 'activo' || o.value === 'inactivo')
+      : ESTADO_OPTIONS.filter((o) => o.value !== member.estado);
   const canSubmit = nuevoEstado !== '' && tipo !== '' && !isSubmitting;
 
   return (
@@ -97,7 +108,7 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
               className="w-full rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-200 outline-none focus:border-turquoise/50"
             >
               <option value="">Seleccionar…</option>
-              {ESTADO_OPTIONS.filter((o) => o.value !== member.estado).map((o) => (
+              {estadoOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>

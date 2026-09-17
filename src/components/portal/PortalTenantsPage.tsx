@@ -2,6 +2,7 @@
 
 import { useTenantView } from '@/hooks/portal/tenant/useTenantView';
 import { TenantDirectoryList } from '@/components/portal/tenant/TenantDirectoryList';
+import { InvitacionesPendientesSection } from '@/components/portal/invitaciones/InvitacionesPendientesSection';
 
 function LoadingState() {
   return (
@@ -22,6 +23,8 @@ export function PortalTenantsPage() {
           Explora las organizaciones y accede a aquellas donde ya tienes membresía activa.
         </p>
       </header>
+
+      <InvitacionesPendientesSection />
 
       {loading ? <LoadingState /> : null}
 
