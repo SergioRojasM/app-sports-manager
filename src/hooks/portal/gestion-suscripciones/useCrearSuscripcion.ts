@@ -163,7 +163,7 @@ export function useCrearSuscripcion({
           .select('usuario_id, nombre, apellido, email, numero_identificacion, tipo_identificacion, rol_nombre, estado')
           .eq('tenant_id', tenantId)
           .eq('rol_nombre', 'usuario')
-          .neq('estado', 'inactivo');
+          .not('estado', 'in', '(inactivo,pendiente_activacion)');
 
         if (data) {
           const options: AtletaOption[] = (data as Array<{

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/services/supabase/client';
 import type {
+  AdminTenantEntitlements,
   TenantEditFormValues,
   TenantEditPayload,
   TenantEditResult,
@@ -272,6 +273,19 @@ export const tenantService = {
     }));
   },
 
+  async getTenantEntitlements(supabase: SupabaseClient, tenantId: string): Promise<AdminTenantEntitlements> {
+    const { data, error } = await supabase
+      .from('admin_tenants')
+      .select('aprovisionamiento_administrado_habilitado')
+      .eq('tenant_id', tenantId)
+      .maybeSingle();
+
+    return {
+      aprovisionamientoAdministradoHabilitado:
+        !error && data?.aprovisionamiento_administrado_habilitado === true,
+    };
+  },
+
   async canUserAccessTenant(
     supabase: SupabaseClient,
     userId: string,
@@ -279,7 +293,7 @@ export const tenantService = {
   ): Promise<TenantAccessDecision> {
     const { data, error } = await supabase
       .from('miembros_tenant')
-      .select('tenant_id, rol_id, roles(nombre)')
+      .select('tenant_id, rol_id, estado, roles(nombre)')
       .eq('usuario_id', userId)
       .eq('tenant_id', tenantId)
       .limit(1)
@@ -290,15 +304,26 @@ export const tenantService = {
         tenantId,
         allowed: false,
         role: null,
+        pendingActivation: false,
       };
     }
 
-    const row = data as MembershipWithRoleRow;
+    const row = data as MembershipWithRoleRow & { estado: string };
+
+    if (row.estado === 'pendiente_activacion') {
+      return {
+        tenantId,
+        allowed: false,
+        role: null,
+        pendingActivation: true,
+      };
+    }
 
     return {
       tenantId,
       allowed: true,
       role: normalizeRole(toSingle(row.roles)?.nombre),
+      pendingActivation: false,
     };
   },
 
