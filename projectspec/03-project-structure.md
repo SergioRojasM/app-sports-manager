@@ -13,10 +13,17 @@ Following structure reflects the current implementation and the target scalable 
 │   │   ├── layout.tsx                    # Root layout with providers
 │   │   ├── page.tsx                      # Landing/home
 │   │   ├── globals.css                   # Global styles & Tailwind imports
+│   │   ├── api/                          # Privileged route handlers (server-only; the ONLY place the service-role client is used) (US-0114)
+│   │   │   └── portal/orgs/[tenant_id]/
+│   │   │       ├── invitaciones/route.ts                              # POST: crear_invitacion_tenant (user session) → auth.admin.inviteUserByEmail; identical 202 whether or not the email already has an account (in-app delivery)
+│   │   │       ├── invitaciones/[invitacion_id]/reenviar/route.ts     # POST: reenviar_invitacion_tenant → re-send, same 202 contract
+│   │   │       └── miembros/aprovisionar/route.ts                     # POST: reservar_alta_administrada → auth.admin.createUser (server-generated password, email_confirm) → completar_alta_administrada; compensates with deleteUser; returns the password once (Cache-Control: no-store)
 │   │   ├── auth/                         # Authentication routes
 │   │   │   ├── login/
 │   │   │   ├── signup/
-│   │   │   └── callback/
+│   │   │   ├── callback/
+│   │   │   ├── confirm/route.ts          # Invite email landing (US-0114): verifyOtp(token_hash, type=invite) → cookie session → relative redirect to /auth/update-password?next=<same-origin path from redirect_to>
+│   │   │   └── update-password/page.tsx  # Honors a validated `next` (US-0114); portal targets continue via /portal/bootstrap
 │   │   ├── entrenamientos-publicos/page.tsx  # Public, unauthenticated trainings discovery page (top-level, outside /portal — not matched by middleware.ts's protectedPaths) (US-0091)
 │   │   ├── entrenamientos-publicos/[entrenamiento_id]/page.tsx  # Public detail page for one published training; awaits params, wraps PublicTrainingDetallePage in Suspense (it reads the `from` search param) — also outside protectedPaths (US-0109)
 │   │   ├── dashboard/                    # Legacy redirect entry
@@ -29,6 +36,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── page.tsx
 │   │       │   └── loading.tsx
 │   │       ├── perfil/page.tsx           # User profile (global, not tenant-scoped)
+│   │       ├── invitaciones/[invitacion_id]/page.tsx  # Recipient: review and accept a tenant invitation (US-0114)
+│   │       ├── activar-cuenta/[tenant_id]/page.tsx    # Provisioned member: replace the temporary password and activate the pending membership (US-0114)
 │   │       ├── (atleta)/                 # Portal-level athlete area (US-0093) — no role gate: roles are per-tenant and public-plan buyers hold no membership; pages are self-scoped by atleta_id = auth.uid()
 │   │       │   ├── layout.tsx            # Pass-through; auth is enforced by the parent portal shell
 │   │       │   ├── mis-suscripciones/page.tsx  # Cross-tenant "Mis Suscripciones" (replaces the tenant-scoped route)
@@ -37,7 +46,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users)
 │   │           └── [tenant_id]/
-│   │               ├── layout.tsx        # Membership + role gate for tenant entry
+│   │               ├── layout.tsx        # Membership + role gate for tenant entry; a `pendiente_activacion` membership redirects to /portal/activar-cuenta/[tenant_id] (US-0114)
 │   │               ├── page.tsx          # Redirect to tenant role landing
 │   │               ├── (administrador)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-administrador users to /portal/orgs/[tenant_id]
@@ -176,7 +185,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EquipoTable.tsx
 │   │   │       ├── EquipoStatsCards.tsx
 │   │   │       ├── EquipoHeaderFilters.tsx
-│   │   │       ├── EquipoStatusBadge.tsx
+│   │   │       ├── EquipoStatusBadge.tsx          # Includes sky "Pendiente de activación" (US-0114)
+│   │   │       ├── CambiarEstadoModal.tsx         # Pending members may only become Activo/Inactivo; "Activación de cuenta" motivo (US-0114)
 │   │   │       ├── AsignarNivelModal.tsx        # Per-discipline level assignment for athletes
 │   │   │       ├── EditarPerfilMiembroModal.tsx  # Slide-in modal: edit member profile + sports data
 │   │   │       ├── EliminarMiembroModal.tsx      # Confirmation dialog: remove member from team
@@ -188,6 +198,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── SolicitudesTable.tsx
 │   │   │       ├── AceptarSolicitudModal.tsx
 │   │   │       └── SolicitudesTab.tsx
+│   │   │   └── gestion-invitaciones/      # Feature slice (portal/gestion-equipo/gestion-invitaciones, US-0114) — mirrors gestion-solicitudes styling
+│   │   │       ├── AgregarMiembroModal.tsx        # Email, role, optional nombre/nota; Modo choice only when admin_tenants entitlement is on; active-member warning
+│   │   │       ├── ContrasenaTemporalModal.tsx    # One-time password reveal; cannot be dismissed until "Compartiré esta contraseña por un canal aprobado" is checked
+│   │   │       ├── InvitacionesTab.tsx            # Estado filter, Agregar miembro action, loading/error/empty states
+│   │   │       ├── InvitacionesTable.tsx          # Correo/Rol/Estado/Expira/Creada; Reenviar + inline-confirm Cancelar for pendiente/enviada/expirada
+│   │   │       └── InvitacionEstadoBadge.tsx      # pendiente and enviada share "Pendiente" so the list never reveals whether an email had an account
+│   │   │   └── invitaciones/              # Feature slice (portal/invitaciones — recipient side, US-0114)
+│   │   │       ├── AceptarInvitacionPage.tsx      # Accept flow with explicit expired/cancelled/accepted/not-found states
+│   │   │       ├── ActivarCuentaPage.tsx          # New password + confirmation → activation
+│   │   │       └── InvitacionesPendientesSection.tsx  # Rendered by PortalTenantsPage when the user has pending invitations (in-app delivery for existing accounts)
 │   │   │   └── gestion-suscripciones/     # Feature slice (portal/gestion-suscripciones)
 │   │   │       ├── GestionSuscripcionesPage.tsx  # Owns activeTab (Miembros/No miembros) state, tab bar with tabCounts badges, tab-aware empty state (US-0098)
 │   │   │       ├── SuscripcionesTable.tsx        # Includes "Tipo" column rendering SuscripcionTipoBadge per row (US-0098)
@@ -292,6 +312,14 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useEquipo.ts
 │   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
 │   │           └── useUsuarioNivelDisciplina.ts  # Fetch + upsert athlete discipline levels
+│   │       └── gestion-invitaciones/     # US-0114
+│   │           ├── useInvitacionesAdmin.ts   # Loads all invitations once; client-side estado filter; activeCount; reenviar/cancelar
+│   │           ├── useAgregarMiembro.ts      # agregar(modo, input); holds the one-time resultadoAlta until limpiarResultado
+│   │           └── useTenantEntitlements.ts  # Reads admin_tenants; fails closed
+│   │       └── invitaciones/             # US-0114 (recipient)
+│   │           ├── useMisInvitaciones.ts
+│   │           ├── useAceptarInvitacion.ts
+│   │           └── useActivarCuenta.ts       # updatePassword first; activar_alta_administrada only on success
 │   │       └── gestion-solicitudes/
 │   │           ├── useSolicitudesAdmin.ts    # Admin: load pending, accept/reject actions
 │   │           └── useSolicitudRequest.ts   # User: submit request, track history/blocked state
@@ -323,7 +351,7 @@ Following structure reflects the current implementation and the target scalable 
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
 │   │       ├── client.ts                 # Browser client
-│   │       ├── server.ts                 # Server client
+│   │       ├── server.ts                 # Server client + createServiceClient() (service role; `import 'server-only'`; throws when SUPABASE_SERVICE_ROLE_KEY is missing) — only src/app/api and server-only libs may use the service client
 │   │       ├── middleware.ts             # Auth middleware helpers
 │   │       ├── auth.ts
 │   │       ├── portal/                   # Portal bounded-context services
@@ -342,6 +370,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── pagos.service.ts  # updateComprobantePath resets estado to 'pendiente' and clears motivo_rechazo on resubmission, so a rejected payment re-enters review (US-0106)
 │   │       │   └── equipo.service.ts
 │   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests)
+│   │       │   └── invitaciones.service.ts     # Admin: v_invitaciones_tenant_admin select, cancelar RPC, fetch to /api routes; recipient: get_mis_invitaciones_pendientes, get_invitacion_para_aceptar, activar_invitacion_tenant, activar_alta_administrada (US-0114)
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
@@ -375,6 +404,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── reglas-suspension.types.ts # ReglaSuspension, ReglaSuspensionCreatePayload, ReglaSuspensionUpdatePayload, ReglaSuspensionFormValues
 │   │       └── equipo.types.ts
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
+│   │       └── invitaciones.types.ts           # InvitacionEstado, InvitacionRow, AgregarMiembroInput/Modo, AltaAdministradaResultado, InvitacionesServiceError codes (US-0114)
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS, PERFIL_INCOMPLETO — US-0095), BookingResult; BookingRejection.servicioNombre (optional, SERVICIO_REQUERIDO/UNIDADES_AGOTADAS only) feeds the pre-filtered plan catalog (US-0101)
@@ -390,6 +420,11 @@ Following structure reflects the current implementation and the target scalable 
 │       ├── slugify.ts                        # slugify(value): snake_case key (diacritics stripped, leading digits trimmed) — used to auto-compute campo_nombre for "Datos" sections (US-0085)
 │       ├── validators.ts
 │       └── portal/
+│           ├── password-generator.ts        # server-only: generateTemporaryPassword() — 16 chars, crypto.randomInt, every character class (US-0114)
+│           ├── audit-log.ts                 # server-only: logAuditEvent() — one JSON line with allow-listed fields only; never emails, passwords, tokens, or raw errors (US-0114)
+│           ├── privileged-route.ts          # server-only: route helpers — body parsing, no-store responses, APP_URL-based invite redirectTo, email-exists detection (US-0114)
+│           ├── invitaciones-delivery.ts     # server-only: deliverInvitation() — inviteUserByEmail + outcome recording shared by create/resend routes (US-0114)
+│           ├── invitaciones-errors.ts       # Client-safe: onboarding RPC SQLSTATE/message → HTTP status + error code, Spanish user messages (US-0114)
 │           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
 │           ├── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
 │           ├── formulario-secciones-grouping.ts  # buildFormularioRenderPlan() — groups a flat, order-derived FormularioSeccion[] into 'seccion' cards (positional, no parent FK) + 'mitad'-width pairing; shared by FormularioSeccionesBuilder, FormularioSeccionesGrouped (preview), and FormularioRespuestaModal (live booking) so all three render identically (US-0108)
@@ -411,6 +446,7 @@ Following structure reflects the current implementation and the target scalable 
 │   └── specs/
 │
 ├── proxy.ts                     # Next.js proxy (required for Supabase)
+├── supabase/templates/invite.html  # Invite email template → {{ .SiteURL }}/auth/confirm?token_hash=…&type=invite&redirect_to=… (enabled in supabase/config.toml; must also be set in the production dashboard) (US-0114)
 ├── .env.local                   # Environment variables (not committed)
 ├── .env.example                 # Environment variables template
 ├── .gitignore                   # Git ignore rules
@@ -474,6 +510,17 @@ Supabase (database)
 |----------|---------|---------|
 | `book_and_deduct_service_units(...)` | Atomic booking + multi-service unit deduction via JSONB deductions array; optionally validates required "datos" fields and inserts a linked `formulario_respuestas` row atomically when `p_formulario_plantilla_id`/`p_formulario_respuesta` are provided (US-0087); also validates the attached template's `perfil_campos_requeridos` against `p_atleta_id`'s `usuarios`/`perfil_deportivo` profile before any write, raising `PERFIL_INCOMPLETO` when a requested field is missing (US-0095); freezes the validated profile values into `formulario_respuestas.perfil_snapshot` at insert time, so later profile edits don't retroactively change a historical response (US-0096); `p_permitir_pendiente`/`p_suscripcion_id` insert the reserva as `pendiente` (instead of `confirmada`) linked to a pending suscripcion, for the public-training skip-plan-confirmation path (US-0106); `p_plan_purchase` (jsonb: plan_id, plan_tipo_id, comentarios, metodo_pago_id, monto) makes the function CREATE that pending suscripcion + its `suscripcion_servicios` + the `pagos` row itself, in the same transaction as the reserva, re-checking `can_subscribe_to_plan` and the absence of a duplicate `pendiente` subscription first (raises `PLAN_NO_DISPONIBLE`, `SUSCRIPCION_PENDIENTE_EXISTENTE`, or `PLAN_PURCHASE_REQUIERE_PENDIENTE`) — so an abandoned booking can no longer strand a pending plan request (US-0110) | Called via RPC from `reservas.service.ts` |
 | `cancel_and_restore_service_units(...)` | Atomic cancellation + service unit restoration from `reserva_servicios` ledger | Called via RPC from `reservas.service.ts` |
+| `get_admin_tenants_for_authenticated_user()` / `get_member_tenants_for_authenticated_user()` / `get_trainer_or_admin_tenants_for_authenticated_user()` | Tenant-capability helpers; as of US-0114 all three EXCLUDE `pendiente_activacion` memberships, and the policies/functions that previously joined `miembros_tenant` directly for the caller (entrenamientos*, nivel_disciplina, usuario_nivel_disciplina, reservas select/insert, can_read_plan, can_subscribe_to_plan) go through them | RLS policy expressions |
+| `cambiar_estado_miembro(...)` | Admin check via `get_admin_tenants_for_authenticated_user()`; rejects any move INTO `pendiente_activacion` and allows only `activo`/`inactivo` OUT of it (22023); pending → activo also marks the linked alta `activada` (US-0114) | RPC from `equipo.service.ts` |
+| `ensure_admin_tenant_row()` | Creates the default `admin_tenants` entitlements row for every new tenant (US-0114) | `after insert` trigger on `tenants` |
+| `crear_invitacion_tenant(p_tenant_id, p_email, p_rol_id, p_nombre, p_nota)` | Admin + assignable-role check, email normalization, rate limits (30/h per admin, 200/day per tenant), idempotent on the active (tenant, email) invitation — re-submitting counts as a resend (US-0114) | `POST /api/portal/orgs/[tenant_id]/invitaciones` (user session) |
+| `reenviar_invitacion_tenant(p_invitacion_id)` / `cancelar_invitacion_tenant(p_invitacion_id)` | Resend: 3/h per invitation, renews expiry, revives `expirada`; cancel: idempotent, 22023 from terminal states (US-0114) | Resend route (user session) / `invitaciones.service.ts` |
+| `registrar_envio_invitacion(p_invitacion_id, p_canal)` / `registrar_fallo_invitacion(p_invitacion_id, p_codigo)` | Record invite delivery (`email` → `enviada`; `in_app` keeps `pendiente`) or failure; **service_role only** (US-0114) | Invite routes (service client) |
+| `get_mis_invitaciones_pendientes()` / `get_invitacion_para_aceptar(p_invitacion_id)` | Invitations addressed to the caller's CONFIRMED email; P0002 for anything else (US-0114) | `invitaciones.service.ts` |
+| `activar_invitacion_tenant(p_invitacion_id)` | Row lock; EXPIRED/CANCELLED/EMAIL_MISMATCH/ALREADY_ACCEPTED checks; conflict-safe `activo` membership that never changes an existing role; idempotent retry (US-0114) | `invitaciones.service.ts` |
+| `reservar_alta_administrada(...)` / `completar_alta_administrada(p_alta_id, p_usuario_id)` / `registrar_fallo_alta(p_alta_id, p_codigo)` | Provisioning saga: reserve (admin, role, `admin_tenants` flag → FEATURE_DISABLED, 20/day, abandoned reservations >10 min released) → complete (`pendiente_activacion` membership) / record failure; complete + failure are **service_role only** (US-0114) | `POST /api/portal/orgs/[tenant_id]/miembros/aprovisionar` |
+| `activar_alta_administrada(p_tenant_id)` | Caller's own `pendiente_activacion` membership → `activo`, alta `activada`, novedad `activacion_cuenta` (US-0114) | `invitaciones.service.ts` after `updatePassword` |
+| `expirar_invitaciones_tenant()` | Marks active invitations past `expires_at` as `expirada`; provisioned accounts never expire (US-0114) | pg_cron |
 | `confirm_pending_reservas_for_suscripcion(p_suscripcion_id)` | On subscription approval, confirms every linked `pendiente` reserva it can (resolves the training's matching service requirement, deducts the unit, logs to `reserva_servicios`), leaving any it can't satisfy in `pendiente` rather than failing the approval (US-0106) | Called via RPC from `gestion-suscripciones.service.ts` after a suscripcion is approved |
 | `reject_pending_reservas_for_suscripcion(p_suscripcion_id, p_motivo)` | Moves every `reservas` row linked to the subscription and still `pendiente` to `rechazada`, copying the admin's rejection reason into `motivo_rechazo` (US-0106) | Called via RPC from `gestion-suscripciones.service.ts` on payment rejection or on cancelling a still-`pendiente` subscription |
 | `check_entrenamiento_publico_restricciones_membresia()` | Blocks publishing only when a training HAS restriction rows and NONE is free of membership-only conditions (`usuario_estado` / `validar_nivel_disciplina`) — rows are OR-ed at booking time, so a single service-only row keeps it publishable. Replaces the US-0089 service-restriction rule (US-0094) | `before insert or update` trigger on `entrenamientos_publicos` |
@@ -491,6 +538,7 @@ Supabase (database)
 | Job Name | Schedule | Description |
 |----------|----------|-------------|
 | `evaluar-suspensiones-diarias` | `0 6 * * *` (06:00 UTC / 01:00 AM COT) | Runs `reactivar_suspensiones_expiradas()` first, then `evaluar_suspensiones_cron()` |
+| `expirar-invitaciones-tenant` | `15 6 * * *` (06:15 UTC / 01:15 AM COT) | Runs `expirar_invitaciones_tenant()` (US-0114); acceptance RPCs also check `expires_at`, so correctness does not depend on the job |
 
 ## File Naming Conventions
 
@@ -735,6 +783,10 @@ Required variables in `.env.local`:
 # Supabase Configuration (see supabase-setup.md)
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+
+# Server-only — NEVER prefix with NEXT_PUBLIC_ (US-0114)
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # the project's service-role key (not a personal access token)
+APP_URL=http://localhost:3000                     # trusted origin for Auth email links; production: https://www.grit-arena.com
 
 # Optional: Analytics, monitoring, etc.
 NEXT_PUBLIC_GA_ID=your-ga-id

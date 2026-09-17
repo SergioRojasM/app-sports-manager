@@ -18,6 +18,7 @@ const CHIPS: FilterChip[] = [
   { label: 'Mora', value: 'mora' },
   { label: 'Suspendido', value: 'suspendido' },
   { label: 'Inactivo', value: 'inactivo' },
+  { label: 'Pendiente de activación', value: 'pendiente_activacion' },
 ];
 
 export function EquipoHeaderFilters({

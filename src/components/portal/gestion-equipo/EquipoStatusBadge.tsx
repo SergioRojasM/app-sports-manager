@@ -9,6 +9,7 @@ const BADGE_CLASSES: Record<MiembroEstado, string> = {
   mora: 'bg-amber-900/30 text-amber-300 border border-amber-400/30',
   suspendido: 'bg-orange-900/30 text-orange-300 border border-orange-400/30',
   inactivo: 'bg-slate-800/50 text-slate-400 border border-slate-600/30',
+  pendiente_activacion: 'bg-sky-900/30 text-sky-300 border border-sky-400/30',
 };
 
 const ESTADO_LABELS: Record<MiembroEstado, string> = {
@@ -16,6 +17,7 @@ const ESTADO_LABELS: Record<MiembroEstado, string> = {
   mora: 'Mora',
   suspendido: 'Suspendido',
   inactivo: 'Inactivo',
+  pendiente_activacion: 'Pendiente de activación',
 };
 
 export function EquipoStatusBadge({ estado }: EquipoStatusBadgeProps) {

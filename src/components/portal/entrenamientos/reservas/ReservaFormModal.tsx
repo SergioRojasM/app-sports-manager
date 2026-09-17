@@ -128,7 +128,7 @@ export function ReservaFormModal({
             )
           `)
           .eq('tenant_id', tenantId)
-          .neq('estado', 'inactivo');
+          .not('estado', 'in', '(inactivo,pendiente_activacion)');
 
         if (!cancelled && data) {
           const options: AtletaOption[] = data.map((row) => {

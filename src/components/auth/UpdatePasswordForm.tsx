@@ -5,7 +5,12 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
 
-export function UpdatePasswordForm() {
+type UpdatePasswordFormProps = {
+  /** Validated same-origin path to continue to after saving (e.g. an invitation to accept). */
+  nextPath?: string;
+};
+
+export function UpdatePasswordForm({ nextPath }: UpdatePasswordFormProps) {
   const router = useRouter();
   const { updatePassword } = useAuth();
 
@@ -49,7 +54,17 @@ export function UpdatePasswordForm() {
       return;
     }
 
-    router.push("/auth/login?reset=success");
+    if (!nextPath) {
+      router.push("/auth/login?reset=success");
+      return;
+    }
+
+    // Portal pages need the role/profile cookies that /portal/bootstrap sets.
+    router.push(
+      nextPath.startsWith("/portal")
+        ? `/portal/bootstrap?next=${encodeURIComponent(nextPath)}`
+        : nextPath
+    );
   };
 
   return (
