@@ -1,4 +1,4 @@
-export type AnaliticaPreset = '30d' | '90d' | 'month' | 'custom';
+export type AnaliticaPreset = '30d' | '90d' | '6m' | 'month' | 'custom';
 
 export type AnaliticaDateRange = {
   dateFrom: string;
