@@ -58,6 +58,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
+│   │               │   └── analitica/page.tsx           # Admin-only BI dashboard: Resumen, Ingresos, Operación y Equipo (US-0115)
 │   │               ├── (atleta)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-usuario users to /portal/orgs/[tenant_id]
 │   │               │   ├── entrenamientos-disponibles/page.tsx
@@ -224,6 +225,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── CrearSuscripcionModal.tsx     # 3-step admin modal to create a subscription on behalf of an athlete
 │   │   │       ├── SuscripcionTipoBadge.tsx      # "Miembro"/"No miembro" badge from es_miembro (US-0098)
 │   │   │       └── index.ts
+│   │   │   └── analitica/                  # Feature slice (portal/analitica — US-0115)
+│   │   │       ├── AnaliticaPage.tsx       # Tenant BI root: date range, stale-data refresh state and four accessible tabs
+│   │   │       ├── AnaliticaDateRangeFilter.tsx # Colombia/Bogota presets and custom date validation
+│   │   │       ├── AnaliticaTabs.tsx       # WAI-ARIA tablist with Arrow/Home/End keyboard navigation
+│   │   │       ├── AnaliticaKpiCard.tsx
+│   │   │       └── index.ts
 │   │   │   └── gestion-reservas/           # Feature slice (portal/gestion-reservas — US-0073)
 │   │   │       ├── GestionReservasPage.tsx        # Main page: filters, table, banner, CSV export
 │   │   │       ├── ReservasFiltersPanel.tsx        # Server-side filter panel: date range, athlete search, attendance, discipline
@@ -333,6 +340,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useEditarSuscripcion.ts   # Form state + plans fetch + date validation for full-field edit
 │   │           ├── useEliminarSuscripcion.ts  # Confirmation + delete action for permanent deletion
 │   │           └── useCrearSuscripcion.ts    # 3-step form state for admin-initiated subscription creation
+│   │       └── analitica/
+│   │           └── useAnalitica.ts           # Loads one aggregate RPC response per applied date range; preserves stale data during refresh (US-0115)
 │   │       └── perfil/
 │   │           └── usePerfil.ts
 │   │       └── planes-publicos/            # Feature hooks for the public plan catalog (US-0093)
@@ -375,6 +384,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
+│   │       │   └── analitica.service.ts  # Browser RPC adapter for get_tenant_bi_dashboard only; maps 42501/22007 without exposing bi schema facts (US-0115)
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
@@ -407,6 +417,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── invitaciones.types.ts           # InvitacionEstado, InvitacionRow, AgregarMiembroInput/Modo, AltaAdministradaResultado, InvitacionesServiceError codes (US-0114)
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
+│   │       └── analitica.types.ts       # Aggregate BI dashboard contract, date filters and typed RPC errors (US-0115)
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS, PERFIL_INCOMPLETO — US-0095), BookingResult; BookingRejection.servicioNombre (optional, SERVICIO_REQUERIDO/UNIDADES_AGOTADAS only) feeds the pre-filtered plan catalog (US-0101)
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias; SuscripcionAdminRow.es_miembro (computed from miembros_tenant existence, not stored) and SuscripcionTab ('miembros' | 'no_miembros') (US-0098)
 │   │       └── mis-suscripciones.types.ts  # MiSuscripcionRow (incl. tenant_id + tenant_nombre — US-0093), MiPagoRow — user-facing subscription + payment view types

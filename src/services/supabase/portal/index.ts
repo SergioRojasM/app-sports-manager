@@ -7,3 +7,4 @@ export { planesService } from './planes.service';
 export { suscripcionesService } from './suscripciones.service';
 export { pagosService } from './pagos.service';
 export { asistenciasService } from './asistencias.service';
+export { analiticaService } from './analitica.service';

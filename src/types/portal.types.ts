@@ -78,6 +78,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
     { label: 'Suscripciones', path: 'gestion-suscripciones', icon: 'subscriptions' },
     { label: 'Equipo', path: 'gestion-equipo', icon: 'groups' },
     { label: 'Reservas', path: 'gestion-reservas', icon: 'event_available' },
+    { label: 'Analítica', path: 'analitica', icon: 'analytics' },
   ],
   usuario: [
     { label: 'Entrenamientos Disponibles', path: 'gestion-entrenamientos', icon: 'directions_run' },
