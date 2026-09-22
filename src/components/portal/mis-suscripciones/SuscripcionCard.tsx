@@ -23,15 +23,15 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
     suscripcion;
 
   return (
-    <div className="glass-card rounded-md p-4 border border-white/5 hover:border-primary/20 transition-all">
+    <div className="border bg-grit-card backdrop-blur-md rounded-grit-2xl p-4 border-grit-glass-border hover:border-grit-cyan/20 transition-all">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-1">
-        <h3 className="text-sm font-semibold text-secondary truncate">{plan_nombre}</h3>
+        <h3 className="font-grit-title text-sm font-semibold text-grit-teal truncate">{plan_nombre}</h3>
         <SuscripcionEstadoBadge estado={estado} />
       </div>
 
       {/* Organization */}
-      <p className="mb-1 flex items-center gap-1 text-xs text-slate-400">
+      <p className="mb-1 flex items-center gap-1 text-xs text-grit-subtext">
         <span className="material-symbols-outlined text-sm" aria-hidden="true">
           corporate_fare
         </span>
@@ -39,13 +39,13 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
       </p>
 
       {/* Dates */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-grit-subtext">
         <span>
-          <span className="text-slate-500">Inicio:</span>{' '}
+          <span className="text-grit-muted">Inicio:</span>{' '}
           {fecha_inicio ? formatDate(fecha_inicio) : '—'}
         </span>
         <span>
-          <span className="text-slate-500">Fin:</span>{' '}
+          <span className="text-grit-muted">Fin:</span>{' '}
           {fecha_fin ? formatDate(fecha_fin) : '—'}
         </span>
       </div>
@@ -53,7 +53,7 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
       {/* Services section */}
       {servicios.length > 0 ? (
         <div className="mt-2">
-          <p className="text-xs text-slate-500 mb-1">Servicios:</p>
+          <p className="text-xs text-grit-muted mb-1">Servicios:</p>
           <div className="space-y-1.5">
             {servicios.map((srv) => {
               const isExhausted = srv.unidades_restantes === 0 && srv.unidades_incluidas !== null;
@@ -64,19 +64,19 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
 
               return (
                 <div key={srv.servicio_id}>
-                  <div className="flex justify-between text-[10px] text-slate-400 mb-0.5">
+                  <div className="flex justify-between text-[10px] text-grit-subtext mb-0.5">
                     <span>{srv.servicio_nombre}</span>
-                    <span className={isExhausted ? 'text-rose-400 font-bold' : ''}>
+                    <span className={isExhausted ? 'text-grit-danger font-bold' : ''}>
                       {srv.unidades_restantes ?? '∞'} / {srv.unidades_incluidas ?? '∞'}
                     </span>
                   </div>
                   {showBar ? (
-                    <div className="w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-grit-card rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
                           isExhausted
                             ? 'bg-rose-500'
-                            : 'bg-gradient-to-r from-secondary to-primary'
+                            : 'bg-gradient-to-r from-grit-teal to-grit-cyan'
                         }`}
                         style={{ width: `${pct}%` }}
                         aria-label={`Unidades restantes de ${srv.servicio_nombre}`}
@@ -94,7 +94,7 @@ export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCa
       {pago ? (
         <PagoCard pago={pago} tenantId={tenantId} userId={userId} />
       ) : (
-        <p className="mt-2 text-xs italic text-slate-500">
+        <p className="mt-2 text-xs italic text-grit-muted">
           Sin registro de pago para esta suscripción.
         </p>
       )}

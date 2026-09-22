@@ -86,7 +86,7 @@ export function PlanesPublicosModal({
     <>
       <div className="fixed inset-0 z-40 flex items-center justify-center">
         <div
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
           onClick={handleClose}
           aria-hidden="true"
         />
@@ -94,17 +94,17 @@ export function PlanesPublicosModal({
         <div
           ref={dialogRef}
           tabIndex={-1}
-          className="glass relative z-10 mx-4 flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-xl border border-portal-border p-6 shadow-2xl"
+          className="border bg-grit-glass backdrop-blur-md relative z-10 mx-4 flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-grit-lg border-grit-glass-border p-6 shadow-2xl"
           role="dialog"
           aria-modal="true"
           aria-labelledby="planes-publicos-modal-title"
         >
           <div className="flex flex-shrink-0 items-start justify-between gap-4">
             <div>
-              <h2 id="planes-publicos-modal-title" className="text-xl font-semibold text-slate-100">
+              <h2 id="planes-publicos-modal-title" className="font-grit-title text-xl font-semibold text-grit-text">
                 Planes de {tenantNombre}
               </h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-grit-subtext">
                 {catalog.esMiembro
                   ? 'Eres miembro de esta organización: además de los planes públicos, aquí puedes adquirir sus planes exclusivos para miembros.'
                   : 'Planes disponibles para cualquier persona, sin necesidad de pertenecer a la organización.'}
@@ -115,7 +115,7 @@ export function PlanesPublicosModal({
               type="button"
               onClick={handleClose}
               aria-label="Cerrar"
-              className="rounded-lg border border-portal-border p-1.5 text-slate-400 transition hover:text-slate-100"
+              className="rounded-grit-md border border-grit-glass-border p-1.5 text-grit-subtext transition hover:text-grit-text"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">
                 close
@@ -125,7 +125,7 @@ export function PlanesPublicosModal({
 
           {suscripcion.successMessage ? (
             <div
-              className="mt-4 flex-shrink-0 rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200"
+              className="mt-4 flex-shrink-0 rounded-grit-md border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200"
               role="status"
             >
               {suscripcion.successMessage}
@@ -142,7 +142,7 @@ export function PlanesPublicosModal({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar planes o servicios"
-              className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-turquoise focus:outline-none"
+              className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text placeholder:text-grit-muted focus:border-grit-cyan focus:outline-none"
             />
           </div>
 
@@ -154,18 +154,18 @@ export function PlanesPublicosModal({
             </p>
 
             {loading ? (
-              <p className="rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+              <p className="rounded-grit-2xl border border-grit-glass-border p-6 text-sm text-grit-subtext">
                 Cargando planes...
               </p>
             ) : null}
 
             {!loading && error ? (
-              <div className="rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-                <p className="text-sm text-rose-200">{error}</p>
+              <div className="rounded-grit-2xl border border-grit-danger/25 bg-grit-danger/10 p-6">
+                <p className="text-sm text-grit-danger">{error}</p>
                 <button
                   type="button"
                   onClick={() => void retry()}
-                  className="mt-3 rounded-lg border border-rose-300/30 px-3 py-1.5 text-xs font-semibold text-rose-100"
+                  className="mt-3 rounded-grit-md border border-grit-danger/30 px-3 py-1.5 text-xs font-semibold text-grit-danger"
                 >
                   Reintentar
                 </button>
@@ -173,7 +173,7 @@ export function PlanesPublicosModal({
             ) : null}
 
             {!loading && !error && plans.length === 0 ? (
-              <p className="rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+              <p className="rounded-grit-2xl border border-grit-glass-border p-6 text-sm text-grit-subtext">
                 {catalog.esMiembro
                   ? 'Esta organización no tiene planes activos disponibles.'
                   : 'Esta organización no tiene planes públicos disponibles.'}
@@ -181,14 +181,14 @@ export function PlanesPublicosModal({
             ) : null}
 
             {!loading && !error && plans.length > 0 && filteredPlans.length === 0 ? (
-              <div className="rounded-lg border border-portal-border p-6 text-center">
-                <p className="text-sm text-slate-300">
+              <div className="rounded-grit-2xl border border-grit-glass-border p-6 text-center">
+                <p className="text-sm text-grit-subtext">
                   No se encontraron planes ni servicios que coincidan con la búsqueda.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="mt-3 text-sm font-medium text-turquoise hover:underline"
+                  className="mt-3 text-sm font-medium text-grit-cyan hover:underline"
                 >
                   Limpiar búsqueda
                 </button>

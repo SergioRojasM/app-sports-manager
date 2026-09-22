@@ -130,14 +130,14 @@ export function CrearSuscripcionModal({
   if (!open) return null;
 
   const inputClass =
-    'w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 outline-none focus:border-turquoise/50 focus:ring-1 focus:ring-turquoise/30 disabled:opacity-50';
-  const labelClass = 'mb-1 block text-xs font-medium text-slate-400';
+    'w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none focus:border-grit-cyan/50 focus:ring-1 focus:ring-grit-cyan/30 disabled:opacity-50';
+  const labelClass = 'mb-1 block text-xs font-medium text-grit-subtext';
   const cancelBtnClass =
-    'rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/[0.04] disabled:opacity-50';
+    'rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-medium text-grit-subtext transition-colors hover:bg-white/[0.04] disabled:opacity-50';
   const primaryBtnClass =
-    'rounded-lg border border-turquoise/40 bg-turquoise/10 px-4 py-2 text-sm font-medium text-turquoise transition-colors hover:bg-turquoise/20 disabled:opacity-50';
+    'rounded-grit-md border border-grit-cyan/40 bg-grit-cyan/10 px-4 py-2 text-sm font-medium text-grit-cyan transition-colors hover:bg-grit-cyan/20 disabled:opacity-50';
   const errorClass =
-    'mt-1 text-xs text-rose-300';
+    'mt-1 text-xs text-grit-danger';
 
   // ─────── Render Step 1: Athlete picker ───────
   const renderStep1 = () => (
@@ -173,7 +173,7 @@ export function CrearSuscripcionModal({
           {dropdownOpen && filteredAtletas.length > 0 && (
             <ul
               role="listbox"
-              className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-portal-border bg-navy-deep shadow-lg"
+              className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-grit-md border border-grit-glass-border bg-grit-bg shadow-lg"
             >
               {filteredAtletas.map((opt, idx) => (
                 <li
@@ -182,8 +182,8 @@ export function CrearSuscripcionModal({
                   aria-selected={opt.id === atletaId}
                   className={`cursor-pointer px-3 py-2 text-sm transition-colors ${
                     idx === activeOptionIndex
-                      ? 'bg-turquoise/20 text-turquoise'
-                      : 'text-slate-200 hover:bg-white/[0.06]'
+                      ? 'bg-grit-cyan/20 text-grit-cyan'
+                      : 'text-grit-text hover:bg-white/[0.06]'
                   }`}
                   onMouseDown={(e) => {
                     e.preventDefault();
@@ -192,14 +192,14 @@ export function CrearSuscripcionModal({
                 >
                   <span className="font-medium">{opt.label}</span>
                   {opt.identificacion && (
-                    <span className="ml-2 text-xs text-slate-400">{opt.identificacion}</span>
+                    <span className="ml-2 text-xs text-grit-subtext">{opt.identificacion}</span>
                   )}
                 </li>
               ))}
             </ul>
           )}
           {dropdownOpen && !loadingAtletas && filteredAtletas.length === 0 && (
-            <div className="absolute z-10 mt-1 w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-400 shadow-lg">
+            <div className="absolute z-10 mt-1 w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-subtext shadow-lg">
               Sin resultados
             </div>
           )}
@@ -246,10 +246,10 @@ export function CrearSuscripcionModal({
             {activeTipos.map((t) => (
               <label
                 key={t.id}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+                className={`flex cursor-pointer items-start gap-3 rounded-grit-md border px-3 py-2.5 transition-colors ${
                   planTipoId === t.id
-                    ? 'border-turquoise/50 bg-turquoise/5'
-                    : 'border-portal-border bg-navy-deep hover:bg-white/[0.04]'
+                    ? 'border-grit-cyan/50 bg-grit-cyan/5'
+                    : 'border-grit-glass-border bg-grit-bg hover:bg-white/[0.04]'
                 }`}
               >
                 <input
@@ -259,11 +259,11 @@ export function CrearSuscripcionModal({
                   checked={planTipoId === t.id}
                   onChange={() => setPlanTipoId(t.id)}
                   disabled={isSubmitting}
-                  className="mt-0.5 accent-turquoise"
+                  className="mt-0.5 accent-grit-cyan"
                 />
                 <div>
-                  <span className="text-sm font-medium text-slate-100">{t.nombre}</span>
-                  <span className="ml-2 text-xs text-slate-400">
+                  <span className="text-sm font-medium text-grit-text">{t.nombre}</span>
+                  <span className="ml-2 text-xs text-grit-subtext">
                     {t.vigencia_dias} días
                   </span>
                 </div>
@@ -291,9 +291,9 @@ export function CrearSuscripcionModal({
                 checked={estado === v}
                 onChange={() => setEstado(v)}
                 disabled={isSubmitting}
-                className="accent-turquoise"
+                className="accent-grit-cyan"
               />
-              <span className="text-sm text-slate-200 capitalize">{v}</span>
+              <span className="text-sm text-grit-text capitalize">{v}</span>
             </label>
           ))}
         </div>
@@ -339,16 +339,16 @@ export function CrearSuscripcionModal({
       </div>
 
       {/* Payment section */}
-      <div className="rounded-lg border border-portal-border p-3">
+      <div className="rounded-grit-md border border-grit-glass-border p-3">
         <label className="flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"
             checked={crearPago}
             onChange={(e) => setCrearPago(e.target.checked)}
             disabled={isSubmitting}
-            className="accent-turquoise"
+            className="accent-grit-cyan"
           />
-          <span className="text-sm font-medium text-slate-200">Registrar pago</span>
+          <span className="text-sm font-medium text-grit-text">Registrar pago</span>
         </label>
 
         {crearPago && (
@@ -402,9 +402,9 @@ export function CrearSuscripcionModal({
                       checked={estadoPago === v}
                       onChange={() => setEstadoPago(v)}
                       disabled={isSubmitting}
-                      className="accent-turquoise"
+                      className="accent-grit-cyan"
                     />
-                    <span className="text-sm text-slate-200 capitalize">{v}</span>
+                    <span className="text-sm text-grit-text capitalize">{v}</span>
                   </label>
                 ))}
               </div>
@@ -415,7 +415,7 @@ export function CrearSuscripcionModal({
 
       {/* General error */}
       {errors.general && (
-        <div className="rounded-lg border border-rose-400/25 bg-rose-900/20 px-3 py-2 text-xs text-rose-200">
+        <div className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
           {errors.general}
         </div>
       )}
@@ -424,7 +424,7 @@ export function CrearSuscripcionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
       onClick={() => {
         if (!isSubmitting) {
           reset();
@@ -438,14 +438,14 @@ export function CrearSuscripcionModal({
         aria-modal="true"
         aria-label="Crear Suscripción"
         tabIndex={-1}
-        className="glass mx-4 w-full max-w-lg rounded-xl border border-portal-border p-6 shadow-2xl outline-none"
+        className="border bg-grit-glass backdrop-blur-md mx-4 w-full max-w-lg rounded-grit-lg border-grit-glass-border p-6 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Nueva Suscripción</h2>
-            <p className="mt-0.5 text-xs text-slate-400">Paso {step} de 3</p>
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">Nueva Suscripción</h2>
+            <p className="mt-0.5 text-xs text-grit-subtext">Paso {step} de 3</p>
           </div>
           <button
             onClick={() => {
@@ -455,7 +455,7 @@ export function CrearSuscripcionModal({
               }
             }}
             disabled={isSubmitting}
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-200 disabled:opacity-50"
+            className="rounded-grit-md p-1.5 text-grit-subtext transition-colors hover:bg-white/[0.06] hover:text-grit-text disabled:opacity-50"
             aria-label="Cerrar"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -470,7 +470,7 @@ export function CrearSuscripcionModal({
             <div
               key={s}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                s <= step ? 'bg-turquoise' : 'bg-white/10'
+                s <= step ? 'bg-grit-cyan' : 'bg-white/10'
               }`}
             />
           ))}

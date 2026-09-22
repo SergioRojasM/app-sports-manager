@@ -153,7 +153,7 @@ export function ReglaSuspensionFormModal({
       <button
         type="button"
         aria-label="Cerrar formulario de regla de suspensión"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -162,14 +162,14 @@ export function ReglaSuspensionFormModal({
         role="dialog"
         aria-modal="true"
         aria-label={mode === 'create' ? 'Crear regla de suspensión' : 'Editar regla de suspensión'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
               {mode === 'create' ? 'Crear regla de suspensión' : 'Editar regla de suspensión'}
             </h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-grit-subtext">
               Configura los parámetros de la regla de suspensión automática.
             </p>
           </div>
@@ -177,7 +177,7 @@ export function ReglaSuspensionFormModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -189,7 +189,7 @@ export function ReglaSuspensionFormModal({
           {/* Nombre */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="rs-nombre"
             >
               Nombre
@@ -203,14 +203,14 @@ export function ReglaSuspensionFormModal({
               maxLength={100}
               placeholder="Ej: Suspensión por acumulación mensual"
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.nombre
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {fieldErrors.nombre ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.nombre}
               </p>
             ) : null}
@@ -219,7 +219,7 @@ export function ReglaSuspensionFormModal({
           {/* Número de inasistencias */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="rs-num-inasistencias"
             >
               Número de inasistencias
@@ -233,14 +233,14 @@ export function ReglaSuspensionFormModal({
               onChange={(e) => setNumInasistencias(e.target.value)}
               disabled={isSubmitting}
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.num_inasistencias
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {fieldErrors.num_inasistencias ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.num_inasistencias}
               </p>
             ) : null}
@@ -256,8 +256,8 @@ export function ReglaSuspensionFormModal({
                 onClick={() => setPorSuscripcion(!porSuscripcion)}
                 disabled={isSubmitting}
                 className={[
-                  'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-turquoise/40 focus:ring-offset-2 focus:ring-offset-navy-medium disabled:opacity-50',
-                  porSuscripcion ? 'bg-turquoise' : 'bg-slate-600',
+                  'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-grit-cyan/40 focus:ring-offset-2 focus:ring-offset-grit-bg disabled:opacity-50',
+                  porSuscripcion ? 'bg-grit-cyan' : 'bg-grit-subtext/20',
                 ].join(' ')}
               >
                 <span
@@ -267,7 +267,7 @@ export function ReglaSuspensionFormModal({
                   ].join(' ')}
                 />
               </button>
-              <span className="text-sm text-slate-300">
+              <span className="text-sm text-grit-subtext">
                 Contar inasistencias en la suscripción activa
               </span>
             </div>
@@ -276,7 +276,7 @@ export function ReglaSuspensionFormModal({
           {/* Por días atrás */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="rs-por-dias-atras"
             >
               En los últimos N días
@@ -290,17 +290,17 @@ export function ReglaSuspensionFormModal({
               onChange={(e) => setPorDiasAtras(e.target.value)}
               disabled={isSubmitting}
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.por_dias_atras
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {!isNaN(parsedDiasDisplay) && parsedDiasDisplay === 0 ? (
-              <p className="mt-1 text-xs text-slate-500">No aplica</p>
+              <p className="mt-1 text-xs text-grit-muted">No aplica</p>
             ) : null}
             {fieldErrors.por_dias_atras ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.por_dias_atras}
               </p>
             ) : null}
@@ -309,7 +309,7 @@ export function ReglaSuspensionFormModal({
           {/* Condición error (cross-field) */}
           {fieldErrors.condicion ? (
             <div
-              className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
               role="alert"
             >
               {fieldErrors.condicion}
@@ -319,7 +319,7 @@ export function ReglaSuspensionFormModal({
           {/* Duración */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="rs-duracion"
             >
               Duración de la suspensión (días)
@@ -333,17 +333,17 @@ export function ReglaSuspensionFormModal({
               onChange={(e) => setDuracion(e.target.value)}
               disabled={isSubmitting}
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.duracion
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {!isNaN(parsedDuracionDisplay) && parsedDuracionDisplay === 0 ? (
-              <p className="mt-1 text-xs text-slate-500">Permanente (sin límite de días)</p>
+              <p className="mt-1 text-xs text-grit-muted">Permanente (sin límite de días)</p>
             ) : null}
             {fieldErrors.duracion ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.duracion}
               </p>
             ) : null}
@@ -358,8 +358,8 @@ export function ReglaSuspensionFormModal({
               onClick={() => setActivo(!activo)}
               disabled={isSubmitting}
               className={[
-                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-turquoise/40 focus:ring-offset-2 focus:ring-offset-navy-medium disabled:opacity-50',
-                activo ? 'bg-turquoise' : 'bg-slate-600',
+                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-grit-cyan/40 focus:ring-offset-2 focus:ring-offset-grit-bg disabled:opacity-50',
+                activo ? 'bg-grit-cyan' : 'bg-grit-subtext/20',
               ].join(' ')}
             >
               <span
@@ -369,14 +369,14 @@ export function ReglaSuspensionFormModal({
                 ].join(' ')}
               />
             </button>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-grit-subtext">
               {activo ? 'Regla activa' : 'Regla inactiva'}
             </span>
           </div>
 
           {submitError ? (
             <div
-              className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
               role="alert"
             >
               {submitError}
@@ -384,12 +384,12 @@ export function ReglaSuspensionFormModal({
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cancelar
           </button>
@@ -397,7 +397,7 @@ export function ReglaSuspensionFormModal({
             type="button"
             onClick={() => void handleSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting
               ? 'Guardando...'

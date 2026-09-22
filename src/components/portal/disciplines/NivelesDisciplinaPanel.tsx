@@ -66,30 +66,30 @@ export function NivelesDisciplinaPanel({ tenantId, disciplinaId }: NivelesDiscip
   return (
     <tr>
       <td colSpan={3} className="p-0">
-        <div className="border-t border-portal-border bg-navy-deep/30 px-8 py-4">
+        <div className="border-t border-grit-glass-border bg-grit-bg/30 px-8 py-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Niveles de progresión</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Niveles de progresión</h4>
             <button
               type="button"
               onClick={openCreate}
-              className="rounded-lg border border-portal-border bg-navy-medium px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+              className="rounded-grit-md border border-grit-glass-border bg-grit-card px-3 py-1.5 text-xs font-semibold text-grit-text transition hover:text-grit-cyan"
             >
               + Agregar nivel
             </button>
           </div>
 
           {loading ? (
-            <p className="mt-3 text-xs text-slate-400">Cargando niveles...</p>
+            <p className="mt-3 text-xs text-grit-subtext">Cargando niveles...</p>
           ) : error && niveles.length === 0 ? (
-            <div className="mt-3 rounded-lg border border-rose-400/25 bg-rose-900/20 px-3 py-2 text-xs text-rose-200">
+            <div className="mt-3 rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
               {error}
             </div>
           ) : niveles.length === 0 ? (
-            <p className="mt-3 text-xs text-slate-400">No hay niveles creados para esta disciplina.</p>
+            <p className="mt-3 text-xs text-grit-subtext">No hay niveles creados para esta disciplina.</p>
           ) : (
-            <div className="mt-3 overflow-x-auto rounded-lg border border-portal-border">
+            <div className="mt-3 overflow-x-auto rounded-grit-md border border-grit-glass-border">
               <table className="w-full text-left text-sm">
-                <thead className="bg-navy-medium/60 text-xs uppercase tracking-wider text-slate-400">
+                <thead className="bg-grit-card text-xs uppercase tracking-wider text-grit-subtext">
                   <tr>
                     <th className="px-4 py-2">Orden</th>
                     <th className="px-4 py-2">Nombre</th>
@@ -97,21 +97,21 @@ export function NivelesDisciplinaPanel({ tenantId, disciplinaId }: NivelesDiscip
                     <th className="px-4 py-2 text-right">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-portal-border">
+                <tbody className="divide-y divide-grit-glass-border">
                   {niveles.map((nivel) => (
-                    <tr key={nivel.id} className="hover:bg-navy-medium/30">
-                      <td className="px-4 py-2 text-slate-300">{nivel.orden}</td>
-                      <td className="px-4 py-2 font-medium text-slate-100">{nivel.nombre}</td>
+                    <tr key={nivel.id} className="hover:bg-grit-card">
+                      <td className="px-4 py-2 text-grit-subtext">{nivel.orden}</td>
+                      <td className="px-4 py-2 font-medium text-grit-text">{nivel.nombre}</td>
                       <td className="px-4 py-2">
                         <span
                           className={[
                             'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium',
                             nivel.activo
                               ? 'border border-emerald-400/40 bg-emerald-900/25 text-emerald-200'
-                              : 'border border-slate-500/40 bg-slate-700/40 text-slate-300',
+                              : 'border border-grit-glass-border bg-grit-card text-grit-subtext',
                           ].join(' ')}
                         >
-                          <span className={['h-1.5 w-1.5 rounded-full', nivel.activo ? 'bg-emerald-300' : 'bg-slate-400'].join(' ')} />
+                          <span className={['h-1.5 w-1.5 rounded-full', nivel.activo ? 'bg-emerald-300' : 'bg-grit-subtext/20'].join(' ')} />
                           {nivel.activo ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
@@ -120,7 +120,7 @@ export function NivelesDisciplinaPanel({ tenantId, disciplinaId }: NivelesDiscip
                           <button
                             type="button"
                             onClick={() => openEdit(nivel)}
-                            className="rounded-lg border border-portal-border bg-navy-medium px-2.5 py-1 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+                            className="rounded-grit-md border border-grit-glass-border bg-grit-card px-2.5 py-1 text-xs font-semibold text-grit-text transition hover:text-grit-cyan"
                           >
                             Editar
                           </button>
@@ -129,14 +129,14 @@ export function NivelesDisciplinaPanel({ tenantId, disciplinaId }: NivelesDiscip
                               <button
                                 type="button"
                                 onClick={() => void confirmDelete(nivel.id)}
-                                className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                                className="rounded-grit-md border border-grit-danger/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-grit-danger transition hover:bg-rose-500/20"
                               >
                                 Confirmar
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setDeleteConfirmId(null)}
-                                className="rounded-lg border border-portal-border px-2.5 py-1 text-xs font-semibold text-slate-300"
+                                className="rounded-grit-md border border-grit-glass-border px-2.5 py-1 text-xs font-semibold text-grit-subtext"
                               >
                                 No
                               </button>
@@ -145,7 +145,7 @@ export function NivelesDisciplinaPanel({ tenantId, disciplinaId }: NivelesDiscip
                             <button
                               type="button"
                               onClick={() => setDeleteConfirmId(nivel.id)}
-                              className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                              className="rounded-grit-md border border-grit-danger/40 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-grit-danger transition hover:bg-rose-500/20"
                             >
                               Eliminar
                             </button>
@@ -164,7 +164,7 @@ export function NivelesDisciplinaPanel({ tenantId, disciplinaId }: NivelesDiscip
           ) : null}
 
           {error && niveles.length > 0 ? (
-            <div className="mt-2 rounded-lg border border-rose-400/25 bg-rose-900/20 px-3 py-2 text-xs text-rose-200">
+            <div className="mt-2 rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
               {error}
             </div>
           ) : null}

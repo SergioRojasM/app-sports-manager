@@ -41,13 +41,13 @@ export function ReservaPlanCell({
   plan_fecha_fin,
 }: ReservaPlanCellProps) {
   if (!plan_nombre) {
-    return <span className="text-sm text-slate-300">—</span>;
+    return <span className="text-sm text-grit-subtext">—</span>;
   }
 
   return (
     <div className="min-w-[150px]">
-      <div className="text-sm text-slate-300">{plan_nombre}</div>
-      <div className="text-xs text-slate-500">
+      <div className="text-sm text-grit-subtext">{plan_nombre}</div>
+      <div className="text-xs text-grit-muted">
         {formatPlanDate(plan_fecha_inicio)} – {formatPlanDate(plan_fecha_fin)}
       </div>
     </div>

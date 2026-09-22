@@ -5,6 +5,7 @@ import { usePlanesView, getActiveTipos } from '@/hooks/portal/planes/usePlanesVi
 import { useSuscripcion } from '@/hooks/portal/planes/useSuscripcion';
 import { PlanesTable } from './PlanesTable';
 import { SuscripcionModal } from './SuscripcionModal';
+import { GritPageHeader } from '@/components/ui';
 
 type PlanesViewPageProps = {
   tenantId: string;
@@ -13,7 +14,7 @@ type PlanesViewPageProps = {
 
 function LoadingState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       Cargando planes...
     </div>
   );
@@ -21,7 +22,7 @@ function LoadingState() {
 
 function EmptyState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       No hay planes disponibles en este momento.
     </div>
   );
@@ -35,16 +36,11 @@ export function PlanesViewPage({ tenantId, role }: PlanesViewPageProps) {
 
   return (
     <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Planes de Membresía</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Consulta los planes disponibles en esta organización.
-        </p>
-      </header>
+      <GritPageHeader title="Planes de Membresía" subtitle="Consulta los planes disponibles en esta organización." />
 
       {suscripcion.successMessage ? (
         <div
-          className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200"
+          className="rounded-grit-md border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200"
           role="status"
         >
           {suscripcion.successMessage}
@@ -54,8 +50,8 @@ export function PlanesViewPage({ tenantId, role }: PlanesViewPageProps) {
       {loading ? <LoadingState /> : null}
 
       {!loading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
+        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+          <p className="text-sm text-grit-danger">{error}</p>
         </div>
       ) : null}
 
@@ -79,7 +75,7 @@ export function PlanesViewPage({ tenantId, role }: PlanesViewPageProps) {
                     <button
                       type="button"
                       onClick={() => void suscripcion.openModal(plan)}
-                      className="rounded-lg bg-turquoise px-3 py-1.5 text-xs font-semibold text-navy-deep transition hover:bg-turquoise/90"
+                      className="rounded-grit-md bg-grit-cyan px-3 py-1.5 text-xs font-semibold text-grit-bg transition hover:bg-grit-cyan/90"
                     >
                       Adquirir
                     </button>

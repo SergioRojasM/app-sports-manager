@@ -51,7 +51,7 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
 
   if (loading) {
     return (
-      <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+      <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
         Cargando plantilla...
       </div>
     );
@@ -59,8 +59,8 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
 
   if (error || !plantilla) {
     return (
-      <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-        <p className="text-sm text-rose-200">{error ?? 'No fue posible cargar la plantilla.'}</p>
+      <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+        <p className="text-sm text-grit-danger">{error ?? 'No fue posible cargar la plantilla.'}</p>
       </div>
     );
   }
@@ -70,7 +70,7 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
       <div className="flex items-center justify-between gap-4">
         <Link
           href={`/portal/orgs/${tenantId}/gestion-formularios`}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 transition hover:text-turquoise"
+          className="inline-flex items-center gap-1.5 text-sm text-grit-subtext transition hover:text-grit-cyan"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">arrow_back</span>
           Volver a Formularios
@@ -84,12 +84,12 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
         ) : null}
       </div>
 
-      <div className="glass overflow-hidden rounded-xl border border-portal-border">
+      <div className="border bg-grit-glass backdrop-blur-md overflow-hidden rounded-grit-lg border-grit-glass-border">
         <FormularioHeaderEditor tenantId={tenantId} secciones={secciones} onUpdateHeaderField={updateHeaderSeccion} />
 
         <div className="space-y-4 p-6">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plantilla-editor-nombre">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="plantilla-editor-nombre">
               Nombre
             </label>
             <input
@@ -97,11 +97,11 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
               type="text"
               value={plantilla.nombre}
               onChange={(e) => updatePlantillaField({ nombre: e.target.value })}
-              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-2xl font-semibold text-slate-100 outline-none transition focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-2xl font-semibold text-grit-text outline-none transition focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="plantilla-editor-descripcion">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="plantilla-editor-descripcion">
               Descripción
             </label>
             <textarea
@@ -110,17 +110,17 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
               value={plantilla.descripcion ?? ''}
               onChange={(e) => updatePlantillaField({ descripcion: e.target.value || null })}
               placeholder="Descripción opcional de la plantilla"
-              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-300 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-subtext outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
             />
           </div>
 
-          <div className="flex items-center justify-between border-t border-portal-border pt-4">
-            <label className="flex items-center gap-2 text-sm text-slate-200">
+          <div className="flex items-center justify-between border-t border-grit-glass-border pt-4">
+            <label className="flex items-center gap-2 text-sm text-grit-text">
               <input
                 type="checkbox"
                 checked={plantilla.activo}
                 onChange={(e) => updatePlantillaField({ activo: e.target.checked })}
-                className="rounded border-slate-600 bg-navy-deep"
+                className="rounded border-grit-glass-border bg-grit-bg"
               />
               Plantilla activa
             </label>
@@ -128,7 +128,7 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
             <button
               type="button"
               onClick={() => setPreviewOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-portal-border bg-navy-deep/60 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-turquoise/50 hover:text-turquoise"
+              className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-4 py-2 text-sm font-semibold text-grit-text transition hover:border-grit-cyan/50 hover:text-grit-cyan"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">visibility</span>
               Vista previa
@@ -136,11 +136,11 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
           </div>
 
           {/* Datos de perfil requeridos (US-0095) */}
-          <div className="border-t border-portal-border pt-4">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          <div className="border-t border-grit-glass-border pt-4">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
               Datos de perfil requeridos
             </p>
-            <p className="mb-3 text-xs text-slate-500">
+            <p className="mb-3 text-xs text-grit-muted">
               Selecciona los datos del perfil del atleta que este formulario necesita — evita pedirlos de nuevo como
               secciones de &quot;Datos&quot;.
             </p>
@@ -148,12 +148,12 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
             <div className="grid gap-4 sm:grid-cols-2">
               {(['personal', 'deportivo'] as const).map((grupo) => (
                 <div key={grupo}>
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-grit-muted">
                     {grupo === 'personal' ? 'Datos personales' : 'Datos deportivos'}
                   </p>
                   <div className="space-y-2">
                     {FORMULARIO_PERFIL_CAMPOS.filter((c) => c.grupo === grupo).map((campo) => (
-                      <label key={campo.key} className="flex items-center gap-2 text-sm text-slate-200">
+                      <label key={campo.key} className="flex items-center gap-2 text-sm text-grit-text">
                         <input
                           type="checkbox"
                           checked={plantilla.perfil_campos_requeridos.includes(campo.key)}
@@ -164,7 +164,7 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
                               : plantilla.perfil_campos_requeridos.filter((k) => k !== campo.key);
                             updatePlantillaField({ perfil_campos_requeridos: next });
                           }}
-                          className="rounded border-slate-600 bg-navy-deep"
+                          className="rounded border-grit-glass-border bg-grit-bg"
                         />
                         {campo.label}
                       </label>
@@ -195,14 +195,14 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
         onClose={() => setPreviewOpen(false)}
       />
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-portal-border bg-navy-deep/95 px-6 py-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-grit-glass-border bg-grit-bg/95 px-6 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
-          <div className="min-h-5 text-sm text-rose-300">{saveError}</div>
+          <div className="min-h-5 text-sm text-grit-danger">{saveError}</div>
           <button
             type="button"
             onClick={() => void saveAll()}
             disabled={!isDirty || saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-5 py-2.5 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-5 py-2.5 text-sm font-semibold text-grit-bg transition-all duration-200 hover:bg-grit-cyan/85 hover:shadow-lg hover:shadow-grit-cyan/25 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? 'Guardando...' : 'Guardar cambios'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">save</span>

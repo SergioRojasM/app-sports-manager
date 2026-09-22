@@ -14,7 +14,7 @@ type PerfilDeportivoFormProps = {
 };
 
 const inputClass =
-  'w-full rounded-xl border border-portal-border bg-white/5 py-2.5 pl-10 pr-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-teal-500 focus:ring-1 focus:ring-teal-500';
+  'w-full rounded-grit-lg border border-grit-glass-border bg-white/5 py-2.5 pl-10 pr-3 text-sm text-grit-text placeholder:text-grit-muted outline-none transition focus:border-teal-500 focus:ring-1 focus:ring-teal-500';
 
 export function PerfilDeportivoForm({
   formValues,
@@ -30,7 +30,7 @@ export function PerfilDeportivoForm({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 className="font-grit-title text-sm font-semibold uppercase tracking-wide text-grit-subtext">
         Perfil Deportivo
       </h2>
 
@@ -40,12 +40,12 @@ export function PerfilDeportivoForm({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="peso_kg"
-              className="text-xs font-medium uppercase tracking-wide text-slate-400"
+              className="text-xs font-medium uppercase tracking-wide text-grit-subtext"
             >
               Peso (kg)
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-500">
+              <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-grit-muted">
                 monitor_weight
               </span>
               <input
@@ -61,7 +61,7 @@ export function PerfilDeportivoForm({
               />
             </div>
             {fieldErrors.peso_kg && (
-              <p className="text-xs text-red-400">{fieldErrors.peso_kg}</p>
+              <p className="text-xs text-grit-danger">{fieldErrors.peso_kg}</p>
             )}
           </div>
         )}
@@ -71,12 +71,12 @@ export function PerfilDeportivoForm({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="altura_cm"
-              className="text-xs font-medium uppercase tracking-wide text-slate-400"
+              className="text-xs font-medium uppercase tracking-wide text-grit-subtext"
             >
               Altura (cm)
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-500">
+              <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-grit-muted">
                 height
               </span>
               <input
@@ -92,7 +92,7 @@ export function PerfilDeportivoForm({
               />
             </div>
             {fieldErrors.altura_cm && (
-              <p className="text-xs text-red-400">{fieldErrors.altura_cm}</p>
+              <p className="text-xs text-grit-danger">{fieldErrors.altura_cm}</p>
             )}
           </div>
         )}

@@ -16,8 +16,8 @@ function ActiveBadge({ activo }: { activo: boolean }) {
       Activo
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-800/60 px-2 py-0.5 text-xs font-semibold text-slate-400 ring-1 ring-slate-600/40">
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+    <span className="inline-flex items-center gap-1 rounded-full bg-grit-card px-2 py-0.5 text-xs font-semibold text-grit-subtext ring-1 ring-grit-glass-border">
+      <span className="h-1.5 w-1.5 rounded-full bg-grit-subtext/20" />
       Inactivo
     </span>
   );
@@ -25,36 +25,36 @@ function ActiveBadge({ activo }: { activo: boolean }) {
 
 export function ServiciosTable({ rows, onEdit, onDelete }: ServiciosTableProps) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-portal-border">
+    <div className="overflow-x-auto rounded-grit-lg border border-grit-glass-border">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-portal-border bg-navy-deep/60">
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+          <tr className="border-b border-grit-glass-border bg-grit-bg/60">
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">
               Nombre
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">
               Descripción
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">
               Estado
             </th>
-            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">
               Acciones
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-portal-border">
+        <tbody className="divide-y divide-grit-glass-border">
           {rows.map((servicio) => (
             <tr
               key={servicio.id}
-              className="transition-colors hover:bg-navy-deep/30"
+              className="transition-colors hover:bg-grit-bg/30"
             >
-              <td className="px-4 py-3 font-medium text-slate-200">{servicio.nombre}</td>
-              <td className="px-4 py-3 text-slate-400">
+              <td className="px-4 py-3 font-medium text-grit-text">{servicio.nombre}</td>
+              <td className="px-4 py-3 text-grit-subtext">
                 {servicio.descripcion ? (
                   <MultilineText>{servicio.descripcion}</MultilineText>
                 ) : (
-                  <span className="italic text-slate-600">Sin descripción</span>
+                  <span className="italic text-grit-muted">Sin descripción</span>
                 )}
               </td>
               <td className="px-4 py-3">
@@ -65,7 +65,7 @@ export function ServiciosTable({ rows, onEdit, onDelete }: ServiciosTableProps) 
                   <button
                     type="button"
                     onClick={() => onEdit(servicio)}
-                    className="rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-turquoise/50 hover:text-turquoise"
+                    className="rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-3 py-1.5 text-xs font-semibold text-grit-subtext transition hover:border-grit-cyan/50 hover:text-grit-cyan"
                     aria-label={`Editar servicio ${servicio.nombre}`}
                   >
                     Editar
@@ -73,7 +73,7 @@ export function ServiciosTable({ rows, onEdit, onDelete }: ServiciosTableProps) 
                   <button
                     type="button"
                     onClick={() => onDelete(servicio)}
-                    className="rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-rose-400/50 hover:text-rose-300"
+                    className="rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-3 py-1.5 text-xs font-semibold text-grit-subtext transition hover:border-grit-danger/50 hover:text-grit-danger"
                     aria-label={`Eliminar servicio ${servicio.nombre}`}
                   >
                     Eliminar

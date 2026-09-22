@@ -18,8 +18,8 @@ function ActiveBadge({ activo }: { activo: boolean }) {
       Activo
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-800/60 px-2 py-0.5 text-xs font-semibold text-slate-400 ring-1 ring-slate-600/40">
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
+    <span className="inline-flex items-center gap-1 rounded-full bg-grit-card px-2 py-0.5 text-xs font-semibold text-grit-subtext ring-1 ring-grit-glass-border">
+      <span className="h-1.5 w-1.5 rounded-full bg-grit-subtext/20" />
       Inactivo
     </span>
   );
@@ -27,32 +27,32 @@ function ActiveBadge({ activo }: { activo: boolean }) {
 
 export function FormulariosTable({ tenantId, rows, onPreview, onDelete }: FormulariosTableProps) {
   return (
-    <div className="glass overflow-hidden rounded-xl border border-portal-border">
+    <div className="border bg-grit-glass backdrop-blur-md overflow-hidden rounded-grit-lg border-grit-glass-border">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-portal-border text-left text-sm">
-          <thead className="bg-navy-medium/80">
+        <table className="min-w-full divide-y divide-grit-glass-border text-left text-sm">
+          <thead className="bg-grit-card">
             <tr>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Nombre</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Descripción</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Secciones</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">Estado</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">Nombre</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">Descripción</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">Secciones</th>
+              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">Estado</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.1em] text-grit-subtext">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-portal-border bg-navy-deep/50">
+          <tbody className="divide-y divide-grit-glass-border bg-grit-bg/50">
             {rows.map((plantilla) => (
-              <tr key={plantilla.id} className="transition-colors hover:bg-navy-medium/50">
-                <td className="px-4 py-4 font-medium text-slate-200">{plantilla.nombre}</td>
-                <td className="px-4 py-4 text-slate-400">
+              <tr key={plantilla.id} className="transition-colors hover:bg-grit-card">
+                <td className="px-4 py-4 font-medium text-grit-text">{plantilla.nombre}</td>
+                <td className="px-4 py-4 text-grit-subtext">
                   {plantilla.descripcion ? (
                     <MultilineText>{plantilla.descripcion}</MultilineText>
                   ) : (
-                    <span className="italic text-slate-600">Sin descripción</span>
+                    <span className="italic text-grit-muted">Sin descripción</span>
                   )}
                 </td>
-                <td className="px-4 py-4 text-slate-300">{plantilla.seccionesCount}</td>
+                <td className="px-4 py-4 text-grit-subtext">{plantilla.seccionesCount}</td>
                 <td className="px-4 py-4">
                   <ActiveBadge activo={plantilla.activo} />
                 </td>
@@ -62,14 +62,14 @@ export function FormulariosTable({ tenantId, rows, onPreview, onDelete }: Formul
                       type="button"
                       onClick={() => onPreview(plantilla)}
                       aria-label={`Previsualizar plantilla ${plantilla.nombre}`}
-                      className="rounded-lg p-2 text-slate-400 transition hover:bg-navy-medium hover:text-turquoise"
+                      className="rounded-grit-md p-2 text-grit-subtext transition hover:bg-grit-card hover:text-grit-cyan"
                     >
                       <span className="material-symbols-outlined text-base" aria-hidden="true">visibility</span>
                     </button>
                     <Link
                       href={`/portal/orgs/${tenantId}/gestion-formularios/${plantilla.id}`}
                       aria-label={`Editar plantilla ${plantilla.nombre}`}
-                      className="rounded-lg p-2 text-slate-400 transition hover:bg-navy-medium hover:text-turquoise"
+                      className="rounded-grit-md p-2 text-grit-subtext transition hover:bg-grit-card hover:text-grit-cyan"
                     >
                       <span className="material-symbols-outlined text-base" aria-hidden="true">edit</span>
                     </Link>
@@ -77,7 +77,7 @@ export function FormulariosTable({ tenantId, rows, onPreview, onDelete }: Formul
                       type="button"
                       onClick={() => onDelete(plantilla)}
                       aria-label={`Eliminar plantilla ${plantilla.nombre}`}
-                      className="rounded-lg p-2 text-slate-400 transition hover:bg-navy-medium hover:text-rose-300"
+                      className="rounded-grit-md p-2 text-grit-subtext transition hover:bg-grit-card hover:text-grit-danger"
                     >
                       <span className="material-symbols-outlined text-base" aria-hidden="true">delete</span>
                     </button>

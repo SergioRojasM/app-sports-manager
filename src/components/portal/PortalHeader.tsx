@@ -4,8 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { UserAvatarMenu } from '@/components/portal/UserAvatarMenu';
 import { PortalNavMenu } from '@/components/portal/PortalNavMenu';
+import { GritIcon } from '@/components/ui';
 import type { PortalDisplayProfile, UserRole } from '@/types/portal.types';
-import { PortalBreadcrumb } from '@/components/portal/PortalBreadcrumb';
 
 type PortalHeaderProps = {
   profile: PortalDisplayProfile;
@@ -14,7 +14,7 @@ type PortalHeaderProps = {
 
 export function PortalHeader({ profile, role }: PortalHeaderProps) {
   return (
-    <header className="relative z-20 flex h-16 flex-shrink-0 items-center justify-between border-b border-portal-border bg-navy-deep/95 px-6 backdrop-blur-md">
+    <header className="relative z-20 flex flex-shrink-0 items-center justify-between border-b border-grit-glass-border bg-grit-bg/80 px-4 py-[18px] backdrop-blur-md sm:px-6 lg:px-12">
       {/* Left: logo + nav menu */}
       <div className="flex items-center gap-4">
         <Link href="/portal" className="flex items-center">
@@ -22,28 +22,21 @@ export function PortalHeader({ profile, role }: PortalHeaderProps) {
             <Image src="/logo-navbar.png" alt="GRIT Arena" fill className="object-contain" />
           </div>
         </Link>
-        <div className="h-5 w-px bg-portal-border" />
+        <div className="h-5 w-px bg-grit-glass-border" />
         <PortalNavMenu role={role} />
-        {/* Breadcrumb — hidden on mobile to keep avatar/notifications accessible */}
-        <div className="hidden md:flex items-center gap-2">
-          <div className="h-5 w-px bg-portal-border" />
-          <PortalBreadcrumb />
-        </div>
       </div>
 
       {/* Right: actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3.5">
         {/* Notifications */}
         <button
           aria-label="Notificaciones"
-          className="relative flex h-8 w-8 items-center justify-center rounded-md bg-slate-800 text-slate-400 transition-colors hover:text-turquoise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full border border-grit-glass-border bg-grit-glass text-grit-subtext transition-colors hover:text-grit-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"
         >
-          <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-            notifications
-          </span>
+          <GritIcon name="notifications" size={16} />
           <span
             aria-hidden="true"
-            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-turquoise"
+            className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-grit-cyan"
           />
         </button>
 

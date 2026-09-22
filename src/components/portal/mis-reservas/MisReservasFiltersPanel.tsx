@@ -64,10 +64,10 @@ export function MisReservasFiltersPanel({
   };
 
   return (
-    <div className="glass space-y-4 rounded-lg border border-portal-border p-4">
+    <div className="border bg-grit-glass backdrop-blur-md space-y-4 rounded-grit-2xl border-grit-glass-border p-4">
       {/* Date range */}
       <div className="space-y-2">
-        <span className="text-xs font-medium text-slate-500">Rango de fechas:</span>
+        <span className="text-xs font-medium text-grit-muted">Rango de fechas:</span>
         <div className="flex flex-wrap items-center gap-2">
           {DATE_PRESETS.map((preset) => {
             const isActive = filters.datePreset === preset.value;
@@ -80,8 +80,8 @@ export function MisReservasFiltersPanel({
                 }
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                   isActive
-                    ? 'border-turquoise/60 bg-turquoise/15 text-turquoise'
-                    : 'border-portal-border bg-transparent text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                    ? 'border-grit-cyan/60 bg-grit-cyan/15 text-grit-cyan'
+                    : 'border-grit-glass-border bg-transparent text-grit-subtext hover:border-grit-glass-border hover:text-grit-subtext'
                 }`}
               >
                 {preset.label}
@@ -93,27 +93,27 @@ export function MisReservasFiltersPanel({
         {filters.datePreset === 'rango_personalizado' && (
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <div className="flex items-center gap-2">
-              <label htmlFor="mis-reservas-fecha-desde" className="text-xs text-slate-500">Desde:</label>
+              <label htmlFor="mis-reservas-fecha-desde" className="text-xs text-grit-muted">Desde:</label>
               <input
                 id="mis-reservas-fecha-desde"
                 type="date"
                 value={filters.fechaDesde}
                 onChange={(e) => onFilterChange('fechaDesde', e.target.value)}
-                className="rounded border border-portal-border bg-transparent px-2 py-1 text-xs text-slate-200 focus:border-turquoise/60 focus:outline-none"
+                className="rounded border border-grit-glass-border bg-transparent px-2 py-1 text-xs text-grit-text focus:border-grit-cyan/60 focus:outline-none"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label htmlFor="mis-reservas-fecha-hasta" className="text-xs text-slate-500">Hasta:</label>
+              <label htmlFor="mis-reservas-fecha-hasta" className="text-xs text-grit-muted">Hasta:</label>
               <input
                 id="mis-reservas-fecha-hasta"
                 type="date"
                 value={filters.fechaHasta}
                 onChange={(e) => onFilterChange('fechaHasta', e.target.value)}
-                className="rounded border border-portal-border bg-transparent px-2 py-1 text-xs text-slate-200 focus:border-turquoise/60 focus:outline-none"
+                className="rounded border border-grit-glass-border bg-transparent px-2 py-1 text-xs text-grit-text focus:border-grit-cyan/60 focus:outline-none"
               />
             </div>
             {dateError && (
-              <span className="text-xs text-rose-400">{dateError}</span>
+              <span className="text-xs text-grit-danger">{dateError}</span>
             )}
           </div>
         )}
@@ -121,7 +121,7 @@ export function MisReservasFiltersPanel({
 
       {/* Attendance chips */}
       <div className="space-y-1">
-        <span className="text-xs font-medium text-slate-500">Asistencia:</span>
+        <span className="text-xs font-medium text-grit-muted">Asistencia:</span>
         <div className="flex flex-wrap items-center gap-2">
           {ASISTENCIA_CHIPS.map((chip) => {
             const isActive =
@@ -137,8 +137,8 @@ export function MisReservasFiltersPanel({
                 }
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                   isActive
-                    ? 'border-turquoise/60 bg-turquoise/15 text-turquoise'
-                    : 'border-portal-border bg-transparent text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                    ? 'border-grit-cyan/60 bg-grit-cyan/15 text-grit-cyan'
+                    : 'border-grit-glass-border bg-transparent text-grit-subtext hover:border-grit-glass-border hover:text-grit-subtext'
                 }`}
               >
                 {chip.label}
@@ -150,16 +150,16 @@ export function MisReservasFiltersPanel({
 
       {/* Discipline dropdown */}
       <div className="space-y-1">
-        <label htmlFor="mis-reservas-disciplina-filter" className="text-xs font-medium text-slate-500">Disciplina:</label>
+        <label htmlFor="mis-reservas-disciplina-filter" className="text-xs font-medium text-grit-muted">Disciplina:</label>
         <select
           id="mis-reservas-disciplina-filter"
           value={filters.disciplinaNombre}
           onChange={(e) => onFilterChange('disciplinaNombre', e.target.value)}
-          className="w-full max-w-sm rounded border border-portal-border bg-transparent px-3 py-1.5 text-sm text-slate-200 focus:border-turquoise/60 focus:outline-none"
+          className="w-full max-w-sm rounded border border-grit-glass-border bg-transparent px-3 py-1.5 text-sm text-grit-text focus:border-grit-cyan/60 focus:outline-none"
         >
-          <option value="" className="bg-slate-800">Todas las disciplinas</option>
+          <option value="" className="bg-grit-card">Todas las disciplinas</option>
           {disciplines.map((nombre) => (
-            <option key={nombre} value={nombre} className="bg-slate-800">
+            <option key={nombre} value={nombre} className="bg-grit-card">
               {nombre}
             </option>
           ))}
@@ -169,16 +169,16 @@ export function MisReservasFiltersPanel({
       {/* Organization dropdown — only shown when reservations span more than one org */}
       {tenantOptions.length > 1 && (
         <div className="space-y-1">
-          <label htmlFor="mis-reservas-organizacion-filter" className="text-xs font-medium text-slate-500">Organización:</label>
+          <label htmlFor="mis-reservas-organizacion-filter" className="text-xs font-medium text-grit-muted">Organización:</label>
           <select
             id="mis-reservas-organizacion-filter"
             value={filters.tenantId}
             onChange={(e) => onFilterChange('tenantId', e.target.value)}
-            className="w-full max-w-sm rounded border border-portal-border bg-transparent px-3 py-1.5 text-sm text-slate-200 focus:border-turquoise/60 focus:outline-none"
+            className="w-full max-w-sm rounded border border-grit-glass-border bg-transparent px-3 py-1.5 text-sm text-grit-text focus:border-grit-cyan/60 focus:outline-none"
           >
-            <option value="" className="bg-slate-800">Todas las organizaciones</option>
+            <option value="" className="bg-grit-card">Todas las organizaciones</option>
             {tenantOptions.map((option) => (
-              <option key={option.id} value={option.id} className="bg-slate-800">
+              <option key={option.id} value={option.id} className="bg-grit-card">
                 {option.nombre}
               </option>
             ))}
@@ -192,7 +192,7 @@ export function MisReservasFiltersPanel({
           type="button"
           onClick={handleApply}
           disabled={!canApply}
-          className="rounded-lg bg-turquoise/90 px-4 py-1.5 text-xs font-semibold text-slate-900 transition-colors hover:bg-turquoise disabled:opacity-40 disabled:cursor-not-allowed"
+          className="rounded-grit-md bg-grit-cyan/90 px-4 py-1.5 text-xs font-semibold text-grit-muted/60 transition-colors hover:bg-grit-cyan disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Aplicar filtros
         </button>
@@ -200,7 +200,7 @@ export function MisReservasFiltersPanel({
           <button
             type="button"
             onClick={onClear}
-            className="rounded-lg border border-portal-border px-4 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:border-slate-500 hover:text-slate-300"
+            className="rounded-grit-md border border-grit-glass-border px-4 py-1.5 text-xs font-medium text-grit-subtext transition-colors hover:border-grit-glass-border hover:text-grit-subtext"
           >
             Limpiar filtros
           </button>

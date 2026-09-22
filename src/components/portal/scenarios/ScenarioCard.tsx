@@ -24,7 +24,7 @@ function resolveStatusBadge(scenario: ScenarioWithAvailability) {
   if (!scenario.activo) {
     return {
       label: 'Inactivo',
-      className: 'border-rose-400/40 bg-rose-500/15 text-rose-200',
+      className: 'border-grit-danger/40 bg-rose-500/15 text-grit-danger',
     };
   }
 
@@ -38,12 +38,12 @@ export function ScenarioCard({ scenario, onEdit, onDelete }: ScenarioCardProps) 
   const status = resolveStatusBadge(scenario);
 
   return (
-    <article className="glass group rounded-xl border border-portal-border bg-navy-medium/50 p-5 transition hover:border-turquoise/35">
+    <article className="border bg-grit-glass backdrop-blur-md group rounded-grit-2xl border-grit-glass-border bg-grit-card p-5 transition hover:border-grit-cyan/35">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-slate-100">{scenario.nombre}</h3>
-          <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400">
-            <span className="material-symbols-outlined text-sm text-turquoise" aria-hidden="true">
+          <h3 className="font-grit-title text-lg font-semibold text-grit-text">{scenario.nombre}</h3>
+          <p className="mt-1 inline-flex items-center gap-1 text-xs text-grit-subtext">
+            <span className="material-symbols-outlined text-sm text-grit-cyan" aria-hidden="true">
               location_on
             </span>
             {scenario.ubicacion ?? 'Ubicación no definida'}
@@ -60,27 +60,27 @@ export function ScenarioCard({ scenario, onEdit, onDelete }: ScenarioCardProps) 
         </span>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-2 text-sm text-slate-300 sm:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-2 text-sm text-grit-subtext sm:grid-cols-2">
         <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-turquoise" aria-hidden="true">
+          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
             groups
           </span>
           Capacidad: {scenario.capacidad ?? 'N/D'}
         </div>
         <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-turquoise" aria-hidden="true">
+          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
             event_available
           </span>
           Horarios disponibles: {scenario.schedules.filter((schedule) => schedule.disponible).length}
         </div>
         <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-turquoise" aria-hidden="true">
+          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
             pin_drop
           </span>
           Dirección: {truncateText(scenario.direccion)}
         </div>
         <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-turquoise" aria-hidden="true">
+          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
             explore
           </span>
           Coordenadas: {truncateText(scenario.coordenadas)}
@@ -91,14 +91,14 @@ export function ScenarioCard({ scenario, onEdit, onDelete }: ScenarioCardProps) 
         <button
           type="button"
           onClick={() => void onDelete(scenario)}
-          className="flex-1 rounded-lg border border-rose-400/35 bg-rose-500/10 px-3 py-2 text-sm font-medium text-rose-200 transition hover:bg-rose-500/20"
+          className="flex-1 rounded-grit-md border border-grit-danger/35 bg-rose-500/10 px-3 py-2 text-sm font-medium text-grit-danger transition hover:bg-rose-500/20"
         >
           Eliminar
         </button>
         <button
           type="button"
           onClick={() => onEdit(scenario)}
-          className="flex-1 rounded-lg bg-turquoise px-3 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90"
+          className="flex-1 rounded-grit-md bg-grit-cyan px-3 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90"
         >
           Edit
         </button>

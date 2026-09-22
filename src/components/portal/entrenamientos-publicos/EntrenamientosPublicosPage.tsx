@@ -66,11 +66,11 @@ export function EntrenamientosPublicosPage() {
   }, [loading, allItems, searchParams, router, pathname]);
 
   return (
-    <div className="relative min-h-[80vh] px-6 pb-8 pt-3 md:px-10 md:pb-10 md:pt-4">
-      <div className="sticky top-4 z-10 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-landing-bg/40 px-4 py-2 backdrop-blur">
+    <div className="relative min-h-[80vh]">
+      <div className="sticky top-4 z-10 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-grit-2xl bg-grit-bg/40 px-4 py-2 backdrop-blur">
         <div className="flex flex-wrap items-center gap-4">
-          <h1 className="font-landing-display text-2xl italic font-bold leading-tight text-landing-text">
-            Entrenamientos <span className="text-landing-primary">Públicos</span>
+          <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px] italic">
+            Entrenamientos <span className="text-grit-cyan">Públicos</span>
           </h1>
           <SessionsAvailableWidget count={items.length} />
         </div>
@@ -78,9 +78,9 @@ export function EntrenamientosPublicosPage() {
         <button
           type="button"
           onClick={() => setFiltersOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg border border-landing-border bg-landing-bg/60 px-4 py-2 font-landing-body text-sm font-semibold text-landing-text transition hover:border-landing-primary/50"
+          className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-4 py-2 font-grit-body text-sm font-semibold text-grit-text transition hover:border-grit-cyan/50"
         >
-          <span className="material-symbols-outlined text-base text-landing-primary" aria-hidden="true">
+          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
             tune
           </span>
           Filtrar
@@ -88,7 +88,7 @@ export function EntrenamientosPublicosPage() {
       </div>
 
       {isDefaultDateRange && !loading && !error && (
-        <p className="mb-6 -mt-4 font-landing-body text-xs text-landing-text-secondary">
+        <p className="mb-6 -mt-4 font-grit-body text-xs text-grit-subtext">
           Se muestran los entrenamientos de los próximos 60 días. Si quieres ver más, filtra por fechas.
         </p>
       )}
@@ -96,17 +96,17 @@ export function EntrenamientosPublicosPage() {
       <div className="relative">
         {loading && (
           <div className="flex items-center justify-center py-24">
-            <p className="font-landing-body text-sm text-landing-text-secondary">Cargando entrenamientos públicos...</p>
+            <p className="font-grit-body text-sm text-grit-subtext">Cargando entrenamientos públicos...</p>
           </div>
         )}
 
         {!loading && error && (
           <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
-            <p className="font-landing-body text-sm text-rose-300">{error}</p>
+            <p className="font-grit-body text-sm text-grit-danger">{error}</p>
             <button
               type="button"
               onClick={() => void refetch()}
-              className="rounded-lg border border-landing-border px-3 py-2 font-landing-body text-xs font-semibold text-landing-text"
+              className="rounded-grit-md border border-grit-glass-border px-3 py-2 font-grit-body text-xs font-semibold text-grit-text"
             >
               Reintentar
             </button>

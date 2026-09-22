@@ -1,5 +1,7 @@
 'use client';
 
+import { GritButton, GritCard, GritInfoRow, GritSectionHeading } from '@/components/ui';
+
 type PublicTrainingDetalleReservaProps = {
   reservasActivas: number;
   cupoMaximo: number | null;
@@ -20,24 +22,8 @@ function formatDuracion(duracionMinutos: number | null): string {
   return `${horas} ${horas === 1 ? 'hora' : 'horas'} ${minutos} minutos`;
 }
 
-function InfoRow({ icon, label, value }: { icon: string; label: string; value: string }) {
-  return (
-    <li className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-landing-bg/70">
-        <span className="material-symbols-outlined text-base text-landing-primary" aria-hidden="true">
-          {icon}
-        </span>
-      </span>
-      <span className="flex flex-col">
-        <span className="font-landing-body text-[11px] font-semibold text-landing-text-secondary">{label}</span>
-        <span className="font-landing-body text-[13px] font-bold text-landing-text">{value}</span>
-      </span>
-    </li>
-  );
-}
-
 /**
- * Reserve card, matching design node `mttfC` (US-0109).
+ * Reserve card, matching design node `mttfC` (US-0109, restyled in US-0116).
  *
  * The design's "Nivel recomendado" row is deliberately NOT implemented — no
  * data source exists for it.
@@ -52,52 +38,54 @@ export function PublicTrainingDetalleReserva({
   onReservar,
 }: PublicTrainingDetalleReservaProps) {
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-landing-primary/25 bg-landing-surface-card/60 p-4 backdrop-blur">
-      <h2 className="font-landing-display text-[22px] font-bold text-landing-text">Reserva tu cupo</h2>
+    <GritCard as="section" variant="glass" padding="lg" className="flex h-full flex-col gap-5">
+      <GritSectionHeading title="Reserva tu cupo" />
 
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <InfoRow
-          icon="groups"
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <GritInfoRow
+          as="li"
+          icon="group"
           label="Cupos disponibles"
           // Remaining capacity, not reservations taken — the label says "disponibles"
           value={`${Math.max(0, (cupoMaximo ?? 0) - reservasActivas)} de ${cupoMaximo ?? '—'}`}
         />
-        <InfoRow icon="timer" label="Duración" value={formatDuracion(duracionMinutos)} />
+        <GritInfoRow as="li" icon="schedule" label="Duración" value={formatDuracion(duracionMinutos)} />
         {/* Rendered only when the publication has an entrenador_id — never as an
             empty row or the literal "null" (US-0109) */}
-        {entrenadorNombre && <InfoRow icon="person" label="Entrenador" value={entrenadorNombre} />}
+        {entrenadorNombre && <GritInfoRow as="li" icon="person" label="Entrenador" value={entrenadorNombre} />}
       </ul>
 
-      <div className="flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={onReservar}
-          disabled={reservarDisabled}
-          aria-disabled={reservarDisabled}
-          className="w-full rounded-lg bg-landing-primary px-4 py-3 font-landing-body text-sm font-bold text-landing-bg transition hover:bg-landing-primary-light disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {reservarDisabled ? 'Cargando…' : 'Reservar mi cupo'}
-        </button>
+      <div className="mt-auto flex flex-col gap-2.5">
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <GritButton
+            onClick={onReservar}
+            disabled={reservarDisabled}
+            aria-disabled={reservarDisabled}
+            className="h-[42px] flex-1 py-0"
+          >
+            {reservarDisabled ? 'Cargando…' : 'Reservar mi cupo'}
+          </GritButton>
 
-        {paginaEventoUrl && (
-          <>
-            <a
+          {paginaEventoUrl && (
+            <GritButton
               href={paginaEventoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-landing-border px-4 py-2.5 font-landing-body text-[13px] font-bold text-landing-text transition hover:border-landing-primary/40 hover:text-landing-primary"
+              external
+              variant="secondary"
+              icon="arrow_outward"
+              iconPosition="end"
+              className="h-[42px] flex-1 py-0 text-[13px]"
             >
               Ver detalles oficiales
-              <span className="material-symbols-outlined text-sm" aria-hidden="true">
-                open_in_new
-              </span>
-            </a>
-            <p className="text-center font-landing-body text-[11px] font-medium text-landing-text-secondary">
-              Serás redirigido al sitio oficial del evento.
-            </p>
-          </>
+            </GritButton>
+          )}
+        </div>
+
+        {paginaEventoUrl && (
+          <p className="text-center font-grit-body text-[11px] font-medium text-grit-subtext">
+            Serás redirigido al sitio oficial del evento.
+          </p>
         )}
       </div>
-    </section>
+    </GritCard>
   );
 }

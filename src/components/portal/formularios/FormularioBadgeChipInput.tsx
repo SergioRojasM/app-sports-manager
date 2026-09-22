@@ -33,7 +33,7 @@ export function FormularioBadgeChipInput({ value, onChange, readOnly = false }: 
         {value.map((badge, index) => (
           <span
             key={`${badge}-${index}`}
-            className="inline-flex items-center gap-2 rounded-[10px] border border-turquoise/25 px-3.5 py-2 text-[13px] font-semibold text-slate-100"
+            className="inline-flex items-center gap-2 rounded-[10px] border border-grit-cyan/25 px-3.5 py-2 text-[13px] font-semibold text-grit-text"
           >
             {badge}
           </span>
@@ -48,14 +48,14 @@ export function FormularioBadgeChipInput({ value, onChange, readOnly = false }: 
         {value.map((badge, index) => (
           <span
             key={`${badge}-${index}`}
-            className="inline-flex items-center gap-1.5 rounded-[10px] border border-turquoise/25 px-3 py-1.5 text-xs font-semibold text-slate-100"
+            className="inline-flex items-center gap-1.5 rounded-[10px] border border-grit-cyan/25 px-3 py-1.5 text-xs font-semibold text-grit-text"
           >
             {badge}
             <button
               type="button"
               onClick={() => removeBadge(index)}
               aria-label={`Quitar badge ${badge}`}
-              className="text-slate-400 transition hover:text-rose-300"
+              className="text-grit-subtext transition hover:text-grit-danger"
             >
               <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
             </button>
@@ -78,13 +78,13 @@ export function FormularioBadgeChipInput({ value, onChange, readOnly = false }: 
             maxLength={60}
             placeholder="Ej: Piscina Olímpica"
             aria-label="Nuevo badge"
-            className="flex-1 rounded-[8px] border border-slate-700 bg-navy-deep px-3 py-1.5 text-xs text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+            className="flex-1 rounded-[8px] border border-grit-glass-border bg-grit-bg px-3 py-1.5 text-xs text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
           />
           <button
             type="button"
             onClick={addBadge}
             aria-label="Añadir badge"
-            className="rounded-[8px] border border-portal-border bg-navy-deep/60 p-1.5 text-slate-300 transition hover:border-turquoise/50 hover:text-turquoise"
+            className="rounded-[8px] border border-grit-glass-border bg-grit-bg/60 p-1.5 text-grit-subtext transition hover:border-grit-cyan/50 hover:text-grit-cyan"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
           </button>

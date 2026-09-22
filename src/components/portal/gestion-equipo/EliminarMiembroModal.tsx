@@ -30,19 +30,19 @@ export function EliminarMiembroModal({ miembro, onClose, onConfirm }: EliminarMi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-portal-border bg-navy-deep p-6 shadow-xl">
+      <div className="relative z-10 w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-bg p-6 shadow-xl">
         {/* Icon */}
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/15">
-          <span className="material-symbols-outlined text-2xl text-rose-400" aria-hidden="true">person_remove</span>
+          <span className="material-symbols-outlined text-2xl text-grit-danger" aria-hidden="true">person_remove</span>
         </div>
 
-        <h2 className="mb-2 text-center text-lg font-semibold text-slate-100">Eliminar del equipo</h2>
-        <p className="mb-1 text-center text-sm text-slate-300">
-          ¿Estás seguro de que deseas eliminar a <span className="font-medium text-slate-100">{fullName}</span> del equipo?
+        <h2 className="font-grit-title mb-2 text-center text-lg font-semibold text-grit-text">Eliminar del equipo</h2>
+        <p className="mb-1 text-center text-sm text-grit-subtext">
+          ¿Estás seguro de que deseas eliminar a <span className="font-medium text-grit-text">{fullName}</span> del equipo?
         </p>
-        <p className="mb-6 text-center text-xs text-slate-400">
+        <p className="mb-6 text-center text-xs text-grit-subtext">
           La cuenta del usuario no será eliminada, solo se retirará la membresía de esta organización.
         </p>
 
@@ -50,7 +50,7 @@ export function EliminarMiembroModal({ miembro, onClose, onConfirm }: EliminarMi
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-portal-border px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
+            className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-semibold text-grit-subtext transition hover:bg-white/5"
           >
             Cancelar
           </button>
@@ -58,7 +58,7 @@ export function EliminarMiembroModal({ miembro, onClose, onConfirm }: EliminarMi
             type="button"
             onClick={handleConfirm}
             disabled={isSubmitting}
-            className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-600 disabled:opacity-50"
+            className="rounded-grit-md bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-600 disabled:opacity-50"
           >
             {isSubmitting ? 'Eliminando…' : 'Eliminar'}
           </button>

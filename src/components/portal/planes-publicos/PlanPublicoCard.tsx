@@ -31,16 +31,16 @@ function formatServicio(nombre: string, unidades: number | null): string {
 
 function TipoRow({ tipo }: { tipo: PlanPublicoTipoItem }) {
   return (
-    <li className="rounded-lg border border-portal-border bg-navy-medium/50 p-3">
+    <li className="rounded-grit-md border border-grit-glass-border bg-grit-card p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-sm font-semibold text-slate-100">{tipo.nombre}</p>
-        <p className="text-sm font-semibold text-turquoise">{formatCurrency(tipo.precio)}</p>
+        <p className="text-sm font-semibold text-grit-text">{tipo.nombre}</p>
+        <p className="text-sm font-semibold text-grit-cyan">{formatCurrency(tipo.precio)}</p>
       </div>
 
-      <p className="mt-1 text-xs text-slate-400">Vigencia: {formatVigencia(tipo.vigencia_dias)}</p>
+      <p className="mt-1 text-xs text-grit-subtext">Vigencia: {formatVigencia(tipo.vigencia_dias)}</p>
 
       {tipo.descripcion ? (
-        <MultilineText className="mt-1 text-xs text-slate-400">{tipo.descripcion}</MultilineText>
+        <MultilineText className="mt-1 text-xs text-grit-subtext">{tipo.descripcion}</MultilineText>
       ) : null}
 
       {tipo.servicios.length > 0 ? (
@@ -48,7 +48,7 @@ function TipoRow({ tipo }: { tipo: PlanPublicoTipoItem }) {
           {tipo.servicios.map((servicio) => (
             <li
               key={servicio.servicioId}
-              className="rounded-full border border-portal-border bg-navy-deep px-2 py-0.5 text-[11px] text-slate-300"
+              className="rounded-full border border-grit-glass-border bg-grit-bg px-2 py-0.5 text-[11px] text-grit-subtext"
             >
               {formatServicio(servicio.servicioNombre, servicio.unidades)}
             </li>
@@ -61,12 +61,12 @@ function TipoRow({ tipo }: { tipo: PlanPublicoTipoItem }) {
 
 export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCardProps) {
   return (
-    <article className="glass rounded-xl border border-portal-border p-4">
+    <article className="border bg-grit-glass backdrop-blur-md rounded-grit-lg border-grit-glass-border p-4">
       <header className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-base font-semibold text-slate-100">{plan.nombre}</h3>
+          <h3 className="font-grit-title text-base font-semibold text-grit-text">{plan.nombre}</h3>
           {plan.descripcion ? (
-            <MultilineText className="mt-1 text-sm text-slate-400">{plan.descripcion}</MultilineText>
+            <MultilineText className="mt-1 text-sm text-grit-subtext">{plan.descripcion}</MultilineText>
           ) : null}
         </div>
 
@@ -83,7 +83,7 @@ export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCard
           ) : null}
 
           {plan.tipo ? (
-            <span className="rounded-full border border-portal-border bg-navy-deep px-2.5 py-0.5 text-[11px] capitalize text-slate-300">
+            <span className="rounded-full border border-grit-glass-border bg-grit-bg px-2.5 py-0.5 text-[11px] capitalize text-grit-subtext">
               {plan.tipo}
             </span>
           ) : null}
@@ -95,7 +95,7 @@ export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCard
           {plan.disciplinaNames.map((nombre) => (
             <li
               key={nombre}
-              className="rounded-full border border-turquoise/30 bg-turquoise/10 px-2.5 py-0.5 text-[11px] text-turquoise"
+              className="rounded-full border border-grit-cyan/30 bg-grit-cyan/10 px-2.5 py-0.5 text-[11px] text-grit-cyan"
             >
               {nombre}
             </li>
@@ -106,8 +106,8 @@ export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCard
       {plan.beneficiosList.length > 0 ? (
         <ul className="mt-3 space-y-1">
           {plan.beneficiosList.map((beneficio) => (
-            <li key={beneficio} className="flex items-start gap-1.5 text-xs text-slate-300">
-              <span className="material-symbols-outlined text-sm text-turquoise" aria-hidden="true">
+            <li key={beneficio} className="flex items-start gap-1.5 text-xs text-grit-subtext">
+              <span className="material-symbols-outlined text-sm text-grit-cyan" aria-hidden="true">
                 check
               </span>
               {beneficio}
@@ -119,11 +119,11 @@ export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCard
       {/* Collapsed by default: the card leads with the plan itself, and the subtype
           list stays one click away for whoever wants the detail. */}
       {plan.tipos.length > 0 ? (
-        <details className="group mt-3 rounded-lg border border-portal-border bg-navy-deep/40">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-xs text-slate-300 [&::-webkit-details-marker]:hidden">
+        <details className="group mt-3 rounded-grit-md border border-grit-glass-border bg-grit-bg/40">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-xs text-grit-subtext [&::-webkit-details-marker]:hidden">
             <span className="font-medium">
               {plan.tipos.length === 1 ? '1 opción disponible' : `${plan.tipos.length} opciones disponibles`}
-              <span className="ml-2 font-normal text-slate-400">
+              <span className="ml-2 font-normal text-grit-subtext">
                 desde {formatCurrency(Math.min(...plan.tipos.map((tipo) => tipo.precio)))}
               </span>
             </span>
@@ -142,7 +142,7 @@ export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCard
           </ul>
         </details>
       ) : (
-        <p className="mt-3 text-xs text-slate-500">Este plan no tiene opciones disponibles.</p>
+        <p className="mt-3 text-xs text-grit-muted">Este plan no tiene opciones disponibles.</p>
       )}
 
       {canAcquire && plan.tipos.length > 0 ? (
@@ -150,7 +150,7 @@ export function PlanPublicoCard({ plan, canAcquire, onAcquire }: PlanPublicoCard
           <button
             type="button"
             onClick={() => onAcquire(plan)}
-            className="rounded-lg bg-turquoise px-3 py-1.5 text-xs font-semibold text-navy-deep transition hover:bg-turquoise/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+            className="rounded-grit-md bg-grit-cyan px-3 py-1.5 text-xs font-semibold text-grit-bg transition hover:bg-grit-cyan/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-grit-bg"
           >
             Adquirir
           </button>

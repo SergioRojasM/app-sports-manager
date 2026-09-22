@@ -45,10 +45,10 @@ const FIELDS: FieldConfig[] = [
 
 export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpload, bannerUpload }: EditTenantFormProps) {
   const maxSolicitudesError = errors.max_solicitudes;
-  const maxSolicitudesInputClass = `w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition-all placeholder:text-slate-500 focus:ring-2 ${
+  const maxSolicitudesInputClass = `w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition-all placeholder:text-grit-muted focus:ring-2 ${
     maxSolicitudesError
-      ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-      : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35'
+      ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+      : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35'
   }`;
 
   const currentLogoSrc = logoUpload?.previewUrl ?? (values.logo_url || null);
@@ -60,11 +60,11 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
       {/* Logo upload section */}
       {logoUpload ? (
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
             Logo
           </label>
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-portal-border bg-navy-deep">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-grit-glass-border bg-grit-bg">
               {currentLogoSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -73,7 +73,7 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <span className="material-symbols-outlined text-2xl text-slate-400" aria-hidden="true">
+                <span className="material-symbols-outlined text-2xl text-grit-subtext" aria-hidden="true">
                   shield
                 </span>
               )}
@@ -85,13 +85,13 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
                 accept="image/jpeg,image/png,image/webp"
                 disabled={isDisabled}
                 onChange={logoUpload.onFileSelect}
-                className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 file:mr-3 file:rounded file:border-0 file:bg-turquoise/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-turquoise disabled:opacity-50"
+                className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text file:mr-3 file:rounded file:border-0 file:bg-grit-cyan/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-grit-cyan disabled:opacity-50"
               />
-              <p className="mt-1 text-[10px] text-slate-500">JPEG, PNG o WebP. Máximo 2 MB.</p>
+              <p className="mt-1 text-[10px] text-grit-muted">JPEG, PNG o WebP. Máximo 2 MB.</p>
             </div>
           </div>
           {logoUpload.error ? (
-            <p className="text-xs font-medium text-rose-300" role="alert">
+            <p className="text-xs font-medium text-grit-danger" role="alert">
               {logoUpload.error}
             </p>
           ) : null}
@@ -101,10 +101,10 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
       {/* Banner upload section */}
       {bannerUpload ? (
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
             Banner
           </label>
-          <div className="h-20 w-full overflow-hidden rounded-xl border border-portal-border bg-navy-deep">
+          <div className="h-20 w-full overflow-hidden rounded-grit-lg border border-grit-glass-border bg-grit-bg">
             {currentBannerSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -114,7 +114,7 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
               />
             ) : (
               <div className="flex h-full items-center justify-center">
-                <span className="material-symbols-outlined text-2xl text-slate-400" aria-hidden="true">
+                <span className="material-symbols-outlined text-2xl text-grit-subtext" aria-hidden="true">
                   panorama
                 </span>
               </div>
@@ -126,11 +126,11 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
             accept="image/jpeg,image/png,image/webp"
             disabled={isDisabled}
             onChange={bannerUpload.onFileSelect}
-            className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 file:mr-3 file:rounded file:border-0 file:bg-turquoise/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-turquoise disabled:opacity-50"
+            className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text file:mr-3 file:rounded file:border-0 file:bg-grit-cyan/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-grit-cyan disabled:opacity-50"
           />
-          <p className="mt-1 text-[10px] text-slate-500">JPEG, PNG o WebP. Máximo 2 MB.</p>
+          <p className="mt-1 text-[10px] text-grit-muted">JPEG, PNG o WebP. Máximo 2 MB.</p>
           {bannerUpload.error ? (
-            <p className="text-xs font-medium text-rose-300" role="alert">
+            <p className="text-xs font-medium text-grit-danger" role="alert">
               {bannerUpload.error}
             </p>
           ) : null}
@@ -139,15 +139,15 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
 
       {FIELDS.map((field) => {
         const fieldError = errors[field.key];
-        const inputClassName = `w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition-all placeholder:text-slate-500 focus:ring-2 ${
+        const inputClassName = `w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition-all placeholder:text-grit-muted focus:ring-2 ${
           fieldError
-            ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-            : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35'
+            ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+            : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35'
         }`;
 
         return (
           <div key={field.key} className="space-y-1.5">
-            <label htmlFor={field.key} className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+            <label htmlFor={field.key} className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
               {field.label}
             </label>
 
@@ -176,7 +176,7 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
             )}
 
             {fieldError ? (
-              <p className="text-xs font-medium text-rose-300" role="alert">
+              <p className="text-xs font-medium text-grit-danger" role="alert">
                 {fieldError}
               </p>
             ) : null}
@@ -186,7 +186,7 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
 
       {/* max_solicitudes — numeric field */}
       <div className="space-y-1.5">
-        <label htmlFor="max_solicitudes" className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+        <label htmlFor="max_solicitudes" className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
           Máximo de solicitudes rechazadas antes de bloqueo
         </label>
         <input
@@ -203,7 +203,7 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
           className={maxSolicitudesInputClass}
         />
         {maxSolicitudesError ? (
-          <p className="text-xs font-medium text-rose-300" role="alert">
+          <p className="text-xs font-medium text-grit-danger" role="alert">
             {maxSolicitudesError}
           </p>
         ) : null}
@@ -213,7 +213,7 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
       <div className="space-y-1.5">
         <span
           id="requiere-perfil-desc"
-          className="block text-[11px] text-slate-500"
+          className="block text-[11px] text-grit-muted"
         >
           Cuando está activo, los usuarios deberán completar su perfil (nombre, apellido, teléfono, fecha de nacimiento,
           tipo y número de identificación, fecha de expedición y RH) para poder enviar una solicitud de acceso.
@@ -227,9 +227,9 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
             onChange={(event) => onChange('requiere_perfil_completo', event.target.checked ? 'true' : 'false')}
             disabled={isSubmitting}
             aria-describedby="requiere-perfil-desc"
-            className="h-4 w-4 rounded border-slate-600 bg-navy-deep accent-turquoise disabled:opacity-50"
+            className="h-4 w-4 rounded border-grit-glass-border bg-grit-bg accent-grit-cyan disabled:opacity-50"
           />
-          <span className="text-sm font-medium text-slate-200">
+          <span className="text-sm font-medium text-grit-text">
             Requerir perfil completo para solicitar acceso
           </span>
         </label>
