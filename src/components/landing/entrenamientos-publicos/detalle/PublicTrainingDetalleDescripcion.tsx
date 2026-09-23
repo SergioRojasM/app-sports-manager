@@ -1,13 +1,14 @@
 'use client';
 
 import ReactMarkdown from 'react-markdown';
+import { GritSectionHeading } from '@/components/ui';
 
 type PublicTrainingDetalleDescripcionProps = {
   descripcionLarga: string | null;
 };
 
 /**
- * Long-form description, matching design node `Z08z5i` (US-0109).
+ * Long-form description, matching design node `Z08z5i` (US-0109, restyled in US-0116).
  *
  * Rendered through `react-markdown`, which builds a React element tree rather
  * than injecting HTML — no `dangerouslySetInnerHTML` anywhere in this path. Raw
@@ -22,17 +23,17 @@ export function PublicTrainingDetalleDescripcion({ descripcionLarga }: PublicTra
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-landing-display text-[22px] font-bold text-landing-text">Descripción</h2>
+      <GritSectionHeading title="Descripción" />
       <div
-        className="flex flex-col gap-3 font-landing-body text-sm font-medium text-landing-text-secondary
-          [&_a]:text-landing-primary [&_a]:underline
-          [&_h1]:font-landing-display [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-landing-text
-          [&_h2]:font-landing-display [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-landing-text
-          [&_h3]:font-landing-display [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-landing-text
-          [&_strong]:font-bold [&_strong]:text-landing-text
+        className="flex flex-col gap-3 font-grit-body text-sm font-medium text-grit-subtext
+          [&_a]:text-grit-cyan [&_a]:underline
+          [&_h1]:font-grit-title [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-grit-text
+          [&_h2]:font-grit-title [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-grit-text
+          [&_h3]:font-grit-title [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-grit-text
+          [&_strong]:font-bold [&_strong]:text-grit-text
           [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5
-          [&_blockquote]:border-l-2 [&_blockquote]:border-landing-primary/40 [&_blockquote]:pl-3
-          [&_code]:rounded [&_code]:bg-landing-surface-card [&_code]:px-1 [&_code]:py-0.5"
+          [&_blockquote]:border-l-2 [&_blockquote]:border-grit-cyan/40 [&_blockquote]:pl-3
+          [&_code]:rounded-grit-xs [&_code]:bg-grit-card [&_code]:px-1 [&_code]:py-0.5"
       >
         <ReactMarkdown>{descripcionLarga}</ReactMarkdown>
       </div>

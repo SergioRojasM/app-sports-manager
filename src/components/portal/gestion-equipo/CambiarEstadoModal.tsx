@@ -78,17 +78,17 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
+      <div className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm" onClick={handleClose} />
 
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-portal-border bg-navy-deep p-6 shadow-xl">
+      <div className="relative z-10 w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-bg p-6 shadow-xl">
         {/* Icon */}
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-turquoise/15">
-          <span className="material-symbols-outlined text-2xl text-turquoise" aria-hidden="true">swap_horiz</span>
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-grit-cyan/15">
+          <span className="material-symbols-outlined text-2xl text-grit-cyan" aria-hidden="true">swap_horiz</span>
         </div>
 
-        <h2 className="mb-2 text-center text-lg font-semibold text-slate-100">Cambiar estado</h2>
-        <p className="mb-1 text-center text-sm text-slate-300">
-          <span className="font-medium text-slate-100">{fullName}</span>
+        <h2 className="font-grit-title mb-2 text-center text-lg font-semibold text-grit-text">Cambiar estado</h2>
+        <p className="mb-1 text-center text-sm text-grit-subtext">
+          <span className="font-medium text-grit-text">{fullName}</span>
         </p>
         <div className="mb-4 flex justify-center">
           <EquipoStatusBadge estado={member.estado} />
@@ -98,14 +98,14 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
         <div className="space-y-4">
           {/* Nuevo estado */}
           <div>
-            <label htmlFor="ce-nuevo-estado" className="mb-1 block text-xs font-medium text-slate-300">
-              Nuevo estado <span className="text-rose-400">*</span>
+            <label htmlFor="ce-nuevo-estado" className="mb-1 block text-xs font-medium text-grit-subtext">
+              Nuevo estado <span className="text-grit-danger">*</span>
             </label>
             <select
               id="ce-nuevo-estado"
               value={nuevoEstado}
               onChange={(e) => setNuevoEstado(e.target.value as MiembroEstado)}
-              className="w-full rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-200 outline-none focus:border-turquoise/50"
+              className="w-full rounded-grit-md border border-grit-glass-border bg-grit-card px-3 py-2 text-sm text-grit-text outline-none focus:border-grit-cyan/50"
             >
               <option value="">Seleccionar…</option>
               {estadoOptions.map((o) => (
@@ -116,14 +116,14 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
 
           {/* Tipo de novedad */}
           <div>
-            <label htmlFor="ce-tipo" className="mb-1 block text-xs font-medium text-slate-300">
-              Motivo <span className="text-rose-400">*</span>
+            <label htmlFor="ce-tipo" className="mb-1 block text-xs font-medium text-grit-subtext">
+              Motivo <span className="text-grit-danger">*</span>
             </label>
             <select
               id="ce-tipo"
               value={tipo}
               onChange={(e) => setTipo(e.target.value as MiembroNovedadTipo)}
-              className="w-full rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-200 outline-none focus:border-turquoise/50"
+              className="w-full rounded-grit-md border border-grit-glass-border bg-grit-card px-3 py-2 text-sm text-grit-text outline-none focus:border-grit-cyan/50"
             >
               <option value="">Seleccionar…</option>
               {TIPO_OPTIONS.map((o) => (
@@ -134,8 +134,8 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
 
           {/* Descripción */}
           <div>
-            <label htmlFor="ce-descripcion" className="mb-1 block text-xs font-medium text-slate-300">
-              Descripción <span className="text-xs text-slate-500">(opcional)</span>
+            <label htmlFor="ce-descripcion" className="mb-1 block text-xs font-medium text-grit-subtext">
+              Descripción <span className="text-xs text-grit-muted">(opcional)</span>
             </label>
             <textarea
               id="ce-descripcion"
@@ -144,16 +144,16 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
               maxLength={500}
               rows={3}
               placeholder="Detalle del cambio de estado…"
-              className="w-full resize-none rounded-lg border border-portal-border bg-navy-medium px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 outline-none focus:border-turquoise/50"
+              className="w-full resize-none rounded-grit-md border border-grit-glass-border bg-grit-card px-3 py-2 text-sm text-grit-text placeholder:text-grit-muted outline-none focus:border-grit-cyan/50"
             />
-            <p className="mt-0.5 text-right text-[10px] text-slate-500">{descripcion.length}/500</p>
+            <p className="mt-0.5 text-right text-[10px] text-grit-muted">{descripcion.length}/500</p>
           </div>
         </div>
 
         {/* Error */}
         {errorMsg ? (
-          <div className="mt-4 rounded-lg border border-rose-400/25 bg-rose-900/20 p-3">
-            <p className="text-xs text-rose-200">{errorMsg}</p>
+          <div className="mt-4 rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 p-3">
+            <p className="text-xs text-grit-danger">{errorMsg}</p>
           </div>
         ) : null}
 
@@ -163,7 +163,7 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/5 disabled:opacity-50"
+            className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-semibold text-grit-subtext transition hover:bg-white/5 disabled:opacity-50"
           >
             Cancelar
           </button>
@@ -171,7 +171,7 @@ export function CambiarEstadoModal({ member, isOpen, onClose, onConfirm }: Cambi
             type="button"
             onClick={() => void handleConfirm()}
             disabled={!canSubmit}
-            className="rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90 disabled:opacity-50"
+            className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-bold text-grit-bg transition hover:bg-grit-cyan/90 disabled:opacity-50"
           >
             {isSubmitting ? 'Guardando…' : 'Confirmar'}
           </button>

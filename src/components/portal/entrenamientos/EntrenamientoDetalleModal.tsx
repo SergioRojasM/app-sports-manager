@@ -133,7 +133,7 @@ export function EntrenamientoDetalleModal({
       <button
         type="button"
         aria-label="Cerrar detalle del entrenamiento"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
       />
 
@@ -141,17 +141,17 @@ export function EntrenamientoDetalleModal({
         role="dialog"
         aria-modal="true"
         aria-label="Detalle del entrenamiento"
-        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Detalle del entrenamiento</h2>
-            <p className="mt-1 text-xs text-slate-400">Información completa de solo lectura.</p>
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">Detalle del entrenamiento</h2>
+            <p className="mt-1 text-xs text-grit-subtext">Información completa de solo lectura.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -161,50 +161,50 @@ export function EntrenamientoDetalleModal({
 
         <div className="flex-1 space-y-6 overflow-y-auto px-5 py-4">
           {/* Basic info */}
-          <section className="space-y-3 rounded-xl border border-portal-border bg-navy-deep/45 p-4">
+          <section className="space-y-3 rounded-grit-lg border border-grit-glass-border bg-grit-bg/45 p-4">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-semibold text-slate-100">{instance.nombre}</h3>
+              <h3 className="font-grit-title text-sm font-semibold text-grit-text">{instance.nombre}</h3>
               <VisibilidadBadge visibilidad={instance.visibilidad} />
             </div>
 
             {instance.descripcion ? (
-              <MultilineText className="text-sm text-slate-300">{instance.descripcion}</MultilineText>
+              <MultilineText className="text-sm text-grit-subtext">{instance.descripcion}</MultilineText>
             ) : null}
 
             <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <dt className="text-xs text-slate-400">Disciplina</dt>
-                <dd className="text-sm text-slate-200">{disciplineNameById[instance.disciplina_id] ?? 'Sin disciplina'}</dd>
+                <dt className="text-xs text-grit-subtext">Disciplina</dt>
+                <dd className="text-sm text-grit-text">{disciplineNameById[instance.disciplina_id] ?? 'Sin disciplina'}</dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-400">Escenario</dt>
-                <dd className="text-sm text-slate-200">{scenarioNameById[instance.escenario_id] ?? 'Sin escenario'}</dd>
+                <dt className="text-xs text-grit-subtext">Escenario</dt>
+                <dd className="text-sm text-grit-text">{scenarioNameById[instance.escenario_id] ?? 'Sin escenario'}</dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-400">Entrenador</dt>
-                <dd className="text-sm text-slate-200">
+                <dt className="text-xs text-grit-subtext">Entrenador</dt>
+                <dd className="text-sm text-grit-text">
                   {instance.entrenador_id ? entrenadorNameById[instance.entrenador_id] ?? 'Sin asignar' : 'Sin asignar'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-400">Duración</dt>
-                <dd className="text-sm text-slate-200">
+                <dt className="text-xs text-grit-subtext">Duración</dt>
+                <dd className="text-sm text-grit-text">
                   {instance.duracion_minutos ? `${instance.duracion_minutos} min` : 'Sin definir'}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-slate-400">Cupo máximo</dt>
-                <dd className="text-sm text-slate-200">{instance.cupo_maximo ?? 'Sin límite'}</dd>
+                <dt className="text-xs text-grit-subtext">Cupo máximo</dt>
+                <dd className="text-sm text-grit-text">{instance.cupo_maximo ?? 'Sin límite'}</dd>
               </div>
               {instance.punto_encuentro ? (
                 <div>
-                  <dt className="text-xs text-slate-400">Punto de encuentro</dt>
-                  <dd className="text-sm text-slate-200">{instance.punto_encuentro}</dd>
+                  <dt className="text-xs text-grit-subtext">Punto de encuentro</dt>
+                  <dd className="text-sm text-grit-text">{instance.punto_encuentro}</dd>
                 </div>
               ) : null}
               {instance.formulario_externo ? (
                 <div>
-                  <dt className="text-xs text-slate-400">
+                  <dt className="text-xs text-grit-subtext">
                     Formulario externo{instance.formulario_obligatorio ? ' · Obligatorio' : ''}
                   </dt>
                   <dd className="text-sm">
@@ -212,7 +212,7 @@ export function EntrenamientoDetalleModal({
                       href={instance.formulario_externo}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-turquoise hover:underline"
+                      className="text-grit-cyan hover:underline"
                     >
                       {instance.formulario_externo}
                     </a>
@@ -221,15 +221,15 @@ export function EntrenamientoDetalleModal({
               ) : null}
               {instance.formulario_id ? (
                 <div>
-                  <dt className="text-xs text-slate-400">
+                  <dt className="text-xs text-grit-subtext">
                     Formulario{instance.formulario_obligatorio ? ' · Obligatorio' : ''}
                   </dt>
-                  <dd className="text-sm text-slate-200">
+                  <dd className="text-sm text-grit-text">
                     <span>{instance.formulario_plantilla?.nombre ?? 'Plantilla de formulario'}</span>{' '}
                     <button
                       type="button"
                       onClick={handleOpenPreview}
-                      className="text-turquoise hover:underline"
+                      className="text-grit-cyan hover:underline"
                     >
                       Ver formulario
                     </button>
@@ -240,24 +240,24 @@ export function EntrenamientoDetalleModal({
           </section>
 
           {/* Horario / Recurrencia */}
-          <section className="space-y-2 rounded-xl border border-portal-border bg-navy-deep/45 p-4">
-            <h3 className="text-sm font-semibold text-slate-100">Horario y recurrencia</h3>
+          <section className="space-y-2 rounded-grit-2xl border border-grit-glass-border bg-grit-bg/45 p-4">
+            <h3 className="font-grit-title text-sm font-semibold text-grit-text">Horario y recurrencia</h3>
 
             {instance.entrenamiento_grupo_id ? (
               relatedGroup ? (
-                <div className="space-y-3 text-sm text-slate-200">
+                <div className="space-y-3 text-sm text-grit-text">
                   <p>
-                    <span className="text-slate-400">Tipo de serie:</span>{' '}
+                    <span className="text-grit-subtext">Tipo de serie:</span>{' '}
                     {relatedGroup.tipo === 'recurrente' ? 'Recurrente' : 'Único'}
                   </p>
                   <p>
-                    <span className="text-slate-400">Vigencia:</span> {formatDateOnlyLabel(relatedGroup.fecha_inicio)} –{' '}
+                    <span className="text-grit-subtext">Vigencia:</span> {formatDateOnlyLabel(relatedGroup.fecha_inicio)} –{' '}
                     {relatedGroup.fecha_fin ? formatDateOnlyLabel(relatedGroup.fecha_fin) : 'Sin fecha de fin'}
                   </p>
 
                   {relatedGroup.reglas.map((rule, index) => (
-                    <div key={rule.id} className="rounded-lg border border-slate-700/60 bg-navy-medium/20 p-3">
-                      <p className="text-xs text-slate-400">Bloque horario {index + 1}</p>
+                    <div key={rule.id} className="rounded-grit-2xl border border-grit-glass-border bg-grit-card p-3">
+                      <p className="text-xs text-grit-subtext">Bloque horario {index + 1}</p>
                       <p>Días: {rule.dias_semana.map((day) => WEEKDAY_LABELS[day] ?? day).join(', ')}</p>
                       <p>Repite cada {rule.repetir_cada_semanas} semana(s)</p>
                       {rule.tipo_bloque === 'una_vez_dia' ? <p>Hora: {rule.hora_inicio}</p> : null}
@@ -269,53 +269,53 @@ export function EntrenamientoDetalleModal({
                   ))}
 
                   <p>
-                    <span className="text-slate-400">Esta instancia:</span> {formatDateTimeLabel(instance.fecha_hora)}
+                    <span className="text-grit-subtext">Esta instancia:</span> {formatDateTimeLabel(instance.fecha_hora)}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm text-slate-400">No se encontró información de la serie asociada.</p>
+                <p className="text-sm text-grit-subtext">No se encontró información de la serie asociada.</p>
               )
             ) : (
-              <p className="text-sm text-slate-200">{formatDateTimeLabel(instance.fecha_hora)}</p>
+              <p className="text-sm text-grit-text">{formatDateTimeLabel(instance.fecha_hora)}</p>
             )}
           </section>
 
           {/* Categorías por nivel */}
-          <section className="space-y-2 rounded-xl border border-portal-border bg-navy-deep/45 p-4">
-            <h3 className="text-sm font-semibold text-slate-100">Categorías por nivel</h3>
+          <section className="space-y-2 rounded-grit-2xl border border-grit-glass-border bg-grit-bg/45 p-4">
+            <h3 className="font-grit-title text-sm font-semibold text-grit-text">Categorías por nivel</h3>
             {viewLoading ? (
-              <p className="text-sm text-slate-400">Cargando categorías...</p>
+              <p className="text-sm text-grit-subtext">Cargando categorías...</p>
             ) : categorias.length > 0 ? (
               <ul className="space-y-1">
                 {categorias.map((categoria) => (
-                  <li key={categoria.id} className="flex items-center justify-between text-sm text-slate-200">
+                  <li key={categoria.id} className="flex items-center justify-between text-sm text-grit-text">
                     <span>{nivelNameById[categoria.nivel_id] ?? 'Nivel no disponible'}</span>
-                    <span className="text-slate-400">{categoria.cupos_asignados} cupos</span>
+                    <span className="text-grit-subtext">{categoria.cupos_asignados} cupos</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-400">Sin configuración de categorías.</p>
+              <p className="text-sm text-grit-subtext">Sin configuración de categorías.</p>
             )}
           </section>
 
           {/* Restricciones de reserva */}
-          <section className="space-y-2 rounded-xl border border-portal-border bg-navy-deep/45 p-4">
-            <h3 className="text-sm font-semibold text-slate-100">Restricciones de reserva</h3>
+          <section className="space-y-2 rounded-grit-2xl border border-grit-glass-border bg-grit-bg/45 p-4">
+            <h3 className="font-grit-title text-sm font-semibold text-grit-text">Restricciones de reserva</h3>
             {viewLoading ? (
-              <p className="text-sm text-slate-400">Cargando restricciones...</p>
+              <p className="text-sm text-grit-subtext">Cargando restricciones...</p>
             ) : hasRestricciones ? (
               <div className="space-y-3">
                 <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <dt className="text-xs text-slate-400">Antelación mínima para reservar</dt>
-                    <dd className="text-sm text-slate-200">
+                    <dt className="text-xs text-grit-subtext">Antelación mínima para reservar</dt>
+                    <dd className="text-sm text-grit-text">
                       {instance.reserva_antelacion_horas != null ? `${instance.reserva_antelacion_horas} horas` : 'Sin restricción'}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-slate-400">Antelación mínima para cancelar</dt>
-                    <dd className="text-sm text-slate-200">
+                    <dt className="text-xs text-grit-subtext">Antelación mínima para cancelar</dt>
+                    <dd className="text-sm text-grit-text">
                       {instance.cancelacion_antelacion_horas != null
                         ? `${instance.cancelacion_antelacion_horas} horas`
                         : 'Sin restricción'}
@@ -331,9 +331,9 @@ export function EntrenamientoDetalleModal({
                         .map((id) => servicioNameById[id] ?? 'Servicio no disponible');
 
                       return (
-                        <div key={restriccion.id} className="rounded-lg border border-slate-700/60 bg-navy-medium/20 p-3 text-sm text-slate-200">
+                        <div key={restriccion.id} className="rounded-grit-md border border-grit-glass-border bg-grit-card p-3 text-sm text-grit-text">
                           {restriccion.descripcion ? (
-                            <MultilineText className="text-xs text-slate-400">{restriccion.descripcion}</MultilineText>
+                            <MultilineText className="text-xs text-grit-subtext">{restriccion.descripcion}</MultilineText>
                           ) : null}
                           <p>Estado usuario: {usuarioEstadoLabel(restriccion.usuario_estado)}</p>
                           <p>Validar nivel: {restriccion.validar_nivel_disciplina ? 'Sí' : 'No'}</p>
@@ -345,19 +345,19 @@ export function EntrenamientoDetalleModal({
                 ) : null}
               </div>
             ) : (
-              <p className="text-sm text-slate-400">Sin restricciones configuradas.</p>
+              <p className="text-sm text-grit-subtext">Sin restricciones configuradas.</p>
             )}
           </section>
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           {canManage ? (
             <button
               type="button"
               aria-label="Guardar configuración como plantilla"
               onClick={onOpenGuardarPlantillaModal}
               disabled={viewLoading}
-              className="inline-flex items-center gap-2 rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-turquoise/70 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text transition hover:border-grit-cyan/70 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">
                 bookmark_add
@@ -369,7 +369,7 @@ export function EntrenamientoDetalleModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cerrar
           </button>

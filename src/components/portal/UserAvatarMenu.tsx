@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { GritIcon } from '@/components/ui';
 import type { PortalDisplayProfile } from '@/types/portal.types';
 
 type UserAvatarMenuProps = {
@@ -57,7 +58,7 @@ export function UserAvatarMenu({ profile }: UserAvatarMenuProps) {
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Menú de usuario"
-        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border-2 border-turquoise/30 transition-all hover:border-turquoise focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise"
+        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-grit-cyan transition-all hover:shadow-[0_0_12px_rgba(20,219,196,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"
         onClick={() => setOpen((prev) => !prev)}
       >
         {profile.foto_url ? (
@@ -69,12 +70,8 @@ export function UserAvatarMenu({ profile }: UserAvatarMenuProps) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="font-display text-sm font-semibold text-turquoise">
-            {initials || (
-              <span className="material-symbols-outlined text-base" aria-hidden="true">
-                person
-              </span>
-            )}
+          <span className="font-grit-title text-sm font-bold text-grit-cyan">
+            {initials || <GritIcon name="person" size={16} />}
           </span>
         )}
       </button>
@@ -82,33 +79,29 @@ export function UserAvatarMenu({ profile }: UserAvatarMenuProps) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-md border border-portal-border bg-navy-medium shadow-xl"
+          className="absolute right-0 top-full z-50 mt-2 flex w-56 flex-col gap-1 overflow-hidden rounded-grit-lg border border-grit-glass-border bg-grit-bg/95 p-2 shadow-xl backdrop-blur-md"
         >
-          <div className="border-b border-portal-border px-4 py-2.5">
-            <p className="truncate text-sm font-medium text-slate-100">
+          <div className="border-b border-grit-glass-border px-3.5 pb-2.5 pt-1.5">
+            <p className="truncate font-grit-body text-sm font-semibold text-grit-text">
               {profile.nombre} {profile.apellido}
             </p>
-            <p className="truncate text-xs text-slate-400">{profile.email}</p>
+            <p className="truncate font-grit-body text-xs text-grit-subtext">{profile.email}</p>
           </div>
           <Link
             href="/portal/perfil"
             role="menuitem"
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 transition-colors hover:bg-navy-soft hover:text-slate-100"
+            className="flex items-center gap-3.5 rounded-grit-md px-3.5 py-2.5 font-grit-body text-sm font-medium text-grit-subtext transition-colors hover:bg-grit-cyan/10 hover:text-grit-text"
             onClick={() => setOpen(false)}
           >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              person
-            </span>
+            <GritIcon name="person" size={18} />
             Perfil
           </Link>
           <button
             role="menuitem"
-            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-slate-300 transition-colors hover:bg-navy-soft hover:text-red-400"
+            className="flex w-full items-center gap-3.5 rounded-grit-md px-3.5 py-2.5 font-grit-body text-sm font-medium text-grit-subtext transition-colors hover:bg-grit-danger/10 hover:text-grit-danger"
             onClick={handleLogout}
           >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              logout
-            </span>
+            <GritIcon name="logout" size={18} />
             Cerrar sesión
           </button>
         </div>

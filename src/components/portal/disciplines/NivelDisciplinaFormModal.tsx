@@ -105,7 +105,7 @@ export function NivelDisciplinaFormModal({
       <button
         type="button"
         aria-label="Cerrar formulario de nivel"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -114,20 +114,20 @@ export function NivelDisciplinaFormModal({
         role="dialog"
         aria-modal="true"
         aria-label={mode === 'create' ? 'Crear nivel' : 'Editar nivel'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
               {mode === 'create' ? 'Crear nivel' : 'Editar nivel'}
             </h2>
-            <p className="mt-1 text-xs text-slate-400">Define el nombre y orden del nivel de progresión.</p>
+            <p className="mt-1 text-xs text-grit-subtext">Define el nombre y orden del nivel de progresión.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
           </button>
@@ -135,7 +135,7 @@ export function NivelDisciplinaFormModal({
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
           <div>
-            <label htmlFor="nivel-nombre" className="mb-1 block text-xs text-slate-300">Nombre *</label>
+            <label htmlFor="nivel-nombre" className="mb-1 block text-xs text-grit-subtext">Nombre *</label>
             <input
               id="nivel-nombre"
               type="text"
@@ -145,17 +145,17 @@ export function NivelDisciplinaFormModal({
               disabled={isSubmitting}
               placeholder="Ej. Principiante"
               className={[
-                'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-100 outline-none transition focus:ring-2',
+                'w-full rounded-grit-md border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition focus:ring-2',
                 fieldErrors.nombre
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
-            {fieldErrors.nombre ? <p className="mt-1 text-xs font-medium text-rose-300" role="alert">{fieldErrors.nombre}</p> : null}
+            {fieldErrors.nombre ? <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">{fieldErrors.nombre}</p> : null}
           </div>
 
           <div>
-            <label htmlFor="nivel-orden" className="mb-1 block text-xs text-slate-300">Orden *</label>
+            <label htmlFor="nivel-orden" className="mb-1 block text-xs text-grit-subtext">Orden *</label>
             <input
               id="nivel-orden"
               type="number"
@@ -165,13 +165,13 @@ export function NivelDisciplinaFormModal({
               disabled={isSubmitting}
               placeholder="1"
               className={[
-                'w-full rounded-lg border bg-navy-deep px-3 py-2 text-sm text-slate-100 outline-none transition focus:ring-2',
+                'w-full rounded-grit-md border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition focus:ring-2',
                 fieldErrors.orden
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
-            {fieldErrors.orden ? <p className="mt-1 text-xs font-medium text-rose-300" role="alert">{fieldErrors.orden}</p> : null}
+            {fieldErrors.orden ? <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">{fieldErrors.orden}</p> : null}
           </div>
 
           <div className="flex items-center gap-2">
@@ -181,24 +181,24 @@ export function NivelDisciplinaFormModal({
               checked={values.activo}
               onChange={(e) => setValues((prev) => ({ ...prev, activo: e.target.checked }))}
               disabled={isSubmitting}
-              className="rounded border-slate-600 bg-navy-deep"
+              className="rounded border-grit-glass-border bg-grit-bg"
             />
-            <label htmlFor="nivel-activo" className="text-sm text-slate-200">Nivel activo</label>
+            <label htmlFor="nivel-activo" className="text-sm text-grit-text">Nivel activo</label>
           </div>
 
           {submitError ? (
-            <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+            <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
               {submitError}
             </div>
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cancelar
           </button>
@@ -206,7 +206,7 @@ export function NivelDisciplinaFormModal({
             type="button"
             onClick={() => void handleSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg"
           >
             {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear nivel' : 'Guardar cambios'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">save</span>

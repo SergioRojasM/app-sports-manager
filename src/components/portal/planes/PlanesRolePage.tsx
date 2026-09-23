@@ -13,7 +13,7 @@ export function PlanesRolePage({ tenantId }: PlanesRolePageProps) {
 
   if (loading || !role) {
     return (
-      <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+      <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
         Cargando...
       </div>
     );

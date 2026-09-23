@@ -79,28 +79,28 @@ export function PublicTrainingReservaModal({
           type="button"
           aria-label="Cerrar"
           onClick={onClose}
-          className="absolute inset-0 bg-slate-950/70"
+          className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         />
-        <div className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl">
+        <div className="relative z-10 w-full max-w-md rounded-grit-lg border border-grit-glass-border bg-grit-card p-6 text-center shadow-xl">
           {guided && (
             <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={3} trainingNombre={trainingNombre} />
           )}
           <span className="material-symbols-outlined text-4xl text-emerald-300" aria-hidden="true">
             check_circle
           </span>
-          <h3 className="mt-3 text-lg font-semibold text-slate-100">{reserva.successMessage}</h3>
-          <p className="mt-1 text-sm text-slate-400">
+          <h3 className="font-grit-title mt-3 text-lg font-semibold text-grit-text">{reserva.successMessage}</h3>
+          <p className="mt-1 text-sm text-grit-subtext">
             Tu reserva para &quot;{trainingNombre}&quot; ha sido registrada.
           </p>
 
           {/* Where to follow this up. Both destinations are the cross-tenant ones, since a
               marketplace booker is often not a member of the organization. */}
-          <div className="mt-4 space-y-1.5 border-t border-portal-border pt-4 text-left text-sm text-slate-400">
+          <div className="mt-4 space-y-1.5 border-t border-grit-glass-border pt-4 text-left text-sm text-grit-subtext">
             <p>
               Puedes consultar tus entrenamientos en:{' '}
               <Link
                 href="/portal/mis-reservas"
-                className="whitespace-nowrap font-semibold text-turquoise hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-medium"
+                className="whitespace-nowrap font-semibold text-grit-cyan hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-grit-bg"
               >
                 Mis Reservas
               </Link>
@@ -109,7 +109,7 @@ export function PublicTrainingReservaModal({
               Puedes consultar tus suscripciones en:{' '}
               <Link
                 href="/portal/mis-suscripciones"
-                className="whitespace-nowrap font-semibold text-turquoise hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-medium"
+                className="whitespace-nowrap font-semibold text-grit-cyan hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-grit-bg"
               >
                 Mis Suscripciones
               </Link>
@@ -119,7 +119,7 @@ export function PublicTrainingReservaModal({
           <button
             type="button"
             onClick={onClose}
-            className="mt-5 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
+            className="mt-5 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg"
           >
             Cerrar
           </button>
@@ -156,19 +156,19 @@ export function PublicTrainingReservaModal({
   if (reserva.checkingEligibility) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 bg-slate-950/70" />
+        <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm" />
         <div
           role="status"
           aria-live="polite"
-          className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl"
+          className="relative z-10 w-full max-w-md rounded-grit-lg border border-grit-glass-border bg-grit-card p-6 text-center shadow-xl"
         >
           {guided && (
             <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={2} trainingNombre={trainingNombre} />
           )}
-          <span className="material-symbols-outlined animate-spin text-4xl text-turquoise" aria-hidden="true">
+          <span className="material-symbols-outlined animate-spin text-4xl text-grit-cyan" aria-hidden="true">
             progress_activity
           </span>
-          <p className="mt-3 text-sm text-slate-300">Verificando disponibilidad…</p>
+          <p className="mt-3 text-sm text-grit-subtext">Verificando disponibilidad…</p>
         </div>
       </div>
     );
@@ -196,12 +196,12 @@ export function PublicTrainingReservaModal({
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
           hidden={planesOpen}
         >
-          <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 bg-slate-950/70" />
+          <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm" />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="reserva-rechazo-title"
-            className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 text-center shadow-xl"
+            className="relative z-10 w-full max-w-md rounded-grit-lg border border-grit-glass-border bg-grit-card p-6 text-center shadow-xl"
           >
             {guided && (
               <GuidedBookingStepper steps={GUIDED_BOOKING_STEPS} currentStep={2} trainingNombre={trainingNombre} />
@@ -209,17 +209,17 @@ export function PublicTrainingReservaModal({
             <span className="material-symbols-outlined text-4xl text-amber-300" aria-hidden="true">
               lock
             </span>
-            <h3 id="reserva-rechazo-title" className="mt-3 text-lg font-semibold text-slate-100">
+            <h3 id="reserva-rechazo-title" className="font-grit-title mt-3 text-lg font-semibold text-grit-text">
               {canSkipConfirmation ? 'Puedes reservar mientras se aprueba tu plan' : 'No puedes reservar todavía'}
             </h3>
-            <p className="mt-2 text-sm text-slate-300">
+            <p className="mt-2 text-sm text-grit-subtext">
               {canSkipConfirmation
                 ? 'Este entrenamiento permite continuar la reserva mientras se revisa tu plan. Elige un plan para continuar: tu reserva y tu solicitud quedarán pendientes de aprobación.'
                 : bookingRejection.message}
             </p>
 
             {canAcquirePlan && esMiembroDelTenant ? (
-              <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-amber-300/25 bg-amber-400/10 px-3 py-2 text-left text-xs text-amber-200">
+              <p className="mt-3 flex items-start gap-1.5 rounded-grit-md border border-amber-300/25 bg-amber-400/10 px-3 py-2 text-left text-xs text-amber-200">
                 <span className="material-symbols-outlined text-sm" aria-hidden="true">
                   workspace_premium
                 </span>
@@ -236,7 +236,7 @@ export function PublicTrainingReservaModal({
                   ref={verPlanesRef}
                   type="button"
                   onClick={() => setPlanesOpen(true)}
-                  className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+                  className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-grit-bg"
                 >
                   {canSkipConfirmation
                     ? 'Elegir plan y continuar'
@@ -248,7 +248,7 @@ export function PublicTrainingReservaModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg border border-portal-border px-4 py-2 text-sm font-semibold text-slate-300 transition hover:text-slate-100"
+                className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-semibold text-grit-subtext transition hover:text-grit-text"
               >
                 Cerrar
               </button>

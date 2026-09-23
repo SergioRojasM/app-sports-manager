@@ -15,10 +15,10 @@ function statusBadge(estado: string) {
   const map: Record<string, { bg: string; text: string; label: string }> = {
     activa: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Activa' },
     pendiente: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Pendiente' },
-    vencida: { bg: 'bg-slate-500/20', text: 'text-slate-400', label: 'Vencida' },
-    cancelada: { bg: 'bg-rose-500/20', text: 'text-rose-400', label: 'Cancelada' },
+    vencida: { bg: 'bg-grit-subtext/20', text: 'text-grit-subtext', label: 'Vencida' },
+    cancelada: { bg: 'bg-rose-500/20', text: 'text-grit-danger', label: 'Cancelada' },
   };
-  const badge = map[estado] ?? { bg: 'bg-slate-500/20', text: 'text-slate-400', label: estado };
+  const badge = map[estado] ?? { bg: 'bg-grit-subtext/20', text: 'text-grit-subtext', label: estado };
   return (
     <span className={`${badge.bg} ${badge.text} text-[10px] font-bold px-2 py-0.5 rounded-md`}>
       {badge.label}
@@ -31,11 +31,11 @@ function paymentBadge(pagoEstado: string | null) {
   const map: Record<string, { bg: string; text: string; label: string }> = {
     pendiente: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Pago pendiente' },
     aprobado: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Pago aprobado' },
-    rechazado: { bg: 'bg-rose-500/20', text: 'text-rose-400', label: 'Pago rechazado' },
+    rechazado: { bg: 'bg-rose-500/20', text: 'text-grit-danger', label: 'Pago rechazado' },
   };
   const badge = map[pagoEstado] ?? {
-    bg: 'bg-slate-500/20',
-    text: 'text-slate-400',
+    bg: 'bg-grit-subtext/20',
+    text: 'text-grit-subtext',
     label: pagoEstado,
   };
   return (
@@ -67,7 +67,7 @@ export function InicioSuscripciones({
       : suscripciones.filter((s) => s.estado === filter);
 
   return (
-    <div className="glass-card rounded-md p-6">
+    <div className="border border-grit-glass-border bg-grit-card backdrop-blur-md rounded-grit-2xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-sm font-bold">Mis Suscripciones</h4>
       </div>
@@ -80,8 +80,8 @@ export function InicioSuscripciones({
             onClick={() => setFilter(f.key)}
             className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
               filter === f.key
-                ? 'bg-secondary/20 text-secondary'
-                : 'bg-slate-800/40 text-slate-400 hover:text-slate-200'
+                ? 'bg-grit-teal/20 text-grit-teal'
+                : 'bg-grit-card text-grit-subtext hover:text-grit-text'
             }`}
             aria-label={`Filtrar suscripciones: ${f.label}`}
           >
@@ -92,27 +92,27 @@ export function InicioSuscripciones({
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-6 text-center">
-          <span className="material-symbols-outlined text-3xl text-slate-600 mb-2">
+          <span className="material-symbols-outlined text-3xl text-grit-muted mb-2">
             card_membership
           </span>
-          <p className="text-slate-400 text-sm">No tienes suscripciones activas</p>
+          <p className="text-grit-subtext text-sm">No tienes suscripciones activas</p>
         </div>
       ) : (
         <div className="space-y-3">
           {filtered.map((s) => (
             <div
               key={s.id}
-              className="p-3 rounded-md bg-slate-800/20 border border-transparent hover:border-primary/20 transition-all"
+              className="p-3 rounded-md bg-grit-card border border-transparent hover:border-grit-cyan/20 transition-all"
             >
               <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-semibold text-secondary truncate">
+                <p className="text-sm font-semibold text-grit-teal truncate">
                   {s.plan_nombre}
                 </p>
                 {statusBadge(s.estado)}
               </div>
-              <p className="text-xs text-slate-500 mb-2">{s.org_nombre}</p>
+              <p className="text-xs text-grit-muted mb-2">{s.org_nombre}</p>
 
-              <div className="flex items-center justify-between text-xs text-slate-400">
+              <div className="flex items-center justify-between text-xs text-grit-subtext">
                 <span>
                   {formatDate(s.fecha_inicio)} — {formatDate(s.fecha_fin)}
                 </span>
@@ -120,7 +120,7 @@ export function InicioSuscripciones({
               </div>
 
               {s.servicios.length > 0 ? (
-                <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-400">
+                <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-grit-subtext">
                   {s.servicios.map((srv, idx) => (
                     <span key={srv.servicio_id}>
                       {srv.servicio_nombre}: {srv.unidades_restantes ?? '∞'}/{srv.unidades_incluidas ?? '∞'}

@@ -61,7 +61,7 @@ export function FormularioPreviewModal({
         type="button"
         aria-label="Cerrar vista previa"
         className={[
-          'absolute inset-0 bg-slate-950/70 transition-opacity duration-300',
+          'absolute inset-0 bg-grit-bg/70 backdrop-blur-sm transition-opacity duration-300',
           visible ? 'opacity-100' : 'opacity-0',
         ].join(' ')}
         onClick={onClose}
@@ -76,16 +76,16 @@ export function FormularioPreviewModal({
           visible ? 'opacity-100' : 'pointer-events-none opacity-0',
         ].join(' ')}
       >
-        <div className="glass flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]">
-          <header className="flex items-center justify-between border-b border-portal-border px-6 py-4">
+        <div className="border bg-grit-glass backdrop-blur-md flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-grit-2xl border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]">
+          <header className="flex items-center justify-between border-b border-grit-glass-border px-6 py-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Vista previa</p>
-              <h2 className="text-lg font-semibold text-slate-100">{plantillaNombre}</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Vista previa</p>
+              <h2 className="font-grit-title text-lg font-semibold text-grit-text">{plantillaNombre}</h2>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100"
+              className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
             </button>
@@ -96,14 +96,14 @@ export function FormularioPreviewModal({
 
             {!loading && !error && perfilCamposRequeridos.length > 0 ? (
               <div>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
                   Datos de perfil solicitados
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {perfilCamposRequeridos.map((key) => (
                     <span
                       key={key}
-                      className="rounded-md border border-turquoise/30 bg-turquoise/10 px-2 py-0.5 text-xs font-medium text-turquoise"
+                      className="rounded-md border border-grit-cyan/30 bg-grit-cyan/10 px-2 py-0.5 text-xs font-medium text-grit-cyan"
                     >
                       {FORMULARIO_PERFIL_CAMPOS.find((c) => c.key === key)?.label ?? key}
                     </span>
@@ -112,16 +112,16 @@ export function FormularioPreviewModal({
               </div>
             ) : null}
 
-            {loading ? <p className="text-sm text-slate-400">Cargando vista previa...</p> : null}
+            {loading ? <p className="text-sm text-grit-subtext">Cargando vista previa...</p> : null}
 
             {!loading && error ? (
-              <div className="rounded-lg border border-rose-400/25 bg-rose-900/20 px-4 py-3 text-sm text-rose-200">
+              <div className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger">
                 {error}
               </div>
             ) : null}
 
             {!loading && !error && bodySecciones.length === 0 ? (
-              <p className="text-sm text-slate-400">Esta plantilla todavía no tiene secciones.</p>
+              <p className="text-sm text-grit-subtext">Esta plantilla todavía no tiene secciones.</p>
             ) : null}
 
             {!loading && !error && bodySecciones.length > 0 ? <FormularioSeccionesGrouped secciones={bodySecciones} /> : null}

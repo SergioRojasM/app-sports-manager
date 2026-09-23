@@ -18,7 +18,7 @@ const TIPO_LABELS: Record<string, string> = {
 
 function TipoBadge({ tipo }: { tipo: string }) {
   return (
-    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+    <span className="rounded-full bg-grit-cyan/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-cyan">
       {TIPO_LABELS[tipo] ?? tipo}
     </span>
   );
@@ -30,7 +30,7 @@ function StatusBadge({ activo }: { activo: boolean }) {
       Activo
     </span>
   ) : (
-    <span className="rounded-full bg-slate-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+    <span className="rounded-full bg-grit-subtext/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-subtext">
       Inactivo
     </span>
   );
@@ -46,15 +46,15 @@ function MethodRow({
   onDelete: (m: MetodoPago) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-navy-deep/55 px-3 py-2.5">
+    <div className="flex items-center gap-3 rounded-grit-md bg-grit-bg/55 px-3 py-2.5">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-200 truncate">{metodo.nombre}</span>
+          <span className="text-sm font-medium text-grit-text truncate">{metodo.nombre}</span>
           <TipoBadge tipo={metodo.tipo} />
           <StatusBadge activo={metodo.activo} />
         </div>
         {metodo.valor ? (
-          <p className="mt-0.5 text-xs text-slate-400 truncate">{metodo.valor}</p>
+          <p className="mt-0.5 text-xs text-grit-subtext truncate">{metodo.valor}</p>
         ) : null}
       </div>
 
@@ -64,7 +64,7 @@ function MethodRow({
             href={metodo.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-navy-soft hover:text-turquoise"
+            className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-cyan"
             title="Abrir enlace"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
@@ -75,7 +75,7 @@ function MethodRow({
         <button
           type="button"
           onClick={() => onEdit(metodo)}
-          className="rounded-lg p-1.5 text-slate-400 transition hover:bg-navy-soft hover:text-slate-200"
+          className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-text"
           title="Editar"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">
@@ -85,7 +85,7 @@ function MethodRow({
         <button
           type="button"
           onClick={() => onDelete(metodo)}
-          className="rounded-lg p-1.5 text-slate-400 transition hover:bg-navy-soft hover:text-rose-300"
+          className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-danger"
           title="Eliminar"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">
@@ -117,21 +117,21 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
 
   return (
     <>
-      <article className="overflow-hidden rounded-lg border border-portal-border bg-navy-medium/95 shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
-        <header className="flex items-center justify-between border-b border-portal-border px-4 py-3">
+      <article className="overflow-hidden rounded-grit-md border border-grit-glass-border bg-grit-card shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-4 py-3">
           <div className="flex items-center gap-2">
             <span
-              className="material-symbols-outlined rounded-full bg-primary/20 p-2 text-[18px] text-primary"
+              className="material-symbols-outlined rounded-full bg-grit-cyan/20 p-2 text-[18px] text-grit-cyan"
               aria-hidden="true"
             >
               payments
             </span>
-            <h3 className="text-base font-semibold text-slate-100">Métodos de Pago</h3>
+            <h3 className="font-grit-title text-base font-semibold text-grit-text">Métodos de Pago</h3>
           </div>
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-turquoise px-3 py-1.5 text-xs font-semibold text-navy-deep transition hover:bg-turquoise/90"
+            className="inline-flex items-center gap-1.5 rounded-grit-md bg-grit-cyan px-3 py-1.5 text-xs font-semibold text-grit-bg transition hover:bg-grit-cyan/90"
           >
             <span className="material-symbols-outlined text-sm" aria-hidden="true">
               add
@@ -143,13 +143,13 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
         <div className="p-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <span className="material-symbols-outlined animate-spin text-2xl text-slate-400" aria-hidden="true">
+              <span className="material-symbols-outlined animate-spin text-2xl text-grit-subtext" aria-hidden="true">
                 progress_activity
               </span>
             </div>
           ) : error && metodos.length === 0 ? (
             <div
-              className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
               role="alert"
             >
               {error}
@@ -157,15 +157,15 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
           ) : metodos.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-center">
               <span
-                className="material-symbols-outlined text-3xl text-slate-500"
+                className="material-symbols-outlined text-3xl text-grit-muted"
                 aria-hidden="true"
               >
                 credit_card_off
               </span>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-grit-subtext">
                 No hay métodos de pago configurados.
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-grit-muted">
                 Agrega un método para que los usuarios puedan seleccionarlo al suscribirse.
               </p>
             </div>
@@ -173,7 +173,7 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
             <div className="space-y-2">
               {error ? (
                 <div
-                  className="mb-2 rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+                  className="mb-2 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
                   role="alert"
                 >
                   {error}
@@ -202,27 +202,27 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
             onClick={closeDelete}
             aria-hidden="true"
           />
           <div
-            className="glass relative z-10 mx-4 w-full max-w-md rounded-xl border border-portal-border p-6 shadow-2xl"
+            className="border bg-grit-glass backdrop-blur-md relative z-10 mx-4 w-full max-w-md rounded-grit-2xl border-grit-glass-border p-6 shadow-2xl"
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="delete-mp-title"
           >
-            <h2 id="delete-mp-title" className="text-lg font-semibold text-slate-100">
+            <h2 id="delete-mp-title" className="font-grit-title text-lg font-semibold text-grit-text">
               Eliminar método de pago
             </h2>
-            <p className="mt-2 text-sm text-slate-300">
-              ¿Deseas eliminar <span className="font-semibold text-slate-100">{deleteTarget.nombre}</span>?
+            <p className="mt-2 text-sm text-grit-subtext">
+              ¿Deseas eliminar <span className="font-semibold text-grit-text">{deleteTarget.nombre}</span>?
               Los pagos asociados conservarán su registro, pero perderán la referencia a este método.
             </p>
 
             {error ? (
               <div
-                className="mt-3 rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+                className="mt-3 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
                 role="alert"
               >
                 {error}
@@ -234,7 +234,7 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
                 type="button"
                 onClick={closeDelete}
                 disabled={isSubmitting}
-                className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+                className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
               >
                 Cancelar
               </button>
@@ -242,7 +242,7 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
                 type="button"
                 onClick={() => void confirmDelete()}
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-2 rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-grit-md bg-rose-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSubmitting ? 'Eliminando...' : 'Eliminar'}
                 <span className="material-symbols-outlined text-base" aria-hidden="true">

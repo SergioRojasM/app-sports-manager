@@ -7,6 +7,7 @@ import { PlanFormModal } from './PlanFormModal';
 import { PlanesHeaderFilters } from './PlanesHeaderFilters';
 import { PlanesTable } from './PlanesTable';
 import type { Servicio } from '@/types/portal/servicios.types';
+import { GritPageHeader } from '@/components/ui';
 
 type PlanesPageProps = {
   tenantId: string;
@@ -14,7 +15,7 @@ type PlanesPageProps = {
 
 function LoadingState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       Cargando planes...
     </div>
   );
@@ -22,7 +23,7 @@ function LoadingState() {
 
 function EmptyState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       No hay planes registrados para esta organización.
     </div>
   );
@@ -72,12 +73,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
 
   return (
     <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Planes de Membresía</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Crea y administra los planes de membresía de tu organización.
-        </p>
-      </header>
+      <GritPageHeader title="Planes de Membresía" subtitle="Crea y administra los planes de membresía de tu organización." />
 
       <PlanesHeaderFilters
         searchTerm={searchTerm}
@@ -86,13 +82,13 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
       />
 
       {successMessage ? (
-        <div className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
+        <div className="rounded-grit-md border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
           {successMessage}
         </div>
       ) : null}
 
       {submitError && !modalOpen ? (
-        <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+        <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
           {submitError}
         </div>
       ) : null}
@@ -100,11 +96,11 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
       {loading ? <LoadingState /> : null}
 
       {!loading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
+        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+          <p className="text-sm text-grit-danger">{error}</p>
           <button
             type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+            className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
             onClick={() => void refresh()}
           >
             Reintentar

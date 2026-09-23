@@ -16,7 +16,7 @@ type FormulariosPageProps = {
 
 function LoadingState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       Cargando plantillas...
     </div>
   );
@@ -24,12 +24,12 @@ function LoadingState() {
 
 function EmptyState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-8 text-center">
-      <span className="material-symbols-outlined mb-3 block text-4xl text-slate-500" aria-hidden="true">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-8 text-center">
+      <span className="material-symbols-outlined mb-3 block text-4xl text-grit-muted" aria-hidden="true">
         description
       </span>
-      <p className="text-sm font-medium text-slate-300">No hay plantillas de formularios registradas.</p>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="text-sm font-medium text-grit-subtext">No hay plantillas de formularios registradas.</p>
+      <p className="mt-1 text-xs text-grit-muted">
         Crea tu primera plantilla para definir los campos que se recogerán en los entrenamientos.
       </p>
     </div>
@@ -109,15 +109,15 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
     <section className="space-y-6">
       <header className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-100">Formularios</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Formularios</h1>
+          <p className="mt-2 text-sm text-grit-subtext">
             Gestiona las plantillas de formularios que se utilizarán en los entrenamientos.
           </p>
         </div>
         <button
           type="button"
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2.5 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25"
+          className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2.5 text-sm font-semibold text-grit-bg transition-all duration-200 hover:bg-grit-cyan/85 hover:shadow-lg hover:shadow-grit-cyan/25"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
           Nueva plantilla
@@ -126,7 +126,7 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
 
       {deleteError ? (
         <div
-          className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+          className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
           role="alert"
         >
           {deleteError}
@@ -136,11 +136,11 @@ export function FormulariosPage({ tenantId }: FormulariosPageProps) {
       {isLoading ? <LoadingState /> : null}
 
       {!isLoading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
+        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+          <p className="text-sm text-grit-danger">{error}</p>
           <button
             type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+            className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
             onClick={() => void refresh()}
           >
             Reintentar

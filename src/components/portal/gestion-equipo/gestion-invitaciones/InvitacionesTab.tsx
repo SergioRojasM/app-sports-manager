@@ -60,14 +60,14 @@ export function InvitacionesTab({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label htmlFor="invitaciones-filtro" className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <label htmlFor="invitaciones-filtro" className="text-xs font-semibold uppercase tracking-wider text-grit-subtext">
             Estado
           </label>
           <select
             id="invitaciones-filtro"
             value={filtro}
             onChange={(e) => onFiltroChange(e.target.value as InvitacionesFiltro)}
-            className="rounded-md border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-200 focus:border-primary focus:outline-none"
+            className="rounded-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text focus:border-grit-cyan focus:outline-none"
           >
             {FILTRO_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -80,7 +80,7 @@ export function InvitacionesTab({
         <button
           type="button"
           onClick={onAgregarMiembro}
-          className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90"
+          className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-bold text-grit-bg transition hover:bg-grit-cyan/90"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">person_add</span>
           Agregar miembro
@@ -92,8 +92,8 @@ export function InvitacionesTab({
           role="status"
           className={
             actionMessage.tone === 'ok'
-              ? 'rounded-lg border border-emerald-400/25 bg-emerald-900/20 p-3 text-sm text-emerald-200'
-              : 'rounded-lg border border-rose-400/25 bg-rose-900/20 p-3 text-sm text-rose-200'
+              ? 'rounded-grit-md border border-emerald-400/25 bg-emerald-900/20 p-3 text-sm text-emerald-200'
+              : 'rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 p-3 text-sm text-grit-danger'
           }
         >
           {actionMessage.text}
@@ -101,20 +101,20 @@ export function InvitacionesTab({
       ) : null}
 
       {loading ? (
-        <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">Cargando invitaciones...</div>
+        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">Cargando invitaciones...</div>
       ) : error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
+        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+          <p className="text-sm text-grit-danger">{error}</p>
           <button
             type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+            className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
             onClick={() => void refresh()}
           >
             Reintentar
           </button>
         </div>
       ) : invitaciones.length === 0 ? (
-        <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">No hay invitaciones.</div>
+        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">No hay invitaciones.</div>
       ) : (
         <InvitacionesTable
           rows={invitaciones}

@@ -32,7 +32,7 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
       <button
         type="button"
         disabled
-        className="inline-flex w-full items-center justify-center rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm font-semibold text-slate-400"
+        className="inline-flex w-full items-center justify-center rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm font-semibold text-grit-subtext"
       >
         <span className="material-symbols-outlined mr-1.5 animate-spin text-sm" aria-hidden="true">
           progress_activity
@@ -80,13 +80,13 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
       {/* Confirmation step */}
       {confirming ? (
         <div className="flex w-full flex-col gap-2">
-          <p className="text-center text-xs text-slate-300">¿Confirmar solicitud?</p>
+          <p className="text-center text-xs text-grit-subtext">¿Confirmar solicitud?</p>
           <div className="flex gap-2">
             <button
               type="button"
               disabled={submitting}
               onClick={() => void handleSubmit()}
-              className="flex-1 rounded-lg bg-turquoise px-3 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 disabled:opacity-50"
+              className="flex-1 rounded-grit-md bg-grit-cyan px-3 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90 disabled:opacity-50"
             >
               {submitting ? (
                 <span className="inline-flex items-center gap-1">
@@ -102,13 +102,13 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
             <button
               type="button"
               onClick={() => { setConfirming(false); setSubmitError(null); }}
-              className="flex-1 rounded-lg border border-portal-border px-3 py-2 text-sm font-semibold text-slate-300 hover:bg-navy-soft"
+              className="flex-1 rounded-grit-md border border-grit-glass-border px-3 py-2 text-sm font-semibold text-grit-subtext hover:bg-grit-cyan/10"
             >
               Cancelar
             </button>
           </div>
           {submitError ? (
-            <p className="text-center text-xs text-rose-300">{submitError}</p>
+            <p className="text-center text-xs text-grit-danger">{submitError}</p>
           ) : null}
         </div>
       ) : (
@@ -117,10 +117,10 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
           disabled={disabled}
           onClick={() => setConfirming(true)}
           className={[
-            'inline-flex w-full items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold transition',
+            'inline-flex w-full items-center justify-center rounded-grit-md px-3 py-2 text-sm font-semibold transition',
             disabled
-              ? 'border border-portal-border bg-navy-deep text-slate-400 cursor-not-allowed'
-              : 'border border-portal-border bg-navy-deep text-slate-200 hover:bg-navy-soft',
+              ? 'border border-grit-glass-border bg-grit-bg text-grit-subtext cursor-not-allowed'
+              : 'border border-grit-glass-border bg-grit-bg text-grit-text hover:bg-grit-cyan/10',
           ].join(' ')}
         >
           {label}
@@ -129,18 +129,18 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
 
       {/* Blocked message */}
       {isBlocked ? (
-        <p className="text-center text-[11px] text-slate-500">
+        <p className="text-center text-[11px] text-grit-muted">
           Has alcanzado el límite de solicitudes. Contacta a la organización directamente.
         </p>
       ) : null}
 
       {/* Incomplete profile banner */}
       {isProfileIncomplete ? (
-        <div className="rounded-lg border border-amber-400/30 bg-amber-950/30 px-3 py-2.5 text-xs text-amber-200" role="alert">
+        <div className="rounded-grit-md border border-amber-400/30 bg-amber-950/30 px-3 py-2.5 text-xs text-amber-200" role="alert">
           <p>Esta organización requiere que completes tu perfil antes de solicitar acceso.</p>
           <Link
             href="/portal/perfil"
-            className="mt-1 inline-flex items-center gap-1 font-semibold text-turquoise hover:underline"
+            className="mt-1 inline-flex items-center gap-1 font-semibold text-grit-cyan hover:underline"
           >
             <span className="material-symbols-outlined text-xs" aria-hidden="true">arrow_forward</span>
             Completar perfil
@@ -153,7 +153,7 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
         <button
           type="button"
           onClick={() => setHistoryOpen(!historyOpen)}
-          className="flex w-full items-center justify-center gap-1 text-[11px] text-slate-500 hover:text-slate-400"
+          className="flex w-full items-center justify-center gap-1 text-[11px] text-grit-muted hover:text-grit-subtext"
         >
           <span className="material-symbols-outlined text-xs" aria-hidden="true">
             {historyOpen ? 'expand_less' : 'expand_more'}
@@ -164,13 +164,13 @@ export function SolicitarAccesoButton({ tenantId }: SolicitarAccesoButtonProps) 
 
       {/* History panel */}
       {hasHistory && historyOpen && !confirming ? (
-        <div className="space-y-1.5 rounded-lg border border-portal-border bg-navy-deep/60 p-2.5">
+        <div className="space-y-1.5 rounded-grit-md border border-grit-glass-border bg-grit-bg/60 p-2.5">
           {solicitudes.map((s) => (
             <div key={s.id} className="flex items-start gap-2 text-[11px]">
               <SolicitudEstadoBadge estado={s.estado} />
-              <span className="text-slate-400">{formatDate(s.created_at)}</span>
+              <span className="text-grit-subtext">{formatDate(s.created_at)}</span>
               {s.nota_revision ? (
-                <span className="text-slate-500 italic">— {s.nota_revision}</span>
+                <span className="text-grit-muted italic">— {s.nota_revision}</span>
               ) : null}
             </div>
           ))}

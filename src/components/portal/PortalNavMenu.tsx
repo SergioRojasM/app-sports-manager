@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePortalNavigation } from '@/hooks/portal/usePortalNavigation';
+import { GritIcon } from '@/components/ui';
 import type { UserRole } from '@/types/portal.types';
 
 type PortalNavMenuProps = {
@@ -45,25 +46,22 @@ export function PortalNavMenu({ role }: PortalNavMenuProps) {
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Menú de navegación"
-        className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-slate-300 transition-colors hover:bg-navy-soft hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-turquoise"
+        className="flex items-center gap-1.5 rounded-grit-md px-2.5 py-1.5 font-grit-body text-sm font-semibold text-grit-subtext transition-colors hover:bg-grit-cyan/10 hover:text-grit-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"
         onClick={() => setOpen((prev) => !prev)}
       >
-        <span className="material-symbols-outlined text-[20px] text-turquoise" aria-hidden="true">
-          grid_view
-        </span>
+        <GritIcon name="grid_view" size={20} className="text-grit-cyan" />
         <span className="hidden sm:inline">Menú</span>
-        <span
-          className={`material-symbols-outlined text-[16px] text-slate-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          aria-hidden="true"
-        >
-          expand_more
-        </span>
+        <GritIcon
+          name="expand_more"
+          size={16}
+          className={`text-grit-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-md border border-portal-border bg-navy-medium shadow-xl"
+          className="absolute left-0 top-full z-50 mt-2 flex w-60 flex-col gap-1 overflow-hidden rounded-grit-lg border border-grit-glass-border bg-grit-bg/95 p-2 shadow-xl backdrop-blur-md"
         >
           {menuItems.map((item) => {
             const isActive =
@@ -75,26 +73,16 @@ export function PortalNavMenu({ role }: PortalNavMenuProps) {
                 role="menuitem"
                 aria-current={isActive ? 'page' : undefined}
                 className={[
-                  'flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors',
+                  'flex items-center gap-3.5 rounded-grit-md border px-3.5 py-2.5 font-grit-body text-sm transition-colors',
+                  // Active item mirrors the design's "Nav Operación" state (zfVKC)
                   isActive
-                    ? 'bg-turquoise/10 text-turquoise'
-                    : 'text-slate-300 hover:bg-navy-soft hover:text-slate-100',
+                    ? 'border-grit-glass-border bg-gradient-to-r from-grit-cyan/15 to-transparent font-semibold text-grit-text'
+                    : 'border-transparent font-medium text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-text',
                 ].join(' ')}
                 onClick={() => setOpen(false)}
               >
-                <span
-                  className={`material-symbols-outlined text-[20px] ${isActive ? 'text-turquoise' : 'text-slate-500'}`}
-                  aria-hidden="true"
-                >
-                  {item.icon}
-                </span>
+                <GritIcon name={item.icon} size={18} className={isActive ? 'text-grit-cyan' : 'text-grit-subtext'} />
                 <span className="flex-1">{item.label}</span>
-                {isActive && (
-                  <span
-                    aria-hidden="true"
-                    className="h-1.5 w-1.5 rounded-full bg-turquoise"
-                  />
-                )}
               </Link>
             );
           })}

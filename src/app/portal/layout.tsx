@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/services/supabase/server';
 import { PortalHeader } from '@/components/portal/PortalHeader';
+import { PortalBreadcrumb } from '@/components/portal/PortalBreadcrumb';
+import { GritPageContainer } from '@/components/ui';
 import type { UserRole, PortalDisplayProfile } from '@/types/portal.types';
 import { VALID_ROLES } from '@/types/portal.types';
 
@@ -43,9 +45,14 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-navy-deep text-slate-100">
+    <div className="grit-shell flex h-screen flex-col overflow-hidden font-grit-body">
       <PortalHeader profile={displayProfile} role={role} />
-      <main className="flex-1 overflow-y-auto p-6">{children}</main>
+      <main className="flex-1 overflow-y-auto">
+        {/* Breadcrumb row (design `AOIa5`) scrolls with the content; page padding
+            comes from GritPageContainer so every Portal page shares it (US-0116) */}
+        <PortalBreadcrumb />
+        <GritPageContainer>{children}</GritPageContainer>
+      </main>
     </div>
   );
 }

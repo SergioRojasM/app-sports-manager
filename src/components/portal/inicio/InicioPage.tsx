@@ -6,12 +6,20 @@ import { InicioSuscripciones } from './InicioSuscripciones';
 import { InicioOrganizaciones } from './InicioOrganizaciones';
 import { InicioQuickActions } from './InicioQuickActions';
 import { InicioPagosPendientesAlert } from './InicioPagosPendientesAlert';
+import { GritPageHeader } from '@/components/ui';
 
 export function InicioPage({ data }: { data: InicioDashboardData }) {
   const featured = data.proximosEntrenamientos[0] ?? null;
 
   return (
     <div className="space-y-6">
+      <GritPageHeader
+        eyebrow="Inicio"
+        title="Tu"
+        titleAccent="resumen"
+        subtitle="Tus suscripciones, organizaciones y próximos entrenamientos en un solo lugar."
+      />
+
       {/* Stats row — full width */}
       <InicioStatsCards stats={data.stats} />
 

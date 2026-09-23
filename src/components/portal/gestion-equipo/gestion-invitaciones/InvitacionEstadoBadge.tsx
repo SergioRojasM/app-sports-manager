@@ -10,8 +10,8 @@ const CONFIG: Record<InvitacionEstado, { label: string; classes: string }> = {
   enviada: { label: 'Pendiente', classes: 'bg-amber-400/15 text-amber-300 border-amber-400/25' },
   aceptada: { label: 'Aceptada', classes: 'bg-emerald-400/15 text-emerald-300 border-emerald-400/25' },
   expirada: { label: 'Expirada', classes: 'bg-orange-400/15 text-orange-300 border-orange-400/25' },
-  cancelada: { label: 'Cancelada', classes: 'bg-slate-400/10 text-slate-400 border-slate-500/25' },
-  fallida: { label: 'Fallida', classes: 'bg-rose-400/15 text-rose-300 border-rose-400/25' },
+  cancelada: { label: 'Cancelada', classes: 'bg-grit-subtext/10 text-grit-subtext border-grit-glass-border' },
+  fallida: { label: 'Fallida', classes: 'bg-rose-400/15 text-grit-danger border-grit-danger/25' },
 };
 
 export function InvitacionEstadoBadge({ estado }: InvitacionEstadoBadgeProps) {

@@ -46,9 +46,9 @@ type ReservasPanelProps = {
 // ─────────────────────────────────────────────
 
 function capacityColorClass(activas: number, maximo: number | null): string {
-  if (maximo === null) return 'text-slate-400';
+  if (maximo === null) return 'text-grit-subtext';
   const ratio = activas / maximo;
-  if (ratio >= 1) return 'text-rose-300';
+  if (ratio >= 1) return 'text-grit-danger';
   if (ratio >= 0.7) return 'text-amber-300';
   return 'text-emerald-300';
 }
@@ -586,29 +586,29 @@ export function ReservasPanel({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Slide-over panel */}
       <aside
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-portal-border bg-navy-deep shadow-2xl"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-lg flex-col border-l border-grit-glass-border bg-grit-bg shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-label={`Reservas: ${instance.nombre}`}
       >
         {/* Header */}
-        <header className="border-b border-portal-border px-6 py-4">
+        <header className="border-b border-grit-glass-border px-6 py-4">
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1">
-              <h2 className="truncate text-lg font-semibold text-slate-100">{instance.nombre}</h2>
-              <p className="mt-1 text-sm text-slate-400">Reservas del entrenamiento</p>
+              <h2 className="font-grit-title truncate text-lg font-semibold text-grit-text">{instance.nombre}</h2>
+              <p className="mt-1 text-sm text-grit-subtext">Reservas del entrenamiento</p>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="ml-4 flex-shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-700/40 hover:text-slate-200"
+              className="ml-4 flex-shrink-0 rounded-grit-md p-1 text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-text"
             >
               <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
               <span className="sr-only">Cerrar panel</span>
@@ -621,7 +621,7 @@ export function ReservasPanel({
                 type="button"
                 onClick={handleExportCsv}
                 disabled={isExporting}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-grit-md px-2 py-1 text-sm font-medium text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-cyan disabled:opacity-50"
                 title="Descargar Reservas"
               >
                 <span className="material-symbols-outlined text-base" aria-hidden="true">
@@ -633,7 +633,7 @@ export function ReservasPanel({
                 type="button"
                 onClick={() => void handleExportFormularioRespuestas()}
                 disabled={isExportingFormulario}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-grit-md px-2 py-1 text-sm font-medium text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-cyan disabled:opacity-50"
                 title="Descargar Respuestas Formulario"
               >
                 <span className="material-symbols-outlined text-base" aria-hidden="true">
@@ -646,27 +646,27 @@ export function ReservasPanel({
         </header>
 
         {/* Capacity indicator */}
-        <div className="border-b border-portal-border px-6 py-3">
+        <div className="border-b border-grit-glass-border px-6 py-3">
           <div className="flex items-center gap-3 text-sm">
-            <span className="material-symbols-outlined text-base text-slate-400" aria-hidden="true">group</span>
-            <span className="text-slate-300">Capacidad:</span>
-            <span className={`font-semibold ${capacidad ? capacityColorClass(capacidad.reservas_activas, capacidad.cupo_maximo) : 'text-slate-400'}`}>
+            <span className="material-symbols-outlined text-base text-grit-subtext" aria-hidden="true">group</span>
+            <span className="text-grit-subtext">Capacidad:</span>
+            <span className={`font-semibold ${capacidad ? capacityColorClass(capacidad.reservas_activas, capacidad.cupo_maximo) : 'text-grit-subtext'}`}>
               {capacidadLabel}
             </span>
             {capacidad && !capacidad.disponible && (
-              <span className="rounded-md border border-rose-400/40 bg-rose-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-rose-200">
+              <span className="rounded-md border border-grit-danger/40 bg-rose-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-grit-danger">
                 Lleno
               </span>
             )}
           </div>
           {instance.formulario_externo && (
             <div className="mt-2 flex items-center gap-2 text-sm">
-              <span className="material-symbols-outlined text-base text-slate-400" aria-hidden="true">link</span>
+              <span className="material-symbols-outlined text-base text-grit-subtext" aria-hidden="true">link</span>
               <a
                 href={instance.formulario_externo}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-turquoise hover:underline"
+                className="font-medium text-grit-cyan hover:underline"
               >
                 Formulario externo
               </a>
@@ -677,12 +677,12 @@ export function ReservasPanel({
           )}
           {instance.formulario_id && (
             <div className="mt-2 flex items-center gap-2 text-sm">
-              <span className="material-symbols-outlined text-base text-slate-400" aria-hidden="true">description</span>
-              <span className="font-medium text-slate-300">{instance.formulario_plantilla?.nombre ?? 'Plantilla de formulario'}</span>
+              <span className="material-symbols-outlined text-base text-grit-subtext" aria-hidden="true">description</span>
+              <span className="font-medium text-grit-subtext">{instance.formulario_plantilla?.nombre ?? 'Plantilla de formulario'}</span>
               <button
                 type="button"
                 onClick={handleOpenFormularioPreview}
-                className="font-medium text-turquoise hover:underline"
+                className="font-medium text-grit-cyan hover:underline"
               >
                 Ver formulario
               </button>
@@ -692,7 +692,7 @@ export function ReservasPanel({
             </div>
           )}
           {instance.formulario_obligatorio && (instance.formulario_externo || instance.formulario_id) && (
-            <p className="mt-1 text-xs text-slate-400">Debes completar este formulario antes de reservar.</p>
+            <p className="mt-1 text-xs text-grit-subtext">Debes completar este formulario antes de reservar.</p>
           )}
 
           {/* Per-category capacity breakdown */}
@@ -708,11 +708,11 @@ export function ReservasPanel({
                     <span className={`font-semibold ${capacityColorClass(cat.reservas_activas, cat.cupos_asignados)}`}>
                       {cat.reservas_activas} / {cat.cupos_asignados}
                     </span>
-                    <span className="text-slate-500">
+                    <span className="text-grit-muted">
                       ({cuposLibres} {cuposLibres === 1 ? 'disponible' : 'disponibles'})
                     </span>
                     {!cat.disponible && (
-                      <span className="rounded-md border border-rose-400/40 bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-rose-200">
+                      <span className="rounded-md border border-grit-danger/40 bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-grit-danger">
                         Lleno
                       </span>
                     )}
@@ -725,15 +725,15 @@ export function ReservasPanel({
 
         {/* Restrictions */}
         {restrictionLabels.length > 0 && (
-          <div className="border-b border-portal-border px-6 py-3">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <div className="border-b border-grit-glass-border px-6 py-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-grit-subtext">
               <span className="material-symbols-outlined text-sm" aria-hidden="true">lock</span>
               Restricciones
             </div>
             <ul className="mt-1.5 space-y-1">
               {restrictionLabels.map((label, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-slate-300">
-                  <span className="mt-0.5 text-slate-500" aria-hidden="true">•</span>
+                <li key={i} className="flex items-start gap-2 text-xs text-grit-subtext">
+                  <span className="mt-0.5 text-grit-muted" aria-hidden="true">•</span>
                   {label}
                 </li>
               ))}
@@ -743,14 +743,14 @@ export function ReservasPanel({
 
         {/* Error */}
         {reservasHook.error && (
-          <div className="mx-6 mt-4 rounded-lg border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+          <div className="mx-6 mt-4 rounded-grit-md border border-grit-danger/40 bg-rose-500/15 px-4 py-3 text-sm text-grit-danger">
             {reservasHook.error}
           </div>
         )}
 
         {/* Booking rejection alert */}
         {reservasHook.bookingRejection && (
-          <div className="mx-6 mt-4 flex items-start gap-2 rounded-lg border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-200">
+          <div className="mx-6 mt-4 flex items-start gap-2 rounded-grit-md border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-200">
             <span className="material-symbols-outlined mt-0.5 text-base text-amber-300" aria-hidden="true">warning</span>
             <span className="flex-1">{reservasHook.bookingRejection.message}</span>
             <button
@@ -765,42 +765,42 @@ export function ReservasPanel({
         )}
 
         {/* Actions bar */}
-        <div className="border-b border-portal-border px-6 py-3">
+        <div className="border-b border-grit-glass-border px-6 py-3">
           {isAdmin ? (
             <button
               type="button"
               onClick={handleAdminCreate}
               disabled={capacidad !== null && !capacidad.disponible}
-              className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-3 py-1.5 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-3 py-1.5 text-sm font-semibold text-grit-bg hover:bg-grit-cyan/90 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">person_add</span>
               Nueva reserva
             </button>
           ) : !myReserva ? (
             isPast ? (
-              <p className="text-sm text-slate-400">Entrenamiento finalizado</p>
+              <p className="text-sm text-grit-subtext">Entrenamiento finalizado</p>
             ) : (
               <button
                 type="button"
                 onClick={handleSelfBook}
                 disabled={capacidad !== null && !capacidad.disponible}
-                className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-3 py-1.5 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-3 py-1.5 text-sm font-semibold text-grit-bg hover:bg-grit-cyan/90 disabled:opacity-50"
               >
                 <span className="material-symbols-outlined text-base" aria-hidden="true">bookmark_add</span>
                 Reservar
               </button>
             )
           ) : (
-            <p className="text-sm text-slate-400">Ya tienes una reserva activa para este entrenamiento.</p>
+            <p className="text-sm text-grit-subtext">Ya tienes una reserva activa para este entrenamiento.</p>
           )}
         </div>
 
         {/* Reservas list */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {reservasHook.isLoading ? (
-            <p className="text-sm text-slate-400">Cargando reservas...</p>
+            <p className="text-sm text-grit-subtext">Cargando reservas...</p>
           ) : displayedReservas.length === 0 ? (
-            <p className="text-sm text-slate-400">No hay reservas registradas.</p>
+            <p className="text-sm text-grit-subtext">No hay reservas registradas.</p>
           ) : (
             <ul className="space-y-3">
               {displayedReservas.map((reserva) => {
@@ -818,18 +818,18 @@ export function ReservasPanel({
                 return (
                   <li
                     key={reserva.id}
-                    className={`rounded-lg border p-3 ${
+                    className={`rounded-grit-md border p-3 ${
                       isOwn
-                        ? 'border-turquoise/30 bg-turquoise/5'
-                        : 'border-portal-border bg-navy-medium/40'
+                        ? 'border-grit-cyan/30 bg-grit-cyan/5'
+                        : 'border-grit-glass-border bg-grit-card'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-slate-100">
+                        <p className="truncate text-sm font-medium text-grit-text">
                           {reserva.atleta_nombre} {reserva.atleta_apellido}
                           {isOwn && (
-                            <span className="ml-2 text-[10px] font-semibold uppercase text-turquoise">(Tú)</span>
+                            <span className="ml-2 text-[10px] font-semibold uppercase text-grit-cyan">(Tú)</span>
                           )}
                         </p>
                       </div>
@@ -848,7 +848,7 @@ export function ReservasPanel({
                             type="button"
                             onClick={() => setSelectedReservaForAsistencia(reserva)}
                             title="Verificar asistencia"
-                            className="rounded-md p-1 text-slate-400 hover:bg-slate-700/40 hover:text-turquoise"
+                            className="rounded-md p-1 text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-cyan"
                           >
                             <span className="material-symbols-outlined text-base" aria-hidden="true">fact_check</span>
                             <span className="sr-only">Verificar asistencia</span>
@@ -858,7 +858,7 @@ export function ReservasPanel({
                     </div>
 
                     {reserva.notas && (
-                      <p className="mt-2 text-xs text-slate-400 italic">{reserva.notas}</p>
+                      <p className="mt-2 text-xs text-grit-subtext italic">{reserva.notas}</p>
                     )}
 
                     {/* Row actions */}
@@ -868,7 +868,7 @@ export function ReservasPanel({
                           <button
                             type="button"
                             onClick={() => void handleOpenRespuestaViewer(reserva)}
-                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise"
+                            className="rounded-md px-2 py-1 text-xs font-medium text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-cyan"
                           >
                             Ver respuesta
                           </button>
@@ -877,7 +877,7 @@ export function ReservasPanel({
                           <button
                             type="button"
                             onClick={() => handleEdit(reserva.id)}
-                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700/40 hover:text-turquoise"
+                            className="rounded-md px-2 py-1 text-xs font-medium text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-cyan"
                           >
                             Editar
                           </button>
@@ -887,7 +887,7 @@ export function ReservasPanel({
                             type="button"
                             onClick={() => handleCancel(reserva.id)}
                             disabled={isPast && !isAdmin}
-                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700/40 hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-md px-2 py-1 text-xs font-medium text-grit-subtext hover:bg-grit-cyan/10 hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Cancelar
                           </button>
@@ -896,7 +896,7 @@ export function ReservasPanel({
                           <button
                             type="button"
                             onClick={() => handleDelete(reserva.id)}
-                            className="rounded-md px-2 py-1 text-xs font-medium text-slate-300 hover:bg-rose-500/20 hover:text-rose-300"
+                            className="rounded-md px-2 py-1 text-xs font-medium text-grit-subtext hover:bg-rose-500/20 hover:text-grit-danger"
                           >
                             Eliminar
                           </button>

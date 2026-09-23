@@ -27,6 +27,7 @@ import { useTenantEntitlements } from '@/hooks/portal/gestion-invitaciones/useTe
 import type { AgregarMiembroInput, AgregarMiembroModo } from '@/types/portal/invitaciones.types';
 import type { MiembroTableItem } from '@/types/portal/equipo.types';
 import type { RolOption } from '@/types/portal/equipo.types';
+import { GritPageHeader } from '@/components/ui';
 
 type EquipoPageProps = {
   tenantId: string;
@@ -36,7 +37,7 @@ type ActiveTab = 'equipo' | 'solicitudes' | 'bloqueados' | 'invitaciones';
 
 function LoadingState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       Cargando equipo...
     </div>
   );
@@ -44,7 +45,7 @@ function LoadingState() {
 
 function EmptyState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       No hay miembros registrados para esta organización.
     </div>
   );
@@ -132,23 +133,18 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
 
   return (
     <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Gestión de Equipo</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Visualiza los miembros de tu organización, su estado y roles asignados.
-        </p>
-      </header>
+      <GritPageHeader title="Gestión de Equipo" subtitle="Visualiza los miembros de tu organización, su estado y roles asignados." />
 
       {/* Tab bar */}
-      <nav className="flex gap-1 rounded-lg border border-portal-border bg-navy-deep/60 p-1">
+      <nav className="flex gap-1 rounded-grit-md border border-grit-glass-border bg-grit-bg/60 p-1">
         <button
           type="button"
           onClick={() => setActiveTab('equipo')}
           className={[
             'rounded-md px-4 py-2 text-sm font-semibold transition',
             activeTab === 'equipo'
-              ? 'bg-navy-soft text-slate-100'
-              : 'text-slate-400 hover:text-slate-200',
+              ? 'bg-grit-card text-grit-text'
+              : 'text-grit-subtext hover:text-grit-text',
           ].join(' ')}
         >
           Equipo
@@ -159,13 +155,13 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
           className={[
             'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
             activeTab === 'solicitudes'
-              ? 'bg-navy-soft text-slate-100'
-              : 'text-slate-400 hover:text-slate-200',
+              ? 'bg-grit-card text-grit-text'
+              : 'text-grit-subtext hover:text-grit-text',
           ].join(' ')}
         >
           Solicitudes
           {solicitudesAdmin.pendingCount > 0 ? (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-turquoise px-1.5 text-[11px] font-bold text-navy-deep">
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-grit-cyan px-1.5 text-[11px] font-bold text-grit-bg">
               {solicitudesAdmin.pendingCount}
             </span>
           ) : null}
@@ -176,8 +172,8 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
           className={[
             'rounded-md px-4 py-2 text-sm font-semibold transition',
             activeTab === 'bloqueados'
-              ? 'bg-navy-soft text-slate-100'
-              : 'text-slate-400 hover:text-slate-200',
+              ? 'bg-grit-card text-grit-text'
+              : 'text-grit-subtext hover:text-grit-text',
           ].join(' ')}
         >
           Bloqueados
@@ -188,13 +184,13 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
           className={[
             'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
             activeTab === 'invitaciones'
-              ? 'bg-navy-soft text-slate-100'
-              : 'text-slate-400 hover:text-slate-200',
+              ? 'bg-grit-card text-grit-text'
+              : 'text-grit-subtext hover:text-grit-text',
           ].join(' ')}
         >
           Invitaciones
           {invitacionesAdmin.activeCount > 0 ? (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-turquoise px-1.5 text-[11px] font-bold text-navy-deep">
+            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-grit-cyan px-1.5 text-[11px] font-bold text-grit-bg">
               {invitacionesAdmin.activeCount}
             </span>
           ) : null}
@@ -219,7 +215,7 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
               <button
                 type="button"
                 onClick={openAgregarMiembro}
-                className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90"
+                className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-bold text-grit-bg transition hover:bg-grit-cyan/90"
               >
                 <span className="material-symbols-outlined text-base">person_add</span>
                 Agregar miembro
@@ -233,7 +229,7 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
                     ? 'No hay reglas de suspensión activas'
                     : 'Configurar regla de suspensión para miembros'
                 }
-                className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-bold text-grit-bg transition hover:bg-grit-cyan/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-base">gavel</span>
                 Configurar Suspensión
@@ -244,11 +240,11 @@ export function EquipoPage({ tenantId }: EquipoPageProps) {
           {loading ? <LoadingState /> : null}
 
           {!loading && error ? (
-            <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-              <p className="text-sm text-rose-200">{error}</p>
+            <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+              <p className="text-sm text-grit-danger">{error}</p>
               <button
                 type="button"
-                className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+                className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
                 onClick={() => void refresh()}
               >
                 Reintentar

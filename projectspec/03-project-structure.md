@@ -12,7 +12,7 @@ Following structure reflects the current implementation and the target scalable 
 │   ├── app/                              # Inbound adapters (routing / delivery)
 │   │   ├── layout.tsx                    # Root layout with providers
 │   │   ├── page.tsx                      # Landing/home
-│   │   ├── globals.css                   # Global styles & Tailwind imports
+│   │   ├── globals.css                   # Global styles & Tailwind imports; `--grit-*` design tokens (1:1 with grit-arena-v2.pen variables) + `.grit-shell` background (US-0116)
 │   │   ├── api/                          # Privileged route handlers (server-only; the ONLY place the service-role client is used) (US-0114)
 │   │   │   └── portal/orgs/[tenant_id]/
 │   │   │       ├── invitaciones/route.ts                              # POST: crear_invitacion_tenant (user session) → auth.admin.inviteUserByEmail; identical 202 whether or not the email already has an account (in-app delivery)
@@ -58,6 +58,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
+│   │               │   └── analitica/page.tsx           # Admin-only BI dashboard: Resumen, Ingresos, Operación y Equipo (US-0115)
 │   │               ├── (atleta)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-usuario users to /portal/orgs/[tenant_id]
 │   │               │   ├── entrenamientos-disponibles/page.tsx
@@ -78,9 +79,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── entrenamientos-publicos/  # Feature slice (landing/entrenamientos-publicos — public discovery page, US-0091)
 │   │   │       ├── PublicEntrenamientosLandingPage.tsx  # Page shell; reuses PublicTrainingCard/PublicTrainingsGrid from components/portal/entrenamientos-publicos as-is (no auth coupling)
 │   │   │       ├── RegistrateParaReservarModal.tsx      # "Regístrate para reservar" CTA dialog shown instead of the real booking flow for anonymous visitors; builds a guided booking target (buildGuidedNextPath) passed as `next` to both signup/login links, and shows GuidedBookingStepper at step 1 (US-0103)
-│   │   │       ├── detalle/                             # Public training detail page, matching grit-arena-v2.pen node obHO3 (US-0109)
-│   │   │       │   ├── PublicTrainingDetallePage.tsx        # Page shell: usePublicTrainingDetalle fetch, breadcrumb/"Volver" driven by the `from` param (same-origin paths only, else falls back to /entrenamientos-publicos), distinct not-found vs. fetch-error states, closing CTA banner, and the useAuth()-branched reserve CTA that opens the EXISTING RegistrateParaReservarModal (anonymous) or PublicTrainingReservaModal (authenticated), both unmodified
-│   │   │       │   ├── PublicTrainingDetalleHero.tsx        # Banner (with empty-banner fallback + overlay), discipline/público tags, title, subtitle, meta row (date, time range from duracion_minutos, escenario/punto de encuentro, cupos disponibles)
+│   │   │       ├── detalle/                             # Public training detail page, content styled per grit-arena-v2.pen node OyIqr with the ui/grit kit (US-0109, restyled US-0116)
+│   │   │       │   ├── PublicTrainingDetallePage.tsx        # Page shell: keeps the landing Header/Footer + landing-shell (unchanged); usePublicTrainingDetalle fetch; `from`-driven origin (same-origin paths only, else /entrenamientos-publicos); renders Breadcrumb + States or Body; useAuth()-branched reserve handler opening the EXISTING RegistrateParaReservarModal (anonymous) or PublicTrainingReservaModal (authenticated)
+│   │   │       │   ├── PublicTrainingDetalleBody.tsx        # Chrome-agnostic body (hero → includes|schedule → location|reserve → pricing → CTA banner); props item/onReservar/reservarDisabled — reusable by a future Portal route (US-0117)
+│   │   │       │   ├── PublicTrainingDetalleBreadcrumb.tsx  # ⌂ Inicio › Entrenamientos › {nombre} row (design AOIa5) with the right-aligned "Volver" link; both hrefs = resolved origin
+│   │   │       │   ├── PublicTrainingDetalleStates.tsx      # loading / error ("Reintentar") / not-found placeholders built on GritEmptyState
+│   │   │       │   ├── PublicTrainingDetalleCtaBanner.tsx   # Closing "¿Listo para mejorar tu rendimiento?" banner (design I6JYGB)
+│   │   │       │   ├── PublicTrainingDetalleHero.tsx        # Banner (with empty-banner fallback + overlay), GritTag discipline (icon from getDisciplinaVisual) / público tags, title, subtitle, meta row; `children` slot renders divider + description inside the title block
 │   │   │       │   ├── PublicTrainingDetalleDescripcion.tsx # descripcion_larga via react-markdown (React elements, never dangerouslySetInnerHTML — raw HTML/script renders as literal text); hidden when empty
 │   │   │       │   ├── PublicTrainingDetalleIncluye.tsx     # "¿Qué incluye este entrenamiento?" checklist from incluye[]; hidden when empty
 │   │   │       │   ├── PublicTrainingDetalleCronograma.tsx  # "¿Cómo será la sesión?" + "Xh Ymin en total" badge computed from duracion_minutos + timeline from cronograma[] in array order; hidden when empty
@@ -90,9 +95,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       │   └── index.ts
 │   │   │       └── index.ts
 │   │   ├── portal/
-│   │   │   ├── PortalHeader.tsx          # Shared portal shell components
-│   │   │   ├── PortalNavMenu.tsx
-│   │   │   ├── PortalSidebar.tsx
+│   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v2 Navbar styling (grit-arena-v2 oUFl9); no breadcrumb inside (US-0116)
+│   │   │   ├── PortalBreadcrumb.tsx      # Standalone row rendered by portal/layout.tsx at the top of <main> (design AOIa5), visible + wrapping on mobile; SLUG_LABELS map (US-0116)
+│   │   │   ├── PortalNavMenu.tsx         # Glass dropdown; active item = cyan gradient + glass-border ("Nav Operación" style)
 │   │   │   ├── RoleBasedMenu.tsx
 │   │   │   ├── UserAvatarMenu.tsx
 │   │   │   ├── inicio/                   # Feature slice (portal/inicio — user home dashboard)
@@ -224,6 +229,27 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── CrearSuscripcionModal.tsx     # 3-step admin modal to create a subscription on behalf of an athlete
 │   │   │       ├── SuscripcionTipoBadge.tsx      # "Miembro"/"No miembro" badge from es_miembro (US-0098)
 │   │   │       └── index.ts
+│   │   │   └── analitica/                  # Feature slice (portal/analitica — US-0115; styled per grit-arena-v2.pen node zfVKC in US-0116's design pass)
+│   │   │       ├── AnaliticaPage.tsx       # Tenant BI root: date range, stale-data refresh state and four accessible tabs; GritPageHeader + GritCard panels/tables + GritEmptyState states. Resumen = 2 rows × 4 KPI cards (clickable → tab) + 3 rows × 2 nivo charts (analitica-resumen-kpis-graficas). Ingresos / Operación / Equipo per analitica-pestanas-ingresos-operacion-equipo: KPI rows, monthly charts, AnaliticaDataTable tables with headers; Equipo counts athletes only
+│   │   │       ├── AnaliticaDateRangeFilter.tsx # Colombia/Bogota presets and custom date validation; glass drawer with gritInputClass inputs and GritButton actions
+│   │   │       ├── AnaliticaTabs.tsx       # WAI-ARIA tablist with Arrow/Home/End keyboard navigation; v2 active state (cyan gradient + glass border)
+│   │   │       ├── AnaliticaKpiCard.tsx    # KPI card per zfVKC: GritCard + 40px round GritIconTile, 28px Rajdhani value, optional `icon`, tone → grit-success / grit-discipline-run
+│   │   │       ├── chart-theme.ts          # analiticaChartTheme + ANALITICA_CHART_COLORS for the @nivo charts — the ONLY place chart colours are defined (grit-* values, hue-separated series order)
+│   │   │       ├── format.ts               # Shared formatters: currency/integer/percent/percentOr, decimal1, compactCurrency ("$ 1,2 M" / "$ 850 mil"), share %, monthLabel/spansYears, shortDate ("10 may 2026"), monthYear, MEMBER_STATUS_LABELS
+│   │   │       ├── AnaliticaDataTable.tsx  # Detail-tab table: header row, right-aligned numeric columns, overflow-x-auto inside its panel, shared empty message
+│   │   │       ├── charts/                 # Resumen nivo charts (analitica-resumen-kpis-graficas); each renders ChartEmpty on an empty/all-zero series, fixed h-72
+│   │   │       │   ├── MonthlyRevenueBarChart.tsx       # @nivo/bar: validated + pending per month (clipped to range), custom layer draws the compact total above each bar
+│   │   │       │   ├── RevenueValidationPieChart.tsx    # @nivo/pie donut: Validados vs Pendientes, % arc labels
+│   │   │       │   ├── SubscriptionsSoldLineChart.tsx   # @nivo/line: subscriptions created per month (excl. canceladas)
+│   │   │       │   ├── SubscriptionsByPlanBarChart.tsx  # @nivo/bar horizontal: sold per plan, best seller on top, top 9 + "Otros planes"
+│   │   │       │   ├── BookingAverageLineChart.tsx      # @nivo/line: valid bookings ÷ sessions per month
+│   │   │       │   ├── BookingsByDisciplinePieChart.tsx # @nivo/pie donut: % of valid bookings per discipline, top 5 + "Otras"
+│   │   │       │   ├── SubscriptionsSoldStackedBarChart.tsx # Ingresos: @nivo/bar stacked, sold per month with / without validated payment, totals above bars
+│   │   │       │   ├── MonthlyOperationsLineChart.tsx   # Operación: @nivo/line, trainings + bookings per month on one left axis, slice tooltip
+│   │   │       │   ├── MonthlyPercentLineChart.tsx      # Operación: @nivo/line, monthly avg occupancy/attendance %, Y 0–100, null months as gaps
+│   │   │       │   ├── shared.tsx          # ChartEmpty, ChartFrame (h-72), ChartTooltip, donutLegend, truncate, barTotalsLayer (totals above plain or stacked bars)
+│   │   │       │   └── index.ts
+│   │   │       └── index.ts
 │   │   │   └── gestion-reservas/           # Feature slice (portal/gestion-reservas — US-0073)
 │   │   │       ├── GestionReservasPage.tsx        # Main page: filters, table, banner, CSV export
 │   │   │       ├── ReservasFiltersPanel.tsx        # Server-side filter panel: date range, athlete search, attendance, discipline
@@ -248,7 +274,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── MisReservasTable.tsx            # Data table with Organización column, badges, client-side pagination
 │   │   │       └── index.ts
 │   │   │   └── entrenamientos-publicos/     # Feature slice (portal/entrenamientos-publicos — cross-tenant marketplace, US-0089)
-│   │   │       ├── EntrenamientosPublicosPage.tsx  # Sticky floating header (title + subtitle + widget + "Filtrar" button) above a full-width grid, styled per grit-arena.pen node ql3Ij using the existing landing-* Tailwind tokens; parses a guided booking target from the URL (parseGuidedParams) once loaded, auto-opens PublicTrainingReservaModal for the matching training and strips the query params via router.replace (US-0103); shows a note under the header ("...próximos 60 días...") while the default 60-day date window (isDefaultDateRange) is active and not loading/erroring (US-0113)
+│   │   │       ├── EntrenamientosPublicosPage.tsx  # Sticky floating header (title + subtitle + widget + "Filtrar" button) above a full-width grid, styled per grit-arena.pen node ql3Ij using the grit-* Tailwind tokens (US-0116); parses a guided booking target from the URL (parseGuidedParams) once loaded, auto-opens PublicTrainingReservaModal for the matching training and strips the query params via router.replace (US-0103); shows a note under the header ("...próximos 60 días...") while the default 60-day date window (isDefaultDateRange) is active and not loading/erroring (US-0113)
 │   │   │       ├── PublicTrainingFiltersDrawer.tsx  # Right-side drawer (opened via the header's "Filtrar" button): date chips (compute+apply a dateFrom/dateTo range), interactive navigable calendar (hook-owned calendarMonth, click-to-select/extend/restart range, "Limpiar fechas"), "Organización" dropdown, search (US-0102)
 │   │   │       ├── PublicTrainingCard.tsx           # Shared card (marketplace grid AND PublicarEntrenamientoModal's live preview), driven by PublicTrainingCardData; shows tenantNombre and a "Requiere: …" row from serviciosRequeridos (empty on the anonymous landing page — US-0094); "Ver" button over the banner (only when bannerUrl is set) opens PublicTrainingBannerModal fullscreen, local useState, no auth coupling (US-0100); "Vista previa" (internal formulario via useFormularioPreview + FormularioPreviewModal, or external link) and "Adquirir plan" (opens PlanesPublicosModal pre-searched to the first required service) actions, each gated on formularioId/formularioExterno/serviciosRequeridos so they're absent wherever that data isn't populated (US-0101); "Ver detalles" link to the detail page built from usePathname() as the `from` origin, rendered only when entrenamientoId is set (omitted in PublicarEntrenamientoModal's preview, where the training may be unpublished); formatPrecio() takes PrecioItem[] — "Gratis" (empty) / the single value / "Desde $<lowest>" (US-0109)
 │   │   │       ├── PublicTrainingBannerModal.tsx    # Fullscreen banner viewer: backdrop + Escape + close button, modeled on FormularioPreviewModal's overlay pattern (US-0100)
@@ -259,6 +285,20 @@ Following structure reflects the current implementation and the target scalable 
 │   │   └── ui/
 │   │       ├── MultilineText.tsx        # Renders a string with whitespace-pre-wrap (preserves line breaks), optional maxLength truncation, `as` tag prop (p/span/div) — US-0099
 │   │       ├── GuidedBookingStepper.tsx # 5-step progress indicator (currentStep 1-5, optional trainingNombre), role="status" aria-live="polite"; shown only during a guided public-training booking journey (US-0103)
+│   │       ├── grit/                    # grit-arena-v2 presentational kit (US-0116) — no data fetching; values taken from grit-arena-v2.pen
+│   │       │   ├── GritCard.tsx         # variant glass|card|highlight, padding sm|md|lg|xl (16/20/24/28), radius 16, `as`
+│   │       │   ├── GritButton.tsx       # primary|secondary|outline-accent|ghost, sm|md, radius 10; renders <Link>/<a external> when href is set; loading/disabled; cyan focus ring
+│   │       │   ├── GritTag.tsx          # Uppercase pill (accent|neutral) with optional icon
+│   │       │   ├── GritBadge.tsx        # Small info chip (card fill + glass border)
+│   │       │   ├── GritIconTile.tsx     # 34|40|48 px icon container, rounded|circle, card|accent tone
+│   │       │   ├── GritInfoRow.tsx      # Icon tile + label/value pair
+│   │       │   ├── GritSectionHeading.tsx # Rajdhani h2 (md 20px / lg 22px) + subtitle + action slot
+│   │       │   ├── GritPageHeader.tsx   # The page's single h1 (eyebrow, title + cyan titleAccent, subtitle, actions)
+│   │       │   ├── GritPageContainer.tsx # 1440 max width, 16/24/48 side padding, 32 gap — applied once by portal/layout.tsx to every Portal page
+│   │       │   ├── GritDivider.tsx, GritIcon.tsx (Material Symbols @ weight 300), GritEmptyState.tsx
+│   │       │   ├── icon-map.ts          # Design Lucide name → Material Symbols ligature (single swap point)
+│   │       │   ├── styles.ts            # cx(), gritInputClass, gritSelectClass, gritFocusRing
+│   │       │   └── index.ts             # Re-exported from components/ui/index.ts
 │   │       └── index.ts
 │   │
 │   ├── hooks/                            # Application core (use cases)
@@ -333,6 +373,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useEditarSuscripcion.ts   # Form state + plans fetch + date validation for full-field edit
 │   │           ├── useEliminarSuscripcion.ts  # Confirmation + delete action for permanent deletion
 │   │           └── useCrearSuscripcion.ts    # 3-step form state for admin-initiated subscription creation
+│   │       └── analitica/
+│   │           └── useAnalitica.ts           # Loads one aggregate RPC response per applied date range; preserves stale data during refresh (US-0115)
 │   │       └── perfil/
 │   │           └── usePerfil.ts
 │   │       └── planes-publicos/            # Feature hooks for the public plan catalog (US-0093)
@@ -375,6 +417,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
+│   │       │   └── analitica.service.ts  # Browser RPC adapter for get_tenant_bi_dashboard only; maps 42501/22007 without exposing bi schema facts (US-0115)
+│   │       │                             #   The RPC aggregates private `bi` fact views (no grants to anon/authenticated):
+│   │       │                             #   fct_pagos, fct_entrenamientos, fct_reservas, fct_asistencia, fct_suscripciones, and fct_miembros
+│   │       │                             #   (one row per membership: nombre_completo, rol, es_atleta, estado — names and team figures). The RPC reads ONLY bi.* facts
+│   │       │                             #   (one row per subscription: plan/plan type, Bogotá sale date, es_vendida, es_activa = estado 'activa',
+│   │       │                             #   per-subscription payment summary). All subscription KPIs MUST read fct_suscripciones (bi-fct-suscripciones)
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
@@ -407,6 +455,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── invitaciones.types.ts           # InvitacionEstado, InvitacionRow, AgregarMiembroInput/Modo, AltaAdministradaResultado, InvitacionesServiceError codes (US-0114)
 │   │       └── nivel-disciplina.types.ts      # NivelDisciplina, form values, service error types
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
+│   │       └── analitica.types.ts       # Aggregate BI dashboard contract, date filters and typed RPC errors (US-0115)
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS, PERFIL_INCOMPLETO — US-0095), BookingResult; BookingRejection.servicioNombre (optional, SERVICIO_REQUERIDO/UNIDADES_AGOTADAS only) feeds the pre-filtered plan catalog (US-0101)
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias; SuscripcionAdminRow.es_miembro (computed from miembros_tenant existence, not stored) and SuscripcionTab ('miembros' | 'no_miembros') (US-0098)
 │   │       └── mis-suscripciones.types.ts  # MiSuscripcionRow (incl. tenant_id + tenant_nombre — US-0093), MiPagoRow — user-facing subscription + payment view types
@@ -427,6 +476,7 @@ Following structure reflects the current implementation and the target scalable 
 │           ├── invitaciones-errors.ts       # Client-safe: onboarding RPC SQLSTATE/message → HTTP status + error code, Spanish user messages (US-0114)
 │           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
 │           ├── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
+│           ├── disciplina-visual.ts         # getDisciplinaVisual(nombre) → { icon, colorClass } — accent/case-insensitive name matching to the design's discipline colours, `sports` + cyan fallback (US-0116)
 │           ├── formulario-secciones-grouping.ts  # buildFormularioRenderPlan() — groups a flat, order-derived FormularioSeccion[] into 'seccion' cards (positional, no parent FK) + 'mitad'-width pairing; shared by FormularioSeccionesBuilder, FormularioSeccionesGrouped (preview), and FormularioRespuestaModal (live booking) so all three render identically (US-0108)
 │           └── entrenamientos-publicos/
 │               └── guidedBooking.ts         # buildGuidedNextPath()/parseGuidedParams() — single source of truth for the guided booking target carried through signup/email-confirmation/login as the `next` query param (US-0103)
@@ -454,7 +504,7 @@ Following structure reflects the current implementation and the target scalable 
 ├── tsconfig.json                # TypeScript configuration
 ├── eslint.config.mjs            # ESLint configuration
 ├── postcss.config.mjs           # PostCSS configuration
-├── tailwind.config.ts           # Tailwind CSS configuration
+├── tailwind.config.ts           # Tailwind CSS configuration — colors.grit.*, font-grit-title/body, rounded-grit-{xs..2xl}; legacy lg/xl radius overrides kept for landing/auth only (US-0116)
 └── package.json                 # Dependencies
 ```
 
@@ -812,6 +862,15 @@ src/
 - [Project Initialization](project-init.md) - Setup instructions
 - [Supabase Setup](supabase-setup.md) - Complete Supabase configuration
 - [Tech Spec](tech-spec.md) - Technology stack details
+
+## Visual Design System (US-0116)
+
+- **Source of truth**: `projectspec/designs/pencil/grit-arena-v2.pen`. Portal code uses only `grit-*` tokens (`bg-grit-bg`, `text-grit-text|subtext|muted`, `grit-cyan`, `bg-grit-glass|card`, `border-grit-glass-border`, `grit-danger|success`, `grit-discipline-*`) and the `@/components/ui` grit kit.
+- **Fonts**: `font-grit-title` (Rajdhani) for headings, KPI values and prices; `font-grit-body` (Montserrat) everywhere else.
+- **Radii**: use `rounded-grit-{xs,sm,md,lg,xl,2xl}` (6–16px). Never `rounded-lg`/`rounded-xl` in Portal code — `tailwind.config.ts` overrides them to 32/48px for landing/auth.
+- **Translucent tokens** (`grit-glass`, `grit-card`, `grit-glass-border`) take no `/opacity` modifier; solid ones (`grit-cyan`, `grit-bg`, …) do.
+- **Pages**: `portal/layout.tsx` provides `.grit-shell`, the breadcrumb row and one `GritPageContainer`; page components render one `h1` (via `GritPageHeader`) and no outer page padding. Modal backdrops: `bg-grit-bg/70 backdrop-blur-sm`.
+- **Deprecated** (landing/auth only, do not use in Portal): `turquoise`, `accent-teal`, `navy-*`, `card-dark`, `.glass`, `.glass-card`, `landing-*`.
 
 ## Code Style Rules
 

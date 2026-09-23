@@ -8,6 +8,7 @@ import { useFormularioPreview } from '@/hooks/portal/entrenamientos-publicos/use
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
 import { PlanesPublicosModal } from '@/components/portal/planes-publicos';
 import type { PrecioItem } from '@/types/portal/entrenamientos-publicos.types';
+import { getDisciplinaVisual } from '@/lib/portal/disciplina-visual';
 
 export type PublicTrainingCardData = {
   nombre: string;
@@ -92,8 +93,8 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
   return (
     <>
       <div
-        className={`flex flex-col overflow-hidden rounded-2xl border transition ${
-          featured ? 'border-landing-primary/60 shadow-[0_0_32px_rgba(20,219,196,0.15)]' : 'border-landing-border'
+        className={`flex flex-col overflow-hidden rounded-grit-2xl border transition ${
+          featured ? 'border-grit-cyan/60 shadow-[0_0_32px_rgba(20,219,196,0.15)]' : 'border-grit-glass-border'
         }`}
       >
         <div className="relative h-64 w-full overflow-hidden">
@@ -108,7 +109,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
                   e.stopPropagation();
                   setBannerModalOpen(true);
                 }}
-                className="absolute bottom-3 right-3 flex items-center gap-1 rounded-md border border-landing-border bg-landing-bg/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-landing-text transition hover:text-landing-primary"
+                className="absolute bottom-3 right-3 flex items-center gap-1 rounded-md border border-grit-glass-border bg-grit-bg/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-grit-text transition hover:text-grit-cyan"
               >
                 <span className="material-symbols-outlined text-xs" aria-hidden="true">
                   visibility
@@ -118,14 +119,14 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
             </>
           ) : (
             <div className="flex h-full w-full items-center justify-center">
-              <span className="material-symbols-outlined text-4xl text-landing-text-secondary/40" aria-hidden="true">
+              <span className="material-symbols-outlined text-4xl text-grit-subtext/40" aria-hidden="true">
                 image
               </span>
             </div>
           )}
 
           {featured && (
-            <span className="absolute left-3 top-3 flex items-center gap-1 rounded-md border border-landing-primary/50 bg-landing-bg/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-landing-primary">
+            <span className="absolute left-3 top-3 flex items-center gap-1 rounded-md border border-grit-cyan/50 bg-grit-bg/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-grit-cyan">
               <span className="material-symbols-outlined text-xs" aria-hidden="true">
                 star
               </span>
@@ -133,19 +134,19 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
             </span>
           )}
 
-          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-landing-border bg-landing-bg/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-landing-text">
-            <span className="material-symbols-outlined text-xs text-landing-primary" aria-hidden="true">
-              directions_run
+          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-grit-glass-border bg-grit-bg/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-grit-text">
+            <span className="material-symbols-outlined text-xs text-grit-cyan" aria-hidden="true">
+              {getDisciplinaVisual(data.disciplinaNombre).icon}
             </span>
             {data.disciplinaNombre}
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col gap-2 bg-landing-surface-card/80 p-3.5 backdrop-blur">
-          <h3 className="font-landing-display text-lg italic font-bold text-landing-text">{data.nombre}</h3>
+        <div className="flex flex-1 flex-col gap-2 bg-grit-card p-3.5 backdrop-blur">
+          <h3 className="font-grit-title text-lg italic font-bold text-grit-text">{data.nombre}</h3>
 
           {data.tenantNombre && (
-            <p className="-mt-1 flex items-center gap-1 font-landing-body text-xs font-semibold text-landing-primary">
+            <p className="-mt-1 flex items-center gap-1 font-grit-body text-xs font-semibold text-grit-cyan">
               <span className="material-symbols-outlined text-[13px]" aria-hidden="true">
                 shield
               </span>
@@ -154,15 +155,15 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
           )}
 
           {data.descripcion && (
-            <p className="line-clamp-2 whitespace-pre-wrap font-landing-body text-sm text-landing-text-secondary">
+            <p className="line-clamp-2 whitespace-pre-wrap font-grit-body text-sm text-grit-subtext">
               {data.descripcion}
             </p>
           )}
 
-          <div className="grid grid-cols-3 gap-1 font-landing-body text-[10px] text-landing-text-secondary">
+          <div className="grid grid-cols-3 gap-1 font-grit-body text-[10px] text-grit-subtext">
             <div className="flex flex-col gap-0">
-              <span className="flex items-center gap-0.5 font-semibold text-landing-text">
-                <span className="material-symbols-outlined text-[11px] text-landing-primary" aria-hidden="true">
+              <span className="flex items-center gap-0.5 font-semibold text-grit-text">
+                <span className="material-symbols-outlined text-[11px] text-grit-cyan" aria-hidden="true">
                   calendar_month
                 </span>
                 {formatDateLabel(data.fechaHora)}
@@ -170,8 +171,8 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
               <span>{formatTimeLabel(data.fechaHora)}</span>
             </div>
             <div className="flex flex-col gap-0">
-              <span className="flex items-center gap-0.5 font-semibold text-landing-text">
-                <span className="material-symbols-outlined text-[11px] text-landing-primary" aria-hidden="true">
+              <span className="flex items-center gap-0.5 font-semibold text-grit-text">
+                <span className="material-symbols-outlined text-[11px] text-grit-cyan" aria-hidden="true">
                   location_on
                 </span>
                 {data.escenarioNombre}
@@ -179,8 +180,8 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
               <span>{data.escenarioUbicacion ?? ''}</span>
             </div>
             <div className="flex flex-col gap-0">
-              <span className="flex items-center gap-0.5 font-semibold text-landing-text">
-                <span className="material-symbols-outlined text-[11px] text-landing-primary" aria-hidden="true">
+              <span className="flex items-center gap-0.5 font-semibold text-grit-text">
+                <span className="material-symbols-outlined text-[11px] text-grit-cyan" aria-hidden="true">
                   groups
                 </span>
                 {data.reservasActivas}/{cupoMaximo || '—'}
@@ -190,8 +191,8 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
           </div>
 
           {data.reservaAntelacionHoras != null && (
-            <p className="flex items-center gap-1 font-landing-body text-[11px] text-landing-text-secondary">
-              <span className="material-symbols-outlined text-[13px] text-landing-primary" aria-hidden="true">
+            <p className="flex items-center gap-1 font-grit-body text-[11px] text-grit-subtext">
+              <span className="material-symbols-outlined text-[13px] text-grit-cyan" aria-hidden="true">
                 schedule
               </span>
               Reserva con al menos {data.reservaAntelacionHoras}h de anticipación
@@ -199,20 +200,20 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
           )}
 
           <div className="space-y-1">
-            <div className="flex items-center justify-between font-landing-body text-[11px] font-semibold text-landing-text-secondary">
+            <div className="flex items-center justify-between font-grit-body text-[11px] font-semibold text-grit-subtext">
               <span>Ocupación</span>
-              <span className="text-landing-primary">{Math.round(ocupacionRatio * 100)}%</span>
+              <span className="text-grit-cyan">{Math.round(ocupacionRatio * 100)}%</span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-landing-surface-elevated">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-grit-card">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-landing-primary-dark to-landing-primary"
+                className="h-full rounded-full bg-gradient-to-r from-grit-teal to-grit-cyan"
                 style={{ width: `${Math.round(ocupacionRatio * 100)}%` }}
               />
             </div>
           </div>
 
           {serviciosRequeridos.length > 0 ? (
-            <p className="flex items-start gap-1.5 text-xs text-landing-text-muted">
+            <p className="flex items-start gap-1.5 text-xs text-grit-muted">
               <span className="material-symbols-outlined text-sm" aria-hidden="true">
                 info
               </span>
@@ -230,7 +231,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
                 <button
                   type="button"
                   onClick={() => data.formularioId && formularioPreview.openPreview(data.formularioId)}
-                  className="inline-flex items-center gap-1 rounded-md border border-landing-border px-2.5 py-1 font-landing-body text-[11px] font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                  className="inline-flex items-center gap-1 rounded-md border border-grit-glass-border px-2.5 py-1 font-grit-body text-[11px] font-semibold text-grit-subtext transition hover:border-grit-cyan/40 hover:text-grit-cyan"
                 >
                   <span className="material-symbols-outlined text-xs" aria-hidden="true">
                     description
@@ -243,7 +244,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
                   href={data.formularioExterno ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-md border border-landing-border px-2.5 py-1 font-landing-body text-[11px] font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                  className="inline-flex items-center gap-1 rounded-md border border-grit-glass-border px-2.5 py-1 font-grit-body text-[11px] font-semibold text-grit-subtext transition hover:border-grit-cyan/40 hover:text-grit-cyan"
                 >
                   <span className="material-symbols-outlined text-xs" aria-hidden="true">
                     open_in_new
@@ -255,7 +256,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
                 <button
                   type="button"
                   onClick={() => setPlanesModalOpen(true)}
-                  className="inline-flex items-center gap-1 rounded-md border border-landing-border px-2.5 py-1 font-landing-body text-[11px] font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                  className="inline-flex items-center gap-1 rounded-md border border-grit-glass-border px-2.5 py-1 font-grit-body text-[11px] font-semibold text-grit-subtext transition hover:border-grit-cyan/40 hover:text-grit-cyan"
                 >
                   <span className="material-symbols-outlined text-xs" aria-hidden="true">
                     card_membership
@@ -267,12 +268,12 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
           )}
 
           <div className="mt-auto flex items-center justify-between gap-3 pt-1">
-            <span className="font-landing-display text-base font-bold text-landing-text">{formatPrecio(data.precio)}</span>
+            <span className="font-grit-title text-base font-bold text-grit-text">{formatPrecio(data.precio)}</span>
             <div className="flex items-center gap-2">
               {detalleHref && (
                 <Link
                   href={detalleHref}
-                  className="rounded-lg border border-landing-border px-3 py-2 font-landing-body text-sm font-semibold text-landing-text-secondary transition hover:border-landing-primary/40 hover:text-landing-primary"
+                  className="rounded-grit-md border border-grit-glass-border px-3 py-2 font-grit-body text-sm font-semibold text-grit-subtext transition hover:border-grit-cyan/40 hover:text-grit-cyan"
                 >
                   Ver detalles
                 </Link>
@@ -283,7 +284,7 @@ export function PublicTrainingCard({ data, featured = false, onReservar, reserva
                 disabled={reservarDisabled || !onReservar}
                 aria-disabled={reservarDisabled || !onReservar}
                 title={reservarDisabled ? 'No disponible' : undefined}
-                className="rounded-lg bg-landing-primary px-4 py-2 font-landing-body text-sm font-semibold text-landing-bg transition hover:bg-landing-primary-light disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-grit-md bg-grit-cyan px-4 py-2 font-grit-body text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan-light disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Reservar
               </button>

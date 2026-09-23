@@ -15,7 +15,7 @@ export function InicioPagosPendientesAlert({
   }).format(total);
 
   return (
-    <div className="glass-card rounded-md p-6 bg-yellow-500/20 border-yellow-500/30">
+    <div className="border backdrop-blur-md rounded-grit-2xl p-6 bg-yellow-500/20 border-yellow-500/30">
       <div className="flex items-start gap-4">
         <div className="size-11 rounded-md bg-yellow-500/20 flex items-center justify-center text-yellow-400 flex-shrink-0">
           <span className="material-symbols-outlined text-2xl">payments</span>

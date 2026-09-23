@@ -28,10 +28,10 @@ type FormularioSeccionCardProps = {
   canMoveDown: boolean;
 };
 
-// Explicit 8px radius (not rounded-xl — overridden in this project to 3rem for the landing
+// Explicit 8px radius (not the xl radius utility — overridden in this project to 3rem for the landing
 // page's pill buttons) to match the P43Yo "Field Box" reference.
 const inputClass =
-  'w-full rounded-[8px] border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35';
+  'w-full rounded-[8px] border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35';
 
 export function FormularioSeccionCard({
   seccion,
@@ -69,13 +69,13 @@ export function FormularioSeccionCard({
       <div className="group relative px-1 py-2">
         <FormularioSeccionContent seccion={seccion} />
 
-        <div className="absolute right-1 top-2 flex items-center gap-1 rounded-lg bg-navy-deep/80 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+        <div className="absolute right-1 top-2 flex items-center gap-1 rounded-grit-md bg-grit-bg/80 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <button
             type="button"
             onClick={onMoveUp}
             disabled={!canMoveUp}
             aria-label="Mover sección hacia arriba"
-            className="rounded p-1.5 text-slate-400 transition hover:text-turquoise disabled:cursor-not-allowed disabled:opacity-30"
+            className="rounded p-1.5 text-grit-subtext transition hover:text-grit-cyan disabled:cursor-not-allowed disabled:opacity-30"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">arrow_upward</span>
           </button>
@@ -84,7 +84,7 @@ export function FormularioSeccionCard({
             onClick={onMoveDown}
             disabled={!canMoveDown}
             aria-label="Mover sección hacia abajo"
-            className="rounded p-1.5 text-slate-400 transition hover:text-turquoise disabled:cursor-not-allowed disabled:opacity-30"
+            className="rounded p-1.5 text-grit-subtext transition hover:text-grit-cyan disabled:cursor-not-allowed disabled:opacity-30"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">arrow_downward</span>
           </button>
@@ -92,7 +92,7 @@ export function FormularioSeccionCard({
             type="button"
             onClick={onExpand}
             aria-label="Editar sección"
-            className="rounded p-1.5 text-slate-400 transition hover:text-turquoise"
+            className="rounded p-1.5 text-grit-subtext transition hover:text-grit-cyan"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">edit</span>
           </button>
@@ -101,14 +101,14 @@ export function FormularioSeccionCard({
               <button
                 type="button"
                 onClick={onDelete}
-                className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-2 py-1 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                className="rounded-grit-md border border-grit-danger/40 bg-rose-500/10 px-2 py-1 text-xs font-semibold text-grit-danger transition hover:bg-rose-500/20"
               >
                 Confirmar
               </button>
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(false)}
-                className="rounded-lg border border-portal-border px-2 py-1 text-xs font-semibold text-slate-300"
+                className="rounded-grit-md border border-grit-glass-border px-2 py-1 text-xs font-semibold text-grit-subtext"
               >
                 No
               </button>
@@ -118,7 +118,7 @@ export function FormularioSeccionCard({
               type="button"
               onClick={() => setConfirmingDelete(true)}
               aria-label="Eliminar sección"
-              className="rounded p-1.5 text-slate-400 transition hover:text-rose-300"
+              className="rounded p-1.5 text-grit-subtext transition hover:text-grit-danger"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">delete</span>
             </button>
@@ -134,10 +134,10 @@ export function FormularioSeccionCard({
   const usesListaValores = FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES.includes(values.campo_tipo);
 
   return (
-    <div className="rounded-xl border border-turquoise/50 bg-navy-medium/60 p-5 shadow-[0_0_0_1px_rgba(45,212,191,0.15)]">
+    <div className="rounded-grit-2xl border border-grit-cyan/50 bg-grit-card p-5 shadow-[0_0_0_1px_rgba(45,212,191,0.15)]">
       <div className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`seccion-tipo-${seccion.id}`}>
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`seccion-tipo-${seccion.id}`}>
             Tipo de sección
           </label>
           <select
@@ -155,12 +155,12 @@ export function FormularioSeccionCard({
         </div>
 
         {isSeparador ? (
-          <p className="text-sm text-slate-400">Un separador no tiene contenido — solo dibuja una línea divisoria.</p>
+          <p className="text-sm text-grit-subtext">Un separador no tiene contenido — solo dibuja una línea divisoria.</p>
         ) : isDatos ? (
           <>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-etiqueta-${seccion.id}`}>
-                Etiqueta <span className="text-rose-400">*</span>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`campo-etiqueta-${seccion.id}`}>
+                Etiqueta <span className="text-grit-danger">*</span>
               </label>
               <input
                 id={`campo-etiqueta-${seccion.id}`}
@@ -174,8 +174,8 @@ export function FormularioSeccionCard({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-tipo-${seccion.id}`}>
-                Tipo de dato <span className="text-rose-400">*</span>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`campo-tipo-${seccion.id}`}>
+                Tipo de dato <span className="text-grit-danger">*</span>
               </label>
               <select
                 id={`campo-tipo-${seccion.id}`}
@@ -193,8 +193,8 @@ export function FormularioSeccionCard({
 
             {usesListaValores ? (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-lista-valores-${seccion.id}`}>
-                  Valores permitidos <span className="text-rose-400">*</span>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`campo-lista-valores-${seccion.id}`}>
+                  Valores permitidos <span className="text-grit-danger">*</span>
                 </label>
                 <textarea
                   id={`campo-lista-valores-${seccion.id}`}
@@ -204,14 +204,14 @@ export function FormularioSeccionCard({
                   placeholder="Ej: Camiseta S, Camiseta M, Camiseta L"
                   className={inputClass}
                 />
-                <p className="mt-1 text-xs text-slate-500">Valores separados por coma.</p>
+                <p className="mt-1 text-xs text-grit-muted">Valores separados por coma.</p>
               </div>
             ) : null}
 
             {values.campo_tipo !== 'checkbox' ? (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-placeholder-${seccion.id}`}>
-                  Placeholder <span className="normal-case font-normal text-slate-500">(opcional)</span>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`campo-placeholder-${seccion.id}`}>
+                  Placeholder <span className="normal-case font-normal text-grit-muted">(opcional)</span>
                 </label>
                 <input
                   id={`campo-placeholder-${seccion.id}`}
@@ -225,7 +225,7 @@ export function FormularioSeccionCard({
             ) : null}
 
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`campo-columna-ancho-${seccion.id}`}>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`campo-columna-ancho-${seccion.id}`}>
                 Ancho de columna
               </label>
               <select
@@ -245,9 +245,9 @@ export function FormularioSeccionCard({
                 type="checkbox"
                 checked={values.campo_obligatorio}
                 onChange={(e) => setField('campo_obligatorio', e.target.checked)}
-                className="rounded border-slate-600 bg-navy-deep"
+                className="rounded border-grit-glass-border bg-grit-bg"
               />
-              <label htmlFor={`campo-obligatorio-${seccion.id}`} className="text-sm text-slate-200">
+              <label htmlFor={`campo-obligatorio-${seccion.id}`} className="text-sm text-grit-text">
                 Campo obligatorio
               </label>
               {values.campo_tipo ? (
@@ -260,8 +260,8 @@ export function FormularioSeccionCard({
         ) : (
           <>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`seccion-descripcion-${seccion.id}`}>
-                {isSeccion ? 'Título de la sección' : 'Descripción'} <span className="text-rose-400">*</span>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`seccion-descripcion-${seccion.id}`}>
+                {isSeccion ? 'Título de la sección' : 'Descripción'} <span className="text-grit-danger">*</span>
               </label>
               <textarea
                 id={`seccion-descripcion-${seccion.id}`}
@@ -275,8 +275,8 @@ export function FormularioSeccionCard({
 
             {isSeccion ? (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={`seccion-subtitulo-${seccion.id}`}>
-                  Subtítulo de la sección <span className="normal-case font-normal text-slate-500">(opcional)</span>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={`seccion-subtitulo-${seccion.id}`}>
+                  Subtítulo de la sección <span className="normal-case font-normal text-grit-muted">(opcional)</span>
                 </label>
                 <input
                   id={`seccion-subtitulo-${seccion.id}`}
@@ -293,24 +293,24 @@ export function FormularioSeccionCard({
         )}
 
         {fieldError ? (
-          <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+          <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
             {fieldError}
           </div>
         ) : null}
       </div>
 
-      <div className="mt-5 flex items-center justify-end gap-3 border-t border-portal-border pt-4">
+      <div className="mt-5 flex items-center justify-end gap-3 border-t border-grit-glass-border pt-4">
         <button
           type="button"
           onClick={handleCancel}
-          className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:border-slate-500 hover:bg-navy-deep hover:text-slate-100"
+          className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text transition-all duration-200 hover:border-grit-glass-border hover:bg-grit-bg hover:text-grit-text"
         >
           Cancelar
         </button>
         <button
           type="button"
           onClick={handleDone}
-          className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25"
+          className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg transition-all duration-200 hover:bg-grit-cyan/85 hover:shadow-lg hover:shadow-grit-cyan/25"
         >
           Listo
           <span className="material-symbols-outlined text-base" aria-hidden="true">check</span>

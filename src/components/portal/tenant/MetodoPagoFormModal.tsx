@@ -133,7 +133,7 @@ export function MetodoPagoFormModal({
       <button
         type="button"
         aria-label="Cerrar formulario de método de pago"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -142,14 +142,14 @@ export function MetodoPagoFormModal({
         role="dialog"
         aria-modal="true"
         aria-label={mode === 'create' ? 'Crear método de pago' : 'Editar método de pago'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
               {mode === 'create' ? 'Crear método de pago' : 'Editar método de pago'}
             </h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-grit-subtext">
               Configura los datos del método de pago para esta organización.
             </p>
           </div>
@@ -157,7 +157,7 @@ export function MetodoPagoFormModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -169,7 +169,7 @@ export function MetodoPagoFormModal({
           {/* Nombre */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="mp-nombre"
             >
               Nombre
@@ -182,14 +182,14 @@ export function MetodoPagoFormModal({
               disabled={isSubmitting}
               placeholder="Ej: Nequi, Bancolombia, Efectivo"
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.nombre
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {fieldErrors.nombre ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.nombre}
               </p>
             ) : null}
@@ -198,7 +198,7 @@ export function MetodoPagoFormModal({
           {/* Tipo */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="mp-tipo"
             >
               Tipo
@@ -209,10 +209,10 @@ export function MetodoPagoFormModal({
               onChange={(e) => setTipo(e.target.value as MetodoPagoTipo)}
               disabled={isSubmitting}
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition focus:ring-2',
                 fieldErrors.tipo
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             >
               <option value="">Selecciona un tipo</option>
@@ -223,7 +223,7 @@ export function MetodoPagoFormModal({
               ))}
             </select>
             {fieldErrors.tipo ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.tipo}
               </p>
             ) : null}
@@ -232,10 +232,10 @@ export function MetodoPagoFormModal({
           {/* Número */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="mp-valor"
             >
-              Número <span className="normal-case tracking-normal text-slate-500">(opcional)</span>
+              Número <span className="normal-case tracking-normal text-grit-muted">(opcional)</span>
             </label>
             <input
               id="mp-valor"
@@ -244,17 +244,17 @@ export function MetodoPagoFormModal({
               onChange={(e) => setValor(e.target.value)}
               disabled={isSubmitting}
               placeholder="Ej: cuenta 123-456-789, CBU, número"
-              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
             />
           </div>
 
           {/* URL */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="mp-url"
             >
-              URL <span className="normal-case tracking-normal text-slate-500">(opcional)</span>
+              URL <span className="normal-case tracking-normal text-grit-muted">(opcional)</span>
             </label>
             <input
               id="mp-url"
@@ -264,14 +264,14 @@ export function MetodoPagoFormModal({
               disabled={isSubmitting}
               placeholder="https://…"
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.url
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {fieldErrors.url ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.url}
               </p>
             ) : null}
@@ -280,10 +280,10 @@ export function MetodoPagoFormModal({
           {/* Comentarios */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="mp-comentarios"
             >
-              Comentarios <span className="normal-case tracking-normal text-slate-500">(opcional)</span>
+              Comentarios <span className="normal-case tracking-normal text-grit-muted">(opcional)</span>
             </label>
             <textarea
               id="mp-comentarios"
@@ -292,7 +292,7 @@ export function MetodoPagoFormModal({
               onChange={(e) => setComentarios(e.target.value)}
               disabled={isSubmitting}
               placeholder="Instrucciones de pago, titular de cuenta, etc."
-              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
             />
           </div>
 
@@ -305,8 +305,8 @@ export function MetodoPagoFormModal({
               onClick={() => setActivo(!activo)}
               disabled={isSubmitting}
               className={[
-                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-turquoise/40 focus:ring-offset-2 focus:ring-offset-navy-medium disabled:opacity-50',
-                activo ? 'bg-turquoise' : 'bg-slate-600',
+                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-grit-cyan/40 focus:ring-offset-2 focus:ring-offset-grit-bg disabled:opacity-50',
+                activo ? 'bg-grit-cyan' : 'bg-grit-subtext/20',
               ].join(' ')}
             >
               <span
@@ -316,14 +316,14 @@ export function MetodoPagoFormModal({
                 ].join(' ')}
               />
             </button>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-grit-subtext">
               {activo ? 'Activo' : 'Inactivo'}
             </span>
           </div>
 
           {submitError ? (
             <div
-              className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
               role="alert"
             >
               {submitError}
@@ -331,12 +331,12 @@ export function MetodoPagoFormModal({
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cancelar
           </button>
@@ -344,7 +344,7 @@ export function MetodoPagoFormModal({
             type="button"
             onClick={() => void handleSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting
               ? 'Guardando...'
