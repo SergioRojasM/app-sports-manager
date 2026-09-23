@@ -1,199 +1,367 @@
 ---
-name: GRIT Arena — Portal UI Design Guide
-derived_from: projectspec/designs/pencil/grit-arena.pen (node d41rX5, "Entrenamientos")
-scope: Authenticated portal/app pages (dashboard, entrenamientos, perfil, organización, etc.)
-related: ../landing_new_dessign/DESIGN.md (marketing/landing brand guide — public-facing pages only)
+name: GRIT Arena — UI Design Guide
+design_source: projectspec/designs/pencil/grit-arena-v2.pen
+code_source: src/app/globals.css · tailwind.config.ts · src/components/ui/grit/
+scope: Authenticated Portal (/portal/*) and the public training pages
+updated: 2026-09-23 (US-0116 + analitica-v2-design)
 ---
 
-# Portal UI Design Guide
+# UI Design Guide
 
-Reference to follow **every time a new portal page is designed or built**.
-It captures the recurring visual patterns already established across the
-existing screens (`04_dashboard`, `10_entrenamientos`, `11_Perfil`,
-`12_user_home`, etc.) so new pages look like they belong to the same product
-instead of reinventing layout each time.
+Read this **before building or restyling any page**. It describes the design
+system as it exists in the code today, so a new screen looks like it belongs to
+the product without reinventing anything.
 
-This is the **app/portal** guide — dark, data-dense, glass panels. The
-[landing guide](../landing_new_dessign/DESIGN.md) is a separate, more
-editorial style for public marketing pages; don't mix the two.
+Two rules cover most of it:
 
-## Design tokens
+1. **Use the tokens and the kit.** Colours, fonts, radii and containers already
+   exist. If a screen needs something the kit doesn't have, extend the kit —
+   don't write one-off classes.
+2. **The design file wins.** `grit-arena-v2.pen` is the source of truth for
+   measurements. The tokens mirror its variables 1:1, so `$glass-border` in the
+   design is `border-grit-glass-border` in code.
 
-| Token | Value | Usage |
+---
+
+## 1. Where everything lives
+
+| What | Where |
+| --- | --- |
+| Design file (source of truth) | `projectspec/designs/pencil/grit-arena-v2.pen` |
+| CSS variables + `.grit-shell` | `src/app/globals.css` |
+| Tailwind tokens (colours, fonts, radii) | `tailwind.config.ts` (`theme.extend`) |
+| Component kit | `src/components/ui/grit/` — import from `@/components/ui` |
+| Portal shell (header, breadcrumb, page container) | `src/app/portal/layout.tsx`, `src/components/portal/Portal*.tsx` |
+| Chart theme + palette | `src/components/portal/analitica/chart-theme.ts` |
+| Discipline icon/colour helper | `src/lib/portal/disciplina-visual.ts` |
+| Design → Material Symbols icon map | `src/components/ui/grit/icon-map.ts` |
+
+### Design file frames
+
+| Frame | Screen it drives |
+| --- | --- |
+| `zfVKC` | Operations dashboard — KPI cards, panels, tables (used by `analitica`) |
+| `OyIqr` | Public training detail |
+| `ql3Ij` | Public trainings marketplace |
+| `d41rX5` | Athlete trainings schedule |
+| `P43Yo` | Form preview / form builder header |
+
+---
+
+## 2. Tokens
+
+Use the Tailwind names. Never write a raw hex in a component.
+
+### Colour
+
+| Token | Value | Use for |
 | --- | --- | --- |
-| `bg-navy` | `#07111F` | Page background — always this near-black navy, never pure black |
-| `accent-cyan` | `#14DBC4` | Primary accent: CTAs, active/selected states, links, key icons |
-| `accent-teal` | `#0FA3AB` | Secondary accent (also `discipline-cycle`) |
-| `text-primary` | `#E6EDF3` | Titles, primary content, values |
-| `text-subtext` | `#BAC7D5` | Secondary text, meta info, labels |
-| `glass-fill` | `#0F1F30B0` | Translucent panel/card/pill background |
-| `glass-border` | `#14DBC440` | 1px hairline border on nearly every panel, pill, and button |
-| `card-fill` | `#0B1826CC` | Slightly denser fill for nested cards inside a panel |
-| `font-title` | Rajdhani, 700 | Page titles, big numbers, day/date numerals |
-| `font-body` | Montserrat | Everything else — body text, labels, buttons, nav |
+| `grit-bg` | `#07111F` | Page background (via `.grit-shell`), text on cyan fills |
+| `grit-cyan` | `#14DBC4` | The single brand accent: primary buttons, active states, key icons, links |
+| `grit-cyan-light` | `#49F5E2` | Hover state of a cyan fill only |
+| `grit-teal` | `#0FA3AB` | Secondary accent, rarely — prefer cyan |
+| `grit-text` | `#E6EDF3` | Titles, values, primary copy |
+| `grit-subtext` | `#BAC7D5` | Labels, meta lines, secondary copy |
+| `grit-muted` | `#8A9AAB` | Tertiary detail, placeholders, "compare" captions (≥11px only) |
+| `grit-glass` | `rgba(15,31,48,.69)` | Translucent panel fill (always with `backdrop-blur`) |
+| `grit-card` | `rgba(11,24,38,.8)` | Denser fill for data cards, tiles and nested surfaces |
+| `grit-glass-border` | `rgba(20,219,196,.25)` | The hairline border on nearly every surface |
+| `grit-sidebar` | `rgba(6,14,26,.8)` | Reserved for a future sidebar layout |
+| `grit-success` | `#3DDC97` | Positive values, upward deltas |
+| `grit-danger` | `#FF6B6B` | Errors, destructive actions, failed states |
 
-Category/status colors (for tags, icons, badges — pick a consistent palette
-per domain, don't invent new hues per page):
+Category colours — reuse these, never invent a hue per page:
 
 | Token | Value |
 | --- | --- |
-| `discipline-swim` | `#14DBC4` |
-| `discipline-cycle` | `#0FA3AB` |
-| `discipline-run` | `#F2B84B` |
-| `discipline-strength` | `#B98AFF` |
-| `discipline-functional` | `#FF6B6B` |
-| `discipline-mobility` | `#6BCB77` |
+| `grit-discipline-swim` | `#14DBC4` |
+| `grit-discipline-cycle` | `#0FA3AB` |
+| `grit-discipline-run` | `#F2B84B` (also the warning colour) |
+| `grit-discipline-strength` | `#B98AFF` |
+| `grit-discipline-functional` | `#FF6B6B` |
+| `grit-discipline-mobility` | `#6BCB77` |
 
-Background treatment: one or two large, very soft radial-gradient ellipses
-(accent color fading to transparent, ~20% peak opacity) placed behind the
-content for ambient glow. Always non-interactive, always clipped to the page
-frame, never competing with foreground content.
+Don't pick a discipline colour by hand: `getDisciplinaVisual(nombre)` returns
+`{ icon, colorClass }` from the discipline's name, with a neutral fallback.
 
-## Typography rules
+**Opacity modifiers**: solid tokens are hex, so `bg-grit-cyan/15` works.
+Translucent tokens (`grit-glass`, `grit-card`, `grit-glass-border`,
+`grit-sidebar`) are CSS variables and **must be used without a modifier** —
+`bg-grit-card/60` silently produces nothing.
 
-- **Rajdhani (bold)** — reserved for page titles (e.g. `38px/700`) and large
-  numerals (day numbers, stats). Never for body copy.
-- **Montserrat** — everything interactive or paragraph-length: nav items,
-  buttons, form labels, card copy, table cells.
-- Standard sizes seen across the portal: `38px` page title, `15px` subtitle/
-  section labels, `13–14px` primary UI text, `10–12px` meta/secondary text.
-  Stay within this scale rather than introducing new sizes per page.
-- Secondary/meta text is always `text-subtext`, never a dimmed opacity of
-  `text-primary` — use the dedicated token so contrast stays consistent.
+### Typography
 
-## Page skeleton
+| Token | Family | Use for |
+| --- | --- | --- |
+| `font-grit-title` | Rajdhani | `h1`–`h3`, KPI values, prices, big numerals |
+| `font-grit-body` | Montserrat | Everything else; set once by `.grit-shell` |
 
-Every portal page follows the same top-level shape:
+Scale in use — stay inside it:
+
+| Size | Where |
+| --- | --- |
+| 36px (`sm:text-[36px]`) | Page `h1` |
+| 28px | KPI value, price |
+| 22px / 20px | Section headings (`GritSectionHeading` `lg` / `md`) |
+| 15px | Lead paragraph under a title |
+| 13–14px | Body, buttons, table cells, nav |
+| 11–12px | Labels, meta, badges, captions |
+
+Secondary text always uses `text-grit-subtext` — never a dimmed
+`text-grit-text`, so contrast stays predictable.
+
+### Radius
+
+Use the named scale. **`rounded-lg` and `rounded-xl` are 32px and 48px** in
+this project (a legacy override the landing and auth pages depend on), so they
+must never appear in Portal code.
+
+| Class | Value | Use for |
+| --- | --- | --- |
+| `rounded-grit-xs` | 6px | Tiny chips |
+| `rounded-grit-sm` | 8px | Tags, badges |
+| `rounded-grit-md` | 10px | Buttons, inputs, menu items, 34–40px icon tiles |
+| `rounded-grit-lg` | 12px | Dropdown panels, 48px icon tiles, tab containers |
+| `rounded-grit-xl` | 14px | The design's KPI/panel radius — available when you need it, though `GritCard` standardises on 16px |
+| `rounded-grit-2xl` | 16px | Cards, panels, modals (the `GritCard` default) |
+
+### Spacing
+
+- **Gaps**: 4–6 (label pairs) · 8–14 (controls, list rows) · 16–20 (cards in a
+  grid) · 24–32 (sections).
+- **Padding**: 16 / 20 / 24 / 28 (`GritCard` `sm`–`xl`) · 18 (KPI cards) ·
+  22 (dashboard panels).
+- **Page**: owned by `GritPageContainer` — max width 1440, side padding
+  16/24/48 by breakpoint, 24 top, 48 bottom, 32 between blocks.
+
+---
+
+## 3. Page skeleton
+
+### Portal pages
+
+`src/app/portal/layout.tsx` already provides the shell. A page renders **only
+its content**:
 
 ```
-Page (bg-navy, clip)
-├─ ambient background glow (1-2 radial ellipses)
-└─ Content (vertical)
-   ├─ Navbar (see below) — identical across all portal pages
-   └─ Body (vertical, gap ~28, padding ~32/48/36/48)
-      ├─ Header Row (space-between)
-      │  ├─ Left: page Title (Rajdhani, 38px/700) + one-line subtitle
-      │  └─ Right (optional): a summary/stat widget relevant to the page
-      └─ page-specific content below
+.grit-shell (h-screen, flex-col, font-grit-body)
+├─ PortalHeader            navbar: logo · Menú · notifications · avatar
+└─ <main> (scrolls)
+   ├─ PortalBreadcrumb     ⌂ Inicio › Org › Page
+   └─ GritPageContainer    ← your page renders inside this
+      ├─ GritPageHeader    the page's single <h1> (+ actions)
+      └─ your content      cards, tables, panels…
 ```
 
-### Navbar (shared, don't redesign per page)
+Consequences for a new page:
 
-Row, `space-between`, 1px bottom border (`glass-border`), padding `18/48`.
+- **Do not** add outer page padding, a max width, or a background — the layout
+  owns them. A page component starts at `<div className="space-y-6">`.
+- **Exactly one `h1` per page**, and it comes from `GritPageHeader`.
+- Don't re-render the navbar or the breadcrumb; both are automatic. Add a label
+  for a new route segment in `SLUG_LABELS` inside `PortalBreadcrumb.tsx`.
 
-- **Left**: logo (cyan rounded-square icon badge + "GRIT" / "ARENA"
-  two-line wordmark) → menu dropdown ("Menú" + grid icon + chevron) →
-  breadcrumb trail (`Inicio › Org › Team › Current Page`, all `text-subtext`
-  except the current page, which is bold `text-primary`).
-- **Right**: notification bell (36x36 glass pill) → user avatar (36x36 cyan
-  circle with initial, or photo).
+```tsx
+export function MiModuloPage({ tenantId }: { tenantId: string }) {
+  return (
+    <section className="space-y-6">
+      <GritPageHeader
+        eyebrow="Módulo"
+        title="Gestión de"
+        titleAccent="entrenamientos"
+        subtitle="Una frase que explica para qué sirve la página."
+        actions={<GritButton icon="add">Crear</GritButton>}
+      />
+      {/* content */}
+    </section>
+  );
+}
+```
 
-### Header Row
+### Public pages
 
-- Title uses the page name in Spanish, sentence case (`Entrenamientos`,
-  `Perfil`, not `ENTRENAMIENTOS`).
-- Subtitle is one short sentence describing the page's purpose, `text-subtext`.
-- An optional widget on the right surfaces one key number relevant to the
-  page (e.g. "24 entrenamientos disponibles esta semana") — a glass pill with
-  an icon badge, a bold value line, and a subtext caption line. Use this
-  pattern instead of a plain stat number floating in the header.
+`/entrenamientos-publicos/*` keeps the marketing `Header` and `Footer` and the
+`landing-shell` wrapper (with its top padding for the fixed header). Inside
+that chrome, the content uses the same tokens and kit as the Portal. The
+marketing home (`/`) and `/auth/*` keep the older `landing-*` tokens and are
+out of scope for this guide.
 
-## Reusable component patterns
+---
 
-### Glass panel (the base container)
+## 4. The component kit
 
-The default wrapper for any grouped content block (calendar, sidebar, form
-section, table container): `glass-fill` background, `glass-border` 1px
-stroke, `cornerRadius: 16`, internal `padding: 24`, vertical layout with
-`gap: 20`. Nested cards inside a panel step down to `card-fill` +
-`cornerRadius: 10` so there's a visible depth hierarchy without shadows.
+Everything imports from `@/components/ui`. These are presentational only: no
+data fetching, no business logic.
 
-### Buttons
+| Component | Key props (defaults) | Notes |
+| --- | --- | --- |
+| `GritCard` | `variant` glass·card·highlight (`glass`), `padding` none·sm·md·lg·xl (`lg`), `as` (`div`) | 16px radius + glass border. `glass` = panels, filters, modals (adds blur); `card` = data tiles, tables, KPIs; `highlight` = the featured item |
+| `GritPageHeader` | `title`, `titleAccent`, `eyebrow`, `subtitle`, `italic`, `actions` | The page's `h1`; `titleAccent` renders cyan |
+| `GritPageContainer` | — | Applied once by the Portal layout; use directly only outside `/portal` |
+| `GritSectionHeading` | `title`, `subtitle`, `action`, `size` md·lg (`lg`), `as` (`h2`) | Section title inside a card; `action` is right-aligned |
+| `GritButton` | `variant` primary·secondary·outline-accent·ghost (`primary`), `size` sm·md (`md`), `icon`, `iconPosition`, `fullWidth`, `loading`, `href`, `external` | Renders `<button>`, `<Link>`, or `<a target="_blank" rel="noopener noreferrer">` when `external`. Cyan focus ring included |
+| `GritTag` | `tone` accent·neutral (`accent`), `icon`, `colorClass` | Uppercase pill, 12px/700, letter-spacing .5 |
+| `GritBadge` | `icon` | Neutral info chip on `grit-card` |
+| `GritIconTile` | `size` 34·40·48 (`34`), `shape` rounded·circle, `tone` card·accent | Icon container from the design's "Icon Wrap" frames |
+| `GritInfoRow` | `icon`, `label`, `value`, `as` | Icon tile + label/value pair |
+| `GritDivider` | — | 1px `grit-glass-border` rule |
+| `GritIcon` | `name`, `size` (16), `label` | Material Symbols at weight 300; decorative (`aria-hidden`) unless `label` is set |
+| `GritEmptyState` | `icon`, `title`, `description`, `action`, `titleAs`, `descriptionClassName` | Loading / error / empty / not-found |
+| `gritInputClass`, `gritSelectClass` | — | Class strings for `<input>` / `<select>` |
+| `gritFocusRing`, `cx` | — | Shared focus ring; class joiner |
 
-- **Primary**: `accent-cyan` fill, dark text (`#07111F` — never white on
-  cyan, contrast is the point), `cornerRadius: 8`, no heavy shadow.
-- **Secondary / icon button**: transparent fill, `glass-border` 1px stroke,
-  `text-subtext` or `text-primary` content. Circular (`cornerRadius: 18` on a
-  36x36 box) for icon-only nav buttons (prev/next arrows, bell); rounded
-  rectangle (`cornerRadius: 10`, padding `9/16`) for text buttons (`Hoy`,
-  `Mañana`, `Limpiar`).
-- Never stack more than one filled primary button in the same row — the
-  cyan fill must stay a rare, deliberate accent.
+### Button rules
 
-### Pills / dropdowns
+- One filled `primary` per view. Cyan is an accent, not a background.
+- Text on a cyan fill is `text-grit-bg` (dark), never white.
+- A destructive action is `variant="secondary"` with `text-grit-danger`, not a
+  red fill.
 
-A horizontal pill (`cornerRadius: 10`, `glass-border` stroke, padding
-`~9-10/12-16`) is the standard control for: date ranges, "today/tomorrow"
-quick filters, category dropdowns. Structure: optional leading icon (13-16px,
-`text-subtext` unless it's the active state) → label (`13px/600`,
-`text-primary`) → optional trailing chevron (`text-subtext`). Don't invent a
-different shape (e.g. underlined select, plain text link) for the same kind
-of control on another page.
+---
 
-### Grid/column layouts (calendar, schedules, kanban-like data)
+## 5. Recurring patterns
 
-When a page needs repeated day/category columns (as in the weekly training
-schedule): equal-width `fill_container` columns, `gap: 12`, each column
-`padding: 8`, contents centered. A column can be marked **selected/active**
-by giving it its own subtle tinted fill (`accent-cyan` at ~8% opacity),
-a `1.5px` `accent-cyan` stroke, and `cornerRadius: 12` — this is distinct
-from **"today"/"current"**, which instead gets a small cyan dot marker under
-its header label. Never conflate the two states into one visual treatment;
-a user must be able to view a day other than today without losing the sense
-of "where today is."
+### KPI card (design `zfVKC`)
 
-### List items (rows of records)
+`GritCard variant="card"` + 18px padding + 14px gap: a 40px round
+`GritIconTile tone="accent"`, then a 28px Rajdhani value, a 12px `grit-subtext`
+label and an optional 11px `grit-muted` detail. (The design draws these at a
+14px radius; the kit keeps every card at 16px for consistency.) Tone the value with
+`grit-success` (positive) or `grit-discipline-run` (warning). See
+`AnaliticaKpiCard.tsx`.
 
-Row layout, `gap: 12`, vertically centered: icon badge (36x36, tinted
-category-color background at ~13% opacity, full-color icon) → text block
-(title `14px/700` + one or two meta lines `11px/500` `text-subtext`,
-`fixed-width` + `fill_container` so text wraps instead of overflowing) →
-right-aligned trailing block (a key value/stat stacked over its label, plus
-an optional primary action button). This is the default shape for any
-"list of bookable/actionable records" pattern — reuse it rather than
-building a bespoke row per page.
+### Panel with a heading
 
-### Small cards (compact record summary)
+```tsx
+<GritCard as="section" variant="card" padding="none" className="p-[22px]">
+  <GritSectionHeading size="md" title="Ingresos mensuales" subtitle="Pagos validados" />
+  <div className="mt-5">{children}</div>
+</GritCard>
+```
 
-Vertical, `card-fill` background, `glass-border` stroke, `cornerRadius: 10`,
-padding `10`, `gap: 6`: a small category row (icon + colored label) → a bold
-title (wraps, `lineHeight: 1.25`) → one or two `text-subtext` meta lines → a
-bottom pill showing a count/ratio (`booked/capacity` style, `accent-cyan`
-stroke and text). Used wherever a compact, stackable unit of information is
-needed (e.g. inside a grid column).
+### Tables
 
-## Spacing & radius scale
+Header cells: `text-grit-subtext`, 12px, semibold, uppercase, tracking-wide.
+Body cells: `text-grit-text`, tertiary column `text-grit-subtext`. Row
+separators: `border-t border-white/[.07]` — a neutral hairline, not the cyan
+glass border, which is reserved for surface edges.
 
-Stick to the values already in use — don't introduce arbitrary new numbers:
+### List rows
 
-- **Radius**: `6` (tiny pills) · `8` (buttons, icon wraps) · `10` (cards,
-  pills, dropdowns) · `12` (selected states) · `14–16` (panels) · `18`
-  (circular 36px buttons/avatars).
-- **Gaps**: `4–6` (tight label pairs) · `8–12` (related controls, list rows)
-  · `16` (list items) · `20–32` (sections within/between panels).
-- **Padding**: `8` (grid column cells) · `10` (compact cards) · `24`
-  (panels) · body page padding `32 / 48 / 36 / 48` (top/sides/bottom).
+`GritIconTile` (category-tinted) → a text block (title 14px/700 + one or two
+`grit-subtext` meta lines) → a right-aligned value or action. Reuse this shape
+for any list of records.
 
-## Icons
+### Modals and drawers
 
-Lucide icons only, used at small sizes (12–18px), always tinted
-(`text-subtext` for neutral/inactive, `accent-cyan` or a category color for
-active/emphasized). Never a filled/duotone icon style — keep them line icons
-consistent with the rest of the set already used (`zap`, `bell`, `calendar`,
-`arrow-left`/`arrow-right`, `chevron-down`/`chevron-right`, `users`,
-`list-filter`, `layout-grid`, plus category icons like `waves`, `bike`,
-`activity`, `dumbbell`, `flame`, `wind`).
+Backdrop: `fixed inset-0 z-50 bg-grit-bg/70 backdrop-blur-sm`. Panel:
+`GritCard variant="glass"` (16px radius), title as a section heading, actions
+as `GritButton`. Keep Escape-to-close and click-outside-to-close.
 
-## Checklist before shipping a new portal page
+### Forms
 
-- [ ] Background is `bg-navy` with clipping, not pure black.
-- [ ] Navbar matches the shared pattern exactly (no per-page redesign).
-- [ ] Page title is Rajdhani bold; everything else is Montserrat.
-- [ ] Any grouped content sits inside a `glass-fill` panel with
-      `glass-border`, not a bare/borderless block.
-- [ ] Only one filled cyan primary action is emphasized per view.
-- [ ] Selected vs. "current/today" states use two visually distinct
-      treatments if both concepts exist on the page.
-- [ ] Category/status colors reuse the existing discipline/status token set
-      instead of introducing new colors.
-- [ ] Spacing values (gap/padding/radius) come from the scale above.
+`gritInputClass` / `gritSelectClass` for fields; labels 12px semibold
+`grit-subtext`; inline errors `text-grit-danger`. Never restyle a field
+ad hoc — extend `styles.ts` if a new field type appears.
+
+### Empty, loading and error states
+
+All three go through `GritEmptyState`. Keep them distinct: a fetch error is
+retryable (`action` = "Reintentar") and must never read as "no data". When data
+is already on screen and a refresh fails, show a compact banner above it
+instead of replacing the page.
+
+### Charts (`@nivo`)
+
+Import `analiticaChartTheme` and `ANALITICA_CHART_COLORS` from
+`src/components/portal/analitica/chart-theme.ts`. Never pass an inline palette
+or theme. Series order is cyan → purple → amber → green → teal → red;
+neighbouring entries differ in hue so adjacent slices stay distinguishable.
+Charts are the one place hex literals are allowed, because nivo cannot read
+Tailwind classes — and they live only in that file.
+
+### Background
+
+`.grit-shell` paints the navy background plus two soft radial glows (cyan
+top-right, teal mid-left). Don't add page-level gradients on top of it.
+
+---
+
+## 6. Icons
+
+The design draws Lucide icons; the app renders **Material Symbols Outlined** at
+weight 300 through `GritIcon`. `icon-map.ts` holds the translation (for example
+`house → home`, `clock-3 → schedule`, `circle-check → check_circle`,
+`arrow-up-right → arrow_outward`). When you take an icon from the design file,
+add its mapping there rather than guessing in a component.
+
+Sizes: 13px (inside tags and small buttons) · 15–18px (list rows, menu items) ·
+20–22px (headers, 48px tiles) · 30px+ (decorative). Colour: `grit-subtext` when
+neutral, `grit-cyan` or a category colour when active.
+
+---
+
+## 7. Accessibility
+
+- One `h1` per page; sections use `h2`/`h3` via `GritSectionHeading`.
+- Every interactive element keeps a visible focus ring (`gritFocusRing`; the
+  kit's buttons include it).
+- Icons are `aria-hidden` unless they carry meaning — then pass `label`.
+- Breadcrumbs: `nav[aria-label="Ruta de navegación"] > ol`, last crumb
+  `aria-current="page"`.
+- Dropdowns and dialogs: `aria-expanded` / `aria-haspopup` / `aria-modal`,
+  Escape closes, focus returns to the trigger.
+- Contrast on `#07111F`: `grit-text` ≈ 15:1, `grit-subtext` ≈ 10:1,
+  `grit-muted` ≈ 6:1 (so `grit-muted` only for 11px+ secondary text).
+
+---
+
+## 8. Deprecated — never in Portal code
+
+These exist only for the marketing landing and `/auth/*`:
+
+`turquoise` · `accent-teal` (`#00e5c4`) · `navy-deep` / `navy-medium` /
+`navy-soft` · `card-dark` · `.glass` / `.glass-card` · `font-display` (Lexend) ·
+`landing-*` tokens · `slate-*` text and surfaces · `rounded-lg` / `rounded-xl`.
+
+CI-style check before opening a PR:
+
+```bash
+grep -rE "turquoise|portal-primary|portal-card|portal-border|glass-card|navy-deep|navy-medium|navy-soft|card-dark|font-display|landing-(primary|text|bg|border|surface)|rounded-(lg|xl)\b" \
+  src/components/portal src/app/portal
+```
+
+It must return nothing.
+
+---
+
+## 9. Checklist for a new page
+
+- [ ] The page renders only its content; no outer padding, max width or background.
+- [ ] Exactly one `h1`, from `GritPageHeader`.
+- [ ] Every surface is a `GritCard` (`card` for data, `glass` for panels/modals).
+- [ ] Only `grit-*` tokens; no `slate-*`, no raw hex, no deprecated tokens.
+- [ ] Radii come from `rounded-grit-*`; no `rounded-lg` / `rounded-xl`.
+- [ ] Headings in `font-grit-title`, everything else in `font-grit-body`.
+- [ ] One filled cyan primary action per view; dark text on cyan.
+- [ ] Inputs use `gritInputClass`; modals use the standard backdrop.
+- [ ] Loading, empty and error states exist and are distinguishable; errors retry.
+- [ ] Category colours come from `getDisciplinaVisual` or the discipline tokens.
+- [ ] Icons go through `GritIcon`, with new design icons added to `icon-map.ts`.
+- [ ] Checked at 375 / 768 / 1440 px: no horizontal scroll, columns stack.
+- [ ] Keyboard pass: focus rings visible, Escape closes overlays.
+- [ ] The grep in §8 returns nothing.
+
+---
+
+## 10. Extending the system
+
+If a screen needs something the kit doesn't cover:
+
+1. Check the design file first — the pattern probably exists in another frame.
+2. Add it to `src/components/ui/grit/` with the same prop style (`variant`,
+   `size`, `tone`), export it from the barrel, and document it in §4.
+3. New colour or radius: add the CSS variable in `globals.css` **and** the
+   Tailwind token, mirroring the design file's variable name.
+4. Never fork a kit component inside a feature folder — that is how the two
+   parallel design systems appeared in the first place.

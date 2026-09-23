@@ -22,7 +22,7 @@ export function AnaliticaTabs({ activeTab, onChange }: { activeTab: AnaliticaTab
   }
 
   return (
-    <div role="tablist" aria-label="Vistas de analítica" className="flex overflow-x-auto rounded-lg border border-portal-border bg-navy-deep/60 p-1">
+    <div role="tablist" aria-label="Vistas de analítica" className="flex gap-1 overflow-x-auto rounded-grit-lg border border-grit-glass-border bg-grit-card p-1">
       {tabs.map((tab, index) => (
         <button
           key={tab.id}
@@ -34,7 +34,7 @@ export function AnaliticaTabs({ activeTab, onChange }: { activeTab: AnaliticaTab
           tabIndex={activeTab === tab.id ? 0 : -1}
           onClick={() => onChange(tab.id)}
           onKeyDown={(event) => onKeyDown(event, index)}
-          className={`whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === tab.id ? 'bg-navy-soft text-slate-100 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+          className={`whitespace-nowrap rounded-grit-md border px-4 py-2 font-grit-body text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan ${activeTab === tab.id ? 'border-grit-glass-border bg-gradient-to-r from-grit-cyan/15 to-transparent font-semibold text-grit-text' : 'border-transparent font-medium text-grit-subtext hover:text-grit-cyan'}`}
         >
           {tab.label}
         </button>

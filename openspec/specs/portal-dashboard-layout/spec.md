@@ -1,5 +1,9 @@
-## ADDED Requirements
+# Capability: portal-dashboard-layout
 
+## Purpose
+Defines the authenticated Portal shell: the shared layout under `/portal/*`, its fixed v2 navbar, the breadcrumb row, the avatar/role menus, route protection and post-login redirects, plus the visual system the shell follows (`grit-arena-v2.pen`).
+
+## Requirements
 ### Requirement: Shared portal layout wraps all child routes
 `src/app/portal/layout.tsx` SHALL be a Next.js App Router Server Component layout that composes `PortalSidebar`, `PortalHeader`, and a `{children}` content slot. Every route under `/portal/*` MUST inherit this layout with no duplication or conditional rendering. The admin route `/portal/gestion-organizacion` MUST render functional organization cards aligned with the approved organization design and MUST NOT remain as construction placeholder content.
 
@@ -18,7 +22,7 @@
 ---
 
 ### Requirement: Fixed top header
-`PortalHeader` SHALL be a Client Component rendered inside `portal/layout.tsx`. It MUST remain fixed/sticky at the top of the viewport during scroll and SHALL contain: (1) application logo, (2) notifications icon with visual indicator, (3) user avatar button.
+`PortalHeader` SHALL be a Client Component rendered inside `portal/layout.tsx`. It MUST remain fixed/sticky at the top of the viewport during scroll and SHALL contain: (1) application logo, (2) notifications icon with visual indicator, (3) user avatar button. It SHALL follow the v2 Navbar design (`grit-arena-v2.pen` nodes `oUFl9` / `d41rX5`): vertical padding 18px, horizontal padding 16/24/48px by breakpoint, `grit-glass-border` bottom border, `bg-grit-bg/80` with backdrop blur, the `PortalNavMenu` trigger in 14px Montserrat 600 subtext (cyan on hover/active, 10px radius), a 36px round notifications button (`grit-glass` fill, `grit-glass-border` border) and a 36px round avatar with a 1px cyan ring. The header SHALL NOT contain the breadcrumb.
 
 #### Scenario: Header is visible during scroll
 - **WHEN** the user scrolls down any `/portal/*` page
@@ -27,6 +31,10 @@
 #### Scenario: Header contains required elements
 - **WHEN** the header is rendered
 - **THEN** it SHALL display the app logo, a notifications icon, and a user avatar button
+
+#### Scenario: Header matches v2 navbar styling
+- **WHEN** the header is rendered at 1440px
+- **THEN** its padding, border, button sizes and typography SHALL match node `oUFl9` within ±2px
 
 ---
 
@@ -96,29 +104,28 @@ A `src/app/portal/loading.tsx` file SHALL exist as a Next.js loading UI for the 
 ---
 
 ### Requirement: Visual design aligned with dashboard.html
-The portal shell (layout, sidebar, header) SHALL follow the design reference at `projectspec/designs/dashboard.html`: dark navy background (`#020617`), Lexend font family, electric-blue (`#00d4ff`) and turquoise (`#00f5d4`) brand colors, Material Symbols Outlined icons, and sidebar active state with left-border gradient.
+The portal shell (layout, header, menus, breadcrumb) SHALL follow the design reference `projectspec/designs/pencil/grit-arena-v2.pen` instead of `projectspec/designs/dashboard.html`: `.grit-shell` background (`#07111F` with cyan/teal radial glows), Montserrat body and Rajdhani headings, `#14DBC4` accent, `grit-*` tokens only, and Material Symbols Outlined icons through `GritIcon`. Dropdown panels (`PortalNavMenu`, `UserAvatarMenu`, `RoleBasedMenu`) SHALL use `GritCard variant="glass"` with 12px radius; items SHALL use padding 10/14px, 10px radius, gap 14px, 14px/500 subtext, and the active item SHALL use a cyan-to-transparent gradient, a `grit-glass-border` border, `grit-text` 600 and a cyan icon (design "Nav Operación"). `<main>` SHALL NOT apply page padding itself; it renders the breadcrumb row followed by `GritPageContainer` wrapping the page.
 
 #### Scenario: Design tokens match the reference
-- **WHEN** the portal shell is rendered in dark mode
-- **THEN** the background, fonts, and brand colors SHALL match `dashboard.html`
+- **WHEN** the portal shell is rendered
+- **THEN** the background, fonts, and brand colors SHALL match the `grit-arena-v2.pen` variables
 
-#### Scenario: Active sidebar item is visually distinct
-- **WHEN** the user is on a route that matches a sidebar menu item
-- **THEN** that item SHALL display the active state gradient and left border
+#### Scenario: Active menu item is visually distinct
+- **WHEN** the user is on a route that matches a menu item
+- **THEN** that item SHALL display the cyan gradient, border and cyan icon
 
 ---
+### Requirement: Portal breadcrumb row below the header
+`portal/layout.tsx` SHALL render `PortalBreadcrumb` as a standalone row at the top of the scrollable `<main>` (below `PortalHeader`, above the page), styled per `AOIa5`: `home` icon 13px, `›` separators, 13px 500 subtext crumbs, last crumb 700 `grit-text` with `aria-current="page"`, horizontal padding 16/24/48px, top padding 16px, inside `nav[aria-label="Ruta de navegación"] > ol`. It SHALL keep the existing rule of rendering nothing when there is only one segment, SHALL wrap on narrow viewports and truncate the last crumb (`max-w-[60vw]`). `SLUG_LABELS` SHALL add `entrenamientos-publicos`, `analitica`, `mis-reservas`, `mis-suscripciones`, `mis-suscripciones-y-pagos`, `landing-org`, `invitaciones` and `gestion-reservas`. Segment and href resolution logic SHALL NOT change.
 
-### Requirement: Portal header breadcrumb is hidden on mobile viewports
-`PortalHeader` SHALL hide the `PortalBreadcrumb` component and its preceding divider on viewports narrower than the `md` breakpoint (< 768 px). The breadcrumb wrapper MUST use Tailwind classes `hidden md:flex` so the elements are removed from both the visual layout and the accessibility tree on mobile. The `PortalBreadcrumb` component file itself MUST NOT be modified.
+#### Scenario: Breadcrumb visible on mobile
+- **WHEN** a user views `/portal/orgs/{tenant}/gestion-equipo` at 375px
+- **THEN** the breadcrumb row SHALL be visible, wrap without horizontal scroll, and the header avatar and notifications SHALL remain clickable
 
-#### Scenario: Breadcrumb is not rendered on mobile
-- **WHEN** a user views any portal page on a viewport narrower than 768 px
-- **THEN** the breadcrumb and its preceding divider SHALL NOT be visible and SHALL NOT be present in the accessibility tree
+#### Scenario: New slug labels
+- **WHEN** a user views `/portal/orgs/{tenant}/analitica`
+- **THEN** the last crumb SHALL read "Analítica"
 
-#### Scenario: Breadcrumb is visible on desktop
-- **WHEN** a user views any portal page on a viewport of 768 px or wider
-- **THEN** the breadcrumb and its preceding divider SHALL be fully visible and behave as before
-
-#### Scenario: Avatar and notifications remain accessible on mobile
-- **WHEN** a user views any portal page on a viewport narrower than 768 px
-- **THEN** the `UserAvatarMenu` and notification button in the right section of the header SHALL be fully visible and clickable
+#### Scenario: Single-segment path has no breadcrumb
+- **WHEN** the pathname resolves to only the root "Inicio" segment
+- **THEN** the breadcrumb row SHALL render nothing (existing rule)

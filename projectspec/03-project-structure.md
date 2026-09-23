@@ -229,11 +229,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── CrearSuscripcionModal.tsx     # 3-step admin modal to create a subscription on behalf of an athlete
 │   │   │       ├── SuscripcionTipoBadge.tsx      # "Miembro"/"No miembro" badge from es_miembro (US-0098)
 │   │   │       └── index.ts
-│   │   │   └── analitica/                  # Feature slice (portal/analitica — US-0115)
-│   │   │       ├── AnaliticaPage.tsx       # Tenant BI root: date range, stale-data refresh state and four accessible tabs
-│   │   │       ├── AnaliticaDateRangeFilter.tsx # Colombia/Bogota presets and custom date validation
-│   │   │       ├── AnaliticaTabs.tsx       # WAI-ARIA tablist with Arrow/Home/End keyboard navigation
-│   │   │       ├── AnaliticaKpiCard.tsx
+│   │   │   └── analitica/                  # Feature slice (portal/analitica — US-0115; styled per grit-arena-v2.pen node zfVKC in US-0116's design pass)
+│   │   │       ├── AnaliticaPage.tsx       # Tenant BI root: date range, stale-data refresh state and four accessible tabs; GritPageHeader + GritCard panels/tables + GritEmptyState states
+│   │   │       ├── AnaliticaDateRangeFilter.tsx # Colombia/Bogota presets and custom date validation; glass drawer with gritInputClass inputs and GritButton actions
+│   │   │       ├── AnaliticaTabs.tsx       # WAI-ARIA tablist with Arrow/Home/End keyboard navigation; v2 active state (cyan gradient + glass border)
+│   │   │       ├── AnaliticaKpiCard.tsx    # KPI card per zfVKC: GritCard + 40px round GritIconTile, 28px Rajdhani value, optional `icon`, tone → grit-success / grit-discipline-run
+│   │   │       ├── chart-theme.ts          # analiticaChartTheme + ANALITICA_CHART_COLORS for the @nivo charts — the ONLY place chart colours are defined (grit-* values, hue-separated series order)
 │   │   │       └── index.ts
 │   │   │   └── gestion-reservas/           # Feature slice (portal/gestion-reservas — US-0073)
 │   │   │       ├── GestionReservasPage.tsx        # Main page: filters, table, banner, CSV export
