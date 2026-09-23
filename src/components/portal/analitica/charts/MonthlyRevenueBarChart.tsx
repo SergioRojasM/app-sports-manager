@@ -1,30 +1,16 @@
 'use client';
 
-import { ResponsiveBar, type BarCustomLayerProps } from '@nivo/bar';
+import { ResponsiveBar } from '@nivo/bar';
 import type { AnaliticaRevenue } from '@/types/portal/analitica.types';
-import { ANALITICA_CHART_COLORS, ANALITICA_LEGEND_TEXT_COLOR, analiticaChartTheme } from '../chart-theme';
+import { ANALITICA_CHART_COLORS, analiticaChartTheme } from '../chart-theme';
 import { compactCurrency, currency, monthLabel, spansYears } from '../format';
-import { ChartEmpty, ChartFrame, ChartTooltip } from './shared';
+import { barTotalsLayer, ChartEmpty, ChartFrame, ChartTooltip } from './shared';
 
 type Datum = { month: string; total: number; validated: number; pending: number };
 
-/** Draws each month's compact total above its bar; nivo has no native "outside" label. */
-function TotalsLayer({ bars }: BarCustomLayerProps<Datum>) {
-  return <g>{bars.map((bar) => bar.data.value ? (
-    <text
-      key={bar.key}
-      x={bar.x + bar.width / 2}
-      y={bar.y - 6}
-      textAnchor="middle"
-      fill={ANALITICA_LEGEND_TEXT_COLOR}
-      style={{ fontSize: 11, fontWeight: 600 }}
-    >
-      {compactCurrency(bar.data.value)}
-    </text>
-  ) : null)}</g>;
-}
+const TotalsLayer = barTotalsLayer<Datum>(compactCurrency);
 
-/** Row 3 · "Ingresos mensuales": validated + pending per month, clipped to the range. */
+/** "Ingresos mensuales" (Resumen row 3, Ingresos row 2): validated + pending per month, clipped to the range. */
 export function MonthlyRevenueBarChart({ data }: { data: AnaliticaRevenue['monthlyRevenue'] }) {
   const multiYear = spansYears(data);
   const chartData: Datum[] = data.map((row) => ({

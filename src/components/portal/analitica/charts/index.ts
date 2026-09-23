@@ -5,3 +5,6 @@ export { SubscriptionsByPlanBarChart } from './SubscriptionsByPlanBarChart';
 export { BookingAverageLineChart } from './BookingAverageLineChart';
 export { BookingsByDisciplinePieChart } from './BookingsByDisciplinePieChart';
 export { ChartEmpty } from './shared';
+export { SubscriptionsSoldStackedBarChart } from './SubscriptionsSoldStackedBarChart';
+export { MonthlyOperationsLineChart } from './MonthlyOperationsLineChart';
+export { MonthlyPercentLineChart } from './MonthlyPercentLineChart';

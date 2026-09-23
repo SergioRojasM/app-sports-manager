@@ -6,6 +6,22 @@ export type AnaliticaDateRange = {
   preset: AnaliticaPreset;
 };
 
+export type AnaliticaRevenueBreakdown = {
+  /** Distinct subscriptions behind the payments. */
+  subscriptionCount: number;
+  /** Validated + pending payments. */
+  paymentCount: number;
+  totalRevenue: number;
+  recognizedRevenue: number;
+  pendingRevenue: number;
+};
+
+/** Per-training averages shared by the monthly, discipline and public/private breakdowns. */
+export type AnaliticaTrainingAverages = {
+  averageOccupancyPercent: number | null;
+  averageAttendancePercent: number | null;
+};
+
 export type AnaliticaRevenue = {
   recognizedRevenue: number;
   previousPeriodRevenue: number;
@@ -15,6 +31,10 @@ export type AnaliticaRevenue = {
   pendingPaymentAmount: number;
   /** Validated + pending in range (rejected excluded) = recognizedRevenue + pendingPaymentAmount. */
   totalRevenue: number;
+  /** totalRevenue ÷ calendar months overlapping the range. */
+  averageMonthlyRevenue: number;
+  /** Validated + pending from the 1st of dateTo's month to dateTo (not clipped to dateFrom). */
+  monthToDateRevenue: number;
   monthlyRevenue: Array<{
     monthStart: string;
     monthKey: string;
@@ -26,22 +46,17 @@ export type AnaliticaRevenue = {
     /** Validated + pending in the month, clipped to the range; sums to totalRevenue. */
     totalRevenue: number;
   }>;
-  revenueByPlan: Array<{
+  /** Breakdowns over validated + pending payments in range (rejected excluded). */
+  revenueByPlan: Array<AnaliticaRevenueBreakdown & {
     planName: string;
     planTypeName: string | null;
-    paymentCount: number;
-    recognizedRevenue: number;
   }>;
-  revenueByPaymentMethod: Array<{
+  revenueByPaymentMethod: Array<AnaliticaRevenueBreakdown & {
     paymentMethodName: string;
-    paymentCount: number;
-    recognizedRevenue: number;
   }>;
-  topAthletesByRevenue: Array<{
+  topAthletesByRevenue: Array<AnaliticaRevenueBreakdown & {
     athleteId: string;
     athleteName: string;
-    paymentCount: number;
-    recognizedRevenue: number;
   }>;
 };
 
@@ -53,27 +68,34 @@ export type AnaliticaOperations = {
   averageOccupancyPercent: number | null;
   /** Mean of per-session attendance (past sessions with bookings); null when none. */
   averageAttendancePercent: number | null;
-  monthlyBookingAverage: Array<{
+  monthlyBookingAverage: Array<AnaliticaTrainingAverages & {
     monthStart: string;
     monthKey: string;
     scheduledTrainingCount: number;
     validBookingCount: number;
     averageBookingsPerTraining: number;
   }>;
+  /** scheduledTrainingCount ÷ months in range. */
+  averageMonthlyTrainings: number;
+  /** validBookingCount ÷ months in range. */
+  averageMonthlyBookings: number;
   offeredCapacity: number;
   validBookingCount: number;
   cancelledBookingCount: number;
   occupancyPercent: number | null;
   trainingsWithoutCapacity: number;
-  bookingByDiscipline: Array<{
+  bookingByDiscipline: Array<AnaliticaTrainingAverages & {
     disciplineName: string;
+    trainingCount: number;
     validBookingCount: number;
     cancelledBookingCount: number;
     offeredCapacity: number;
     occupancyPercent: number | null;
   }>;
-  bookingByPublicStatus: Array<{
+  bookingByPublicStatus: Array<AnaliticaTrainingAverages & {
+    /** "Público" (published to the marketplace) or "Privado". */
     label: string;
+    trainingCount: number;
     validBookingCount: number;
     occupancyPercent: number | null;
   }>;
@@ -82,6 +104,13 @@ export type AnaliticaOperations = {
     athleteName: string;
     validBookingCount: number;
     cancellationCount: number;
+    attendanceCount: number;
+  }>;
+  /** Active athletes with the fewest valid bookings in range, including 0. */
+  bottomAthletesByBookings: Array<{
+    athleteId: string;
+    athleteName: string;
+    validBookingCount: number;
     attendanceCount: number;
   }>;
   upcomingCapacityAlerts: Array<{
@@ -96,9 +125,14 @@ export type AnaliticaOperations = {
   }>;
 };
 
+/** Athletes only (role `usuario`). */
 export type AnaliticaTeam = {
   membersByStatus: Record<string, number>;
   activeAthleteCount: number;
+  activeAthletesByPlan: Array<{
+    planName: string;
+    athleteCount: number;
+  }>;
   activeAthletesByPlanType: Array<{
     planTypeName: string;
     athleteCount: number;
@@ -108,7 +142,10 @@ export type AnaliticaTeam = {
     athleteId: string;
     athleteName: string;
     membershipStatus: string;
+    /** Bogotá session date of the latest non-cancelled booking. */
     latestBookingDate: string | null;
+    /** Bogotá sale date of the latest subscription, any state. */
+    latestSubscriptionDate: string | null;
   }>;
 };
 
@@ -119,6 +156,8 @@ export type AnaliticaSubscriptions = {
     monthStart: string;
     monthKey: string;
     subscriptionCount: number;
+    withValidatedPaymentCount: number;
+    withoutValidatedPaymentCount: number;
   }>;
   soldByPlan: Array<{
     planName: string;
