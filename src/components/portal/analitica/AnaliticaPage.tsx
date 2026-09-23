@@ -1,19 +1,58 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { ResponsiveBar } from '@nivo/bar';
-import { ResponsivePie } from '@nivo/pie';
 import { useAnalitica } from '@/hooks/portal/analitica/useAnalitica';
 import { GritButton, GritCard, GritEmptyState, GritPageHeader, GritSectionHeading } from '@/components/ui';
 import type { AnaliticaDashboard, AnaliticaDateRange } from '@/types/portal/analitica.types';
 import { AnaliticaDateRangeFilter, bogotaToday } from './AnaliticaDateRangeFilter';
 import { AnaliticaKpiCard } from './AnaliticaKpiCard';
 import { AnaliticaTabs, type AnaliticaTab } from './AnaliticaTabs';
-import { ANALITICA_CHART_COLORS, ANALITICA_LEGEND_TEXT_COLOR, analiticaChartTheme } from './chart-theme';
+import {
+  BookingAverageLineChart,
+  BookingsByDisciplinePieChart,
+  ChartEmpty,
+  MonthlyRevenueBarChart,
+  RevenueValidationPieChart,
+  SubscriptionsByPlanBarChart,
+  SubscriptionsSoldLineChart,
+} from './charts';
+import { currency, decimal1, integer, percent } from './format';
 
-const currency = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
-const integer = new Intl.NumberFormat('es-CO');
-const percent = (value: number | null) => value === null ? 'Sin capacidad' : `${value.toFixed(1)}%`;
+type SummaryKpi = {
+  label: string;
+  value: string;
+  detail?: string;
+  tone?: 'default' | 'warning' | 'success';
+  icon: string;
+  tab: AnaliticaTab;
+};
+
+/** The two Resumen KPI rows, in display order (4 + 4). */
+function buildSummaryKpis({ revenue, operations, team }: AnaliticaDashboard): SummaryKpi[] {
+  const pendingCount = revenue.pendingPaymentCount;
+  return [
+    { label: 'Ingresos totales', value: currency.format(revenue.totalRevenue), tone: 'success', icon: 'payments', tab: 'ingresos' },
+    {
+      label: 'Ingresos pendientes por validar',
+      value: currency.format(revenue.pendingPaymentAmount),
+      detail: `${integer.format(pendingCount)} ${pendingCount === 1 ? 'pago pendiente' : 'pagos pendientes'} por validar`,
+      tone: 'warning',
+      icon: 'pending',
+      tab: 'ingresos',
+    },
+    { label: 'Entrenamientos programados', value: integer.format(operations.scheduledTrainingCount), icon: 'event_available', tab: 'operacion' },
+    { label: 'Promedio de reservas / entrenamiento', value: decimal1(operations.averageBookingsPerTraining), icon: 'event_seat', tab: 'operacion' },
+    { label: 'Ocupación promedio / entrenamiento', value: percent(operations.averageOccupancyPercent), icon: 'donut_small', tab: 'operacion' },
+    {
+      label: 'Asistencia promedio / entrenamiento',
+      value: operations.averageAttendancePercent === null ? 'Sin datos' : percent(operations.averageAttendancePercent),
+      icon: 'how_to_reg',
+      tab: 'operacion',
+    },
+    { label: 'Atletas activos', value: integer.format(team.activeAthleteCount), icon: 'group', tab: 'equipo' },
+    { label: 'Atletas activos sin suscripción', value: integer.format(team.activeAthletesWithoutSubscriptionCount), tone: 'warning', icon: 'person_off', tab: 'equipo' },
+  ];
+}
 
 function initialRange(): AnaliticaDateRange {
   const dateTo = bogotaToday();
@@ -28,14 +67,7 @@ export function AnaliticaPage({ tenantId }: { tenantId: string }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { data, loading, refreshing, error, refresh } = useAnalitica({ tenantId, dateRange });
 
-  const summaryKpis = useMemo<Array<[string, string, AnaliticaTab, string]>>(() => data ? [
-    ['Ingresos validados', currency.format(data.revenue.recognizedRevenue), 'ingresos' as const, 'payments'],
-    ['Pagos pendientes', integer.format(data.revenue.pendingPaymentCount), 'ingresos' as const, 'pending'],
-    ['Entrenamientos programados', integer.format(data.operations.scheduledTrainingCount), 'operacion' as const, 'event_available'],
-    ['Ocupación', percent(data.operations.occupancyPercent), 'operacion' as const, 'donut_small'],
-    ['Atletas activos', integer.format(data.team.activeAthleteCount), 'equipo' as const, 'group'],
-    ['Activos sin suscripción', integer.format(data.team.activeAthletesWithoutSubscriptionCount), 'equipo' as const, 'person_off'],
-  ] : [], [data]);
+  const summaryKpis = useMemo(() => data ? buildSummaryKpis(data) : [], [data]);
 
   return (
     <section className="space-y-6">
@@ -72,16 +104,24 @@ export function AnaliticaPage({ tenantId }: { tenantId: string }) {
   );
 }
 
-function Resumen({ data, kpis, onNavigate }: { data: AnaliticaDashboard; kpis: Array<[string, string, AnaliticaTab, string]>; onNavigate: (tab: AnaliticaTab) => void }) {
+const CHART_ROW = 'grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]';
+
+function Resumen({ data, kpis, onNavigate }: { data: AnaliticaDashboard; kpis: SummaryKpi[]; onNavigate: (tab: AnaliticaTab) => void }) {
+  const kpiButton = (kpi: SummaryKpi) => <button key={kpi.label} type="button" onClick={() => onNavigate(kpi.tab)} className="rounded-grit-2xl text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"><AnaliticaKpiCard label={kpi.label} value={kpi.value} detail={kpi.detail} tone={kpi.tone} icon={kpi.icon} /></button>;
   return <div className="space-y-6">
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{kpis.map(([label, value, tab, icon]) => <button key={label} type="button" onClick={() => onNavigate(tab)} className="rounded-grit-2xl text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"><AnaliticaKpiCard label={label} value={value} icon={icon} /></button>)}</div>
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(300px,0.85fr)]">
-      <Panel title="Ingresos mensuales" subtitle="Pagos validados en el periodo"><RevenueChart data={data.revenue.monthlyRevenue} /></Panel>
-      <Panel title="Reservas por publicación" subtitle="Distribución de reservas válidas"><BookingStatusChart data={data.operations.bookingByPublicStatus} /></Panel>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">{kpis.slice(0, 4).map(kpiButton)}</div>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">{kpis.slice(4).map(kpiButton)}</div>
+    <div className={CHART_ROW}>
+      <Panel title="Ingresos mensuales" subtitle="Pagos validados y pendientes por mes"><MonthlyRevenueBarChart data={data.revenue.monthlyRevenue} /></Panel>
+      <Panel title="Ingresos por estado de validación" subtitle="Validados frente a pendientes"><RevenueValidationPieChart validated={data.revenue.recognizedRevenue} pending={data.revenue.pendingPaymentAmount} /></Panel>
     </div>
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
-      <Panel title="Estado actual del equipo" subtitle="Miembros por estado"><MemberStatusChart data={data.team.membersByStatus} /></Panel>
-      <Panel title="Alertas de capacidad" subtitle="Próximas sesiones por encima de 80%"><Alerts rows={data.operations.upcomingCapacityAlerts} /></Panel>
+    <div className={CHART_ROW}>
+      <Panel title="Suscripciones vendidas por mes" subtitle="Suscripciones creadas, sin canceladas"><SubscriptionsSoldLineChart data={data.subscriptions.monthlySold} /></Panel>
+      <Panel title="Suscripciones vendidas por plan" subtitle="Total del periodo"><SubscriptionsByPlanBarChart data={data.subscriptions.soldByPlan} /></Panel>
+    </div>
+    <div className={CHART_ROW}>
+      <Panel title="Promedio de reservas por entrenamiento" subtitle="Reservas válidas por sesión, por mes"><BookingAverageLineChart data={data.operations.monthlyBookingAverage} /></Panel>
+      <Panel title="Reservas por disciplina" subtitle="Participación de reservas válidas"><BookingsByDisciplinePieChart data={data.operations.bookingByDiscipline} /></Panel>
     </div>
   </div>;
 }
@@ -131,12 +171,6 @@ function RevenueTable({ rows, labelKey }: { rows: Array<Record<string, unknown>>
 function OperationsTable({ rows }: { rows: string[][] }) { return rows.length ? <table className="w-full text-left font-grit-body text-xs"><tbody>{rows.map((row) => <tr key={row.join('-')} className="border-t border-white/[.07] text-grit-text"><td className="py-2">{row[0]}</td><td className="py-2 text-right">{row[1]}</td><td className="py-2 text-right text-grit-subtext">{row[2]}</td></tr>)}</tbody></table> : <Empty />; }
 function Ranking({ rows }: { rows: string[][] }) { return rows.length ? <ol className="space-y-2">{rows.map((row, index) => <li key={`${row[0]}-${index}`} className="grid grid-cols-[24px_1fr_auto_auto] gap-2 font-grit-body text-xs"><span className="font-semibold text-grit-cyan">{index + 1}</span><span className="text-grit-text">{row[0]}</span><span className="text-grit-subtext">{row[1]}</span><span className="text-grit-muted">{row[2]}</span></li>)}</ol> : <Empty />; }
 function Alerts({ rows }: { rows: AnaliticaDashboard['operations']['upcomingCapacityAlerts'] }) { return rows.length ? <div className="space-y-2">{rows.map((row) => <div key={row.trainingId} className="flex items-center justify-between gap-3 border-t border-white/[.07] py-2 font-grit-body text-xs"><div><p className="text-grit-text">{row.disciplineName ?? 'Entrenamiento'}</p><p className="text-grit-muted">{row.scenarioName ?? 'Sin escenario'} · {new Date(row.sessionAt).toLocaleDateString('es-CO', { timeZone: 'America/Bogota' })}</p></div><span className="font-semibold text-grit-discipline-run">{percent(row.occupancyPercent)}</span></div>)}</div> : <Empty />; }
-function Empty() { return <p className="font-grit-body text-sm text-grit-muted">No hay datos para el periodo seleccionado.</p>; }
-
-function RevenueChart({ data }: { data: AnaliticaDashboard['revenue']['monthlyRevenue'] }) { const chartData = data.map((row) => ({ month: new Intl.DateTimeFormat('es-CO', { month: 'short' }).format(new Date(`${row.monthStart}T12:00:00Z`)), ingresos: row.recognizedRevenue })); return chartData.length ? <div className="h-72"><ResponsiveBar data={chartData} keys={['ingresos']} indexBy="month" margin={{ top: 12, right: 12, bottom: 42, left: 68 }} padding={0.35} colors={[ANALITICA_CHART_COLORS[0]]} borderRadius={3} enableLabel={false} theme={analiticaChartTheme} axisBottom={{ tickSize: 0, tickPadding: 10 }} axisLeft={{ tickSize: 0, tickPadding: 8, format: (value) => `${Number(value) / 1000}k` }} tooltip={({ value, indexValue }) => <div className="px-2 py-1 font-grit-body text-xs"><strong>{String(indexValue)}</strong><br />{currency.format(Number(value))}</div>} /></div> : <Empty />; }
-
-function BookingStatusChart({ data }: { data: AnaliticaDashboard['operations']['bookingByPublicStatus'] }) { const chartData = data.filter((item) => item.validBookingCount > 0).map((item) => ({ id: item.label, label: item.label, value: item.validBookingCount })); return chartData.length ? <div className="h-72"><ResponsivePie data={chartData} margin={{ top: 18, right: 18, bottom: 52, left: 18 }} innerRadius={0.65} padAngle={2} cornerRadius={4} activeOuterRadiusOffset={6} colors={ANALITICA_CHART_COLORS} theme={analiticaChartTheme} arcLabelsSkipAngle={10} arcLinkLabelsSkipAngle={10} legends={[{ anchor: 'bottom', direction: 'row', justify: false, translateY: 42, itemsSpacing: 8, itemWidth: 145, itemHeight: 18, itemTextColor: ANALITICA_LEGEND_TEXT_COLOR, symbolSize: 10, symbolShape: 'circle' }]} tooltip={({ datum }) => <div className="px-2 py-1 font-grit-body text-xs"><strong>{datum.label}</strong><br />{integer.format(Number(datum.value))} reservas</div>} /></div> : <Empty />; }
-
-function MemberStatusChart({ data }: { data: AnaliticaDashboard['team']['membersByStatus'] }) { const labels: Record<string, string> = { activo: 'Activo', mora: 'En mora', suspendido: 'Suspendido', inactivo: 'Inactivo', pendiente_activacion: 'Pendiente' }; const chartData = Object.entries(data).filter(([, value]) => value > 0).map(([id, value]) => ({ id, label: labels[id] ?? id, value })); return chartData.length ? <div className="h-72"><ResponsivePie data={chartData} margin={{ top: 18, right: 18, bottom: 52, left: 18 }} innerRadius={0.62} padAngle={2} cornerRadius={4} colors={ANALITICA_CHART_COLORS} theme={analiticaChartTheme} arcLabelsSkipAngle={10} arcLinkLabelsSkipAngle={10} legends={[{ anchor: 'bottom', direction: 'row', justify: false, translateY: 42, itemsSpacing: 8, itemWidth: 100, itemHeight: 18, itemTextColor: ANALITICA_LEGEND_TEXT_COLOR, symbolSize: 10, symbolShape: 'circle' }]} tooltip={({ datum }) => <div className="px-2 py-1 font-grit-body text-xs"><strong>{datum.label}</strong><br />{integer.format(Number(datum.value))} miembros</div>} /></div> : <Empty />; }
+const Empty = ChartEmpty;
 
 function formatRange({ dateFrom, dateTo }: AnaliticaDateRange) { const formatter = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'America/Bogota' }); return `${formatter.format(new Date(`${dateFrom}T12:00:00Z`))} - ${formatter.format(new Date(`${dateTo}T12:00:00Z`))}`; }

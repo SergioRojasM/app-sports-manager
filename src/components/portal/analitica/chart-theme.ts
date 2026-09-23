@@ -32,6 +32,8 @@ export const analiticaChartTheme = {
   },
   grid: { line: { stroke: LINE } },
   legends: { text: { fill: TEXT } },
+  labels: { text: { fill: TEXT, fontSize: 11, fontWeight: 600 } },
+  crosshair: { line: { stroke: MUTED, strokeWidth: 1, strokeOpacity: 0.6 } },
   tooltip: {
     container: {
       background: '#0B1826', // grit-card, opaque so tooltips stay legible over charts
@@ -45,3 +47,6 @@ export const analiticaChartTheme = {
 
 /** Legend item colour, kept next to the theme so charts never inline it. */
 export const ANALITICA_LEGEND_TEXT_COLOR = TEXT;
+
+/** Dark text for labels drawn on top of a bright slice or bar. */
+export const ANALITICA_ON_ACCENT_TEXT_COLOR = '#07111F'; // grit-bg-navy

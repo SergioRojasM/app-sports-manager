@@ -13,11 +13,18 @@ export type AnaliticaRevenue = {
   yearToDateRevenue: number;
   pendingPaymentCount: number;
   pendingPaymentAmount: number;
+  /** Validated + pending in range (rejected excluded) = recognizedRevenue + pendingPaymentAmount. */
+  totalRevenue: number;
   monthlyRevenue: Array<{
     monthStart: string;
     monthKey: string;
+    /** Whole calendar month (not clipped to the range), as in phase one. */
     recognizedRevenue: number;
     cumulativeRevenue: number;
+    /** Pending amount in the month, clipped to the range. */
+    pendingRevenue: number;
+    /** Validated + pending in the month, clipped to the range; sums to totalRevenue. */
+    totalRevenue: number;
   }>;
   revenueByPlan: Array<{
     planName: string;
@@ -40,6 +47,19 @@ export type AnaliticaRevenue = {
 
 export type AnaliticaOperations = {
   scheduledTrainingCount: number;
+  /** Valid bookings on non-cancelled sessions ÷ non-cancelled sessions. */
+  averageBookingsPerTraining: number;
+  /** Mean of per-session occupancy (sessions with capacity); null when none. */
+  averageOccupancyPercent: number | null;
+  /** Mean of per-session attendance (past sessions with bookings); null when none. */
+  averageAttendancePercent: number | null;
+  monthlyBookingAverage: Array<{
+    monthStart: string;
+    monthKey: string;
+    scheduledTrainingCount: number;
+    validBookingCount: number;
+    averageBookingsPerTraining: number;
+  }>;
   offeredCapacity: number;
   validBookingCount: number;
   cancelledBookingCount: number;
@@ -92,10 +112,25 @@ export type AnaliticaTeam = {
   }>;
 };
 
+/** Subscriptions created in range, excluding cancelled ones, any payment state. */
+export type AnaliticaSubscriptions = {
+  soldCount: number;
+  monthlySold: Array<{
+    monthStart: string;
+    monthKey: string;
+    subscriptionCount: number;
+  }>;
+  soldByPlan: Array<{
+    planName: string;
+    subscriptionCount: number;
+  }>;
+};
+
 export type AnaliticaDashboard = {
   revenue: AnaliticaRevenue;
   operations: AnaliticaOperations;
   team: AnaliticaTeam;
+  subscriptions: AnaliticaSubscriptions;
 };
 
 export class AnaliticaServiceError extends Error {
