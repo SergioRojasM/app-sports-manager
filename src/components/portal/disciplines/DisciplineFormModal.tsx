@@ -51,7 +51,7 @@ export function DisciplineFormModal({
       <button
         type="button"
         aria-label="Cerrar formulario de disciplina"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -60,14 +60,14 @@ export function DisciplineFormModal({
         role="dialog"
         aria-modal="true"
         aria-label={mode === 'create' ? 'Crear disciplina' : 'Editar disciplina'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
               {mode === 'create' ? 'Create discipline' : 'Edit discipline'}
             </h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-grit-subtext">
               Configure discipline data for this organization.
             </p>
           </div>
@@ -75,7 +75,7 @@ export function DisciplineFormModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -85,7 +85,7 @@ export function DisciplineFormModal({
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="discipline-nombre">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="discipline-nombre">
               Name
             </label>
             <input
@@ -96,21 +96,21 @@ export function DisciplineFormModal({
               disabled={isSubmitting}
               placeholder="Basketball"
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.nombre
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {fieldErrors.nombre ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.nombre}
               </p>
             ) : null}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor="discipline-descripcion">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="discipline-descripcion">
               Description
             </label>
             <textarea
@@ -121,14 +121,14 @@ export function DisciplineFormModal({
               disabled={isSubmitting}
               placeholder="Optional discipline description"
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldErrors.descripcion
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {fieldErrors.descripcion ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.descripcion}
               </p>
             ) : null}
@@ -141,26 +141,26 @@ export function DisciplineFormModal({
               checked={values.activo}
               onChange={(event) => onChangeField('activo', event.target.checked)}
               disabled={isSubmitting}
-              className="rounded border-slate-600 bg-navy-deep"
+              className="rounded border-grit-glass-border bg-grit-bg"
             />
-            <label htmlFor="discipline-active" className="text-sm text-slate-200">
+            <label htmlFor="discipline-active" className="text-sm text-grit-text">
               Discipline active
             </label>
           </div>
 
           {submitError ? (
-            <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+            <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
               {submitError}
             </div>
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cancel
           </button>
@@ -168,7 +168,7 @@ export function DisciplineFormModal({
             type="button"
             onClick={() => void onSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg"
           >
             {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create discipline' : 'Save changes'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">

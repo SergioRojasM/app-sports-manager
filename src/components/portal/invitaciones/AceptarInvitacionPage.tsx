@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAceptarInvitacion } from '@/hooks/portal/invitaciones/useAceptarInvitacion';
 import { INVITACIONES_ERROR_MESSAGES } from '@/lib/portal/invitaciones-errors';
 import type { InvitacionesErrorCode, InvitacionEstado } from '@/types/portal/invitaciones.types';
+import { GritPageHeader } from '@/components/ui';
 
 const ROL_DISPLAY_LABELS: Record<string, string> = {
   usuario: 'Atleta',
@@ -26,12 +27,12 @@ type StatusCardProps = {
 
 function StatusCard({ icon, iconClass, title, message, children }: StatusCardProps) {
   return (
-    <div className="glass mx-auto w-full max-w-lg rounded-2xl border border-portal-border p-8 text-center">
+    <div className="border bg-grit-glass backdrop-blur-md mx-auto w-full max-w-lg rounded-grit-2xl border-grit-glass-border p-8 text-center">
       <span className={`material-symbols-outlined text-5xl ${iconClass}`} aria-hidden="true">
         {icon}
       </span>
-      <h2 className="mt-3 text-xl font-semibold text-slate-100">{title}</h2>
-      <p className="mt-2 text-sm text-slate-400">{message}</p>
+      <h2 className="font-grit-title mt-3 text-xl font-semibold text-grit-text">{title}</h2>
+      <p className="mt-2 text-sm text-grit-subtext">{message}</p>
       {children ? <div className="mt-6 flex flex-col items-center gap-3">{children}</div> : null}
     </div>
   );
@@ -40,7 +41,7 @@ function StatusCard({ icon, iconClass, title, message, children }: StatusCardPro
 const volverLink = (
   <Link
     href="/portal/orgs"
-    className="rounded-lg border border-portal-border px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
+    className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-semibold text-grit-subtext transition hover:bg-white/5"
   >
     Ir a organizaciones
   </Link>
@@ -48,9 +49,9 @@ const volverLink = (
 
 const TERMINAL_STATES: Partial<Record<InvitacionEstado, { icon: string; iconClass: string; title: string; code: InvitacionesErrorCode }>> = {
   expirada: { icon: 'schedule', iconClass: 'text-orange-300', title: 'Invitación expirada', code: 'expired' },
-  cancelada: { icon: 'block', iconClass: 'text-slate-400', title: 'Invitación cancelada', code: 'cancelled' },
+  cancelada: { icon: 'block', iconClass: 'text-grit-subtext', title: 'Invitación cancelada', code: 'cancelled' },
   aceptada: { icon: 'check_circle', iconClass: 'text-emerald-300', title: 'Invitación aceptada', code: 'already_accepted' },
-  fallida: { icon: 'error', iconClass: 'text-rose-300', title: 'Invitación no disponible', code: 'unexpected' },
+  fallida: { icon: 'error', iconClass: 'text-grit-danger', title: 'Invitación no disponible', code: 'unexpected' },
 };
 
 export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPageProps) {
@@ -70,7 +71,7 @@ export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPagePro
 
   if (loading) {
     content = (
-      <div className="glass mx-auto w-full max-w-lg rounded-2xl border border-portal-border p-8 text-center text-sm text-slate-300">
+      <div className="border bg-grit-glass backdrop-blur-md mx-auto w-full max-w-lg rounded-grit-2xl border-grit-glass-border p-8 text-center text-sm text-grit-subtext">
         Cargando invitación...
       </div>
     );
@@ -78,7 +79,7 @@ export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPagePro
     content = (
       <StatusCard
         icon="mail_lock"
-        iconClass="text-slate-400"
+        iconClass="text-grit-subtext"
         title="Invitación no encontrada"
         message="Esta invitación no existe o fue enviada a otro correo electrónico. Verifica que iniciaste sesión con el correo que recibió la invitación."
       >
@@ -89,14 +90,14 @@ export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPagePro
     content = (
       <StatusCard
         icon="error"
-        iconClass="text-rose-300"
+        iconClass="text-grit-danger"
         title="No pudimos cargar la invitación"
         message={INVITACIONES_ERROR_MESSAGES[loadErrorCode ?? 'unexpected']}
       >
         <button
           type="button"
           onClick={() => void reload()}
-          className="rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90"
+          className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-bold text-grit-bg transition hover:bg-grit-cyan/90"
         >
           Reintentar
         </button>
@@ -114,7 +115,7 @@ export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPagePro
         {invitacion.estado === 'aceptada' ? (
           <Link
             href={`/portal/orgs/${invitacion.tenant_id}`}
-            className="rounded-lg bg-turquoise px-4 py-2 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90"
+            className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-bold text-grit-bg transition hover:bg-grit-cyan/90"
           >
             Ir a {invitacion.tenant_nombre}
           </Link>
@@ -130,15 +131,15 @@ export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPagePro
     content = (
       <StatusCard
         icon="group_add"
-        iconClass="text-turquoise"
+        iconClass="text-grit-cyan"
         title={`Te invitaron a ${invitacion.tenant_nombre}`}
         message={`Al aceptar te unirás a la organización con el rol de ${rolLabel}.`}
       >
-        <p className="text-xs text-slate-500">Esta invitación vence el {expira}.</p>
+        <p className="text-xs text-grit-muted">Esta invitación vence el {expira}.</p>
 
         {acceptError ? (
-          <div className="w-full rounded-lg border border-rose-400/25 bg-rose-900/20 p-3" role="alert">
-            <p className="text-xs text-rose-200">{acceptError.message}</p>
+          <div className="w-full rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 p-3" role="alert">
+            <p className="text-xs text-grit-danger">{acceptError.message}</p>
           </div>
         ) : null}
 
@@ -146,7 +147,7 @@ export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPagePro
           type="button"
           onClick={() => void handleAceptar()}
           disabled={isAccepting}
-          className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-5 py-2.5 text-sm font-bold text-navy-deep transition hover:bg-turquoise/90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-5 py-2.5 text-sm font-bold text-grit-bg transition hover:bg-grit-cyan/90 disabled:opacity-50"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">check</span>
           {isAccepting ? 'Aceptando…' : 'Aceptar invitación'}
@@ -158,10 +159,7 @@ export function AceptarInvitacionPage({ invitacionId }: AceptarInvitacionPagePro
 
   return (
     <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Invitación</h1>
-        <p className="mt-2 text-sm text-slate-400">Revisa la invitación de la organización antes de unirte.</p>
-      </header>
+      <GritPageHeader title="Invitación" subtitle="Revisa la invitación de la organización antes de unirte." />
       {content}
     </section>
   );

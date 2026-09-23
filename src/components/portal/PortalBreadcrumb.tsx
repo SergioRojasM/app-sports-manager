@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
+import { GritIcon } from '@/components/ui';
 import { useTenantName } from '@/hooks/portal/tenant/useTenantName';
 import { useFormularioPlantillaName } from '@/hooks/portal/formularios/useFormularioPlantillaName';
 
@@ -21,6 +22,18 @@ const SLUG_LABELS: Record<string, string> = {
   'entrenamientos-disponibles': 'Entrenamientos Disponibles',
   atletas: 'Atletas',
   perfil: 'Perfil',
+  'entrenamientos-publicos': 'Entrenamientos públicos',
+  analitica: 'Analítica',
+  'mis-reservas': 'Mis reservas',
+  'mis-suscripciones': 'Mis suscripciones',
+  'mis-suscripciones-y-pagos': 'Suscripciones y pagos',
+  'landing-org': 'Organización',
+  invitaciones: 'Invitaciones',
+  'gestion-reservas': 'Reservas',
+  'gestion-equipo': 'Equipo',
+  'gestion-suscripciones': 'Suscripciones',
+  'activar-cuenta': 'Activar cuenta',
+  inicio: 'Inicio',
 };
 
 type BreadcrumbSegment = {
@@ -77,30 +90,33 @@ export function PortalBreadcrumb() {
   // Only render when there is more than the root "Inicio"
   if (segments.length <= 1) return null;
 
+  // Standalone row under the header (design `AOIa5`), aligned with GritPageContainer
+  // and visible on mobile, where it wraps instead of hiding (US-0116)
   return (
-    <nav
-      aria-label="Ruta actual"
-      className="flex items-center gap-1 text-xs text-slate-500"
-    >
-      {segments.map((seg, i) => (
-        <span key={seg.href} className="flex items-center gap-1">
-          {i > 0 && (
-            <span aria-hidden="true" className="select-none text-slate-600">
-              ›
-            </span>
-          )}
-          {seg.isLast ? (
-            <span className="font-medium text-slate-300">{seg.label}</span>
-          ) : (
-            <Link
-              href={seg.href}
-              className="transition-colors hover:text-slate-300"
-            >
-              {seg.label}
-            </Link>
-          )}
-        </span>
-      ))}
-    </nav>
+    <div className="mx-auto w-full max-w-[1440px] px-4 pt-4 sm:px-6 lg:px-12">
+      <nav aria-label="Ruta de navegación">
+        <ol className="flex flex-wrap items-center gap-2 font-grit-body text-[13px] font-medium text-grit-subtext">
+          {segments.map((seg, i) => (
+            <li key={seg.href} className="flex min-w-0 items-center gap-2">
+              {i > 0 && (
+                <span aria-hidden="true" className="select-none">
+                  ›
+                </span>
+              )}
+              {i === 0 && <GritIcon name="home" size={13} />}
+              {seg.isLast ? (
+                <span className="max-w-[60vw] truncate font-bold text-grit-text" aria-current="page">
+                  {seg.label}
+                </span>
+              ) : (
+                <Link href={seg.href} className="transition-colors hover:text-grit-cyan">
+                  {seg.label}
+                </Link>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </div>
   );
 }

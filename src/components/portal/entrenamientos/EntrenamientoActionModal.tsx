@@ -48,32 +48,32 @@ export function EntrenamientoActionModal({
         type="button"
         aria-label="Cerrar modal de acciones"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
       />
 
-      <div className="relative z-10 w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-5 shadow-xl">
-        <h3 className="text-lg font-semibold text-slate-100">{canManage ? '¿Qué deseas hacer?' : 'Acciones disponibles'}</h3>
-        <p className="mt-1 text-sm text-slate-400">{canManage ? 'Selecciona una acción para el entrenamiento.' : 'Puedes consultar las reservas de este entrenamiento.'}</p>
-        <p className="mt-2 text-sm font-semibold text-slate-200">{trainingName}</p>
+      <div className="relative z-10 w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-card p-5 shadow-xl">
+        <h3 className="font-grit-title text-lg font-semibold text-grit-text">{canManage ? '¿Qué deseas hacer?' : 'Acciones disponibles'}</h3>
+        <p className="mt-1 text-sm text-grit-subtext">{canManage ? 'Selecciona una acción para el entrenamiento.' : 'Puedes consultar las reservas de este entrenamiento.'}</p>
+        <p className="mt-2 text-sm font-semibold text-grit-text">{trainingName}</p>
 
         <div className="mt-5 space-y-2">
           <button
             type="button"
             onClick={onViewDetail}
-            className="w-full rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-3 text-left transition hover:border-turquoise/70"
+            className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-3 text-left transition hover:border-grit-cyan/70"
           >
-            <p className="text-sm font-semibold text-slate-100">Ver detalle</p>
-            <p className="mt-0.5 text-xs text-slate-400">Consulta la información completa de este entrenamiento.</p>
+            <p className="text-sm font-semibold text-grit-text">Ver detalle</p>
+            <p className="mt-0.5 text-xs text-grit-subtext">Consulta la información completa de este entrenamiento.</p>
           </button>
 
           {onViewReservas && (
             <button
               type="button"
               onClick={onViewReservas}
-              className="w-full rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-3 text-left transition hover:border-turquoise/70"
+              className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-3 text-left transition hover:border-grit-cyan/70"
             >
-              <p className="text-sm font-semibold text-slate-100">Ver reservas</p>
-              <p className="mt-0.5 text-xs text-slate-400">Consulta las reservas de este entrenamiento.</p>
+              <p className="text-sm font-semibold text-grit-text">Ver reservas</p>
+              <p className="mt-0.5 text-xs text-grit-subtext">Consulta las reservas de este entrenamiento.</p>
             </button>
           )}
 
@@ -82,14 +82,14 @@ export function EntrenamientoActionModal({
               type="button"
               onClick={onEdit}
               disabled={!canEdit}
-              className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
                 canEdit
-                  ? 'border-portal-border bg-navy-deep/70 hover:border-turquoise/70'
-                  : 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 opacity-70'
+                  ? 'border-grit-glass-border bg-grit-bg/70 hover:border-grit-cyan/70'
+                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
               }`}
             >
-              <p className="text-sm font-semibold text-slate-100">Editar</p>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="text-sm font-semibold text-grit-text">Editar</p>
+              <p className="mt-0.5 text-xs text-grit-subtext">
                 {canEdit ? 'Permite ajustar datos del entrenamiento único.' : (editDisabledReason ?? 'Acción no disponible.')}
               </p>
             </button>
@@ -100,14 +100,14 @@ export function EntrenamientoActionModal({
               type="button"
               onClick={onDelete}
               disabled={!canDelete}
-              className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
                 canDelete
-                  ? 'border-rose-400/40 bg-rose-500/10 hover:border-rose-300/70'
-                  : 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 opacity-70'
+                  ? 'border-grit-danger/40 bg-rose-500/10 hover:border-grit-danger/70'
+                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
               }`}
             >
-              <p className={`text-sm font-semibold ${canDelete ? 'text-rose-200' : 'text-slate-200'}`}>Eliminar</p>
-              <p className={`mt-0.5 text-xs ${canDelete ? 'text-rose-200/80' : 'text-slate-400'}`}>
+              <p className={`text-sm font-semibold ${canDelete ? 'text-grit-danger' : 'text-grit-text'}`}>Eliminar</p>
+              <p className={`mt-0.5 text-xs ${canDelete ? 'text-grit-danger/80' : 'text-grit-subtext'}`}>
                 {canDelete ? 'Permite eliminar según las reglas de alcance.' : (deleteDisabledReason ?? 'Acción no disponible.')}
               </p>
             </button>
@@ -118,16 +118,16 @@ export function EntrenamientoActionModal({
               type="button"
               onClick={onPublicar}
               disabled={!canPublish}
-              className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
                 canPublish
-                  ? 'border-turquoise/40 bg-turquoise/10 hover:border-turquoise/70'
-                  : 'cursor-not-allowed border-portal-border/60 bg-navy-deep/40 opacity-70'
+                  ? 'border-grit-cyan/40 bg-grit-cyan/10 hover:border-grit-cyan/70'
+                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
               }`}
             >
-              <p className={`text-sm font-semibold ${canPublish ? 'text-turquoise' : 'text-slate-200'}`}>
+              <p className={`text-sm font-semibold ${canPublish ? 'text-grit-cyan' : 'text-grit-text'}`}>
                 {isPublished ? 'Gestionar publicación' : 'Publicar'}
               </p>
-              <p className={`mt-0.5 text-xs ${canPublish ? 'text-turquoise/80' : 'text-slate-400'}`}>
+              <p className={`mt-0.5 text-xs ${canPublish ? 'text-grit-cyan/80' : 'text-grit-subtext'}`}>
                 {canPublish
                   ? isPublished
                     ? 'Edita o despublica el entrenamiento del marketplace público.'
@@ -142,7 +142,7 @@ export function EntrenamientoActionModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cancelar
           </button>

@@ -129,23 +129,23 @@ export function EntrenamientosCalendar({
   const visibleLegend = disciplineIds.map((disciplineId) => ({
     disciplineId,
     name: disciplineNameById[disciplineId] ?? `Disciplina ${disciplineId.slice(0, 8)}`,
-    colorClass: colorByDisciplineId[disciplineId] ?? 'bg-slate-400',
+    colorClass: colorByDisciplineId[disciplineId] ?? 'bg-grit-subtext/20',
   }));
 
   return (
-    <section className="glass rounded-xl border border-portal-border p-4">
+    <section className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-4">
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-semibold text-slate-100">Calendario</h2>
-          <p className="text-xs text-slate-400">{monthLabel}</p>
+          <h2 className="font-grit-title text-base font-semibold text-grit-text">Calendario</h2>
+          <p className="text-xs text-grit-subtext">{monthLabel}</p>
         </div>
 
         {visibleLegend.length > 0 ? (
           <div className="max-w-[60%]">
-            <p className="mb-2 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-400">Leyenda por disciplina</p>
+            <p className="mb-2 text-right text-[11px] font-semibold uppercase tracking-wide text-grit-subtext">Leyenda por disciplina</p>
             <div className="flex flex-wrap justify-end gap-x-3 gap-y-1.5">
               {visibleLegend.map((legend) => (
-                <div key={legend.disciplineId} className="inline-flex items-center gap-2 text-xs text-slate-300">
+                <div key={legend.disciplineId} className="inline-flex items-center gap-2 text-xs text-grit-subtext">
                   <span className={`h-2.5 w-2.5 rounded-full ${legend.colorClass} ring-1 ring-white/20`} />
                   <span>{legend.name}</span>
                 </div>
@@ -155,24 +155,24 @@ export function EntrenamientosCalendar({
         ) : null}
       </header>
 
-      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-lg border border-portal-border bg-navy-deep/40 px-3 py-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Visibilidad</p>
-        <div className="inline-flex items-center gap-2 text-xs text-slate-300">
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-grit-md border border-grit-glass-border bg-grit-bg/40 px-3 py-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-grit-subtext">Visibilidad</p>
+        <div className="inline-flex items-center gap-2 text-xs text-grit-subtext">
           <span
-            className="h-3 w-3 bg-slate-300"
+            className="h-3 w-3 bg-grit-subtext/20"
             style={{ clipPath: STAR_CLIP_PATH }}
           />
           <span>Público – visible para todos</span>
         </div>
-        <div className="inline-flex items-center gap-2 text-xs text-slate-300">
-          <span className="h-2.5 w-2.5 rounded-full bg-slate-300 ring-1 ring-white/20" />
+        <div className="inline-flex items-center gap-2 text-xs text-grit-subtext">
+          <span className="h-2.5 w-2.5 rounded-full bg-grit-subtext/20 ring-1 ring-white/20" />
           <span>Privado – solo tu organización</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 border-b border-portal-border pb-2">
+      <div className="grid grid-cols-7 gap-2 border-b border-grit-glass-border pb-2">
         {WEEKDAY_HEADERS.map((label) => (
-          <p key={label} className="text-center text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          <p key={label} className="text-center text-[11px] font-semibold uppercase tracking-wider text-grit-subtext">
             {label}
           </p>
         ))}
@@ -192,22 +192,22 @@ export function EntrenamientosCalendar({
                 }
                 onSelectDate(cell.dateKey);
               }}
-              className={`min-h-[78px] rounded-lg border p-2 ${
+              className={`min-h-[78px] rounded-grit-md border p-2 ${
                 cell.dateKey
                   ? isSelected
-                    ? 'cursor-pointer border-turquoise/80 bg-navy-deep/70 ring-1 ring-turquoise/40 transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-navy-deep/80'
-                    : 'cursor-pointer border-portal-border bg-navy-deep/50 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-turquoise/40 hover:bg-navy-deep/65 hover:shadow-[0_6px_18px_rgba(15,23,42,0.35)]'
+                    ? 'cursor-pointer border-grit-cyan/80 bg-grit-bg/70 ring-1 ring-grit-cyan/40 transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-grit-bg/80'
+                    : 'cursor-pointer border-grit-glass-border bg-grit-bg/50 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-grit-cyan/40 hover:bg-grit-bg/65 hover:shadow-[0_6px_18px_rgba(15,23,42,0.35)]'
                   : 'border-transparent bg-transparent'
               }`}
             >
               {cell.dayNumber ? (
                 <>
-                  <p className="mb-2 text-xs font-semibold text-slate-300">{cell.dayNumber}</p>
+                  <p className="mb-2 text-xs font-semibold text-grit-subtext">{cell.dayNumber}</p>
 
                   {dayItems.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
                       {dayItems.map((item) => {
-                        const disciplineColor = colorByDisciplineId[item.instance.disciplina_id] ?? 'bg-slate-400';
+                        const disciplineColor = colorByDisciplineId[item.instance.disciplina_id] ?? 'bg-grit-subtext/20';
                         const isPublic = item.instance.visibilidad === 'publico';
                         const timeLabel = item.instance.fecha_hora
                           ? toTimeLabelInBogota(item.instance.fecha_hora)
@@ -228,7 +228,7 @@ export function EntrenamientosCalendar({
                       })}
 
                       {dayItems.length > 8 ? (
-                        <p className="text-[10px] text-slate-400">{dayItems.length}</p>
+                        <p className="text-[10px] text-grit-subtext">{dayItems.length}</p>
                       ) : null}
                     </div>
                   ) : null}
@@ -240,21 +240,21 @@ export function EntrenamientosCalendar({
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-400">No hay entrenamientos programados para este mes.</p>
+        <p className="mt-4 text-sm text-grit-subtext">No hay entrenamientos programados para este mes.</p>
       ) : null}
 
-      <footer className="mt-4 flex items-center justify-end gap-2 border-t border-portal-border pt-3">
+      <footer className="mt-4 flex items-center justify-end gap-2 border-t border-grit-glass-border pt-3">
         <button
           type="button"
           onClick={onPreviousMonth}
-          className="rounded-lg border border-portal-border bg-navy-deep/80 px-3 py-2 text-xs font-semibold text-slate-200"
+          className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 px-3 py-2 text-xs font-semibold text-grit-text"
         >
           Mes anterior
         </button>
         <button
           type="button"
           onClick={onNextMonth}
-          className="rounded-lg border border-portal-border bg-navy-deep/80 px-3 py-2 text-xs font-semibold text-slate-200"
+          className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 px-3 py-2 text-xs font-semibold text-grit-text"
         >
           Mes siguiente
         </button>

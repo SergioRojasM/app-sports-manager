@@ -47,28 +47,28 @@ type InputFieldProps = {
 function FormField({ id, label, icon, error, children }: InputFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-xs font-medium uppercase tracking-wide text-slate-400">
+      <label htmlFor={id} className="text-xs font-medium uppercase tracking-wide text-grit-subtext">
         {label}
       </label>
       <div className="relative">
-        <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-500">
+        <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-grit-muted">
           {icon}
         </span>
         {children}
       </div>
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-grit-danger">{error}</p>}
     </div>
   );
 }
 
 const inputClass =
-  'w-full rounded-xl border border-portal-border bg-white/5 py-2.5 pl-10 pr-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-teal-500 focus:ring-1 focus:ring-teal-500';
+  'w-full rounded-grit-lg border border-grit-glass-border bg-white/5 py-2.5 pl-10 pr-3 text-sm text-grit-text placeholder:text-grit-muted outline-none transition focus:border-teal-500 focus:ring-1 focus:ring-teal-500';
 
 const readonlyClass =
-  'w-full rounded-xl border border-portal-border bg-white/[0.02] py-2.5 pl-10 pr-3 text-sm text-slate-400 outline-none cursor-not-allowed';
+  'w-full rounded-grit-lg border border-grit-glass-border bg-white/[0.02] py-2.5 pl-10 pr-3 text-sm text-grit-subtext outline-none cursor-not-allowed';
 
 const selectClass =
-  'w-full rounded-xl border border-portal-border bg-[#1e293b] py-2.5 pl-10 pr-3 text-sm text-slate-100 outline-none transition focus:border-teal-500 focus:ring-1 focus:ring-teal-500';
+  'w-full rounded-grit-lg border border-grit-glass-border bg-grit-card py-2.5 pl-10 pr-3 text-sm text-grit-text outline-none transition focus:border-teal-500 focus:ring-1 focus:ring-teal-500';
 
 export function PerfilPersonalForm({
   formValues,
@@ -101,7 +101,7 @@ export function PerfilPersonalForm({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <h2 className="font-grit-title text-sm font-semibold uppercase tracking-wide text-grit-subtext">
         Información Personal
       </h2>
 

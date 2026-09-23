@@ -54,12 +54,12 @@ export function PagoCard({ pago, tenantId, userId }: PagoCardProps) {
   };
 
   return (
-    <div className="mt-2 rounded-md bg-slate-700/30 border border-white/5 p-2">
+    <div className="mt-2 rounded-md bg-grit-card border border-grit-glass-border p-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-        <span className="text-slate-100 font-medium">{formatCurrency(pago.monto)}</span>
-        <span className="text-slate-400">{pago.metodo_pago_nombre ?? '—'}</span>
+        <span className="text-grit-text font-medium">{formatCurrency(pago.monto)}</span>
+        <span className="text-grit-subtext">{pago.metodo_pago_nombre ?? '—'}</span>
         <PagoEstadoBadge estado={pago.estado} />
-        <span className="text-slate-400">
+        <span className="text-grit-subtext">
           {pago.fecha_pago ? formatDate(pago.fecha_pago) : '—'}
         </span>
 
@@ -69,7 +69,7 @@ export function PagoCard({ pago, tenantId, userId }: PagoCardProps) {
             href={signedUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-secondary hover:underline"
+            className="inline-flex items-center gap-1 text-xs text-grit-teal hover:underline"
           >
             <span className="material-symbols-outlined !text-[14px] !leading-[14px]">attachment</span>
             Comprobante
@@ -95,7 +95,7 @@ export function PagoCard({ pago, tenantId, userId }: PagoCardProps) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="inline-flex items-center gap-1.5 rounded-md border border-portal-border bg-slate-800/40 px-2.5 py-1 text-[10px] font-medium text-slate-300 transition-all hover:border-turquoise/50 hover:bg-turquoise/10 hover:text-turquoise disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-grit-glass-border bg-grit-card px-2.5 py-1 text-[10px] font-medium text-grit-subtext transition-all hover:border-grit-cyan/50 hover:bg-grit-cyan/10 hover:text-grit-cyan disabled:opacity-50"
             >
               <span className="material-symbols-outlined !text-[14px] !leading-[14px]">
                 {isUploading ? 'hourglass_empty' : 'upload_file'}
@@ -111,13 +111,13 @@ export function PagoCard({ pago, tenantId, userId }: PagoCardProps) {
       </div>
 
       {pago.estado === 'rechazado' && pago.motivo_rechazo && (
-        <p className="mt-1 text-xs text-rose-300">
+        <p className="mt-1 text-xs text-grit-danger">
           <span className="font-medium">Motivo del rechazo:</span> {pago.motivo_rechazo}
         </p>
       )}
 
       {error && (
-        <p className="mt-1 text-xs text-rose-400" role="alert" aria-live="assertive">
+        <p className="mt-1 text-xs text-grit-danger" role="alert" aria-live="assertive">
           {error}
         </p>
       )}

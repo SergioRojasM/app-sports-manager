@@ -42,7 +42,7 @@ function ChipRow<T extends string>({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs font-medium text-slate-500">{label}:</span>
+      <span className="text-xs font-medium text-grit-muted">{label}:</span>
       {chips.map((chip) => {
         const isActive = active === chip.value;
         return (
@@ -52,8 +52,8 @@ function ChipRow<T extends string>({
             onClick={() => onChange(chip.value)}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
               isActive
-                ? 'border-turquoise/60 bg-turquoise/15 text-turquoise'
-                : 'border-portal-border bg-transparent text-slate-400 hover:border-slate-500 hover:text-slate-300'
+                ? 'border-grit-cyan/60 bg-grit-cyan/15 text-grit-cyan'
+                : 'border-grit-glass-border bg-transparent text-grit-subtext hover:border-grit-glass-border hover:text-grit-subtext'
             }`}
           >
             {chip.label}
@@ -76,7 +76,7 @@ export function SuscripcionesHeaderFilters({
     <div className="space-y-4">
       {/* Search input */}
       <div className="relative">
-        <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-slate-400">
+        <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-grit-subtext">
           search
         </span>
         <input
@@ -84,7 +84,7 @@ export function SuscripcionesHeaderFilters({
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar por atleta, plan o ID de suscripción…"
-          className="w-full rounded-lg border border-portal-border bg-navy-deep py-2.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-turquoise/50 focus:ring-1 focus:ring-turquoise/30"
+          className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg py-2.5 pl-10 pr-4 text-sm text-grit-text placeholder-grit-muted outline-none focus:border-grit-cyan/50 focus:ring-1 focus:ring-grit-cyan/30"
         />
       </div>
 

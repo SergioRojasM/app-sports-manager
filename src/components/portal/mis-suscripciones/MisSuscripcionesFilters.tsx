@@ -46,7 +46,7 @@ function ChipGroup<T extends string>({
 }) {
   return (
     <div className="space-y-1.5">
-      <span className="text-xs font-medium text-slate-400">{label}</span>
+      <span className="text-xs font-medium text-grit-subtext">{label}</span>
       <div className="flex flex-wrap gap-2">
         {chips.map((chip) => {
           const isActive = active === chip.value;
@@ -58,8 +58,8 @@ function ChipGroup<T extends string>({
               aria-pressed={isActive}
               className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
                 isActive
-                  ? 'bg-turquoise/20 text-turquoise border border-turquoise/50'
-                  : 'bg-slate-800/40 text-slate-400 border border-transparent hover:text-slate-200'
+                  ? 'bg-grit-cyan/20 text-grit-cyan border border-grit-cyan/50'
+                  : 'bg-grit-card text-grit-subtext border border-transparent hover:text-grit-text'
               }`}
             >
               {chip.label}
@@ -97,14 +97,14 @@ export function MisSuscripcionesFilters({
 
       {tenantOptions.length > 1 ? (
         <div className="space-y-1.5">
-          <label htmlFor="mis-suscripciones-tenant" className="text-xs font-medium text-slate-400">
+          <label htmlFor="mis-suscripciones-tenant" className="text-xs font-medium text-grit-subtext">
             Organización
           </label>
           <select
             id="mis-suscripciones-tenant"
             value={tenantFilter}
             onChange={(event) => onTenantChange(event.target.value)}
-            className="block rounded-md border border-portal-border bg-navy-deep px-3 py-1 text-xs text-slate-200 focus:border-turquoise focus:outline-none"
+            className="block rounded-md border border-grit-glass-border bg-grit-bg px-3 py-1 text-xs text-grit-text focus:border-grit-cyan focus:outline-none"
           >
             <option value="all">Todas</option>
             {tenantOptions.map((option) => (

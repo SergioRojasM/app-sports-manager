@@ -138,14 +138,14 @@ export function SuscripcionModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={handleClose}
         aria-hidden="true"
       />
 
       {/* Modal */}
       <div
-        className="glass relative z-10 mx-4 w-full max-w-lg max-h-[85dvh] flex flex-col rounded-xl border border-portal-border p-6 shadow-2xl"
+        className="border bg-grit-glass backdrop-blur-md relative z-10 mx-4 w-full max-w-lg max-h-[85dvh] flex flex-col rounded-grit-lg border-grit-glass-border p-6 shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="suscripcion-modal-title"
@@ -153,7 +153,7 @@ export function SuscripcionModal({
         {/* Fixed header */}
         <h2
           id="suscripcion-modal-title"
-          className="text-xl font-semibold text-slate-100 flex-shrink-0"
+          className="font-grit-title text-xl font-semibold text-grit-text flex-shrink-0"
         >
           {modalTitle}
         </h2>
@@ -161,7 +161,7 @@ export function SuscripcionModal({
         {/* Error / duplicate guard */}
         {error ? (
           <div
-            className="mt-4 flex-shrink-0 rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+            className="mt-4 flex-shrink-0 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
             role="alert"
           >
             {error}
@@ -173,8 +173,8 @@ export function SuscripcionModal({
           <>
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto min-h-0 mt-4">
-              <p className="text-sm text-slate-400">
-                Selecciona una opción para el plan <span className="font-medium text-slate-200">{plan.nombre}</span>:
+              <p className="text-sm text-grit-subtext">
+                Selecciona una opción para el plan <span className="font-medium text-grit-text">{plan.nombre}</span>:
               </p>
 
               <div className="mt-3 grid gap-3">
@@ -192,23 +192,23 @@ export function SuscripcionModal({
                       key={tipo.id}
                       type="button"
                       onClick={() => onSelectTipo(tipo.id)}
-                      className={`w-full rounded-lg border p-4 text-left transition ${
+                      className={`w-full rounded-grit-2xl border p-4 text-left transition ${
                         isSelected
-                          ? 'border-turquoise bg-turquoise/10'
-                          : 'border-portal-border bg-navy-medium/50 hover:border-turquoise/40'
+                          ? 'border-grit-cyan bg-grit-cyan/10'
+                          : 'border-grit-glass-border bg-grit-card hover:border-grit-cyan/40'
                       }`}
                     >
-                      <p className="text-sm font-semibold text-slate-100">{tipo.nombre}</p>
+                      <p className="text-sm font-semibold text-grit-text">{tipo.nombre}</p>
                       {tipo.descripcion ? (
-                        <p className="mt-1 text-xs text-slate-400">{tipo.descripcion}</p>
+                        <p className="mt-1 text-xs text-grit-subtext">{tipo.descripcion}</p>
                       ) : null}
-                      <div className="mt-2 flex gap-4 text-xs text-slate-300">
+                      <div className="mt-2 flex gap-4 text-xs text-grit-subtext">
                         <span>
-                          <span className="font-medium text-slate-400">Precio:</span>{' '}
+                          <span className="font-medium text-grit-subtext">Precio:</span>{' '}
                           {formatCurrency(tipo.precio)}
                         </span>
                         <span>
-                          <span className="font-medium text-slate-400">Vigencia:</span>{' '}
+                          <span className="font-medium text-grit-subtext">Vigencia:</span>{' '}
                           {tipoVigencia}
                         </span>
                       </div>
@@ -217,7 +217,7 @@ export function SuscripcionModal({
                           {tipo.servicios.map((s) => (
                             <span
                               key={s.servicioId}
-                              className="bg-navy-deep/40 rounded px-1.5 py-0.5 text-[10px] text-slate-400"
+                              className="bg-grit-bg/40 rounded px-1.5 py-0.5 text-[10px] text-grit-subtext"
                             >
                               {s.servicioNombre ?? s.servicioId}: {s.unidades ?? '∞'} uds
                             </span>
@@ -235,7 +235,7 @@ export function SuscripcionModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-lg border border-portal-border bg-navy-medium px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-turquoise"
+                className="rounded-grit-md border border-grit-glass-border bg-grit-card px-4 py-2 text-sm font-semibold text-grit-text transition hover:text-grit-cyan"
               >
                 Cancelar
               </button>
@@ -243,7 +243,7 @@ export function SuscripcionModal({
                 type="button"
                 disabled={!selectedTipoId}
                 onClick={() => setStep(2)}
-                className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Continuar
               </button>
@@ -257,15 +257,15 @@ export function SuscripcionModal({
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto min-h-0 mt-4">
               {/* Plan / subtype summary */}
-              <div className="rounded-lg border border-portal-border bg-navy-medium/50 p-4">
-                <p className="text-sm font-semibold text-slate-100">{plan.nombre}</p>
-                <div className="mt-2 grid grid-cols-3 gap-3 text-xs text-slate-300">
+              <div className="rounded-grit-2xl border border-grit-glass-border bg-grit-card p-4">
+                <p className="text-sm font-semibold text-grit-text">{plan.nombre}</p>
+                <div className="mt-2 grid grid-cols-3 gap-3 text-xs text-grit-subtext">
                   <div>
-                    <span className="block font-medium text-slate-400">Precio</span>
+                    <span className="block font-medium text-grit-subtext">Precio</span>
                     {selectedTipo ? formatCurrency(selectedTipo.precio) : '—'}
                   </div>
                   <div>
-                    <span className="block font-medium text-slate-400">Vigencia</span>
+                    <span className="block font-medium text-grit-subtext">Vigencia</span>
                     {selectedTipo
                       ? selectedTipo.vigencia_dias === 1
                         ? '1 día'
@@ -277,12 +277,12 @@ export function SuscripcionModal({
                 </div>
                 {selectedTipo?.servicios && selectedTipo.servicios.length > 0 ? (
                   <div className="mt-2">
-                    <span className="block text-xs font-medium text-slate-400 mb-1">Servicios</span>
+                    <span className="block text-xs font-medium text-grit-subtext mb-1">Servicios</span>
                     <div className="flex flex-wrap gap-1">
                       {selectedTipo.servicios.map((s) => (
                         <span
                           key={s.servicioId}
-                          className="bg-navy-deep/40 rounded px-1.5 py-0.5 text-[10px] text-slate-400"
+                          className="bg-grit-bg/40 rounded px-1.5 py-0.5 text-[10px] text-grit-subtext"
                         >
                           {s.servicioNombre ?? s.servicioId}: {s.unidades ?? '∞'} uds
                         </span>
@@ -298,19 +298,19 @@ export function SuscripcionModal({
                 <div>
                   <label
                     htmlFor="suscripcion-metodo-pago"
-                    className="mb-1 block text-xs font-medium text-slate-300"
+                    className="mb-1 block text-xs font-medium text-grit-subtext"
                   >
-                    Método de pago <span className="text-rose-400">*</span>
+                    Método de pago <span className="text-grit-danger">*</span>
                   </label>
                   {metodosPagoError ? (
                     <div
-                      className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+                      className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
                       role="alert"
                     >
                       {metodosPagoError}
                     </div>
                   ) : metodosPago.length === 0 ? (
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-grit-subtext">
                       No hay métodos de pago disponibles. Contacta al administrador.
                     </p>
                   ) : (
@@ -320,7 +320,7 @@ export function SuscripcionModal({
                         value={selectedMetodoId}
                         onChange={(e) => setSelectedMetodoId(e.target.value)}
                         disabled={isSubmitting || isDuplicate}
-                        className="w-full rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-2 text-sm text-slate-200 focus:border-turquoise/60 focus:outline-none focus:ring-1 focus:ring-turquoise/40 disabled:opacity-50"
+                        className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-3 py-2 text-sm text-grit-text focus:border-grit-cyan/60 focus:outline-none focus:ring-1 focus:ring-grit-cyan/40 disabled:opacity-50"
                       >
                         <option value="">Selecciona un método de pago</option>
                         {metodosPago.map((m) => (
@@ -331,21 +331,21 @@ export function SuscripcionModal({
                       </select>
 
                       {selectedMetodo ? (
-                        <div className="mt-2 rounded-lg border border-portal-border bg-navy-deep/40 px-3 py-2 text-xs text-slate-300 space-y-1">
+                        <div className="mt-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/40 px-3 py-2 text-xs text-grit-subtext space-y-1">
                           {selectedMetodo.valor ? (
                             <p>
-                              <span className="font-medium text-slate-400">Número:</span>{' '}
+                              <span className="font-medium text-grit-subtext">Número:</span>{' '}
                               {selectedMetodo.valor}
                             </p>
                           ) : null}
                           {selectedMetodo.url ? (
                             <p>
-                              <span className="font-medium text-slate-400">Enlace:</span>{' '}
+                              <span className="font-medium text-grit-subtext">Enlace:</span>{' '}
                               <a
                                 href={selectedMetodo.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-turquoise underline"
+                                className="text-grit-cyan underline"
                               >
                                 {selectedMetodo.url}
                               </a>
@@ -353,7 +353,7 @@ export function SuscripcionModal({
                           ) : null}
                           {selectedMetodo.comentarios ? (
                             <p>
-                              <span className="font-medium text-slate-400">Instrucciones:</span>{' '}
+                              <span className="font-medium text-grit-subtext">Instrucciones:</span>{' '}
                               {selectedMetodo.comentarios}
                             </p>
                           ) : null}
@@ -367,9 +367,9 @@ export function SuscripcionModal({
                 <div>
                   <label
                     htmlFor="suscripcion-comentarios"
-                    className="mb-1 block text-xs font-medium text-slate-300"
+                    className="mb-1 block text-xs font-medium text-grit-subtext"
                   >
-                    Comentarios <span className="text-slate-500">(opcional)</span>
+                    Comentarios <span className="text-grit-muted">(opcional)</span>
                   </label>
                   <textarea
                     id="suscripcion-comentarios"
@@ -378,7 +378,7 @@ export function SuscripcionModal({
                     onChange={(e) => setComentarios(e.target.value)}
                     disabled={isSubmitting || isDuplicate}
                     placeholder="Agrega un comentario o nota para el administrador..."
-                    className="w-full rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-turquoise/60 focus:outline-none focus:ring-1 focus:ring-turquoise/40 disabled:opacity-50"
+                    className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-3 py-2 text-sm text-grit-text placeholder:text-grit-muted focus:border-grit-cyan/60 focus:outline-none focus:ring-1 focus:ring-grit-cyan/40 disabled:opacity-50"
                   />
                 </div>
 
@@ -386,9 +386,9 @@ export function SuscripcionModal({
                 <div>
                   <label
                     htmlFor="suscripcion-comprobante"
-                    className="mb-1 block text-xs font-medium text-slate-300"
+                    className="mb-1 block text-xs font-medium text-grit-subtext"
                   >
-                    Comprobante de pago <span className="text-slate-500">(opcional)</span>
+                    Comprobante de pago <span className="text-grit-muted">(opcional)</span>
                   </label>
                   <input
                     ref={fileInputRef}
@@ -397,15 +397,15 @@ export function SuscripcionModal({
                     accept="image/*,application/pdf"
                     disabled={isSubmitting || isDuplicate}
                     onChange={handleFileChange}
-                    className="w-full rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-2 text-sm text-slate-200 file:mr-3 file:rounded file:border-0 file:bg-turquoise/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-turquoise disabled:opacity-50"
+                    className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-3 py-2 text-sm text-grit-text file:mr-3 file:rounded file:border-0 file:bg-grit-cyan/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-grit-cyan disabled:opacity-50"
                   />
                   {fileName ? (
-                    <p className="mt-1 text-xs text-slate-400">
-                      Archivo seleccionado: <span className="font-medium text-slate-300">{fileName}</span>
+                    <p className="mt-1 text-xs text-grit-subtext">
+                      Archivo seleccionado: <span className="font-medium text-grit-subtext">{fileName}</span>
                     </p>
                   ) : null}
                   {fileError ? (
-                    <p className="mt-1 text-xs text-rose-300" role="alert">
+                    <p className="mt-1 text-xs text-grit-danger" role="alert">
                       {fileError}
                     </p>
                   ) : null}
@@ -420,7 +420,7 @@ export function SuscripcionModal({
                   type="button"
                   onClick={() => setStep(1)}
                   disabled={isSubmitting}
-                  className="rounded-lg border border-portal-border bg-navy-medium px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-turquoise disabled:opacity-50"
+                  className="rounded-grit-md border border-grit-glass-border bg-grit-card px-4 py-2 text-sm font-semibold text-grit-text transition hover:text-grit-cyan disabled:opacity-50"
                 >
                   Volver
                 </button>
@@ -429,7 +429,7 @@ export function SuscripcionModal({
                 type="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="rounded-lg border border-portal-border bg-navy-medium px-4 py-2 text-sm font-semibold text-slate-200 transition hover:text-turquoise disabled:opacity-50"
+                className="rounded-grit-md border border-grit-glass-border bg-grit-card px-4 py-2 text-sm font-semibold text-grit-text transition hover:text-grit-cyan disabled:opacity-50"
               >
                 Cancelar
               </button>
@@ -437,7 +437,7 @@ export function SuscripcionModal({
                 type="button"
                 onClick={handleConfirm}
                 disabled={confirmDisabled}
-                className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? 'Enviando...' : 'Confirmar'}
               </button>

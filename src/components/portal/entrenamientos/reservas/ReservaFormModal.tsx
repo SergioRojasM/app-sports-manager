@@ -255,19 +255,19 @@ export function ReservaFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
     >
-      <div className="w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 shadow-2xl">
-        <h2 className="mb-4 text-lg font-semibold text-slate-100">
+      <div className="w-full max-w-md rounded-grit-lg border border-grit-glass-border bg-grit-card p-6 shadow-2xl">
+        <h2 className="font-grit-title mb-4 text-lg font-semibold text-grit-text">
           {mode === 'create' ? 'Nueva Reserva' : 'Editar Reserva'}
         </h2>
 
         {headerExtra}
 
         {mode === 'create' && hasFormularioInterno && (
-          <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          <div className="mb-4 flex items-start gap-2 rounded-grit-md border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
             <span className="material-symbols-outlined mt-0.5 text-base" aria-hidden="true">description</span>
             <span>
               Este entrenamiento tiene un formulario{formularioObligatorio ? ' obligatorio' : ' opcional'} adjunto
@@ -277,7 +277,7 @@ export function ReservaFormModal({
         )}
 
         {submitError && (
-          <div className="mb-4 rounded-lg border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+          <div className="mb-4 rounded-grit-md border border-grit-danger/40 bg-rose-500/15 px-4 py-3 text-sm text-grit-danger">
             {submitError}
           </div>
         )}
@@ -286,7 +286,7 @@ export function ReservaFormModal({
           {/* Atleta picker — only admin/entrenador create mode */}
           {showAtletaPicker && mode === 'create' && (
             <div>
-              <label htmlFor="reserva-atleta-search" className="mb-1 block text-sm font-medium text-slate-300">
+              <label htmlFor="reserva-atleta-search" className="mb-1 block text-sm font-medium text-grit-subtext">
                 Atleta
               </label>
               <div className="relative">
@@ -309,17 +309,17 @@ export function ReservaFormModal({
                   disabled={loadingAtletas || isSubmitting}
                   placeholder={loadingAtletas ? 'Cargando atletas…' : 'Buscar por nombre o cédula…'}
                   autoComplete="off"
-                  className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-turquoise focus:outline-none disabled:opacity-60"
+                  className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text placeholder:text-grit-muted focus:border-grit-cyan focus:outline-none disabled:opacity-60"
                 />
                 {isDropdownOpen && !loadingAtletas && (
                   <ul
                     id="reserva-atleta-listbox"
                     role="listbox"
                     aria-label="Atletas"
-                    className="absolute left-0 top-full z-[60] mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-portal-border bg-navy-deep shadow-xl"
+                    className="absolute left-0 top-full z-[60] mt-1 max-h-52 w-full overflow-y-auto rounded-grit-md border border-grit-glass-border bg-grit-bg shadow-xl"
                   >
                     {filteredOptions.length === 0 ? (
-                      <li className="px-3 py-2 text-sm text-slate-500">Sin resultados</li>
+                      <li className="px-3 py-2 text-sm text-grit-muted">Sin resultados</li>
                     ) : (
                       filteredOptions.map((option, index) => (
                         <li
@@ -334,13 +334,13 @@ export function ReservaFormModal({
                           }}
                           className={`cursor-pointer px-3 py-2 transition-colors ${
                             index === highlightedIndex
-                              ? 'bg-turquoise/20 text-turquoise'
-                              : 'text-slate-100 hover:bg-slate-700/50'
+                              ? 'bg-grit-cyan/20 text-grit-cyan'
+                              : 'text-grit-text hover:bg-grit-cyan/10'
                           }`}
                         >
                           <p className="text-sm font-medium leading-tight">{option.label}</p>
                           {option.identificacion && (
-                            <p className="text-xs text-slate-400">{option.identificacion}</p>
+                            <p className="text-xs text-grit-subtext">{option.identificacion}</p>
                           )}
                         </li>
                       ))
@@ -349,7 +349,7 @@ export function ReservaFormModal({
                 )}
               </div>
               {errors.atleta_id && (
-                <p className="mt-1 text-xs text-rose-300">{errors.atleta_id}</p>
+                <p className="mt-1 text-xs text-grit-danger">{errors.atleta_id}</p>
               )}
             </div>
           )}
@@ -357,7 +357,7 @@ export function ReservaFormModal({
           {/* Estado selector — only in edit mode */}
           {mode === 'edit' && (
             <div>
-              <label htmlFor="reserva-estado" className="mb-1 block text-sm font-medium text-slate-300">
+              <label htmlFor="reserva-estado" className="mb-1 block text-sm font-medium text-grit-subtext">
                 Estado
               </label>
               <select
@@ -365,7 +365,7 @@ export function ReservaFormModal({
                 value={form.estado}
                 onChange={(event) => onUpdateField('estado', event.target.value)}
                 disabled={isSubmitting}
-                className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 focus:border-turquoise focus:outline-none"
+                className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text focus:border-grit-cyan focus:outline-none"
               >
                 {ESTADO_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -379,9 +379,9 @@ export function ReservaFormModal({
           {/* Level selector — only in create mode when categories exist */}
           {mode === 'create' && categorias.length > 0 && (
             <fieldset disabled={isSubmitting}>
-              <legend className="mb-2 text-sm font-medium text-slate-300">Nivel</legend>
+              <legend className="mb-2 text-sm font-medium text-grit-subtext">Nivel</legend>
               {loadingCategorias ? (
-                <div className="flex items-center gap-2 text-sm text-slate-400">
+                <div className="flex items-center gap-2 text-sm text-grit-subtext">
                   <span className="material-symbols-rounded animate-spin text-base">progress_activity</span>
                   Cargando niveles...
                 </div>
@@ -392,10 +392,10 @@ export function ReservaFormModal({
                     return (
                       <label
                         key={cat.id}
-                        className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition-colors ${
+                        className={`flex cursor-pointer items-center gap-3 rounded-grit-md border px-3 py-2 transition-colors ${
                           form.entrenamiento_categoria_id === cat.id
-                            ? 'border-turquoise bg-turquoise/10'
-                            : 'border-portal-border bg-navy-deep hover:border-slate-500'
+                            ? 'border-grit-cyan bg-grit-cyan/10'
+                            : 'border-grit-glass-border bg-grit-bg hover:border-grit-glass-border'
                         } ${!cat.disponible ? 'cursor-not-allowed opacity-50' : ''}`}
                       >
                         <input
@@ -406,10 +406,10 @@ export function ReservaFormModal({
                           onChange={(e) => onUpdateField('entrenamiento_categoria_id', e.target.value)}
                           disabled={!cat.disponible}
                           aria-disabled={!cat.disponible}
-                          className="accent-turquoise"
+                          className="accent-grit-cyan"
                         />
-                        <span className="flex-1 text-sm text-slate-100">{cat.nombre}</span>
-                        <span className="text-xs text-slate-400">
+                        <span className="flex-1 text-sm text-grit-text">{cat.nombre}</span>
+                        <span className="text-xs text-grit-subtext">
                           {cuposDisponibles} {cuposDisponibles === 1 ? 'cupo disponible' : 'cupos disponibles'}
                         </span>
                       </label>
@@ -418,14 +418,14 @@ export function ReservaFormModal({
                 </div>
               )}
               {errors.entrenamiento_categoria_id && (
-                <p className="mt-1 text-xs text-rose-300">{errors.entrenamiento_categoria_id}</p>
+                <p className="mt-1 text-xs text-grit-danger">{errors.entrenamiento_categoria_id}</p>
               )}
             </fieldset>
           )}
 
           {/* Notas */}
           <div>
-            <label htmlFor="reserva-notas" className="mb-1 block text-sm font-medium text-slate-300">
+            <label htmlFor="reserva-notas" className="mb-1 block text-sm font-medium text-grit-subtext">
               Notas (opcional)
             </label>
             <textarea
@@ -434,7 +434,7 @@ export function ReservaFormModal({
               onChange={(event) => onUpdateField('notas', event.target.value)}
               disabled={isSubmitting}
               rows={3}
-              className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-turquoise focus:outline-none"
+              className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text placeholder:text-grit-muted focus:border-grit-cyan focus:outline-none"
               placeholder="Notas adicionales..."
             />
           </div>
@@ -442,7 +442,7 @@ export function ReservaFormModal({
           {/* Actions */}
           {adminConfirmPending ? (
             <div className="space-y-3">
-              <div className="rounded-lg border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+              <div className="rounded-grit-md border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
                 <p className="font-medium">Sin unidades disponibles</p>
                 <p className="mt-1 text-amber-300/80">El atleta no tiene unidades disponibles en los servicios requeridos. ¿Deseas crear la reserva de todas formas sin descontar unidades?</p>
               </div>
@@ -451,7 +451,7 @@ export function ReservaFormModal({
                   type="button"
                   onClick={onCancelAdminConfirmation}
                   disabled={isConfirmingAdminBooking}
-                  className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40 disabled:opacity-50"
+                  className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-medium text-grit-subtext hover:bg-grit-cyan/10 disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -459,7 +459,7 @@ export function ReservaFormModal({
                   type="button"
                   onClick={onConfirmAdminBooking}
                   disabled={isConfirmingAdminBooking}
-                  className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-400 disabled:opacity-50"
+                  className="rounded-grit-md bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-400 disabled:opacity-50"
                 >
                   {isConfirmingAdminBooking ? 'Creando...' : 'Confirmar de todas formas'}
                 </button>
@@ -471,14 +471,14 @@ export function ReservaFormModal({
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40"
+                className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-medium text-grit-subtext hover:bg-grit-cyan/10"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
+                className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg hover:bg-grit-cyan/90 disabled:opacity-50"
               >
                 {isSubmitting
                   ? 'Guardando...'

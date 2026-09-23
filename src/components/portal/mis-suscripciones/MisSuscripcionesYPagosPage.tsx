@@ -34,17 +34,17 @@ export function MisSuscripcionesYPagosPage({
   if (isEmpty) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-100">Mis Suscripciones</h1>
-        <div className="glass-card rounded-md p-8 text-center">
-          <span className="material-symbols-outlined mb-2 text-4xl text-slate-500">
+        <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Mis Suscripciones</h1>
+        <div className="border border-grit-glass-border bg-grit-card backdrop-blur-md rounded-grit-2xl p-8 text-center">
+          <span className="material-symbols-outlined mb-2 text-4xl text-grit-muted">
             credit_card_off
           </span>
-          <p className="text-slate-400">
+          <p className="text-grit-subtext">
             Aún no tienes suscripciones en ninguna organización.
           </p>
           <Link
             href="/portal/orgs"
-            className="mt-3 inline-block text-sm font-medium text-secondary hover:underline"
+            className="mt-3 inline-block text-sm font-medium text-grit-teal hover:underline"
           >
             Explorar organizaciones y sus planes
           </Link>
@@ -55,7 +55,7 @@ export function MisSuscripcionesYPagosPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-100">Mis Suscripciones</h1>
+      <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Mis Suscripciones</h1>
 
       {/* Filters */}
       <MisSuscripcionesFilters
@@ -70,12 +70,12 @@ export function MisSuscripcionesYPagosPage({
 
       {/* Filter empty state */}
       {isFilterEmpty ? (
-        <div className="glass-card rounded-md p-8 text-center">
-          <p className="text-slate-400">No se encontraron resultados con los filtros seleccionados.</p>
+        <div className="border border-grit-glass-border bg-grit-card backdrop-blur-md rounded-grit-2xl p-8 text-center">
+          <p className="text-grit-subtext">No se encontraron resultados con los filtros seleccionados.</p>
           <button
             type="button"
             onClick={clearFilters}
-            className="mt-3 text-sm font-medium text-secondary hover:underline"
+            className="mt-3 text-sm font-medium text-grit-teal hover:underline"
           >
             Limpiar filtros
           </button>

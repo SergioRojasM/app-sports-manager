@@ -17,6 +17,27 @@
   --landing-text-muted: #7f8ea3;
   --landing-border: #213247;
   --landing-divider: #1a293a;
+  /* grit-arena-v2 design tokens (US-0116) — mirror the variables of
+     projectspec/designs/pencil/grit-arena-v2.pen 1:1. New Portal code uses these. */
+  --grit-bg-navy: #07111f;
+  --grit-accent-cyan: #14dbc4;
+  --grit-accent-cyan-light: #49f5e2;
+  --grit-accent-teal: #0fa3ab;
+  --grit-text-primary: #e6edf3;
+  --grit-text-subtext: #bac7d5;
+  --grit-text-muted: #8a9aab;
+  --grit-glass-fill: rgba(15, 31, 48, 0.69);
+  --grit-glass-border: rgba(20, 219, 196, 0.25);
+  --grit-card-fill: rgba(11, 24, 38, 0.8);
+  --grit-sidebar-fill: rgba(6, 14, 26, 0.8);
+  --grit-success: #3ddc97;
+  --grit-danger: #ff6b6b;
+  --grit-discipline-swim: #14dbc4;
+  --grit-discipline-cycle: #0fa3ab;
+  --grit-discipline-run: #f2b84b;
+  --grit-discipline-strength: #b98aff;
+  --grit-discipline-functional: #ff6b6b;
+  --grit-discipline-mobility: #6bcb77;
   color-scheme: dark;
 }
 
@@ -52,10 +73,14 @@ body {
   font-family: var(--font-montserrat), sans-serif;
 }
 
-/* Portal sidebar active nav item */
-.sidebar-item-active {
-  background: linear-gradient(90deg, rgba(0, 229, 196, 0.15) 0%, rgba(22, 30, 46, 0) 100%);
-  border-left: 3px solid #00e5c4;
+/* grit-arena-v2 shell background: navy + the design's "BG Glow" ellipses (US-0116) */
+.grit-shell {
+  background:
+    radial-gradient(circle at 92% 0%, rgba(20, 219, 196, 0.14), transparent 35%),
+    radial-gradient(circle at 0% 55%, rgba(15, 163, 171, 0.1), transparent 30%),
+    var(--grit-bg-navy);
+  color: var(--grit-text-primary);
+  font-family: var(--font-montserrat), sans-serif;
 }
 
 .material-symbols-outlined {
@@ -219,6 +244,7 @@ body {
   }
 }
 
+/* @deprecated for Portal code (US-0116) — use <GritCard> from @/components/ui instead of .glass / .glass-card */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);

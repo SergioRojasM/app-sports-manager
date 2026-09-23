@@ -27,7 +27,7 @@ function InsertHandle({ beforeId, onInsert }: { beforeId: string | null; onInser
         type="button"
         onClick={() => onInsert(beforeId)}
         aria-label="Insertar campo o sección aquí"
-        className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-turquoise/50 bg-navy-deep text-turquoise opacity-0 shadow-sm transition-opacity group-hover/insert:opacity-100 hover:bg-turquoise hover:text-navy-deep"
+        className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-grit-cyan/50 bg-grit-bg text-grit-cyan opacity-0 shadow-sm transition-opacity group-hover/insert:opacity-100 hover:bg-grit-cyan hover:text-grit-bg"
       >
         <span className="material-symbols-outlined text-sm" aria-hidden="true">add</span>
       </button>
@@ -95,12 +95,12 @@ export function FormularioSeccionesBuilder({
   return (
     <div className="space-y-1">
       {secciones.length === 0 ? (
-        <div className="glass rounded-lg border border-portal-border p-8 text-center">
-          <span className="material-symbols-outlined mb-3 block text-4xl text-slate-500" aria-hidden="true">
+        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-md border-grit-glass-border p-8 text-center">
+          <span className="material-symbols-outlined mb-3 block text-4xl text-grit-muted" aria-hidden="true">
             dashboard_customize
           </span>
-          <p className="text-sm font-medium text-slate-300">Esta plantilla todavía no tiene secciones.</p>
-          <p className="mt-1 text-xs text-slate-500">Añade tu primera sección para empezar a construir el formulario.</p>
+          <p className="text-sm font-medium text-grit-subtext">Esta plantilla todavía no tiene secciones.</p>
+          <p className="mt-1 text-xs text-grit-muted">Añade tu primera sección para empezar a construir el formulario.</p>
         </div>
       ) : (
         <>
@@ -112,10 +112,10 @@ export function FormularioSeccionesBuilder({
               return (
                 <div key={item.header.seccion.id} className="space-y-1">
                   {renderCard(item.header)}
-                  <div className="ml-2 space-y-1 rounded-xl border border-portal-border/60 bg-navy-deep/30 p-3 pl-4">
+                  <div className="ml-2 space-y-1 rounded-grit-lg border border-grit-glass-border bg-grit-bg/30 p-3 pl-4">
                     {item.children.length === 0 ? (
                       <>
-                        <p className="px-1 py-2 text-xs text-slate-500">Sin campos todavía.</p>
+                        <p className="px-1 py-2 text-xs text-grit-muted">Sin campos todavía.</p>
                         <InsertHandle beforeId={nextRootAnchor} onInsert={handleAdd} />
                       </>
                     ) : null}
@@ -145,7 +145,7 @@ export function FormularioSeccionesBuilder({
       <button
         type="button"
         onClick={() => handleAdd(null)}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-portal-border bg-navy-deep/40 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-turquoise/60 hover:text-turquoise"
+        className="flex w-full items-center justify-center gap-2 rounded-grit-lg border border-dashed border-grit-glass-border bg-grit-bg/40 px-4 py-3 text-sm font-semibold text-grit-subtext transition hover:border-grit-cyan/60 hover:text-grit-cyan"
       >
         <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
         Añadir sección de formulario

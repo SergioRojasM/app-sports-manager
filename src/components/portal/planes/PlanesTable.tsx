@@ -49,34 +49,34 @@ export function PlanesTable({
   renderRowAction,
 }: PlanesTableProps) {
   return (
-    <div className="glass overflow-hidden rounded-xl border border-portal-border">
+    <div className="border bg-grit-glass backdrop-blur-md overflow-hidden rounded-grit-lg border-grit-glass-border">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-portal-border text-left">
-          <thead className="bg-navy-medium/80">
+        <table className="min-w-full divide-y divide-grit-glass-border text-left">
+          <thead className="bg-grit-card">
             <tr>
-              <th className="pl-8 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Nombre</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Tipo</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Subtipos</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Servicios</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Beneficios</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Estado</th>
+              <th className="pl-8 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Nombre</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Tipo</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Subtipos</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Servicios</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Beneficios</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Estado</th>
               {showVisibilidad ? (
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Visibilidad</th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Visibilidad</th>
               ) : null}
               {!readOnly ? (
-                <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Acciones</th>
+                <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Acciones</th>
               ) : null}
             </tr>
           </thead>
-          <tbody className="divide-y divide-portal-border bg-navy-deep/50">
+          <tbody className="divide-y divide-grit-glass-border bg-grit-bg/50">
             {rows.map((row) => {
               const services = collectUniqueServices(row);
               return (
-                <tr key={row.id} className="hover:bg-navy-medium/50">
+                <tr key={row.id} className="hover:bg-grit-card">
                   <td className="pl-8 pr-6 py-4">
-                    <div className="text-sm font-semibold text-slate-100">{row.nombre}</div>
+                    <div className="text-sm font-semibold text-grit-text">{row.nombre}</div>
                     {row.descripcion ? (
-                      <MultilineText maxLength={60} className="mt-1 max-w-xs text-xs text-slate-400">
+                      <MultilineText maxLength={60} className="mt-1 max-w-xs text-xs text-grit-subtext">
                         {row.descripcion}
                       </MultilineText>
                     ) : null}
@@ -94,7 +94,7 @@ export function PlanesTable({
                         {row.tipo === 'presencial' ? 'Presencial' : row.tipo === 'mixto' ? 'Mixto' : 'Virtual'}
                       </span>
                     ) : (
-                      <span className="text-xs text-slate-500">—</span>
+                      <span className="text-xs text-grit-muted">—</span>
                     )}
                   </td>
                   <td className="px-6 py-4">
@@ -105,17 +105,17 @@ export function PlanesTable({
                           {tipos.map((t) => (
                             <div
                               key={t.id}
-                              className="rounded-md border border-turquoise/20 bg-turquoise/5 px-2.5 py-1.5 text-xs"
+                              className="rounded-md border border-grit-cyan/20 bg-grit-cyan/5 px-2.5 py-1.5 text-xs"
                             >
-                              <span className="font-medium text-slate-100">{t.nombre}</span>
-                              <span className="ml-2 text-slate-400">
+                              <span className="font-medium text-grit-text">{t.nombre}</span>
+                              <span className="ml-2 text-grit-subtext">
                                 {formatCurrency(t.precio)} · {t.vigencia_dias}d
                               </span>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-500">—</span>
+                        <span className="text-xs text-grit-muted">—</span>
                       );
                     })()}
                   </td>
@@ -125,28 +125,28 @@ export function PlanesTable({
                         {services.map((s) => (
                           <span
                             key={s.servicioId}
-                            className="inline-flex items-center rounded-full border border-turquoise/30 bg-turquoise/10 px-2.5 py-0.5 text-xs font-medium text-turquoise"
+                            className="inline-flex items-center rounded-full border border-grit-cyan/30 bg-grit-cyan/10 px-2.5 py-0.5 text-xs font-medium text-grit-cyan"
                           >
                             {s.nombre}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs italic text-slate-500">Sin servicios</span>
+                      <span className="text-xs italic text-grit-muted">Sin servicios</span>
                     )}
                   </td>
                   <td className="px-6 py-4">
                     {row.beneficios ? (
                       <ul className="space-y-0.5">
                         {row.beneficios.split('|').filter(Boolean).map((b, i) => (
-                          <li key={i} className="flex items-center gap-1 text-xs text-slate-300">
-                            <span className="material-symbols-outlined text-xs text-turquoise" aria-hidden="true">check</span>
+                          <li key={i} className="flex items-center gap-1 text-xs text-grit-subtext">
+                            <span className="material-symbols-outlined text-xs text-grit-cyan" aria-hidden="true">check</span>
                             {b}
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <span className="text-xs text-slate-500">—</span>
+                      <span className="text-xs text-grit-muted">—</span>
                     )}
                   </td>
                   <td className="px-6 py-4">
@@ -155,13 +155,13 @@ export function PlanesTable({
                         'inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium',
                         row.activo
                           ? 'border border-emerald-400/40 bg-emerald-900/25 text-emerald-200'
-                          : 'border border-slate-500/40 bg-slate-700/40 text-slate-300',
+                          : 'border border-grit-glass-border bg-grit-card text-grit-subtext',
                       ].join(' ')}
                     >
                       <span
                         className={[
                           'h-1.5 w-1.5 rounded-full',
-                          row.activo ? 'bg-emerald-300' : 'bg-slate-400',
+                          row.activo ? 'bg-emerald-300' : 'bg-grit-subtext/20',
                         ].join(' ')}
                       />
                       {row.statusLabel}
@@ -173,8 +173,8 @@ export function PlanesTable({
                         className={[
                           'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
                           row.es_publico
-                            ? 'border border-turquoise/40 bg-turquoise/10 text-turquoise'
-                            : 'border border-slate-500/40 bg-slate-700/40 text-slate-300',
+                            ? 'border border-grit-cyan/40 bg-grit-cyan/10 text-grit-cyan'
+                            : 'border border-grit-glass-border bg-grit-card text-grit-subtext',
                         ].join(' ')}
                       >
                         <span className="material-symbols-outlined text-sm" aria-hidden="true">
@@ -193,7 +193,7 @@ export function PlanesTable({
                               type="button"
                               title="Editar"
                               onClick={() => onEdit?.(row)}
-                              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-navy-medium hover:text-turquoise"
+                              className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-card hover:text-grit-cyan"
                             >
                               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
                               <span className="sr-only">Editar</span>
@@ -202,7 +202,7 @@ export function PlanesTable({
                               type="button"
                               title="Duplicar"
                               onClick={() => onDuplicate?.(row)}
-                              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-navy-medium hover:text-turquoise"
+                              className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-card hover:text-grit-cyan"
                             >
                               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">content_copy</span>
                               <span className="sr-only">Duplicar</span>
@@ -211,7 +211,7 @@ export function PlanesTable({
                               type="button"
                               title="Eliminar"
                               onClick={() => onDelete?.(row)}
-                              className="rounded-lg p-1.5 text-slate-400 transition hover:bg-rose-500/15 hover:text-rose-300"
+                              className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-rose-500/15 hover:text-grit-danger"
                             >
                               <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
                               <span className="sr-only">Eliminar</span>

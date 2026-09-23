@@ -3,14 +3,14 @@ import type { TrainingCalendarItem, TrainingVisibility } from '@/types/portal/en
 export function VisibilidadBadge({ visibilidad }: { visibilidad: TrainingVisibility }) {
   if (visibilidad === 'publico') {
     return (
-      <span className="rounded-md border border-turquoise/40 bg-turquoise/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-turquoise">
+      <span className="rounded-md border border-grit-cyan/40 bg-grit-cyan/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-grit-cyan">
         Público
       </span>
     );
   }
 
   return (
-    <span className="rounded-md border border-slate-500/40 bg-slate-700/25 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+    <span className="rounded-md border border-grit-glass-border bg-grit-card px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-grit-subtext">
       Privado
     </span>
   );
@@ -20,7 +20,7 @@ function CapacityPill({ reservasActivas, cupoMaximo }: { reservasActivas: number
   const ratio = cupoMaximo > 0 ? reservasActivas / cupoMaximo : 0;
   const colorClass =
     ratio >= 1
-      ? 'border-rose-400/40 bg-rose-500/15 text-rose-200'
+      ? 'border-grit-danger/40 bg-rose-500/15 text-grit-danger'
       : ratio >= 0.7
         ? 'border-amber-400/40 bg-amber-900/25 text-amber-200'
         : 'border-emerald-400/40 bg-emerald-900/25 text-emerald-200';
@@ -55,10 +55,10 @@ export function EntrenamientosList({
 
   return (
     <div className="sticky top-24">
-      <section className="glass rounded-xl border border-portal-border p-4 max-h-[78vh] overflow-y-scroll [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.65)_rgba(2,6,23,0.35)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-navy-deep/35 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-500/70 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/80">
+      <section className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-4 max-h-[78vh] overflow-y-scroll [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:rgba(20,219,196,0.35)_rgba(7,17,31,0.35)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-grit-bg/35 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-grit-subtext/70 hover:[&::-webkit-scrollbar-thumb]:bg-grit-subtext/80">
       <header className="mb-4">
-        <h2 className="text-base font-semibold text-slate-100">Lista de entrenamientos</h2>
-        <p className="text-xs text-slate-400">
+        <h2 className="font-grit-title text-base font-semibold text-grit-text">Lista de entrenamientos</h2>
+        <p className="text-xs text-grit-subtext">
           {selectedDateLabel ? `Entrenamientos para ${selectedDateLabel}` : 'Entrenamientos del mes seleccionado'}
         </p>
 
@@ -66,7 +66,7 @@ export function EntrenamientosList({
           <button
             type="button"
             onClick={onClearDateFilter}
-            className="mt-2 rounded-lg border border-portal-border bg-navy-deep/80 px-2.5 py-1 text-xs font-semibold text-slate-200"
+            className="mt-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/80 px-2.5 py-1 text-xs font-semibold text-grit-text"
           >
             Ver todo el mes
           </button>
@@ -74,7 +74,7 @@ export function EntrenamientosList({
       </header>
 
       {items.length === 0 ? (
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-grit-subtext">
           {selectedDateLabel
             ? 'No hay entrenamientos programados para este día.'
             : 'No hay entrenamientos programados para este mes.'}
@@ -87,15 +87,15 @@ export function EntrenamientosList({
             return (
               <li
                 key={item.instance.id}
-                className="rounded-xl border border-portal-border bg-navy-deep/60 p-3 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-turquoise/45 hover:bg-navy-deep/75 hover:shadow-[0_8px_24px_rgba(6,182,212,0.12)]"
+                className="rounded-grit-lg border border-grit-glass-border bg-grit-bg/60 p-3 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-grit-cyan/45 hover:bg-grit-bg/75 hover:shadow-[0_8px_24px_rgba(6,182,212,0.12)]"
               >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-100">{item.instance.nombre}</p>
+                    <p className="text-sm font-semibold text-grit-text">{item.instance.nombre}</p>
                     <VisibilidadBadge visibilidad={item.instance.visibilidad} />
                     {isHistorical ? (
-                      <span className="rounded-md border border-slate-500/60 bg-slate-700/35 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-300">
+                      <span className="rounded-md border border-grit-glass-border bg-grit-card px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-grit-subtext">
                         Histórico
                       </span>
                     ) : null}
@@ -106,14 +106,14 @@ export function EntrenamientosList({
                       />
                     )}
                   </div>
-                  <p className="max-w-[320px] truncate text-xs text-slate-400">
+                  <p className="max-w-[320px] truncate text-xs text-grit-subtext">
                     <span className="inline-flex items-center gap-1">
                       <span>Serie: {item.groupName}</span>
                     </span>{' '}
                     ·{' '}
                     <span className="inline-flex items-center gap-1">
                       <span
-                        className="material-symbols-outlined leading-none text-turquoise"
+                        className="material-symbols-outlined leading-none text-grit-cyan"
                         style={{ fontSize: '14px' }}
                         aria-hidden="true"
                       >
@@ -124,7 +124,7 @@ export function EntrenamientosList({
                     ·{' '}
                     <span className="inline-flex items-center gap-1">
                       <span
-                        className="material-symbols-outlined leading-none text-turquoise"
+                        className="material-symbols-outlined leading-none text-grit-cyan"
                         style={{ fontSize: '14px' }}
                         aria-hidden="true"
                       >
@@ -133,10 +133,10 @@ export function EntrenamientosList({
                       <span>{scenarioNameById[item.instance.escenario_id] ?? 'Sin escenario'}</span>
                     </span>
                   </p>
-                  <p className="mt-1 max-w-[320px] truncate text-xs text-slate-300">
+                  <p className="mt-1 max-w-[320px] truncate text-xs text-grit-subtext">
                     <span className="inline-flex items-center gap-1">
                       <span
-                        className="material-symbols-outlined leading-none text-turquoise"
+                        className="material-symbols-outlined leading-none text-grit-cyan"
                         style={{ fontSize: '14px' }}
                         aria-hidden="true"
                       >
@@ -147,7 +147,7 @@ export function EntrenamientosList({
                     ·{' '}
                     <span className="inline-flex items-center gap-1">
                       <span
-                        className="material-symbols-outlined leading-none text-turquoise"
+                        className="material-symbols-outlined leading-none text-grit-cyan"
                         style={{ fontSize: '14px' }}
                         aria-hidden="true"
                       >
@@ -157,22 +157,22 @@ export function EntrenamientosList({
                     </span>
                   </p>
                   {item.instance.punto_encuentro ? (
-                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
+                    <p className="mt-1 max-w-[320px] truncate text-xs text-grit-subtext">
                       <span
-                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
+                        className="material-symbols-outlined mr-1 leading-none text-grit-cyan"
                         style={{ fontSize: '14px' }}
                         aria-hidden="true"
                       >
                         pin_drop
                       </span>
-                      <span className="font-medium text-slate-300">Punto de encuentro:</span>{' '}
+                      <span className="font-medium text-grit-subtext">Punto de encuentro:</span>{' '}
                       {item.instance.punto_encuentro}
                     </p>
                   ) : null}
                   {item.instance.formulario_externo ? (
-                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
+                    <p className="mt-1 max-w-[320px] truncate text-xs text-grit-subtext">
                       <span
-                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
+                        className="material-symbols-outlined mr-1 leading-none text-grit-cyan"
                         style={{ fontSize: '14px' }}
                         aria-hidden="true"
                       >
@@ -182,7 +182,7 @@ export function EntrenamientosList({
                         href={item.instance.formulario_externo}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-medium text-turquoise hover:underline"
+                        className="font-medium text-grit-cyan hover:underline"
                       >
                         Formulario externo
                       </a>
@@ -190,15 +190,15 @@ export function EntrenamientosList({
                     </p>
                   ) : null}
                   {item.instance.formulario_id ? (
-                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
+                    <p className="mt-1 max-w-[320px] truncate text-xs text-grit-subtext">
                       <span
-                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
+                        className="material-symbols-outlined mr-1 leading-none text-grit-cyan"
                         style={{ fontSize: '14px' }}
                         aria-hidden="true"
                       >
                         description
                       </span>
-                      <span className="font-medium text-slate-300">
+                      <span className="font-medium text-grit-subtext">
                         Formulario: {item.instance.formulario_plantilla?.nombre ?? 'Plantilla'}
                       </span>
                       {item.instance.formulario_obligatorio ? ' · Obligatorio' : ''}
@@ -209,7 +209,7 @@ export function EntrenamientosList({
                   <button
                     type="button"
                     onClick={() => onOpenActions(item.instance.id)}
-                    className="rounded-lg border border-portal-border bg-navy-deep px-2.5 py-1.5 text-xs font-semibold text-slate-200 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-turquoise/50 hover:bg-navy-deep/80 hover:text-slate-100"
+                    className="rounded-grit-md border border-grit-glass-border bg-grit-bg px-2.5 py-1.5 text-xs font-semibold text-grit-text transition duration-200 ease-out hover:-translate-y-0.5 hover:border-grit-cyan/50 hover:bg-grit-bg/80 hover:text-grit-text"
                   >
                     {canManage ? 'Opciones' : 'Ver'}
                   </button>

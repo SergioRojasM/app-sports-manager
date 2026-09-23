@@ -62,16 +62,16 @@ export function FormularioSeccionesGrouped({ secciones, renderDatos }: Formulari
         return (
           <div
             key={item.header.seccion.id}
-            className="space-y-4 rounded-2xl border border-portal-border bg-navy-medium/40 p-5"
+            className="space-y-4 rounded-grit-2xl border border-grit-glass-border bg-grit-card p-5"
           >
             <div className="flex items-center gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-turquoise text-sm font-bold text-navy-deep">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-grit-md bg-grit-cyan text-sm font-bold text-grit-bg">
                 {item.numero}
               </span>
               <div>
-                <h3 className="text-base font-bold text-slate-100">{item.header.seccion.seccion_descripcion}</h3>
+                <h3 className="font-grit-title text-base font-bold text-grit-text">{item.header.seccion.seccion_descripcion}</h3>
                 {item.header.seccion.seccion_subtitulo ? (
-                  <p className="text-xs text-slate-400">{item.header.seccion.seccion_subtitulo}</p>
+                  <p className="text-xs text-grit-subtext">{item.header.seccion.seccion_subtitulo}</p>
                 ) : null}
               </div>
             </div>

@@ -3,10 +3,11 @@
 import { useTenantView } from '@/hooks/portal/tenant/useTenantView';
 import { TenantDirectoryList } from '@/components/portal/tenant/TenantDirectoryList';
 import { InvitacionesPendientesSection } from '@/components/portal/invitaciones/InvitacionesPendientesSection';
+import { GritPageHeader } from '@/components/ui';
 
 function LoadingState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       Cargando organizaciones disponibles...
     </div>
   );
@@ -17,23 +18,21 @@ export function PortalTenantsPage() {
 
   return (
     <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Organizaciones disponibles</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Explora las organizaciones y accede a aquellas donde ya tienes membresía activa.
-        </p>
-      </header>
+      <GritPageHeader
+        title="Organizaciones disponibles"
+        subtitle="Explora las organizaciones y accede a aquellas donde ya tienes membresía activa."
+      />
 
       <InvitacionesPendientesSection />
 
       {loading ? <LoadingState /> : null}
 
       {!loading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
+        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+          <p className="text-sm text-grit-danger">{error}</p>
           <button
             type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+            className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
             onClick={() => void retry()}
           >
             Reintentar

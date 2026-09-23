@@ -16,28 +16,28 @@ export function DisciplinesTable({ rows, tenantId, onEdit, onDelete }: Disciplin
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
-    <div className="glass overflow-hidden rounded-xl border border-portal-border">
+    <div className="border bg-grit-glass backdrop-blur-md overflow-hidden rounded-grit-lg border-grit-glass-border">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-portal-border text-left">
-          <thead className="bg-navy-medium/80">
+        <table className="min-w-full divide-y divide-grit-glass-border text-left">
+          <thead className="bg-grit-card">
             <tr>
               <th className="w-10 pl-4 pr-0 py-4" />
-              <th className="pl-4 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Discipline</th>
-              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Status</th>
-              <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">Actions</th>
+              <th className="pl-4 pr-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Discipline</th>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Status</th>
+              <th className="pl-6 pr-8 py-4 text-right text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-portal-border bg-navy-deep/50">
+          <tbody className="divide-y divide-grit-glass-border bg-grit-bg/50">
             {rows.map((row) => {
               const isExpanded = expandedId === row.id;
               return (
                 <Fragment key={row.id}>
-                  <tr className="hover:bg-navy-medium/50">
+                  <tr className="hover:bg-grit-card">
                     <td className="pl-4 pr-0 py-4">
                       <button
                         type="button"
                         onClick={() => setExpandedId(isExpanded ? null : row.id)}
-                        className="rounded p-1 text-slate-400 transition hover:text-slate-200"
+                        className="rounded p-1 text-grit-subtext transition hover:text-grit-text"
                         aria-label={isExpanded ? 'Colapsar niveles' : 'Expandir niveles'}
                       >
                         <span className="material-symbols-outlined text-base" aria-hidden="true">
@@ -46,9 +46,9 @@ export function DisciplinesTable({ rows, tenantId, onEdit, onDelete }: Disciplin
                       </button>
                     </td>
                     <td className="pl-4 pr-6 py-4">
-                  <div className="text-sm font-semibold text-slate-100">{row.nombre}</div>
+                  <div className="text-sm font-semibold text-grit-text">{row.nombre}</div>
                   {row.descripcion ? (
-                    <MultilineText className="mt-1 text-xs text-slate-400">{row.descripcion}</MultilineText>
+                    <MultilineText className="mt-1 text-xs text-grit-subtext">{row.descripcion}</MultilineText>
                   ) : null}
                 </td>
                 <td className="px-6 py-4">
@@ -57,13 +57,13 @@ export function DisciplinesTable({ rows, tenantId, onEdit, onDelete }: Disciplin
                       'inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium',
                       row.status === 'active'
                         ? 'border border-emerald-400/40 bg-emerald-900/25 text-emerald-200'
-                        : 'border border-slate-500/40 bg-slate-700/40 text-slate-300',
+                        : 'border border-grit-glass-border bg-grit-card text-grit-subtext',
                     ].join(' ')}
                   >
                     <span
                       className={[
                         'h-1.5 w-1.5 rounded-full',
-                        row.status === 'active' ? 'bg-emerald-300' : 'bg-slate-400',
+                        row.status === 'active' ? 'bg-emerald-300' : 'bg-grit-subtext/20',
                       ].join(' ')}
                     />
                     {row.statusLabel}
@@ -74,14 +74,14 @@ export function DisciplinesTable({ rows, tenantId, onEdit, onDelete }: Disciplin
                     <button
                       type="button"
                       onClick={() => onEdit(row)}
-                      className="rounded-lg border border-portal-border bg-navy-medium px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:text-turquoise"
+                      className="rounded-grit-md border border-grit-glass-border bg-grit-card px-3 py-1.5 text-xs font-semibold text-grit-text transition hover:text-grit-cyan"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => onDelete(row)}
-                      className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                      className="rounded-grit-md border border-grit-danger/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-grit-danger transition hover:bg-rose-500/20"
                     >
                       Delete
                     </button>

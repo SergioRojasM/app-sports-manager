@@ -35,11 +35,11 @@ type PublicTrainingsGridProps = {
 export function PublicTrainingsGrid({ featuredItem, standardItems, onReservar }: PublicTrainingsGridProps) {
   if (!featuredItem && standardItems.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-landing-border py-24 text-center">
-        <span className="material-symbols-outlined text-4xl text-landing-text-secondary/50" aria-hidden="true">
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-grit-2xl border border-dashed border-grit-glass-border py-24 text-center">
+        <span className="material-symbols-outlined text-4xl text-grit-subtext/50" aria-hidden="true">
           sports
         </span>
-        <p className="font-landing-body text-sm text-landing-text-secondary">
+        <p className="font-grit-body text-sm text-grit-subtext">
           No hay entrenamientos públicos disponibles por ahora.
         </p>
       </div>

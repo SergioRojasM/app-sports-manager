@@ -11,7 +11,7 @@ import { EditTenantDrawer } from './EditTenantDrawer';
 
 function EmptyState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       No organization data is available for this account yet.
     </div>
   );
@@ -19,7 +19,7 @@ function EmptyState() {
 
 function LoadingState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       Loading organization information...
     </div>
   );
@@ -75,11 +75,11 @@ export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
 
   if (error) {
     return (
-      <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-        <p className="text-sm text-rose-200">{error}</p>
+      <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+        <p className="text-sm text-grit-danger">{error}</p>
         <button
           type="button"
-          className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+          className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
           onClick={() => void retry()}
         >
           Retry
@@ -95,7 +95,7 @@ export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
   return (
     <div className="space-y-4">
       {successMessage ? (
-        <div className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
+        <div className="rounded-grit-md border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
           {successMessage}
         </div>
       ) : null}
@@ -105,7 +105,7 @@ export function TenantInfoCards({ tenantId }: TenantInfoCardsProps) {
           type="button"
           onClick={() => void openDrawer()}
           disabled={isSubmitting}
-          className="inline-flex items-center gap-2 rounded-lg border border-portal-border bg-navy-medium/80 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-navy-medium disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border bg-grit-card px-4 py-2 text-sm font-semibold text-grit-text transition hover:bg-grit-card disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span className="material-symbols-outlined text-base" aria-hidden="true">
             edit

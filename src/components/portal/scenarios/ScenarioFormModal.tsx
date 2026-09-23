@@ -88,7 +88,7 @@ export function ScenarioFormModal({
       <button
         type="button"
         aria-label="Cerrar formulario de escenario"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -97,14 +97,14 @@ export function ScenarioFormModal({
         role="dialog"
         aria-modal="true"
         aria-label={mode === 'create' ? 'Crear escenario' : 'Editar escenario'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
               {mode === 'create' ? 'Crear escenario' : 'Editar escenario'}
             </h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-grit-subtext">
               Gestiona datos del escenario y su disponibilidad horaria.
             </p>
           </div>
@@ -112,7 +112,7 @@ export function ScenarioFormModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -124,15 +124,15 @@ export function ScenarioFormModal({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {FIELDS.map((field) => {
               const fieldError = fieldErrors[field.key as keyof ScenarioFieldErrors];
-              const baseClassName = `w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2 ${
+              const baseClassName = `w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2 ${
                 fieldError
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35'
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35'
               }`;
 
               return (
                 <div key={field.key} className={field.multiline ? 'md:col-span-2' : ''}>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400" htmlFor={field.key}>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor={field.key}>
                     {field.label}
                   </label>
                   {field.multiline ? (
@@ -157,7 +157,7 @@ export function ScenarioFormModal({
                     />
                   )}
                   {fieldError ? (
-                    <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+                    <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                       {fieldError}
                     </p>
                   ) : null}
@@ -166,14 +166,14 @@ export function ScenarioFormModal({
             })}
           </div>
 
-          <div className="space-y-3 rounded-xl border border-portal-border bg-navy-deep/45 p-4">
+          <div className="space-y-3 rounded-grit-2xl border border-grit-glass-border bg-grit-bg/45 p-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-100">Horarios</h3>
+              <h3 className="font-grit-title text-sm font-semibold text-grit-text">Horarios</h3>
               <button
                 type="button"
                 onClick={onAddSchedule}
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1 rounded-lg border border-portal-border bg-navy-deep px-2.5 py-1.5 text-xs font-semibold text-slate-200"
+                className="inline-flex items-center gap-1 rounded-grit-md border border-grit-glass-border bg-grit-bg px-2.5 py-1.5 text-xs font-semibold text-grit-text"
               >
                 <span className="material-symbols-outlined text-sm" aria-hidden="true">
                   add
@@ -183,16 +183,16 @@ export function ScenarioFormModal({
             </div>
 
             {values.schedules.length === 0 ? (
-              <p className="text-xs text-slate-400">No hay horarios configurados. Puedes guardar sin horarios.</p>
+              <p className="text-xs text-grit-subtext">No hay horarios configurados. Puedes guardar sin horarios.</p>
             ) : null}
 
             {values.schedules.map((schedule, index) => {
               const rowErrors = scheduleErrors[index] ?? {};
 
               return (
-                <div key={`${index}-${schedule.hora_inicio}`} className="grid grid-cols-1 gap-2 rounded-lg border border-portal-border p-3 md:grid-cols-4">
+                <div key={`${index}-${schedule.hora_inicio}`} className="grid grid-cols-1 gap-2 rounded-grit-md border border-grit-glass-border p-3 md:grid-cols-4">
                   <div>
-                    <label className="mb-1 block text-[11px] font-semibold uppercase text-slate-400">Día (0-6)</label>
+                    <label className="mb-1 block text-[11px] font-semibold uppercase text-grit-subtext">Día (0-6)</label>
                     <input
                       type="number"
                       min={0}
@@ -200,40 +200,40 @@ export function ScenarioFormModal({
                       value={schedule.dia_semana}
                       onChange={(event) => onChangeScheduleField(index, 'dia_semana', event.target.value)}
                       disabled={isSubmitting}
-                      className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
+                      className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text"
                     />
-                    {rowErrors.dia_semana ? <p className="mt-1 text-xs text-rose-300">{rowErrors.dia_semana}</p> : null}
+                    {rowErrors.dia_semana ? <p className="mt-1 text-xs text-grit-danger">{rowErrors.dia_semana}</p> : null}
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-semibold uppercase text-slate-400">Hora inicio</label>
+                    <label className="mb-1 block text-[11px] font-semibold uppercase text-grit-subtext">Hora inicio</label>
                     <input
                       type="time"
                       value={schedule.hora_inicio}
                       onChange={(event) => onChangeScheduleField(index, 'hora_inicio', event.target.value)}
                       disabled={isSubmitting}
-                      className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
+                      className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text"
                     />
-                    {rowErrors.hora_inicio ? <p className="mt-1 text-xs text-rose-300">{rowErrors.hora_inicio}</p> : null}
+                    {rowErrors.hora_inicio ? <p className="mt-1 text-xs text-grit-danger">{rowErrors.hora_inicio}</p> : null}
                   </div>
                   <div>
-                    <label className="mb-1 block text-[11px] font-semibold uppercase text-slate-400">Hora fin</label>
+                    <label className="mb-1 block text-[11px] font-semibold uppercase text-grit-subtext">Hora fin</label>
                     <input
                       type="time"
                       value={schedule.hora_fin}
                       onChange={(event) => onChangeScheduleField(index, 'hora_fin', event.target.value)}
                       disabled={isSubmitting}
-                      className="w-full rounded-lg border border-slate-700 bg-navy-deep px-3 py-2 text-sm text-slate-100"
+                      className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text"
                     />
-                    {rowErrors.hora_fin ? <p className="mt-1 text-xs text-rose-300">{rowErrors.hora_fin}</p> : null}
+                    {rowErrors.hora_fin ? <p className="mt-1 text-xs text-grit-danger">{rowErrors.hora_fin}</p> : null}
                   </div>
                   <div className="flex flex-col justify-between gap-2">
-                    <label className="inline-flex items-center gap-2 text-xs text-slate-300">
+                    <label className="inline-flex items-center gap-2 text-xs text-grit-subtext">
                       <input
                         type="checkbox"
                         checked={schedule.disponible}
                         onChange={(event) => onChangeScheduleField(index, 'disponible', event.target.checked)}
                         disabled={isSubmitting}
-                        className="rounded border-slate-600 bg-navy-deep"
+                        className="rounded border-grit-glass-border bg-grit-bg"
                       />
                       Disponible
                     </label>
@@ -241,7 +241,7 @@ export function ScenarioFormModal({
                       type="button"
                       onClick={() => onRemoveSchedule(index)}
                       disabled={isSubmitting}
-                      className="inline-flex items-center justify-center rounded-lg border border-rose-400/40 bg-rose-500/10 px-2 py-1.5 text-xs font-medium text-rose-200"
+                      className="inline-flex items-center justify-center rounded-grit-md border border-grit-danger/40 bg-rose-500/10 px-2 py-1.5 text-xs font-medium text-grit-danger"
                     >
                       Quitar
                     </button>
@@ -258,26 +258,26 @@ export function ScenarioFormModal({
               checked={values.activo}
               onChange={(event) => onChangeField('activo', event.target.checked)}
               disabled={isSubmitting}
-              className="rounded border-slate-600 bg-navy-deep"
+              className="rounded border-grit-glass-border bg-grit-bg"
             />
-            <label htmlFor="scenario-active" className="text-sm text-slate-200">
+            <label htmlFor="scenario-active" className="text-sm text-grit-text">
               Escenario activo
             </label>
           </div>
 
           {submitError ? (
-            <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+            <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
               {submitError}
             </div>
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cancelar
           </button>
@@ -285,7 +285,7 @@ export function ScenarioFormModal({
             type="button"
             onClick={() => void onSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg"
           >
             {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear escenario' : 'Guardar cambios'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">

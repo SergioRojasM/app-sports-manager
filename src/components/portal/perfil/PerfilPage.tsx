@@ -25,7 +25,7 @@ export function PerfilPage() {
   /* ── Loading ── */
   if (loading) {
     return (
-      <div className="glass rounded-xl border border-portal-border p-8 text-sm text-slate-300">
+      <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-8 text-sm text-grit-subtext">
         Cargando perfil…
       </div>
     );
@@ -34,12 +34,12 @@ export function PerfilPage() {
   /* ── Error ── */
   if (error && !successMessage) {
     return (
-      <div className="glass rounded-xl border border-red-500/30 bg-red-500/10 p-8">
-        <p className="text-sm text-red-400">{error}</p>
+      <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/30 bg-red-500/10 p-8">
+        <p className="text-sm text-grit-danger">{error}</p>
         <button
           type="button"
           onClick={refresh}
-          className="mt-3 rounded-lg border border-red-500/40 px-3 py-1.5 text-xs text-red-300 transition hover:bg-red-500/10"
+          className="mt-3 rounded-grit-md border border-grit-danger/40 px-3 py-1.5 text-xs text-grit-danger transition hover:bg-red-500/10"
         >
           Reintentar
         </button>
@@ -51,7 +51,7 @@ export function PerfilPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Success banner */}
       {successMessage && (
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+        <div className="flex items-center gap-3 rounded-grit-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
           <span className="material-symbols-outlined text-base">check_circle</span>
           {successMessage}
         </div>
@@ -59,14 +59,14 @@ export function PerfilPage() {
 
       {/* Submit error (when data is already loaded) */}
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="flex items-center gap-3 rounded-grit-lg border border-grit-danger/30 bg-red-500/10 px-4 py-3 text-sm text-grit-danger">
           <span className="material-symbols-outlined text-base">error</span>
           {error}
         </div>
       )}
 
       {/* Main card */}
-      <div className="glass rounded-xl border border-portal-border p-6 shadow-2xl">
+      <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 shadow-2xl">
         <div className="space-y-8">
           {/* Header: avatar + name + save/cancel */}
           <PerfilHeader
@@ -78,7 +78,7 @@ export function PerfilPage() {
             onCancel={cancel}
           />
 
-          <hr className="border-portal-border" />
+          <hr className="border-grit-glass-border" />
 
           {/* Personal information */}
           <PerfilPersonalForm
@@ -88,7 +88,7 @@ export function PerfilPage() {
             updateField={updateField}
           />
 
-          <hr className="border-portal-border" />
+          <hr className="border-grit-glass-border" />
 
           {/* Sports profile */}
           <PerfilDeportivoForm

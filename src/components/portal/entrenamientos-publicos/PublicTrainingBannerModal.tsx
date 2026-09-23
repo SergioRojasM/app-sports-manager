@@ -39,7 +39,7 @@ export function PublicTrainingBannerModal({ open, bannerUrl, alt, onClose }: Pub
         aria-label="Cerrar imagen (fondo)"
         tabIndex={-1}
         className={[
-          'absolute inset-0 bg-landing-bg/90 transition-opacity duration-300',
+          'absolute inset-0 bg-grit-bg/70 backdrop-blur-sm transition-opacity duration-300',
           visible ? 'opacity-100' : 'opacity-0',
         ].join(' ')}
         onClick={onClose}
@@ -59,7 +59,7 @@ export function PublicTrainingBannerModal({ open, bannerUrl, alt, onClose }: Pub
             type="button"
             aria-label="Cerrar imagen"
             onClick={onClose}
-            className="absolute -top-11 right-0 rounded-lg border border-landing-border bg-landing-surface-card/80 p-2 text-landing-text transition hover:text-landing-primary"
+            className="absolute -top-11 right-0 rounded-grit-md border border-grit-glass-border bg-grit-card p-2 text-grit-text transition hover:text-grit-cyan"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -70,7 +70,7 @@ export function PublicTrainingBannerModal({ open, bannerUrl, alt, onClose }: Pub
           <img
             src={bannerUrl}
             alt={alt}
-            className="max-h-[90vh] w-full rounded-2xl border border-landing-border object-contain"
+            className="max-h-[90vh] w-full rounded-grit-2xl border border-grit-glass-border object-contain"
           />
         </div>
       </div>

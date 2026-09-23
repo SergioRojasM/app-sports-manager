@@ -7,8 +7,8 @@ type SuscripcionEstadoBadgeProps = {
 const BADGE_CLASSES: Record<SuscripcionEstado, string> = {
   pendiente: 'bg-amber-900/30 text-amber-300 border border-amber-400/30',
   activa: 'bg-emerald-900/30 text-emerald-300 border border-emerald-400/30',
-  vencida: 'bg-slate-800/50 text-slate-400 border border-slate-600/30',
-  cancelada: 'bg-slate-800/50 text-slate-400 border border-slate-600/30',
+  vencida: 'bg-grit-card text-grit-subtext border border-grit-glass-border',
+  cancelada: 'bg-grit-card text-grit-subtext border border-grit-glass-border',
 };
 
 const ESTADO_LABELS: Record<SuscripcionEstado, string> = {

@@ -19,14 +19,14 @@ const CARDS: StatCardDef[] = [
 
 function StatCard({ card, stats }: { card: StatCardDef; stats: SuscripcionesAdminStats }) {
   return (
-    <div className="glass rounded-lg border border-portal-border p-5">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-5">
       <div className="flex items-center gap-3">
-        <span className={`material-symbols-outlined text-2xl ${card.color ?? 'text-turquoise'}`}>
+        <span className={`material-symbols-outlined text-2xl ${card.color ?? 'text-grit-cyan'}`}>
           {card.icon}
         </span>
         <div>
-          <p className="text-sm text-slate-400">{card.label}</p>
-          <p className="text-2xl font-bold text-slate-100">
+          <p className="text-sm text-grit-subtext">{card.label}</p>
+          <p className="text-2xl font-bold text-grit-text">
             {card.getValue(stats)}
           </p>
         </div>

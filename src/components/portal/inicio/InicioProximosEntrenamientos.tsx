@@ -7,7 +7,7 @@ function statusBadge(estado: string) {
     confirmada: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Confirmada' },
     pendiente: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Pendiente' },
   };
-  const badge = map[estado] ?? { bg: 'bg-slate-500/20', text: 'text-slate-400', label: estado };
+  const badge = map[estado] ?? { bg: 'bg-grit-subtext/20', text: 'text-grit-subtext', label: estado };
   return (
     <span
       className={`${badge.bg} ${badge.text} text-[10px] font-bold px-2 py-0.5 rounded-md`}
@@ -23,20 +23,20 @@ export function InicioProximosEntrenamientos({
   entrenamientos: InicioEntrenamiento[];
 }) {
   return (
-    <div className="glass-card rounded-md p-6">
+    <div className="border border-grit-glass-border bg-grit-card backdrop-blur-md rounded-grit-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h4 className="text-sm font-bold">Próximos Entrenamientos</h4>
-          <p className="text-slate-500 text-[10px]">Tus sesiones reservadas</p>
+          <p className="text-grit-muted text-[10px]">Tus sesiones reservadas</p>
         </div>
       </div>
 
       {entrenamientos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <span className="material-symbols-outlined text-3xl text-slate-600 mb-2">
+          <span className="material-symbols-outlined text-3xl text-grit-muted mb-2">
             directions_run
           </span>
-          <p className="text-slate-400 text-sm">No tienes entrenamientos próximos</p>
+          <p className="text-grit-subtext text-sm">No tienes entrenamientos próximos</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -44,20 +44,20 @@ export function InicioProximosEntrenamientos({
             <Link
               key={e.reserva_id}
               href={`/portal/orgs/${e.tenant_id}/gestion-entrenamientos`}
-              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-md bg-slate-700/30 border border-white/5 hover:border-primary/30 transition-all group"
+              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-grit-2xl bg-grit-card border border-grit-glass-border hover:border-grit-cyan/30 transition-all group"
               aria-label={`Ver entrenamiento ${e.nombre}`}
             >
               <div className="flex items-center gap-3 sm:contents">
                 {/* Discipline icon */}
-                <div className="size-10 rounded-md bg-secondary/10 flex items-center justify-center text-secondary flex-shrink-0">
+                <div className="size-10 rounded-md bg-grit-teal/10 flex items-center justify-center text-grit-teal flex-shrink-0">
                   <span className="material-symbols-outlined text-lg">
                     {e.disciplina_nombre ? 'exercise' : 'exercise'}
                   </span>
                 </div>
 
                 <div className="flex-1 min-w-0 sm:hidden">
-                  <p className="text-sm font-semibold text-secondary truncate">{e.nombre}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{formatBogotaDateTime(e.fecha_hora)}</p>
+                  <p className="text-sm font-semibold text-grit-teal truncate">{e.nombre}</p>
+                  <p className="text-xs text-grit-muted mt-0.5">{formatBogotaDateTime(e.fecha_hora)}</p>
                 </div>
 
                 <div className="flex-shrink-0 sm:hidden">{statusBadge(e.reserva_estado)}</div>
@@ -65,9 +65,9 @@ export function InicioProximosEntrenamientos({
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-secondary truncate hidden sm:block">{e.nombre}</p>
-                <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">{formatBogotaDateTime(e.fecha_hora)}</p>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:mt-1">
+                <p className="text-sm font-semibold text-grit-teal truncate hidden sm:block">{e.nombre}</p>
+                <p className="text-xs text-grit-muted mt-0.5 hidden sm:block">{formatBogotaDateTime(e.fecha_hora)}</p>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-grit-muted sm:mt-1">
                   {e.escenario_nombre && (
                     <span className="flex items-center gap-1">
                       <span className="material-symbols-outlined text-xs">location_on</span>
@@ -80,7 +80,7 @@ export function InicioProximosEntrenamientos({
                       {e.punto_encuentro}
                     </span>
                   )}
-                  <span className="text-slate-600">·</span>
+                  <span className="text-grit-muted">·</span>
                   <span>{e.org_nombre}</span>
                 </div>
               </div>

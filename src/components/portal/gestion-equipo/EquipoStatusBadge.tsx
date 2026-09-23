@@ -8,7 +8,7 @@ const BADGE_CLASSES: Record<MiembroEstado, string> = {
   activo: 'bg-emerald-900/30 text-emerald-300 border border-emerald-400/30',
   mora: 'bg-amber-900/30 text-amber-300 border border-amber-400/30',
   suspendido: 'bg-orange-900/30 text-orange-300 border border-orange-400/30',
-  inactivo: 'bg-slate-800/50 text-slate-400 border border-slate-600/30',
+  inactivo: 'bg-grit-card text-grit-subtext border border-grit-glass-border',
   pendiente_activacion: 'bg-sky-900/30 text-sky-300 border border-sky-400/30',
 };
 

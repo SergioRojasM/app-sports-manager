@@ -46,7 +46,7 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
         type="button"
         aria-label="Cerrar formulario de plantilla"
         className={[
-          'absolute inset-0 bg-slate-950/70 transition-opacity duration-300',
+          'absolute inset-0 bg-grit-bg/70 backdrop-blur-sm transition-opacity duration-300',
           visible ? 'opacity-100' : 'opacity-0',
         ].join(' ')}
         onClick={onClose}
@@ -58,14 +58,14 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
         aria-modal="true"
         aria-label="Nueva plantilla"
         className={[
-          'absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out',
+          'absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out',
           visible ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Nueva plantilla</h2>
-            <p className="mt-1 text-xs text-slate-400">
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">Nueva plantilla</h2>
+            <p className="mt-1 text-xs text-grit-subtext">
               Dale un nombre a tu plantilla; luego podrás construirla sección por sección.
             </p>
           </div>
@@ -73,7 +73,7 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
           </button>
@@ -83,10 +83,10 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
           {/* Nombre */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="plantilla-nombre"
             >
-              Nombre <span className="text-rose-400">*</span>
+              Nombre <span className="text-grit-danger">*</span>
             </label>
             <input
               id="plantilla-nombre"
@@ -97,14 +97,14 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
               maxLength={150}
               placeholder="Ej: Ficha médica de ingreso"
               className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
+                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
                 fieldError
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
+                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
+                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
               ].join(' ')}
             />
             {fieldError ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldError}
               </p>
             ) : null}
@@ -113,10 +113,10 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
           {/* Descripción */}
           <div>
             <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
               htmlFor="plantilla-descripcion"
             >
-              Descripción <span className="normal-case font-normal text-slate-500">(opcional)</span>
+              Descripción <span className="normal-case font-normal text-grit-muted">(opcional)</span>
             </label>
             <textarea
               id="plantilla-descripcion"
@@ -125,13 +125,13 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
               onChange={(e) => setField('descripcion', e.target.value)}
               disabled={isSubmitting}
               placeholder="Descripción opcional de la plantilla"
-              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
+              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
             />
           </div>
 
           {submitError ? (
             <div
-              className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
+              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
               role="alert"
             >
               {submitError}
@@ -139,12 +139,12 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition-all duration-200 hover:border-slate-500 hover:bg-navy-deep hover:text-slate-100"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text transition-all duration-200 hover:border-grit-glass-border hover:bg-grit-bg hover:text-grit-text"
           >
             Cancelar
           </button>
@@ -152,7 +152,7 @@ export function FormularioFormModal({ open, submitError, onClose, onSubmit }: Fo
             type="button"
             onClick={() => void handleFormSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition-all duration-200 hover:bg-turquoise/85 hover:shadow-lg hover:shadow-turquoise/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg transition-all duration-200 hover:bg-grit-cyan/85 hover:shadow-lg hover:shadow-grit-cyan/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
           >
             {isSubmitting ? 'Creando...' : 'Crear plantilla'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">save</span>

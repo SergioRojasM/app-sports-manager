@@ -65,7 +65,7 @@ export function EditTenantDrawer({
       <button
         type="button"
         aria-label="Cerrar edición de organización"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -74,19 +74,19 @@ export function EditTenantDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Editar organización"
-        className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Editar organización</h2>
-            <p className="mt-1 text-xs text-slate-400">Actualiza la información principal de tu organización.</p>
+            <h2 className="font-grit-title text-lg font-semibold text-grit-text">Editar organización</h2>
+            <p className="mt-1 text-xs text-grit-subtext">Actualiza la información principal de tu organización.</p>
           </div>
           <button
             type="button"
             aria-label="Cerrar"
             disabled={isSubmitting}
             onClick={onClose}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -96,7 +96,7 @@ export function EditTenantDrawer({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {isLoading ? (
-            <div className="rounded-lg border border-portal-border bg-navy-deep/50 p-4 text-sm text-slate-300">
+            <div className="rounded-grit-2xl border border-grit-glass-border bg-grit-bg/50 p-4 text-sm text-grit-subtext">
               Cargando información editable...
             </div>
           ) : (
@@ -111,18 +111,18 @@ export function EditTenantDrawer({
           )}
 
           {submitError ? (
-            <div className="mt-4 rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+            <div className="mt-4 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
               {submitError}
             </div>
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text transition hover:bg-grit-bg disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancelar
           </button>
@@ -130,7 +130,7 @@ export function EditTenantDrawer({
             type="button"
             onClick={() => void onSubmit()}
             disabled={isSubmitting || isLoading}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">
