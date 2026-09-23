@@ -414,6 +414,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
 │   │       │   └── analitica.service.ts  # Browser RPC adapter for get_tenant_bi_dashboard only; maps 42501/22007 without exposing bi schema facts (US-0115)
+│   │       │                             #   The RPC aggregates private `bi` fact views (no grants to anon/authenticated):
+│   │       │                             #   fct_pagos, fct_entrenamientos, fct_reservas, fct_asistencia, and fct_suscripciones
+│   │       │                             #   (one row per subscription: plan/plan type, Bogotá sale date, es_vendida, es_activa = estado 'activa',
+│   │       │                             #   per-subscription payment summary). All subscription KPIs MUST read fct_suscripciones (bi-fct-suscripciones)
 │   │       │   └── perfil.service.ts
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
