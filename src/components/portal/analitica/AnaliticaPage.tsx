@@ -3,20 +3,24 @@
 import { useMemo, useState } from 'react';
 import { useAnalitica } from '@/hooks/portal/analitica/useAnalitica';
 import { GritButton, GritCard, GritEmptyState, GritPageHeader, GritSectionHeading } from '@/components/ui';
-import type { AnaliticaDashboard, AnaliticaDateRange } from '@/types/portal/analitica.types';
+import type { AnaliticaDashboard, AnaliticaDateRange, AnaliticaOperations, AnaliticaRevenueBreakdown } from '@/types/portal/analitica.types';
 import { AnaliticaDateRangeFilter, bogotaToday } from './AnaliticaDateRangeFilter';
 import { AnaliticaKpiCard } from './AnaliticaKpiCard';
 import { AnaliticaTabs, type AnaliticaTab } from './AnaliticaTabs';
+import { AnaliticaDataTable, type AnaliticaColumn } from './AnaliticaDataTable';
 import {
   BookingAverageLineChart,
   BookingsByDisciplinePieChart,
   ChartEmpty,
+  MonthlyOperationsLineChart,
+  MonthlyPercentLineChart,
   MonthlyRevenueBarChart,
   RevenueValidationPieChart,
   SubscriptionsByPlanBarChart,
   SubscriptionsSoldLineChart,
+  SubscriptionsSoldStackedBarChart,
 } from './charts';
-import { currency, decimal1, integer, percent } from './format';
+import { currency, decimal1, integer, MEMBER_STATUS_LABELS, monthYear, percent, percentOr, shortDate } from './format';
 
 type SummaryKpi = {
   label: string;
@@ -126,33 +130,140 @@ function Resumen({ data, kpis, onNavigate }: { data: AnaliticaDashboard; kpis: S
   </div>;
 }
 
+const TWO_COLUMNS = 'grid gap-4 lg:grid-cols-2';
+const KPI_ROW = 'grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4';
+
+const REVENUE_COLUMNS = (label: string): AnaliticaColumn[] => [
+  { key: 'label', label },
+  { key: 'subscriptions', label: 'Suscripciones', align: 'right' },
+  { key: 'payments', label: 'Pagos', align: 'right' },
+  { key: 'total', label: 'Total', align: 'right' },
+  { key: 'validated', label: 'Validado', align: 'right' },
+  { key: 'pending', label: 'Pendiente', align: 'right' },
+];
+
+function revenueRow(id: string, label: string, row: AnaliticaRevenueBreakdown) {
+  return {
+    id,
+    label,
+    subscriptions: integer.format(row.subscriptionCount),
+    payments: integer.format(row.paymentCount),
+    total: <span className="font-semibold">{currency.format(row.totalRevenue)}</span>,
+    validated: currency.format(row.recognizedRevenue),
+    pending: currency.format(row.pendingRevenue),
+  };
+}
+
 function Ingresos({ data }: { data: AnaliticaDashboard }) {
-  const { revenue } = data;
+  const { revenue, subscriptions } = data;
   return <div className="space-y-6">
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <AnaliticaKpiCard label="Ingresos validados" value={currency.format(revenue.recognizedRevenue)} tone="success" icon="payments" />
-      <AnaliticaKpiCard label="Variación periodo anterior" value={revenue.revenueChangePercent === null ? 'Sin referencia' : percent(revenue.revenueChangePercent)} icon="trending_up" />
-      <AnaliticaKpiCard label="Acumulado anual" value={currency.format(revenue.yearToDateRevenue)} icon="savings" />
+    <div className={KPI_ROW}>
+      <AnaliticaKpiCard label="Ingresos totales" value={currency.format(revenue.totalRevenue)} detail="Validados + pendientes" tone="success" icon="payments" />
+      <AnaliticaKpiCard label="Ingreso promedio por mes" value={currency.format(revenue.averageMonthlyRevenue)} icon="calendar_month" />
+      <AnaliticaKpiCard label="Acumulado MTD" value={currency.format(revenue.monthToDateRevenue)} detail={monthYear(data.revenue.monthlyRevenue.at(-1)?.monthStart ?? '')} icon="savings" />
       <AnaliticaKpiCard label="Pendiente de validar" value={currency.format(revenue.pendingPaymentAmount)} detail={`${integer.format(revenue.pendingPaymentCount)} pagos`} tone="warning" icon="pending" />
     </div>
-    <Panel title="Ingresos mensuales"><MiniBars items={revenue.monthlyRevenue.map((row) => ({ label: row.monthKey, value: row.recognizedRevenue, text: currency.format(row.recognizedRevenue) }))} /></Panel>
-    <div className="grid gap-4 lg:grid-cols-2"><Panel title="Ingresos por plan"><RevenueTable rows={revenue.revenueByPlan} labelKey="planName" /></Panel><Panel title="Métodos de pago"><RevenueTable rows={revenue.revenueByPaymentMethod} labelKey="paymentMethodName" /></Panel></div>
-    <Panel title="Atletas con mayor ingreso"><Ranking rows={revenue.topAthletesByRevenue.map((row) => [row.athleteName, currency.format(row.recognizedRevenue), `${row.paymentCount} pagos`])} /></Panel>
+    <Panel title="Ingresos mensuales" subtitle="Pagos validados y pendientes por mes"><MonthlyRevenueBarChart data={revenue.monthlyRevenue} /></Panel>
+    <Panel title="Suscripciones vendidas por mes" subtitle="Según si ya tienen un pago validado"><SubscriptionsSoldStackedBarChart data={subscriptions.monthlySold} /></Panel>
+    <div className={TWO_COLUMNS}>
+      <Panel title="Ingresos por plan"><AnaliticaDataTable columns={REVENUE_COLUMNS('Plan')} rows={revenue.revenueByPlan.map((row, index) => revenueRow(`${row.planName}-${row.planTypeName ?? ''}-${index}`, row.planName, row))} /></Panel>
+      <Panel title="Métodos de pago"><AnaliticaDataTable columns={REVENUE_COLUMNS('Método')} rows={revenue.revenueByPaymentMethod.map((row) => revenueRow(row.paymentMethodName, row.paymentMethodName, row))} /></Panel>
+    </div>
+    <Panel title="Atletas con mayor ingreso"><AnaliticaDataTable columns={REVENUE_COLUMNS('Atleta')} rows={revenue.topAthletesByRevenue.map((row) => revenueRow(row.athleteId, row.athleteName, row))} /></Panel>
   </div>;
+}
+
+const BOOKING_BREAKDOWN_COLUMNS = (label: string): AnaliticaColumn[] => [
+  { key: 'label', label },
+  { key: 'trainings', label: 'Entrenamientos', align: 'right' },
+  { key: 'bookings', label: 'Reservas', align: 'right' },
+  { key: 'occupancy', label: '% Ocupación promedio', align: 'right' },
+  { key: 'attendance', label: '% Asistencia promedio', align: 'right' },
+];
+
+function bookingBreakdownRow(label: string, row: AnaliticaOperations['bookingByDiscipline'][number] | AnaliticaOperations['bookingByPublicStatus'][number]) {
+  return {
+    id: label,
+    label,
+    trainings: integer.format(row.trainingCount),
+    bookings: integer.format(row.validBookingCount),
+    occupancy: percentOr(row.averageOccupancyPercent, 'Sin capacidad'),
+    attendance: percentOr(row.averageAttendancePercent, 'Sin datos'),
+  };
+}
+
+const ATHLETE_BOOKING_COLUMNS: AnaliticaColumn[] = [
+  { key: 'rank', label: '#' },
+  { key: 'athlete', label: 'Atleta' },
+  { key: 'bookings', label: 'Reservas', align: 'right' },
+  { key: 'attendance', label: 'Asistencias', align: 'right' },
+];
+
+function athleteBookingRows(rows: Array<{ athleteId: string; athleteName: string; validBookingCount: number; attendanceCount: number }>) {
+  return rows.map((row, index) => ({
+    id: row.athleteId,
+    rank: <span className="font-semibold text-grit-cyan">{index + 1}</span>,
+    athlete: row.athleteName,
+    bookings: integer.format(row.validBookingCount),
+    attendance: integer.format(row.attendanceCount),
+  }));
 }
 
 function Operacion({ data }: { data: AnaliticaDashboard }) {
   const { operations } = data;
   return <div className="space-y-6">
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><AnaliticaKpiCard label="Entrenamientos programados" value={integer.format(operations.scheduledTrainingCount)} icon="event_available" /><AnaliticaKpiCard label="Reservas válidas" value={integer.format(operations.validBookingCount)} icon="event_seat" /><AnaliticaKpiCard label="Ocupación" value={percent(operations.occupancyPercent)} icon="donut_small" /><AnaliticaKpiCard label="Sin cupo definido" value={integer.format(operations.trainingsWithoutCapacity)} tone="warning" icon="help" /></div>
-    <div className="grid gap-4 lg:grid-cols-2"><Panel title="Reservas por disciplina"><OperationsTable rows={operations.bookingByDiscipline.map((row) => [row.disciplineName, integer.format(row.validBookingCount), percent(row.occupancyPercent)])} /></Panel><Panel title="Publicación en marketplace"><OperationsTable rows={operations.bookingByPublicStatus.map((row) => [row.label, integer.format(row.validBookingCount), percent(row.occupancyPercent)])} /></Panel></div>
-    <div className="grid gap-4 lg:grid-cols-2"><Panel title="Atletas con más reservas"><Ranking rows={operations.topAthletesByBookings.map((row) => [row.athleteName, `${row.validBookingCount} reservas`, `${row.attendanceCount} asistencias`])} /></Panel><Panel title="Próximas sesiones con alta ocupación"><Alerts rows={operations.upcomingCapacityAlerts} /></Panel></div>
+    <div className={KPI_ROW}>
+      <AnaliticaKpiCard label="Entrenamientos programados" value={integer.format(operations.scheduledTrainingCount)} detail={`${decimal1(operations.averageMonthlyTrainings)} promedio por mes`} icon="event_available" />
+      <AnaliticaKpiCard label="Reservas válidas" value={integer.format(operations.validBookingCount)} detail={`${decimal1(operations.averageMonthlyBookings)} promedio por mes`} icon="event_seat" />
+      <AnaliticaKpiCard label="Ocupación promedio / entrenamiento" value={percent(operations.averageOccupancyPercent)} icon="donut_small" />
+      <AnaliticaKpiCard label="Asistencia promedio / entrenamiento" value={percentOr(operations.averageAttendancePercent, 'Sin datos')} icon="how_to_reg" />
+    </div>
+    <Panel title="Entrenamientos y reservas por mes" subtitle="Sesiones no canceladas y sus reservas válidas"><MonthlyOperationsLineChart data={operations.monthlyBookingAverage} /></Panel>
+    <div className={TWO_COLUMNS}>
+      <Panel title="Ocupación promedio por mes" subtitle="Promedio por entrenamiento con cupo"><MonthlyPercentLineChart data={operations.monthlyBookingAverage} valueKey="averageOccupancyPercent" label="Ocupación" /></Panel>
+      <Panel title="Asistencia promedio por mes" subtitle="Promedio por entrenamiento realizado con reservas"><MonthlyPercentLineChart data={operations.monthlyBookingAverage} valueKey="averageAttendancePercent" label="Asistencia" colorIndex={3} /></Panel>
+    </div>
+    <div className={TWO_COLUMNS}>
+      <Panel title="Reservas por disciplina"><AnaliticaDataTable columns={BOOKING_BREAKDOWN_COLUMNS('Disciplina')} rows={operations.bookingByDiscipline.map((row) => bookingBreakdownRow(row.disciplineName, row))} /></Panel>
+      <Panel title="Reservas por tipo de entrenamiento"><AnaliticaDataTable columns={BOOKING_BREAKDOWN_COLUMNS('Tipo')} rows={operations.bookingByPublicStatus.map((row) => bookingBreakdownRow(row.label, row))} /></Panel>
+    </div>
+    <div className={TWO_COLUMNS}>
+      <Panel title="Atletas con más reservas" subtitle="Top 10 del periodo"><AnaliticaDataTable columns={ATHLETE_BOOKING_COLUMNS} rows={athleteBookingRows(operations.topAthletesByBookings)} /></Panel>
+      <Panel title="Atletas con menos reservas" subtitle="Top 10 de atletas activos, incluye 0 reservas"><AnaliticaDataTable columns={ATHLETE_BOOKING_COLUMNS} rows={athleteBookingRows(operations.bottomAthletesByBookings)} /></Panel>
+    </div>
+    <Panel title="Próximas sesiones con alta ocupación"><Alerts rows={operations.upcomingCapacityAlerts} /></Panel>
   </div>;
 }
 
 function Equipo({ data }: { data: AnaliticaDashboard }) {
   const { team } = data;
-  return <div className="space-y-6"><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{Object.entries(team.membersByStatus).map(([state, count]) => <AnaliticaKpiCard key={state} label={state.replace('_', ' ')} value={integer.format(count)} icon="group" />)}</div><div className="grid gap-4 lg:grid-cols-2"><Panel title="Atletas activos por tipo de plan"><Ranking rows={team.activeAthletesByPlanType.map((row) => [row.planTypeName, `${row.athleteCount} atletas`, ''])} /></Panel><Panel title="Cobertura de suscripciones"><AnaliticaKpiCard label="Atletas activos sin suscripción" value={integer.format(team.activeAthletesWithoutSubscriptionCount)} tone="warning" icon="person_off" /></Panel></div><Panel title="Miembros activos sin suscripción"><OperationsTable rows={team.membersWithoutSubscription.map((row) => [row.athleteName, row.membershipStatus, row.latestBookingDate ?? 'Sin reservas'])} /></Panel></div>;
+  return <div className="space-y-6">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      {MEMBER_STATUS_LABELS.map(([state, label]) => <AnaliticaKpiCard key={state} label={label} value={integer.format(team.membersByStatus[state] ?? 0)} detail="Atletas" icon="group" />)}
+    </div>
+    <div className={TWO_COLUMNS}>
+      <Panel title="Atletas activos por plan"><AnaliticaDataTable
+        columns={[{ key: 'plan', label: 'Plan' }, { key: 'athletes', label: 'Atletas', align: 'right' }]}
+        rows={team.activeAthletesByPlan.map((row) => ({ id: row.planName, plan: row.planName, athletes: integer.format(row.athleteCount) }))}
+      /></Panel>
+      <Panel title="Cobertura de suscripciones"><AnaliticaKpiCard label="Atletas activos sin suscripción" value={integer.format(team.activeAthletesWithoutSubscriptionCount)} tone="warning" icon="person_off" /></Panel>
+    </div>
+    <Panel title="Atletas activos sin suscripción" subtitle="Hasta 25, primero los que llevan más tiempo sin reservar"><AnaliticaDataTable
+      columns={[
+        { key: 'athlete', label: 'Atleta' },
+        { key: 'status', label: 'Estado' },
+        { key: 'booking', label: 'Última reserva', align: 'right' },
+        { key: 'subscription', label: 'Última suscripción', align: 'right' },
+      ]}
+      rows={team.membersWithoutSubscription.map((row) => ({
+        id: row.athleteId,
+        athlete: row.athleteName,
+        status: row.membershipStatus === 'activo' ? 'Activo' : row.membershipStatus,
+        booking: row.latestBookingDate ? shortDate(row.latestBookingDate) : 'Sin reservas',
+        subscription: row.latestSubscriptionDate ? shortDate(row.latestSubscriptionDate) : 'Sin suscripciones',
+      }))}
+    /></Panel>
+  </div>;
 }
 
 function Panel({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) { return <GritCard as="section" variant="card" padding="none" className="p-[22px]"><GritSectionHeading size="md" title={title} subtitle={subtitle} /><div className="mt-5">{children}</div></GritCard>; }
@@ -166,10 +277,6 @@ function StateCard({ message, tone, compact, onRetry }: { message: string; tone?
   }
   return <GritEmptyState icon={tone === 'error' ? 'error' : 'hourglass_empty'} title={tone === 'error' ? 'No pudimos cargar la analítica' : 'Cargando analítica...'} description={tone === 'error' ? message : undefined} descriptionClassName={tone === 'error' ? 'text-grit-danger' : undefined} action={onRetry ? <GritButton size="sm" onClick={onRetry}>Reintentar</GritButton> : undefined} />;
 }
-function MiniBars({ items }: { items: Array<{ label: string; value: number; text: string }> }) { const max = Math.max(...items.map((item) => item.value), 1); return items.length ? <div className="space-y-3">{items.map((item) => <div key={item.label} className="grid grid-cols-[74px_1fr_auto] items-center gap-3 font-grit-body text-xs"><span className="text-grit-subtext">{item.label}</span><div className="h-1.5 overflow-hidden rounded-full bg-white/[.07]"><div className="h-full rounded-full bg-grit-cyan" style={{ width: `${(item.value / max) * 100}%` }} /></div><span className="font-semibold text-grit-text">{item.text}</span></div>)}</div> : <Empty />; }
-function RevenueTable({ rows, labelKey }: { rows: Array<Record<string, unknown>>; labelKey: string }) { return <table className="w-full text-left font-grit-body text-xs"><thead className="text-grit-subtext"><tr><th className="pb-2 font-semibold uppercase tracking-wide">Concepto</th><th className="pb-2 text-right font-semibold uppercase tracking-wide">Pagos</th><th className="pb-2 text-right font-semibold uppercase tracking-wide">Ingreso</th></tr></thead><tbody>{rows.map((row, index) => <tr key={`${String(row[labelKey])}-${index}`} className="border-t border-white/[.07] text-grit-text"><td className="py-2">{String(row[labelKey])}</td><td className="py-2 text-right">{integer.format(Number(row.paymentCount))}</td><td className="py-2 text-right">{currency.format(Number(row.recognizedRevenue))}</td></tr>)}</tbody></table>; }
-function OperationsTable({ rows }: { rows: string[][] }) { return rows.length ? <table className="w-full text-left font-grit-body text-xs"><tbody>{rows.map((row) => <tr key={row.join('-')} className="border-t border-white/[.07] text-grit-text"><td className="py-2">{row[0]}</td><td className="py-2 text-right">{row[1]}</td><td className="py-2 text-right text-grit-subtext">{row[2]}</td></tr>)}</tbody></table> : <Empty />; }
-function Ranking({ rows }: { rows: string[][] }) { return rows.length ? <ol className="space-y-2">{rows.map((row, index) => <li key={`${row[0]}-${index}`} className="grid grid-cols-[24px_1fr_auto_auto] gap-2 font-grit-body text-xs"><span className="font-semibold text-grit-cyan">{index + 1}</span><span className="text-grit-text">{row[0]}</span><span className="text-grit-subtext">{row[1]}</span><span className="text-grit-muted">{row[2]}</span></li>)}</ol> : <Empty />; }
 function Alerts({ rows }: { rows: AnaliticaDashboard['operations']['upcomingCapacityAlerts'] }) { return rows.length ? <div className="space-y-2">{rows.map((row) => <div key={row.trainingId} className="flex items-center justify-between gap-3 border-t border-white/[.07] py-2 font-grit-body text-xs"><div><p className="text-grit-text">{row.disciplineName ?? 'Entrenamiento'}</p><p className="text-grit-muted">{row.scenarioName ?? 'Sin escenario'} · {new Date(row.sessionAt).toLocaleDateString('es-CO', { timeZone: 'America/Bogota' })}</p></div><span className="font-semibold text-grit-discipline-run">{percent(row.occupancyPercent)}</span></div>)}</div> : <Empty />; }
 const Empty = ChartEmpty;
 

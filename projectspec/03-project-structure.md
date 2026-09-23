@@ -230,12 +230,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── SuscripcionTipoBadge.tsx      # "Miembro"/"No miembro" badge from es_miembro (US-0098)
 │   │   │       └── index.ts
 │   │   │   └── analitica/                  # Feature slice (portal/analitica — US-0115; styled per grit-arena-v2.pen node zfVKC in US-0116's design pass)
-│   │   │       ├── AnaliticaPage.tsx       # Tenant BI root: date range, stale-data refresh state and four accessible tabs; GritPageHeader + GritCard panels/tables + GritEmptyState states. Resumen = 2 rows × 4 KPI cards (clickable → tab) + 3 rows × 2 nivo charts (analitica-resumen-kpis-graficas)
+│   │   │       ├── AnaliticaPage.tsx       # Tenant BI root: date range, stale-data refresh state and four accessible tabs; GritPageHeader + GritCard panels/tables + GritEmptyState states. Resumen = 2 rows × 4 KPI cards (clickable → tab) + 3 rows × 2 nivo charts (analitica-resumen-kpis-graficas). Ingresos / Operación / Equipo per analitica-pestanas-ingresos-operacion-equipo: KPI rows, monthly charts, AnaliticaDataTable tables with headers; Equipo counts athletes only
 │   │   │       ├── AnaliticaDateRangeFilter.tsx # Colombia/Bogota presets and custom date validation; glass drawer with gritInputClass inputs and GritButton actions
 │   │   │       ├── AnaliticaTabs.tsx       # WAI-ARIA tablist with Arrow/Home/End keyboard navigation; v2 active state (cyan gradient + glass border)
 │   │   │       ├── AnaliticaKpiCard.tsx    # KPI card per zfVKC: GritCard + 40px round GritIconTile, 28px Rajdhani value, optional `icon`, tone → grit-success / grit-discipline-run
 │   │   │       ├── chart-theme.ts          # analiticaChartTheme + ANALITICA_CHART_COLORS for the @nivo charts — the ONLY place chart colours are defined (grit-* values, hue-separated series order)
-│   │   │       ├── format.ts               # Shared formatters: currency/integer/percent, decimal1, compactCurrency ("$ 1,2 M" / "$ 850 mil"), share %, monthLabel/spansYears
+│   │   │       ├── format.ts               # Shared formatters: currency/integer/percent/percentOr, decimal1, compactCurrency ("$ 1,2 M" / "$ 850 mil"), share %, monthLabel/spansYears, shortDate ("10 may 2026"), monthYear, MEMBER_STATUS_LABELS
+│   │   │       ├── AnaliticaDataTable.tsx  # Detail-tab table: header row, right-aligned numeric columns, overflow-x-auto inside its panel, shared empty message
 │   │   │       ├── charts/                 # Resumen nivo charts (analitica-resumen-kpis-graficas); each renders ChartEmpty on an empty/all-zero series, fixed h-72
 │   │   │       │   ├── MonthlyRevenueBarChart.tsx       # @nivo/bar: validated + pending per month (clipped to range), custom layer draws the compact total above each bar
 │   │   │       │   ├── RevenueValidationPieChart.tsx    # @nivo/pie donut: Validados vs Pendientes, % arc labels
@@ -243,7 +244,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       │   ├── SubscriptionsByPlanBarChart.tsx  # @nivo/bar horizontal: sold per plan, best seller on top, top 9 + "Otros planes"
 │   │   │       │   ├── BookingAverageLineChart.tsx      # @nivo/line: valid bookings ÷ sessions per month
 │   │   │       │   ├── BookingsByDisciplinePieChart.tsx # @nivo/pie donut: % of valid bookings per discipline, top 5 + "Otras"
-│   │   │       │   ├── shared.tsx          # ChartEmpty, ChartFrame (h-72), ChartTooltip, donutLegend, truncate
+│   │   │       │   ├── SubscriptionsSoldStackedBarChart.tsx # Ingresos: @nivo/bar stacked, sold per month with / without validated payment, totals above bars
+│   │   │       │   ├── MonthlyOperationsLineChart.tsx   # Operación: @nivo/line, trainings + bookings per month on one left axis, slice tooltip
+│   │   │       │   ├── MonthlyPercentLineChart.tsx      # Operación: @nivo/line, monthly avg occupancy/attendance %, Y 0–100, null months as gaps
+│   │   │       │   ├── shared.tsx          # ChartEmpty, ChartFrame (h-72), ChartTooltip, donutLegend, truncate, barTotalsLayer (totals above plain or stacked bars)
 │   │   │       │   └── index.ts
 │   │   │       └── index.ts
 │   │   │   └── gestion-reservas/           # Feature slice (portal/gestion-reservas — US-0073)
@@ -415,7 +419,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
 │   │       │   └── analitica.service.ts  # Browser RPC adapter for get_tenant_bi_dashboard only; maps 42501/22007 without exposing bi schema facts (US-0115)
 │   │       │                             #   The RPC aggregates private `bi` fact views (no grants to anon/authenticated):
-│   │       │                             #   fct_pagos, fct_entrenamientos, fct_reservas, fct_asistencia, and fct_suscripciones
+│   │       │                             #   fct_pagos, fct_entrenamientos, fct_reservas, fct_asistencia, fct_suscripciones, and fct_miembros
+│   │       │                             #   (one row per membership: nombre_completo, rol, es_atleta, estado — names and team figures). The RPC reads ONLY bi.* facts
 │   │       │                             #   (one row per subscription: plan/plan type, Bogotá sale date, es_vendida, es_activa = estado 'activa',
 │   │       │                             #   per-subscription payment summary). All subscription KPIs MUST read fct_suscripciones (bi-fct-suscripciones)
 │   │       │   └── perfil.service.ts

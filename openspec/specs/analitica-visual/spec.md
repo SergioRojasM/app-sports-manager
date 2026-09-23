@@ -89,11 +89,11 @@ Loading, error and empty states SHALL render through `GritEmptyState` (error des
 - **THEN** the compact error banner SHALL appear above the still-rendered dashboard
 
 ### Requirement: Analytics behavior is unchanged
-The restyle MUST NOT change data fetching (`useAnalitica`), the analytics service, date presets, Bogotá date handling, tab state, formatting (currency/integer/percent) or the route. The content of the "Resumen" tab and the additive RPC fields that feed it are governed by the `analitica-resumen-dashboard` capability; the `Ingresos`, `Operación` and `Equipo` tabs MUST keep their KPI values, rows and series.
+The restyle MUST NOT change data fetching (`useAnalitica`), the analytics service, date presets, Bogotá date handling, tab state, formatting (currency/integer/percent) or the route. The content of the "Resumen" tab is governed by the `analitica-resumen-dashboard` capability, and the content of the `Ingresos`, `Operación` and `Equipo` tabs by the `analitica-detail-tabs` capability, together with the RPC fields that feed them.
 
-#### Scenario: Same data in detail tabs
-- **WHEN** the `Ingresos`, `Operación` or `Equipo` tab renders for a tenant and date range
-- **THEN** its KPI values, table rows and chart series SHALL be identical to the pre-change output
+#### Scenario: Resumen unaffected by detail-tab changes
+- **WHEN** the detail tabs change under `analitica-detail-tabs`
+- **THEN** the Resumen KPI values and chart series SHALL stay identical for the same tenant and range
 
 #### Scenario: Type-check and lint
 - **WHEN** `npx tsc --noEmit` and `npm run lint` run

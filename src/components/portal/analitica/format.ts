@@ -35,3 +35,24 @@ export function monthLabel(monthStart: string, multiYear: boolean) {
 /** True when the monthly series covers more than one calendar year. */
 export const spansYears = (rows: Array<{ monthStart: string }>) =>
   new Set(rows.map((row) => row.monthStart.slice(0, 4))).size > 1;
+
+const shortDateFormatter = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const monthYearFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+/** "10 may 2026" from a `YYYY-MM-DD` date. */
+export const shortDate = (date: string) => shortDateFormatter.format(new Date(`${date}T12:00:00Z`)).replace(/\./g, '').replace(/ de /g, ' ');
+
+/** "septiembre 2026" for the month containing a `YYYY-MM-DD` date. */
+export const monthYear = (date: string) => monthYearFormatter.format(new Date(`${date}T12:00:00Z`)).replace(' de ', ' ');
+
+/** Percentage or a fallback when the average has no qualifying sessions. */
+export const percentOr = (value: number | null, fallback: string) => value === null ? fallback : `${value.toFixed(1)}%`;
+
+/** Athlete membership states → labels for the Equipo cards, in display order. */
+export const MEMBER_STATUS_LABELS: Array<[string, string]> = [
+  ['activo', 'Activos'],
+  ['mora', 'En mora'],
+  ['suspendido', 'Suspendidos'],
+  ['inactivo', 'Inactivos'],
+  ['pendiente_activacion', 'Pendientes de activación'],
+];
