@@ -1,0 +1,12 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "isolated": true,
+    "launchOptions": { "headless": true },
+    "contextOptions": {
+      "viewport": { "width": 1280, "height": 720 },
+      "recordVideo": { "dir": "./videos", "size": { "width": 1280, "height": 720 } }
+    }
+  },
+  "outputDir": "./videos"
+}
