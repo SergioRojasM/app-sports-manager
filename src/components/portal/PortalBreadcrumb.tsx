@@ -19,6 +19,8 @@ const SLUG_LABELS: Record<string, string> = {
   'gestion-formularios': 'Formularios',
   'gestion-entrenamientos': 'Entrenamientos',
   'gestion-eventos': 'Eventos',
+  nuevo: 'Nuevo evento',
+  editar: 'Editar evento',
   'gestion-planes': 'Planes',
   'entrenamientos-disponibles': 'Entrenamientos Disponibles',
   atletas: 'Atletas',
@@ -57,8 +59,11 @@ export function PortalBreadcrumb() {
   // Any UUID segment after the tenant id (e.g. a plantilla id under gestion-formularios/{id}) is
   // resolved separately so it isn't mislabeled with the tenant's name.
   const secondaryUuidId = useMemo(() => {
-    const uuidParts = pathname.split('/').filter((part) => UUID_RE.test(part));
-    return uuidParts.length > 1 ? uuidParts[1] : undefined;
+    const parts = pathname.split('/');
+    const uuidIndexes = parts.map((part, index) => (UUID_RE.test(part) ? index : -1)).filter((index) => index >= 0);
+    const secondIndex = uuidIndexes[1];
+    // Only form templates have a name lookup; event ids get a static label (US-0119)
+    return secondIndex !== undefined && parts[secondIndex - 1] === 'gestion-formularios' ? parts[secondIndex] : undefined;
   }, [pathname]);
 
   const plantillaName = useFormularioPlantillaName(secondaryUuidId);
@@ -78,6 +83,11 @@ export function PortalBreadcrumb() {
         result.push({ label: 'Inicio', href: '/portal', isLast });
       } else if (UUID_RE.test(part)) {
         uuidsSeen += 1;
+        if (uuidsSeen > 1 && parts[i - 1] === 'gestion-eventos') {
+          // There is no page at /gestion-eventos/{id}; the crumb points at the edit wizard
+          result.push({ label: 'Evento', href: `${accumulated}/editar`, isLast });
+          continue;
+        }
         const label = uuidsSeen === 1 ? tenantName : plantillaName;
         result.push({ label: label ?? '…', href: accumulated, isLast });
       } else {
@@ -98,7 +108,7 @@ export function PortalBreadcrumb() {
       <nav aria-label="Ruta de navegación">
         <ol className="flex flex-wrap items-center gap-2 font-grit-body text-[13px] font-medium text-grit-subtext">
           {segments.map((seg, i) => (
-            <li key={seg.href} className="flex min-w-0 items-center gap-2">
+            <li key={`${i}-${seg.href}`} className="flex min-w-0 items-center gap-2">
               {i > 0 && (
                 <span aria-hidden="true" className="select-none">
                   ›

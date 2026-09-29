@@ -6,19 +6,30 @@ type PublicTrainingDetalleCtaBannerProps = {
   /** True while useAuth() is initializing — the CTA cannot yet pick a modal (US-0109). */
   reservarDisabled: boolean;
   onReservar: () => void;
+  /** Events show only "Reserva tu cupo", without the training subtitle (US-0119). */
+  variant?: 'entrenamiento' | 'evento';
 };
 
 /** Closing call-to-action banner, matching design node `I6JYGB` (US-0116). */
-export function PublicTrainingDetalleCtaBanner({ reservarDisabled, onReservar }: PublicTrainingDetalleCtaBannerProps) {
+export function PublicTrainingDetalleCtaBanner({
+  reservarDisabled,
+  onReservar,
+  variant = 'entrenamiento',
+}: PublicTrainingDetalleCtaBannerProps) {
+  const esEvento = variant === 'evento';
   return (
     <GritCard as="section" variant="glass" padding="none" className="flex flex-wrap items-center justify-between gap-4 px-7 py-6">
       <div className="flex items-center gap-4">
         <GritIconTile icon="event_available" size={48} tone="accent" />
         <span className="flex flex-col gap-[3px]">
-          <span className="font-grit-title text-xl font-bold text-grit-text">¿Listo para mejorar tu rendimiento?</span>
-          <span className="font-grit-body text-[13px] font-medium text-grit-subtext">
-            Asegura tu cupo y entrena con propósito.
+          <span className="font-grit-title text-xl font-bold text-grit-text">
+            {esEvento ? 'Reserva tu cupo' : '¿Listo para mejorar tu rendimiento?'}
           </span>
+          {!esEvento && (
+            <span className="font-grit-body text-[13px] font-medium text-grit-subtext">
+              Asegura tu cupo y entrena con propósito.
+            </span>
+          )}
         </span>
       </div>
       <GritButton

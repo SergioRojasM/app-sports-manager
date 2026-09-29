@@ -14,11 +14,12 @@ const CARDS: Array<{ label: string; icon: string; color: string; getValue: (stat
     getValue: (stats) => stats.proximosConfirmados,
   },
   { label: 'Cancelados', icon: 'event_busy', color: 'text-grit-danger', getValue: (stats) => stats.cancelados },
+  { label: 'Borradores', icon: 'edit_note', color: 'text-grit-subtext', getValue: (stats) => stats.borradores },
 ];
 
 export function EventosStatsCards({ stats }: EventosStatsCardsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {CARDS.map((card) => (
         <div key={card.label} className="rounded-grit-2xl border border-grit-glass-border bg-grit-glass p-5 backdrop-blur-md">
           <div className="flex items-center gap-3">

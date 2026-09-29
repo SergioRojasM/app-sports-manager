@@ -103,3 +103,43 @@ export function formatEventoPrecio(precio: PrecioItem[]): string {
   if (precio.length === 1) return formatCurrency(precio[0].precio);
   return `Desde ${formatCurrency(Math.min(...precio.map((item) => item.precio)))}`;
 }
+
+/** ISO instant → `YYYY-MM-DDTHH:mm` as seen in Bogotá, for `datetime-local` inputs (US-0119). */
+export function toDateTimeLocalInBogota(value: string | null): string {
+  if (!value) return '';
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: EVENTOS_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date(value));
+
+  const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? '';
+  // Some engines render midnight as "24" with hour12: false
+  const hour = get('hour') === '24' ? '00' : get('hour');
+  return `${get('year')}-${get('month')}-${get('day')}T${hour}:${get('minute')}`;
+}
+
+/** `YYYY-MM-DDTHH:mm` typed in Bogotá → ISO string with the fixed -05:00 offset, or null when empty/invalid. */
+export function fromDateTimeLocalInBogota(value: string): string | null {
+  const trimmed = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) return null;
+  const iso = `${trimmed}:00${BOGOTA_UTC_OFFSET}`;
+  return Number.isNaN(new Date(iso).getTime()) ? null : iso;
+}
+
+export function formatCop(value: number): string {
+  return formatCurrency(value);
+}
+
+/** Price after a percentage discount, rounded to whole pesos. */
+export function aplicarDescuento(valor: number, porcentaje: number): number {
+  return Math.round(valor * (1 - porcentaje / 100));
+}
+
+export function formatDescuento(porcentaje: number): string {
+  return `${new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 }).format(porcentaje)} %`;
+}
