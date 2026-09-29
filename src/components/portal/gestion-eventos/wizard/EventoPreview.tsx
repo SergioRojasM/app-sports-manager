@@ -73,6 +73,7 @@ export function EventoPreview({ draft, eventoId, tenantId, borrador, bannerUrl }
               onReservar={noop}
               reservarDisabled
               tipoLabel={draft.publico ? 'Evento público' : 'Evento privado'}
+              variant="evento"
             />
           </div>
         ) : (

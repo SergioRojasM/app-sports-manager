@@ -11,7 +11,19 @@ type PublicTrainingDetalleHeroProps = {
   children?: ReactNode;
   /** Kind tag next to the discipline; the events wizard preview passes "Evento público/privado" (US-0119). */
   tipoLabel?: string;
+  /** `evento` renders the location as a link to `puntoEncuentro` when it is a URL (US-0119). */
+  variant?: 'entrenamiento' | 'evento';
 };
+
+function toHttpUrl(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 function formatFecha(fechaHora: string | null): string {
   if (!fechaHora) return 'Sin fecha definida';
@@ -28,13 +40,36 @@ function formatRangoHorario(fechaHora: string | null, duracionMinutos: number | 
   return `${formatter.format(start)} – ${formatter.format(end)}`;
 }
 
-function MetaItem({ icon, top, bottom }: { icon: string; top: string; bottom?: string | null }) {
+function MetaItem({
+  icon,
+  top,
+  bottom,
+  href,
+}: {
+  icon: string;
+  top: string;
+  bottom?: string | null;
+  /** When set, `bottom` renders as a link opening in a new tab. */
+  href?: string | null;
+}) {
   return (
     <li className="flex items-start gap-2">
       <GritIcon name={icon} size={15} className="mt-0.5 text-grit-cyan" />
       <span className="flex flex-col gap-px">
         <span className="font-grit-body text-[13px] font-semibold text-grit-text">{top}</span>
-        {bottom ? <span className="font-grit-body text-[11px] font-medium text-grit-subtext">{bottom}</span> : null}
+        {bottom && href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-grit-body text-[11px] font-semibold text-grit-cyan underline"
+          >
+            {bottom}
+            <GritIcon name="open_in_new" size={12} />
+          </a>
+        ) : bottom ? (
+          <span className="font-grit-body text-[11px] font-medium text-grit-subtext">{bottom}</span>
+        ) : null}
       </span>
     </li>
   );
@@ -44,7 +79,14 @@ function MetaItem({ icon, top, bottom }: { icon: string; top: string; bottom?: s
  * Banner + tags + title/subtitle + meta row, matching design nodes `UBgoO`
  * (banner) and `VekF7` (title block) (US-0109, restyled in US-0116).
  */
-export function PublicTrainingDetalleHero({ item, children, tipoLabel = 'Entrenamiento público' }: PublicTrainingDetalleHeroProps) {
+export function PublicTrainingDetalleHero({
+  item,
+  children,
+  tipoLabel = 'Entrenamiento público',
+  variant = 'entrenamiento',
+}: PublicTrainingDetalleHeroProps) {
+  const ubicacionUrl = variant === 'evento' ? toHttpUrl(item.puntoEncuentro) : null;
+  const paginaEventoUrl = variant === 'evento' ? toHttpUrl(item.paginaEventoUrl) : null;
   const cupoMaximo = item.cupoMaximo ?? 0;
   // The design labels this slot "cupos disponibles", so it must show remaining
   // capacity — `reservasActivas` is the count already taken (US-0109)
@@ -92,8 +134,28 @@ export function PublicTrainingDetalleHero({ item, children, tipoLabel = 'Entrena
           {item.fechaHora && (
             <MetaItem icon="schedule" top={formatRangoHorario(item.fechaHora, item.duracionMinutos)} />
           )}
-          <MetaItem icon="location_on" top={item.escenarioNombre} bottom={item.puntoEncuentro} />
+          {ubicacionUrl ? (
+            <MetaItem
+              icon="location_on"
+              top={item.escenarioNombre || 'Punto de encuentro'}
+              bottom="Ver ubicación"
+              href={ubicacionUrl}
+            />
+          ) : (
+            <MetaItem icon="location_on" top={item.escenarioNombre} bottom={item.puntoEncuentro} />
+          )}
           <MetaItem icon="group" top={`${cuposDisponibles} / ${cupoMaximo || '—'}`} bottom="cupos disponibles" />
+          {/* Events drop the "reserva tu cupo" card, so its booking lead time and official link move here (US-0119) */}
+          {variant === 'evento' && item.reservaAntelacionHoras !== null && (
+            <MetaItem
+              icon="event_available"
+              top={`Reserva hasta ${item.reservaAntelacionHoras} h antes`}
+              bottom="del inicio del evento"
+            />
+          )}
+          {paginaEventoUrl && (
+            <MetaItem icon="language" top="Página del evento" bottom="Ver página oficial" href={paginaEventoUrl} />
+          )}
         </ul>
 
         {children}

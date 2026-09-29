@@ -8,6 +8,7 @@ import { useEventoWizardOptions } from '@/hooks/portal/gestion-eventos/useEvento
 import { EventoConfiguracionStep } from './EventoConfiguracionStep';
 import { EventoEntradasStep } from './EventoEntradasStep';
 import { EventoMetodosPagoStep } from './EventoMetodosPagoStep';
+import { EventoPreviewModal } from './EventoPreviewModal';
 import { EventoWizardFooter } from './EventoWizardFooter';
 import { EventoWizardStepper } from './EventoWizardStepper';
 import { SalirSinGuardarModal } from './SalirSinGuardarModal';
@@ -51,6 +52,7 @@ export function EventoWizardPage({ tenantId, eventoId }: EventoWizardPageProps) 
   });
 
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef<EventoWizardStep>(wizard.step);
@@ -202,9 +204,21 @@ export function EventoWizardPage({ tenantId, eventoId }: EventoWizardPageProps) 
         disabled={options.loading}
         onBack={() => wizard.goTo((wizard.step - 1) as EventoWizardStep)}
         onNext={() => wizard.goTo((wizard.step + 1) as EventoWizardStep)}
+        onPreview={() => setPreviewOpen(true)}
         onGuardarBorrador={() => void wizard.guardarBorrador()}
         onGuardarFinal={() => void wizard.guardarFinal()}
       />
+
+      {previewOpen && (
+        <EventoPreviewModal
+          draft={wizard.draft}
+          eventoId={wizard.eventoId}
+          tenantId={wizard.tenantId}
+          borrador={wizard.esBorrador}
+          bannerUrl={wizard.bannerDisplayUrl}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
 
       {confirmLeave && (
         <SalirSinGuardarModal onStay={() => setConfirmLeave(false)} onLeave={() => router.push(listPath)} />

@@ -1,7 +1,21 @@
 'use client';
 
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { cx, gritFocusRing } from '@/components/ui';
+
+const subscribeNoop = () => () => {};
+
+/**
+ * Renders children on document.body. Wizard sections and cards use backdrop-blur, which makes
+ * them the containing block for `fixed` descendants — a modal rendered inside them would be
+ * clipped to the card and painted under the sticky footer (US-0119).
+ */
+export function BodyPortal({ children }: { children: ReactNode }) {
+  // false during SSR/hydration, true on the client — avoids touching `document` on the server
+  const isClient = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  return isClient ? createPortal(children, document.body) : null;
+}
 
 type EventoDangerButtonProps = {
   onClick: () => void;
@@ -55,27 +69,29 @@ export function EventoModalShell({ title, onClose, busy = false, children, foote
   }, [onClose, busy]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
-      onClick={() => {
-        if (!busy) onClose();
-      }}
-    >
+    <BodyPortal>
       <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        tabIndex={-1}
-        className="mx-4 w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-glass p-6 shadow-2xl outline-none backdrop-blur-md"
-        onClick={(event) => event.stopPropagation()}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
+        onClick={() => {
+          if (!busy) onClose();
+        }}
       >
-        <h2 id={titleId} className="font-grit-title text-lg font-semibold text-grit-text">
-          {title}
-        </h2>
-        <div className="mt-3 space-y-2 font-grit-body text-sm text-grit-subtext">{children}</div>
-        <div className="mt-6 flex justify-end gap-3">{footer}</div>
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          tabIndex={-1}
+          className="mx-4 w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-glass p-6 shadow-2xl outline-none backdrop-blur-md"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <h2 id={titleId} className="font-grit-title text-lg font-semibold text-grit-text">
+            {title}
+          </h2>
+          <div className="mt-3 space-y-2 font-grit-body text-sm text-grit-subtext">{children}</div>
+          <div className="mt-6 flex justify-end gap-3">{footer}</div>
+        </div>
       </div>
-    </div>
+    </BodyPortal>
   );
 }

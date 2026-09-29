@@ -4,6 +4,7 @@ import { GritButton } from '@/components/ui';
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
 import { useFormularioPreview } from '@/hooks/portal/entrenamientos-publicos/useFormularioPreview';
 import { ERROR_KEYS } from '@/lib/portal/eventos-wizard.utils';
+import { BodyPortal } from '../EventoModalShell';
 import { Field, SelectShell, fieldA11y, selectClass } from './fields';
 import type { FormularioPlantillaListItem } from '@/types/portal/formularios.types';
 
@@ -83,16 +84,18 @@ export function EventoFormularioSelector({ tenantId, formularios, value, error, 
       </Field>
 
       {preview.open && (
-        <FormularioPreviewModal
-          open={preview.open}
-          tenantId={tenantId}
-          plantillaNombre={preview.plantillaNombre}
-          secciones={preview.secciones}
-          perfilCamposRequeridos={preview.perfilCamposRequeridos}
-          loading={preview.loading}
-          error={preview.error}
-          onClose={preview.closePreview}
-        />
+        <BodyPortal>
+          <FormularioPreviewModal
+            open={preview.open}
+            tenantId={tenantId}
+            plantillaNombre={preview.plantillaNombre}
+            secciones={preview.secciones}
+            perfilCamposRequeridos={preview.perfilCamposRequeridos}
+            loading={preview.loading}
+            error={preview.error}
+            onClose={preview.closePreview}
+          />
+        </BodyPortal>
       )}
     </>
   );

@@ -1,4 +1,4 @@
-import { fromDateTimeLocalInBogota, toDateTimeLocalInBogota } from '@/lib/portal/eventos.utils';
+import { fromDateTimeLocalInBogota, toDateKeyInBogota, toDateTimeLocalInBogota } from '@/lib/portal/eventos.utils';
 import type { PrecioItem, PublicTrainingListItem } from '@/types/portal/entrenamientos-publicos.types';
 import type {
   EventoCompleto,
@@ -55,7 +55,11 @@ export function emptyEventoDraft(): EventoDraft {
   };
 }
 
-export function emptyEntradaDraft(): EventoEntradaDraft {
+/**
+ * New ticket row. The sale window defaults to "from today 00:00 (Bogotá) until the event starts";
+ * `fechaHoraEvento` is the draft's `datetime-local` value ('' when the event has no date yet).
+ */
+export function emptyEntradaDraft(fechaHoraEvento = ''): EventoEntradaDraft {
   return {
     clientKey: newClientKey(),
     id: null,
@@ -63,8 +67,8 @@ export function emptyEntradaDraft(): EventoEntradaDraft {
     nombre: '',
     eventosIdBundle: [],
     valor: '',
-    validaDesde: '',
-    validaHasta: '',
+    validaDesde: `${toDateKeyInBogota(new Date())}T00:00`,
+    validaHasta: fechaHoraEvento,
     cupones: [],
   };
 }

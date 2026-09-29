@@ -224,14 +224,15 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EventosTable.tsx           # List view, 20 rows/page, stacked rows below md
 │   │   │       ├── EventosCalendar.tsx        # Month grid (Bogotá), 3 chips + "+N" per day, selected-day list, undated-events note; does NOT reuse EntrenamientosCalendar
 │   │   │       ├── EventoActionsMenu.tsx      # Kebab menu portalled to document.body (cards/table clip overflow; backdrop-blur ancestors trap fixed elements), flips upward near the viewport bottom; drafts only get "Continuar editando" + "Eliminar" (US-0119)
-│   │   │       ├── EventoModalShell.tsx       # Shared dialog frame + EventoDangerButton
+│   │   │       ├── EventoModalShell.tsx       # Shared dialog frame + EventoDangerButton + BodyPortal (all events modals render on document.body: backdrop-blur cards trap `fixed` children under the wizard's sticky footer)
 │   │   │       ├── CambiarEstadoEventoModal.tsx / EliminarEventoModal.tsx
 │   │   │       ├── EventoEstadoBadge.tsx      # Confirmado / Cancelado, or a dashed "Borrador" pill when `borrador` (US-0119)
 │   │   │       └── wizard/                    # Full-page create/edit wizard (US-0119) — no mockup, grit-arena-v2 tokens
 │   │   │           ├── EventoWizardPage.tsx   # Root: loading / not-found / error states, header (Borrador tag + "Último guardado"), stepper, active step, footer, leave guard, focus management (step h2 on step change, first invalid field on failed validation)
 │   │   │           ├── EventoWizardStepper.tsx  # <ol aria-label="Pasos del evento">, aria-current="step", check on done, red dot + "Revisar" on steps with errors
-│   │   │           ├── EventoWizardFooter.tsx   # Sticky: Atrás / Siguiente / "Guardar borrador" (new or draft only; disabled without name or changes) / "Publicar evento" (step 3) or "Guardar cambios" (published, every step); role=alert save error; role=status "Borrador guardado"
-│   │   │           ├── EventoConfiguracionStep.tsx  # Step 1: form sections + sticky live preview (collapsible below lg)
+│   │   │           ├── EventoWizardFooter.tsx   # Sticky: Atrás / Vista previa / Siguiente / "Guardar borrador" (new or draft only; disabled without name or changes) / "Publicar evento" (step 3) or "Guardar cambios" (published, every step); role=alert save error; role=status "Borrador guardado"
+│   │   │           ├── EventoConfiguracionStep.tsx  # Step 1: single-column form sections (the live preview lives in EventoPreviewModal)
+│   │   │           ├── EventoPreviewModal.tsx # Large dialog opened from the footer's "Vista previa" button; portaled to document.body
 │   │   │           ├── EventoPreview.tsx      # Página (PublicTrainingDetalleBody via toDetallePreviewItem, inert) / Tarjeta (EventoCard hideActions) radiogroup; useDeferredValue on the draft
 │   │   │           ├── EventoEscenarioSelector.tsx  # Active scenarios + "Sin escenario" + "+ Crear nuevo escenario" → existing ScenarioFormModal driven by useScenarios({ onCreated }) which auto-selects the new one; stale snapshot "(guardado en el evento)"
 │   │   │           ├── EventoEntrenadoresSelector.tsx  # Searchable checkbox list of trainers; per-trainer `experiencia` textarea (max 500)

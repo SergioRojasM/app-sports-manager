@@ -7,7 +7,7 @@ import { formatCop } from '@/lib/portal/eventos.utils';
 import { EventoDangerButton, EventoModalShell } from '../EventoModalShell';
 import { EventoBundleSelector } from './EventoBundleSelector';
 import { EventoCuponesEditor } from './EventoCuponesEditor';
-import { Field, FieldError, RowIconButton, fieldA11y, fieldDomId, inputClass } from './fields';
+import { Field, FieldError, RowIconButton, errorDomId, fieldA11y, fieldDomId, inputClass } from './fields';
 import {
   EVENTO_ENTRADA_TIPO_LABELS,
   type EventoEntradaDraft,
@@ -186,26 +186,41 @@ export function EventoEntradasEditor({ wizard, eventos, disabled }: EventoEntrad
             )}
 
             <div>
-              <p className="mb-1 font-grit-body text-xs font-semibold text-grit-subtext">Venta disponible (opcional, hora de Bogotá)</p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <input
-                  {...fieldA11y(ventanaKey, errors[ventanaKey])}
-                  type="datetime-local"
-                  aria-label={`Entrada ${n} válida desde`}
-                  value={entrada.validaDesde}
-                  onChange={(event) => wizard.updateEntrada(entrada.clientKey, { validaDesde: event.target.value })}
-                  disabled={disabled}
-                  className={inputClass(errors[ventanaKey])}
-                />
-                <input
-                  type="datetime-local"
-                  aria-label={`Entrada ${n} válida hasta`}
-                  aria-invalid={errors[ventanaKey] ? true : undefined}
-                  value={entrada.validaHasta}
-                  onChange={(event) => wizard.updateEntrada(entrada.clientKey, { validaHasta: event.target.value })}
-                  disabled={disabled}
-                  className={inputClass(errors[ventanaKey])}
-                />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor={fieldDomId(ventanaKey)}
+                    className="mb-1 block font-grit-body text-xs font-semibold text-grit-subtext"
+                  >
+                    Venta disponible desde
+                  </label>
+                  <input
+                    {...fieldA11y(ventanaKey, errors[ventanaKey])}
+                    type="datetime-local"
+                    value={entrada.validaDesde}
+                    onChange={(event) => wizard.updateEntrada(entrada.clientKey, { validaDesde: event.target.value })}
+                    disabled={disabled}
+                    className={inputClass(errors[ventanaKey])}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor={`${fieldDomId(ventanaKey)}-hasta`}
+                    className="mb-1 block font-grit-body text-xs font-semibold text-grit-subtext"
+                  >
+                    Venta disponible hasta
+                  </label>
+                  <input
+                    id={`${fieldDomId(ventanaKey)}-hasta`}
+                    type="datetime-local"
+                    aria-invalid={errors[ventanaKey] ? true : undefined}
+                    aria-describedby={errors[ventanaKey] ? errorDomId(ventanaKey) : undefined}
+                    value={entrada.validaHasta}
+                    onChange={(event) => wizard.updateEntrada(entrada.clientKey, { validaHasta: event.target.value })}
+                    disabled={disabled}
+                    className={inputClass(errors[ventanaKey])}
+                  />
+                </div>
               </div>
               <FieldError errorKey={ventanaKey} error={errors[ventanaKey]} />
             </div>

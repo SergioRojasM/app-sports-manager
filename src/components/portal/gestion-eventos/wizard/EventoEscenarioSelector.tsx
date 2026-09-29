@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { ScenarioFormModal } from '@/components/portal/scenarios/ScenarioFormModal';
 import { useScenarios } from '@/hooks/portal/scenarios/useScenarios';
+import { BodyPortal } from '../EventoModalShell';
 import { Field, SelectShell, fieldA11y, selectClass } from './fields';
 import type { Scenario } from '@/types/portal/scenarios.types';
 import type { EventoEscenarioSnapshot } from '@/types/portal/eventos.types';
@@ -82,21 +83,23 @@ export function EventoEscenarioSelector({ tenantId, value, onChange, disabled }:
         </SelectShell>
       </Field>
 
-      <ScenarioFormModal
-        open={scenarios.modalOpen}
-        mode="create"
-        isSubmitting={scenarios.isSubmitting}
-        values={scenarios.formValues}
-        fieldErrors={scenarios.fieldErrors}
-        scheduleErrors={scenarios.scheduleErrors}
-        submitError={scenarios.submitError}
-        onClose={scenarios.closeModal}
-        onSubmit={scenarios.submit}
-        onChangeField={scenarios.updateField}
-        onAddSchedule={scenarios.addSchedule}
-        onRemoveSchedule={scenarios.removeSchedule}
-        onChangeScheduleField={scenarios.updateScheduleField}
-      />
+      <BodyPortal>
+        <ScenarioFormModal
+          open={scenarios.modalOpen}
+          mode="create"
+          isSubmitting={scenarios.isSubmitting}
+          values={scenarios.formValues}
+          fieldErrors={scenarios.fieldErrors}
+          scheduleErrors={scenarios.scheduleErrors}
+          submitError={scenarios.submitError}
+          onClose={scenarios.closeModal}
+          onSubmit={scenarios.submit}
+          onChangeField={scenarios.updateField}
+          onAddSchedule={scenarios.addSchedule}
+          onRemoveSchedule={scenarios.removeSchedule}
+          onChangeScheduleField={scenarios.updateScheduleField}
+        />
+      </BodyPortal>
     </>
   );
 }

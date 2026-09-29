@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useId, useState } from 'react';
-import { GritButton, GritIcon, cx } from '@/components/ui';
+import { useCallback, useId } from 'react';
+import { GritButton } from '@/components/ui';
 import {
   ERROR_KEYS,
   EVENTO_BANNER_MIME_TYPES,
@@ -10,7 +10,6 @@ import {
 } from '@/lib/portal/eventos-wizard.utils';
 import { EventoEntrenadoresSelector } from './EventoEntrenadoresSelector';
 import { EventoEscenarioSelector } from './EventoEscenarioSelector';
-import { EventoPreview } from './EventoPreview';
 import { Field, RowIconButton, SelectShell, WizardSection, fieldA11y, inputClass, selectClass } from './fields';
 import type { EventoWizardState } from '@/hooks/portal/gestion-eventos/useEventoWizard';
 import type { EventoWizardOptions } from '@/hooks/portal/gestion-eventos/useEventoWizardOptions';
@@ -59,7 +58,6 @@ function Toggle({
 
 export function EventoConfiguracionStep({ wizard, options, disabled }: EventoConfiguracionStepProps) {
   const { draft, errors, updateField } = wizard;
-  const [showMobilePreview, setShowMobilePreview] = useState(false);
   const bannerInputId = useId();
   const handleEscenarioChange = useCallback(
     (value: EventoWizardState['draft']['escenario']) => updateField('escenario', value),
@@ -67,18 +65,8 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
   );
   const disciplinaStale = draft.disciplina !== '' && !options.disciplinas.some((option) => option.label === draft.disciplina);
 
-  const preview = (
-    <EventoPreview
-      draft={draft}
-      eventoId={wizard.eventoId}
-      tenantId={wizard.tenantId}
-      borrador={wizard.esBorrador}
-      bannerUrl={wizard.bannerDisplayUrl}
-    />
-  );
-
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <div className="mx-auto max-w-4xl">
       <div className="space-y-5">
         <WizardSection title="Información básica" icon="info">
           <Field errorKey={ERROR_KEYS.nombre} label="Nombre del evento" required error={errors[ERROR_KEYS.nombre]}>
@@ -250,14 +238,19 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
             disabled={disabled}
           />
 
-          <Field errorKey="puntoEncuentro" label="Punto de encuentro">
+          <Field
+            errorKey="puntoEncuentro"
+            label="Punto de encuentro"
+            hint="Pega el enlace de Google Maps; en la página del evento se muestra como un enlace a la ubicación."
+            hintId="evento-punto-encuentro-hint"
+          >
             <input
-              {...fieldA11y('puntoEncuentro', undefined)}
+              {...fieldA11y('puntoEncuentro', undefined, 'evento-punto-encuentro-hint')}
               type="text"
               value={draft.puntoEncuentro}
               onChange={(event) => updateField('puntoEncuentro', event.target.value)}
               disabled={disabled}
-              placeholder="Entrada principal del parque"
+              placeholder="https://maps.app.goo.gl/KAuYCWHmrx1udyUdA?g_st=ic"
               className={inputClass()}
             />
           </Field>
@@ -348,7 +341,7 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
           <fieldset className="space-y-2">
             <legend className="mb-1 font-grit-body text-xs font-semibold text-grit-subtext">Cronograma</legend>
             {draft.cronograma.map((row, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2">
                 <input
                   type="text"
                   aria-label={`Hora del bloque ${index + 1}`}
@@ -356,7 +349,7 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
                   onChange={(event) => wizard.updateCronograma(index, 'hora', event.target.value)}
                   disabled={disabled}
                   placeholder="7:00 am"
-                  className={inputClass(undefined, 'w-1/3')}
+                  className={inputClass()}
                 />
                 <input
                   type="text"
@@ -365,7 +358,7 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
                   onChange={(event) => wizard.updateCronograma(index, 'descripcion', event.target.value)}
                   disabled={disabled}
                   placeholder="Calentamiento"
-                  className={inputClass(undefined, 'flex-1')}
+                  className={inputClass()}
                 />
                 <RowIconButton
                   icon="delete"
@@ -384,7 +377,7 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
           <fieldset className="space-y-2">
             <legend className="mb-1 font-grit-body text-xs font-semibold text-grit-subtext">¿Qué incluye?</legend>
             {draft.incluye.map((row, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2">
                 <input
                   type="text"
                   aria-label={`Título del ítem ${index + 1}`}
@@ -392,7 +385,7 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
                   onChange={(event) => wizard.updateIncluye(index, 'titulo', event.target.value)}
                   disabled={disabled}
                   placeholder="Hidratación"
-                  className={inputClass(undefined, 'w-1/3')}
+                  className={inputClass()}
                 />
                 <input
                   type="text"
@@ -401,7 +394,7 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
                   onChange={(event) => wizard.updateIncluye(index, 'descripcion', event.target.value)}
                   disabled={disabled}
                   placeholder="Bebida isotónica al finalizar"
-                  className={inputClass(undefined, 'flex-1')}
+                  className={inputClass()}
                 />
                 <RowIconButton
                   icon="delete"
@@ -437,30 +430,6 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
           />
         </WizardSection>
       </div>
-
-      <div className="lg:hidden">
-        <GritButton
-          variant="secondary"
-          size="sm"
-          icon={showMobilePreview ? 'visibility_off' : 'visibility'}
-          onClick={() => setShowMobilePreview((value) => !value)}
-          aria-expanded={showMobilePreview}
-          fullWidth
-        >
-          {showMobilePreview ? 'Ocultar vista previa' : 'Ver vista previa'}
-        </GritButton>
-        {showMobilePreview && <div className="mt-4">{preview}</div>}
-      </div>
-
-      <aside className={cx('hidden lg:block')}>
-        <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
-          <p className="mb-2 flex items-center gap-1.5 font-grit-body text-[11px] text-grit-muted">
-            <GritIcon name="bolt" size={14} className="text-grit-cyan" />
-            Se actualiza mientras escribes
-          </p>
-          {preview}
-        </div>
-      </aside>
     </div>
   );
 }

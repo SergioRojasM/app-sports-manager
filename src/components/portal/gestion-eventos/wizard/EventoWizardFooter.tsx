@@ -18,6 +18,7 @@ type EventoWizardFooterProps = {
   disabled: boolean;
   onBack: () => void;
   onNext: () => void;
+  onPreview: () => void;
   onGuardarBorrador: () => void;
   onGuardarFinal: () => void;
 };
@@ -37,6 +38,7 @@ export function EventoWizardFooter({
   disabled,
   onBack,
   onNext,
+  onPreview,
   onGuardarBorrador,
   onGuardarFinal,
 }: EventoWizardFooterProps) {
@@ -62,6 +64,9 @@ export function EventoWizardFooter({
               Atrás
             </GritButton>
           )}
+          <GritButton variant="ghost" size="sm" icon="visibility" onClick={onPreview} disabled={isSaving}>
+            Vista previa
+          </GritButton>
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-2">

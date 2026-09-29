@@ -303,9 +303,12 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
   }, []);
 
   const addEntrada = useCallback(() => {
-    const entrada = emptyEntradaDraft();
-    setDraft((current) => ({ ...current, entradas: [...current.entradas, entrada] }));
-    return entrada.clientKey;
+    const clientKey = crypto.randomUUID();
+    setDraft((current) => ({
+      ...current,
+      entradas: [...current.entradas, { ...emptyEntradaDraft(current.fechaHora), clientKey }],
+    }));
+    return clientKey;
   }, []);
 
   const updateEntrada = useCallback(

@@ -18,6 +18,8 @@ type PublicTrainingDetalleBodyProps = {
   reservarDisabled: boolean;
   /** Forwarded to the hero's kind tag (US-0119). */
   tipoLabel?: string;
+  /** `evento` hides the location and "reserva tu cupo" cards and links the header location (US-0119). */
+  variant?: 'entrenamiento' | 'evento';
 };
 
 /**
@@ -25,10 +27,16 @@ type PublicTrainingDetalleBodyProps = {
  * `yDuIt` (US-0116). Chrome-agnostic: the caller owns header/footer, the
  * breadcrumb and the booking modals.
  */
-export function PublicTrainingDetalleBody({ item, onReservar, reservarDisabled, tipoLabel }: PublicTrainingDetalleBodyProps) {
+export function PublicTrainingDetalleBody({
+  item,
+  onReservar,
+  reservarDisabled,
+  tipoLabel,
+  variant = 'entrenamiento',
+}: PublicTrainingDetalleBodyProps) {
   return (
     <div className="flex flex-col gap-8">
-      <PublicTrainingDetalleHero item={item} tipoLabel={tipoLabel}>
+      <PublicTrainingDetalleHero item={item} tipoLabel={tipoLabel} variant={variant}>
         <GritDivider />
         <PublicTrainingDetalleDescripcion descripcionLarga={item.descripcionLarga} />
       </PublicTrainingDetalleHero>
@@ -38,26 +46,28 @@ export function PublicTrainingDetalleBody({ item, onReservar, reservarDisabled, 
         <PublicTrainingDetalleCronograma cronograma={item.cronograma} duracionMinutos={item.duracionMinutos} />
       </div>
 
-      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
-        <PublicTrainingDetalleUbicacion
-          escenarioNombre={item.escenarioNombre}
-          escenarioUbicacion={item.escenarioUbicacion}
-          puntoEncuentro={item.puntoEncuentro}
-        />
-        <PublicTrainingDetalleReserva
-          reservasActivas={item.reservasActivas}
-          cupoMaximo={item.cupoMaximo}
-          duracionMinutos={item.duracionMinutos}
-          entrenadorNombre={item.entrenadorNombre}
-          paginaEventoUrl={item.paginaEventoUrl}
-          reservarDisabled={reservarDisabled}
-          onReservar={onReservar}
-        />
-      </div>
+      {variant === 'entrenamiento' && (
+        <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2">
+          <PublicTrainingDetalleUbicacion
+            escenarioNombre={item.escenarioNombre}
+            escenarioUbicacion={item.escenarioUbicacion}
+            puntoEncuentro={item.puntoEncuentro}
+          />
+          <PublicTrainingDetalleReserva
+            reservasActivas={item.reservasActivas}
+            cupoMaximo={item.cupoMaximo}
+            duracionMinutos={item.duracionMinutos}
+            entrenadorNombre={item.entrenadorNombre}
+            paginaEventoUrl={item.paginaEventoUrl}
+            reservarDisabled={reservarDisabled}
+            onReservar={onReservar}
+          />
+        </div>
+      )}
 
       <PublicTrainingDetallePrecios precio={item.precio} />
 
-      <PublicTrainingDetalleCtaBanner reservarDisabled={reservarDisabled} onReservar={onReservar} />
+      <PublicTrainingDetalleCtaBanner reservarDisabled={reservarDisabled} onReservar={onReservar} variant={variant} />
     </div>
   );
 }
