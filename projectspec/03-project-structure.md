@@ -55,6 +55,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-escenarios/page.tsx
 │   │               │   ├── gestion-formularios/page.tsx  # Admin: form templates list (US-0084/US-0085)
 │   │               │   ├── gestion-formularios/[formulario]/page.tsx  # Admin: Google-Forms-style section builder for one template (US-0085); visual Hero header + checkbox/seleccion fields/two-column layout/seccion cards/separadores + manual "Guardar cambios" save (US-0108)
+│   │               │   ├── gestion-eventos/page.tsx     # Admin: team events management — cards/list/calendar views, delete + confirmado⇄cancelado status; wraps GestionEventosPage in Suspense (it reads ?vista=) (US-0118)
 │   │               │   ├── gestion-organizacion/page.tsx
 │   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
@@ -213,6 +214,17 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── AceptarInvitacionPage.tsx      # Accept flow with explicit expired/cancelled/accepted/not-found states
 │   │   │       ├── ActivarCuentaPage.tsx          # New password + confirmation → activation
 │   │   │       └── InvitacionesPendientesSection.tsx  # Rendered by PortalTenantsPage when the user has pending invitations (in-app delivery for existing accounts)
+│   │   │   └── gestion-eventos/           # Feature slice (portal/gestion-eventos — team events, US-0118)
+│   │   │       ├── GestionEventosPage.tsx     # Route-agnostic (only tenantId) so phase 2 can mount it on a trainer route under (shared); owns modal state and the onNuevo/onEditar seams (phase 1: EventoProximamenteModal)
+│   │   │       ├── EventosToolbar.tsx         # View switcher (radiogroup, arrow keys) + search/estado/periodo/disciplina filters
+│   │   │       ├── EventosStatsCards.tsx      # Total / Próximos confirmados / Cancelados over the unfiltered dataset
+│   │   │       ├── EventosGrid.tsx / EventoCard.tsx  # Cards view (default), modeled on PublicTrainingCard
+│   │   │       ├── EventosTable.tsx           # List view, 20 rows/page, stacked rows below md
+│   │   │       ├── EventosCalendar.tsx        # Month grid (Bogotá), 3 chips + "+N" per day, selected-day list, undated-events note; does NOT reuse EntrenamientosCalendar
+│   │   │       ├── EventoActionsMenu.tsx      # Kebab menu portalled to document.body (cards/table clip overflow; backdrop-blur ancestors trap fixed elements), flips upward near the viewport bottom
+│   │   │       ├── EventoModalShell.tsx       # Shared dialog frame + EventoDangerButton
+│   │   │       ├── CambiarEstadoEventoModal.tsx / EliminarEventoModal.tsx / EventoProximamenteModal.tsx
+│   │   │       └── EventoEstadoBadge.tsx
 │   │   │   └── gestion-suscripciones/     # Feature slice (portal/gestion-suscripciones)
 │   │   │       ├── GestionSuscripcionesPage.tsx  # Owns activeTab (Miembros/No miembros) state, tab bar with tabCounts badges, tab-aware empty state (US-0098)
 │   │   │       ├── SuscripcionesTable.tsx        # Includes "Tipo" column rendering SuscripcionTipoBadge per row (US-0098)
@@ -365,6 +377,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useSolicitudRequest.ts   # User: submit request, track history/blocked state
 │   │       └── gestion-reservas/
 │   │           └── useGestionReservas.ts     # Filter state, loading, pagination, CSV export; delegates to reservasService.getReservasManagement (US-0073)
+│   │       └── gestion-eventos/               # US-0118
+│   │           ├── useGestionEventos.ts      # Loads tenant events + disciplines; client-side filters (250 ms debounced search), sorting, pagination, stats; matchesCalendarFilters (all filters except periodo)
+│   │           ├── useEventosVista.ts        # ?vista=tarjetas|lista|calendario via router.replace (fallback tarjetas)
+│   │           ├── useEventosCalendar.ts     # Bogotá month state; fetches only the visible month (listEventos desde/hasta) while the calendar view is active
+│   │           ├── useCambiarEstadoEvento.ts
+│   │           └── useEliminarEvento.ts
 │   │       └── gestion-suscripciones/
 │   │           ├── useGestionSuscripciones.ts    # Accepts activeTab (Miembros/No miembros); tab-filters rows before search/chip filters, tab-scoped stats, exposes tabCounts derived from the full unfiltered list (US-0098)
 │   │           ├── useValidarPago.ts  # reject() now requires and forwards a non-empty motivo string (US-0106)
@@ -417,6 +435,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
+│   │       │   └── eventos.service.ts  # eventosService: listEventos(tenantId, {desde?, hasta?}) with disciplina/escenario/entrenador embeds (entrenador MUST name eventos_entrenador_id_fkey — two FKs into usuarios), getEventoById, createEvento (creado_por from session), updateEvento, updateEstadoEvento, deleteEvento; zero-row writes and PGRST116 map to EventoServiceError 'forbidden' because RLS filters silently (US-0118)
 │   │       │   └── analitica.service.ts  # Browser RPC adapter for get_tenant_bi_dashboard only; maps 42501/22007 without exposing bi schema facts (US-0115)
 │   │       │                             #   The RPC aggregates private `bi` fact views (no grants to anon/authenticated):
 │   │       │                             #   fct_pagos, fct_entrenamientos, fct_reservas, fct_asistencia, fct_suscripciones, and fct_miembros
@@ -457,6 +476,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── analitica.types.ts       # Aggregate BI dashboard contract, date filters and typed RPC errors (US-0115)
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS, PERFIL_INCOMPLETO — US-0095), BookingResult; BookingRejection.servicioNombre (optional, SERVICIO_REQUERIDO/UNIDADES_AGOTADAS only) feeds the pre-filtered plan catalog (US-0101)
+│   │       └── eventos.types.ts  # Evento (DB row), EventoInput, EventoListItem, EventoEstado ('confirmado' | 'cancelado'), EventosVista, EventosPeriodo, EventosClientFilters, EventosStats, EventoServiceError; reuses CronogramaItem/IncluyeItem/PrecioItem from entrenamientos-publicos.types (US-0118)
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias; SuscripcionAdminRow.es_miembro (computed from miembros_tenant existence, not stored) and SuscripcionTab ('miembros' | 'no_miembros') (US-0098)
 │   │       └── mis-suscripciones.types.ts  # MiSuscripcionRow (incl. tenant_id + tenant_nombre — US-0093), MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
@@ -477,6 +497,7 @@ Following structure reflects the current implementation and the target scalable 
 │           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
 │           ├── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
 │           ├── disciplina-visual.ts         # getDisciplinaVisual(nombre) → { icon, colorClass } — accent/case-insensitive name matching to the design's discipline colours, `sports` + cyan fallback (US-0116)
+│           ├── eventos.utils.ts             # Bogotá date keys/month ranges (fixed -05:00, no DST) and event formatters (fecha, hora, duración, cupo, precio) (US-0118)
 │           ├── formulario-secciones-grouping.ts  # buildFormularioRenderPlan() — groups a flat, order-derived FormularioSeccion[] into 'seccion' cards (positional, no parent FK) + 'mitad'-width pairing; shared by FormularioSeccionesBuilder, FormularioSeccionesGrouped (preview), and FormularioRespuestaModal (live booking) so all three render identically (US-0108)
 │           └── entrenamientos-publicos/
 │               └── guidedBooking.ts         # buildGuidedNextPath()/parseGuidedParams() — single source of truth for the guided booking target carried through signup/email-confirmation/login as the `next` query param (US-0103)
@@ -589,6 +610,19 @@ Supabase (database)
 |----------|----------|-------------|
 | `evaluar-suspensiones-diarias` | `0 6 * * *` (06:00 UTC / 01:00 AM COT) | Runs `reactivar_suspensiones_expiradas()` first, then `evaluar_suspensiones_cron()` |
 | `expirar-invitaciones-tenant` | `15 6 * * *` (06:15 UTC / 01:15 AM COT) | Runs `expirar_invitaciones_tenant()` (US-0114); acceptance RPCs also check `expires_at`, so correctness does not depend on the job |
+
+### Team events table (`eventos`, US-0118)
+
+Standalone table (no FK to `entrenamientos`/`entrenamientos_publicos`); columns mirror `entrenamientos_publicos` incl. `precio`/`cronograma`/`incluye` jsonb arrays. `estado` ∈ (`confirmado`, `cancelado`). `escenario_id`/`entrenador_id` are nullable uuid FKs (`on delete set null`), `disciplina_id` is `restrict`, `tenant_id` cascades.
+
+| Actor | SELECT | INSERT / UPDATE / DELETE |
+|---|---|---|
+| `anon` | `publico and activo` | — |
+| authenticated non-member | `publico and activo` | — |
+| member (non-pending) | above + `activo` rows of own tenants | — |
+| admin / trainer | all rows of their tenants | ✓ (UPDATE `with check` blocks moving a row to another tenant) |
+
+Policies use `get_member_tenants_for_authenticated_user()` / `get_trainer_or_admin_tenants_for_authenticated_user()` — both return a `tenant_id` column (not `id`, unlike `get_admin_tenants_for_authenticated_user()` which returns `setof tenants`).
 
 ## File Naming Conventions
 
