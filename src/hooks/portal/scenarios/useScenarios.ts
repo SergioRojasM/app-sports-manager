@@ -5,6 +5,7 @@ import { createClient } from '@/services/supabase/client';
 import { scenariosService } from '@/services/supabase/portal/scenarios.service';
 import type {
   CreateScenarioInput,
+  Scenario,
   ScenarioFieldErrors,
   ScenarioFormValues,
   ScenarioScheduleFieldErrors,
@@ -83,6 +84,8 @@ function compareTimes(start: string, end: string): number {
 
 type UseScenariosOptions = {
   tenantId: string;
+  /** Called with the new row after a successful create, before the list reloads (used by the events wizard, US-0119). */
+  onCreated?: (scenario: Scenario) => void;
 };
 
 type UseScenariosResult = ScenariosViewModel & {
@@ -108,7 +111,7 @@ type UseScenariosResult = ScenariosViewModel & {
   refresh: () => Promise<void>;
 };
 
-export function useScenarios({ tenantId }: UseScenariosOptions): UseScenariosResult {
+export function useScenarios({ tenantId, onCreated }: UseScenariosOptions): UseScenariosResult {
   const [scenarios, setScenarios] = useState<ScenarioWithAvailability[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -404,6 +407,7 @@ export function useScenarios({ tenantId }: UseScenariosOptions): UseScenariosRes
 
         const createdScenario = await scenariosService.createScenario(payload);
         savedScenarioId = createdScenario.id;
+        onCreated?.(createdScenario);
       }
 
       if (modalMode === 'edit' && selectedScenario) {
@@ -455,7 +459,7 @@ export function useScenarios({ tenantId }: UseScenariosOptions): UseScenariosRes
     } finally {
       setIsSubmitting(false);
     }
-  }, [formValues, loadScenarios, modalMode, selectedScenario, tenantId, validate]);
+  }, [formValues, loadScenarios, modalMode, onCreated, selectedScenario, tenantId, validate]);
 
   return {
     scenarios,

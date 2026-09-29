@@ -95,7 +95,7 @@ export function EventosCalendar({
   const todayKey = toDateKeyInBogota(new Date());
 
   const disciplineIds = Array.from(
-    new Set(Object.values(eventosByDate).flat().map((evento) => evento.disciplinaId)),
+    new Set(Object.values(eventosByDate).flat().map((evento) => evento.disciplinaNombre ?? '')),
   ).sort((left, right) => left.localeCompare(right));
 
   const colorByDisciplineId = disciplineIds.reduce<Record<string, string>>((accumulator, disciplineId, index) => {
@@ -198,10 +198,18 @@ export function EventosCalendar({
                         <span
                           className={cx(
                             'h-1.5 w-1.5 shrink-0 rounded-full',
-                            colorByDisciplineId[evento.disciplinaId] ?? 'bg-grit-subtext/40',
+                            evento.borrador
+                              ? 'border border-dashed border-grit-subtext'
+                              : colorByDisciplineId[evento.disciplinaNombre ?? ''] ?? 'bg-grit-subtext/40',
                           )}
                         />
-                        <span className={cx('hidden truncate sm:inline', evento.estado === 'cancelado' && 'text-grit-muted line-through')}>
+                        <span
+                          className={cx(
+                            'hidden truncate sm:inline',
+                            !evento.borrador && evento.estado === 'cancelado' && 'text-grit-muted line-through',
+                            evento.borrador && 'italic text-grit-subtext',
+                          )}
+                        >
                           {evento.nombre}
                         </span>
                       </span>
@@ -244,12 +252,13 @@ export function EventosCalendar({
                     <p className={cx('truncate text-sm font-semibold', evento.estado === 'cancelado' ? 'text-grit-muted' : 'text-grit-text')}>
                       {evento.nombre}
                     </p>
-                    <p className="truncate text-xs text-grit-subtext">{evento.disciplinaNombre}</p>
+                    <p className="truncate text-xs text-grit-subtext">{evento.disciplinaNombre ?? 'Sin disciplina'}</p>
                   </div>
-                  <EventoEstadoBadge estado={evento.estado} />
+                  <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
                   <EventoActionsMenu
                     eventoNombre={evento.nombre}
                     estado={evento.estado}
+                    borrador={evento.borrador}
                     onEditar={() => onEditar(evento)}
                     onCambiarEstado={(target) => onCambiarEstado(evento, target)}
                     onEliminar={() => onEliminar(evento)}

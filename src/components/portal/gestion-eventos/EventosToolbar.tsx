@@ -137,6 +137,7 @@ export function EventosToolbar({
           <option value="todos">Todos</option>
           <option value="confirmado">Confirmado</option>
           <option value="cancelado">Cancelado</option>
+          <option value="borrador">Borrador</option>
         </SelectField>
 
         {vista !== 'calendario' && (
@@ -151,7 +152,7 @@ export function EventosToolbar({
           </SelectField>
         )}
 
-        <SelectField label="Disciplina" value={filters.disciplinaId} onChange={onDisciplinaChange}>
+        <SelectField label="Disciplina" value={filters.disciplina} onChange={onDisciplinaChange}>
           <option value="todas">Todas</option>
           {disciplinas.map((disciplina) => (
             <option key={disciplina.id} value={disciplina.id}>

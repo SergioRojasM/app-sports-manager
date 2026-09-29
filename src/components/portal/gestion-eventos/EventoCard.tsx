@@ -13,10 +13,14 @@ import type { EventoEstado, EventoListItem } from '@/types/portal/eventos.types'
 
 type EventoCardProps = {
   evento: EventoListItem;
-  onEditar: () => void;
-  onCambiarEstado: (target: EventoEstado) => void;
-  onEliminar: () => void;
+  onEditar?: () => void;
+  onCambiarEstado?: (target: EventoEstado) => void;
+  onEliminar?: () => void;
+  /** Used by the wizard's live preview (US-0119). */
+  hideActions?: boolean;
 };
+
+const noop = () => {};
 
 function InfoLine({ icon, children }: { icon: string; children: React.ReactNode }) {
   return (
@@ -27,9 +31,15 @@ function InfoLine({ icon, children }: { icon: string; children: React.ReactNode 
   );
 }
 
-export function EventoCard({ evento, onEditar, onCambiarEstado, onEliminar }: EventoCardProps) {
+export function EventoCard({
+  evento,
+  onEditar = noop,
+  onCambiarEstado = noop,
+  onEliminar = noop,
+  hideActions = false,
+}: EventoCardProps) {
   const visual = getDisciplinaVisual(evento.disciplinaNombre);
-  const cancelado = evento.estado === 'cancelado';
+  const cancelado = !evento.borrador && evento.estado === 'cancelado';
   const lugar = evento.escenarioNombre ?? evento.puntoEncuentro;
   const duracion = formatDuracion(evento.duracionMinutos);
 
@@ -51,12 +61,12 @@ export function EventoCard({ evento, onEditar, onCambiarEstado, onEliminar }: Ev
         )}
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-          <EventoEstadoBadge estado={evento.estado} />
+          <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
         </div>
 
         <span className="absolute right-3 top-3 flex items-center gap-1 rounded-grit-sm border border-grit-glass-border bg-grit-bg/80 px-2.5 py-1 font-grit-body text-[10px] font-semibold uppercase tracking-wide text-grit-text">
           <GritIcon name={visual.icon} size={12} className={visual.colorClass} />
-          {evento.disciplinaNombre}
+          {evento.disciplinaNombre ?? 'Sin disciplina'}
         </span>
       </div>
 
@@ -70,13 +80,16 @@ export function EventoCard({ evento, onEditar, onCambiarEstado, onEliminar }: Ev
           >
             {evento.nombre}
           </h3>
-          <EventoActionsMenu
-            eventoNombre={evento.nombre}
-            estado={evento.estado}
-            onEditar={onEditar}
-            onCambiarEstado={onCambiarEstado}
-            onEliminar={onEliminar}
-          />
+          {!hideActions && (
+            <EventoActionsMenu
+              eventoNombre={evento.nombre}
+              estado={evento.estado}
+              borrador={evento.borrador}
+              onEditar={onEditar}
+              onCambiarEstado={onCambiarEstado}
+              onEliminar={onEliminar}
+            />
+          )}
         </div>
 
         {(!evento.publico || !evento.activo) && (
@@ -105,7 +118,9 @@ export function EventoCard({ evento, onEditar, onCambiarEstado, onEliminar }: Ev
           <InfoLine icon="groups">{formatCupo(evento.cupoMaximo)}</InfoLine>
         </div>
 
-        <p className="mt-auto pt-2 font-grit-title text-base font-bold text-grit-text">{formatEventoPrecio(evento.precio)}</p>
+        <p className="mt-auto pt-2 font-grit-title text-base font-bold text-grit-text">
+          {evento.borrador && evento.precio.length === 0 ? 'Precio por definir' : formatEventoPrecio(evento.precio)}
+        </p>
       </div>
     </article>
   );

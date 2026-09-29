@@ -16,6 +16,8 @@ type PublicTrainingDetalleBodyProps = {
   onReservar: () => void;
   /** True while the booking entry point can't be chosen yet (auth initializing). */
   reservarDisabled: boolean;
+  /** Forwarded to the hero's kind tag (US-0119). */
+  tipoLabel?: string;
 };
 
 /**
@@ -23,10 +25,10 @@ type PublicTrainingDetalleBodyProps = {
  * `yDuIt` (US-0116). Chrome-agnostic: the caller owns header/footer, the
  * breadcrumb and the booking modals.
  */
-export function PublicTrainingDetalleBody({ item, onReservar, reservarDisabled }: PublicTrainingDetalleBodyProps) {
+export function PublicTrainingDetalleBody({ item, onReservar, reservarDisabled, tipoLabel }: PublicTrainingDetalleBodyProps) {
   return (
     <div className="flex flex-col gap-8">
-      <PublicTrainingDetalleHero item={item}>
+      <PublicTrainingDetalleHero item={item} tipoLabel={tipoLabel}>
         <GritDivider />
         <PublicTrainingDetalleDescripcion descripcionLarga={item.descripcionLarga} />
       </PublicTrainingDetalleHero>

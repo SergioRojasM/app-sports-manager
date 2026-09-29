@@ -3,77 +3,97 @@ import {
   EVENTO_ESTADOS,
   EventoServiceError,
   type Evento,
+  type EventoCompleto,
+  type EventoEntradaConCupones,
   type EventoEstado,
-  type EventoInput,
   type EventoListItem,
   type EventosListFilters,
+  type GuardarEventoPayload,
+  type GuardarEventoResult,
 } from '@/types/portal/eventos.types';
 
 type PostgrestErrorLike = {
   code?: string;
   message?: string;
+  details?: string | null;
 } | null;
 
 const FORBIDDEN_MESSAGE = 'No tienes permisos para gestionar este evento.';
+const INVALID_DATA_MESSAGE = 'Los datos del evento no son válidos.';
+
+/** Messages for the codes `guardar_evento_completo` raises as exception text (US-0119). */
+const RPC_INVALID_DATA_MESSAGES: Record<string, string> = {
+  NOMBRE_REQUERIDO: 'Escribe el nombre del evento.',
+  DISCIPLINA_REQUERIDA: 'Selecciona la disciplina del evento.',
+  ENTRADAS_REQUERIDAS: 'Agrega al menos una entrada.',
+  ENTRADA_INCOMPLETA: 'Todas las entradas deben tener nombre y valor.',
+  BUNDLE_REQUERIDO: 'Las entradas múltiples deben incluir al menos un evento.',
+  CUPON_INCOMPLETO: 'Todos los cupones deben tener nombre, código y descuento.',
+  CUPON_EN_ENTRADA_GRATIS: 'Las entradas gratuitas no admiten cupones.',
+  METODO_PAGO_REQUERIDO: 'Selecciona al menos un método de pago para las entradas con costo.',
+  FORMULARIO_INACTIVO: 'El formulario seleccionado está inactivo.',
+  NO_REVERTIR_A_BORRADOR: 'Un evento publicado no puede volver a borrador.',
+};
 
 function forbiddenError(): EventoServiceError {
   return new EventoServiceError('forbidden', FORBIDDEN_MESSAGE);
 }
 
 function mapServiceError(error: PostgrestErrorLike): EventoServiceError {
+  const message = error?.message ?? '';
+
   // PGRST116 on a write means RLS filtered the row out, so .single() saw zero rows
   if (error?.code === '42501' || error?.code === 'PGRST116') {
     return forbiddenError();
   }
 
+  if (error?.code === 'P0002') {
+    return new EventoServiceError('not_found', 'El evento ya no existe.');
+  }
+
+  if (error?.code === '23505') {
+    if (message.includes('uq_evento_entrada_cupones_codigo')) {
+      return new EventoServiceError('duplicate_cupon', 'El código de cupón ya está en uso en este evento.');
+    }
+    if (message.includes('uq_evento_entradas_nombre')) {
+      return new EventoServiceError('duplicate_entrada', 'Ya existe una entrada con ese nombre en el evento.');
+    }
+    return new EventoServiceError('invalid_data', INVALID_DATA_MESSAGE);
+  }
+
   if (error?.code === '23503') {
-    return new EventoServiceError('invalid_reference', 'La disciplina, escenario o entrenador seleccionado no existe.');
+    if (message.includes('FORMULARIO_INVALIDO')) {
+      return new EventoServiceError('invalid_reference', 'El formulario seleccionado no existe o está inactivo.');
+    }
+    if (message.includes('BUNDLE_INVALIDO')) {
+      return new EventoServiceError('invalid_reference', 'Uno de los eventos del paquete ya no existe.');
+    }
+    return new EventoServiceError('invalid_reference', 'Una referencia del evento no es válida.');
   }
 
   if (error?.code === '23514') {
-    return new EventoServiceError('invalid_data', 'Los datos del evento no son válidos.');
+    const code = Object.keys(RPC_INVALID_DATA_MESSAGES).find((key) => message.includes(key));
+    return new EventoServiceError('invalid_data', code ? RPC_INVALID_DATA_MESSAGES[code] : INVALID_DATA_MESSAGE);
   }
 
   return new EventoServiceError('unknown', 'No se pudo completar la operación. Intenta de nuevo.');
 }
 
-function toNullable(value: string | null | undefined): string | null {
-  const trimmed = value?.trim() ?? '';
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-type NamedRef = { id: string; nombre: string | null } | null;
-type EntrenadorRef = { id: string; nombre: string | null; apellido: string | null } | null;
-
-type EventoListRow = Evento & {
-  disciplina: NamedRef;
-  escenario: NamedRef;
-  entrenador: EntrenadorRef;
-};
-
-/**
- * `eventos` has two FKs into `usuarios` (`entrenador_id`, `creado_por`), so the
- * trainer embed MUST name its constraint or PostgREST rejects the query as ambiguous.
- */
-const LIST_SELECT =
-  '*, disciplina:disciplinas(id, nombre), escenario:escenarios(id, nombre), entrenador:usuarios!eventos_entrenador_id_fkey(id, nombre, apellido)';
-
-function toListItem(row: EventoListRow): EventoListItem {
-  const entrenadorNombre = row.entrenador
-    ? toNullable([row.entrenador.nombre ?? '', row.entrenador.apellido ?? ''].join(' '))
-    : null;
+function toListItem(row: Evento): EventoListItem {
+  const entrenadores = Array.isArray(row.entrenador_id) ? row.entrenador_id : [];
+  const entrenadorNombre = entrenadores
+    .map((entrenador) => entrenador.nombre?.trim())
+    .filter(Boolean)
+    .join(', ');
 
   return {
     id: row.id,
     tenantId: row.tenant_id,
     nombre: row.nombre ?? 'Evento sin nombre',
     descripcion: row.descripcion,
-    disciplinaId: row.disciplina_id,
-    disciplinaNombre: row.disciplina?.nombre ?? 'Sin disciplina',
-    escenarioId: row.escenario_id,
-    escenarioNombre: row.escenario?.nombre ?? null,
-    entrenadorId: row.entrenador_id,
-    entrenadorNombre,
+    disciplinaNombre: row.disciplina_id,
+    escenarioNombre: row.escenario_id?.nombre ?? null,
+    entrenadorNombre: entrenadorNombre || null,
     fechaHora: row.fecha_hora,
     duracionMinutos: row.duracion_minutos,
     cupoMaximo: row.cupo_maximo,
@@ -83,42 +103,42 @@ function toListItem(row: EventoListRow): EventoListItem {
     bannerUrl: row.banner_url,
     activo: row.activo,
     publico: row.publico,
+    borrador: row.borrador,
   };
 }
 
-function toPayload(input: Partial<EventoInput>): Record<string, unknown> {
-  const payload: Record<string, unknown> = {};
+type RpcResult = {
+  evento_id: string;
+  borrador: boolean;
+  entradas: { client_key: string; id: string; cupones: { client_key: string; id: string }[] }[];
+};
 
-  if (input.nombre !== undefined) payload.nombre = toNullable(input.nombre);
-  if (input.descripcion !== undefined) payload.descripcion = toNullable(input.descripcion);
-  if (input.disciplinaId !== undefined) payload.disciplina_id = input.disciplinaId;
-  if (input.escenarioId !== undefined) payload.escenario_id = toNullable(input.escenarioId);
-  if (input.entrenadorId !== undefined) payload.entrenador_id = toNullable(input.entrenadorId);
-  if (input.fechaHora !== undefined) payload.fecha_hora = toNullable(input.fechaHora);
-  if (input.duracionMinutos !== undefined) payload.duracion_minutos = input.duracionMinutos;
-  if (input.cupoMaximo !== undefined) payload.cupo_maximo = input.cupoMaximo;
-  if (input.puntoEncuentro !== undefined) payload.punto_encuentro = toNullable(input.puntoEncuentro);
-  if (input.estado !== undefined) payload.estado = input.estado;
-  if (input.reservaAntelacionHoras !== undefined) payload.reserva_antelacion_horas = input.reservaAntelacionHoras;
-  if (input.cancelacionAntelacionHoras !== undefined) payload.cancelacion_antelacion_horas = input.cancelacionAntelacionHoras;
-  if (input.precio !== undefined) payload.precio = input.precio ?? [];
-  if (input.bannerUrl !== undefined) payload.banner_url = toNullable(input.bannerUrl);
-  if (input.activo !== undefined) payload.activo = input.activo;
-  if (input.publico !== undefined) payload.publico = input.publico;
-  if (input.omitirConfirmacionCompra !== undefined) payload.omitir_confirmacion_compra = input.omitirConfirmacionCompra;
-  if (input.cronograma !== undefined) payload.cronograma = input.cronograma ?? [];
-  if (input.incluye !== undefined) payload.incluye = input.incluye ?? [];
-  if (input.descripcionLarga !== undefined) payload.descripcion_larga = toNullable(input.descripcionLarga);
-  if (input.paginaEventoUrl !== undefined) payload.pagina_evento_url = toNullable(input.paginaEventoUrl);
+/** `numeric` columns come back from PostgREST as numbers; coerce defensively in case a string slips through. */
+function toNumberOrNull(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+}
 
-  return payload;
+function normalizeEntradas(entradas: EventoEntradaConCupones[] | null | undefined): EventoEntradaConCupones[] {
+  return (entradas ?? [])
+    .map((entrada) => ({
+      ...entrada,
+      valor: toNumberOrNull(entrada.valor),
+      eventos_id_bundle: Array.isArray(entrada.eventos_id_bundle) ? entrada.eventos_id_bundle : [],
+      cupones: (entrada.cupones ?? [])
+        .map((cupon) => ({ ...cupon, descuento: toNumberOrNull(cupon.descuento) }))
+        .sort((left, right) => left.created_at.localeCompare(right.created_at)),
+    }))
+    .sort((left, right) => left.orden - right.orden || left.created_at.localeCompare(right.created_at));
 }
 
 export const eventosService = {
   async listEventos(tenantId: string, filters: EventosListFilters = {}): Promise<EventoListItem[]> {
     const supabase = createClient();
 
-    let query = supabase.from('eventos').select(LIST_SELECT).eq('tenant_id', tenantId);
+    // Disciplina, escenario and entrenadores are snapshots on the row itself (US-0119), so no embeds are needed
+    let query = supabase.from('eventos').select('*').eq('tenant_id', tenantId);
 
     if (filters.desde) query = query.gte('fecha_hora', filters.desde);
     if (filters.hasta) query = query.lt('fecha_hora', filters.hasta);
@@ -129,7 +149,7 @@ export const eventosService = {
       throw mapServiceError(error);
     }
 
-    return ((data ?? []) as unknown as EventoListRow[]).map(toListItem);
+    return ((data ?? []) as Evento[]).map(toListItem);
   },
 
   async getEventoById(tenantId: string, eventoId: string): Promise<Evento | null> {
@@ -149,50 +169,69 @@ export const eventosService = {
     return (data as Evento | null) ?? null;
   },
 
-  async createEvento(tenantId: string, input: EventoInput): Promise<Evento> {
-    const supabase = createClient();
-
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData.user) {
-      throw forbiddenError();
-    }
-
-    const payload = {
-      ...toPayload(input),
-      tenant_id: tenantId,
-      creado_por: authData.user.id,
-    };
-
-    const { data, error } = await supabase.from('eventos').insert(payload).select('*').single();
-
-    if (error) {
-      throw mapServiceError(error);
-    }
-
-    return data as Evento;
-  },
-
-  async updateEvento(tenantId: string, eventoId: string, input: Partial<EventoInput>): Promise<Evento> {
+  /** The event with its tickets (by `orden`) and each ticket's coupons, for the edit wizard. */
+  async getEventoCompleto(tenantId: string, eventoId: string): Promise<EventoCompleto | null> {
     const supabase = createClient();
 
     const { data, error } = await supabase
       .from('eventos')
-      .update(toPayload(input))
+      .select('*, entradas:evento_entradas(*, cupones:evento_entrada_cupones(*))')
       .eq('tenant_id', tenantId)
       .eq('id', eventoId)
-      .select('*')
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      // A malformed id is "not found" from the caller's point of view
+      if (error.code === '22P02') return null;
+      throw mapServiceError(error);
+    }
+
+    if (!data) return null;
+
+    const row = data as EventoCompleto;
+    return { ...row, entradas: normalizeEntradas(row.entradas) };
+  },
+
+  /**
+   * Atomic save of the event, its tickets and coupons through `guardar_evento_completo`.
+   * `borrador: true` validates only the name and format; `false` enforces completeness and publishes.
+   */
+  async guardarEventoCompleto(
+    tenantId: string,
+    eventoId: string,
+    payload: GuardarEventoPayload,
+    options: { esNuevo: boolean; borrador: boolean },
+  ): Promise<GuardarEventoResult> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase.rpc('guardar_evento_completo', {
+      p_tenant_id: tenantId,
+      p_evento_id: eventoId,
+      p_es_nuevo: options.esNuevo,
+      p_borrador: options.borrador,
+      p_evento: payload.evento,
+      p_entradas: payload.entradas,
+    });
 
     if (error) {
       throw mapServiceError(error);
     }
 
-    return data as Evento;
+    const result = data as RpcResult;
+    return {
+      eventoId: result.evento_id,
+      borrador: result.borrador,
+      entradas: (result.entradas ?? []).map((entrada) => ({
+        clientKey: entrada.client_key,
+        id: entrada.id,
+        cupones: (entrada.cupones ?? []).map((cupon) => ({ clientKey: cupon.client_key, id: cupon.id })),
+      })),
+    };
   },
 
   async updateEstadoEvento(tenantId: string, eventoId: string, estado: EventoEstado): Promise<Evento> {
     if (!EVENTO_ESTADOS.includes(estado)) {
-      throw new EventoServiceError('invalid_data', 'Los datos del evento no son válidos.');
+      throw new EventoServiceError('invalid_data', INVALID_DATA_MESSAGE);
     }
 
     const supabase = createClient();

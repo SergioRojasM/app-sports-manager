@@ -50,6 +50,7 @@ export function EventosTable({
     <EventoActionsMenu
       eventoNombre={evento.nombre}
       estado={evento.estado}
+      borrador={evento.borrador}
       onEditar={() => onEditar(evento)}
       onCambiarEstado={(target) => onCambiarEstado(evento, target)}
       onEliminar={() => onEliminar(evento)}
@@ -82,7 +83,7 @@ export function EventosTable({
                     <div className={cx('truncate font-semibold', cancelado ? 'text-grit-muted' : 'text-grit-text')} title={evento.nombre}>
                       {evento.nombre}
                     </div>
-                    <div className="truncate text-xs text-grit-subtext">{evento.disciplinaNombre}</div>
+                    <div className="truncate text-xs text-grit-subtext">{evento.disciplinaNombre ?? 'Sin disciplina'}</div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-xs text-grit-subtext">{formatFechaHora(evento.fechaHora)}</td>
                   <td className="max-w-[180px] truncate px-4 py-3 text-grit-subtext">
@@ -92,7 +93,7 @@ export function EventosTable({
                   <td className="whitespace-nowrap px-4 py-3 text-grit-subtext">{evento.cupoMaximo ?? 'Ilimitado'}</td>
                   <td className="px-4 py-3 text-grit-subtext">{evento.publico ? 'Público' : 'Privado'}</td>
                   <td className="px-4 py-3">
-                    <EventoEstadoBadge estado={evento.estado} />
+                    <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end">{renderActions(evento)}</div>
@@ -113,7 +114,7 @@ export function EventosTable({
                 <p className={cx('truncate font-semibold', evento.estado === 'cancelado' ? 'text-grit-muted' : 'text-grit-text')}>
                   {evento.nombre}
                 </p>
-                <p className="text-xs text-grit-subtext">{evento.disciplinaNombre}</p>
+                <p className="text-xs text-grit-subtext">{evento.disciplinaNombre ?? 'Sin disciplina'}</p>
               </div>
               {renderActions(evento)}
             </div>
@@ -130,7 +131,7 @@ export function EventosTable({
               <dd className="text-grit-subtext">{evento.publico ? 'Público' : 'Privado'}</dd>
               <dt className="text-grit-muted">Estado</dt>
               <dd>
-                <EventoEstadoBadge estado={evento.estado} />
+                <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
               </dd>
             </dl>
           </li>

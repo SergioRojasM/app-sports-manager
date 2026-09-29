@@ -9,6 +9,8 @@ type PublicTrainingDetalleHeroProps = {
   item: PublicTrainingListItem;
   /** Rendered at the end of the title block (divider + description, design `VekF7`). */
   children?: ReactNode;
+  /** Kind tag next to the discipline; the events wizard preview passes "Evento público/privado" (US-0119). */
+  tipoLabel?: string;
 };
 
 function formatFecha(fechaHora: string | null): string {
@@ -42,7 +44,7 @@ function MetaItem({ icon, top, bottom }: { icon: string; top: string; bottom?: s
  * Banner + tags + title/subtitle + meta row, matching design nodes `UBgoO`
  * (banner) and `VekF7` (title block) (US-0109, restyled in US-0116).
  */
-export function PublicTrainingDetalleHero({ item, children }: PublicTrainingDetalleHeroProps) {
+export function PublicTrainingDetalleHero({ item, children, tipoLabel = 'Entrenamiento público' }: PublicTrainingDetalleHeroProps) {
   const cupoMaximo = item.cupoMaximo ?? 0;
   // The design labels this slot "cupos disponibles", so it must show remaining
   // capacity — `reservasActivas` is the count already taken (US-0109)
@@ -72,7 +74,7 @@ export function PublicTrainingDetalleHero({ item, children }: PublicTrainingDeta
           <GritTag tone="accent" icon={disciplina.icon}>
             {item.disciplinaNombre}
           </GritTag>
-          <GritTag tone="neutral">Entrenamiento público</GritTag>
+          <GritTag tone="neutral">{tipoLabel}</GritTag>
         </div>
 
         <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-4xl lg:text-[40px]">

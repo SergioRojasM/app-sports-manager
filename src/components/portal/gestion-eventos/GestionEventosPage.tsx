@@ -1,10 +1,12 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { GritButton, GritEmptyState, GritPageHeader } from '@/components/ui';
+import { useRouter } from 'next/navigation';
+import { GritButton, GritEmptyState, GritIcon, GritPageHeader } from '@/components/ui';
 import { useGestionEventos, EVENTOS_PAGE_SIZE } from '@/hooks/portal/gestion-eventos/useGestionEventos';
 import { useEventosVista } from '@/hooks/portal/gestion-eventos/useEventosVista';
 import { useEventosCalendar } from '@/hooks/portal/gestion-eventos/useEventosCalendar';
+import { useEventoGuardadoBanner } from '@/hooks/portal/gestion-eventos/useEventoGuardadoBanner';
 import { EventosToolbar } from './EventosToolbar';
 import { EventosStatsCards } from './EventosStatsCards';
 import { EventosGrid, EventosGridSkeleton } from './EventosGrid';
@@ -12,7 +14,6 @@ import { EventosTable, EventosTableSkeleton } from './EventosTable';
 import { EventosCalendar } from './EventosCalendar';
 import { CambiarEstadoEventoModal } from './CambiarEstadoEventoModal';
 import { EliminarEventoModal } from './EliminarEventoModal';
-import { EventoProximamenteModal } from './EventoProximamenteModal';
 import type { EventoEstado, EventoListItem } from '@/types/portal/eventos.types';
 
 type GestionEventosPageProps = {
@@ -20,18 +21,20 @@ type GestionEventosPageProps = {
 };
 
 type ModalState =
-  | { kind: 'proximamente'; mode: 'crear' | 'editar' }
   | { kind: 'estado'; evento: EventoListItem; target: EventoEstado }
   | { kind: 'eliminar'; evento: EventoListItem }
   | null;
 
 /**
- * Route-agnostic on purpose: phase 2 mounts this same component on a separate
+ * Route-agnostic on purpose: a later phase mounts this same component on a separate
  * trainer route under (shared), so it must depend only on `tenantId` (US-0118).
+ * Create/edit happen in the full-page wizard (US-0119).
  */
 export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
+  const router = useRouter();
   const [modal, setModal] = useState<ModalState>(null);
   const { vista, setVista } = useEventosVista();
+  const guardadoBanner = useEventoGuardadoBanner();
   const gestion = useGestionEventos(tenantId);
   const calendar = useEventosCalendar({
     tenantId,
@@ -45,9 +48,12 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
     [eventos, matchesCalendarFilters],
   );
 
-  // Phase 2 replaces these two seams with the event form
-  const onNuevo = useCallback(() => setModal({ kind: 'proximamente', mode: 'crear' }), []);
-  const onEditar = useCallback(() => setModal({ kind: 'proximamente', mode: 'editar' }), []);
+  const basePath = `/portal/orgs/${tenantId}/gestion-eventos`;
+  const onNuevo = useCallback(() => router.push(`${basePath}/nuevo`), [basePath, router]);
+  const onEditar = useCallback(
+    (evento: EventoListItem) => router.push(`${basePath}/${evento.id}/editar`),
+    [basePath, router],
+  );
   const onCambiarEstado = useCallback(
     (evento: EventoListItem, target: EventoEstado) => setModal({ kind: 'estado', evento, target }),
     [],
@@ -173,6 +179,26 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
     <section className="space-y-6">
       <GritPageHeader title="Eventos" subtitle="Gestiona los eventos de tu equipo" actions={nuevoButton} />
 
+      {guardadoBanner.message && (
+        <div
+          role="status"
+          className="flex items-center justify-between gap-3 rounded-grit-md border border-grit-success/40 bg-grit-success/10 px-4 py-3 font-grit-body text-sm text-grit-success"
+        >
+          <span className="flex items-center gap-2">
+            <GritIcon name="check_circle" size={18} />
+            {guardadoBanner.message}
+          </span>
+          <button
+            type="button"
+            onClick={guardadoBanner.dismiss}
+            aria-label="Cerrar mensaje"
+            className="rounded-grit-sm p-1 text-grit-success transition hover:bg-grit-success/10"
+          >
+            <GritIcon name="close" size={16} />
+          </button>
+        </div>
+      )}
+
       <EventosToolbar
         vista={vista}
         onVistaChange={setVista}
@@ -181,14 +207,12 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
         onSearchChange={gestion.setSearch}
         onEstadoChange={gestion.setEstado}
         onPeriodoChange={gestion.setPeriodo}
-        onDisciplinaChange={gestion.setDisciplinaId}
+        onDisciplinaChange={gestion.setDisciplina}
       />
 
       {!gestion.loading && !gestion.error && <EventosStatsCards stats={gestion.stats} />}
 
       {renderContent()}
-
-      {modal?.kind === 'proximamente' && <EventoProximamenteModal mode={modal.mode} onClose={closeModal} />}
 
       {modal?.kind === 'estado' && (
         <CambiarEstadoEventoModal

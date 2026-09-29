@@ -47,6 +47,11 @@ export function buildEntrenamientoPublicoBannerPath(
   return `orgs/${tenantId}/entrenamientos-publicos/${entrenamientoId}.${ext}`;
 }
 
+/** Team event banner path: orgs/{tenantId}/eventos/{eventoId}.{ext} (US-0119) */
+export function buildEventoBannerPath(tenantId: string, eventoId: string, ext: string): string {
+  return `orgs/${tenantId}/eventos/${eventoId}.${ext}`;
+}
+
 // ─── Result types ───
 
 export type StorageUploadResult = {

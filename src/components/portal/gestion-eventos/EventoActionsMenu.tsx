@@ -8,6 +8,8 @@ import type { EventoEstado } from '@/types/portal/eventos.types';
 type EventoActionsMenuProps = {
   eventoNombre: string;
   estado: EventoEstado;
+  /** Drafts only offer "Continuar editando" and "Eliminar" (US-0119). */
+  borrador?: boolean;
   onEditar: () => void;
   onCambiarEstado: (target: EventoEstado) => void;
   onEliminar: () => void;
@@ -33,7 +35,14 @@ function computePosition(trigger: HTMLElement): MenuPosition {
   return fitsBelow ? { top: rect.bottom + 4, right } : { bottom: window.innerHeight - rect.top + 4, right };
 }
 
-export function EventoActionsMenu({ eventoNombre, estado, onEditar, onCambiarEstado, onEliminar }: EventoActionsMenuProps) {
+export function EventoActionsMenu({
+  eventoNombre,
+  estado,
+  borrador = false,
+  onEditar,
+  onCambiarEstado,
+  onEliminar,
+}: EventoActionsMenuProps) {
   const [position, setPosition] = useState<MenuPosition | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -41,13 +50,16 @@ export function EventoActionsMenu({ eventoNombre, estado, onEditar, onCambiarEst
   const menuId = useId();
   const open = position !== null;
 
-  const actions: MenuAction[] = [
-    { key: 'editar', label: 'Editar', icon: 'edit', run: onEditar },
-    estado === 'confirmado'
-      ? { key: 'cancelar', label: 'Cancelar evento', icon: 'event_busy', run: () => onCambiarEstado('cancelado') }
-      : { key: 'confirmar', label: 'Confirmar evento', icon: 'event_available', run: () => onCambiarEstado('confirmado') },
-    { key: 'eliminar', label: 'Eliminar', icon: 'delete', danger: true, run: onEliminar },
-  ];
+  const eliminar: MenuAction = { key: 'eliminar', label: 'Eliminar', icon: 'delete', danger: true, run: onEliminar };
+  const actions: MenuAction[] = borrador
+    ? [{ key: 'continuar', label: 'Continuar editando', icon: 'edit_note', run: onEditar }, eliminar]
+    : [
+        { key: 'editar', label: 'Editar', icon: 'edit', run: onEditar },
+        estado === 'confirmado'
+          ? { key: 'cancelar', label: 'Cancelar evento', icon: 'event_busy', run: () => onCambiarEstado('cancelado') }
+          : { key: 'confirmar', label: 'Confirmar evento', icon: 'event_available', run: () => onCambiarEstado('confirmado') },
+        eliminar,
+      ];
 
   useEffect(() => {
     if (!open) return;

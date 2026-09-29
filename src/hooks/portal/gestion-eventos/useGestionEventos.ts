@@ -29,7 +29,7 @@ type UseGestionEventosResult = {
   setSearch: (value: string) => void;
   setEstado: (value: EventosClientFilters['estado']) => void;
   setPeriodo: (value: EventosClientFilters['periodo']) => void;
-  setDisciplinaId: (value: string) => void;
+  setDisciplina: (value: string) => void;
   clearFilters: () => void;
   hasActiveFilters: boolean;
   /** Search/estado/disciplina filters without the periodo, for the month calendar. */
@@ -71,7 +71,8 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
         disciplinesService.listDisciplinesByTenant(tenantId),
       ]);
       setEventos(eventosData);
-      setDisciplinas(disciplinasData.map((disciplina) => ({ id: disciplina.id, label: disciplina.nombre })));
+      // Events store the discipline NAME (US-0119), so the option id is the name
+      setDisciplinas(disciplinasData.map((disciplina) => ({ id: disciplina.nombre, label: disciplina.nombre })));
     } catch (err) {
       console.error('Failed to load eventos:', err);
       setError(err instanceof EventoServiceError ? err.message : 'No se pudieron cargar los eventos.');
@@ -93,11 +94,15 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
     (evento: EventoListItem) => {
       const search = debouncedSearch.trim().toLowerCase();
       if (search && !evento.nombre.toLowerCase().includes(search)) return false;
-      if (filters.estado !== 'todos' && evento.estado !== filters.estado) return false;
-      if (filters.disciplinaId !== 'todas' && evento.disciplinaId !== filters.disciplinaId) return false;
+      if (filters.estado === 'borrador' && !evento.borrador) return false;
+      // Confirmado / Cancelado describe published events only
+      if ((filters.estado === 'confirmado' || filters.estado === 'cancelado') && (evento.borrador || evento.estado !== filters.estado)) {
+        return false;
+      }
+      if (filters.disciplina !== 'todas' && evento.disciplinaNombre !== filters.disciplina) return false;
       return true;
     },
-    [debouncedSearch, filters.estado, filters.disciplinaId],
+    [debouncedSearch, filters.estado, filters.disciplina],
   );
 
   const filteredEventos = useMemo(() => {
@@ -117,8 +122,11 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
     const now = Date.now();
     return {
       total: eventos.length,
-      proximosConfirmados: eventos.filter((evento) => evento.estado === 'confirmado' && isUpcoming(evento, now)).length,
-      cancelados: eventos.filter((evento) => evento.estado === 'cancelado').length,
+      proximosConfirmados: eventos.filter(
+        (evento) => !evento.borrador && evento.estado === 'confirmado' && isUpcoming(evento, now),
+      ).length,
+      cancelados: eventos.filter((evento) => !evento.borrador && evento.estado === 'cancelado').length,
+      borradores: eventos.filter((evento) => evento.borrador).length,
     };
   }, [eventos]);
 
@@ -127,7 +135,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
   // Filters change the result set, so go back to the first page
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, filters.estado, filters.disciplinaId, filters.periodo]);
+  }, [debouncedSearch, filters.estado, filters.disciplina, filters.periodo]);
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
@@ -147,7 +155,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
     (value: EventosClientFilters['periodo']) => setFilters((prev) => ({ ...prev, periodo: value })),
     [],
   );
-  const setDisciplinaId = useCallback((value: string) => setFilters((prev) => ({ ...prev, disciplinaId: value })), []);
+  const setDisciplina = useCallback((value: string) => setFilters((prev) => ({ ...prev, disciplina: value })), []);
   const clearFilters = useCallback(() => {
     setFilters(DEFAULT_EVENTOS_FILTERS);
     setDebouncedSearch('');
@@ -157,7 +165,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
     filters.search.trim() !== '' ||
     filters.estado !== DEFAULT_EVENTOS_FILTERS.estado ||
     filters.periodo !== DEFAULT_EVENTOS_FILTERS.periodo ||
-    filters.disciplinaId !== DEFAULT_EVENTOS_FILTERS.disciplinaId;
+    filters.disciplina !== DEFAULT_EVENTOS_FILTERS.disciplina;
 
   return {
     eventos,
@@ -172,7 +180,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
     setSearch,
     setEstado,
     setPeriodo,
-    setDisciplinaId,
+    setDisciplina,
     clearFilters,
     hasActiveFilters,
     matchesCalendarFilters,
