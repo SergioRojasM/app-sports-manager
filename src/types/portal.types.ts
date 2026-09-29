@@ -74,6 +74,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
     { label: 'Servicios', path: 'gestion-servicios', icon: 'category' },
     { label: 'Formularios', path: 'gestion-formularios', icon: 'description' },
     { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
+    { label: 'Eventos', path: 'gestion-eventos', icon: 'event' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
     { label: 'Suscripciones', path: 'gestion-suscripciones', icon: 'subscriptions' },
     { label: 'Equipo', path: 'gestion-equipo', icon: 'groups' },
