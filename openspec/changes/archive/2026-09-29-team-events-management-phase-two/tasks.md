@@ -192,7 +192,7 @@
 - [x] 9.4 Validation: forward blocked; hidden-step error jump; empty value not coerced; duplicate coupon code; a free ticket has no coupons; a paid event needs a method; invalid URL; oversize banner; past date on create
 - [x] 9.5 Error paths: RPC failure keeps the draft (simulate offline — NOT exercised in the browser; RPC rejections verified in SQL); not-found edit URL; load error with "Reintentar"; the unsaved-changes guard, including no prompt after a draft save
 - [x] 9.6 Management page: "Nuevo evento" and "Editar" navigate to the wizard; the draft tag, filter, stat and restricted actions; the disciplina filter by name; the status change and delete still work
-- [ ] 9.7 Access: trainer and athlete are redirected from both wizard URLs — NOT exercised (no trainer/athlete credentials); relies on the unchanged `(administrador)` layout guard
+- [x] 9.7 Access: trainer and athlete are redirected from both wizard URLs — validated manually by the user
 - [x] 9.8 Keyboard and screen reader — partially: aria wiring and focus moves verified via Playwright (focused field ids, aria-invalid); no manual keyboard-only or screen-reader pass: the stepper, radio groups, focus moves, dialog `Escape`
 - [x] 9.9 Confirm that `ScenariosPage`, `PublicarEntrenamientoModal` and the trainings / public trainings behave as before (`git diff --stat` review)
 

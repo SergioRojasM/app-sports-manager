@@ -44,7 +44,7 @@ The wizard SHALL show a stepper with three steps: "Configura tu evento", "Config
 - **THEN** step 3 SHALL be displayed
 
 ### Requirement: Step 1 event configuration with live preview
-Step 1 SHALL show the event form next to a live preview (stacked, with a "Ver vista previa" toggle, below `lg`). The preview SHALL switch between *Página* (default: `PublicTrainingDetalleBody` fed by `toDetallePreviewItem(draft)`) and *Tarjeta* (`EventoCard` with `hideActions`). Every edit SHALL update the preview without a network call. Prices in the preview SHALL come only from step-2 tickets with a valid value.
+Step 1 SHALL show the event form as a single centered column. The live preview SHALL NOT be inline: a "Vista previa" button in the wizard footer, available on every step, SHALL open `EventoPreviewModal`, a large dialog rendered on `document.body`. The preview SHALL switch between *Página* (default: `PublicTrainingDetalleBody` with `variant="evento"`, fed by `toDetallePreviewItem(draft)`) and *Tarjeta* (`EventoCard` with `hideActions`). It SHALL reflect the current draft without a network call. Prices in the preview SHALL come only from step-2 tickets with a valid value.
 
 The form SHALL contain:
 - `nombre`: required, max 150
@@ -55,17 +55,21 @@ The form SHALL contain:
 - `fecha_hora`: a Bogotá `datetime-local`, optional, and not in the past on create
 - `duracion_minutos`
 - venue selector (see the escenario requirement)
-- `punto_encuentro`
+- `punto_encuentro`: a Google Maps link (placeholder `https://maps.app.goo.gl/KAuYCWHmrx1udyUdA?g_st=ic`), shown on the event page as a location link
 - trainer multi-select (see the trainers requirement)
 - `cupo_maximo`, `reserva_antelacion_horas`, `cancelacion_antelacion_horas` and `omitir_confirmacion_compra`
-- `cronograma` and `incluye` row editors
+- `cronograma` and `incluye` row editors, each row laid out as 1/3 (hora / título) + 2/3 (descripción) + delete button
 - the `publico` toggle, and the `activo` toggle (labelled "Oculto" when off)
 
 `estado` SHALL NOT be editable in the wizard.
 
-#### Scenario: Preview updates live
-- **WHEN** the admin types "Copa Verano" in the name field
-- **THEN** the *Página* preview hero SHALL show "Copa Verano" immediately
+#### Scenario: Preview reflects the draft
+- **WHEN** the admin types "Copa Verano" in the name field and clicks "Vista previa" in the footer
+- **THEN** a dialog "Vista previa del evento" SHALL open, and its *Página* hero SHALL show "Copa Verano"
+
+#### Scenario: Preview modal closes
+- **WHEN** the preview dialog is open and the admin presses Escape, clicks the close button, or clicks the backdrop
+- **THEN** the dialog SHALL close and the draft SHALL be unchanged
 
 #### Scenario: Card preview
 - **WHEN** the admin switches the preview to *Tarjeta*
@@ -114,11 +118,15 @@ Step 2 SHALL manage ticket cards. Each card SHALL have:
 - `nombre`: required on publish, max 100, unique case-insensitively within the event
 - `tipo_entrada`: Sencilla (default) or Múltiple. Múltiple shows a bundle multi-select of the tenant's other non-cancelled events, never the current one, with at least 1 required on publish. Switching back to Sencilla SHALL clear the bundle.
 - `valor`: COP, a raw-string input, >= 0, required on publish, and never coerced from an empty string to 0
-- `valida_desde` / `valida_hasta`: optional Bogotá datetimes, `desde < hasta`. `hasta` must not be after the event's end when `fecha_hora` is set.
+- "Venta disponible desde" / "Venta disponible hasta" (`valida_desde` / `valida_hasta`): optional Bogotá datetimes, `desde < hasta`. `hasta` must not be after the event's end when `fecha_hora` is set. A newly added ticket SHALL be pre-filled with *desde* = today (Bogotá) at 00:00 and *hasta* = the event's `fecha_hora` (empty when the event has no date).
 - move up / move down, and delete (with confirmation when the ticket has coupons)
 - a coupon editor: rows with `nombre`, `cupon` (uppercased while typing, `^[A-Z0-9_-]{3,30}$`, unique across the event), `descuento` (a percentage in `(0, 100]` with a "$X → $Y" preview), and an optional validity window. "Añadir cupón" SHALL be disabled on tickets with `valor = 0`.
 
 Publishing SHALL require at least one ticket. The step SHALL also offer the access-form select: "Sin formulario", plus the tenant's active form templates, with a "Vista previa" that opens `FormularioPreviewModal`. When there are no templates, it SHALL show an empty state linking to `gestion-formularios`.
+
+#### Scenario: Sale window defaults
+- **WHEN** the event's date is 2026-12-12 07:30, and the admin adds a ticket on 2026-09-29
+- **THEN** "Venta disponible desde" SHALL be `2026-09-29T00:00` and "Venta disponible hasta" SHALL be `2026-12-12T07:30`
 
 #### Scenario: Múltiple ticket requires a bundle on publish
 - **WHEN** the admin publishes with a Múltiple ticket that has no bundled event
@@ -246,8 +254,38 @@ While the draft differs from its last saved or loaded state, closing or reloadin
 - Every input MUST have a label. Repeated row inputs MUST have indexed `aria-label`s (for example "Código del cupón 1 de la entrada 2"). Invalid fields MUST set `aria-invalid` and reference their error through `aria-describedby`.
 - On a step change, focus MUST move to the step heading. On a failed validation, focus MUST move to the first invalid field.
 - Ticket type and preview mode MUST be native radio groups or `role="radiogroup"`. Payment-method cards MUST be real checkboxes.
-- Dialogs (create scenario, form preview, leave without saving, delete ticket) MUST use `role="dialog"` and `aria-modal`, move focus inside on open, and close on `Escape` unless submitting.
+- Dialogs (event preview, create scenario, form preview, leave without saving, delete ticket) MUST use `role="dialog"` and `aria-modal`, move focus inside on open, and close on `Escape` unless submitting.
+- Every wizard dialog MUST render on `document.body` (`BodyPortal`), so it is painted above the sticky footer and never clipped by a backdrop-blur ancestor.
+
+#### Scenario: Dialogs above the footer
+- **WHEN** the create-scenario or the preview dialog is open
+- **THEN** the element at the footer's position SHALL belong to the dialog or its backdrop, not to the wizard footer
 
 #### Scenario: Focus on invalid field
 - **WHEN** validation fails on step 2 for the second ticket's value
 - **THEN** focus SHALL be on that input, which SHALL have `aria-invalid="true"`
+
+### Requirement: Event page layout
+The event page (and its preview) SHALL render `PublicTrainingDetalleBody` with `variant="evento"`. Public-training pages keep the default `entrenamiento` variant, and their behavior is unchanged. In the event variant:
+- The kind tag SHALL read "Evento público" or "Evento privado".
+- The "Ubicación" and "Reserva tu cupo" cards SHALL NOT be rendered.
+- The header's location item SHALL render `punto_encuentro` as a "Ver ubicación" link opening in a new tab, when it is an http(s) URL. Its title SHALL be the venue name, or "Punto de encuentro" when there is no venue. A non-URL value SHALL render as plain text.
+- The header SHALL show "Reserva hasta N h antes" when `reserva_antelacion_horas` is set.
+- The header SHALL show "Página del evento" with a "Ver página oficial" link, opening in a new tab, when `pagina_evento_url` is an http(s) URL.
+- The closing banner SHALL show only the title "Reserva tu cupo", with no subtitle.
+
+#### Scenario: Location as a link
+- **WHEN** `punto_encuentro` is `https://maps.app.goo.gl/KAuYCWHmrx1udyUdA?g_st=ic`
+- **THEN** the header SHALL show a "Ver ubicación" link with that href and `target="_blank"`, and no "Ubicación" card SHALL be rendered
+
+#### Scenario: Lead time and official page in the header
+- **WHEN** `reserva_antelacion_horas = 24` and `pagina_evento_url = 'https://wolfpack.com/trail-21k'`
+- **THEN** the header SHALL show "Reserva hasta 24 h antes" and a "Ver página oficial" link to that URL, and no "Reserva tu cupo" card SHALL be rendered
+
+#### Scenario: Closing banner
+- **WHEN** the event page is rendered
+- **THEN** the closing banner title SHALL be "Reserva tu cupo", with no subtitle
+
+#### Scenario: Public trainings unchanged
+- **WHEN** a public training detail page is rendered
+- **THEN** it SHALL still show the "Entrenamiento público" tag, the location and reservation cards, and the "¿Listo para mejorar tu rendimiento?" banner
