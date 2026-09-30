@@ -1,5 +1,8 @@
-## MODIFIED Requirements
+# portal-role-navigation Specification
 
+## Purpose
+Defines the role-aware portal sidebar menu and the default post-login and portal-root redirects to /portal/inicio.
+## Requirements
 ### Requirement: Role-based sidebar menu
 `PortalSidebar` SHALL display an "Inicio" entry as the first menu item for all authenticated users, followed by a tenant-discovery entry. The sidebar SHALL adapt tenant-scoped menu items according to the resolved role for the active tenant context. Role-specific tenant items MUST only appear after tenant access is validated.
 
@@ -11,6 +14,8 @@ Visibility of specific tenant route entries:
 - `mis-suscripciones-y-pagos`: only the `usuario` role in the active tenant.
 
 The "Inicio" entry SHALL always be present regardless of tenant context, enabling users to return to their personal dashboard.
+
+Outside a tenant context, the sidebar SHALL include an "Eventos" entry (icon `celebration`) linking to `/portal/eventos`, positioned immediately after "Entrenamientos Públicos" (US-0120).
 
 #### Scenario: Sidebar shows Inicio as first menu item
 - **WHEN** an authenticated user enters the portal shell
@@ -72,7 +77,9 @@ The "Inicio" entry SHALL always be present regardless of tenant context, enablin
 - **WHEN** tenant membership validation fails for requested tenant
 - **THEN** tenant-scoped menu items SHALL NOT be rendered and user SHALL be redirected to `/portal/orgs`
 
-## ADDED Requirements
+#### Scenario: Global events entry outside tenant context
+- **WHEN** an authenticated user is in the portal without an active tenant context
+- **THEN** the sidebar SHALL include "Eventos" with icon `celebration` linking to `/portal/eventos`, immediately after "Entrenamientos Públicos"
 
 ### Requirement: Default post-login redirect to /portal/inicio
 The bootstrap route (`/portal/bootstrap`) SHALL redirect authenticated users to `/portal/inicio` by default when no `next` parameter is provided. The portal layout SHALL use `/portal/inicio` as the default bootstrap target when cookies are missing or invalid.
@@ -95,3 +102,4 @@ The portal root page (`/portal/page.tsx`) SHALL redirect to `/portal/inicio` ins
 #### Scenario: Visiting /portal redirects to /portal/inicio
 - **WHEN** a user navigates to `/portal`
 - **THEN** the system SHALL redirect to `/portal/inicio`
+

@@ -1,6 +1,7 @@
 import { cx } from '@/components/ui';
 import { formatCupo, formatEventoFecha, formatEventoHora } from '@/lib/portal/eventos.utils';
 import { EventoActionsMenu } from './EventoActionsMenu';
+import { EventoActivoBadge } from './EventoActivoBadge';
 import { EventoEstadoBadge } from './EventoEstadoBadge';
 import type { EventoEstado, EventoListItem } from '@/types/portal/eventos.types';
 
@@ -14,9 +15,10 @@ type EventosTableProps = {
   onEditar: (evento: EventoListItem) => void;
   onCambiarEstado: (evento: EventoListItem, target: EventoEstado) => void;
   onEliminar: (evento: EventoListItem) => void;
+  onCambiarActivo: (evento: EventoListItem) => void;
 };
 
-const COLUMNS = ['Evento', 'Fecha y hora', 'Lugar', 'Entrenador', 'Cupo', 'Visibilidad', 'Estado'];
+const COLUMNS = ['Evento', 'Fecha y hora', 'Lugar', 'Entrenador', 'Cupo', 'Visibilidad', 'Activo', 'Estado'];
 
 function formatFechaHora(fechaHora: string | null): string {
   return fechaHora ? `${formatEventoFecha(fechaHora)} · ${formatEventoHora(fechaHora)}` : formatEventoFecha(null);
@@ -42,6 +44,7 @@ export function EventosTable({
   onEditar,
   onCambiarEstado,
   onEliminar,
+  onCambiarActivo,
 }: EventosTableProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalFiltered);
@@ -51,6 +54,8 @@ export function EventosTable({
       eventoNombre={evento.nombre}
       estado={evento.estado}
       borrador={evento.borrador}
+      activo={evento.activo}
+      onCambiarActivo={() => onCambiarActivo(evento)}
       onEditar={() => onEditar(evento)}
       onCambiarEstado={(target) => onCambiarEstado(evento, target)}
       onEliminar={() => onEliminar(evento)}
@@ -93,6 +98,9 @@ export function EventosTable({
                   <td className="whitespace-nowrap px-4 py-3 text-grit-subtext">{evento.cupoMaximo ?? 'Ilimitado'}</td>
                   <td className="px-4 py-3 text-grit-subtext">{evento.publico ? 'Público' : 'Privado'}</td>
                   <td className="px-4 py-3">
+                    <EventoActivoBadge activo={evento.activo} />
+                  </td>
+                  <td className="px-4 py-3">
                     <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
                   </td>
                   <td className="px-4 py-3">
@@ -129,6 +137,10 @@ export function EventosTable({
               <dd className="text-grit-subtext">{formatCupo(evento.cupoMaximo)}</dd>
               <dt className="text-grit-muted">Visibilidad</dt>
               <dd className="text-grit-subtext">{evento.publico ? 'Público' : 'Privado'}</dd>
+              <dt className="text-grit-muted">Activo</dt>
+              <dd>
+                <EventoActivoBadge activo={evento.activo} />
+              </dd>
               <dt className="text-grit-muted">Estado</dt>
               <dd>
                 <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />

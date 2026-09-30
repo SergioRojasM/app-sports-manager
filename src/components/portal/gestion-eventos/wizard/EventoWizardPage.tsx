@@ -216,6 +216,7 @@ export function EventoWizardPage({ tenantId, eventoId }: EventoWizardPageProps) 
           tenantId={wizard.tenantId}
           borrador={wizard.esBorrador}
           bannerUrl={wizard.bannerDisplayUrl}
+          nombreTenant={wizard.nombreTenant}
           onClose={() => setPreviewOpen(false)}
         />
       )}

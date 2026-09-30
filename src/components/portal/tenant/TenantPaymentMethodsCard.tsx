@@ -2,24 +2,16 @@
 
 import { useMetodosPago } from '@/hooks/portal/tenant/useMetodosPago';
 import { MetodoPagoFormModal } from './MetodoPagoFormModal';
-import type { MetodoPago } from '@/types/portal/metodos-pago.types';
+import { METODO_PAGO_TIPO_LABELS, type MetodoPago } from '@/types/portal/metodos-pago.types';
 
 type TenantPaymentMethodsCardProps = {
   tenantId: string;
 };
 
-const TIPO_LABELS: Record<string, string> = {
-  transferencia: 'Transferencia',
-  efectivo: 'Efectivo',
-  tarjeta: 'Tarjeta',
-  pasarela: 'Pasarela',
-  otro: 'Otro',
-};
-
 function TipoBadge({ tipo }: { tipo: string }) {
   return (
     <span className="rounded-full bg-grit-cyan/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-cyan">
-      {TIPO_LABELS[tipo] ?? tipo}
+      {(METODO_PAGO_TIPO_LABELS as Record<string, string>)[tipo] ?? tipo}
     </span>
   );
 }

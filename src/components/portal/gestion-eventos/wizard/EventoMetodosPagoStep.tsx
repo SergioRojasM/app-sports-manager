@@ -8,20 +8,12 @@ import { FieldError, WizardSection, errorDomId, fieldDomId } from './fields';
 import type { EventoWizardState } from '@/hooks/portal/gestion-eventos/useEventoWizard';
 import type { EventoWizardOptions } from '@/hooks/portal/gestion-eventos/useEventoWizardOptions';
 import type { EventoMetodoPagoSnapshot } from '@/types/portal/eventos.types';
-import type { MetodoPago } from '@/types/portal/metodos-pago.types';
+import { METODO_PAGO_TIPO_LABELS, type MetodoPago } from '@/types/portal/metodos-pago.types';
 
 type EventoMetodosPagoStepProps = {
   wizard: EventoWizardState;
   options: EventoWizardOptions;
   disabled: boolean;
-};
-
-const TIPO_LABELS: Record<MetodoPago['tipo'], string> = {
-  transferencia: 'Transferencia',
-  efectivo: 'Efectivo',
-  tarjeta: 'Tarjeta',
-  pasarela: 'Pasarela',
-  otro: 'Otro',
 };
 
 function toSnapshot(metodo: MetodoPago): EventoMetodoPagoSnapshot {
@@ -65,7 +57,7 @@ export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetod
       <WizardSection
         title="Métodos de pago del evento"
         icon="payments"
-        description="Elige cuáles de los métodos de pago de tu organización se aceptan para este evento."
+        description="Elige cuáles de los métodos de pago de tu organización se aceptan para este evento. Los métodos que selecciones se mostrarán a quienes adquieran entradas para este evento."
         action={
           options.metodosPago.length > 0 ? (
             <div className="flex gap-2">
@@ -151,7 +143,7 @@ export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetod
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="font-grit-body text-sm font-semibold text-grit-text">{metodo.nombre}</span>
                     <span className="rounded-full border border-grit-glass-border px-2 py-0.5 font-grit-body text-[10px] font-semibold uppercase text-grit-subtext">
-                      {TIPO_LABELS[metodo.tipo]}
+                      {METODO_PAGO_TIPO_LABELS[metodo.tipo]}
                     </span>
                   </span>
                   {metodo.valor && <span className="block truncate font-grit-body text-xs text-grit-subtext">{metodo.valor}</span>}

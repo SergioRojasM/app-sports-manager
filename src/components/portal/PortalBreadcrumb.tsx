@@ -19,6 +19,7 @@ const SLUG_LABELS: Record<string, string> = {
   'gestion-formularios': 'Formularios',
   'gestion-entrenamientos': 'Entrenamientos',
   'gestion-eventos': 'Eventos',
+  eventos: 'Eventos',
   nuevo: 'Nuevo evento',
   editar: 'Editar evento',
   'gestion-planes': 'Planes',
@@ -81,6 +82,9 @@ export function PortalBreadcrumb() {
 
       if (i === 0 && part === 'portal') {
         result.push({ label: 'Inicio', href: '/portal', isLast });
+      } else if (UUID_RE.test(part) && parts[i - 1] === 'eventos' && parts[i - 2] === 'portal') {
+        // Portal event page (US-0120): never render the raw event id
+        result.push({ label: 'Evento', href: accumulated, isLast });
       } else if (UUID_RE.test(part)) {
         uuidsSeen += 1;
         if (uuidsSeen > 1 && parts[i - 1] === 'gestion-eventos') {

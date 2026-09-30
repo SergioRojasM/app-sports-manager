@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useMemo, useState } from 'react';
 import { cx, gritFocusRing } from '@/components/ui';
-import { PublicTrainingDetalleBody } from '@/components/landing/entrenamientos-publicos/detalle/PublicTrainingDetalleBody';
+import { EventoDetalleBody } from '@/components/portal/eventos/detalle/EventoDetalleBody';
 import { toCardPreviewItem, toDetallePreviewItem } from '@/lib/portal/eventos-wizard.utils';
 import { EventoCard } from '../EventoCard';
 import type { EventoDraft } from '@/types/portal/eventos.types';
@@ -16,6 +16,8 @@ type EventoPreviewProps = {
   borrador: boolean;
   /** Local object URL of a not-yet-uploaded banner, or the stored banner. */
   bannerUrl: string | null;
+  /** Organization line of the page preview; null while loading hides it (US-0120). */
+  nombreTenant: string | null;
 };
 
 const MODES: Array<{ value: PreviewMode; label: string }> = [
@@ -26,13 +28,16 @@ const MODES: Array<{ value: PreviewMode; label: string }> = [
 const noop = () => {};
 
 /** Live preview of how the event will look, fed by pure adapters over the in-memory draft (US-0119). */
-export function EventoPreview({ draft, eventoId, tenantId, borrador, bannerUrl }: EventoPreviewProps) {
+export function EventoPreview({ draft, eventoId, tenantId, borrador, bannerUrl, nombreTenant }: EventoPreviewProps) {
   const [mode, setMode] = useState<PreviewMode>('pagina');
   // Markdown rendering of the long description is the heaviest part; let typing stay responsive
   const deferredDraft = useDeferredValue(draft);
   const previewDraft = useMemo(() => ({ ...deferredDraft, bannerUrl }), [deferredDraft, bannerUrl]);
 
-  const detalleItem = useMemo(() => toDetallePreviewItem(previewDraft, eventoId, tenantId), [previewDraft, eventoId, tenantId]);
+  const detalleItem = useMemo(
+    () => toDetallePreviewItem(previewDraft, eventoId, tenantId, nombreTenant),
+    [previewDraft, eventoId, tenantId, nombreTenant],
+  );
   const cardItem = useMemo(
     () => toCardPreviewItem(previewDraft, eventoId, tenantId, borrador),
     [previewDraft, eventoId, tenantId, borrador],
@@ -68,12 +73,11 @@ export function EventoPreview({ draft, eventoId, tenantId, borrador, bannerUrl }
       <div className="overflow-hidden rounded-grit-2xl border border-dashed border-grit-glass-border bg-grit-bg/40 p-4" aria-live="off">
         {mode === 'pagina' ? (
           <div className="pointer-events-none select-none" inert>
-            <PublicTrainingDetalleBody
-              item={detalleItem}
-              onReservar={noop}
-              reservarDisabled
+            <EventoDetalleBody
+              evento={detalleItem}
+              onObtenerEntrada={noop}
+              obtenerEntradaDisabled
               tipoLabel={draft.publico ? 'Evento público' : 'Evento privado'}
-              variant="evento"
             />
           </div>
         ) : (

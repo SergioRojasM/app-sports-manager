@@ -1,6 +1,7 @@
 import { GritIcon, cx, gritFocusRing } from '@/components/ui';
 import { formatDateKeyLabel, formatEventoHora, toDateKeyInBogota } from '@/lib/portal/eventos.utils';
 import { EventoActionsMenu } from './EventoActionsMenu';
+import { EventoActivoBadge } from './EventoActivoBadge';
 import { EventoEstadoBadge } from './EventoEstadoBadge';
 import type { EventoEstado, EventoListItem } from '@/types/portal/eventos.types';
 
@@ -21,6 +22,7 @@ type EventosCalendarProps = {
   onEditar: (evento: EventoListItem) => void;
   onCambiarEstado: (evento: EventoListItem, target: EventoEstado) => void;
   onEliminar: (evento: EventoListItem) => void;
+  onCambiarActivo: (evento: EventoListItem) => void;
 };
 
 type CalendarCell = {
@@ -68,9 +70,13 @@ function buildMonthCells(monthStartDate: string): CalendarCell[] {
   return cells;
 }
 
-function eventCountLabel(count: number): string {
+function eventCountLabel(eventos: EventoListItem[]): string {
+  const count = eventos.length;
   if (count === 0) return 'sin eventos';
-  return count === 1 ? '1 evento' : `${count} eventos`;
+  const inactivos = eventos.filter((evento) => !evento.activo).length;
+  const base = count === 1 ? '1 evento' : `${count} eventos`;
+  if (inactivos === 0) return base;
+  return `${base}, ${inactivos === 1 ? '1 inactivo' : `${inactivos} inactivos`}`;
 }
 
 export function EventosCalendar({
@@ -90,6 +96,7 @@ export function EventosCalendar({
   onEditar,
   onCambiarEstado,
   onEliminar,
+  onCambiarActivo,
 }: EventosCalendarProps) {
   const monthCells = buildMonthCells(monthStartDate);
   const todayKey = toDateKeyInBogota(new Date());
@@ -177,7 +184,7 @@ export function EventosCalendar({
                     type="button"
                     onClick={() => onSelectDate(cell.dateKey as string)}
                     aria-pressed={isSelected}
-                    aria-label={`${formatDateKeyLabel(cell.dateKey)}, ${eventCountLabel(dayEventos.length)}`}
+                    aria-label={`${formatDateKeyLabel(cell.dateKey)}, ${eventCountLabel(dayEventos)}`}
                     className={cx(
                       'flex min-h-[88px] flex-col items-stretch gap-1 rounded-grit-md border p-1.5 text-left transition sm:p-2',
                       gritFocusRing,
@@ -208,10 +215,14 @@ export function EventosCalendar({
                             'hidden truncate sm:inline',
                             !evento.borrador && evento.estado === 'cancelado' && 'text-grit-muted line-through',
                             evento.borrador && 'italic text-grit-subtext',
+                            !evento.activo && 'text-amber-300',
                           )}
                         >
                           {evento.nombre}
                         </span>
+                        {!evento.activo && (
+                          <GritIcon name="visibility_off" size={11} className="shrink-0 text-amber-300" />
+                        )}
                       </span>
                     ))}
                     {overflow > 0 && (
@@ -254,11 +265,16 @@ export function EventosCalendar({
                     </p>
                     <p className="truncate text-xs text-grit-subtext">{evento.disciplinaNombre ?? 'Sin disciplina'}</p>
                   </div>
-                  <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
+                  <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                    <EventoActivoBadge activo={evento.activo} />
+                    <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
+                  </div>
                   <EventoActionsMenu
                     eventoNombre={evento.nombre}
                     estado={evento.estado}
                     borrador={evento.borrador}
+                    activo={evento.activo}
+                    onCambiarActivo={() => onCambiarActivo(evento)}
                     onEditar={() => onEditar(evento)}
                     onCambiarEstado={(target) => onCambiarEstado(evento, target)}
                     onEliminar={() => onEliminar(evento)}

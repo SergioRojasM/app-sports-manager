@@ -1,11 +1,12 @@
 import { fromDateTimeLocalInBogota, toDateKeyInBogota, toDateTimeLocalInBogota } from '@/lib/portal/eventos.utils';
-import type { PrecioItem, PublicTrainingListItem } from '@/types/portal/entrenamientos-publicos.types';
+import type { PrecioItem } from '@/types/portal/entrenamientos-publicos.types';
 import type {
   EventoCompleto,
   EventoCuponDraft,
   EventoDraft,
   EventoEntradaDraft,
   EventoListItem,
+  EventoPublicoDetalle,
   EventoWizardErrors,
   EventoWizardStep,
   GuardarEventoPayload,
@@ -253,41 +254,41 @@ function entrenadoresLabel(draft: EventoDraft): string | null {
 }
 
 /**
- * Draft → the public training detail body's item. Fields with no event equivalent
- * (tenant, bookings, required services, formularios) get neutral values.
+ * Draft → the event detail body's model (US-0120). `nombreTenant` is the event's stored
+ * snapshot in edit mode, or the tenant's current name before a new event's first save.
  */
-export function toDetallePreviewItem(draft: EventoDraft, eventoId: string, tenantId: string): PublicTrainingListItem {
+export function toDetallePreviewItem(
+  draft: EventoDraft,
+  eventoId: string,
+  tenantId: string,
+  nombreTenant: string | null,
+): EventoPublicoDetalle {
   return {
     id: eventoId,
     tenantId,
-    tenantNombre: '',
-    tenantLogoUrl: null,
-    entrenamientoId: eventoId,
+    nombreTenant: nombreTenant ?? '',
     nombre: draft.nombre.trim() || 'Nombre del evento',
     descripcion: trimOrNull(draft.descripcion),
-    disciplinaId: '',
+    paginaEventoUrl: trimOrNull(draft.paginaEventoUrl),
     disciplinaNombre: draft.disciplina || 'Disciplina',
-    escenarioNombre: draft.escenario?.nombre ?? '',
+    escenario: draft.escenario,
+    escenarioNombre: draft.escenario?.nombre ?? null,
     escenarioUbicacion: draft.escenario?.ubicacion ?? draft.escenario?.direccion ?? null,
+    puntoEncuentro: trimOrNull(draft.puntoEncuentro),
+    entrenadores: draft.entrenadores,
+    entrenadorNombre: entrenadoresLabel(draft),
     fechaHora: fromDateTimeLocalInBogota(draft.fechaHora),
     duracionMinutos: parseInteger(draft.duracionMinutos),
     cupoMaximo: parseInteger(draft.cupoMaximo),
-    puntoEncuentro: trimOrNull(draft.puntoEncuentro),
     reservaAntelacionHoras: parseInteger(draft.reservaAntelacionHoras),
     cancelacionAntelacionHoras: parseInteger(draft.cancelacionAntelacionHoras),
     precio: previewPrecio(draft),
+    metodosPago: draft.metodosPago,
+    bannerUrl: draft.bannerUrl,
+    publico: draft.publico,
     descripcionLarga: trimOrNull(draft.descripcionLarga),
-    paginaEventoUrl: trimOrNull(draft.paginaEventoUrl),
     cronograma: completeCronograma(draft),
     incluye: completeIncluye(draft),
-    entrenadorNombre: entrenadoresLabel(draft),
-    bannerUrl: draft.bannerUrl,
-    reservasActivas: 0,
-    serviciosRequeridos: [],
-    omitirConfirmacionPlan: false,
-    createdAt: new Date(0).toISOString(),
-    formularioId: null,
-    formularioExterno: null,
   };
 }
 

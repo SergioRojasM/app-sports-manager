@@ -12,11 +12,13 @@ type EventoPreviewModalProps = {
   tenantId: string;
   borrador: boolean;
   bannerUrl: string | null;
+  /** Organization shown on the event page preview (US-0120). */
+  nombreTenant: string | null;
   onClose: () => void;
 };
 
 /** Full-size preview of the event page / card, opened from the wizard footer (US-0119). */
-export function EventoPreviewModal({ draft, eventoId, tenantId, borrador, bannerUrl, onClose }: EventoPreviewModalProps) {
+export function EventoPreviewModal({ draft, eventoId, tenantId, borrador, bannerUrl, nombreTenant, onClose }: EventoPreviewModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
@@ -67,7 +69,7 @@ export function EventoPreviewModal({ draft, eventoId, tenantId, borrador, banner
             </button>
           </header>
           <div className="overflow-y-auto p-5">
-            <EventoPreview draft={draft} eventoId={eventoId} tenantId={tenantId} borrador={borrador} bannerUrl={bannerUrl} />
+            <EventoPreview draft={draft} eventoId={eventoId} tenantId={tenantId} borrador={borrador} bannerUrl={bannerUrl} nombreTenant={nombreTenant} />
           </div>
         </div>
       </div>

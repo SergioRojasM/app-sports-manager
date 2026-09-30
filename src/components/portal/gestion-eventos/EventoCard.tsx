@@ -8,6 +8,7 @@ import {
   formatEventoPrecio,
 } from '@/lib/portal/eventos.utils';
 import { EventoActionsMenu } from './EventoActionsMenu';
+import { EventoActivoBadge } from './EventoActivoBadge';
 import { EventoEstadoBadge } from './EventoEstadoBadge';
 import type { EventoEstado, EventoListItem } from '@/types/portal/eventos.types';
 
@@ -16,6 +17,8 @@ type EventoCardProps = {
   onEditar?: () => void;
   onCambiarEstado?: (target: EventoEstado) => void;
   onEliminar?: () => void;
+  /** Quick activar/desactivar from the actions menu. */
+  onCambiarActivo?: () => void;
   /** Used by the wizard's live preview (US-0119). */
   hideActions?: boolean;
 };
@@ -36,6 +39,7 @@ export function EventoCard({
   onEditar = noop,
   onCambiarEstado = noop,
   onEliminar = noop,
+  onCambiarActivo,
   hideActions = false,
 }: EventoCardProps) {
   const visual = getDisciplinaVisual(evento.disciplinaNombre);
@@ -46,7 +50,9 @@ export function EventoCard({
   return (
     <article
       className={cx(
-        'flex flex-col overflow-hidden rounded-grit-2xl border border-grit-glass-border transition',
+        'flex flex-col overflow-hidden rounded-grit-2xl border transition',
+        // Inactive events are hidden from members and visitors: make that obvious at a glance
+        evento.activo ? 'border-grit-glass-border' : 'border-dashed border-amber-400/60',
         cancelado && 'opacity-70',
       )}
     >
@@ -60,8 +66,10 @@ export function EventoCard({
           </div>
         )}
 
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-          <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} />
+        {/* Opaque pills so they stay legible over any banner image */}
+        <div className="absolute left-3 top-3 flex max-w-[70%] flex-wrap gap-1.5">
+          <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} overlay />
+          <EventoActivoBadge activo={evento.activo} overlay />
         </div>
 
         <span className="absolute right-3 top-3 flex items-center gap-1 rounded-grit-sm border border-grit-glass-border bg-grit-bg/80 px-2.5 py-1 font-grit-body text-[10px] font-semibold uppercase tracking-wide text-grit-text">
@@ -85,6 +93,8 @@ export function EventoCard({
               eventoNombre={evento.nombre}
               estado={evento.estado}
               borrador={evento.borrador}
+              activo={evento.activo}
+              onCambiarActivo={onCambiarActivo}
               onEditar={onEditar}
               onCambiarEstado={onCambiarEstado}
               onEliminar={onEliminar}
@@ -92,18 +102,11 @@ export function EventoCard({
           )}
         </div>
 
-        {(!evento.publico || !evento.activo) && (
+        {!evento.publico && (
           <div className="flex flex-wrap gap-1.5">
-            {!evento.publico && (
-              <GritTag tone="neutral" icon="lock">
-                Privado
-              </GritTag>
-            )}
-            {!evento.activo && (
-              <GritTag tone="neutral" icon="visibility_off">
-                Inactivo
-              </GritTag>
-            )}
+            <GritTag tone="neutral" icon="lock">
+              Privado
+            </GritTag>
           </div>
         )}
 
