@@ -47,6 +47,8 @@ export type EventoMetodoPagoSnapshot = {
 export type Evento = {
   id: string;
   tenant_id: string;
+  /** Tenant name snapshot, set by `guardar_evento_completo` on create only (US-0120). */
+  nombre_tenant: string;
   nombre: string;
   descripcion: string | null;
   /** Discipline NAME snapshot. Null only while `borrador`. */
@@ -311,6 +313,54 @@ export type EventosStats = {
   cancelados: number;
   borradores: number;
 };
+
+// ─── Public discovery (US-0120) ───
+
+/** Cross-tenant listing item for /eventos and /portal/eventos. Built only from `eventos` columns. */
+export type EventoPublicoListItem = {
+  id: string;
+  tenantId: string;
+  nombreTenant: string;
+  nombre: string;
+  descripcion: string | null;
+  paginaEventoUrl: string | null;
+  disciplinaNombre: string;
+  escenario: EventoEscenarioSnapshot | null;
+  escenarioNombre: string | null;
+  escenarioUbicacion: string | null;
+  puntoEncuentro: string | null;
+  entrenadores: EventoEntrenadorSnapshot[];
+  /** Trainer names joined with ", ", or null. */
+  entrenadorNombre: string | null;
+  fechaHora: string | null;
+  duracionMinutos: number | null;
+  cupoMaximo: number | null;
+  reservaAntelacionHoras: number | null;
+  precio: PrecioItem[];
+  /** Payment methods the admin published for this event (US-0119 step 3). */
+  metodosPago: EventoMetodoPagoSnapshot[];
+  bannerUrl: string | null;
+  publico: boolean;
+};
+
+/** Detail page and wizard preview model. */
+export type EventoPublicoDetalle = EventoPublicoListItem & {
+  descripcionLarga: string | null;
+  cronograma: CronogramaItem[];
+  incluye: IncluyeItem[];
+  cancelacionAntelacionHoras: number | null;
+};
+
+export type EventoEntradasModo = 'usuario' | 'invitado';
+
+/** What the tickets modal hands to the purchase phase through `onContinuar`. */
+export type EventoEntradaSeleccion = {
+  eventoId: string;
+  entrada: PrecioItem;
+  modo: EventoEntradasModo;
+};
+
+export type EventosPublicosDateChip = 'today' | 'tomorrow' | 'this_week' | 'weekend';
 
 export type EventoServiceErrorCode =
   | 'forbidden'

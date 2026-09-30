@@ -107,7 +107,7 @@ RLS MUST be enabled on both tables. Access SHALL be as follows:
 The system SHALL provide `public.guardar_evento_completo(p_tenant_id uuid, p_evento_id uuid, p_es_nuevo boolean, p_borrador boolean, p_evento jsonb, p_entradas jsonb) returns jsonb`. It MUST be declared `security invoker` with `set search_path = public`, executable by `authenticated` only. All of its writes SHALL happen in one transaction: any raised error MUST leave `eventos`, `evento_entradas` and `evento_entrada_cupones` unchanged.
 
 The function SHALL:
-1. Raise `FORBIDDEN` (`42501`) unless the tenant is in `get_trainer_or_admin_tenants_for_authenticated_user()`.
+1. Raise `FORBIDDEN` (`42501`) unless the tenant is in `get_trainer_or_admin_tenants_for_authenticated_user()`. When `p_es_nuevo`, read the tenant's name from `tenants` as `coalesce(nullif(btrim(nombre), ''), 'Organización')`, and raise `TENANT_INVALIDO` (`23503`) when no tenant row is readable (US-0120).
 2. Always validate:
    - a non-blank `nombre`
    - a form template, when set, belongs to the tenant (`FORMULARIO_INVALIDO`, `23503`)
@@ -126,8 +126,8 @@ The function SHALL:
    All of these raise `23514`.
 4. Raise `NO_REVERTIR_A_BORRADOR` (`23514`) when `p_borrador = true` and the stored event has `borrador = false`.
 5. Write the event:
-   - On create: insert with `creado_por = auth.uid()` and `estado = 'confirmado'`.
-   - On edit: update, never touching `tenant_id`, `creado_por`, `estado` or `created_at`, and raise `NOT_FOUND` (`P0002`) when no row matches.
+   - On create: insert with `creado_por = auth.uid()`, `estado = 'confirmado'`, and `nombre_tenant` = the tenant name read in step 1. Any `nombre_tenant` in `p_evento` MUST be ignored.
+   - On edit: update, never touching `tenant_id`, `nombre_tenant`, `creado_por`, `estado` or `created_at`, and raise `NOT_FOUND` (`P0002`) when no row matches.
    - In both cases set `borrador = p_borrador`.
 6. Sync tickets and then each ticket's coupons: delete the rows missing from the payload, then upsert the present ones, forcing `tenant_id` and `evento_id`. It MUST raise `ENTRADA_INVALIDA` (`42501`) for an id that belongs to another event. Coupon codes MUST be stored as `upper(btrim(cupon))`.
 7. Rewrite `eventos.precio` from the tickets with non-null `nombre` and `valor`, as `[{nombre, precio: valor, descripcion: null}]` ordered by `orden`.
@@ -176,4 +176,12 @@ The function SHALL:
 #### Scenario: Immutable columns preserved on edit
 - **WHEN** an edit payload includes a different `tenant_id`, `creado_por` or `estado`
 - **THEN** the stored values SHALL remain unchanged
+
+#### Scenario: Tenant name set on create
+- **WHEN** an admin of the tenant "Wolfpack Club" creates an event (draft or final), and `p_evento` contains `nombre_tenant = 'Otro'`
+- **THEN** the new row SHALL have `nombre_tenant = 'Wolfpack Club'`
+
+#### Scenario: Tenant name kept on edit
+- **WHEN** an existing event is edited after the tenant was renamed
+- **THEN** its `nombre_tenant` SHALL keep the value stored at creation
 

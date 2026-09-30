@@ -2,7 +2,7 @@
 
 import { GritButton } from '@/components/ui';
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
-import { useFormularioPreview } from '@/hooks/portal/entrenamientos-publicos/useFormularioPreview';
+import { useFormularioPreview } from '@/hooks/portal/formularios/useFormularioPreview';
 import { ERROR_KEYS } from '@/lib/portal/eventos-wizard.utils';
 import { BodyPortal } from '../EventoModalShell';
 import { Field, SelectShell, fieldA11y, selectClass } from './fields';

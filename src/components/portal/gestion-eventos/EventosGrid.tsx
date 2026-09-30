@@ -6,6 +6,7 @@ type EventosGridProps = {
   onEditar: (evento: EventoListItem) => void;
   onCambiarEstado: (evento: EventoListItem, target: EventoEstado) => void;
   onEliminar: (evento: EventoListItem) => void;
+  onCambiarActivo: (evento: EventoListItem) => void;
 };
 
 const GRID_CLASSES = 'grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3';
@@ -27,7 +28,7 @@ export function EventosGridSkeleton() {
   );
 }
 
-export function EventosGrid({ eventos, onEditar, onCambiarEstado, onEliminar }: EventosGridProps) {
+export function EventosGrid({ eventos, onEditar, onCambiarEstado, onEliminar, onCambiarActivo }: EventosGridProps) {
   return (
     <div className={GRID_CLASSES}>
       {eventos.map((evento) => (
@@ -37,6 +38,7 @@ export function EventosGrid({ eventos, onEditar, onCambiarEstado, onEliminar }: 
           onEditar={() => onEditar(evento)}
           onCambiarEstado={(target) => onCambiarEstado(evento, target)}
           onEliminar={() => onEliminar(evento)}
+          onCambiarActivo={() => onCambiarActivo(evento)}
         />
       ))}
     </div>

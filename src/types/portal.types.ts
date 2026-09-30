@@ -50,6 +50,12 @@ const PUBLIC_TRAININGS_MENU_ITEM: MenuItem = {
   icon: 'public',
 };
 
+const EVENTOS_MENU_ITEM: MenuItem = {
+  label: 'Eventos',
+  href: '/portal/eventos',
+  icon: 'celebration',
+};
+
 const MIS_SUSCRIPCIONES_MENU_ITEM: MenuItem = {
   label: 'Mis Suscripciones',
   href: '/portal/mis-suscripciones',
@@ -99,6 +105,7 @@ export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[]
       INICIO_MENU_ITEM,
       BASE_MENU_ITEM,
       PUBLIC_TRAININGS_MENU_ITEM,
+      EVENTOS_MENU_ITEM,
       MIS_SUSCRIPCIONES_MENU_ITEM,
       MIS_RESERVAS_MENU_ITEM,
     ];

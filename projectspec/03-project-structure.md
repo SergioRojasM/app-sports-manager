@@ -26,6 +26,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── update-password/page.tsx  # Honors a validated `next` (US-0114); portal targets continue via /portal/bootstrap
 │   │   ├── entrenamientos-publicos/page.tsx  # Public, unauthenticated trainings discovery page (top-level, outside /portal — not matched by middleware.ts's protectedPaths) (US-0091)
 │   │   ├── entrenamientos-publicos/[entrenamiento_id]/page.tsx  # Public detail page for one published training; awaits params, wraps PublicTrainingDetallePage in Suspense (it reads the `from` search param) — also outside protectedPaths (US-0109)
+│   │   ├── eventos/page.tsx              # Public, unauthenticated event discovery (EventosLandingPage in Suspense) — outside protectedPaths (US-0120)
+│   │   ├── eventos/[event_id]/page.tsx   # Public event page (EventoDetalleLandingPage in Suspense; reads `from` / `entradas`) — only `publico` events resolve here (US-0120)
 │   │   ├── dashboard/                    # Legacy redirect entry
 │   │   └── portal/                       # Main post-login bounded context
 │   │       ├── layout.tsx                # Shared portal shell (header + nav)
@@ -43,6 +45,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── mis-suscripciones/page.tsx  # Cross-tenant "Mis Suscripciones" (replaces the tenant-scoped route)
 │   │       │   └── mis-reservas/page.tsx       # Cross-tenant "Mis Reservas" (replaces the tenant-scoped route, US-0097)
 │   │       ├── entrenamientos-publicos/page.tsx  # Public Training Marketplace (non-tenant-scoped, render-only) — cross-tenant discovery of published trainings (US-0089)
+│   │       ├── eventos/page.tsx          # Portal event discovery (EventosPublicosPage in Suspense): public events of every tenant + private events of the user's tenants (US-0120)
+│   │       ├── eventos/[event_id]/page.tsx  # Portal event page (EventoDetallePortalPage in Suspense) (US-0120)
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users)
 │   │           └── [tenant_id]/
@@ -97,9 +101,14 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       │   ├── PublicTrainingDetallePrecios.tsx     # One card per precio[] item, all styled identically — no featured/"MÁS POPULAR" badge; hidden when empty
 │   │   │       │   └── index.ts
 │   │   │       └── index.ts
+│   │   │   └── eventos/                  # Feature slice (landing/eventos — anonymous event discovery, US-0120); no imports from the entrenamientos-publicos slices
+│   │   │       ├── EventosLandingPage.tsx       # Landing shell + EventosPublicosGrid (no filters); "Obtener entrada" via useObtenerEntrada('landing-listado') + ObtenerEntradaModal
+│   │   │       ├── EventoDetalleLandingPage.tsx # Landing Header/Footer shell; useEventoDetalle(id, {soloPublicos: true}); `from` origin (same-origin only, else /eventos); breadcrumb + EventoDetalleStates or EventoDetalleBody; ObtenerEntradaModal + EventoEntradasModal ('invitado')
+│   │   │       ├── EventoDetalleBreadcrumb.tsx  # ⌂ Inicio › Eventos › {nombre} + right-aligned "Volver"
+│   │   │       └── index.ts
 │   │   ├── portal/
 │   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v2 Navbar styling (grit-arena-v2 oUFl9); no breadcrumb inside (US-0116)
-│   │   │   ├── PortalBreadcrumb.tsx      # Standalone row rendered by portal/layout.tsx at the top of <main> (design AOIa5), visible + wrapping on mobile; SLUG_LABELS map (US-0116)
+│   │   │   ├── PortalBreadcrumb.tsx      # Standalone row rendered by portal/layout.tsx at the top of <main> (design AOIa5), visible + wrapping on mobile; SLUG_LABELS map (US-0116); /portal/eventos/{uuid} renders "Evento" (US-0120)
 │   │   │   ├── PortalNavMenu.tsx         # Glass dropdown; active item = cyan gradient + glass-border ("Nav Operación" style)
 │   │   │   ├── RoleBasedMenu.tsx
 │   │   │   ├── UserAvatarMenu.tsx
@@ -223,27 +232,47 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EventosGrid.tsx / EventoCard.tsx  # Cards view (default), modeled on PublicTrainingCard; EventoCard `hideActions` is used by the wizard preview; drafts show the "Borrador" tag, "Sin disciplina" and "Precio por definir" fallbacks (US-0119)
 │   │   │       ├── EventosTable.tsx           # List view, 20 rows/page, stacked rows below md
 │   │   │       ├── EventosCalendar.tsx        # Month grid (Bogotá), 3 chips + "+N" per day, selected-day list, undated-events note; does NOT reuse EntrenamientosCalendar
-│   │   │       ├── EventoActionsMenu.tsx      # Kebab menu portalled to document.body (cards/table clip overflow; backdrop-blur ancestors trap fixed elements), flips upward near the viewport bottom; drafts only get "Continuar editando" + "Eliminar" (US-0119)
+│   │   │       ├── EventoActionsMenu.tsx      # Quick "Activar evento" / "Desactivar evento" item (US-0120). Kebab menu portalled to document.body (cards/table clip overflow; backdrop-blur ancestors trap fixed elements), flips upward near the viewport bottom; drafts only get "Continuar editando" + "Eliminar" (US-0119)
 │   │   │       ├── EventoModalShell.tsx       # Shared dialog frame + EventoDangerButton + BodyPortal (all events modals render on document.body: backdrop-blur cards trap `fixed` children under the wizard's sticky footer)
 │   │   │       ├── CambiarEstadoEventoModal.tsx / EliminarEventoModal.tsx
-│   │   │       ├── EventoEstadoBadge.tsx      # Confirmado / Cancelado, or a dashed "Borrador" pill when `borrador` (US-0119)
+│   │   │       ├── EventoEstadoBadge.tsx      # Confirmado / Cancelado, or a dashed "Borrador" pill when `borrador` (US-0119); `overlay` variant (opaque background over banners, US-0120)
+│   │   │       ├── EventoActivoBadge.tsx      # "Activo" / "Inactivo" pill (icon + text, amber when inactive), `overlay` variant — shown in cards (over the banner, inactive cards get a dashed amber border), list ("Activo" column) and calendar (chip icon + selected-day list) (US-0120)
 │   │   │       └── wizard/                    # Full-page create/edit wizard (US-0119) — no mockup, grit-arena-v2 tokens
 │   │   │           ├── EventoWizardPage.tsx   # Root: loading / not-found / error states, header (Borrador tag + "Último guardado"), stepper, active step, footer, leave guard, focus management (step h2 on step change, first invalid field on failed validation)
 │   │   │           ├── EventoWizardStepper.tsx  # <ol aria-label="Pasos del evento">, aria-current="step", check on done, red dot + "Revisar" on steps with errors
 │   │   │           ├── EventoWizardFooter.tsx   # Sticky: Atrás / Vista previa / Siguiente / "Guardar borrador" (new or draft only; disabled without name or changes) / "Publicar evento" (step 3) or "Guardar cambios" (published, every step); role=alert save error; role=status "Borrador guardado"
 │   │   │           ├── EventoConfiguracionStep.tsx  # Step 1: single-column form sections (the live preview lives in EventoPreviewModal)
 │   │   │           ├── EventoPreviewModal.tsx # Large dialog opened from the footer's "Vista previa" button; portaled to document.body
-│   │   │           ├── EventoPreview.tsx      # Página (PublicTrainingDetalleBody via toDetallePreviewItem, inert) / Tarjeta (EventoCard hideActions) radiogroup; useDeferredValue on the draft
+│   │   │           ├── EventoPreview.tsx      # Página (EventoDetalleBody from portal/eventos/detalle via toDetallePreviewItem, inert — US-0120; was PublicTrainingDetalleBody) / Tarjeta (EventoCard hideActions) radiogroup; useDeferredValue on the draft
 │   │   │           ├── EventoEscenarioSelector.tsx  # Active scenarios + "Sin escenario" + "+ Crear nuevo escenario" → existing ScenarioFormModal driven by useScenarios({ onCreated }) which auto-selects the new one; stale snapshot "(guardado en el evento)"
 │   │   │           ├── EventoEntrenadoresSelector.tsx  # Searchable checkbox list of trainers; per-trainer `experiencia` textarea (max 500)
 │   │   │           ├── EventoEntradasStep.tsx / EventoEntradasEditor.tsx  # Step 2: ticket cards (Sencilla/Múltiple, raw-string valor, sale window, move/delete with coupon-loss confirmation, collapsible coupons auto-expanded on error)
 │   │   │           ├── EventoBundleSelector.tsx  # Múltiple bundle: other non-cancelled tenant events (never the current one); dropped-deleted-events warning
 │   │   │           ├── EventoCuponesEditor.tsx   # Coupon rows (nombre, uppercase code, % discount with "$X → $Y" preview, validity window); disabled on free tickets
 │   │   │           ├── EventoFormularioSelector.tsx  # "Sin formulario" + active templates, "Vista previa" via useFormularioPreview + FormularioPreviewModal
-│   │   │           ├── EventoMetodosPagoStep.tsx  # Step 3: active payment methods as checkbox cards (+ stale snapshots), select/clear all, summary panel
+│   │   │           ├── EventoMetodosPagoStep.tsx  # Step 3: active payment methods as checkbox cards (+ stale snapshots), select/clear all, summary panel; helper text says selected methods are shown to ticket buyers (US-0120)
 │   │   │           ├── SalirSinGuardarModal.tsx   # "Tienes cambios sin guardar. ¿Salir sin guardar?"
 │   │   │           ├── fields.tsx             # Field/FieldError/SelectShell/WizardSection/RowIconButton + fieldDomId(errorKey) so focus requests reach the invalid control
 │   │   │           └── index.ts
+│   │   │   └── eventos/                   # Feature slice (portal/eventos — cross-tenant event discovery + event pages, US-0120); copies/adapts the public-trainings UI, never imports it (that feature will be deprecated)
+│   │   │       ├── EventosPublicosPage.tsx        # Portal listing: sticky header (h1 "Eventos Públicos", EventosDisponiblesWidget, "Filtrar"), 60-day note, grid, filters drawer, EventoEntradasModal ('usuario')
+│   │   │       ├── EventoPublicoCard.tsx          # Card: banner/discipline placeholder (also on image error), Próximo / "Solo miembros" chips, organization (nombre_tenant), Bogotá date, place (URL-valued meeting points shown as "Punto de encuentro"), cupo, trainers, antelación, formatEventoPrecio; "Ver detalles" + "Obtener entrada"; no occupancy/services/forms/plans
+│   │   │       ├── EventosPublicosGrid.tsx        # Featured + 1/3-col grid; empty state, or "No hay eventos que coincidan con los filtros" + "Limpiar filtros" when filters are active
+│   │   │       ├── EventosPublicosFiltersDrawer.tsx  # Bogotá calendar range, quick chips (aria-pressed), Organización + Disciplina selects (derived from rows), search, "Limpiar filtros"
+│   │   │       ├── ObtenerEntradaModal.tsx        # Anonymous get-ticket entry (landing styles): "Crear cuenta gratis" / "Ya tengo cuenta" (next=/portal/eventos/{id}?entradas=1) / "Continuar sin registro"
+│   │   │       ├── EventoEntradasModal.tsx        # Ticket selection over precio (radio group), accepted payment methods for paid tickets, guest note in 'invitado' mode; "Continuar" → onContinuar (purchase seam; disabled + "próximamente" notice while absent)
+│   │   │       ├── EventoMetodoPagoCard.tsx       # One published payment method: tipo label, valor + "Copiar", http(s)-only payment link, plain-text comentarios; `compact` variant used by the tickets modal (the only place payment methods are shown before the purchase flow)
+│   │   │       ├── EventoBannerModal.tsx / EventosDisponiblesWidget.tsx
+│   │   │       ├── detalle/                       # Event page shared by /eventos/[event_id], /portal/eventos/[event_id] and the US-0119 wizard preview
+│   │   │       │   ├── EventoDetalleBody.tsx          # Hero(+Descripción) → Incluye|Cronograma → Entrenadores → Entradas → CTA banner; keeps the approved event layout (no Ubicación card, no occupancy); no payment methods (they belong to the ticket-purchase flow); empty sections hidden
+│   │   │       │   ├── EventoDetalleHero.tsx          # Banner + "Ver", discipline / kind tags, organization line, h1, meta items (date, Bogotá time range, "Ver ubicación" link from punto_encuentro, cupo, lead time, "Ver página oficial")
+│   │   │       │   ├── EventoDetalleDescripcion.tsx / EventoDetalleIncluye.tsx / EventoDetalleCronograma.tsx  # Copies of the training sections (react-markdown, no HTML passthrough)
+│   │   │       │   ├── EventoDetalleEntrenadores.tsx  # Trainer snapshots with their event-specific experiencia
+│   │   │       │   ├── EventoDetalleEntradas.tsx / EventoDetalleCtaBanner.tsx ("Reserva tu cupo" title, "Obtener entrada" button)
+│   │   │       │   ├── EventoDetalleStates.tsx        # loading / error ("Reintentar") / "Evento no encontrado"
+│   │   │       │   ├── EventoDetallePortalPage.tsx    # Portal event page: useEventoDetalle(id, {soloPublicos: false}), "Volver a eventos" from `from`, EventoEntradasModal ('usuario')
+│   │   │       │   └── index.ts
+│   │   │       └── index.ts
 │   │   │   └── gestion-suscripciones/     # Feature slice (portal/gestion-suscripciones)
 │   │   │       ├── GestionSuscripcionesPage.tsx  # Owns activeTab (Miembros/No miembros) state, tab bar with tabCounts badges, tab-aware empty state (US-0098)
 │   │   │       ├── SuscripcionesTable.tsx        # Includes "Tipo" column rendering SuscripcionTipoBadge per row (US-0098)
@@ -338,6 +367,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── entrenamientos-publicos/
 │   │   │       ├── usePublicEntrenamientosLanding.ts  # Loads listPublicTrainingsForLanding(); exposes { items, loading, error, refetch } — no filters in v1 (US-0091)
 │   │   │       └── usePublicTrainingDetalle.ts        # Loads one training via getPublicTrainingDetail(entrenamientoId); exposes { item, loading, error, refetch }. "Not found" (item null, error null) and "fetch failed" (error set) stay distinct so an outage never renders as a deleted training (US-0109)
+│   │   │   └── eventos/
+│   │   │       └── useEventosLanding.ts   # listEventosPublicados({soloPublicos: true}) → { items, loading, error, refetch } (US-0120)
 │   │   └── portal/
 │   │       ├── usePortalNavigation.ts    # Shared portal logic
 │   │       ├── tenant/
@@ -378,7 +409,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           ├── useFormularioForm.ts         # Controlled form state for FormularioFormModal (create-only: nombre + descripcion)
 │   │           ├── useFormularioEditor.ts       # Draft/manual-save model (US-0108): plantillaDraft, secciones (working array), unsavedIds, deletedPersistedIds, isDirty; every mutator (updatePlantillaField/addSeccion/saveSeccion/updateHeaderSeccion/deleteSeccion/reorderSecciones) is a pure local-state update — no Supabase calls until saveAll() batches everything via formulariosService.saveEsquemaBatch; load() lazily backfills the 4 header rows as unsaved drafts for pre-US-0108 templates that lack them; computes campo_nombre via slugify + collision suffix against the full in-memory draft
 │   │           ├── useFormularioSeccionForm.ts  # Controlled state for one section card's edit mode; validation branches by seccion_tipo, incl. seleccion (requires campo_lista_valores) and seccion (requires a título); handleSubmit is now synchronous (US-0108)
-│   │           └── useFormularioPlantillaName.ts # Fetches a plantilla's nombre by id (breadcrumb, mirrors useTenantName)
+│   │           ├── useFormularioPlantillaName.ts # Fetches a plantilla's nombre by id (breadcrumb, mirrors useTenantName)
+│   │           └── useFormularioPreview.ts       # Read-only "Vista previa" state over getPlantillaConSecciones; copied from the public-trainings slice so the events wizard does not depend on it (US-0120)
 │   │       └── gestion-equipo/
 │   │           ├── useEquipo.ts
 │   │           ├── useConfigurarSuspension.ts     # 2-step modal state: rule selection + member multi-select + submit
@@ -398,13 +430,18 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useGestionReservas.ts     # Filter state, loading, pagination, CSV export; delegates to reservasService.getReservasManagement (US-0073)
 │   │       └── gestion-eventos/               # US-0118 / US-0119
 │   │           ├── useGestionEventos.ts      # Loads tenant events + disciplines; client-side filters (250 ms debounced search; estado 'borrador' shows only drafts, confirmado/cancelado exclude them; disciplina matched by NAME), sorting, pagination, stats (incl. borradores); matchesCalendarFilters (all filters except periodo)
-│   │           ├── useEventoWizard.ts        # Wizard state (US-0119): client-generated eventoId, draft + serialized baseline (isDirty, beforeunload), ?paso step sync, goTo (forward validation in create mode only), derived live validation, row mutators, banner file validation, guardarBorrador / guardarFinal → uploadEventoBanner + guardarEventoCompleto, persisted ids written back by clientKey; first draft save hands the draft to the edit route via a module-level Map and router.replace(…/{id}/editar?paso=N) so the remount skips the fetch
+│   │           ├── useEventoWizard.ts        # Exposes nombreTenant for the preview: the stored eventos.nombre_tenant in edit mode, else useTenantName(tenantId) (US-0120). Wizard state (US-0119): client-generated eventoId, draft + serialized baseline (isDirty, beforeunload), ?paso step sync, goTo (forward validation in create mode only), derived live validation, row mutators, banner file validation, guardarBorrador / guardarFinal → uploadEventoBanner + guardarEventoCompleto, persisted ids written back by clientKey; first draft save hands the draft to the edit route via a module-level Map and router.replace(…/{id}/editar?paso=N) so the remount skips the fetch
 │   │           ├── useEventoWizardOptions.ts # Parallel load of active disciplines, trainers, tenant events (bundle), active form templates, active payment methods (US-0119)
 │   │           ├── useEventoGuardadoBanner.ts # One-shot ?guardado=creado|editado message, then strips the param (US-0119)
 │   │           ├── useEventosVista.ts        # ?vista=tarjetas|lista|calendario via router.replace (fallback tarjetas)
 │   │           ├── useEventosCalendar.ts     # Bogotá month state; fetches only the visible month (listEventos desde/hasta) while the calendar view is active
 │   │           ├── useCambiarEstadoEvento.ts
+│   │           ├── useCambiarActivoEvento.ts # Quick activar/desactivar (no modal): updateActivoEvento, pendingId guard, error for the page alert (US-0120)
 │   │           └── useEliminarEvento.ts
+│   │       └── eventos/                        # US-0120 — cross-tenant discovery and event pages
+│   │           ├── useEventosPublicos.ts     # listEventosPublicados({soloPublicos: false}); client-side Bogotá date range (default today → +60 days, undated always pass and sort last), chips, month nav, search (accent-insensitive), tenant/disciplina filters derived from rows, hasActiveFilters / clearFilters / isDefaultDateRange
+│   │           ├── useEventoDetalle.ts       # getEventoPublicado(id, {soloPublicos}); `evento === null` after load = not found, distinct from error
+│   │           └── useObtenerEntrada.ts      # "Obtener entrada" branching by auth × surface ('portal' | 'landing-listado' | 'landing-detalle'); signup/login hrefs with next=/portal/eventos/{id}?entradas=1; continuarSinRegistro; one-shot `?entradas=1` auto-open as derived state (read once on mount) + router.replace to strip it; no I/O
 │   │       └── gestion-suscripciones/
 │   │           ├── useGestionSuscripciones.ts    # Accepts activeTab (Miembros/No miembros); tab-filters rows before search/chip filters, tab-scoped stats, exposes tabCounts derived from the full unfiltered list (US-0098)
 │   │           ├── useValidarPago.ts  # reject() now requires and forwards a non-empty motivo string (US-0106)
@@ -457,7 +494,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
-│   │       │   └── eventos.service.ts  # eventosService: listEventos(tenantId, {desde?, hasta?}) — no embeds since US-0119: disciplina/escenario/entrenadores are snapshots on the row (trainer names joined ", "); getEventoById; getEventoCompleto (event + evento_entradas + evento_entrada_cupones, sorted); guardarEventoCompleto (RPC guardar_evento_completo, draft or final, returns the client_key → id map); updateEstadoEvento; deleteEvento. createEvento/updateEvento were removed in US-0119. Zero-row writes and PGRST116 map to 'forbidden'; RPC exception codes (METODO_PAGO_REQUERIDO, …) and 23505 constraint names map to specific Spanish messages / codes not_found, duplicate_entrada, duplicate_cupon (US-0118 / US-0119)
+│   │       │   └── eventos.service.ts  # eventosService: listEventos(tenantId, {desde?, hasta?}) — no embeds since US-0119: disciplina/escenario/entrenadores are snapshots on the row (trainer names joined ", "); getEventoById; getEventoCompleto (event + evento_entradas + evento_entrada_cupones, sorted); guardarEventoCompleto (RPC guardar_evento_completo, draft or final, returns the client_key → id map); updateEstadoEvento; updateActivoEvento (quick activar/desactivar, US-0120); deleteEvento. createEvento/updateEvento were removed in US-0119. US-0120 adds the only cross-tenant reads: listEventosPublicados({soloPublicos}) and getEventoPublicado(id, {soloPublicos}) — explicit filters activo ∧ ¬borrador ∧ estado='confirmado' ∧ (fecha_hora ≥ now ∨ null) (+ publico on landing surfaces), because RLS alone lets admins/trainers read their drafts; explicit projections (include nombre_tenant and metodos_pago, never formulario_id/creado_por/omitir_confirmacion_compra); limit(500); malformed ids → null without a request; TENANT_INVALIDO → invalid_reference. Zero-row writes and PGRST116 map to 'forbidden'; RPC exception codes (METODO_PAGO_REQUERIDO, …) and 23505 constraint names map to specific Spanish messages / codes not_found, duplicate_entrada, duplicate_cupon (US-0118 / US-0119)
 │   │       │   └── analitica.service.ts  # Browser RPC adapter for get_tenant_bi_dashboard only; maps 42501/22007 without exposing bi schema facts (US-0115)
 │   │       │                             #   The RPC aggregates private `bi` fact views (no grants to anon/authenticated):
 │   │       │                             #   fct_pagos, fct_entrenamientos, fct_reservas, fct_asistencia, fct_suscripciones, and fct_miembros
@@ -474,7 +511,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │
 │   ├── types/                            # Domain & contracts
 │   │   ├── auth.types.ts
-│   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089)
+│   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089); EVENTOS_MENU_ITEM ("Eventos" → /portal/eventos, icon celebration) right after it (US-0120)
 │   │   └── portal/
 │   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url)
 │   │       └── scenarios.types.ts
@@ -489,7 +526,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── formularios.types.ts      # FormularioPlantilla, FormularioSeccion (seccion_tipo: titulo|subtitulo|texto|datos + seccion_descripcion; campo_* nullable), FormularioTipoCampo union, FormularioPlantillaConSecciones, FormularioPlantillaListItem (seccionesCount), Create/UpdateSeccionInput, form-values types, FormularioServiceError (US-0084/US-0085); FormularioRespuesta (id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta jsonb — US-0087); FormularioPerfilCampo union + FORMULARIO_PERFIL_CAMPOS catalog (9 usuarios/perfil_deportivo fields), FormularioPlantilla.perfil_campos_requeridos, UpdatePlantillaInput.perfil_campos_requeridos (US-0095); FormularioRespuesta.perfil_snapshot — requested profile values frozen at submission time, survives later profile edits (US-0096); seccion_tipo extended with encabezado_sobretitulo/encabezado_titulo/encabezado_subtitulo/encabezado_badges/seccion/separador, HEADER_SECCION_TIPOS (the 4 fixed header types) + FORMULARIO_HEADER_BADGES_MAX; campo_tipo extended with checkbox/seleccion, FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES (lista + seleccion); FormularioSeccion.columna_ancho ('completo'|'mitad') and .seccion_subtitulo; FormularioPlantillaDraft — the in-memory metadata shape held by useFormularioEditor (US-0108)
 │   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063), SuscripcionServiceError with code 'plan_unavailable' (US-0093); PendingPlanPurchaseDraft — a plan purchase filled in but deliberately NOT yet persisted, carried in memory through the skip-plan-confirmation booking flow and written only when the booking is submitted (US-0110)
 │   │       └── pagos.types.ts
-│   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput
+│   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput; METODO_PAGO_TIPO_LABELS (US-0120)
 │   │       └── reglas-suspension.types.ts # ReglaSuspension, ReglaSuspensionCreatePayload, ReglaSuspensionUpdatePayload, ReglaSuspensionFormValues
 │   │       └── equipo.types.ts
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
@@ -498,7 +535,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamiento-categorias.types.ts # EntrenamientoCategoria, input, view models
 │   │       └── analitica.types.ts       # Aggregate BI dashboard contract, date filters and typed RPC errors (US-0115)
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS, PERFIL_INCOMPLETO — US-0095), BookingResult; BookingRejection.servicioNombre (optional, SERVICIO_REQUERIDO/UNIDADES_AGOTADAS only) feeds the pre-filtered plan catalog (US-0101)
-│   │       └── eventos.types.ts  # Evento (DB row; US-0119 snapshots EventoEscenarioSnapshot / EventoEntrenadorSnapshot[] / EventoMetodoPagoSnapshot[], borrador, formulario_id), EventoEntrada / EventoEntradaCupon / EventoCompleto, GuardarEventoPayload / GuardarEventoResult, wizard draft types (EventoDraft / EventoEntradaDraft / EventoCuponDraft with clientKey + raw-string amounts and Bogotá datetime-local strings), EVENTO_WIZARD_STEPS, EventoListItem (+ borrador, disciplinaNombre nullable), EventoEstado, EventosVista, EventosPeriodo, EventosClientFilters (estado incl. 'borrador', disciplina by name), EventosStats (+ borradores), EventoServiceError; reuses CronogramaItem/IncluyeItem/PrecioItem from entrenamientos-publicos.types (US-0118 / US-0119)
+│   │       └── eventos.types.ts  # Evento (DB row; US-0119 snapshots EventoEscenarioSnapshot / EventoEntrenadorSnapshot[] / EventoMetodoPagoSnapshot[], borrador, formulario_id), EventoEntrada / EventoEntradaCupon / EventoCompleto, GuardarEventoPayload / GuardarEventoResult, wizard draft types (EventoDraft / EventoEntradaDraft / EventoCuponDraft with clientKey + raw-string amounts and Bogotá datetime-local strings), EVENTO_WIZARD_STEPS, EventoListItem (+ borrador, disciplinaNombre nullable), EventoEstado, EventosVista, EventosPeriodo, EventosClientFilters (estado incl. 'borrador', disciplina by name), EventosStats (+ borradores), EventoServiceError; US-0120 adds Evento.nombre_tenant, EventoPublicoListItem (incl. nombreTenant, escenario, entrenadores, metodosPago) / EventoPublicoDetalle, EventoEntradasModo, EventoEntradaSeleccion (purchase seam), EventosPublicosDateChip; reuses CronogramaItem/IncluyeItem/PrecioItem from entrenamientos-publicos.types (US-0118 / US-0119)
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias; SuscripcionAdminRow.es_miembro (computed from miembros_tenant existence, not stored) and SuscripcionTab ('miembros' | 'no_miembros') (US-0098)
 │   │       └── mis-suscripciones.types.ts  # MiSuscripcionRow (incl. tenant_id + tenant_nombre — US-0093), MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
@@ -520,7 +557,8 @@ Following structure reflects the current implementation and the target scalable 
 │           ├── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
 │           ├── disciplina-visual.ts         # getDisciplinaVisual(nombre) → { icon, colorClass } — accent/case-insensitive name matching to the design's discipline colours, `sports` + cyan fallback (US-0116)
 │           ├── eventos.utils.ts             # Bogotá date keys/month ranges (fixed -05:00, no DST) and event formatters (fecha, hora, duración, cupo, precio) (US-0118); datetime-local ⇄ ISO helpers, formatCop, aplicarDescuento, formatDescuento (US-0119)
-│           ├── eventos-wizard.utils.ts      # Pure wizard logic (US-0119): empty/draftFromEventoCompleto/draftToPayload, preview adapters toDetallePreviewItem / toCardPreviewItem / previewPrecio, validateEventoDraft (mode 'borrador' = name + format only, 'final' = + completeness; same rules as the RPC), ERROR_KEYS / stepOfErrorKey, limits
+│           ├── eventos-wizard.utils.ts      # Pure wizard logic (US-0119): empty/draftFromEventoCompleto/draftToPayload, preview adapters toDetallePreviewItem (→ EventoPublicoDetalle with nombreTenant since US-0120) / toCardPreviewItem / previewPrecio, validateEventoDraft (mode 'borrador' = name + format only, 'final' = + completeness; same rules as the RPC), ERROR_KEYS / stepOfErrorKey, limits
+│           ├── eventos-publicos.utils.ts    # US-0120: Bogotá date-key arithmetic, computeEventosChipRange (Monday-first week), matchesEventoSearch (NFD accent-insensitive), resolveEventosOrigin (same-origin `from` only), portal/landing detail href builders, toHttpUrl (http/https only), EVENTOS_DEFAULT_WINDOW_DAYS
 │           ├── formulario-secciones-grouping.ts  # buildFormularioRenderPlan() — groups a flat, order-derived FormularioSeccion[] into 'seccion' cards (positional, no parent FK) + 'mitad'-width pairing; shared by FormularioSeccionesBuilder, FormularioSeccionesGrouped (preview), and FormularioRespuestaModal (live booking) so all three render identically (US-0108)
 │           └── entrenamientos-publicos/
 │               └── guidedBooking.ts         # buildGuidedNextPath()/parseGuidedParams() — single source of truth for the guided booking target carried through signup/email-confirmation/login as the `next` query param (US-0103)
@@ -644,6 +682,7 @@ Supabase (database)
 - `formulario_id uuid` — FK to `formularios_plantillas` (`on delete set null`), the access form for ticket buyers.
 - `borrador boolean` — work in progress: name-only is enough; hidden from anon and plain members by RLS; one-way (a published event cannot return to draft).
 - `precio jsonb` — **derived** by the RPC from the complete tickets; never written by the UI.
+- `nombre_tenant varchar(150) not null` — tenant name **snapshot** set by `guardar_evento_completo` on create only (from `tenants`, never from the payload), never updated on edit or tenant rename; lets the public event pages read only `eventos` (US-0120, migration `20260930120000_eventos_nombre_tenant.sql`). `metodos_pago` is readable there but only shown in the tickets modal (the event page leaves payment methods to the purchase flow).
 
 `evento_entradas` (ticket types: `sencilla` | `multiple` + `eventos_id_bundle` of same-tenant event ids, `valor` COP, sale window, `orden`) and `evento_entrada_cupones` (percentage `descuento` (0,100], uppercase `cupon` unique per event, validity window) keep format checks in the table; `nombre`/`valor`/`cupon`/`descuento` are nullable because drafts may be incomplete — completeness is enforced by `guardar_evento_completo` on final save. Deleting an event cascades to tickets and coupons.
 
@@ -654,7 +693,7 @@ Supabase (database)
 | member (non-pending) | above + `activo and not borrador` rows of own tenants | tickets of readable events | 0 rows | — |
 | admin / trainer | all rows of their tenants (incl. drafts) | all of their tenants | all of their tenants | ✓ (UPDATE `with check` blocks moving a row to another tenant; ticket/coupon writes must match the parent's tenant) |
 
-`public.guardar_evento_completo(p_tenant_id, p_evento_id, p_es_nuevo, p_borrador, p_evento, p_entradas) → jsonb` (SECURITY INVOKER) — atomic event + tickets + coupons save. Always checks role, name, form ownership, bundle ownership and format; `p_borrador = false` adds completeness (discipline, ≥1 ticket, complete tickets/coupons, bundle for Múltiple, no coupons on free tickets, payment method when paid, active form). Syncs children (delete missing, upsert present, ids from another event rejected), rewrites `precio`, returns `{evento_id, borrador, entradas:[{client_key,id,cupones:[{client_key,id}]}]}`.
+`public.guardar_evento_completo(p_tenant_id, p_evento_id, p_es_nuevo, p_borrador, p_evento, p_entradas) → jsonb` (SECURITY INVOKER) — atomic event + tickets + coupons save. Always checks role, name, form ownership, bundle ownership and format; `p_borrador = false` adds completeness (discipline, ≥1 ticket, complete tickets/coupons, bundle for Múltiple, no coupons on free tickets, payment method when paid, active form). Syncs children (delete missing, upsert present, ids from another event rejected), rewrites `precio`, returns `{evento_id, borrador, entradas:[{client_key,id,cupones:[{client_key,id}]}]}`. On create it also stores `nombre_tenant` (raises `TENANT_INVALIDO` / `23503` if the tenant row is not readable) — US-0120.
 
 Policies use `get_member_tenants_for_authenticated_user()` / `get_trainer_or_admin_tenants_for_authenticated_user()` — both return a `tenant_id` column (not `id`, unlike `get_admin_tenants_for_authenticated_user()` which returns `setof tenants`).
 

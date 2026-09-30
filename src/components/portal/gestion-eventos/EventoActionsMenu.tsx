@@ -10,6 +10,9 @@ type EventoActionsMenuProps = {
   estado: EventoEstado;
   /** Drafts only offer "Continuar editando" and "Eliminar" (US-0119). */
   borrador?: boolean;
+  /** Current visibility; with `onCambiarActivo` the menu offers the quick Activar / Desactivar action. */
+  activo?: boolean;
+  onCambiarActivo?: () => void;
   onEditar: () => void;
   onCambiarEstado: (target: EventoEstado) => void;
   onEliminar: () => void;
@@ -25,8 +28,8 @@ type MenuAction = {
 
 type MenuPosition = { top?: number; bottom?: number; right: number };
 
-/** Approximate height of the three-item menu, used to decide whether it opens upward. */
-const MENU_HEIGHT_ESTIMATE = 140;
+/** Approximate height of the four-item menu, used to decide whether it opens upward. */
+const MENU_HEIGHT_ESTIMATE = 180;
 
 function computePosition(trigger: HTMLElement): MenuPosition {
   const rect = trigger.getBoundingClientRect();
@@ -39,6 +42,8 @@ export function EventoActionsMenu({
   eventoNombre,
   estado,
   borrador = false,
+  activo = true,
+  onCambiarActivo,
   onEditar,
   onCambiarEstado,
   onEliminar,
@@ -51,10 +56,18 @@ export function EventoActionsMenu({
   const open = position !== null;
 
   const eliminar: MenuAction = { key: 'eliminar', label: 'Eliminar', icon: 'delete', danger: true, run: onEliminar };
+  const cambiarActivo: MenuAction[] = onCambiarActivo
+    ? [
+        activo
+          ? { key: 'desactivar', label: 'Desactivar evento', icon: 'visibility_off', run: onCambiarActivo }
+          : { key: 'activar', label: 'Activar evento', icon: 'visibility', run: onCambiarActivo },
+      ]
+    : [];
   const actions: MenuAction[] = borrador
-    ? [{ key: 'continuar', label: 'Continuar editando', icon: 'edit_note', run: onEditar }, eliminar]
+    ? [{ key: 'continuar', label: 'Continuar editando', icon: 'edit_note', run: onEditar }, ...cambiarActivo, eliminar]
     : [
         { key: 'editar', label: 'Editar', icon: 'edit', run: onEditar },
+        ...cambiarActivo,
         estado === 'confirmado'
           ? { key: 'cancelar', label: 'Cancelar evento', icon: 'event_busy', run: () => onCambiarEstado('cancelado') }
           : { key: 'confirmar', label: 'Confirmar evento', icon: 'event_available', run: () => onCambiarEstado('confirmado') },

@@ -421,11 +421,11 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
             disabled={disabled}
           />
           <Toggle
-            id="evento-oculto"
-            checked={!draft.activo}
-            onChange={(value) => updateField('activo', !value)}
-            label="Oculto"
-            description="Solo administradores y entrenadores lo ven (útil para archivar un evento)."
+            id="evento-activo"
+            checked={draft.activo}
+            onChange={(value) => updateField('activo', value)}
+            label={draft.activo ? 'Activo' : 'Inactivo'}
+            description="Si está activo, se publicará en el panel de eventos públicos. Si está inactivo, solo será visible para el administrador."
             disabled={disabled}
           />
         </WizardSection>

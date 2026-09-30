@@ -8,6 +8,7 @@ The system SHALL provide a `public.eventos` table independent from `entrenamient
 
 - `id uuid` primary key, default `gen_random_uuid()`
 - `tenant_id uuid not null`, FK to `tenants(id)` `on delete cascade`
+- `nombre_tenant varchar(150) not null`, non-blank: the tenant's name **snapshot**, set by `guardar_evento_completo` when the event is created and never updated afterwards, including when the tenant is renamed (US-0120)
 - `nombre varchar(150)`, required non-blank (see constraints)
 - `descripcion text`
 - `disciplina_id text`: the discipline **name** snapshot. Not an FK. Nullable only while `borrador = true`.
@@ -41,8 +42,10 @@ The migration MUST convert existing rows:
 - `entrenador_id` becomes a one-element array with `experiencia = ''`, or `[]`.
 - A null or blank `nombre` becomes `'Evento sin nombre'`.
 
+The US-0120 migration MUST backfill `nombre_tenant` for existing rows with the tenant's current `nombre` (or `'Organización'` when blank), before setting it `not null`.
+
 #### Scenario: Defaults applied on minimal insert
-- **WHEN** a row is inserted with only `tenant_id`, `nombre` and `disciplina_id`
+- **WHEN** a row is inserted with only `tenant_id`, `nombre_tenant`, `nombre` and `disciplina_id`
 - **THEN** the row SHALL have `estado = 'confirmado'`, `activo = true`, `publico = true`, `borrador = false`, `omitir_confirmacion_compra = false`, `precio = '[]'`, `cronograma = '[]'`, `incluye = '[]'`, `entrenador_id = '[]'`, `metodos_pago = '[]'`, `formulario_id = null`, and non-null `created_at` / `updated_at`
 
 #### Scenario: Tenant deletion cascades
@@ -60,6 +63,14 @@ The migration MUST convert existing rows:
 #### Scenario: Phase-1 rows migrated
 - **WHEN** the migration runs over an event that referenced discipline "Running", venue "Cancha 1" and trainer "Ana Pérez"
 - **THEN** it SHALL have `disciplina_id = 'Running'`, `escenario_id->>'nombre' = 'Cancha 1'`, and `entrenador_id = [{"id": …, "nombre": "Ana Pérez", "experiencia": ""}]`
+
+#### Scenario: Tenant name backfilled
+- **WHEN** the US-0120 migration runs over existing events of the tenant "Wolfpack Club"
+- **THEN** each of those events SHALL have `nombre_tenant = 'Wolfpack Club'`, and the column SHALL reject `null` and blank values
+
+#### Scenario: Tenant rename does not change events
+- **WHEN** a tenant is renamed after its events were created
+- **THEN** those events SHALL keep their original `nombre_tenant`
 
 ### Requirement: Eventos data constraints
 The table MUST reject invalid data through check constraints:
@@ -156,7 +167,7 @@ INSERT, UPDATE and DELETE on `public.eventos` SHALL be allowed only to authentic
 - **THEN** the update SHALL be rejected, regardless of the caller's role in U
 
 ### Requirement: Eventos data-access service
-The system SHALL expose `eventosService` in `src/services/supabase/portal/eventos.service.ts`, using the browser Supabase client with the user's session. Every query MUST be scoped with `.eq('tenant_id', tenantId)`. The service SHALL provide:
+The system SHALL expose `eventosService` in `src/services/supabase/portal/eventos.service.ts`, using the browser Supabase client with the user's session. Every tenant-scoped function MUST scope its query with `.eq('tenant_id', tenantId)`. The only exceptions are the two cross-tenant read functions `listEventosPublicados` and `getEventoPublicado` (US-0120). The service SHALL provide:
 
 - `listEventos(tenantId, filters?)`: rows mapped to `EventoListItem` **without joins**:
   - `disciplinaNombre` from `disciplina_id`
@@ -169,6 +180,15 @@ The system SHALL expose `eventosService` in `src/services/supabase/portal/evento
 - `guardarEventoCompleto(tenantId, eventoId, payload, { esNuevo, borrador })`: calls the `guardar_evento_completo` RPC and returns `{ eventoId, borrador, entradas: [{ clientKey, id, cupones: [{ clientKey, id }] }] }`.
 - `updateEstadoEvento(tenantId, eventoId, estado)`
 - `deleteEvento(tenantId, eventoId)`
+- `listEventosPublicados({ soloPublicos })` (US-0120): cross-tenant discovery listing.
+  - It ALWAYS applies `activo = true`, `borrador = false`, `estado = 'confirmado'`, and `fecha_hora >= now() OR fecha_hora IS NULL`, regardless of what RLS would allow.
+  - It adds `publico = true` when `soloPublicos` is `true`.
+  - Ordered by `fecha_hora` ascending, nulls last, with `limit(500)`.
+  - It selects an explicit column list that includes `nombre_tenant` and `metodos_pago`, and never `formulario_id`, `creado_por` or `omitir_confirmacion_compra`.
+  - Rows are mapped to `EventoPublicoListItem` (snapshots flattened; trainer names joined with ", ").
+- `getEventoPublicado(eventoId, { soloPublicos })` (US-0120): the same filters, projection and exclusions, plus `descripcion_larga`, `cronograma`, `incluye` and `cancelacion_antelacion_horas`.
+  - Returns an `EventoPublicoDetalle`.
+  - Returns `null` when no row matches or the id is malformed (`22P02`).
 
 `createEvento` and `updateEvento` SHALL NOT exist; every event write other than status or delete goes through `guardarEventoCompleto`.
 
@@ -192,6 +212,26 @@ The system SHALL expose `eventosService` in `src/services/supabase/portal/evento
 - **WHEN** `updateEstadoEvento` is called with a value outside `confirmado` / `cancelado`
 - **THEN** it SHALL throw an `EventoServiceError` with code `invalid_data` without calling Supabase
 
+#### Scenario: Discovery listing excludes staff-only rows
+- **WHEN** a tenant admin calls `listEventosPublicados({ soloPublicos: false })` and their tenant has a draft, an inactive, a cancelled and a past event
+- **THEN** none of those events SHALL be returned, even though RLS allows the admin to read them
+
+#### Scenario: Landing listing is public-only
+- **WHEN** a member of tenant T calls `listEventosPublicados({ soloPublicos: true })`
+- **THEN** T's `publico = false` events SHALL NOT be returned
+
+#### Scenario: Undated published events included
+- **WHEN** a public, active, published, confirmed event has `fecha_hora = null`
+- **THEN** `listEventosPublicados` SHALL return it after the dated events
+
+#### Scenario: Internal columns not requested
+- **WHEN** `listEventosPublicados` or `getEventoPublicado` runs
+- **THEN** the request's `select` SHALL NOT include `formulario_id`, `creado_por` or `omitir_confirmacion_compra`
+
+#### Scenario: Unknown or hidden event detail
+- **WHEN** `getEventoPublicado` is called with a malformed id, an unknown id, or the id of a draft
+- **THEN** it SHALL return `null`
+
 ### Requirement: Eventos service error mapping
 The service MUST throw `EventoServiceError` with a `code` and a Spanish `message`:
 
@@ -203,6 +243,7 @@ The service MUST throw `EventoServiceError` with a `code` and a Spanish `message
 | `23505` on `uq_evento_entrada_cupones_codigo` | `duplicate_cupon` | "El código de cupón ya está en uso en este evento." |
 | `FORMULARIO_INVALIDO` | `invalid_reference` | "El formulario seleccionado no existe o está inactivo." |
 | `BUNDLE_INVALIDO` | `invalid_reference` | "Uno de los eventos del paquete ya no existe." |
+| `TENANT_INVALIDO` | `invalid_reference` | "La organización del evento no existe." |
 | Other `23503` | `invalid_reference` | "Una referencia del evento no es válida." |
 | `NO_REVERTIR_A_BORRADOR` | `invalid_data` | "Un evento publicado no puede volver a borrador." |
 | A `23514` with a known completeness code (`DISCIPLINA_REQUERIDA`, `ENTRADAS_REQUERIDAS`, `ENTRADA_INCOMPLETA`, `BUNDLE_REQUERIDO`, `CUPON_INCOMPLETO`, `CUPON_EN_ENTRADA_GRATIS`, `METODO_PAGO_REQUERIDO`, `FORMULARIO_INACTIVO`) | `invalid_data` | A specific message per code |
@@ -228,4 +269,8 @@ The service MUST throw `EventoServiceError` with a `code` and a Spanish `message
 #### Scenario: Unknown error mapped
 - **WHEN** Supabase returns an unrecognized error code
 - **THEN** the service SHALL throw `EventoServiceError` with code `unknown`
+
+#### Scenario: Missing tenant mapped
+- **WHEN** the RPC raises `TENANT_INVALIDO`
+- **THEN** the service SHALL throw `EventoServiceError` with code `invalid_reference` and the message "La organización del evento no existe."
 

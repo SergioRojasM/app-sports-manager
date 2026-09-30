@@ -29,6 +29,7 @@ import {
   type EventoWizardStep,
 } from '@/types/portal/eventos.types';
 import type { CronogramaItem, IncluyeItem } from '@/types/portal/entrenamientos-publicos.types';
+import { useTenantName } from '@/hooks/portal/tenant/useTenantName';
 
 type SavedState = {
   draft: EventoDraft;
@@ -100,6 +101,11 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
 
+  // Organization name for the preview (US-0120): the event's stored snapshot in edit mode, or the
+  // tenant's current name before a new event's first save (the value the RPC will store on insert)
+  const [storedNombreTenant, setStoredNombreTenant] = useState<string | null>(null);
+  const tenantNombreActual = useTenantName(tenantId);
+
   const [savingKind, setSavingKind] = useState<EventoWizardSavingKind>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -125,6 +131,7 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
       setDraft(loaded);
       setBaseline(serializeDraft(loaded));
       setEsBorrador(evento.borrador);
+      setStoredNombreTenant(evento.nombre_tenant ?? null);
       setUltimoGuardado(evento.borrador ? evento.updated_at : null);
     } catch (err) {
       console.error('Failed to load evento:', err);
@@ -552,6 +559,7 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
     setMetodosPago,
     bundleWarnings,
     // banner
+    nombreTenant: storedNombreTenant ?? tenantNombreActual,
     bannerDisplayUrl: bannerPreviewUrl ?? draft.bannerUrl,
     bannerError,
     selectBannerFile,

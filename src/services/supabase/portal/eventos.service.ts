@@ -7,6 +7,8 @@ import {
   type EventoEntradaConCupones,
   type EventoEstado,
   type EventoListItem,
+  type EventoPublicoDetalle,
+  type EventoPublicoListItem,
   type EventosListFilters,
   type GuardarEventoPayload,
   type GuardarEventoResult,
@@ -68,6 +70,9 @@ function mapServiceError(error: PostgrestErrorLike): EventoServiceError {
     if (message.includes('BUNDLE_INVALIDO')) {
       return new EventoServiceError('invalid_reference', 'Uno de los eventos del paquete ya no existe.');
     }
+    if (message.includes('TENANT_INVALIDO')) {
+      return new EventoServiceError('invalid_reference', 'La organización del evento no existe.');
+    }
     return new EventoServiceError('invalid_reference', 'Una referencia del evento no es válida.');
   }
 
@@ -107,6 +112,110 @@ function toListItem(row: Evento): EventoListItem {
   };
 }
 
+/**
+ * Columns for the cross-tenant discovery pages (US-0120). `metodos_pago` is public content the admin
+ * chose to publish; `formulario_id`, `creado_por` and `omitir_confirmacion_compra` are internal and
+ * never requested here.
+ */
+const EVENTOS_PUBLICOS_LIST_SELECT =
+  'id, tenant_id, nombre_tenant, nombre, descripcion, pagina_evento_url, disciplina_id, ' +
+  'escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, ' +
+  'reserva_antelacion_horas, precio, metodos_pago, banner_url, publico';
+
+const EVENTO_PUBLICO_DETALLE_SELECT =
+  `${EVENTOS_PUBLICOS_LIST_SELECT}, descripcion_larga, cronograma, incluye, cancelacion_antelacion_horas`;
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Discovery pages cap the listing; filtering happens client-side below this size. */
+export const EVENTOS_PUBLICOS_LIMIT = 500;
+
+type EventoPublicoRow = Pick<
+  Evento,
+  | 'id'
+  | 'tenant_id'
+  | 'nombre_tenant'
+  | 'nombre'
+  | 'descripcion'
+  | 'pagina_evento_url'
+  | 'disciplina_id'
+  | 'escenario_id'
+  | 'entrenador_id'
+  | 'fecha_hora'
+  | 'duracion_minutos'
+  | 'cupo_maximo'
+  | 'punto_encuentro'
+  | 'reserva_antelacion_horas'
+  | 'precio'
+  | 'metodos_pago'
+  | 'banner_url'
+  | 'publico'
+>;
+
+type EventoPublicoDetalleRow = EventoPublicoRow &
+  Pick<Evento, 'descripcion_larga' | 'cronograma' | 'incluye' | 'cancelacion_antelacion_horas'>;
+
+/**
+ * Explicit visibility filters for the discovery pages. RLS alone is not enough: it lets a tenant's
+ * admins/trainers read their own drafts and inactive rows, and members read private rows.
+ */
+function publicadosQuery(select: string, soloPublicos: boolean) {
+  const supabase = createClient();
+  let query = supabase
+    .from('eventos')
+    .select(select)
+    .eq('activo', true)
+    .eq('borrador', false)
+    .eq('estado', 'confirmado')
+    .or(`fecha_hora.gte.${new Date().toISOString()},fecha_hora.is.null`);
+
+  if (soloPublicos) query = query.eq('publico', true);
+
+  return query;
+}
+
+function toPublicoListItem(row: EventoPublicoRow): EventoPublicoListItem {
+  const entrenadores = Array.isArray(row.entrenador_id) ? row.entrenador_id : [];
+  const entrenadorNombre = entrenadores
+    .map((entrenador) => entrenador.nombre?.trim())
+    .filter(Boolean)
+    .join(', ');
+
+  return {
+    id: row.id,
+    tenantId: row.tenant_id,
+    nombreTenant: row.nombre_tenant ?? '',
+    nombre: row.nombre ?? 'Evento',
+    descripcion: row.descripcion,
+    paginaEventoUrl: row.pagina_evento_url,
+    disciplinaNombre: row.disciplina_id ?? 'Evento',
+    escenario: row.escenario_id ?? null,
+    escenarioNombre: row.escenario_id?.nombre ?? null,
+    escenarioUbicacion: row.escenario_id?.ubicacion ?? row.escenario_id?.direccion ?? null,
+    puntoEncuentro: row.punto_encuentro,
+    entrenadores,
+    entrenadorNombre: entrenadorNombre || null,
+    fechaHora: row.fecha_hora,
+    duracionMinutos: row.duracion_minutos,
+    cupoMaximo: row.cupo_maximo,
+    reservaAntelacionHoras: row.reserva_antelacion_horas,
+    precio: Array.isArray(row.precio) ? row.precio : [],
+    metodosPago: Array.isArray(row.metodos_pago) ? row.metodos_pago : [],
+    bannerUrl: row.banner_url,
+    publico: row.publico,
+  };
+}
+
+function toPublicoDetalle(row: EventoPublicoDetalleRow): EventoPublicoDetalle {
+  return {
+    ...toPublicoListItem(row),
+    descripcionLarga: row.descripcion_larga,
+    cronograma: Array.isArray(row.cronograma) ? row.cronograma : [],
+    incluye: Array.isArray(row.incluye) ? row.incluye : [],
+    cancelacionAntelacionHoras: row.cancelacion_antelacion_horas,
+  };
+}
+
 type RpcResult = {
   evento_id: string;
   borrador: boolean;
@@ -134,6 +243,40 @@ function normalizeEntradas(entradas: EventoEntradaConCupones[] | null | undefine
 }
 
 export const eventosService = {
+  /**
+   * Cross-tenant discovery listing (US-0120). `soloPublicos` is always true on the anonymous
+   * landing surfaces, even when the browser has a session.
+   */
+  async listEventosPublicados(options: { soloPublicos: boolean }): Promise<EventoPublicoListItem[]> {
+    const { data, error } = await publicadosQuery(EVENTOS_PUBLICOS_LIST_SELECT, options.soloPublicos)
+      .order('fecha_hora', { ascending: true, nullsFirst: false })
+      .limit(EVENTOS_PUBLICOS_LIMIT);
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+
+    return ((data ?? []) as unknown as EventoPublicoRow[]).map(toPublicoListItem);
+  },
+
+  /** One event for the detail pages; null when it does not exist or is not visible there (US-0120). */
+  async getEventoPublicado(eventoId: string, options: { soloPublicos: boolean }): Promise<EventoPublicoDetalle | null> {
+    // A malformed id can never match; skip the request (PostgREST would answer 400 / 22P02)
+    if (!UUID_RE.test(eventoId)) return null;
+
+    const { data, error } = await publicadosQuery(EVENTO_PUBLICO_DETALLE_SELECT, options.soloPublicos)
+      .eq('id', eventoId)
+      .maybeSingle();
+
+    if (error) {
+      // A malformed id is "not found" from the visitor's point of view
+      if (error.code === '22P02') return null;
+      throw mapServiceError(error);
+    }
+
+    return data ? toPublicoDetalle(data as unknown as EventoPublicoDetalleRow) : null;
+  },
+
   async listEventos(tenantId: string, filters: EventosListFilters = {}): Promise<EventoListItem[]> {
     const supabase = createClient();
 
@@ -239,6 +382,25 @@ export const eventosService = {
     const { data, error } = await supabase
       .from('eventos')
       .update({ estado })
+      .eq('tenant_id', tenantId)
+      .eq('id', eventoId)
+      .select('*')
+      .single();
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+
+    return data as Evento;
+  },
+
+  /** Quick hide/show from the management page: `activo = false` hides the event from members and visitors. */
+  async updateActivoEvento(tenantId: string, eventoId: string, activo: boolean): Promise<Evento> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('eventos')
+      .update({ activo })
       .eq('tenant_id', tenantId)
       .eq('id', eventoId)
       .select('*')

@@ -1,5 +1,13 @@
 export type MetodoPagoTipo = 'transferencia' | 'efectivo' | 'tarjeta' | 'pasarela' | 'otro';
 
+export const METODO_PAGO_TIPO_LABELS: Record<MetodoPagoTipo, string> = {
+  transferencia: 'Transferencia',
+  efectivo: 'Efectivo',
+  tarjeta: 'Tarjeta',
+  pasarela: 'Pasarela',
+  otro: 'Otro',
+};
+
 export type MetodoPago = {
   id: string;
   tenant_id: string;

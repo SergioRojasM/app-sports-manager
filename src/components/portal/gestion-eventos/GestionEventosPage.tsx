@@ -7,6 +7,7 @@ import { useGestionEventos, EVENTOS_PAGE_SIZE } from '@/hooks/portal/gestion-eve
 import { useEventosVista } from '@/hooks/portal/gestion-eventos/useEventosVista';
 import { useEventosCalendar } from '@/hooks/portal/gestion-eventos/useEventosCalendar';
 import { useEventoGuardadoBanner } from '@/hooks/portal/gestion-eventos/useEventoGuardadoBanner';
+import { useCambiarActivoEvento } from '@/hooks/portal/gestion-eventos/useCambiarActivoEvento';
 import { EventosToolbar } from './EventosToolbar';
 import { EventosStatsCards } from './EventosStatsCards';
 import { EventosGrid, EventosGridSkeleton } from './EventosGrid';
@@ -69,6 +70,30 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
     if (vista === 'calendario') void reloadCalendar();
   }, [reload, reloadCalendar, vista]);
 
+  // Quick activar/desactivar: no modal, a short confirmation message and a refresh
+  const [activoMessage, setActivoMessage] = useState<string | null>(null);
+  const handleActivoSuccess = useCallback(
+    (evento: EventoListItem, activo: boolean) => {
+      setActivoMessage(
+        activo
+          ? `"${evento.nombre}" está activo: se publica en el panel de eventos públicos.`
+          : `"${evento.nombre}" está inactivo: solo será visible para el administrador.`,
+      );
+      void reload();
+      if (vista === 'calendario') void reloadCalendar();
+    },
+    [reload, reloadCalendar, vista],
+  );
+  const cambiarActivo = useCambiarActivoEvento({ tenantId, onSuccess: handleActivoSuccess });
+  const { toggle: toggleActivo, clearError: clearActivoError } = cambiarActivo;
+  const onCambiarActivo = useCallback(
+    (evento: EventoListItem) => {
+      setActivoMessage(null);
+      void toggleActivo(evento);
+    },
+    [toggleActivo],
+  );
+
   const showUndated = useCallback(() => {
     setPeriodo('proximos');
     setVista('lista');
@@ -127,6 +152,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
           onEditar={onEditar}
           onCambiarEstado={onCambiarEstado}
           onEliminar={onEliminar}
+          onCambiarActivo={onCambiarActivo}
         />
       );
     }
@@ -161,6 +187,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
           onEditar={onEditar}
           onCambiarEstado={onCambiarEstado}
           onEliminar={onEliminar}
+          onCambiarActivo={onCambiarActivo}
         />
       );
     }
@@ -171,6 +198,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
         onEditar={onEditar}
         onCambiarEstado={onCambiarEstado}
         onEliminar={onEliminar}
+        onCambiarActivo={onCambiarActivo}
       />
     );
   };
@@ -193,6 +221,46 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
             onClick={guardadoBanner.dismiss}
             aria-label="Cerrar mensaje"
             className="rounded-grit-sm p-1 text-grit-success transition hover:bg-grit-success/10"
+          >
+            <GritIcon name="close" size={16} />
+          </button>
+        </div>
+      )}
+
+      {activoMessage && (
+        <div
+          role="status"
+          className="flex items-center justify-between gap-3 rounded-grit-md border border-grit-success/40 bg-grit-success/10 px-4 py-3 font-grit-body text-sm text-grit-success"
+        >
+          <span className="flex items-center gap-2">
+            <GritIcon name="check_circle" size={18} />
+            {activoMessage}
+          </span>
+          <button
+            type="button"
+            onClick={() => setActivoMessage(null)}
+            aria-label="Cerrar mensaje"
+            className="rounded-grit-sm p-1 text-grit-success transition hover:bg-grit-success/10"
+          >
+            <GritIcon name="close" size={16} />
+          </button>
+        </div>
+      )}
+
+      {cambiarActivo.error && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 font-grit-body text-sm text-grit-danger"
+        >
+          <span className="flex items-center gap-2">
+            <GritIcon name="error" size={18} />
+            {cambiarActivo.error}
+          </span>
+          <button
+            type="button"
+            onClick={clearActivoError}
+            aria-label="Cerrar mensaje"
+            className="rounded-grit-sm p-1 text-grit-danger transition hover:bg-grit-danger/10"
           >
             <GritIcon name="close" size={16} />
           </button>
