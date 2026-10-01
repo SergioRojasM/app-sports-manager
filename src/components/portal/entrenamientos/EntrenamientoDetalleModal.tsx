@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { MultilineText } from '@/components/ui';
 import type { ViewTarget } from '@/hooks/portal/entrenamientos/useEntrenamientos';
-import { VisibilidadBadge } from './EntrenamientosList';
 import { GuardarPlantillaModal } from './GuardarPlantillaModal';
 import { FormularioPreviewModal } from '@/components/portal/formularios/FormularioPreviewModal';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
@@ -164,7 +163,6 @@ export function EntrenamientoDetalleModal({
           <section className="space-y-3 rounded-grit-lg border border-grit-glass-border bg-grit-bg/45 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-grit-title text-sm font-semibold text-grit-text">{instance.nombre}</h3>
-              <VisibilidadBadge visibilidad={instance.visibilidad} />
             </div>
 
             {instance.descripcion ? (

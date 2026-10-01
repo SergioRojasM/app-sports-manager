@@ -7,7 +7,6 @@ import { entrenamientoCategoriasService } from '@/services/supabase/portal/entre
 import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
-import { entrenamientosPublicosService } from '@/services/supabase/portal/entrenamientos-publicos.service';
 import { useEntrenamientoForm } from './useEntrenamientoForm';
 import { useEntrenamientoScope } from './useEntrenamientoScope';
 import { useEntrenamientosCalendar } from './useEntrenamientosCalendar';
@@ -146,8 +145,6 @@ type UseEntrenamientosResult = {
   viewLoading: boolean;
   requestViewInstance: (instance: TrainingInstance) => void;
   closeViewModal: () => void;
-  // Public training marketplace publishing
-  publishedEntrenamientoIds: Set<string>;
 };
 
 const EMPTY_SUCCESS: string | null = null;
@@ -291,7 +288,6 @@ function buildPlantillaContenidoFromInstance(
     entrenador_id: instance.entrenador_id ?? '',
     duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
     cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
-    visibilidad: instance.visibilidad ?? 'privado',
     categorias: {
       enabled: categorias.length > 0,
       items: categorias.map((c) => ({ nivel_id: c.nivel_id, cupos_asignados: c.cupos_asignados })),
@@ -351,7 +347,6 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues, formula
 
     return {
       tenantId,
-      visibilidad: values.visibilidad,
       group: {
         tipo: 'unico' as const,
         nombre: values.nombre.trim() || 'Entrenamiento único',
@@ -392,7 +387,6 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues, formula
 
   return {
     tenantId,
-    visibilidad: values.visibilidad,
     group: {
       tipo: 'recurrente' as const,
       nombre: values.nombre.trim() || 'Serie de entrenamiento',
@@ -464,7 +458,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [entrenadores, setEntrenadores] = useState<SelectOption[]>([]);
   const [servicios, setServicios] = useState<SelectOption[]>([]);
   const [formulariosPlantillas, setFormulariosPlantillas] = useState<FormularioPlantillaListItem[]>([]);
-  const [publishedEntrenamientoIds, setPublishedEntrenamientoIds] = useState<Set<string>>(new Set());
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -504,7 +497,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         throw new Error('No active session');
       }
 
-      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData, formulariosPlantillasData, publishedIdsData] = await Promise.all([
+      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData, formulariosPlantillasData] = await Promise.all([
         entrenamientosService.listTrainingGroupsByTenant(tenantId),
         entrenamientosService.listTrainingInstancesByTenantAndRange(tenantId, calendar.range.from, calendar.range.to),
         entrenamientosService.listDisciplineOptions(tenantId),
@@ -512,7 +505,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenamientosService.listTrainerOptions(tenantId),
         entrenamientosService.listServicioOptions(tenantId),
         formulariosService.getPlantillasByTenant(tenantId).catch(() => []),
-        entrenamientosPublicosService.listPublishedEntrenamientoIds(tenantId).catch(() => new Set<string>()),
       ]);
 
       setGroups(groupsData);
@@ -526,7 +518,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           .slice()
           .sort((a, b) => a.nombre.localeCompare(b.nombre)),
       );
-      setPublishedEntrenamientoIds(publishedIdsData);
 
       // Enrich instances with reservas_activas count (batch, not N+1)
       const capacidades = await Promise.all(
@@ -727,7 +718,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const prepareEditFromGroup = useCallback(
     (group: TrainingGroupWithDetails, selectedScope: TrainingScope) => {
       const recurringDefaults = getRecurringDefaultsFromRules(group.reglas);
-      const firstGroupInstance = instances.find((inst) => inst.entrenamiento_grupo_id === group.id);
 
       const values: TrainingWizardValues = {
         nombre: group.nombre,
@@ -739,7 +729,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenador_id: group.entrenador_id ?? '',
         duracion_minutos: group.duracion_minutos != null ? String(group.duracion_minutos) : '',
         cupo_maximo: group.cupo_maximo != null ? String(group.cupo_maximo) : '',
-        visibilidad: firstGroupInstance?.visibilidad ?? 'privado',
         tipo: group.tipo,
         fecha_inicio: group.fecha_inicio,
         fecha_fin: group.fecha_fin ?? '',
@@ -793,7 +782,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       setSuccessMessage(null);
       setFormOpen(true);
     },
-    [form, instances, tenantId],
+    [form, tenantId],
   );
 
   const prepareEditFromInstance = useCallback(
@@ -815,7 +804,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           entrenador_id: instance.entrenador_id ?? '',
           duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
           cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
-          visibilidad: instance.visibilidad ?? 'privado',
           tipo: 'unico',
           fecha_inicio: dateOnly,
           fecha_fin: '',
@@ -879,7 +867,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenador_id: instance.entrenador_id ?? '',
         duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
         cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
-        visibilidad: instance.visibilidad ?? 'privado',
         tipo: relatedGroup?.tipo ?? 'unico',
         fecha_inicio: relatedGroup?.fecha_inicio ?? (instance.fecha_hora ? toDateOnlyFromIso(instance.fecha_hora) : ''),
         fecha_fin: relatedGroup?.fecha_fin ?? '',
@@ -1083,7 +1070,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           tenantId,
           trainingGroupId: editTarget.trainingGroupId,
           scope: editTarget.scope === 'single' ? 'future' : editTarget.scope,
-          visibilidad: form.formValues.visibilidad,
           effectiveFrom: editTarget.effectiveFrom,
           groupPatch: {
             ...toUpdatePatch(form.formValues, form.formularioForm),
@@ -1106,7 +1092,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             trainingGroupId: editTarget.trainingGroupId,
             effectiveFrom: editTarget.effectiveFrom,
             scope: 'single',
-            visibilidad: form.formValues.visibilidad,
             patch: {
               ...toUpdatePatch(form.formValues, form.formularioForm),
               fecha_hora: form.formValues.fecha_hora_unico ? toBogotaIsoFromLocalInput(form.formValues.fecha_hora_unico) : null,
@@ -1137,7 +1122,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             tenantId,
             trainingGroupId: editTarget.trainingGroupId,
             scope: editTarget.scope,
-            visibilidad: form.formValues.visibilidad,
             effectiveFrom: editTarget.effectiveFrom,
             groupPatch: {
               ...toUpdatePatch(form.formValues, form.formularioForm),
@@ -1262,7 +1246,5 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     viewLoading,
     requestViewInstance,
     closeViewModal,
-    // Public training marketplace publishing
-    publishedEntrenamientoIds,
   };
 }

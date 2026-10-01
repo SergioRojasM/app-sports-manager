@@ -31,8 +31,6 @@ const DISCIPLINE_COLOR_PALETTE = [
 ];
 
 /** CSS clip-path for a 5-pointed star used on público dots. */
-const STAR_CLIP_PATH = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
-
 function toDateKeyInBogota(value: string): string {
   const date = new Date(value);
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -155,21 +153,6 @@ export function EntrenamientosCalendar({
         ) : null}
       </header>
 
-      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-grit-md border border-grit-glass-border bg-grit-bg/40 px-3 py-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-grit-subtext">Visibilidad</p>
-        <div className="inline-flex items-center gap-2 text-xs text-grit-subtext">
-          <span
-            className="h-3 w-3 bg-grit-subtext/20"
-            style={{ clipPath: STAR_CLIP_PATH }}
-          />
-          <span>Público – visible para todos</span>
-        </div>
-        <div className="inline-flex items-center gap-2 text-xs text-grit-subtext">
-          <span className="h-2.5 w-2.5 rounded-full bg-grit-subtext/20 ring-1 ring-white/20" />
-          <span>Privado – solo tu organización</span>
-        </div>
-      </div>
-
       <div className="grid grid-cols-7 gap-2 border-b border-grit-glass-border pb-2">
         {WEEKDAY_HEADERS.map((label) => (
           <p key={label} className="text-center text-[11px] font-semibold uppercase tracking-wider text-grit-subtext">
@@ -208,7 +191,6 @@ export function EntrenamientosCalendar({
                     <div className="flex flex-wrap gap-1.5">
                       {dayItems.map((item) => {
                         const disciplineColor = colorByDisciplineId[item.instance.disciplina_id] ?? 'bg-grit-subtext/20';
-                        const isPublic = item.instance.visibilidad === 'publico';
                         const timeLabel = item.instance.fecha_hora
                           ? toTimeLabelInBogota(item.instance.fecha_hora)
                           : 'Sin hora';
@@ -217,12 +199,7 @@ export function EntrenamientosCalendar({
                             key={item.instance.id}
                             title={`${item.instance.nombre} · ${timeLabel}`}
                             aria-label={`${item.instance.nombre} ${timeLabel}`}
-                            className={`${disciplineColor} ${
-                              isPublic
-                                ? 'h-3 w-3'
-                                : 'h-2.5 w-2.5 rounded-full ring-1 ring-white/20'
-                            }`}
-                            style={isPublic ? { clipPath: STAR_CLIP_PATH } : undefined}
+                            className={`${disciplineColor} h-2.5 w-2.5 rounded-full ring-1 ring-white/20`}
                           />
                         );
                       })}

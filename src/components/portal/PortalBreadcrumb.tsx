@@ -26,7 +26,6 @@ const SLUG_LABELS: Record<string, string> = {
   'entrenamientos-disponibles': 'Entrenamientos Disponibles',
   atletas: 'Atletas',
   perfil: 'Perfil',
-  'entrenamientos-publicos': 'Entrenamientos públicos',
   analitica: 'Analítica',
   'mis-reservas': 'Mis reservas',
   'mis-entradas': 'Mis entradas',

@@ -15,7 +15,7 @@ Visibility of specific tenant route entries:
 
 The "Inicio" entry SHALL always be present regardless of tenant context, enabling users to return to their personal dashboard.
 
-Outside a tenant context, the sidebar SHALL include an "Eventos" entry (icon `celebration`) linking to `/portal/eventos`, positioned immediately after "Entrenamientos Públicos" (US-0120).
+Outside a tenant context, the sidebar SHALL include an "Eventos" entry (icon `celebration`) linking to `/portal/eventos` (US-0120). The sidebar SHALL NOT include an "Entrenamientos Públicos" entry in any context (US-0123).
 
 Outside a tenant context, the "Mis Reservas" entry SHALL be followed immediately by a "Mis Entradas" entry (icon `confirmation_number`) linking to `/portal/mis-entradas` (US-0121).
 
@@ -81,7 +81,7 @@ Outside a tenant context, the "Mis Reservas" entry SHALL be followed immediately
 
 #### Scenario: Global events entry outside tenant context
 - **WHEN** an authenticated user is in the portal without an active tenant context
-- **THEN** the sidebar SHALL include "Eventos" with icon `celebration` linking to `/portal/eventos`, immediately after "Entrenamientos Públicos"
+- **THEN** the sidebar SHALL include "Eventos" with icon `celebration` linking to `/portal/eventos`, and SHALL NOT include "Entrenamientos Públicos"
 
 #### Scenario: Mis Entradas entry after Mis Reservas
 - **WHEN** an authenticated user is in the portal without an active tenant context

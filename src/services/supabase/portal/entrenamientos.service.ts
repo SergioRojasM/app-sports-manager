@@ -1,5 +1,4 @@
 import { createClient } from '@/services/supabase/client';
-import { PUBLIC_TENANT_ID } from '@/lib/constants';
 import { bogotaDayStartIso, bogotaDayEndIso } from '@/lib/portal/bogota-date';
 import {
   TrainingServiceError,
@@ -11,7 +10,6 @@ import {
   type TrainingGroupRule,
   type TrainingGroupWithDetails,
   type TrainingInstance,
-  type TrainingVisibility,
   type UpdateTrainingInstanceInput,
   type UpdateTrainingSeriesInput,
   type UpsertTrainingGroupRulesInput,
@@ -27,15 +25,6 @@ type TrainingRuleRow = TrainingGroupRule;
 type TrainingInstanceRow = Omit<TrainingInstance, 'origen_creacion'> & {
   origen_creacion: 'manual' | 'generado' | string;
 };
-
-/**
- * Compute the `visible_para` value based on visibility.
- * - 'publico' → PUBLIC_TENANT_ID (system-level public tenant)
- * - 'privado' → the owning tenant's own ID
- */
-function resolveVisiblePara(visibilidad: TrainingVisibility, tenantId: string): string {
-  return visibilidad === 'publico' ? PUBLIC_TENANT_ID : tenantId;
-}
 
 type PostgrestErrorLike = {
   code?: string;
@@ -120,7 +109,6 @@ function mapTrainingInstance(row: TrainingInstanceRow): TrainingInstance {
     fecha_hora: row.fecha_hora,
     duracion_minutos: row.duracion_minutos,
     cupo_maximo: row.cupo_maximo,
-    visibilidad: row.visibilidad === 'publico' ? 'publico' : 'privado',
     visible_para: row.visible_para,
     estado: row.estado,
     reserva_antelacion_horas: (row as Record<string, unknown>).reserva_antelacion_horas as number | null ?? null,
@@ -330,7 +318,7 @@ export const entrenamientosService = {
         .order('created_at', { ascending: true }),
       supabase
         .from('entrenamientos')
-        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
+        .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
         .eq('tenant_id', tenantId),
     ]);
 
@@ -359,7 +347,7 @@ export const entrenamientosService = {
 
     let query = supabase
       .from('entrenamientos')
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at')
       .eq('tenant_id', tenantId)
       .order('fecha_hora', { ascending: true, nullsFirst: false });
 
@@ -384,8 +372,7 @@ export const entrenamientosService = {
     const supabase = createClient();
 
     if (input.group.tipo === 'unico') {
-      const visibilidad = input.visibilidad ?? 'privado';
-      const visible_para = resolveVisiblePara(visibilidad, input.tenantId);
+      const visible_para = input.tenantId;
 
       const { data: unicoData, error: uniqueError } = await supabase
         .from('entrenamientos')
@@ -405,7 +392,6 @@ export const entrenamientosService = {
           fecha_hora: input.uniqueDateTime ?? toIsoFromDateAndTime(input.group.fecha_inicio, null, input.group.timezone ?? 'America/Bogota'),
           duracion_minutos: input.group.duracion_minutos ?? null,
           cupo_maximo: input.group.cupo_maximo ?? null,
-          visibilidad,
           visible_para,
           reserva_antelacion_horas: input.reserva_antelacion_horas ?? null,
           cancelacion_antelacion_horas: input.cancelacion_antelacion_horas ?? null,
@@ -490,7 +476,6 @@ export const entrenamientosService = {
 
     const instances = await this.generateSeriesInstances({
       tenantId: input.tenantId,
-      visibilidad: input.visibilidad,
       trainingGroup: group,
       rules,
       fromDate: input.group.fecha_inicio,
@@ -597,8 +582,7 @@ export const entrenamientosService = {
     const start = toDateOnly(fromDate);
     const end = toDateOnly(toDate);
 
-    const visibilidad = input.visibilidad ?? 'privado';
-    const visible_para = resolveVisiblePara(visibilidad, input.tenantId);
+    const visible_para = input.tenantId;
 
     const rows: Array<Record<string, unknown>> = [];
 
@@ -619,7 +603,6 @@ export const entrenamientosService = {
         fecha_hora: input.uniqueDateTime ?? toIsoFromDateAndTime(fromDate, null, input.trainingGroup.timezone),
         duracion_minutos: input.trainingGroup.duracion_minutos,
         cupo_maximo: input.trainingGroup.cupo_maximo,
-        visibilidad,
         visible_para,
         reserva_antelacion_horas: input.trainingGroup.reserva_antelacion_horas ?? null,
         cancelacion_antelacion_horas: input.trainingGroup.cancelacion_antelacion_horas ?? null,
@@ -662,7 +645,6 @@ export const entrenamientosService = {
               fecha_hora: toIsoFromDateAndTime(dateOnly, startTime, input.trainingGroup.timezone),
               duracion_minutos: input.trainingGroup.duracion_minutos,
               cupo_maximo: input.trainingGroup.cupo_maximo,
-              visibilidad,
               visible_para,
               reserva_antelacion_horas: input.trainingGroup.reserva_antelacion_horas ?? null,
               cancelacion_antelacion_horas: input.trainingGroup.cancelacion_antelacion_horas ?? null,
@@ -681,7 +663,7 @@ export const entrenamientosService = {
     const { data, error } = await supabase
       .from('entrenamientos')
       .insert(rows)
-      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visibilidad, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at');
+      .select('id, tenant_id, entrenamiento_grupo_id, origen_creacion, es_excepcion_serie, bloquear_sync_grupo, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, formulario_obligatorio, formulario_plantilla:formularios_plantillas(nombre), disciplina_id, escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, visible_para, estado, reserva_antelacion_horas, cancelacion_antelacion_horas, created_at, updated_at');
 
     if (error) {
       throw mapServiceError(error);
@@ -742,11 +724,6 @@ export const entrenamientosService = {
         cupo_maximo: group.cupo_maximo,
       };
 
-      if (input.visibilidad) {
-        instancePatch.visibilidad = input.visibilidad;
-        instancePatch.visible_para = resolveVisiblePara(input.visibilidad, input.tenantId);
-      }
-
       const syncQuery = supabase
         .from('entrenamientos')
         .update(instancePatch)
@@ -783,7 +760,6 @@ export const entrenamientosService = {
 
         await this.generateSeriesInstances({
           tenantId: input.tenantId,
-          visibilidad: input.visibilidad,
           trainingGroup: group,
           rules,
           fromDate: regenerationFromDate,
@@ -867,11 +843,6 @@ export const entrenamientosService = {
         es_excepcion_serie: true,
         bloquear_sync_grupo: true,
       };
-
-      if (input.visibilidad) {
-        singlePatch.visibilidad = input.visibilidad;
-        singlePatch.visible_para = resolveVisiblePara(input.visibilidad, input.tenantId);
-      }
       if (input.reserva_antelacion_horas !== undefined) {
         singlePatch.reserva_antelacion_horas = input.reserva_antelacion_horas;
       }
@@ -933,10 +904,6 @@ export const entrenamientosService = {
     }
 
     const scopePatch: Record<string, unknown> = { ...input.patch };
-    if (input.visibilidad) {
-      scopePatch.visibilidad = input.visibilidad;
-      scopePatch.visible_para = resolveVisiblePara(input.visibilidad, input.tenantId);
-    }
 
     const query = supabase
       .from('entrenamientos')

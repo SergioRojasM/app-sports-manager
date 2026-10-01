@@ -44,12 +44,6 @@ const BASE_MENU_ITEM: MenuItem = {
   icon: 'corporate_fare',
 };
 
-const PUBLIC_TRAININGS_MENU_ITEM: MenuItem = {
-  label: 'Entrenamientos Públicos',
-  href: '/portal/entrenamientos-publicos',
-  icon: 'public',
-};
-
 const EVENTOS_MENU_ITEM: MenuItem = {
   label: 'Eventos',
   href: '/portal/eventos',
@@ -110,7 +104,6 @@ export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[]
     return [
       INICIO_MENU_ITEM,
       BASE_MENU_ITEM,
-      PUBLIC_TRAININGS_MENU_ITEM,
       EVENTOS_MENU_ITEM,
       MIS_SUSCRIPCIONES_MENU_ITEM,
       MIS_RESERVAS_MENU_ITEM,

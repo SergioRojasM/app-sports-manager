@@ -6,7 +6,6 @@ import { useSuscripcion } from '@/hooks/portal/planes/useSuscripcion';
 import { SuscripcionModal } from '@/components/portal/planes/SuscripcionModal';
 import { PlanPublicoCard } from './PlanPublicoCard';
 import type { PlanPublicoItem } from '@/types/portal/planes-publicos.types';
-import type { PendingPlanPurchaseDraft } from '@/types/portal/suscripciones.types';
 
 type PlanesPublicosModalProps = {
   open: boolean;
@@ -15,12 +14,6 @@ type PlanesPublicosModalProps = {
   onClose: () => void;
   /** Pre-fills the catalog search on open — e.g. a required service's name (US-0101). Existing callers that omit this keep today's unfiltered behavior. */
   initialSearch?: string;
-  /**
-   * Forwarded to useSuscripcion — hands the filled-in purchase to the caller instead of
-   * creating it here, so the caller can persist it as part of its own flow (US-0106/US-0110).
-   * Existing callers that omit this keep today's immediate-purchase behavior.
-   */
-  onSubscribed?: (purchase: PendingPlanPurchaseDraft) => void;
 };
 
 export function PlanesPublicosModal({
@@ -29,11 +22,10 @@ export function PlanesPublicosModal({
   tenantNombre,
   onClose,
   initialSearch,
-  onSubscribed,
 }: PlanesPublicosModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const catalog = usePlanesPublicos({ tenantId, enabled: open, initialSearch });
-  const suscripcion = useSuscripcion({ tenantId, onSubscribed });
+  const suscripcion = useSuscripcion({ tenantId });
 
   // Membership (and with it the role) is resolved by the catalog itself, since it also
   // decides whether member-only plans are listed — no second access query here.

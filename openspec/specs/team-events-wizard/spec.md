@@ -325,10 +325,6 @@ The event page (the `/eventos/[event_id]` and `/portal/eventos/[event_id]` detai
 - **WHEN** the event page is rendered
 - **THEN** the closing banner title SHALL be "Reserva tu cupo", with no subtitle, and its button SHALL read "Obtener entrada"
 
-#### Scenario: Public trainings unchanged
-- **WHEN** a public training detail page is rendered
-- **THEN** it SHALL still show the "Entrenamiento público" tag, the location and reservation cards, and the "¿Listo para mejorar tu rendimiento?" banner
-
 #### Scenario: Organization shown on the event page
 - **WHEN** an event with `nombre_tenant = 'Wolfpack Club'` is rendered on a detail page
 - **THEN** the hero SHALL show "Wolfpack Club"

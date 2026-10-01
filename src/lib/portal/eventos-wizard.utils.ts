@@ -1,5 +1,5 @@
 import { fromDateTimeLocalInBogota, toDateKeyInBogota, toDateTimeLocalInBogota } from '@/lib/portal/eventos.utils';
-import type { PrecioItem } from '@/types/portal/entrenamientos-publicos.types';
+import type { PrecioItem } from '@/types/portal/eventos.types';
 import type {
   EventoCompleto,
   EventoCuponDraft,

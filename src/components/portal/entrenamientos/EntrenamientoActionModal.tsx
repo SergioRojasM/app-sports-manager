@@ -6,12 +6,6 @@ type EntrenamientoActionModalProps = {
   canDelete: boolean;
   editDisabledReason?: string;
   deleteDisabledReason?: string;
-  /** Admin-only "Publicar" action (US-0089). */
-  isAdmin?: boolean;
-  isPublished?: boolean;
-  canPublish?: boolean;
-  publishDisabledReason?: string;
-  onPublicar?: () => void;
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -27,11 +21,6 @@ export function EntrenamientoActionModal({
   canDelete,
   editDisabledReason,
   deleteDisabledReason,
-  isAdmin = false,
-  isPublished = false,
-  canPublish = false,
-  publishDisabledReason,
-  onPublicar,
   onClose,
   onEdit,
   onDelete,
@@ -109,30 +98,6 @@ export function EntrenamientoActionModal({
               <p className={`text-sm font-semibold ${canDelete ? 'text-grit-danger' : 'text-grit-text'}`}>Eliminar</p>
               <p className={`mt-0.5 text-xs ${canDelete ? 'text-grit-danger/80' : 'text-grit-subtext'}`}>
                 {canDelete ? 'Permite eliminar según las reglas de alcance.' : (deleteDisabledReason ?? 'Acción no disponible.')}
-              </p>
-            </button>
-          )}
-
-          {isAdmin && onPublicar && (
-            <button
-              type="button"
-              onClick={onPublicar}
-              disabled={!canPublish}
-              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
-                canPublish
-                  ? 'border-grit-cyan/40 bg-grit-cyan/10 hover:border-grit-cyan/70'
-                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
-              }`}
-            >
-              <p className={`text-sm font-semibold ${canPublish ? 'text-grit-cyan' : 'text-grit-text'}`}>
-                {isPublished ? 'Gestionar publicación' : 'Publicar'}
-              </p>
-              <p className={`mt-0.5 text-xs ${canPublish ? 'text-grit-cyan/80' : 'text-grit-subtext'}`}>
-                {canPublish
-                  ? isPublished
-                    ? 'Edita o despublica el entrenamiento del marketplace público.'
-                    : 'Publica este entrenamiento en el marketplace público.'
-                  : (publishDisabledReason ?? 'Acción no disponible.')}
               </p>
             </button>
           )}
