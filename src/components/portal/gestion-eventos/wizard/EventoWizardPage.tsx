@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { GritButton, GritEmptyState, GritPageHeader, GritTag } from '@/components/ui';
+import { GritButton, GritEmptyState, GritIcon, GritPageHeader, GritTag } from '@/components/ui';
 import { useEventoWizard } from '@/hooks/portal/gestion-eventos/useEventoWizard';
 import { useEventoWizardOptions } from '@/hooks/portal/gestion-eventos/useEventoWizardOptions';
 import { EventoConfiguracionStep } from './EventoConfiguracionStep';
@@ -19,6 +19,8 @@ type EventoWizardPageProps = {
   tenantId: string;
   /** Present in edit mode. */
   eventoId?: string;
+  /** Create mode only: pre-fills the wizard with a copy of this event (US-0122). */
+  duplicarDeId?: string;
 };
 
 const RELATIVE_TICK_MS = 30_000;
@@ -37,7 +39,7 @@ function formatUltimoGuardado(iso: string, now: number): string {
 }
 
 /** Full-page create/edit wizard for team events (US-0119). */
-export function EventoWizardPage({ tenantId, eventoId }: EventoWizardPageProps) {
+export function EventoWizardPage({ tenantId, eventoId, duplicarDeId }: EventoWizardPageProps) {
   const router = useRouter();
   const options = useEventoWizardOptions(tenantId);
   const eventosExistentesIds = useMemo(
@@ -47,12 +49,14 @@ export function EventoWizardPage({ tenantId, eventoId }: EventoWizardPageProps) 
   const wizard = useEventoWizard({
     tenantId,
     eventoId,
+    duplicarDeId,
     formulariosActivosIds: options.formulariosActivosIds,
     eventosExistentesIds,
   });
 
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [duplicadoNoticeDismissed, setDuplicadoNoticeDismissed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef<EventoWizardStep>(wizard.step);
@@ -176,6 +180,37 @@ export function EventoWizardPage({ tenantId, eventoId }: EventoWizardPageProps) 
         }
       />
 
+      {wizard.duplicadoDe && !duplicadoNoticeDismissed && (
+        <div
+          role="status"
+          className="flex items-start justify-between gap-3 rounded-grit-md border border-grit-cyan/40 bg-grit-cyan/10 px-4 py-3 font-grit-body text-sm text-grit-text"
+        >
+          <span className="flex items-start gap-2">
+            <GritIcon name="content_copy" size={18} className="mt-0.5 shrink-0 text-grit-cyan" />
+            <span className="space-y-1">
+              <span className="block">
+                Estás creando una copia de &quot;{wizard.duplicadoDe.nombre}&quot;. No se guarda nada hasta que pulses
+                &quot;Guardar borrador&quot; o &quot;Publicar evento&quot;.
+              </span>
+              {wizard.duplicadoAjustes?.fechaLimpiada && (
+                <span className="block">
+                  La fecha del evento original ya pasó: define una nueva fecha. Las fechas de cierre de entradas y
+                  cupones se ajustarán a ella.
+                </span>
+              )}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setDuplicadoNoticeDismissed(true)}
+            aria-label="Cerrar mensaje"
+            className="rounded-grit-sm p-1 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-text"
+          >
+            <GritIcon name="close" size={16} />
+          </button>
+        </div>
+      )}
+
       <EventoWizardStepper
         current={wizard.step}
         stepsWithErrors={wizard.stepsWithErrors}
@@ -205,6 +240,7 @@ export function EventoWizardPage({ tenantId, eventoId }: EventoWizardPageProps) 
         onBack={() => wizard.goTo((wizard.step - 1) as EventoWizardStep)}
         onNext={() => wizard.goTo((wizard.step + 1) as EventoWizardStep)}
         onPreview={() => setPreviewOpen(true)}
+        onCancel={requestLeave}
         onGuardarBorrador={() => void wizard.guardarBorrador()}
         onGuardarFinal={() => void wizard.guardarFinal()}
       />

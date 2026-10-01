@@ -17,6 +17,7 @@ type EventosTableProps = {
   onEliminar: (evento: EventoListItem) => void;
   onCambiarActivo: (evento: EventoListItem) => void;
   onVerCompras: (evento: EventoListItem) => void;
+  onDuplicar: (evento: EventoListItem) => void;
 };
 
 const COLUMNS = ['Evento', 'Fecha y hora', 'Lugar', 'Entrenador', 'Cupo', 'Visibilidad', 'Activo', 'Estado'];
@@ -47,6 +48,7 @@ export function EventosTable({
   onEliminar,
   onCambiarActivo,
   onVerCompras,
+  onDuplicar,
 }: EventosTableProps) {
   const start = (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalFiltered);
@@ -59,6 +61,7 @@ export function EventosTable({
       activo={evento.activo}
       onCambiarActivo={() => onCambiarActivo(evento)}
       onVerCompras={() => onVerCompras(evento)}
+      onDuplicar={() => onDuplicar(evento)}
       onEditar={() => onEditar(evento)}
       onCambiarEstado={(target) => onCambiarEstado(evento, target)}
       onEliminar={() => onEliminar(evento)}

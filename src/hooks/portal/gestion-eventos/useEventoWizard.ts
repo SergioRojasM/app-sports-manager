@@ -9,7 +9,9 @@ import {
   EVENTO_BANNER_MAX_BYTES,
   EVENTO_BANNER_MIME_TYPES,
   draftFromEventoCompleto,
+  draftFromEventoDuplicado,
   draftToPayload,
+  shiftWithEventoFecha,
   emptyCuponDraft,
   emptyEntradaDraft,
   emptyEventoDraft,
@@ -22,6 +24,7 @@ import {
   EventoServiceError,
   type EventoCuponDraft,
   type EventoDraft,
+  type EventoDuplicadoAjustes,
   type EventoEntradaDraft,
   type EventoEntrenadorSnapshot,
   type EventoMetodoPagoSnapshot,
@@ -45,6 +48,14 @@ const draftHandoff = new Map<string, SavedState>();
 
 const BORRADOR_FLASH_MS = 4000;
 
+/** Source of an unsaved copy (US-0122); dropped once the copy is saved for the first time. */
+type DuplicadoState = {
+  id: string;
+  nombre: string;
+  bannerUrl: string | null;
+  ajustes: EventoDuplicadoAjustes;
+};
+
 type ShownValidation = { mode: EventoValidationMode; steps: ReadonlySet<EventoWizardStep> } | null;
 
 export type EventoWizardSavingKind = 'borrador' | 'final' | null;
@@ -55,6 +66,8 @@ type UseEventoWizardArgs = {
   tenantId: string;
   /** Present in edit mode. */
   eventoId?: string;
+  /** Create mode only: the event to pre-fill the new draft from (US-0122). */
+  duplicarDeId?: string;
   /** Ids of the tenant's active form templates (final-save check). */
   formulariosActivosIds: ReadonlySet<string>;
   /** Ids of the tenant's existing events, once loaded; used to drop deleted bundle members. */
@@ -73,7 +86,14 @@ function mapEntrada(
   return entradas.map((entrada) => (entrada.clientKey === clientKey ? update(entrada) : entrada));
 }
 
-export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosActivosIds, eventosExistentesIds }: UseEventoWizardArgs) {
+export function useEventoWizard({
+  tenantId,
+  eventoId: eventoIdProp,
+  duplicarDeId: duplicarDeIdProp,
+  formulariosActivosIds,
+  eventosExistentesIds,
+}: UseEventoWizardArgs) {
+  const duplicarDeId = eventoIdProp ? undefined : duplicarDeIdProp;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -88,7 +108,10 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
   const [esBorrador, setEsBorrador] = useState(true);
   const [draft, setDraft] = useState<EventoDraft>(() => handoff.current?.draft ?? emptyEventoDraft());
   const [baseline, setBaseline] = useState(() => serializeDraft(handoff.current?.draft ?? emptyEventoDraft()));
-  const [loading, setLoading] = useState(Boolean(eventoIdProp) && !handoff.current);
+  const [loading, setLoading] = useState((Boolean(eventoIdProp) && !handoff.current) || Boolean(duplicarDeId));
+  const [duplicado, setDuplicado] = useState<DuplicadoState | null>(null);
+  // Last complete event date: the reference for shifting ticket and coupon window ends when the date moves
+  const fechaAncla = useRef('');
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [ultimoGuardado, setUltimoGuardado] = useState<string | null>(handoff.current?.ultimoGuardado ?? null);
@@ -117,14 +140,29 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
   // ─── Load ───
 
   const load = useCallback(async () => {
-    if (!eventoIdProp) return;
+    const sourceId = eventoIdProp ?? duplicarDeId;
+    if (!sourceId) return;
     setLoading(true);
     setLoadError(null);
     setNotFound(false);
     try {
-      const evento = await eventosService.getEventoCompleto(tenantId, eventoIdProp);
+      const evento = await eventosService.getEventoCompleto(tenantId, sourceId);
       if (!evento) {
         setNotFound(true);
+        return;
+      }
+      if (!eventoIdProp) {
+        // Unsaved copy: the baseline stays the empty draft, so the copy is dirty from the start
+        // ("Guardar borrador" enabled, leave guard armed)
+        const copia = draftFromEventoDuplicado(evento, Date.now());
+        fechaAncla.current = copia.fechaOriginal;
+        setDraft(copia.draft);
+        setDuplicado({
+          id: evento.id,
+          nombre: evento.nombre ?? '',
+          bannerUrl: evento.banner_url,
+          ajustes: copia.ajustes,
+        });
         return;
       }
       const loaded = draftFromEventoCompleto(evento);
@@ -139,10 +177,13 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
     } finally {
       setLoading(false);
     }
-  }, [eventoIdProp, tenantId]);
+  }, [duplicarDeId, eventoIdProp, tenantId]);
 
   useEffect(() => {
-    if (!eventoIdProp) return;
+    if (!eventoIdProp) {
+      if (duplicarDeId) void load();
+      return;
+    }
     if (handoff.current) {
       // Hydrated from the first draft save; consume the handoff so a later reload reads from the DB
       draftHandoff.delete(eventoIdProp);
@@ -151,7 +192,7 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
       return;
     }
     void load();
-  }, [eventoIdProp, load]);
+  }, [duplicarDeId, eventoIdProp, load]);
 
   // Bundled events deleted since the last save are dropped, with a warning on the ticket card
   useEffect(() => {
@@ -182,6 +223,10 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
       if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
     };
   }, [bannerPreviewUrl]);
+
+  useEffect(() => {
+    if (draft.fechaHora) fechaAncla.current = draft.fechaHora;
+  }, [draft.fechaHora]);
 
   // ─── Dirty state & leave guard ───
 
@@ -259,7 +304,22 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
   // ─── Mutators ───
 
   const updateField = useCallback(<K extends ScalarDraftField>(field: K, value: EventoDraft[K]) => {
-    setDraft((current) => ({ ...current, [field]: value }));
+    const ancla = fechaAncla.current;
+    setDraft((current) => {
+      const next = { ...current, [field]: value };
+      // Ticket and coupon window ends keep their distance to the event when its date moves. The last
+      // complete date is the reference, so clearing the field while retyping it does not lose it.
+      if (field === 'fechaHora' && next.fechaHora !== current.fechaHora && next.fechaHora) {
+        const mover = (hasta: string) => (ancla ? shiftWithEventoFecha(hasta, ancla, next.fechaHora) : hasta);
+        next.entradas = current.entradas.map((entrada) => ({
+          ...entrada,
+          // Without any previous date, an empty end is the "until the event starts" default waiting for one
+          validaHasta: !ancla && !entrada.validaHasta ? next.fechaHora : mover(entrada.validaHasta),
+          cupones: entrada.cupones.map((cupon) => ({ ...cupon, validoHasta: mover(cupon.validoHasta) })),
+        }));
+      }
+      return next;
+    });
   }, []);
 
   const toggleEntrenador = useCallback((entrenador: { id: string; nombre: string }) => {
@@ -437,6 +497,14 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
         if (bannerFile) {
           const upload = await storageService.uploadEventoBanner(createClient(), tenantId, eventoId, bannerFile);
           bannerUrl = upload.signedUrl;
+        } else if (duplicado && esNuevo && bannerUrl && bannerUrl === duplicado.bannerUrl) {
+          // The copy gets its own banner object; if that fails it keeps the source's URL rather than blocking the save
+          try {
+            const copy = await storageService.copyEventoBanner(createClient(), tenantId, eventoId, bannerUrl);
+            bannerUrl = copy.signedUrl;
+          } catch (err) {
+            console.error('Failed to copy the duplicated evento banner:', err);
+          }
         }
 
         const toSave: EventoDraft = { ...draft, bannerUrl };
@@ -467,6 +535,7 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
         setDraft(saved);
         setBaseline(serializeDraft(saved));
         setShownValidation(null);
+        setDuplicado(null);
 
         if (!borrador) {
           const guardado = esNuevo || esBorrador ? 'creado' : 'editado';
@@ -496,7 +565,7 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
         setSavingKind(null);
       }
     },
-    [bannerFile, bannerPreviewUrl, basePath, draft, esBorrador, esNuevo, eventoId, router, step, tenantId],
+    [bannerFile, bannerPreviewUrl, basePath, draft, duplicado, esBorrador, esNuevo, eventoId, router, step, tenantId],
   );
 
   const runSave = useCallback(
@@ -531,6 +600,8 @@ export function useEventoWizard({ tenantId, eventoId: eventoIdProp, formulariosA
     notFound,
     loadError,
     reload: load,
+    duplicadoDe: duplicado ? { id: duplicado.id, nombre: duplicado.nombre } : null,
+    duplicadoAjustes: duplicado?.ajustes ?? null,
     draft,
     isDirty,
     step,

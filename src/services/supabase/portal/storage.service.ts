@@ -11,6 +11,12 @@ import {
   type StorageUploadResult,
 } from '@/types/portal/storage.types';
 
+const EVENTO_BANNER_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
 function getExtension(file: File): string {
   const name = file.name;
   const dot = name.lastIndexOf('.');
@@ -211,6 +217,31 @@ export const storageService = {
     }
 
     return { signedUrl: signedData.signedUrl, path };
+  },
+
+  /**
+   * Gives a duplicated event its own banner object (US-0122): downloads the source image and
+   * uploads it under the new event's path, so replacing the source banner later does not change the copy.
+   */
+  async copyEventoBanner(
+    supabase: SupabaseClient,
+    tenantId: string,
+    eventoId: string,
+    sourceUrl: string,
+  ): Promise<StorageUploadResult> {
+    const response = await fetch(sourceUrl);
+    if (!response.ok) {
+      throw new Error(`No fue posible descargar la imagen original (${response.status}).`);
+    }
+
+    const blob = await response.blob();
+    const ext = EVENTO_BANNER_EXTENSIONS[blob.type];
+    if (!ext) {
+      throw new Error(`Formato de imagen no permitido: ${blob.type || 'desconocido'}.`);
+    }
+
+    const file = new File([blob], `banner.${ext}`, { type: blob.type });
+    return storageService.uploadEventoBanner(supabase, tenantId, eventoId, file);
   },
 
   /**
