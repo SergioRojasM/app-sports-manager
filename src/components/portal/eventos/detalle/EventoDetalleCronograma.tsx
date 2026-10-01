@@ -1,7 +1,7 @@
 'use client';
 
 import { GritBadge, GritSectionHeading } from '@/components/ui';
-import type { CronogramaItem } from '@/types/portal/entrenamientos-publicos.types';
+import type { CronogramaItem } from '@/types/portal/eventos.types';
 
 type EventoDetalleCronogramaProps = {
   cronograma: CronogramaItem[];

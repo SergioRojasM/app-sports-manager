@@ -38,15 +38,6 @@ export function buildFormularioRespuestaFilePath(
   return `orgs/${tenantId}/users/${atletaId}/formularios/${formularioPlantillaId}/${campoNombre}-${Date.now()}.${ext}`;
 }
 
-/** Public training publication banner path: orgs/{tenantId}/entrenamientos-publicos/{entrenamientoId}.{ext} */
-export function buildEntrenamientoPublicoBannerPath(
-  tenantId: string,
-  entrenamientoId: string,
-  ext: string,
-): string {
-  return `orgs/${tenantId}/entrenamientos-publicos/${entrenamientoId}.${ext}`;
-}
-
 /** Team event banner path: orgs/{tenantId}/eventos/{eventoId}.{ext} (US-0119) */
 export function buildEventoBannerPath(tenantId: string, eventoId: string, ext: string): string {
   return `orgs/${tenantId}/eventos/${eventoId}.${ext}`;
@@ -76,8 +67,3 @@ export type UploadPaymentProofInput = {
   file: File;
 };
 
-export type UploadEntrenamientoPublicoBannerInput = {
-  tenantId: string;
-  entrenamientoId: string;
-  file: File;
-};

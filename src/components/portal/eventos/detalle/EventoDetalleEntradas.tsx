@@ -2,7 +2,7 @@
 
 import { GritButton, GritCard, GritSectionHeading } from '@/components/ui';
 import { formatCop } from '@/lib/portal/eventos.utils';
-import type { PrecioItem } from '@/types/portal/entrenamientos-publicos.types';
+import type { PrecioItem } from '@/types/portal/eventos.types';
 
 type EventoDetalleEntradasProps = {
   precio: PrecioItem[];

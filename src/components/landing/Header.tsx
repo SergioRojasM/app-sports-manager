@@ -16,7 +16,6 @@ const navItems: NavItem[] = [
     href: '/#hero',
     children: [
       // "Equipos y clubes" y "Atletas" quedan ocultos hasta que esos módulos estén implementados.
-      { label: 'Calendario de Entrenamientos', href: '/entrenamientos-publicos' },
       { label: 'Eventos', href: '/eventos' },
     ],
   },

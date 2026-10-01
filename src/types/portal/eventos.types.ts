@@ -1,9 +1,23 @@
-import type {
-  CronogramaItem,
-  IncluyeItem,
-  PrecioItem,
-} from '@/types/portal/entrenamientos-publicos.types';
 import type { MetodoPagoTipo } from '@/types/portal/metodos-pago.types';
+
+/** One row of the event's schedule. Array order is display order. */
+export type CronogramaItem = {
+  hora: string;
+  descripcion: string;
+};
+
+/** One "what's included" entry shown as a checklist item. */
+export type IncluyeItem = {
+  titulo: string;
+  descripcion: string;
+};
+
+/** One pricing option. An event may have zero (Gratis), one, or many. */
+export type PrecioItem = {
+  nombre: string;
+  precio: number;
+  descripcion: string | null;
+};
 
 export type EventoEstado = 'confirmado' | 'cancelado';
 

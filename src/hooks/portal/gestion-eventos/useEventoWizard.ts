@@ -31,7 +31,7 @@ import {
   type EventoWizardErrors,
   type EventoWizardStep,
 } from '@/types/portal/eventos.types';
-import type { CronogramaItem, IncluyeItem } from '@/types/portal/entrenamientos-publicos.types';
+import type { CronogramaItem, IncluyeItem } from '@/types/portal/eventos.types';
 import { useTenantName } from '@/hooks/portal/tenant/useTenantName';
 
 type SavedState = {

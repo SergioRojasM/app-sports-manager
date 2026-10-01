@@ -1,4 +1,4 @@
-import type { PrecioItem } from '@/types/portal/entrenamientos-publicos.types';
+import type { PrecioItem } from '@/types/portal/eventos.types';
 
 export const EVENTOS_TIME_ZONE = 'America/Bogota';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { GritIcon, GritSectionHeading } from '@/components/ui';
-import type { IncluyeItem } from '@/types/portal/entrenamientos-publicos.types';
+import type { IncluyeItem } from '@/types/portal/eventos.types';
 
 type EventoDetalleIncluyeProps = {
   incluye: IncluyeItem[];
