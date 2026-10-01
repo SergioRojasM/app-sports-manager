@@ -45,7 +45,7 @@ No migration, RPC, RLS or storage policy. The source event is never written.
 
 - `npx tsc --noEmit`: passes.
 - `eslint` on the changed files: passes.
-- Manual testing in the running app is still pending (tasks 7.2–7.4): happy path, past / draft / cancelled sources, source without banner, stale references, invalid or foreign `duplicar` id, banner independence.
+- Manual testing in the running app against the local Supabase (tasks 7.2–7.4): passed — happy path (draft, publish), database check (source untouched, new ticket / coupon ids, own banner object, own form snapshot), past / draft / cancelled sources, source without banner, "Quitar imagen", stale discipline, non-UUID and unknown `duplicar` id, leave guard, keyboard activation, window ends following the event date.
 
 ### Notes for the reviewer
 

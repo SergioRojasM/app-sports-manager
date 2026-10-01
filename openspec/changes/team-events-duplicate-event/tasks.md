@@ -36,9 +36,9 @@
 ## 7. Verification
 
 - [x] 7.1 Run the type check (`npx tsc --noEmit`) and lint (`npm run lint`); the project has no test script; do not run a build
-- [ ] 7.2 Manual happy path: duplicate a published event with banner, Sencilla and Múltiple tickets, coupons, form and payment methods; save as draft; publish; confirm the success banner and both events in the list
-- [ ] 7.3 Manual edge cases: past event, draft source, cancelled source, source without banner, source with stale references, non-UUID and foreign `duplicar` id, leaving without saving, "Quitar imagen" before saving
-- [ ] 7.4 Confirm in the local Supabase that the source rows are unchanged, the copy has new ticket / coupon ids, and its banner is stored under `orgs/{tenantId}/eventos/{newId}.*` and survives replacing the source banner
+- [x] 7.2 Manual happy path: duplicate a published event with banner, Sencilla and Múltiple tickets, coupons, form and payment methods; save as draft; publish; confirm the success banner and both events in the list
+- [x] 7.3 Manual edge cases: past event, draft source, cancelled source, source without banner, source with stale references, non-UUID and foreign `duplicar` id, leaving without saving, "Quitar imagen" before saving
+- [x] 7.4 Confirm in the local Supabase that the source rows are unchanged, the copy has new ticket / coupon ids, and its banner is stored under `orgs/{tenantId}/eventos/{newId}.*` and survives replacing the source banner
 
 ## 8. Documentation and delivery
 
