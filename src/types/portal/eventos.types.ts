@@ -247,6 +247,11 @@ export type EventoDraft = {
   metodosPago: EventoMetodoPagoSnapshot[];
 };
 
+/** What `draftFromEventoDuplicado` had to clear because it was already in the past (US-0122). */
+export type EventoDuplicadoAjustes = {
+  fechaLimpiada: boolean;
+};
+
 /**
  * Validation errors keyed by field path: `nombre`, `entradas`, `entrada.{clientKey}.valor`,
  * `cupon.{clientKey}.cupon`, `metodosPago`, … Values are Spanish messages.

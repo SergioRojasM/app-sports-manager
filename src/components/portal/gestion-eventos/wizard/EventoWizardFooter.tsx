@@ -19,6 +19,8 @@ type EventoWizardFooterProps = {
   onBack: () => void;
   onNext: () => void;
   onPreview: () => void;
+  /** Leaves the wizard; the page asks for confirmation when there are unsaved changes. */
+  onCancel: () => void;
   onGuardarBorrador: () => void;
   onGuardarFinal: () => void;
 };
@@ -39,6 +41,7 @@ export function EventoWizardFooter({
   onBack,
   onNext,
   onPreview,
+  onCancel,
   onGuardarBorrador,
   onGuardarFinal,
 }: EventoWizardFooterProps) {
@@ -73,6 +76,10 @@ export function EventoWizardFooter({
           <span role="status" aria-live="polite" className="font-grit-body text-xs text-grit-success">
             {borradorGuardadoFlash && savingKind === null ? 'Borrador guardado' : ''}
           </span>
+
+          <GritButton variant="ghost" size="sm" icon="close" onClick={onCancel} disabled={isSaving}>
+            Cancelar
+          </GritButton>
 
           {mostrarGuardarBorrador && (
             <>

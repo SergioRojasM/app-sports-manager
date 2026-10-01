@@ -4,6 +4,7 @@ import type {
   EventoCompleto,
   EventoCuponDraft,
   EventoDraft,
+  EventoDuplicadoAjustes,
   EventoEntradaDraft,
   EventoListItem,
   EventoPublicoDetalle,
@@ -22,6 +23,7 @@ export const CUPON_NOMBRE_MAX = 100;
 export const CUPON_CODIGO_PATTERN = /^[A-Z0-9_-]{3,30}$/;
 export const EVENTO_BANNER_MAX_BYTES = 5 * 1024 * 1024;
 export const EVENTO_BANNER_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const EVENTO_DUPLICADO_PREFIJO = 'Copia de ';
 
 export function newClientKey(): string {
   return crypto.randomUUID();
@@ -138,6 +140,56 @@ export function draftFromEventoCompleto(evento: EventoCompleto): EventoDraft {
     formularioId: evento.formulario_id,
     metodosPago: evento.metodos_pago ?? [],
   };
+}
+
+const LOCAL_DATETIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+
+/** Minutes of a `datetime-local` value on a fixed clock (Bogotá has no DST), or null when it is not a full value. */
+function localMinutes(value: string): number | null {
+  if (!LOCAL_DATETIME_RE.test(value)) return null;
+  const time = Date.parse(`${value}:00Z`);
+  return Number.isNaN(time) ? null : time / 60_000;
+}
+
+/**
+ * Moves a window end by the same amount the event date moved, so it keeps its distance to the event
+ * (a sale that closed when the event started, or a week before, still does). Returns `value`
+ * unchanged when any of the three is not a full `datetime-local` value.
+ */
+export function shiftWithEventoFecha(value: string, fechaAnterior: string, fechaNueva: string): string {
+  const current = localMinutes(value);
+  const from = localMinutes(fechaAnterior);
+  const to = localMinutes(fechaNueva);
+  if (current === null || from === null || to === null) return value;
+  return new Date((current + to - from) * 60_000).toISOString().slice(0, 16);
+}
+
+/**
+ * Stored event → unsaved copy for the create wizard (US-0122). Tickets and coupons get new
+ * identities. A past event date is cleared (create mode rejects it) and returned as `fechaOriginal`:
+ * the wizard shifts the ticket and coupon window ends from it once the new date is set.
+ */
+export function draftFromEventoDuplicado(
+  evento: EventoCompleto,
+  now: number,
+): { draft: EventoDraft; ajustes: EventoDuplicadoAjustes; fechaOriginal: string } {
+  const base = draftFromEventoCompleto(evento);
+  const fechaIso = fromDateTimeLocalInBogota(base.fechaHora);
+  const fechaLimpiada = fechaIso !== null && new Date(fechaIso).getTime() <= now;
+
+  const draft: EventoDraft = {
+    ...base,
+    nombre: `${EVENTO_DUPLICADO_PREFIJO}${base.nombre}`.slice(0, EVENTO_NOMBRE_MAX),
+    fechaHora: fechaLimpiada ? '' : base.fechaHora,
+    entradas: base.entradas.map((entrada) => ({
+      ...entrada,
+      clientKey: newClientKey(),
+      id: null,
+      cupones: entrada.cupones.map((cupon) => ({ ...cupon, clientKey: newClientKey(), id: null })),
+    })),
+  };
+
+  return { draft, ajustes: { fechaLimpiada }, fechaOriginal: base.fechaHora };
 }
 
 // ─── Parsing helpers ───

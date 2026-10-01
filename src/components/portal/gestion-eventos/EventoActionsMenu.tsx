@@ -15,6 +15,8 @@ type EventoActionsMenuProps = {
   onCambiarActivo?: () => void;
   /** Published events only: opens the event's purchases page (US-0121). */
   onVerCompras?: () => void;
+  /** Opens the create wizard pre-filled with a copy of this event (US-0122). */
+  onDuplicar?: () => void;
   onEditar: () => void;
   onCambiarEstado: (target: EventoEstado) => void;
   onEliminar: () => void;
@@ -30,8 +32,8 @@ type MenuAction = {
 
 type MenuPosition = { top?: number; bottom?: number; right: number };
 
-/** Approximate height of the five-item menu, used to decide whether it opens upward. */
-const MENU_HEIGHT_ESTIMATE = 220;
+/** Approximate height of the six-item menu, used to decide whether it opens upward. */
+const MENU_HEIGHT_ESTIMATE = 260;
 
 function computePosition(trigger: HTMLElement): MenuPosition {
   const rect = trigger.getBoundingClientRect();
@@ -47,6 +49,7 @@ export function EventoActionsMenu({
   activo = true,
   onCambiarActivo,
   onVerCompras,
+  onDuplicar,
   onEditar,
   onCambiarEstado,
   onEliminar,
@@ -59,6 +62,9 @@ export function EventoActionsMenu({
   const open = position !== null;
 
   const eliminar: MenuAction = { key: 'eliminar', label: 'Eliminar', icon: 'delete', danger: true, run: onEliminar };
+  const duplicar: MenuAction[] = onDuplicar
+    ? [{ key: 'duplicar', label: 'Duplicar', icon: 'content_copy', run: onDuplicar }]
+    : [];
   const cambiarActivo: MenuAction[] = onCambiarActivo
     ? [
         activo
@@ -67,9 +73,15 @@ export function EventoActionsMenu({
       ]
     : [];
   const actions: MenuAction[] = borrador
-    ? [{ key: 'continuar', label: 'Continuar editando', icon: 'edit_note', run: onEditar }, ...cambiarActivo, eliminar]
+    ? [
+        { key: 'continuar', label: 'Continuar editando', icon: 'edit_note', run: onEditar },
+        ...duplicar,
+        ...cambiarActivo,
+        eliminar,
+      ]
     : [
         { key: 'editar', label: 'Editar', icon: 'edit', run: onEditar },
+        ...duplicar,
         ...(onVerCompras ? [{ key: 'ver-compras', label: 'Ver compras', icon: 'receipt_long', run: onVerCompras }] : []),
         ...cambiarActivo,
         estado === 'confirmado'
