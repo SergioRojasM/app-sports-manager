@@ -317,6 +317,7 @@ export function toCardPreviewItem(
     activo: draft.activo,
     publico: draft.publico,
     borrador,
+    formularioId: draft.formularioId,
   };
 }
 

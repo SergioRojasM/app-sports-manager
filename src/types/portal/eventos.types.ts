@@ -275,6 +275,8 @@ export type EventoListItem = {
   activo: boolean;
   publico: boolean;
   borrador: boolean;
+  /** Form template the event asks for; used to keep Múltiple bundles on a single form (US-0121). */
+  formularioId: string | null;
 };
 
 /** Server-side filters. `desde` inclusive, `hasta` exclusive (ISO timestamps). */
@@ -336,6 +338,8 @@ export type EventoPublicoListItem = {
   duracionMinutos: number | null;
   cupoMaximo: number | null;
   reservaAntelacionHoras: number | null;
+  /** Null: tickets cannot be cancelled and there is no refund (US-0121). */
+  cancelacionAntelacionHoras: number | null;
   precio: PrecioItem[];
   /** Payment methods the admin published for this event (US-0119 step 3). */
   metodosPago: EventoMetodoPagoSnapshot[];
@@ -348,17 +352,9 @@ export type EventoPublicoDetalle = EventoPublicoListItem & {
   descripcionLarga: string | null;
   cronograma: CronogramaItem[];
   incluye: IncluyeItem[];
-  cancelacionAntelacionHoras: number | null;
 };
 
 export type EventoEntradasModo = 'usuario' | 'invitado';
-
-/** What the tickets modal hands to the purchase phase through `onContinuar`. */
-export type EventoEntradaSeleccion = {
-  eventoId: string;
-  entrada: PrecioItem;
-  modo: EventoEntradasModo;
-};
 
 export type EventosPublicosDateChip = 'today' | 'tomorrow' | 'this_week' | 'weekend';
 
@@ -369,6 +365,8 @@ export type EventoServiceErrorCode =
   | 'duplicate_cupon'
   | 'invalid_reference'
   | 'invalid_data'
+  /** Hard delete blocked by sold tickets (`on delete restrict`, US-0121). */
+  | 'has_purchases'
   | 'unknown';
 
 export class EventoServiceError extends Error {

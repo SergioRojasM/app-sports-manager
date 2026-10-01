@@ -309,9 +309,15 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
               errorKey={ERROR_KEYS.cancelacionAntelacionHoras}
               label="Cancelación hasta (h antes)"
               error={errors[ERROR_KEYS.cancelacionAntelacionHoras]}
+              hint="Déjalo vacío si las entradas no admiten cancelación ni reembolso."
+              hintId="evento-cancelacion-hint"
             >
               <input
-                {...fieldA11y(ERROR_KEYS.cancelacionAntelacionHoras, errors[ERROR_KEYS.cancelacionAntelacionHoras])}
+                {...fieldA11y(
+                  ERROR_KEYS.cancelacionAntelacionHoras,
+                  errors[ERROR_KEYS.cancelacionAntelacionHoras],
+                  'evento-cancelacion-hint',
+                )}
                 type="number"
                 min={0}
                 step={1}

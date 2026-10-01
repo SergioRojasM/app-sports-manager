@@ -99,7 +99,7 @@ export function ObtenerEntradaModal({
         </div>
 
         <p className="mt-4 font-landing-body text-xs text-landing-text-secondary">
-          Sin cuenta no podrás ver tus entradas en el portal; te las enviaremos a tu correo.
+          Sin cuenta podrás descargar tu entrada al finalizar. Para verla después en el portal, crea una cuenta con el mismo correo.
         </p>
       </div>
     </div>

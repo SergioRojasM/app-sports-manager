@@ -10,6 +10,8 @@ type EventoBundleSelectorProps = {
   errorKey: string;
   entradaIndex: number;
   eventoActualId: string;
+  /** Form of the event being edited. Bundled events may have no form or this same one (US-0121). */
+  formularioActualId: string | null;
   eventos: EventoListItem[];
   value: string[];
   error?: string;
@@ -23,6 +25,7 @@ export function EventoBundleSelector({
   errorKey,
   entradaIndex,
   eventoActualId,
+  formularioActualId,
   eventos,
   value,
   error,
@@ -41,6 +44,18 @@ export function EventoBundleSelector({
       .filter((evento) => !term || evento.nombre.toLowerCase().includes(term));
   }, [eventoActualId, eventos, search, selected]);
 
+  // The purchase stores one set of answers (this event's form), so an event asking for another form cannot be bundled
+  const formularioDistinto = (evento: EventoListItem) =>
+    evento.formularioId !== null && evento.formularioId !== formularioActualId;
+  const conflictos = eventos.filter((evento) => selected.has(evento.id) && formularioDistinto(evento));
+  const conflictoError =
+    conflictos.length > 0
+      ? `Quita ${conflictos.map((evento) => `«${evento.nombre}»`).join(', ')}: ${
+          conflictos.length === 1 ? 'usa' : 'usan'
+        } un formulario distinto al de este evento.`
+      : undefined;
+  const shownError = error ?? conflictoError;
+
   const toggle = (id: string) => {
     onChange(selected.has(id) ? value.filter((item) => item !== id) : [...value, id]);
   };
@@ -49,10 +64,10 @@ export function EventoBundleSelector({
     <fieldset
       id={fieldDomId(errorKey)}
       tabIndex={-1}
-      aria-describedby={error ? errorDomId(errorKey) : undefined}
+      aria-describedby={shownError ? errorDomId(errorKey) : undefined}
       className={cx(
         'space-y-2 rounded-grit-md border p-3 outline-none',
-        error ? 'border-grit-danger/60' : 'border-grit-glass-border',
+        shownError ? 'border-grit-danger/60' : 'border-grit-glass-border',
       )}
     >
       <legend className="px-1 font-grit-body text-xs font-semibold text-grit-subtext">
@@ -60,6 +75,11 @@ export function EventoBundleSelector({
       </legend>
       <p className="font-grit-body text-[11px] text-grit-muted">
         Esta entrada da acceso a este evento y a los eventos seleccionados.
+      </p>
+      <p className="flex items-start gap-1.5 rounded-grit-sm border border-grit-cyan/40 bg-grit-cyan/[0.08] px-2.5 py-2 font-grit-body text-xs text-grit-text">
+        <GritIcon name="info" size={14} className="mt-px shrink-0 text-grit-cyan" />
+        Al comprar esta entrada solo se pide el formulario de este evento. Por eso solo puedes incluir eventos sin
+        formulario o con el mismo formulario.
       </p>
       {droppedCount > 0 && (
         <p className="flex items-center gap-1.5 font-grit-body text-xs text-grit-discipline-run">
@@ -91,26 +111,45 @@ export function EventoBundleSelector({
         <p className="font-grit-body text-xs text-grit-subtext">No hay otros eventos disponibles para el paquete.</p>
       ) : (
         <div className="max-h-48 space-y-1 overflow-y-auto">
-          {candidatos.map((evento) => (
-            <label
-              key={evento.id}
-              className="flex cursor-pointer items-center gap-2 rounded-grit-sm px-2 py-1.5 font-grit-body text-sm text-grit-text hover:bg-grit-card"
-            >
-              <input
-                type="checkbox"
-                checked={selected.has(evento.id)}
-                onChange={() => toggle(evento.id)}
-                disabled={disabled}
-                className="h-4 w-4 accent-grit-cyan"
-              />
-              <span className="truncate">
-                {evento.nombre} · <span className="text-grit-subtext">{formatEventoFecha(evento.fechaHora)}</span>
-              </span>
-            </label>
-          ))}
+          {candidatos.map((evento) => {
+            const checked = selected.has(evento.id);
+            const distinto = formularioDistinto(evento);
+            // A conflicting event can still be unchecked, never checked
+            const bloqueado = distinto && !checked;
+            return (
+              <label
+                key={evento.id}
+                className={cx(
+                  'flex items-center gap-2 rounded-grit-sm px-2 py-1.5 font-grit-body text-sm',
+                  bloqueado ? 'cursor-not-allowed text-grit-muted' : 'cursor-pointer text-grit-text hover:bg-grit-card',
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => toggle(evento.id)}
+                  disabled={disabled || bloqueado}
+                  className="h-4 w-4 accent-grit-cyan"
+                />
+                <span className="min-w-0 flex-1 truncate">
+                  {evento.nombre} · <span className="text-grit-subtext">{formatEventoFecha(evento.fechaHora)}</span>
+                </span>
+                {distinto && (
+                  <span
+                    className={cx(
+                      'shrink-0 rounded-grit-sm border px-1.5 py-0.5 text-[10px] font-semibold',
+                      checked ? 'border-grit-danger/50 text-grit-danger' : 'border-grit-glass-border text-grit-muted',
+                    )}
+                  >
+                    Formulario distinto
+                  </span>
+                )}
+              </label>
+            );
+          })}
         </div>
       )}
-      <FieldError errorKey={errorKey} error={error} />
+      <FieldError errorKey={errorKey} error={shownError} />
     </fieldset>
   );
 }

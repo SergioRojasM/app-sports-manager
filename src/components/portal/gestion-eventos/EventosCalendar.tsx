@@ -23,6 +23,7 @@ type EventosCalendarProps = {
   onCambiarEstado: (evento: EventoListItem, target: EventoEstado) => void;
   onEliminar: (evento: EventoListItem) => void;
   onCambiarActivo: (evento: EventoListItem) => void;
+  onVerCompras: (evento: EventoListItem) => void;
 };
 
 type CalendarCell = {
@@ -97,6 +98,7 @@ export function EventosCalendar({
   onCambiarEstado,
   onEliminar,
   onCambiarActivo,
+  onVerCompras,
 }: EventosCalendarProps) {
   const monthCells = buildMonthCells(monthStartDate);
   const todayKey = toDateKeyInBogota(new Date());
@@ -275,6 +277,7 @@ export function EventosCalendar({
                     borrador={evento.borrador}
                     activo={evento.activo}
                     onCambiarActivo={() => onCambiarActivo(evento)}
+                    onVerCompras={() => onVerCompras(evento)}
                     onEditar={() => onEditar(evento)}
                     onCambiarEstado={(target) => onCambiarEstado(evento, target)}
                     onEliminar={() => onEliminar(evento)}
