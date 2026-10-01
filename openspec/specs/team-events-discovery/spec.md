@@ -187,26 +187,15 @@ The `onContinuar` prop and the notice "La compra de entradas estará disponible 
 - **THEN** step 2 "Tus datos" of the checkout SHALL be shown
 
 ### Requirement: Discovery navigation entries
-- The portal global menu (no tenant selected) SHALL include "Eventos" (icon `celebration`) linking to `/portal/eventos`, placed after "Entrenamientos Públicos".
-- The landing header's "Plataforma" group SHALL include "Eventos" linking to `/eventos`, after "Calendario de Entrenamientos".
+- The portal global menu (no tenant selected) SHALL include "Eventos" (icon `celebration`) linking to `/portal/eventos`. The menu SHALL NOT include "Entrenamientos Públicos".
+- The landing header's "Plataforma" group SHALL include "Eventos" linking to `/eventos`, and SHALL NOT include "Calendario de Entrenamientos".
 - The portal breadcrumb SHALL label the `eventos` segment "Eventos".
 
 #### Scenario: Landing header link
 - **WHEN** a visitor opens the "Plataforma" menu in the landing header
-- **THEN** an "Eventos" link to `/eventos` SHALL be listed after "Calendario de Entrenamientos"
+- **THEN** an "Eventos" link to `/eventos` SHALL be listed and no "Calendario de Entrenamientos" link SHALL be shown
 
 #### Scenario: Portal breadcrumb
 - **WHEN** a user is on `/portal/eventos`
 - **THEN** the breadcrumb SHALL read "Eventos"
-
-### Requirement: Events slices independent of public trainings
-No file in `src/components/portal/eventos/`, `src/components/landing/eventos/`, `src/hooks/portal/eventos/`, `src/hooks/landing/eventos/`, `src/components/portal/gestion-eventos/` or `src/lib/portal/eventos*.ts` SHALL import from `components/*/entrenamientos-publicos`, `hooks/*/entrenamientos-publicos` or `lib/portal/entrenamientos-publicos`. Type-only imports from `types/portal/entrenamientos-publicos.types` are allowed. The public-trainings pages SHALL behave exactly as before.
-
-#### Scenario: Isolation grep
-- **WHEN** `grep -rE "(components|hooks)/[a-z]+/entrenamientos-publicos|lib/portal/entrenamientos-publicos"` runs over those folders
-- **THEN** it SHALL return no matches
-
-#### Scenario: Public trainings unaffected
-- **WHEN** `/entrenamientos-publicos`, its detail page, or `/portal/entrenamientos-publicos` is opened
-- **THEN** it SHALL render and behave as before this change
 

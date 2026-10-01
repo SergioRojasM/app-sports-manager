@@ -2,52 +2,7 @@
 
 ## Purpose
 Allows trainers to publish public trainings with an optional toggle that permits athletes to book without having a required plan/subscription upfront, automatically creating a pending subscription if needed. This streamlines the booking flow for gate-behind-plan trainings while maintaining all other access controls and allowing admins to review pending bookings and subscriptions.
-
 ## Requirements
-
-### Requirement: Publish-time skip-confirmation toggle
-The system SHALL allow a trainer/administrator publishing a training to the public marketplace to set `entrenamientos_publicos.omitir_confirmacion_plan` (boolean, default `false`) via a checkbox in the publish form. The value SHALL persist and reload correctly when reopening the publish form for an already-published training.
-
-#### Scenario: Toggle defaults to off
-- **WHEN** an administrator opens the publish form for a training that has never been published
-- **THEN** "Omitir confirmación de plan" SHALL be unchecked
-
-#### Scenario: Toggle persists across reopen
-- **WHEN** an administrator checks "Omitir confirmación de plan", saves the publication, and reopens the publish form later
-- **THEN** the checkbox SHALL be shown checked, reflecting the persisted `omitir_confirmacion_plan = true`
-
----
-
-### Requirement: Booking continues as pending when only the plan/service requirement fails
-When a booking attempt on a public training is rejected with code `SERVICIO_REQUERIDO` or `UNIDADES_AGOTADAS`, and the target training's publication has `omitir_confirmacion_plan = true`, the system SHALL let the athlete continue instead of blocking the booking: the athlete completes the existing plan-purchase flow (creating a `suscripciones` row and a `pagos` row, both `estado = 'pendiente'`), then completes the normal booking form. On submit, the system SHALL insert a `reservas` row with `estado = 'pendiente'` and `suscripcion_id` set to the newly created subscription's id, without deducting any service unit. Every other check that already applies to a booking — timing, `usuario_estado`, `validar_nivel_disciplina`, capacity, per-category capacity, duplicate-booking, and attached-form validation — SHALL still be enforced unchanged; only the plan/service requirement is bypassed.
-
-#### Scenario: Athlete without the required plan can still reserve a spot
-- **WHEN** an athlete books a public training whose publication has `omitir_confirmacion_plan = true`, and the only failing condition is a missing/exhausted required service
-- **THEN** after purchasing a plan through the catalog and completing the booking form, a `reservas` row is inserted with `estado = 'pendiente'` and `suscripcion_id` pointing at the newly created `suscripciones` row
-
-#### Scenario: Other restriction failures still block the booking even with the toggle on
-- **WHEN** an athlete books a public training with `omitir_confirmacion_plan = true`, and the rejection code is `TIMING_RESERVA`, `USUARIO_INACTIVO`, `NIVEL_INSUFICIENTE`, `ENTRENAMIENTO_PASADO`, `FORMULARIO_CAMPOS_FALTANTES`, or `PERFIL_INCOMPLETO`
-- **THEN** the booking remains fully blocked; no reservation or subscription is created
-
-#### Scenario: Capacity and duplicate checks still apply
-- **WHEN** an athlete attempts the skip-confirmation booking path on a training that is at full capacity, or for which the athlete already holds an active reservation
-- **THEN** the booking is rejected the same way a normal booking would be, and no additional `reservas` row is inserted
-
-#### Scenario: Toggle off preserves today's blocking behavior
-- **WHEN** an athlete books a public training whose publication has `omitir_confirmacion_plan = false` (the default) and is rejected with `SERVICIO_REQUERIDO` or `UNIDADES_AGOTADAS`
-- **THEN** the booking is fully blocked exactly as before this change; no `reservas` row is created
-
----
-
-### Requirement: Server-side re-verification of the skip-confirmation flag
-The booking service SHALL NOT rely solely on a client-supplied request flag to allow the pending-booking-without-plan path. Before creating a `reservas` row in `pendiente` without a satisfied plan/service requirement, the service SHALL independently query `entrenamientos_publicos` for the target `entrenamiento_id`/`tenant_id` (`activo = true`) and confirm `omitir_confirmacion_plan = true`.
-
-#### Scenario: Tampered client flag on a non-opted-in training is rejected
-- **WHEN** a booking request sets the client-side "allow pending" flag for a training whose `entrenamientos_publicos.omitir_confirmacion_plan` is `false` (or has no active publication)
-- **THEN** the server SHALL return the original `SERVICIO_REQUERIDO`/`UNIDADES_AGOTADAS` rejection and SHALL NOT create a `reservas` row
-
----
-
 ### Requirement: rechazada reservation state
 `reservas.estado` SHALL accept a new value `rechazada`, in addition to the existing `pendiente`, `confirmada`, `cancelada`, `completada`. `reservas` SHALL gain a nullable `motivo_rechazo` column holding a reason visible to the athlete who made the booking.
 
@@ -110,3 +65,4 @@ Every existing check that treats `reservas.estado = 'cancelada'` as not occupyin
 #### Scenario: Athlete with only a rechazada reservation can book again
 - **WHEN** an athlete whose only existing reservation for a training is `rechazada` attempts to book that training again
 - **THEN** the duplicate-booking check SHALL NOT block the new attempt
+

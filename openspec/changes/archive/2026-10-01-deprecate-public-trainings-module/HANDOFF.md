@@ -51,10 +51,10 @@ Restore the previous policy definitions and grants (`20260916120200`, `202607290
 - Browser: event listing, event detail (schedule, includes, tickets, price) and the event wizard render as before.
 - Browser as member athlete (local): sees the tenant's trainings with only "Ver detalle" and "Ver reservas"; books an unrestricted training (stored as `confirmada`); a training that requires a service they do not hold is rejected with the existing message and no booking row is created.
 - Opening a previously uploaded form file as a non-member (task 9.2) was validated manually by the owner.
+- Full migration history loaded into Supabase by the owner.
 
-### Not verified
-- Editing a recurring series (scopes "future" and "series") in the browser.
-- Applying the full migration history from scratch (`supabase db reset`); the migration was applied with `supabase migration up` to keep local data.
+### Not applicable
+- Editing a recurring series (scopes "future" and "series"): not available in the frontend today, so there is nothing to test.
 
 ### Follow-up
 - US-0124: drop the table, views, columns, `public` tenant, RPC parameters, analytics breakdown and stored banners.
