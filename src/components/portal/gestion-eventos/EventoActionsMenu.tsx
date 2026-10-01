@@ -13,6 +13,8 @@ type EventoActionsMenuProps = {
   /** Current visibility; with `onCambiarActivo` the menu offers the quick Activar / Desactivar action. */
   activo?: boolean;
   onCambiarActivo?: () => void;
+  /** Published events only: opens the event's purchases page (US-0121). */
+  onVerCompras?: () => void;
   onEditar: () => void;
   onCambiarEstado: (target: EventoEstado) => void;
   onEliminar: () => void;
@@ -28,8 +30,8 @@ type MenuAction = {
 
 type MenuPosition = { top?: number; bottom?: number; right: number };
 
-/** Approximate height of the four-item menu, used to decide whether it opens upward. */
-const MENU_HEIGHT_ESTIMATE = 180;
+/** Approximate height of the five-item menu, used to decide whether it opens upward. */
+const MENU_HEIGHT_ESTIMATE = 220;
 
 function computePosition(trigger: HTMLElement): MenuPosition {
   const rect = trigger.getBoundingClientRect();
@@ -44,6 +46,7 @@ export function EventoActionsMenu({
   borrador = false,
   activo = true,
   onCambiarActivo,
+  onVerCompras,
   onEditar,
   onCambiarEstado,
   onEliminar,
@@ -67,6 +70,7 @@ export function EventoActionsMenu({
     ? [{ key: 'continuar', label: 'Continuar editando', icon: 'edit_note', run: onEditar }, ...cambiarActivo, eliminar]
     : [
         { key: 'editar', label: 'Editar', icon: 'edit', run: onEditar },
+        ...(onVerCompras ? [{ key: 'ver-compras', label: 'Ver compras', icon: 'receipt_long', run: onVerCompras }] : []),
         ...cambiarActivo,
         estado === 'confirmado'
           ? { key: 'cancelar', label: 'Cancelar evento', icon: 'event_busy', run: () => onCambiarEstado('cancelado') }

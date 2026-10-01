@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useEventosConFormulario } from '@/hooks/portal/formularios/useEventosConFormulario';
 import { useFormularioEditor } from '@/hooks/portal/formularios/useFormularioEditor';
 import { FormularioHeaderEditor } from './FormularioHeaderEditor';
 import { FormularioSeccionesBuilder } from './FormularioSeccionesBuilder';
@@ -33,6 +34,7 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
   } = useFormularioEditor({ plantillaId });
 
   const [previewOpen, setPreviewOpen] = useState(false);
+  const eventosConFormulario = useEventosConFormulario(tenantId, plantillaId);
 
   useEffect(() => {
     if (!isDirty) return;
@@ -83,6 +85,30 @@ export function FormularioEditorPage({ tenantId, plantillaId }: FormularioEditor
           </span>
         ) : null}
       </div>
+
+      {eventosConFormulario.length > 0 ? (
+        <div
+          role="note"
+          className="flex items-start gap-2.5 rounded-grit-lg border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-100"
+        >
+          <span className="material-symbols-outlined mt-0.5 text-base text-amber-300" aria-hidden="true">sync_problem</span>
+          <div className="min-w-0 space-y-1.5">
+            <p>
+              {eventosConFormulario.length === 1
+                ? 'Esta plantilla se usa en 1 evento.'
+                : `Esta plantilla se usa en ${eventosConFormulario.length} eventos.`}{' '}
+              Los cambios que guardes aquí <strong>no llegan a los eventos automáticamente</strong>: después de guardar,
+              abre cada evento y guárdalo de nuevo para que sus compradores vean el formulario actualizado.
+            </p>
+            <Link
+              href={`/portal/orgs/${tenantId}/gestion-eventos`}
+              className="text-xs font-semibold text-amber-50 underline hover:text-white"
+            >
+              Ir a eventos
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       <div className="border bg-grit-glass backdrop-blur-md overflow-hidden rounded-grit-lg border-grit-glass-border">
         <FormularioHeaderEditor tenantId={tenantId} secciones={secciones} onUpdateHeaderField={updateHeaderSeccion} />

@@ -34,6 +34,10 @@ const RPC_INVALID_DATA_MESSAGES: Record<string, string> = {
   CUPON_EN_ENTRADA_GRATIS: 'Las entradas gratuitas no admiten cupones.',
   METODO_PAGO_REQUERIDO: 'Selecciona al menos un método de pago para las entradas con costo.',
   FORMULARIO_INACTIVO: 'El formulario seleccionado está inactivo.',
+  BUNDLE_FORMULARIO_DISTINTO:
+    'Una entrada múltiple incluye un evento con un formulario distinto. Solo puedes incluir eventos sin formulario o con el mismo formulario de este evento.',
+  FORMULARIO_EN_PAQUETE_DISTINTO:
+    'Este evento está incluido en la entrada múltiple de otro evento que usa un formulario distinto. Usa el mismo formulario o quítalo de ese paquete.',
   NO_REVERTIR_A_BORRADOR: 'Un evento publicado no puede volver a borrador.',
 };
 
@@ -109,6 +113,7 @@ function toListItem(row: Evento): EventoListItem {
     activo: row.activo,
     publico: row.publico,
     borrador: row.borrador,
+    formularioId: row.formulario_id ?? null,
   };
 }
 
@@ -120,10 +125,10 @@ function toListItem(row: Evento): EventoListItem {
 const EVENTOS_PUBLICOS_LIST_SELECT =
   'id, tenant_id, nombre_tenant, nombre, descripcion, pagina_evento_url, disciplina_id, ' +
   'escenario_id, entrenador_id, fecha_hora, duracion_minutos, cupo_maximo, punto_encuentro, ' +
-  'reserva_antelacion_horas, precio, metodos_pago, banner_url, publico';
+  'reserva_antelacion_horas, cancelacion_antelacion_horas, precio, metodos_pago, banner_url, publico';
 
 const EVENTO_PUBLICO_DETALLE_SELECT =
-  `${EVENTOS_PUBLICOS_LIST_SELECT}, descripcion_larga, cronograma, incluye, cancelacion_antelacion_horas`;
+  `${EVENTOS_PUBLICOS_LIST_SELECT}, descripcion_larga, cronograma, incluye`;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -146,6 +151,7 @@ type EventoPublicoRow = Pick<
   | 'cupo_maximo'
   | 'punto_encuentro'
   | 'reserva_antelacion_horas'
+  | 'cancelacion_antelacion_horas'
   | 'precio'
   | 'metodos_pago'
   | 'banner_url'
@@ -153,7 +159,7 @@ type EventoPublicoRow = Pick<
 >;
 
 type EventoPublicoDetalleRow = EventoPublicoRow &
-  Pick<Evento, 'descripcion_larga' | 'cronograma' | 'incluye' | 'cancelacion_antelacion_horas'>;
+  Pick<Evento, 'descripcion_larga' | 'cronograma' | 'incluye'>;
 
 /**
  * Explicit visibility filters for the discovery pages. RLS alone is not enough: it lets a tenant's
@@ -199,6 +205,7 @@ function toPublicoListItem(row: EventoPublicoRow): EventoPublicoListItem {
     duracionMinutos: row.duracion_minutos,
     cupoMaximo: row.cupo_maximo,
     reservaAntelacionHoras: row.reserva_antelacion_horas,
+    cancelacionAntelacionHoras: row.cancelacion_antelacion_horas,
     precio: Array.isArray(row.precio) ? row.precio : [],
     metodosPago: Array.isArray(row.metodos_pago) ? row.metodos_pago : [],
     bannerUrl: row.banner_url,
@@ -212,7 +219,6 @@ function toPublicoDetalle(row: EventoPublicoDetalleRow): EventoPublicoDetalle {
     descripcionLarga: row.descripcion_larga,
     cronograma: Array.isArray(row.cronograma) ? row.cronograma : [],
     incluye: Array.isArray(row.incluye) ? row.incluye : [],
-    cancelacionAntelacionHoras: row.cancelacion_antelacion_horas,
   };
 }
 
@@ -293,6 +299,34 @@ export const eventosService = {
     }
 
     return ((data ?? []) as Evento[]).map(toListItem);
+  },
+
+  /**
+   * Events of the tenant that ask for this form template. Each one keeps its own copy of the form
+   * (`evento_formularios`), refreshed only when the event is saved again (US-0121).
+   */
+  async listEventosPorFormulario(
+    tenantId: string,
+    formularioId: string,
+  ): Promise<{ id: string; nombre: string; borrador: boolean }[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('eventos')
+      .select('id, nombre, borrador')
+      .eq('tenant_id', tenantId)
+      .eq('formulario_id', formularioId)
+      .order('fecha_hora', { ascending: true, nullsFirst: false });
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+
+    return (data ?? []).map((row) => ({
+      id: row.id as string,
+      nombre: (row.nombre as string | null) ?? 'Evento sin nombre',
+      borrador: Boolean(row.borrador),
+    }));
   },
 
   async getEventoById(tenantId: string, eventoId: string): Promise<Evento | null> {
@@ -424,6 +458,13 @@ export const eventosService = {
       .select('id');
 
     if (error) {
+      // Purchases and tickets reference the event with `on delete restrict` (US-0121)
+      if (error.code === '23503') {
+        throw new EventoServiceError(
+          'has_purchases',
+          'No puedes eliminar un evento con entradas vendidas. Cancélalo en su lugar.',
+        );
+      }
       throw mapServiceError(error);
     }
 

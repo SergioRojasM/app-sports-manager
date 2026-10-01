@@ -68,6 +68,12 @@ const MIS_RESERVAS_MENU_ITEM: MenuItem = {
   icon: 'event_available',
 };
 
+const MIS_ENTRADAS_MENU_ITEM: MenuItem = {
+  label: 'Mis Entradas',
+  href: '/portal/mis-entradas',
+  icon: 'confirmation_number',
+};
+
 const SHARED_TENANT_ITEMS: Array<{ label: string; path: string; icon: string }> = [
   // { label: 'Perfil', path: 'perfil', icon: 'person' },
 ];
@@ -108,6 +114,7 @@ export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[]
       EVENTOS_MENU_ITEM,
       MIS_SUSCRIPCIONES_MENU_ITEM,
       MIS_RESERVAS_MENU_ITEM,
+      MIS_ENTRADAS_MENU_ITEM,
     ];
   }
 

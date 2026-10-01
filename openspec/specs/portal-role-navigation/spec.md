@@ -17,6 +17,8 @@ The "Inicio" entry SHALL always be present regardless of tenant context, enablin
 
 Outside a tenant context, the sidebar SHALL include an "Eventos" entry (icon `celebration`) linking to `/portal/eventos`, positioned immediately after "Entrenamientos Públicos" (US-0120).
 
+Outside a tenant context, the "Mis Reservas" entry SHALL be followed immediately by a "Mis Entradas" entry (icon `confirmation_number`) linking to `/portal/mis-entradas` (US-0121).
+
 #### Scenario: Sidebar shows Inicio as first menu item
 - **WHEN** an authenticated user enters the portal shell
 - **THEN** the sidebar SHALL include `Inicio` with `home` icon linking to `/portal/inicio` as the first menu item
@@ -80,6 +82,10 @@ Outside a tenant context, the sidebar SHALL include an "Eventos" entry (icon `ce
 #### Scenario: Global events entry outside tenant context
 - **WHEN** an authenticated user is in the portal without an active tenant context
 - **THEN** the sidebar SHALL include "Eventos" with icon `celebration` linking to `/portal/eventos`, immediately after "Entrenamientos Públicos"
+
+#### Scenario: Mis Entradas entry after Mis Reservas
+- **WHEN** an authenticated user is in the portal without an active tenant context
+- **THEN** the sidebar SHALL include "Mis Entradas" with icon `confirmation_number` linking to `/portal/mis-entradas`, immediately after "Mis Reservas"
 
 ### Requirement: Default post-login redirect to /portal/inicio
 The bootstrap route (`/portal/bootstrap`) SHALL redirect authenticated users to `/portal/inicio` by default when no `next` parameter is provided. The portal layout SHALL use `/portal/inicio` as the default bootstrap target when cookies are missing or invalid.

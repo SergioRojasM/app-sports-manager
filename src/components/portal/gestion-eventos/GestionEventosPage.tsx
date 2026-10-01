@@ -60,6 +60,10 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
     [],
   );
   const onEliminar = useCallback((evento: EventoListItem) => setModal({ kind: 'eliminar', evento }), []);
+  const onVerCompras = useCallback(
+    (evento: EventoListItem) => router.push(`${basePath}/${evento.id}/compras`),
+    [basePath, router],
+  );
   const closeModal = useCallback(() => setModal(null), []);
 
   const { reload } = gestion;
@@ -153,6 +157,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
           onCambiarEstado={onCambiarEstado}
           onEliminar={onEliminar}
           onCambiarActivo={onCambiarActivo}
+          onVerCompras={onVerCompras}
         />
       );
     }
@@ -188,6 +193,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
           onCambiarEstado={onCambiarEstado}
           onEliminar={onEliminar}
           onCambiarActivo={onCambiarActivo}
+          onVerCompras={onVerCompras}
         />
       );
     }
@@ -199,6 +205,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
         onCambiarEstado={onCambiarEstado}
         onEliminar={onEliminar}
         onCambiarActivo={onCambiarActivo}
+        onVerCompras={onVerCompras}
       />
     );
   };

@@ -51,6 +51,8 @@ export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetod
   const cuponesCount = draft.entradas.reduce((total, entrada) => total + entrada.cupones.length, 0);
   const formulario = options.formularios.find((plantilla) => plantilla.id === draft.formularioId);
   const error = errors[ERROR_KEYS.metodosPago];
+  // Cash is never offered at checkout (US-0121): a paid event with only cash cannot be bought online
+  const soloEfectivo = anyPaid && draft.metodosPago.length > 0 && draft.metodosPago.every((metodo) => metodo.tipo === 'efectivo');
 
   return (
     <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -145,6 +147,11 @@ export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetod
                     <span className="rounded-full border border-grit-glass-border px-2 py-0.5 font-grit-body text-[10px] font-semibold uppercase text-grit-subtext">
                       {METODO_PAGO_TIPO_LABELS[metodo.tipo]}
                     </span>
+                    {metodo.tipo === 'efectivo' && (
+                      <span className="rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 font-grit-body text-[10px] font-semibold text-amber-200">
+                        No disponible para compra en línea
+                      </span>
+                    )}
                   </span>
                   {metodo.valor && <span className="block truncate font-grit-body text-xs text-grit-subtext">{metodo.valor}</span>}
                   {metodo.url && <span className="block truncate font-grit-body text-xs text-grit-cyan">{metodo.url}</span>}
@@ -157,6 +164,12 @@ export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetod
           })}
         </fieldset>
         <FieldError errorKey={ERROR_KEYS.metodosPago} error={error} />
+        {soloEfectivo && (
+          <p className="flex items-start gap-1.5 rounded-grit-md border border-amber-400/40 bg-amber-500/15 px-3 py-2 font-grit-body text-xs text-amber-200">
+            <GritIcon name="warning" size={14} className="mt-px" />
+            Los compradores no podrán pagar en línea: el efectivo no se ofrece en la compra de entradas.
+          </p>
+        )}
         {!anyPaid && precios.length > 0 && (
           <p className="font-grit-body text-xs text-grit-subtext">
             Todas las entradas son gratuitas: no es obligatorio seleccionar métodos de pago.

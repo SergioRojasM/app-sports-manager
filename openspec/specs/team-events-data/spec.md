@@ -184,9 +184,9 @@ The system SHALL expose `eventosService` in `src/services/supabase/portal/evento
   - It ALWAYS applies `activo = true`, `borrador = false`, `estado = 'confirmado'`, and `fecha_hora >= now() OR fecha_hora IS NULL`, regardless of what RLS would allow.
   - It adds `publico = true` when `soloPublicos` is `true`.
   - Ordered by `fecha_hora` ascending, nulls last, with `limit(500)`.
-  - It selects an explicit column list that includes `nombre_tenant` and `metodos_pago`, and never `formulario_id`, `creado_por` or `omitir_confirmacion_compra`.
+  - It selects an explicit column list that includes `nombre_tenant`, `metodos_pago` and `cancelacion_antelacion_horas` (US-0121, used by the checkout), and never `formulario_id`, `creado_por` or `omitir_confirmacion_compra`.
   - Rows are mapped to `EventoPublicoListItem` (snapshots flattened; trainer names joined with ", ").
-- `getEventoPublicado(eventoId, { soloPublicos })` (US-0120): the same filters, projection and exclusions, plus `descripcion_larga`, `cronograma`, `incluye` and `cancelacion_antelacion_horas`.
+- `getEventoPublicado(eventoId, { soloPublicos })` (US-0120): the same filters, projection and exclusions, plus `descripcion_larga`, `cronograma` and `incluye`.
   - Returns an `EventoPublicoDetalle`.
   - Returns `null` when no row matches or the id is malformed (`22P02`).
 
@@ -232,6 +232,10 @@ The system SHALL expose `eventosService` in `src/services/supabase/portal/evento
 - **WHEN** `getEventoPublicado` is called with a malformed id, an unknown id, or the id of a draft
 - **THEN** it SHALL return `null`
 
+#### Scenario: Listing carries the cancellation policy
+- **WHEN** `listEventosPublicados` returns an event with `cancelacion_antelacion_horas = 48`
+- **THEN** the `EventoPublicoListItem` SHALL have `cancelacionAntelacionHoras = 48`
+
 ### Requirement: Eventos service error mapping
 The service MUST throw `EventoServiceError` with a `code` and a Spanish `message`:
 
@@ -244,6 +248,7 @@ The service MUST throw `EventoServiceError` with a `code` and a Spanish `message
 | `FORMULARIO_INVALIDO` | `invalid_reference` | "El formulario seleccionado no existe o está inactivo." |
 | `BUNDLE_INVALIDO` | `invalid_reference` | "Uno de los eventos del paquete ya no existe." |
 | `TENANT_INVALIDO` | `invalid_reference` | "La organización del evento no existe." |
+| `23503` from `deleteEvento` (the event has purchases or tickets) | `has_purchases` | "No puedes eliminar un evento con entradas vendidas. Cancélalo en su lugar." |
 | Other `23503` | `invalid_reference` | "Una referencia del evento no es válida." |
 | `NO_REVERTIR_A_BORRADOR` | `invalid_data` | "Un evento publicado no puede volver a borrador." |
 | A `23514` with a known completeness code (`DISCIPLINA_REQUERIDA`, `ENTRADAS_REQUERIDAS`, `ENTRADA_INCOMPLETA`, `BUNDLE_REQUERIDO`, `CUPON_INCOMPLETO`, `CUPON_EN_ENTRADA_GRATIS`, `METODO_PAGO_REQUERIDO`, `FORMULARIO_INACTIVO`) | `invalid_data` | A specific message per code |
@@ -273,4 +278,8 @@ The service MUST throw `EventoServiceError` with a `code` and a Spanish `message
 #### Scenario: Missing tenant mapped
 - **WHEN** the RPC raises `TENANT_INVALIDO`
 - **THEN** the service SHALL throw `EventoServiceError` with code `invalid_reference` and the message "La organización del evento no existe."
+
+#### Scenario: Delete with purchases mapped
+- **WHEN** `deleteEvento` fails with `23503` because the event has purchases
+- **THEN** the service SHALL throw `EventoServiceError` with code `has_purchases` and the message "No puedes eliminar un evento con entradas vendidas. Cancélalo en su lugar."
 

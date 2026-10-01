@@ -19,6 +19,7 @@ type EventoCardProps = {
   onEliminar?: () => void;
   /** Quick activar/desactivar from the actions menu. */
   onCambiarActivo?: () => void;
+  onVerCompras?: () => void;
   /** Used by the wizard's live preview (US-0119). */
   hideActions?: boolean;
 };
@@ -40,6 +41,7 @@ export function EventoCard({
   onCambiarEstado = noop,
   onEliminar = noop,
   onCambiarActivo,
+  onVerCompras,
   hideActions = false,
 }: EventoCardProps) {
   const visual = getDisciplinaVisual(evento.disciplinaNombre);
@@ -95,6 +97,7 @@ export function EventoCard({
               borrador={evento.borrador}
               activo={evento.activo}
               onCambiarActivo={onCambiarActivo}
+              onVerCompras={onVerCompras}
               onEditar={onEditar}
               onCambiarEstado={onCambiarEstado}
               onEliminar={onEliminar}

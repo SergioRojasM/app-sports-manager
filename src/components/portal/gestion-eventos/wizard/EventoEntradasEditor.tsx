@@ -176,6 +176,7 @@ export function EventoEntradasEditor({ wizard, eventos, disabled }: EventoEntrad
                 errorKey={bundleKey}
                 entradaIndex={index}
                 eventoActualId={wizard.eventoId}
+                formularioActualId={wizard.draft.formularioId}
                 eventos={eventos}
                 value={entrada.eventosIdBundle}
                 error={errors[bundleKey]}
