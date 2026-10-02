@@ -15,7 +15,7 @@ The application SHALL NOT serve `/entrenamientos-publicos`, `/entrenamientos-pub
 - **THEN** the response SHALL be the application's 404 page
 
 ### Requirement: Trainings cannot be published
-Trainings management SHALL NOT offer any action to publish a training or to manage a publication, and SHALL NOT display a visibility badge, legend or field. Every training created or edited through the application SHALL be private to its tenant, with `visible_para` equal to the training's `tenant_id`.
+Trainings management SHALL NOT offer any action to publish a training or to manage a publication, and SHALL NOT display a visibility badge, legend or field. Every training created or edited through the application SHALL be private to its tenant. The `entrenamientos` table SHALL NOT have `visibilidad` or `visible_para` columns (US-0124).
 
 #### Scenario: Action modal has no publish option
 - **WHEN** an administrator or trainer opens the actions modal of a training
@@ -27,32 +27,14 @@ Trainings management SHALL NOT offer any action to publish a training or to mana
 
 #### Scenario: New training is private
 - **WHEN** an administrator or trainer creates a training
-- **THEN** the stored row SHALL have `visibilidad = 'privado'` and `visible_para` equal to its `tenant_id`
+- **THEN** the row SHALL be stored with no visibility data and SHALL be readable only under the member and own-booking rules
 
 #### Scenario: Template saved with a visibility value
-- **WHEN** a user loads a saved training template whose content contains a `visibilidad` key
-- **THEN** the wizard SHALL load the template without error and SHALL ignore that key
-
-### Requirement: Existing publications are deactivated without data loss
-The deprecation migration SHALL set `activo = false` on every row of `entrenamientos_publicos`, SHALL set every training to `visibilidad = 'privado'` with `visible_para = tenant_id`, and SHALL NOT delete any row, table or column.
-
-#### Scenario: State after the migration
-- **WHEN** the migration has been applied
-- **THEN** no row of `entrenamientos_publicos` SHALL have `activo = true`, no row of `entrenamientos` SHALL have `visibilidad = 'publico'`, and the row count of `entrenamientos_publicos` SHALL equal the count before the migration
-
-### Requirement: Publication data is closed to clients
-The `authenticated` role SHALL NOT have `insert`, `update` or `delete` on `entrenamientos_publicos`. The `anon` and `authenticated` roles SHALL NOT have any privilege on `entrenamientos_publicos_view` or `entrenamientos_publicos_servicios_view`.
-
-#### Scenario: Anonymous read of the public view
-- **WHEN** a request with the `anon` role selects from `entrenamientos_publicos_view`
-- **THEN** the request SHALL be denied
-
-#### Scenario: Administrator tries to publish through the API
-- **WHEN** a tenant administrator inserts or updates a row in `entrenamientos_publicos`
-- **THEN** the request SHALL be denied
+- **WHEN** a user loads a saved training template saved before US-0124
+- **THEN** the wizard SHALL load the template without error; stored template content SHALL NOT contain a `visibilidad` key
 
 ### Requirement: Training data is readable only by tenant members
-RLS SHALL allow an authenticated user to select a row of `entrenamientos` only when the user is a member of the row's tenant or owns a booking (`reservas.atleta_id = auth.uid()`) on that training. RLS SHALL allow selecting `entrenamiento_categorias` and `entrenamiento_restricciones` only for members of the tenant. No policy SHALL grant access based on `entrenamientos.visibilidad`. The `servicios` select policy SHALL NOT grant access because a service is required by a published training.
+RLS SHALL allow an authenticated user to select a row of `entrenamientos` only when the user is a member of the row's tenant or owns a booking (`reservas.atleta_id = auth.uid()`) on that training. RLS SHALL allow selecting `entrenamiento_categorias` and `entrenamiento_restricciones` only for members of the tenant. No policy, view or function SHALL reference `entrenamientos.visibilidad`, `entrenamientos.visible_para` or `entrenamientos_publicos`. The `servicios` select policy SHALL NOT grant access because a service is required by a published training.
 
 #### Scenario: Non-member reads another tenant's trainings
 - **WHEN** an authenticated user who is not a member of tenant A, and has no booking in tenant A, selects trainings, categories or restrictions of tenant A

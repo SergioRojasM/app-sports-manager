@@ -181,7 +181,7 @@ const BOOKING_BREAKDOWN_COLUMNS = (label: string): AnaliticaColumn[] => [
   { key: 'attendance', label: '% Asistencia promedio', align: 'right' },
 ];
 
-function bookingBreakdownRow(label: string, row: AnaliticaOperations['bookingByDiscipline'][number] | AnaliticaOperations['bookingByPublicStatus'][number]) {
+function bookingBreakdownRow(label: string, row: AnaliticaOperations['bookingByDiscipline'][number]) {
   return {
     id: label,
     label,
@@ -223,10 +223,7 @@ function Operacion({ data }: { data: AnaliticaDashboard }) {
       <Panel title="Ocupación promedio por mes" subtitle="Promedio por entrenamiento con cupo"><MonthlyPercentLineChart data={operations.monthlyBookingAverage} valueKey="averageOccupancyPercent" label="Ocupación" /></Panel>
       <Panel title="Asistencia promedio por mes" subtitle="Promedio por entrenamiento realizado con reservas"><MonthlyPercentLineChart data={operations.monthlyBookingAverage} valueKey="averageAttendancePercent" label="Asistencia" colorIndex={3} /></Panel>
     </div>
-    <div className={TWO_COLUMNS}>
-      <Panel title="Reservas por disciplina"><AnaliticaDataTable columns={BOOKING_BREAKDOWN_COLUMNS('Disciplina')} rows={operations.bookingByDiscipline.map((row) => bookingBreakdownRow(row.disciplineName, row))} /></Panel>
-      <Panel title="Reservas por tipo de entrenamiento"><AnaliticaDataTable columns={BOOKING_BREAKDOWN_COLUMNS('Tipo')} rows={operations.bookingByPublicStatus.map((row) => bookingBreakdownRow(row.label, row))} /></Panel>
-    </div>
+    <Panel title="Reservas por disciplina"><AnaliticaDataTable columns={BOOKING_BREAKDOWN_COLUMNS('Disciplina')} rows={operations.bookingByDiscipline.map((row) => bookingBreakdownRow(row.disciplineName, row))} /></Panel>
     <div className={TWO_COLUMNS}>
       <Panel title="Atletas con más reservas" subtitle="Top 10 del periodo"><AnaliticaDataTable columns={ATHLETE_BOOKING_COLUMNS} rows={athleteBookingRows(operations.topAthletesByBookings)} /></Panel>
       <Panel title="Atletas con menos reservas" subtitle="Top 10 de atletas activos, incluye 0 reservas"><AnaliticaDataTable columns={ATHLETE_BOOKING_COLUMNS} rows={athleteBookingRows(operations.bottomAthletesByBookings)} /></Panel>
