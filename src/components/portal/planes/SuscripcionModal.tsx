@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { MetodoPagoQrImage } from '@/components/portal/tenant/MetodoPagoQrImage';
 import type { PlanTipo, PlanWithDisciplinas } from '@/types/portal/planes.types';
 import type { MetodoPago } from '@/types/portal/metodos-pago.types';
 import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
@@ -356,6 +357,16 @@ export function SuscripcionModal({
                               <span className="font-medium text-grit-subtext">Instrucciones:</span>{' '}
                               {selectedMetodo.comentarios}
                             </p>
+                          ) : null}
+                          {selectedMetodo.qr_url ? (
+                            <div>
+                              <p className="mb-1 font-medium text-grit-subtext">Código QR:</p>
+                              <MetodoPagoQrImage
+                                key={selectedMetodo.qr_url}
+                                url={selectedMetodo.qr_url}
+                                nombre={selectedMetodo.nombre}
+                              />
+                            </div>
                           ) : null}
                         </div>
                       ) : null}

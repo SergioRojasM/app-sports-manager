@@ -7,6 +7,7 @@ import {
   buildReceiptPath,
   buildFormularioRespuestaFilePath,
   buildEventoBannerPath,
+  buildMetodoPagoQrPath,
   type StorageUploadResult,
 } from '@/types/portal/storage.types';
 
@@ -209,6 +210,39 @@ export const storageService = {
 
     const file = new File([blob], `banner.${ext}`, { type: blob.type });
     return storageService.uploadEventoBanner(supabase, tenantId, eventoId, file);
+  },
+
+  /**
+   * Upload a payment method QR image and return a signed URL (US-0128).
+   * Path: orgs/{tenantId}/metodos-pago/{metodoId}/qr-{timestamp}.{ext}
+   * A new object per upload: event snapshots keep pointing to the image they were saved with.
+   */
+  async uploadMetodoPagoQr(
+    supabase: SupabaseClient,
+    tenantId: string,
+    metodoId: string,
+    file: File,
+  ): Promise<StorageUploadResult> {
+    const ext = getExtension(file);
+    const path = buildMetodoPagoQrPath(tenantId, metodoId, ext);
+
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, file, { upsert: false, contentType: file.type });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const { data: signedData, error: signError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .createSignedUrl(path, SIGNED_URL_TTL);
+
+    if (signError || !signedData?.signedUrl) {
+      throw new Error(signError?.message ?? 'No fue posible generar la URL firmada.');
+    }
+
+    return { signedUrl: signedData.signedUrl, path };
   },
 
   /**

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MetodoPagoQrImage } from '@/components/portal/tenant/MetodoPagoQrImage';
 import { GritIcon, GritTag, cx } from '@/components/ui';
 import { toHttpUrl } from '@/lib/portal/eventos-publicos.utils';
 import { METODO_PAGO_TIPO_LABELS } from '@/types/portal/metodos-pago.types';
@@ -8,7 +9,7 @@ import type { EventoMetodoPagoSnapshot } from '@/types/portal/eventos.types';
 
 type EventoMetodoPagoCardProps = {
   metodo: EventoMetodoPagoSnapshot;
-  /** Tickets modal variant: `url` and `comentarios` behind "Ver más". */
+  /** Tickets modal variant: `url`, `comentarios` and the QR image behind "Ver más". */
   compact?: boolean;
 };
 
@@ -20,7 +21,7 @@ export function EventoMetodoPagoCard({ metodo, compact = false }: EventoMetodoPa
   const [copiado, setCopiado] = useState(false);
   const [expanded, setExpanded] = useState(!compact);
   const url = toHttpUrl(metodo.url);
-  const hasDetails = Boolean(metodo.url || metodo.comentarios);
+  const hasDetails = Boolean(metodo.url || metodo.comentarios || metodo.qr_url);
 
   useEffect(() => {
     if (!copiado) return;
@@ -92,6 +93,7 @@ export function EventoMetodoPagoCard({ metodo, compact = false }: EventoMetodoPa
           {metodo.comentarios && (
             <p className="whitespace-pre-wrap font-grit-body text-xs font-medium text-grit-subtext">{metodo.comentarios}</p>
           )}
+          {metodo.qr_url && <MetodoPagoQrImage key={metodo.qr_url} url={metodo.qr_url} nombre={metodo.nombre} />}
         </>
       )}
     </div>

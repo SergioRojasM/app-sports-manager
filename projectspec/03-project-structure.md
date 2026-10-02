@@ -107,8 +107,9 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   ├── TenantIdentityCard.tsx
 │   │   │   │   ├── TenantContactCard.tsx
 │   │   │   │   ├── TenantDirectoryList.tsx
-│   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods
-│   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method
+│   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods; "QR" indicator on methods with qr_url (US-0128)
+│   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method; optional "Imagen QR" field (JPEG/PNG/WebP ≤ 2 MB, preview, Cambiar/Quitar) — uploaded on save through onSubmit(data, qr) (US-0128)
+│   │   │   │   ├── MetodoPagoQrImage.tsx          # Payer-facing QR image of a payment method: white background, opens in a new tab, hidden on load error; used by SuscripcionModal and EventoMetodoPagoCard (US-0128)
 │   │   │   │   ├── TenantReglasSuspensionCard.tsx # Admin card: CRUD list of suspension rules (max 3)
 │   │   │   │   ├── ReglaSuspensionFormModal.tsx   # Right-side form modal for create/edit suspension rule
 │   │   │   │   └── SolicitarAccesoButton.tsx  # 5-state access request button: idle/pending/blocked/incomplete_profile/member
@@ -235,7 +236,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │           ├── EventoBundleSelector.tsx  # Múltiple bundle: other non-cancelled tenant events (never the current one); dropped-deleted-events warning
 │   │   │           ├── EventoCuponesEditor.tsx   # Coupon rows (nombre, uppercase code, % discount with "$X → $Y" preview, validity window); disabled on free tickets
 │   │   │           ├── EventoFormularioSelector.tsx  # "Sin formulario" + active templates, "Vista previa" via useFormularioPreview + FormularioPreviewModal
-│   │   │           ├── EventoMetodosPagoStep.tsx  # Step 3: active payment methods as checkbox cards (+ stale snapshots), select/clear all, summary panel; helper text says selected methods are shown to ticket buyers (US-0120); cash methods are tagged "No disponible para compra en línea" and a paid event with only cash shows a non-blocking warning (US-0121)
+│   │   │           ├── EventoMetodosPagoStep.tsx  # Step 3: active payment methods as checkbox cards (+ stale snapshots), select/clear all, summary panel; toSnapshot copies qr_url and methods with an image show a "QR" tag (US-0128); helper text says selected methods are shown to ticket buyers (US-0120); cash methods are tagged "No disponible para compra en línea" and a paid event with only cash shows a non-blocking warning (US-0121)
 │   │   │           ├── SalirSinGuardarModal.tsx   # "Tienes cambios sin guardar. ¿Salir sin guardar?"
 │   │   │           ├── fields.tsx             # Field/FieldError/SelectShell/WizardSection/RowIconButton + fieldDomId(errorKey) so focus requests reach the invalid control
 │   │   │           └── index.ts
@@ -253,7 +254,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       │   ├── EventoCompraPasoPago.tsx       # Order summary, non-cash methods (EventoMetodoPagoCard), required proof (JPEG/PNG/WebP/PDF ≤ 5 MB)
 │   │   │       │   ├── EventoCompraPasoConfirmacion.tsx  # Status, codes, PDF download (no request needed), "Ver mis entradas" or the guest create-account notice
 │   │   │       │   └── EventoCompraEstadoBadge.tsx / PoliticaCancelacion.tsx / index.ts
-│   │   │       ├── EventoMetodoPagoCard.tsx       # One published payment method: tipo label, valor + "Copiar", http(s)-only payment link, plain-text comentarios; `compact` variant used by the tickets modal (the only place payment methods are shown before the purchase flow)
+│   │   │       ├── EventoMetodoPagoCard.tsx       # One published payment method: tipo label, valor + "Copiar", http(s)-only payment link, plain-text comentarios, QR image when the snapshot has qr_url (US-0128); `compact` variant used by the tickets modal (the only place payment methods are shown before the purchase flow)
 │   │   │       ├── EventoBannerModal.tsx / EventosDisponiblesWidget.tsx
 │   │   │       ├── detalle/                       # Event page shared by /eventos/[event_id], /portal/eventos/[event_id] and the US-0119 wizard preview
 │   │   │       │   ├── EventoDetalleBody.tsx          # Hero(+Descripción) → Incluye|Cronograma → Entrenadores → Entradas → CTA banner; keeps the approved event layout (no Ubicación card, no occupancy); no payment methods (they belong to the ticket-purchase flow); empty sections hidden
@@ -357,7 +358,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── usePortalNavigation.ts    # Shared portal logic
 │   │       ├── tenant/
 │   │       │   ├── useTenantView.ts
-│   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago
+│   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago; submitForm(data, qr) uploads the QR image (create: insert → upload → update qr_url; a failed upload keeps the form open on the created row) (US-0128)
 │   │       │   ├── useReglasSuspension.ts  # CRUD state + 3-rule limit guard for tenant_reglas_suspension
 │   │       │   └── useOrgLogoUpload.ts    # File select, MIME/size validation, preview URL, upload trigger for org logo
 │   │       │   └── useOrgBannerUpload.ts   # File select, MIME/size validation, preview URL, upload trigger for org banner
@@ -487,10 +488,10 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │                             #   (one row per subscription: plan/plan type, Bogotá sale date, es_vendida, es_activa = estado 'activa',
 │   │       │                             #   per-subscription payment summary). All subscription KPIs MUST read fct_suscripciones (bi-fct-suscripciones)
 │   │       │   └── perfil.service.ts
-│   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago
+│   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago (incl. qr_url, US-0128)
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
 │   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
-│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadPaymentProof (upsert option; receipts are writable by an active member OR any subscription holder of the tenant, so non-member buyers of public plans can submit proof — US-0093), getSignedUrl — wraps Supabase Storage API for org-assets bucket; uploadFormularioRespuestaImage uploads a "imagen"-type form-response file under the booking athlete's own users/{atletaId}/formularios/ path (US-0087); readable by any authenticated user via the public_training_banner_read storage policy (US-0089); uploadEventoBanner uploads to orgs/{tenantId}/eventos/{eventoId}.{ext} (upsert, 1-year signed URL stored in eventos.banner_url), readable via event_banner_read (US-0119); copyEventoBanner (US-0122): downloads a duplicated event's inherited banner and re-uploads it under the new event's path
+│   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadMetodoPagoQr (orgs/{tenantId}/metodos-pago/{metodoId}/qr-{ts}.{ext}, new object per upload, US-0128), uploadPaymentProof (upsert option; receipts are writable by an active member OR any subscription holder of the tenant, so non-member buyers of public plans can submit proof — US-0093), getSignedUrl — wraps Supabase Storage API for org-assets bucket; uploadFormularioRespuestaImage uploads a "imagen"-type form-response file under the booking athlete's own users/{atletaId}/formularios/ path (US-0087); readable by any authenticated user via the public_training_banner_read storage policy (US-0089); uploadEventoBanner uploads to orgs/{tenantId}/eventos/{eventoId}.{ext} (upsert, 1-year signed URL stored in eventos.banner_url), readable via event_banner_read (US-0119); copyEventoBanner (US-0122): downloads a duplicated event's inherited banner and re-uploads it under the new event's path
 │   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripciones — the user's subscriptions across ALL tenants with tenant + plan + pago + suscripcion_servicios joins, scoped by atleta_id only (RLS enforces ownership); replaces the tenant-scoped fetch (US-0093)
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
 │   │
@@ -510,7 +511,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── formularios.types.ts      # FormularioPlantilla, FormularioSeccion (seccion_tipo: titulo|subtitulo|texto|datos + seccion_descripcion; campo_* nullable), FormularioTipoCampo union, FormularioPlantillaConSecciones, FormularioPlantillaListItem (seccionesCount), Create/UpdateSeccionInput, form-values types, FormularioServiceError (US-0084/US-0085); FormularioRespuesta (id, formulario_plantilla_id, atleta_id, entrenamiento_id, respuesta jsonb — US-0087); FormularioPerfilCampo union + FORMULARIO_PERFIL_CAMPOS catalog (9 usuarios/perfil_deportivo fields), FormularioPlantilla.perfil_campos_requeridos, UpdatePlantillaInput.perfil_campos_requeridos (US-0095); FormularioRespuesta.perfil_snapshot — requested profile values frozen at submission time, survives later profile edits (US-0096); seccion_tipo extended with encabezado_sobretitulo/encabezado_titulo/encabezado_subtitulo/encabezado_badges/seccion/separador, HEADER_SECCION_TIPOS (the 4 fixed header types) + FORMULARIO_HEADER_BADGES_MAX; campo_tipo extended with checkbox/seleccion, FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES (lista + seleccion); FormularioSeccion.columna_ancho ('completo'|'mitad') and .seccion_subtitulo; FormularioPlantillaDraft — the in-memory metadata shape held by useFormularioEditor (US-0108)
 │   │       └── suscripciones.types.ts  # Suscripcion, SuscripcionInsert, SuscripcionServicio (id, suscripcion_id, servicio_id, unidades_incluidas, unidades_restantes, created_at — US-0063), SuscripcionServiceError with code 'plan_unavailable' (US-0093); PendingPlanPurchaseDraft — a plan purchase filled in but deliberately NOT yet persisted, carried in memory through the skip-plan-confirmation booking flow and written only when the booking is submitted (US-0110)
 │   │       └── pagos.types.ts
-│   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput; METODO_PAGO_TIPO_LABELS (US-0120)
+│   │       └── metodos-pago.types.ts      # MetodoPago, CreateMetodoPagoInput, UpdateMetodoPagoInput; METODO_PAGO_TIPO_LABELS (US-0120); qr_url, MetodoPagoQrChange, METODO_PAGO_QR_MIME_TYPES / METODO_PAGO_QR_MAX_BYTES (US-0128)
 │   │       └── reglas-suspension.types.ts # ReglaSuspension, ReglaSuspensionCreatePayload, ReglaSuspensionUpdatePayload, ReglaSuspensionFormValues
 │   │       └── equipo.types.ts
 │   │       └── solicitudes.types.ts            # SolicitudRow, CreateSolicitudInput, SolicitudesServiceError
