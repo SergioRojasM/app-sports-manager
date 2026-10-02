@@ -55,6 +55,8 @@ export type EventoMetodoPagoSnapshot = {
   valor: string | null;
   url: string | null;
   comentarios: string | null;
+  /** Absent on snapshots saved before US-0128. */
+  qr_url?: string | null;
 };
 
 /** One row of `public.eventos` (US-0118; snapshots and drafts added in US-0119). */

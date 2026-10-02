@@ -24,6 +24,7 @@ function toSnapshot(metodo: MetodoPago): EventoMetodoPagoSnapshot {
     valor: metodo.valor,
     url: metodo.url,
     comentarios: metodo.comentarios,
+    qr_url: metodo.qr_url ?? null,
   };
 }
 
@@ -150,6 +151,15 @@ export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetod
                     {metodo.tipo === 'efectivo' && (
                       <span className="rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 font-grit-body text-[10px] font-semibold text-amber-200">
                         No disponible para compra en línea
+                      </span>
+                    )}
+                    {metodo.qr_url && (
+                      <span
+                        title="Tiene imagen QR"
+                        className="inline-flex items-center gap-1 rounded-full border border-grit-glass-border px-2 py-0.5 font-grit-body text-[10px] font-semibold uppercase text-grit-subtext"
+                      >
+                        <GritIcon name="qr_code_2" size={12} />
+                        QR
                       </span>
                     )}
                   </span>

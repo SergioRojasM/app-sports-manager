@@ -1,11 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type {
-  MetodoPago,
-  MetodoPagoTipo,
-  CreateMetodoPagoInput,
-  UpdateMetodoPagoInput,
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  METODO_PAGO_QR_MAX_BYTES,
+  METODO_PAGO_QR_MIME_TYPES,
+  type MetodoPago,
+  type MetodoPagoTipo,
+  type CreateMetodoPagoInput,
+  type UpdateMetodoPagoInput,
+  type MetodoPagoQrChange,
 } from '@/types/portal/metodos-pago.types';
 
 type MetodoPagoFormModalProps = {
@@ -15,7 +18,10 @@ type MetodoPagoFormModalProps = {
   isSubmitting: boolean;
   submitError: string | null;
   onClose: () => void;
-  onSubmit: (data: CreateMetodoPagoInput | UpdateMetodoPagoInput) => Promise<void>;
+  onSubmit: (
+    data: CreateMetodoPagoInput | UpdateMetodoPagoInput,
+    qr: MetodoPagoQrChange,
+  ) => Promise<void>;
 };
 
 const TIPO_OPTIONS: { value: MetodoPagoTipo; label: string }[] = [
@@ -57,6 +63,11 @@ export function MetodoPagoFormModal({
   const [comentarios, setComentarios] = useState('');
   const [activo, setActivo] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [qrFile, setQrFile] = useState<File | null>(null);
+  const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
+  const [qrRemove, setQrRemove] = useState(false);
+  const [qrError, setQrError] = useState<string | null>(null);
+  const qrInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open && editTarget) {
@@ -76,7 +87,49 @@ export function MetodoPagoFormModal({
       setActivo(true);
       setFieldErrors({});
     }
+    if (open) {
+      setQrFile(null);
+      setQrPreviewUrl(null);
+      setQrRemove(false);
+      setQrError(null);
+    }
   }, [open, editTarget]);
+
+  // Revoke object URL on cleanup
+  useEffect(() => {
+    return () => {
+      if (qrPreviewUrl) URL.revokeObjectURL(qrPreviewUrl);
+    };
+  }, [qrPreviewUrl]);
+
+  const handleQrSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Allow picking the same file again after an error or "Quitar"
+    e.target.value = '';
+    if (!file) return;
+
+    if (!METODO_PAGO_QR_MIME_TYPES.includes(file.type)) {
+      setQrError('Solo se permiten imágenes JPEG, PNG o WebP.');
+      return;
+    }
+
+    if (file.size > METODO_PAGO_QR_MAX_BYTES) {
+      setQrError('El archivo no puede superar 2 MB.');
+      return;
+    }
+
+    setQrError(null);
+    setQrFile(file);
+    setQrPreviewUrl(URL.createObjectURL(file));
+    setQrRemove(false);
+  }, []);
+
+  const handleQrRemove = useCallback(() => {
+    setQrError(null);
+    setQrFile(null);
+    setQrPreviewUrl(null);
+    setQrRemove(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -100,6 +153,8 @@ export function MetodoPagoFormModal({
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
+    const qr: MetodoPagoQrChange = { file: qrFile, remove: qrRemove };
+
     if (editTarget) {
       const payload: UpdateMetodoPagoInput = {
         nombre: nombre.trim(),
@@ -109,7 +164,7 @@ export function MetodoPagoFormModal({
         comentarios: comentarios.trim() || null,
         activo,
       };
-      await onSubmit(payload);
+      await onSubmit(payload, qr);
     } else {
       const payload: CreateMetodoPagoInput = {
         tenant_id: tenantId,
@@ -120,13 +175,14 @@ export function MetodoPagoFormModal({
         comentarios: comentarios.trim() || null,
         activo,
       };
-      await onSubmit(payload);
+      await onSubmit(payload, qr);
     }
-  }, [validate, editTarget, nombre, tipo, valor, url, comentarios, activo, tenantId, onSubmit]);
+  }, [validate, editTarget, nombre, tipo, valor, url, comentarios, activo, tenantId, onSubmit, qrFile, qrRemove]);
 
   if (!open) return null;
 
   const mode = editTarget ? 'edit' : 'create';
+  const qrDisplayUrl = qrPreviewUrl ?? (qrRemove ? null : editTarget?.qr_url ?? null);
 
   return (
     <div className="fixed inset-0 z-50">
@@ -273,6 +329,71 @@ export function MetodoPagoFormModal({
             {fieldErrors.url ? (
               <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
                 {fieldErrors.url}
+              </p>
+            ) : null}
+          </div>
+
+          {/* Imagen QR */}
+          <div>
+            <label
+              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
+              htmlFor="mp-qr"
+            >
+              Imagen QR <span className="normal-case tracking-normal text-grit-muted">(opcional)</span>
+            </label>
+            <input
+              ref={qrInputRef}
+              id="mp-qr"
+              type="file"
+              accept={METODO_PAGO_QR_MIME_TYPES.join(',')}
+              onChange={handleQrSelect}
+              disabled={isSubmitting}
+              className="sr-only"
+            />
+            {qrDisplayUrl ? (
+              <div className="flex items-start gap-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={qrDisplayUrl}
+                  alt={`Código QR de ${nombre.trim() || 'este método de pago'}`}
+                  className="h-40 w-40 shrink-0 rounded-grit-lg bg-white object-contain p-2"
+                />
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => qrInputRef.current?.click()}
+                    disabled={isSubmitting}
+                    className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-3 py-1.5 text-xs font-semibold text-grit-text transition hover:border-grit-cyan focus:outline-none focus:ring-2 focus:ring-grit-cyan/35 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Cambiar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleQrRemove}
+                    disabled={isSubmitting}
+                    className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-3 py-1.5 text-xs font-semibold text-grit-danger transition hover:border-grit-danger/60 focus:outline-none focus:ring-2 focus:ring-grit-danger/35 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => qrInputRef.current?.click()}
+                disabled={isSubmitting}
+                className="flex w-full items-center justify-center gap-2 rounded-grit-lg border border-dashed border-grit-glass-border bg-grit-bg px-4 py-6 text-sm font-semibold text-grit-subtext transition hover:border-grit-cyan hover:text-grit-text focus:outline-none focus:ring-2 focus:ring-grit-cyan/35 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <span className="material-symbols-outlined text-base" aria-hidden="true">
+                  qr_code_2
+                </span>
+                Subir imagen
+              </button>
+            )}
+            <p className="mt-1.5 text-xs text-grit-muted">JPEG, PNG o WebP. Máximo 2 MB.</p>
+            {qrError ? (
+              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
+                {qrError}
               </p>
             ) : null}
           </div>

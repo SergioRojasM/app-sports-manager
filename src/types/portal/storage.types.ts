@@ -43,6 +43,11 @@ export function buildEventoBannerPath(tenantId: string, eventoId: string, ext: s
   return `orgs/${tenantId}/eventos/${eventoId}.${ext}`;
 }
 
+/** Payment method QR image path: orgs/{tenantId}/metodos-pago/{metodoId}/qr-{timestamp}.{ext} (US-0128) */
+export function buildMetodoPagoQrPath(tenantId: string, metodoId: string, ext: string): string {
+  return `orgs/${tenantId}/metodos-pago/${metodoId}/qr-${Date.now()}.${ext}`;
+}
+
 // ─── Result types ───
 
 export type StorageUploadResult = {
