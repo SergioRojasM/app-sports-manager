@@ -113,6 +113,7 @@ The function SHALL:
    - a form template, when set, belongs to the tenant (`FORMULARIO_INVALIDO`, `23503`)
    - every bundle id is an event of the same tenant other than `p_evento_id` (`BUNDLE_INVALIDO`, `23503`)
    - the table format constraints
+   - `p_evento.metodos_pago` and every ticket's `metodos_pago` are arrays of objects that each have `id` and `nombre` (`METODOS_PAGO_INVALIDOS`, `23514`) (US-0130)
 3. When `p_borrador = false`, also validate:
    - a discipline is present (`DISCIPLINA_REQUERIDA`)
    - there is at least one ticket (`ENTRADAS_REQUERIDAS`)
@@ -120,7 +121,7 @@ The function SHALL:
    - every `multiple` ticket has at least one bundled event (`BUNDLE_REQUERIDO`)
    - every coupon has `nombre`, `cupon` and `descuento` (`CUPON_INCOMPLETO`)
    - no coupon is on a ticket with `valor = 0` (`CUPON_EN_ENTRADA_GRATIS`)
-   - at least one payment method exists when any ticket has `valor > 0` (`METODO_PAGO_REQUERIDO`)
+   - every ticket with `valor > 0` has at least one payment method between `p_evento.metodos_pago` and its own `metodos_pago` (`METODO_PAGO_REQUERIDO`) (US-0130)
    - the form, when set, is `activo` (`FORMULARIO_INACTIVO`)
    - every event bundled by a `multiple` ticket has no form or the same `formulario_id` as this event (`BUNDLE_FORMULARIO_DISTINTO`) (US-0121)
    - when this event has a form, no other **published** event bundles it through a `multiple` ticket while using a different `formulario_id` (`FORMULARIO_EN_PAQUETE_DISTINTO`) (US-0121)
@@ -131,7 +132,7 @@ The function SHALL:
    - On create: insert with `creado_por = auth.uid()`, `estado = 'confirmado'`, and `nombre_tenant` = the tenant name read in step 1. Any `nombre_tenant` in `p_evento` MUST be ignored.
    - On edit: update, never touching `tenant_id`, `nombre_tenant`, `creado_por`, `estado` or `created_at`, and raise `NOT_FOUND` (`P0002`) when no row matches.
    - In both cases set `borrador = p_borrador`.
-6. Sync tickets and then each ticket's coupons: delete the rows missing from the payload, then upsert the present ones, forcing `tenant_id` and `evento_id`. It MUST raise `ENTRADA_INVALIDA` (`42501`) for an id that belongs to another event. Coupon codes MUST be stored as `upper(btrim(cupon))`.
+6. Sync tickets and then each ticket's coupons: delete the rows missing from the payload, then upsert the present ones, forcing `tenant_id` and `evento_id`. It MUST raise `ENTRADA_INVALIDA` (`42501`) for an id that belongs to another event. Coupon codes MUST be stored as `upper(btrim(cupon))`. Each ticket's `metodos_pago` SHALL be written from the payload on insert and on update, defaulting to `[]` when absent (US-0130).
 7. Sync the form snapshot in `evento_formularios` (US-0121):
    - When `formulario_id` is null: set `vigente = false` on the event's snapshots.
    - Otherwise: build the snapshot from the template (`nombre`, `perfil_campos_requeridos`, and its **active** `formulario_plantilla_esquema` rows ordered by `orden`) and compute `contenido_hash` (md5 of that content plus the template id). When the `vigente` snapshot has the same hash, leave it. Otherwise set it to `vigente = false` and insert a new `vigente` row.
@@ -156,7 +157,7 @@ The function SHALL:
 - **THEN** the call SHALL fail and no row SHALL change
 
 #### Scenario: Final save rejects incomplete data atomically
-- **WHEN** an edit with `p_borrador = false` includes a paid ticket and an empty `metodos_pago`
+- **WHEN** an edit with `p_borrador = false` includes a paid ticket with an empty ticket `metodos_pago` and an empty event `metodos_pago`
 - **THEN** it SHALL raise `METODO_PAGO_REQUERIDO`, and the event, its tickets and its coupons SHALL keep their previous values
 
 #### Scenario: Final save publishes a draft
@@ -223,3 +224,33 @@ The function SHALL:
 - **WHEN** the event is saved with `formulario_id = null`
 - **THEN** the event SHALL have no `vigente` snapshot, and older snapshots SHALL be kept
 
+#### Scenario: Paid ticket covered only by its own method
+- **WHEN** a final save has an empty event `metodos_pago` and one paid ticket whose `metodos_pago` has one method
+- **THEN** the call SHALL succeed and the ticket row SHALL store that method
+
+#### Scenario: One uncovered paid ticket rejects the save
+- **WHEN** a final save has an empty event `metodos_pago`, paid ticket A with one method and paid ticket B with none
+- **THEN** it SHALL raise `METODO_PAGO_REQUERIDO` and write nothing
+
+#### Scenario: Malformed ticket methods rejected
+- **WHEN** a draft or final save sends a ticket whose `metodos_pago` is an object, or an array with an element lacking `id` or `nombre`
+- **THEN** it SHALL raise `METODOS_PAGO_INVALIDOS` and write nothing
+
+#### Scenario: Ticket methods replaced on edit
+- **WHEN** a stored ticket with two methods is saved again with one method
+- **THEN** the ticket row SHALL store exactly that one method
+
+### Requirement: Ticket payment methods column
+`public.evento_entradas` SHALL have a column `metodos_pago jsonb not null` with default `'[]'`, holding payment-method snapshots valid only for that ticket, in the same format as `eventos.metodos_pago` (`{id, nombre, tipo, valor, url, comentarios, qr_url?, origen?}`). A check constraint `evento_entradas_metodos_pago_array_ck` MUST require a JSON array. Existing rows SHALL get `'[]'` with no backfill. No policy or grant SHALL change: the column is readable wherever the ticket row is readable, including by `anon`.
+
+#### Scenario: Default on existing and new rows
+- **WHEN** the migration is applied, or a ticket is inserted without `metodos_pago`
+- **THEN** the row SHALL have `metodos_pago = '[]'`
+
+#### Scenario: Non-array rejected
+- **WHEN** a ticket is written with `metodos_pago` set to a JSON object
+- **THEN** the statement SHALL fail with a check-constraint violation
+
+#### Scenario: Guest can read ticket methods
+- **WHEN** an anonymous client selects `metodos_pago` from the tickets of a public published event
+- **THEN** the rows SHALL be returned with their methods

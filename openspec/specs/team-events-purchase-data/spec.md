@@ -175,7 +175,7 @@ Access:
    - Require `now() <= fecha_hora - reserva_antelacion_horas` when both are set, else `VENTA_CERRADA`.
    - Require the ticket to belong to the event, with non-null `nombre` / `valor` (else `ENTRADA_INVALIDA`) and inside its sale window (else `VENTA_CERRADA`).
 3. Apply the optional coupon under the `validar_cupon_evento` rules, else `CUPON_INVALIDO`.
-4. When `total > 0`, require a `p_metodo_pago_id` present in `eventos.metodos_pago` with `tipo <> 'efectivo'`, else `METODO_PAGO_INVALIDO`, and store its snapshot. When `total = 0`, store `metodo_pago = null`.
+4. When `total > 0`, require a `p_metodo_pago_id` present in `eventos.metodos_pago` or in the purchased ticket's `evento_entradas.metodos_pago` (US-0130), with `tipo <> 'efectivo'`, else `METODO_PAGO_INVALIDO`, and store its snapshot. Methods of other tickets of the event SHALL NOT be accepted. When `total = 0`, store `metodo_pago = null`.
 5. Read the event's `vigente` row in `evento_formularios` (never the templates). When it exists, require a non-empty value for every `campo_obligatorio` non-`imagen` field in `campos` and every `perfil_campos_requeridos` key, else `FORMULARIO_INCOMPLETO`. Values for fields not in the snapshot SHALL be dropped.
 6. Resolve the target events: `[p_evento_id]`, plus `eventos_id_bundle` for `multiple`. Every bundle event must be of the same tenant and visible for purchase, else `BUNDLE_NO_DISPONIBLE`. Lock them all in id order.
 7. Expire stale `pendiente_pago` purchases of the targets.
@@ -213,6 +213,18 @@ A `23505` on `uq_evento_tickets_evento_email` SHALL be re-raised as `ENTRADA_DUP
 #### Scenario: Sale closed by lead time
 - **WHEN** `reserva_antelacion_horas = 24` and the event starts in 10 h
 - **THEN** it SHALL raise `VENTA_CERRADA`
+
+#### Scenario: Ticket-specific method accepted
+- **WHEN** it is called for a paid ticket with the id of a non-cash method stored only in that ticket's `metodos_pago`
+- **THEN** the purchase SHALL be created and `evento_compras.metodo_pago` SHALL hold that snapshot
+
+#### Scenario: Method of another ticket rejected
+- **WHEN** it is called for paid ticket A with the id of a method stored only in ticket B's `metodos_pago`
+- **THEN** it SHALL raise `METODO_PAGO_INVALIDO` and write nothing
+
+#### Scenario: Guest pays with a ticket-specific method
+- **WHEN** an anonymous buyer calls it with a ticket-specific non-cash method of the purchased ticket
+- **THEN** the purchase SHALL be created
 
 ### Requirement: Finalize purchase RPC
 `finalizar_compra_evento(p_compra_id, p_comprobante_path, p_archivos) → jsonb` SHALL be granted to `anon, authenticated`. It SHALL:
@@ -357,4 +369,3 @@ It SHALL map errors through `mapCompraError` to `EventoCompraServiceError(code, 
 #### Scenario: Unknown error
 - **WHEN** an unrecognized error is returned
 - **THEN** the service SHALL throw code `unknown`
-
