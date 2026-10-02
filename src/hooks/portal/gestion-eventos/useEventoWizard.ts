@@ -28,6 +28,7 @@ import {
   type EventoEntradaDraft,
   type EventoEntrenadorSnapshot,
   type EventoMetodoPagoSnapshot,
+  type EventoMetodoPagoTarget,
   type EventoWizardErrors,
   type EventoWizardStep,
 } from '@/types/portal/eventos.types';
@@ -379,7 +380,7 @@ export function useEventoWizard({
   }, []);
 
   const updateEntrada = useCallback(
-    (clientKey: string, patch: Partial<Omit<EventoEntradaDraft, 'clientKey' | 'id' | 'cupones'>>) => {
+    (clientKey: string, patch: Partial<Omit<EventoEntradaDraft, 'clientKey' | 'id' | 'cupones' | 'metodosPago'>>) => {
       setDraft((current) => ({
         ...current,
         entradas: mapEntrada(current.entradas, clientKey, (entrada) => {
@@ -441,20 +442,61 @@ export function useEventoWizard({
     }));
   }, []);
 
-  const toggleMetodoPago = useCallback((metodo: EventoMetodoPagoSnapshot) => {
+  // Payment methods live on the event (all tickets) or on one ticket (US-0130)
+  const addMetodoPago = useCallback((target: EventoMetodoPagoTarget, metodo: EventoMetodoPagoSnapshot) => {
     setDraft((current) => {
-      const exists = current.metodosPago.some((item) => item.id === metodo.id);
+      if (target.tipo === 'evento') {
+        if (current.metodosPago.some((item) => item.id === metodo.id)) return current;
+        return {
+          ...current,
+          metodosPago: [...current.metodosPago, metodo],
+          // It now applies to every ticket: no ticket keeps its own copy
+          entradas: current.entradas.map((entrada) =>
+            entrada.metodosPago.some((item) => item.id === metodo.id)
+              ? { ...entrada, metodosPago: entrada.metodosPago.filter((item) => item.id !== metodo.id) }
+              : entrada,
+          ),
+        };
+      }
+      if (current.metodosPago.some((item) => item.id === metodo.id)) return current;
       return {
         ...current,
-        metodosPago: exists
-          ? current.metodosPago.filter((item) => item.id !== metodo.id)
-          : [...current.metodosPago, metodo],
+        entradas: mapEntrada(current.entradas, target.clientKey, (entrada) =>
+          entrada.metodosPago.some((item) => item.id === metodo.id)
+            ? entrada
+            : { ...entrada, metodosPago: [...entrada.metodosPago, metodo] },
+        ),
       };
     });
   }, []);
 
-  const setMetodosPago = useCallback((metodos: EventoMetodoPagoSnapshot[]) => {
-    setDraft((current) => ({ ...current, metodosPago: metodos }));
+  const updateMetodoPago = useCallback((target: EventoMetodoPagoTarget, metodo: EventoMetodoPagoSnapshot) => {
+    const replace = (metodos: EventoMetodoPagoSnapshot[]) => metodos.map((item) => (item.id === metodo.id ? metodo : item));
+    setDraft((current) =>
+      target.tipo === 'evento'
+        ? { ...current, metodosPago: replace(current.metodosPago) }
+        : {
+            ...current,
+            entradas: mapEntrada(current.entradas, target.clientKey, (entrada) => ({
+              ...entrada,
+              metodosPago: replace(entrada.metodosPago),
+            })),
+          },
+    );
+  }, []);
+
+  const removeMetodoPago = useCallback((target: EventoMetodoPagoTarget, metodoId: string) => {
+    setDraft((current) =>
+      target.tipo === 'evento'
+        ? { ...current, metodosPago: current.metodosPago.filter((item) => item.id !== metodoId) }
+        : {
+            ...current,
+            entradas: mapEntrada(current.entradas, target.clientKey, (entrada) => ({
+              ...entrada,
+              metodosPago: entrada.metodosPago.filter((item) => item.id !== metodoId),
+            })),
+          },
+    );
   }, []);
 
   // ─── Banner ───
@@ -626,8 +668,9 @@ export function useEventoWizard({
     addCupon,
     updateCupon,
     removeCupon,
-    toggleMetodoPago,
-    setMetodosPago,
+    addMetodoPago,
+    updateMetodoPago,
+    removeMetodoPago,
     bundleWarnings,
     // banner
     nombreTenant: storedNombreTenant ?? tenantNombreActual,

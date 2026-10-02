@@ -32,7 +32,7 @@ const RPC_INVALID_DATA_MESSAGES: Record<string, string> = {
   BUNDLE_REQUERIDO: 'Las entradas múltiples deben incluir al menos un evento.',
   CUPON_INCOMPLETO: 'Todos los cupones deben tener nombre, código y descuento.',
   CUPON_EN_ENTRADA_GRATIS: 'Las entradas gratuitas no admiten cupones.',
-  METODO_PAGO_REQUERIDO: 'Selecciona al menos un método de pago para las entradas con costo.',
+  METODO_PAGO_REQUERIDO: 'Agrega al menos un método de pago para las entradas con costo.',
   FORMULARIO_INACTIVO: 'El formulario seleccionado está inactivo.',
   BUNDLE_FORMULARIO_DISTINTO:
     'Una entrada múltiple incluye un evento con un formulario distinto. Solo puedes incluir eventos sin formulario o con el mismo formulario de este evento.',
@@ -241,6 +241,7 @@ function normalizeEntradas(entradas: EventoEntradaConCupones[] | null | undefine
       ...entrada,
       valor: toNumberOrNull(entrada.valor),
       eventos_id_bundle: Array.isArray(entrada.eventos_id_bundle) ? entrada.eventos_id_bundle : [],
+      metodos_pago: Array.isArray(entrada.metodos_pago) ? entrada.metodos_pago : [],
       cupones: (entrada.cupones ?? [])
         .map((cupon) => ({ ...cupon, descuento: toNumberOrNull(cupon.descuento) }))
         .sort((left, right) => left.created_at.localeCompare(right.created_at)),

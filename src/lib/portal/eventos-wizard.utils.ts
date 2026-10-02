@@ -73,6 +73,7 @@ export function emptyEntradaDraft(fechaHoraEvento = ''): EventoEntradaDraft {
     validaDesde: `${toDateKeyInBogota(new Date())}T00:00`,
     validaHasta: fechaHoraEvento,
     cupones: [],
+    metodosPago: [],
   };
 }
 
@@ -136,6 +137,7 @@ export function draftFromEventoCompleto(evento: EventoCompleto): EventoDraft {
         validoDesde: toDateTimeLocalInBogota(cupon.valido_desde),
         validoHasta: toDateTimeLocalInBogota(cupon.valido_hasta),
       })),
+      metodosPago: entrada.metodos_pago ?? [],
     })),
     formularioId: evento.formulario_id,
     metodosPago: evento.metodos_pago ?? [],
@@ -273,6 +275,7 @@ export function draftToPayload(draft: EventoDraft): GuardarEventoPayload {
       valida_hasta: fromDateTimeLocalInBogota(entrada.validaHasta),
       valor: parseNumber(entrada.valor),
       orden: index,
+      metodos_pago: entrada.metodosPago,
       cupones: entrada.cupones.map((cupon) => ({
         client_key: cupon.clientKey,
         id: cupon.id,
@@ -407,6 +410,7 @@ export const ERROR_KEYS = {
   entradas: 'entradas',
   formularioId: 'formularioId',
   metodosPago: 'metodosPago',
+  metodosPagoEntrada: (clientKey: string) => `metodosPagoEntrada.${clientKey}`,
   entrenador: (id: string) => `entrenador.${id}.experiencia`,
   entrada: (clientKey: string, field: 'nombre' | 'valor' | 'bundle' | 'ventana') => `entrada.${clientKey}.${field}`,
   cupon: (clientKey: string, field: 'nombre' | 'cupon' | 'descuento' | 'ventana') => `cupon.${clientKey}.${field}`,
@@ -417,7 +421,7 @@ export function stepOfErrorKey(key: string): EventoWizardStep {
   if (key === ERROR_KEYS.entradas || key === ERROR_KEYS.formularioId || key.startsWith('entrada.') || key.startsWith('cupon.')) {
     return 2;
   }
-  if (key === ERROR_KEYS.metodosPago) return 3;
+  if (key === ERROR_KEYS.metodosPago || key.startsWith('metodosPagoEntrada.')) return 3;
   return 1;
 }
 
@@ -524,7 +528,7 @@ export function validateEventoDraft(draft: EventoDraft, context: EventoValidatio
     }
   }
 
-  let anyPaid = false;
+  const entradasDePago = new Set<string>();
 
   for (const entrada of draft.entradas) {
     const nombre = entrada.nombre.trim();
@@ -542,7 +546,7 @@ export function validateEventoDraft(draft: EventoDraft, context: EventoValidatio
     } else if (Number.isNaN(valor) || valor < 0 || Math.round(valor * 100) !== valor * 100) {
       errors[ERROR_KEYS.entrada(entrada.clientKey, 'valor')] = 'Ingresa un valor válido (0 o más, máximo 2 decimales).';
     } else if (valor > 0) {
-      anyPaid = true;
+      entradasDePago.add(entrada.clientKey);
     }
 
     if (isFinal && entrada.tipoEntrada === 'multiple' && entrada.eventosIdBundle.length === 0) {
@@ -596,9 +600,18 @@ export function validateEventoDraft(draft: EventoDraft, context: EventoValidatio
     errors[ERROR_KEYS.formularioId] = 'El formulario seleccionado está inactivo o ya no existe.';
   }
 
-  // Step 3
-  if (isFinal && anyPaid && draft.metodosPago.length === 0) {
-    errors[ERROR_KEYS.metodosPago] = 'Selecciona al menos un método de pago para las entradas con costo.';
+  // Step 3: every paid ticket needs a method, one for all tickets or one of its own (US-0130)
+  if (isFinal && draft.metodosPago.length === 0) {
+    const sinMetodo = draft.entradas.filter(
+      (entrada) => entradasDePago.has(entrada.clientKey) && entrada.metodosPago.length === 0,
+    );
+    if (sinMetodo.length > 0 && draft.entradas.every((entrada) => entrada.metodosPago.length === 0)) {
+      errors[ERROR_KEYS.metodosPago] = 'Agrega al menos un método de pago para las entradas con costo.';
+    } else {
+      for (const entrada of sinMetodo) {
+        errors[ERROR_KEYS.metodosPagoEntrada(entrada.clientKey)] = 'Esta entrada tiene costo y no tiene métodos de pago.';
+      }
+    }
   }
 
   const keys = Object.keys(errors);

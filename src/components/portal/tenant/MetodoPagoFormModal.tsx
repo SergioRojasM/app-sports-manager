@@ -18,6 +18,8 @@ type MetodoPagoFormModalProps = {
   isSubmitting: boolean;
   submitError: string | null;
   onClose: () => void;
+  /** `'evento'`: a method that only exists in an event snapshot — no "Activo" toggle (US-0130). */
+  variant?: 'tenant' | 'evento';
   onSubmit: (
     data: CreateMetodoPagoInput | UpdateMetodoPagoInput,
     qr: MetodoPagoQrChange,
@@ -54,6 +56,7 @@ export function MetodoPagoFormModal({
   isSubmitting,
   submitError,
   onClose,
+  variant = 'tenant',
   onSubmit,
 }: MetodoPagoFormModalProps) {
   const [nombre, setNombre] = useState('');
@@ -182,6 +185,14 @@ export function MetodoPagoFormModal({
   if (!open) return null;
 
   const mode = editTarget ? 'edit' : 'create';
+  const esEvento = variant === 'evento';
+  const title = esEvento
+    ? mode === 'create'
+      ? 'Nuevo método de pago del evento'
+      : 'Editar método de pago del evento'
+    : mode === 'create'
+      ? 'Crear método de pago'
+      : 'Editar método de pago';
   const qrDisplayUrl = qrPreviewUrl ?? (qrRemove ? null : editTarget?.qr_url ?? null);
 
   return (
@@ -197,20 +208,23 @@ export function MetodoPagoFormModal({
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label={mode === 'create' ? 'Crear método de pago' : 'Editar método de pago'}
+        aria-label={title}
         className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
         <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
             <h2 className="font-grit-title text-lg font-semibold text-grit-text">
-              {mode === 'create' ? 'Crear método de pago' : 'Editar método de pago'}
+              {title}
             </h2>
             <p className="mt-1 text-xs text-grit-subtext">
-              Configura los datos del método de pago para esta organización.
+              {esEvento
+                ? 'Este método solo existe en este evento. No se guarda en los métodos de pago de tu organización.'
+                : 'Configura los datos del método de pago para esta organización.'}
             </p>
           </div>
           <button
             type="button"
+            aria-label="Cerrar"
             onClick={onClose}
             disabled={isSubmitting}
             className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
@@ -418,29 +432,31 @@ export function MetodoPagoFormModal({
           </div>
 
           {/* Activo toggle */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={activo}
-              onClick={() => setActivo(!activo)}
-              disabled={isSubmitting}
-              className={[
-                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-grit-cyan/40 focus:ring-offset-2 focus:ring-offset-grit-bg disabled:opacity-50',
-                activo ? 'bg-grit-cyan' : 'bg-grit-subtext/20',
-              ].join(' ')}
-            >
-              <span
+          {!esEvento && (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={activo}
+                onClick={() => setActivo(!activo)}
+                disabled={isSubmitting}
                 className={[
-                  'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200',
-                  activo ? 'translate-x-5' : 'translate-x-0',
+                  'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-grit-cyan/40 focus:ring-offset-2 focus:ring-offset-grit-bg disabled:opacity-50',
+                  activo ? 'bg-grit-cyan' : 'bg-grit-subtext/20',
                 ].join(' ')}
-              />
-            </button>
-            <span className="text-sm text-grit-subtext">
-              {activo ? 'Activo' : 'Inactivo'}
-            </span>
-          </div>
+              >
+                <span
+                  className={[
+                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200',
+                    activo ? 'translate-x-5' : 'translate-x-0',
+                  ].join(' ')}
+                />
+              </button>
+              <span className="text-sm text-grit-subtext">
+                {activo ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+          )}
 
           {submitError ? (
             <div
