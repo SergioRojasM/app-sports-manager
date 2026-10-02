@@ -85,9 +85,9 @@ Monthly values SHALL use the same per-training rules as the period KPIs, restric
 - **THEN** the occupancy line SHALL break at July instead of dropping to 0
 
 ### Requirement: Operación tables
-Row 4 SHALL render two tables side by side from `lg`:
+Row 4 SHALL render one table at full width:
 - **"Reservas por disciplina"** — columns **Disciplina, Entrenamientos, Reservas, % Ocupación promedio, % Asistencia promedio** from `bookingByDiscipline[]` (`trainingCount`, `validBookingCount`, `averageOccupancyPercent`, `averageAttendancePercent`).
-- **"Reservas por tipo de entrenamiento"** — the same columns with the first column **Tipo**, from `bookingByPublicStatus[]`, with exactly two rows labelled **"Público"** (published to the marketplace, `es_publico`) and **"Privado"**, in that order.
+The "Reservas por tipo de entrenamiento" table SHALL NOT be rendered (US-0124), and the row SHALL NOT leave an empty grid cell.
 
 Null percentages SHALL render "Sin capacidad" (occupancy) or "Sin datos" (attendance).
 
@@ -98,9 +98,9 @@ Both SHALL have the columns **#, Atleta, Reservas, Asistencias**.
 
 Row 6 SHALL keep "Próximas sesiones con alta ocupación" unchanged, at full width.
 
-#### Scenario: Public/private labels
-- **WHEN** the type table renders
-- **THEN** it SHALL show the rows "Público" and "Privado" and no English labels
+#### Scenario: No training-type table
+- **WHEN** the Operación tab renders
+- **THEN** no "Reservas por tipo de entrenamiento" panel SHALL be shown and "Reservas por disciplina" SHALL span the full row
 
 #### Scenario: Athletes without bookings
 - **WHEN** 4 active athletes have no bookings in range
@@ -137,8 +137,10 @@ Every figure in the Equipo tab SHALL consider only athletes (`bi.fct_miembros.es
 `get_tenant_bi_dashboard` SHALL provide, in addition to the fields defined by `analitica-resumen-dashboard`:
 - `revenue.averageMonthlyRevenue`, `revenue.monthToDateRevenue`; `revenueByPlan[]`, `revenueByPaymentMethod[]` and `topAthletesByRevenue[]` with `subscriptionCount`, `paymentCount`, `totalRevenue`, `recognizedRevenue` and `pendingRevenue` over validated + pending payments in range.
 - `subscriptions.monthlySold[].withValidatedPaymentCount` and `.withoutValidatedPaymentCount`.
-- `operations.averageMonthlyTrainings`, `operations.averageMonthlyBookings`; `monthlyBookingAverage[].averageOccupancyPercent` and `.averageAttendancePercent` (nullable); `bookingByDiscipline[]` and `bookingByPublicStatus[]` with `trainingCount`, `averageOccupancyPercent` and `averageAttendancePercent`; `bookingByPublicStatus[].label` "Público" / "Privado"; `topAthletesByBookings` with up to 10 rows; `bottomAthletesByBookings[]` (`athleteId`, `athleteName`, `validBookingCount`, `attendanceCount`), up to 10 rows.
+- `operations.averageMonthlyTrainings`, `operations.averageMonthlyBookings`; `monthlyBookingAverage[].averageOccupancyPercent` and `.averageAttendancePercent` (nullable); `bookingByDiscipline[]` with `trainingCount`, `averageOccupancyPercent` and `averageAttendancePercent`; `topAthletesByBookings` with up to 10 rows; `bottomAthletesByBookings[]` (`athleteId`, `athleteName`, `validBookingCount`, `attendanceCount`), up to 10 rows.
 - `team.membersByStatus` over athletes only; `team.activeAthletesByPlan[]`; `team.membersWithoutSubscription[].latestSubscriptionDate`, and `latestBookingDate` as defined above.
+
+The RPC result SHALL NOT contain `bookingByPublicStatus`, and the `bi` schema SHALL NOT expose an `es_publico` column (US-0124).
 
 Fields used by Resumen (`totalRevenue`, `recognizedRevenue`, `pendingPaymentAmount`, `pendingPaymentCount`, `monthlyRevenue`, `scheduledTrainingCount`, `averageBookingsPerTraining`, `averageOccupancyPercent`, `averageAttendancePercent`, `monthlyBookingAverage[].averageBookingsPerTraining`, `bookingByDiscipline[].validBookingCount`, `activeAthleteCount`, `activeAthletesWithoutSubscriptionCount`, `subscriptions.soldCount/monthlySold[].subscriptionCount/soldByPlan`) MUST keep their values.
 
@@ -149,4 +151,8 @@ Fields used by Resumen (`totalRevenue`, `recognizedRevenue`, `pendingPaymentAmou
 #### Scenario: Revenue tables add up
 - **WHEN** the RPC returns for any range
 - **THEN** `Σ revenueByPlan.totalRevenue = Σ revenueByPaymentMethod.totalRevenue = revenue.totalRevenue`
+
+#### Scenario: No public/private breakdown
+- **WHEN** the RPC returns for any tenant and range
+- **THEN** `operations` SHALL NOT contain a `bookingByPublicStatus` key
 

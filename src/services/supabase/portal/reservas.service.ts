@@ -878,9 +878,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     p_deductions: deductions,
     p_formulario_plantilla_id: input.formulario_plantilla_id ?? null,
     p_formulario_respuesta: input.formulario_respuesta ?? null,
-    p_permitir_pendiente: false,
     p_suscripcion_id: null,
-    p_plan_purchase: null,
   });
 
   if (error) {

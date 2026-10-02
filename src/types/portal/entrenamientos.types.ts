@@ -85,7 +85,6 @@ export type TrainingInstance = {
   fecha_hora: string | null;
   duracion_minutos: number | null;
   cupo_maximo: number | null;
-  visible_para: string | null;
   estado: TrainingInstanceStatus;
   reserva_antelacion_horas: number | null;
   cancelacion_antelacion_horas: number | null;
