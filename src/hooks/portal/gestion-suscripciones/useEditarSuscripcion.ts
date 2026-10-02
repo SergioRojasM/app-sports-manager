@@ -78,7 +78,11 @@ export function useEditarSuscripcion({
         setPlanes(
           data
             .filter((p) => p.activo)
-            .map((p) => ({ id: p.id, nombre: p.nombre })),
+            // "Activo no visible" plans are assignable by the admin; flag them in the label
+            .map((p) => ({
+              id: p.id,
+              nombre: p.visible_atletas ? p.nombre : `${p.nombre} (No visible)`,
+            })),
         );
       })
       .catch(() => {
