@@ -457,6 +457,7 @@ async function validateBookingRestrictions(
           code: 'SERVICIO_REQUERIDO',
           message: `Este entrenamiento requiere una suscripción activa con unidades disponibles en el servicio: ${svcName}.`,
           ...(svcNameRaw ? { servicioNombre: svcNameRaw } : {}),
+          ofrecerPlan: true,
         };
       }
     }
@@ -799,6 +800,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
         ...(exhaustedSvcName ? { servicioNombre: exhaustedSvcName } : {}),
+        ofrecerPlan: true,
       };
     }
 
@@ -887,6 +889,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'SERVICIO_REQUERIDO',
         message: 'La suscripción utilizada ya no está activa. No es posible completar la reserva.',
+        ofrecerPlan: true,
       };
     }
     if (error.code === 'P0001' && error.message?.includes('UNIDADES_AGOTADAS')) {
@@ -894,6 +897,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
+        ofrecerPlan: true,
       };
     }
     // US-0110: the deferred plan purchase is re-validated inside the RPC, at submit time,
