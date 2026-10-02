@@ -57,9 +57,25 @@ export type Plan = {
   activo: boolean;
   /** When true, the plan is visible to and purchasable by non-members (US-0093). */
   es_publico: boolean;
+  /** When false, athletes can neither see nor acquire the plan; only an administrator assigns it (US-0126). */
+  visible_atletas: boolean;
   created_at: string;
   updated_at: string;
 };
+
+/** UI status derived from `activo` + `visible_atletas` (US-0126). */
+export type PlanEstado = 'activo' | 'activo_no_visible' | 'inactivo';
+
+export const PLAN_ESTADO_LABELS: Record<PlanEstado, string> = {
+  activo: 'Activo',
+  activo_no_visible: 'Activo no visible',
+  inactivo: 'Inactivo',
+};
+
+export function getPlanEstado(plan: Pick<Plan, 'activo' | 'visible_atletas'>): PlanEstado {
+  if (!plan.activo) return 'inactivo';
+  return plan.visible_atletas ? 'activo' : 'activo_no_visible';
+}
 
 export type PlanDisciplina = {
   id: string;
@@ -74,6 +90,7 @@ export type PlanWithDisciplinas = Plan & {
 };
 
 export type PlanTableItem = PlanWithDisciplinas & {
+  estado: PlanEstado;
   statusLabel: string;
   vigenciaLabel: string;       // e.g. "3 meses"
   disciplinaNames: string[];   // resolved discipline names for display
@@ -87,6 +104,7 @@ export type CreatePlanInput = {
   beneficios?: string | null;
   activo?: boolean;
   esPublico?: boolean;
+  visibleAtletas?: boolean;
   disciplinaIds: string[];
 };
 
@@ -101,6 +119,7 @@ export type PlanFormValues = {
   beneficios: string[];     // each item is one benefit text; stored concatenated with '|'
   activo: boolean;
   es_publico: boolean;
+  visible_atletas: boolean;
   disciplinaIds: string[];
 };
 
@@ -123,6 +142,7 @@ export type PlanServiceErrorCode =
   | 'duplicate_name'
   | 'fk_dependency'
   | 'forbidden'
+  | 'hidden_public'
   | 'unknown';
 
 export class PlanServiceError extends Error {
