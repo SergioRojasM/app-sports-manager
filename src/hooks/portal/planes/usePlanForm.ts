@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import type {
+  PlanEstado,
   PlanWithDisciplinas,
   PlanFieldErrors,
   PlanFormValues,
@@ -20,6 +21,7 @@ const EMPTY_FORM: PlanFormValues = {
   beneficios: [],
   activo: true,
   es_publico: false,
+  visible_atletas: true,
   disciplinaIds: [],
 };
 
@@ -41,6 +43,7 @@ function toFormValues(plan: PlanWithDisciplinas): PlanFormValues {
     beneficios: plan.beneficios ? plan.beneficios.split('|').filter(Boolean) : [],
     activo: plan.activo,
     es_publico: plan.es_publico,
+    visible_atletas: plan.visible_atletas,
     disciplinaIds: [...plan.disciplinas],
   };
 }
@@ -118,6 +121,17 @@ export function usePlanForm() {
       const next = { ...current };
       delete next[field as PlanFormField];
       return next;
+    });
+  }, []);
+
+  // Inactivating leaves visible_atletas untouched so a hidden plan stays hidden when reactivated
+  const setEstado = useCallback((estado: PlanEstado) => {
+    setFormValues((current) => {
+      if (estado === 'inactivo') return { ...current, activo: false };
+      if (estado === 'activo_no_visible') {
+        return { ...current, activo: true, visible_atletas: false, es_publico: false };
+      }
+      return { ...current, activo: true, visible_atletas: true };
     });
   }, []);
 
@@ -284,6 +298,7 @@ export function usePlanForm() {
     setFormFromPlan,
     setFormForDuplicate,
     updateField,
+    setEstado,
     addTipo,
     updateTipo,
     removeTipo,

@@ -36,6 +36,7 @@ type PlanRow = {
   beneficios: string | null;
   activo: boolean;
   es_publico: boolean;
+  visible_atletas: boolean;
   created_at: string;
   updated_at: string;
   planes_disciplina: { disciplina_id: string }[];
@@ -43,7 +44,7 @@ type PlanRow = {
 };
 
 const PLAN_COLUMNS =
-  'id, tenant_id, nombre, descripcion, tipo, beneficios, activo, es_publico, created_at, updated_at';
+  'id, tenant_id, nombre, descripcion, tipo, beneficios, activo, es_publico, visible_atletas, created_at, updated_at';
 
 const PLAN_WITH_RELATIONS_COLUMNS = `${PLAN_COLUMNS}, planes_disciplina(disciplina_id), plan_tipos(*, plan_tipos_servicios(servicio_id, unidades, servicios(nombre)))`;
 
@@ -67,6 +68,7 @@ function mapPlanRow(row: PlanRow): PlanWithDisciplinas {
     beneficios: row.beneficios,
     activo: row.activo,
     es_publico: row.es_publico,
+    visible_atletas: row.visible_atletas,
     created_at: row.created_at,
     updated_at: row.updated_at,
     disciplinas: (row.planes_disciplina ?? []).map((pd) => pd.disciplina_id),
@@ -88,6 +90,10 @@ function mapPostgrestError(error: { code?: string; constraint?: string } | null)
 
   if (error.code === '23505' && error.constraint === 'planes_tenant_nombre_uk') {
     return new PlanServiceError('duplicate_name', 'Ya existe un plan con ese nombre en esta organización.');
+  }
+
+  if (error.code === '23514') {
+    return new PlanServiceError('hidden_public', 'Un plan no visible no puede ser público.');
   }
 
   if (error.code === '23503') {
@@ -131,6 +137,7 @@ export const planesService = {
       .eq('tenant_id', tenantId)
       .eq('es_publico', true)
       .eq('activo', true)
+      .eq('visible_atletas', true)
       .order('nombre');
 
     if (error) {
@@ -145,7 +152,8 @@ export const planesService = {
    * and member-only alike. Same shape as `getPlanesPublicos`, just without the
    * `es_publico` filter — RLS (`planes_select_authenticated`) is the real gate, so a
    * caller whose membership check was wrong (or stale) still gets only the public rows
-   * back instead of leaking an internal plan.
+   * back instead of leaking an internal plan. "Activo no visible" plans are admin-assigned
+   * only and never belong to a catalog (US-0126).
    */
   async getPlanesMiembro(tenantId: string): Promise<PlanWithDisciplinas[]> {
     const supabase = createClient();
@@ -155,6 +163,7 @@ export const planesService = {
       .select(PLAN_WITH_RELATIONS_COLUMNS)
       .eq('tenant_id', tenantId)
       .eq('activo', true)
+      .eq('visible_atletas', true)
       .order('nombre');
 
     if (error) {
@@ -176,7 +185,9 @@ export const planesService = {
         tipo: toNullable(input.tipo),
         beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
-        es_publico: input.esPublico ?? false,
+        // A hidden plan can never be public (planes_no_visible_no_publico_ck)
+        es_publico: (input.visibleAtletas ?? true) && (input.esPublico ?? false),
+        visible_atletas: input.visibleAtletas ?? true,
       })
       .select(PLAN_COLUMNS)
       .single();
@@ -215,7 +226,9 @@ export const planesService = {
         tipo: toNullable(input.tipo),
         beneficios: toNullable(input.beneficios),
         activo: input.activo ?? true,
-        es_publico: input.esPublico ?? false,
+        // A hidden plan can never be public (planes_no_visible_no_publico_ck)
+        es_publico: (input.visibleAtletas ?? true) && (input.esPublico ?? false),
+        visible_atletas: input.visibleAtletas ?? true,
       })
       .eq('id', input.planId)
       .eq('tenant_id', input.tenantId)

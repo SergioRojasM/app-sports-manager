@@ -7,7 +7,9 @@ import { disciplinesService } from '@/services/supabase/portal/disciplines.servi
 import { usePlanForm } from './usePlanForm';
 import type { Discipline } from '@/types/portal/disciplines.types';
 import {
+  PLAN_ESTADO_LABELS,
   PlanServiceError,
+  getPlanEstado,
   type CreatePlanInput,
   type PlanWithDisciplinas,
   type PlanTableItem,
@@ -36,6 +38,7 @@ type UsePlanesResult = PlanesViewModel & {
   deletePlan: (plan: PlanWithDisciplinas) => Promise<void>;
   closeModal: () => void;
   updateField: ReturnType<typeof usePlanForm>['updateField'];
+  setEstado: ReturnType<typeof usePlanForm>['setEstado'];
   addTipo: ReturnType<typeof usePlanForm>['addTipo'];
   updateTipo: ReturnType<typeof usePlanForm>['updateTipo'];
   removeTipo: ReturnType<typeof usePlanForm>['removeTipo'];
@@ -45,7 +48,7 @@ type UsePlanesResult = PlanesViewModel & {
 };
 
 function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): PlanTableItem {
-  const status = plan.activo ? 'Activo' : 'Inactivo';
+  const estado = getPlanEstado(plan);
 
   // Derive vigenciaLabel from active plan_tipos
   const activeTipos = (plan.plan_tipos ?? []).filter((t) => t.activo);
@@ -65,7 +68,8 @@ function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): P
 
   return {
     ...plan,
-    statusLabel: status,
+    estado,
+    statusLabel: PLAN_ESTADO_LABELS[estado],
     vigenciaLabel: vigencia,
     disciplinaNames,
   };
@@ -256,6 +260,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
           esPublico: form.formValues.es_publico,
+          visibleAtletas: form.formValues.visible_atletas,
           disciplinaIds: form.formValues.disciplinaIds,
         };
 
@@ -271,6 +276,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
           esPublico: form.formValues.es_publico,
+          visibleAtletas: form.formValues.visible_atletas,
           disciplinaIds: form.formValues.disciplinaIds,
         };
 
@@ -343,6 +349,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     deletePlan,
     closeModal,
     updateField: form.updateField,
+    setEstado: form.setEstado,
     addTipo: form.addTipo,
     updateTipo: form.updateTipo,
     removeTipo: form.removeTipo,

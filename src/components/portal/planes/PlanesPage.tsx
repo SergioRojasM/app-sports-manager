@@ -63,6 +63,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
     deletePlan,
     closeModal,
     updateField,
+    setEstado,
     addTipo,
     updateTipo,
     removeTipo,
@@ -136,6 +137,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
         onClose={closeModal}
         onSubmit={submit}
         onChangeField={updateField}
+        onChangeEstado={setEstado}
         onAddTipo={addTipo}
         onUpdateTipo={updateTipo}
         onRemoveTipo={removeTipo}

@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import type { Discipline } from '@/types/portal/disciplines.types';
-import type {
-  PlanFieldErrors,
-  PlanFormValues,
-  PlanFormField,
-  PlanTipoFormValues,
+import {
+  PLAN_ESTADO_LABELS,
+  getPlanEstado,
+  type PlanEstado,
+  type PlanFieldErrors,
+  type PlanFormValues,
+  type PlanFormField,
+  type PlanTipoFormValues,
 } from '@/types/portal/planes.types';
 import type { TipoFieldErrors } from '@/hooks/portal/planes/usePlanForm';
 import type { Servicio, PlanTipoServicioRow } from '@/types/portal/servicios.types';
@@ -30,6 +33,7 @@ type PlanFormModalProps = {
   onClose: () => void;
   onSubmit: () => Promise<boolean>;
   onChangeField: (field: PlanFormField | 'activo', value: string | boolean | string[]) => void;
+  onChangeEstado: (estado: PlanEstado) => void;
   onAddTipo: () => void;
   onUpdateTipo: (index: number, values: Partial<PlanTipoFormValues>) => void;
   onRemoveTipo: (index: number) => void;
@@ -52,6 +56,7 @@ export function PlanFormModal({
   onClose,
   onSubmit,
   onChangeField,
+  onChangeEstado,
   onAddTipo,
   onUpdateTipo,
   onRemoveTipo,
@@ -89,6 +94,8 @@ export function PlanFormModal({
   }
 
   const activeDisciplines = disciplines.filter((d) => d.activo);
+  const estado = getPlanEstado(values);
+  const isHidden = estado === 'activo_no_visible';
 
   const handleDisciplineToggle = (disciplinaId: string) => {
     const current = values.disciplinaIds;
@@ -441,19 +448,31 @@ export function PlanFormModal({
             ) : null}
           </div>
 
-          {/* Active toggle */}
-          <div className="flex items-center gap-2">
-            <input
-              id="plan-active"
-              type="checkbox"
-              checked={values.activo}
-              onChange={(event) => onChangeField('activo', event.target.checked)}
-              disabled={isSubmitting}
-              className="rounded border-grit-glass-border bg-grit-bg"
-            />
-            <label htmlFor="plan-active" className="text-sm text-grit-text">
-              Plan activo
+          {/* Status: Activo / Activo no visible / Inactivo */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="plan-estado">
+              Estado
             </label>
+            <select
+              id="plan-estado"
+              value={estado}
+              onChange={(event) => onChangeEstado(event.target.value as PlanEstado)}
+              disabled={isSubmitting}
+              aria-describedby={isHidden ? 'plan-estado-help' : undefined}
+              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
+            >
+              {(Object.keys(PLAN_ESTADO_LABELS) as PlanEstado[]).map((key) => (
+                <option key={key} value={key}>
+                  {PLAN_ESTADO_LABELS[key]}
+                </option>
+              ))}
+            </select>
+            {isHidden ? (
+              <p id="plan-estado-help" className="mt-1 text-xs text-grit-subtext">
+                Los atletas no pueden ver ni adquirir este plan. Solo un administrador puede asignarlo
+                desde Gestión de suscripciones.
+              </p>
+            ) : null}
           </div>
 
           {/* Public toggle */}
@@ -464,16 +483,18 @@ export function PlanFormModal({
                 type="checkbox"
                 checked={values.es_publico}
                 onChange={(event) => onChangeField('es_publico', event.target.checked)}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !values.visible_atletas}
+                aria-describedby="plan-public-help"
                 className="rounded border-grit-glass-border bg-grit-bg"
               />
               <label htmlFor="plan-public" className="text-sm text-grit-text">
                 Plan público
               </label>
             </div>
-            <p className="mt-1 pl-6 text-xs text-grit-subtext">
-              Los planes públicos pueden ser vistos y adquiridos por personas que no pertenecen a la
-              organización.
+            <p id="plan-public-help" className="mt-1 pl-6 text-xs text-grit-subtext">
+              {values.visible_atletas
+                ? 'Los planes públicos pueden ser vistos y adquiridos por personas que no pertenecen a la organización.'
+                : 'Un plan no visible no puede ser público.'}
             </p>
           </div>
 

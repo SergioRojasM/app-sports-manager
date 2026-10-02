@@ -230,7 +230,7 @@ export function CrearSuscripcionModal({
               <option value="">Seleccionar plan</option>
               {planes.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.nombre}
+                  {p.visible_atletas ? p.nombre : `${p.nombre} (No visible)`}
                 </option>
               ))}
             </>
