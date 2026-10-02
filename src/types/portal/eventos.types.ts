@@ -47,7 +47,11 @@ export type EventoEntrenadorSnapshot = {
   experiencia: string;
 };
 
-/** Payment method accepted for the event, copied from `tenant_metodos_pago` (US-0119). */
+/**
+ * Payment method accepted for the event (`eventos.metodos_pago`) or for one ticket
+ * (`evento_entradas.metodos_pago`): copied from `tenant_metodos_pago` (US-0119) or created only
+ * for the event, never stored in that table (US-0130).
+ */
 export type EventoMetodoPagoSnapshot = {
   id: string;
   nombre: string;
@@ -57,7 +61,12 @@ export type EventoMetodoPagoSnapshot = {
   comentarios: string | null;
   /** Absent on snapshots saved before US-0128. */
   qr_url?: string | null;
+  /** `'evento'`: created in the wizard, with a client-generated id. Absent means `'tenant'` (US-0130). */
+  origen?: 'tenant' | 'evento';
 };
+
+/** Where a wizard payment method lives: all tickets (the event) or one ticket (US-0130). */
+export type EventoMetodoPagoTarget = { tipo: 'evento' } | { tipo: 'entrada'; clientKey: string };
 
 /** One row of `public.eventos` (US-0118; snapshots and drafts added in US-0119). */
 export type Evento = {
@@ -131,6 +140,8 @@ export type EventoEntrada = {
   valida_hasta: string | null;
   valor: number | null;
   orden: number;
+  /** Payment methods valid only for this ticket (US-0130). */
+  metodos_pago: EventoMetodoPagoSnapshot[];
   created_at: string;
   updated_at: string;
 };
@@ -186,6 +197,7 @@ export type GuardarEventoPayloadEntrada = {
   valida_hasta: string | null;
   valor: number | null;
   orden: number;
+  metodos_pago: EventoMetodoPagoSnapshot[];
   cupones: GuardarEventoPayloadCupon[];
 };
 
@@ -235,6 +247,8 @@ export type EventoEntradaDraft = {
   validaDesde: string;
   validaHasta: string;
   cupones: EventoCuponDraft[];
+  /** Payment methods valid only for this ticket (US-0130). */
+  metodosPago: EventoMetodoPagoSnapshot[];
 };
 
 export type EventoDraft = {

@@ -213,7 +213,16 @@ export function useEventoCompra({ evento, modo }: UseEventoCompraOptions) {
   const vendibles = useMemo(() => entradas.filter((entrada) => entradaVendible(entrada)), [entradas]);
   const entrada = vendibles.find((item) => item.id === entradaId) ?? null;
   const total = entrada ? (cuponAplicado?.total ?? entrada.valor) : 0;
-  const metodosOnline = useMemo(() => evento.metodosPago.filter((metodo) => metodo.tipo !== 'efectivo'), [evento.metodosPago]);
+  // One list for the buyer: methods for all tickets, then the selected ticket's own (US-0130)
+  const metodosEntrada = entrada?.metodosPago;
+  const metodosOnline = useMemo(() => {
+    const vistos = new Set<string>();
+    return [...evento.metodosPago, ...(metodosEntrada ?? [])].filter((metodo) => {
+      if (metodo.tipo === 'efectivo' || vistos.has(metodo.id)) return false;
+      vistos.add(metodo.id);
+      return true;
+    });
+  }, [evento.metodosPago, metodosEntrada]);
   const ventaCerrada = ventaCerradaPorAntelacion(evento);
 
   const bloqueo: EventoCompraBloqueo = loading
@@ -242,7 +251,12 @@ export function useEventoCompra({ evento, modo }: UseEventoCompraOptions) {
     setEntradaId(id);
     setCuponAplicado(null);
     setCuponError(null);
-  }, []);
+    // The chosen method may be specific to the previous ticket (US-0130)
+    const propios = entradas.find((item) => item.id === id)?.metodosPago ?? [];
+    setMetodoPagoId((actual) =>
+      actual && [...evento.metodosPago, ...propios].some((metodo) => metodo.id === actual) ? actual : null,
+    );
+  }, [entradas, evento.metodosPago]);
 
   const cambiarCupon = useCallback((value: string) => {
     setCuponInput(value.toUpperCase());

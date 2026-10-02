@@ -365,7 +365,7 @@ export const eventoComprasService = {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('evento_entradas')
-      .select('id, tipo_entrada, nombre, valor, valida_desde, valida_hasta, eventos_id_bundle, orden')
+      .select('id, tipo_entrada, nombre, valor, valida_desde, valida_hasta, eventos_id_bundle, orden, metodos_pago')
       .eq('evento_id', eventoId)
       .not('nombre', 'is', null)
       .not('valor', 'is', null)
@@ -382,6 +382,7 @@ export const eventoComprasService = {
       validaHasta: row.valida_hasta as string | null,
       eventosIdBundle: Array.isArray(row.eventos_id_bundle) ? (row.eventos_id_bundle as string[]) : [],
       orden: row.orden as number,
+      metodosPago: Array.isArray(row.metodos_pago) ? (row.metodos_pago as EventoMetodoPagoSnapshot[]) : [],
     }));
   },
 

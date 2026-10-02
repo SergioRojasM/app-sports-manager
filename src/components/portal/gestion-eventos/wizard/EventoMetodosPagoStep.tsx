@@ -1,32 +1,21 @@
 'use client';
 
-import { useMemo } from 'react';
-import { GritButton, GritIcon, cx } from '@/components/ui';
+import { useMemo, useRef, useState } from 'react';
+import { GritIcon } from '@/components/ui';
 import { ERROR_KEYS, previewPrecio } from '@/lib/portal/eventos-wizard.utils';
-import { formatEventoFecha, formatEventoHora, formatEventoPrecio } from '@/lib/portal/eventos.utils';
-import { FieldError, WizardSection, errorDomId, fieldDomId } from './fields';
+import { formatCop, formatEventoFecha, formatEventoHora, formatEventoPrecio } from '@/lib/portal/eventos.utils';
+import { EventoMetodoPagoAgregarModal } from './EventoMetodoPagoAgregarModal';
+import { EventoMetodosPagoList } from './EventoMetodosPagoList';
+import { WizardSection } from './fields';
 import type { EventoWizardState } from '@/hooks/portal/gestion-eventos/useEventoWizard';
 import type { EventoWizardOptions } from '@/hooks/portal/gestion-eventos/useEventoWizardOptions';
-import type { EventoMetodoPagoSnapshot } from '@/types/portal/eventos.types';
-import { METODO_PAGO_TIPO_LABELS, type MetodoPago } from '@/types/portal/metodos-pago.types';
+import type { EventoEntradaDraft, EventoMetodoPagoSnapshot, EventoMetodoPagoTarget } from '@/types/portal/eventos.types';
 
 type EventoMetodosPagoStepProps = {
   wizard: EventoWizardState;
   options: EventoWizardOptions;
   disabled: boolean;
 };
-
-function toSnapshot(metodo: MetodoPago): EventoMetodoPagoSnapshot {
-  return {
-    id: metodo.id,
-    nombre: metodo.nombre,
-    tipo: metodo.tipo,
-    valor: metodo.valor,
-    url: metodo.url,
-    comentarios: metodo.comentarios,
-    qr_url: metodo.qr_url ?? null,
-  };
-}
 
 function SummaryRow({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
@@ -40,152 +29,135 @@ function SummaryRow({ icon, label, value }: { icon: string; label: string; value
   );
 }
 
+type MetodoDialog = { target: EventoMetodoPagoTarget; editando: EventoMetodoPagoSnapshot | null };
+
+/** Valid amount of a ticket row, or null while it is empty or not a number. */
+function valorEntrada(entrada: EventoEntradaDraft): number | null {
+  if (entrada.valor.trim() === '') return null;
+  const valor = Number(entrada.valor);
+  return Number.isNaN(valor) || valor < 0 ? null : valor;
+}
+
 export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetodosPagoStepProps) {
   const { draft, errors } = wizard;
-  const selectedIds = useMemo(() => new Set(draft.metodosPago.map((metodo) => metodo.id)), [draft.metodosPago]);
+  const [dialog, setDialog] = useState<MetodoDialog | null>(null);
+  // The control that opened the dialog gets the focus back when it closes
+  const triggerRef = useRef<HTMLElement | null>(null);
   const activeIds = useMemo(() => new Set(options.metodosPago.map((metodo) => metodo.id)), [options.metodosPago]);
-  // Stored snapshots of methods that are no longer active stay listed (checked) until the admin removes them
-  const stale = draft.metodosPago.filter((metodo) => !activeIds.has(metodo.id));
 
   const precios = previewPrecio(draft);
   const anyPaid = precios.some((precio) => precio.precio > 0);
   const cuponesCount = draft.entradas.reduce((total, entrada) => total + entrada.cupones.length, 0);
+  const metodosEntradasCount = draft.entradas.reduce((total, entrada) => total + entrada.metodosPago.length, 0);
   const formulario = options.formularios.find((plantilla) => plantilla.id === draft.formularioId);
-  const error = errors[ERROR_KEYS.metodosPago];
-  // Cash is never offered at checkout (US-0121): a paid event with only cash cannot be bought online
-  const soloEfectivo = anyPaid && draft.metodosPago.length > 0 && draft.metodosPago.every((metodo) => metodo.tipo === 'efectivo');
+  // Cash is never offered at checkout (US-0121): a paid ticket with only cash cannot be bought online
+  const soloEfectivo = draft.entradas.filter((entrada) => {
+    const metodos = [...draft.metodosPago, ...entrada.metodosPago];
+    return (valorEntrada(entrada) ?? 0) > 0 && metodos.length > 0 && metodos.every((metodo) => metodo.tipo === 'efectivo');
+  });
+
+  const openDialog = (target: EventoMetodoPagoTarget, editando: EventoMetodoPagoSnapshot | null) => {
+    triggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setDialog({ target, editando });
+  };
+
+  const closeDialog = () => {
+    setDialog(null);
+    const trigger = triggerRef.current;
+    requestAnimationFrame(() => trigger?.focus());
+  };
+
+  // Tenant methods not yet in the dialog's list; a ticket also skips the ones that apply to all tickets
+  const disponibles = useMemo(() => {
+    if (!dialog) return [];
+    const usados = new Set(draft.metodosPago.map((metodo) => metodo.id));
+    const { target } = dialog;
+    if (target.tipo === 'entrada') {
+      const entrada = draft.entradas.find((item) => item.clientKey === target.clientKey);
+      for (const metodo of entrada?.metodosPago ?? []) usados.add(metodo.id);
+    }
+    return options.metodosPago.filter((metodo) => !usados.has(metodo.id));
+  }, [dialog, draft.metodosPago, draft.entradas, options.metodosPago]);
 
   return (
     <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-      <WizardSection
-        title="Métodos de pago del evento"
-        icon="payments"
-        description="Elige cuáles de los métodos de pago de tu organización se aceptan para este evento. Los métodos que selecciones se mostrarán a quienes adquieran entradas para este evento."
-        action={
-          options.metodosPago.length > 0 ? (
-            <div className="flex gap-2">
-              <GritButton
-                variant="ghost"
-                size="sm"
-                onClick={() => wizard.setMetodosPago([...stale, ...options.metodosPago.map(toSnapshot)])}
-                disabled={disabled}
-              >
-                Seleccionar todos
-              </GritButton>
-              <GritButton variant="ghost" size="sm" onClick={() => wizard.setMetodosPago([])} disabled={disabled}>
-                Quitar todos
-              </GritButton>
-            </div>
-          ) : undefined
-        }
-      >
-        <fieldset
-          id={fieldDomId(ERROR_KEYS.metodosPago)}
-          tabIndex={-1}
-          aria-describedby={error ? errorDomId(ERROR_KEYS.metodosPago) : undefined}
-          className="space-y-2 outline-none"
+      <div className="space-y-5">
+        <WizardSection
+          title="Métodos para todas las entradas"
+          icon="payments"
+          description="Estos métodos se muestran a quienes compren cualquier entrada del evento."
         >
-          <legend className="sr-only">Métodos de pago</legend>
+          <EventoMetodosPagoList
+            label="Métodos de pago para todas las entradas"
+            metodos={draft.metodosPago}
+            activeIds={activeIds}
+            emptyText="Aún no has agregado métodos de pago para todas las entradas."
+            errorKey={ERROR_KEYS.metodosPago}
+            error={errors[ERROR_KEYS.metodosPago]}
+            disabled={disabled}
+            onAdd={() => openDialog({ tipo: 'evento' }, null)}
+            onEdit={(metodo) => openDialog({ tipo: 'evento' }, metodo)}
+            onRemove={(metodoId) => wizard.removeMetodoPago({ tipo: 'evento' }, metodoId)}
+          />
+          {!anyPaid && precios.length > 0 && (
+            <p className="font-grit-body text-xs text-grit-subtext">
+              Todas las entradas son gratuitas: no es obligatorio seleccionar métodos de pago.
+            </p>
+          )}
+        </WizardSection>
 
-          {options.metodosPago.length === 0 && stale.length === 0 && (
-            <div className="rounded-grit-md border border-dashed border-grit-glass-border p-4 font-grit-body text-sm text-grit-subtext">
-              <p>Tu organización no tiene métodos de pago activos.</p>
-              <GritButton
-                variant="ghost"
-                size="sm"
-                icon="open_in_new"
-                href={`/portal/orgs/${wizard.tenantId}/gestion-organizacion`}
-                className="mt-2"
-              >
-                Configurar métodos de pago
-              </GritButton>
-            </div>
+        <WizardSection
+          title="Métodos para una entrada específica"
+          icon="confirmation_number"
+          description="Estos métodos solo se muestran a quienes compren la entrada indicada."
+        >
+          {draft.entradas.length === 0 && (
+            <p className="rounded-grit-md border border-dashed border-grit-glass-border p-3 font-grit-body text-sm text-grit-subtext">
+              Agrega entradas en el paso anterior para asignarles métodos de pago.
+            </p>
           )}
 
-          {stale.map((metodo) => (
-            <label
-              key={metodo.id}
-              className="flex cursor-pointer items-start gap-3 rounded-grit-md border border-grit-discipline-run/50 bg-grit-card p-3"
-            >
-              <input
-                type="checkbox"
-                checked
-                onChange={() => wizard.toggleMetodoPago(metodo)}
-                disabled={disabled}
-                className="mt-1 h-4 w-4 accent-grit-cyan"
-              />
-              <span className="min-w-0">
-                <span className="block font-grit-body text-sm font-semibold text-grit-text">
-                  {metodo.nombre} <span className="font-normal text-grit-discipline-run">(inactivo o eliminado)</span>
-                </span>
-                <span className="block font-grit-body text-xs text-grit-subtext">
-                  Ya no está activo en tu organización. Si lo quitas, no podrás volver a seleccionarlo.
-                </span>
-              </span>
-            </label>
-          ))}
-
-          {options.metodosPago.map((metodo) => {
-            const checked = selectedIds.has(metodo.id);
+          {draft.entradas.map((entrada) => {
+            const target: EventoMetodoPagoTarget = { tipo: 'entrada', clientKey: entrada.clientKey };
+            const nombre = entrada.nombre.trim() || 'Entrada sin nombre';
+            const valor = valorEntrada(entrada);
+            const errorKey = ERROR_KEYS.metodosPagoEntrada(entrada.clientKey);
             return (
-              <label
-                key={metodo.id}
-                className={cx(
-                  'flex cursor-pointer items-start gap-3 rounded-grit-md border p-3 transition focus-within:ring-2 focus-within:ring-grit-cyan',
-                  checked ? 'border-grit-cyan/60 bg-grit-cyan/10' : 'border-grit-glass-border bg-grit-card',
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => wizard.toggleMetodoPago(toSnapshot(metodo))}
-                  disabled={disabled}
-                  className="mt-1 h-4 w-4 accent-grit-cyan"
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="font-grit-body text-sm font-semibold text-grit-text">{metodo.nombre}</span>
-                    <span className="rounded-full border border-grit-glass-border px-2 py-0.5 font-grit-body text-[10px] font-semibold uppercase text-grit-subtext">
-                      {METODO_PAGO_TIPO_LABELS[metodo.tipo]}
-                    </span>
-                    {metodo.tipo === 'efectivo' && (
-                      <span className="rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 font-grit-body text-[10px] font-semibold text-amber-200">
-                        No disponible para compra en línea
-                      </span>
-                    )}
-                    {metodo.qr_url && (
-                      <span
-                        title="Tiene imagen QR"
-                        className="inline-flex items-center gap-1 rounded-full border border-grit-glass-border px-2 py-0.5 font-grit-body text-[10px] font-semibold uppercase text-grit-subtext"
-                      >
-                        <GritIcon name="qr_code_2" size={12} />
-                        QR
-                      </span>
-                    )}
-                  </span>
-                  {metodo.valor && <span className="block truncate font-grit-body text-xs text-grit-subtext">{metodo.valor}</span>}
-                  {metodo.url && <span className="block truncate font-grit-body text-xs text-grit-cyan">{metodo.url}</span>}
-                  {metodo.comentarios && (
-                    <span className="block font-grit-body text-xs text-grit-muted">{metodo.comentarios}</span>
+              <div key={entrada.clientKey} className="space-y-2 rounded-grit-lg border border-grit-glass-border p-3">
+                <h4 className="flex flex-wrap items-baseline gap-2 font-grit-body text-sm font-semibold text-grit-text">
+                  {nombre}
+                  {valor !== null && (
+                    <span className="text-xs font-normal text-grit-subtext">{valor === 0 ? 'Gratis' : formatCop(valor)}</span>
                   )}
-                </span>
-              </label>
+                </h4>
+                <EventoMetodosPagoList
+                  label={`Métodos de pago de la entrada ${nombre}`}
+                  metodos={entrada.metodosPago}
+                  activeIds={activeIds}
+                  emptyText="Sin métodos específicos"
+                  errorKey={errorKey}
+                  error={errors[errorKey]}
+                  disabled={disabled}
+                  onAdd={() => openDialog(target, null)}
+                  onEdit={(metodo) => openDialog(target, metodo)}
+                  onRemove={(metodoId) => wizard.removeMetodoPago(target, metodoId)}
+                />
+              </div>
             );
           })}
-        </fieldset>
-        <FieldError errorKey={ERROR_KEYS.metodosPago} error={error} />
-        {soloEfectivo && (
-          <p className="flex items-start gap-1.5 rounded-grit-md border border-amber-400/40 bg-amber-500/15 px-3 py-2 font-grit-body text-xs text-amber-200">
+        </WizardSection>
+
+        {soloEfectivo.map((entrada) => (
+          <p
+            key={entrada.clientKey}
+            className="flex items-start gap-1.5 rounded-grit-md border border-amber-400/40 bg-amber-500/15 px-3 py-2 font-grit-body text-xs text-amber-200"
+          >
             <GritIcon name="warning" size={14} className="mt-px" />
-            Los compradores no podrán pagar en línea: el efectivo no se ofrece en la compra de entradas.
+            Los compradores de «{entrada.nombre.trim() || 'Entrada sin nombre'}» no podrán pagar en línea: el efectivo no se
+            ofrece en la compra de entradas.
           </p>
-        )}
-        {!anyPaid && precios.length > 0 && (
-          <p className="font-grit-body text-xs text-grit-subtext">
-            Todas las entradas son gratuitas: no es obligatorio seleccionar métodos de pago.
-          </p>
-        )}
-      </WizardSection>
+        ))}
+      </div>
 
       <WizardSection title="Resumen" icon="fact_check">
         <SummaryRow icon="event" label="Evento" value={draft.nombre.trim() || 'Sin nombre'} />
@@ -214,9 +186,24 @@ export function EventoMetodosPagoStep({ wizard, options, disabled }: EventoMetod
         <SummaryRow
           icon="payments"
           label="Métodos de pago"
-          value={draft.metodosPago.length === 0 ? 'Ninguno' : String(draft.metodosPago.length)}
+          value={
+            draft.metodosPago.length + metodosEntradasCount === 0
+              ? 'Ninguno'
+              : `${draft.metodosPago.length} para todas las entradas · ${metodosEntradasCount} por entrada`
+          }
         />
       </WizardSection>
+
+      {dialog && (
+        <EventoMetodoPagoAgregarModal
+          tenantId={wizard.tenantId}
+          disponibles={disponibles}
+          editando={dialog.editando}
+          onAdd={(metodo) => wizard.addMetodoPago(dialog.target, metodo)}
+          onUpdate={(metodo) => wizard.updateMetodoPago(dialog.target, metodo)}
+          onClose={closeDialog}
+        />
+      )}
     </div>
   );
 }

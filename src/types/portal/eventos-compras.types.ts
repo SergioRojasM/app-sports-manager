@@ -43,6 +43,8 @@ export type EntradaVendible = {
   validaHasta: string | null;
   eventosIdBundle: string[];
   orden: number;
+  /** Payment methods valid only for this ticket (US-0130). */
+  metodosPago: EventoMetodoPagoSnapshot[];
 };
 
 export type CuponValidacion = {

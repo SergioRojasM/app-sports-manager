@@ -1,107 +1,21 @@
-# team-events-tickets-data Specification
+## ADDED Requirements
 
-## Purpose
-Defines the `evento_entradas` and `evento_entrada_cupones` tables (format constraints, draft-nullable fields, uniqueness, cascades), their RLS matrix, and the atomic `guardar_evento_completo` save RPC with its draft/final validation, child sync, derived price and returned id map (US-0119).
-## Requirements
-### Requirement: Event tickets table
-The system SHALL provide `public.evento_entradas` with the following columns:
-- `id uuid` primary key
-- `evento_id uuid not null`, FK to `eventos(id)` `on delete cascade`
-- `tenant_id uuid not null`, FK to `tenants(id)` `on delete cascade`; it MUST equal the parent event's tenant
-- `tipo_entrada varchar(20) not null`, default `'sencilla'`
-- `nombre varchar(100)`, nullable
-- `eventos_id_bundle jsonb not null`, default `'[]'`
-- `valida_desde timestamptz` and `valida_hasta timestamptz`
-- `valor numeric(12,2)`, nullable
-- `orden integer not null`, default `0`
-- `created_at` and `updated_at`, with the shared `set_updated_at()` trigger
+### Requirement: Ticket payment methods column
+`public.evento_entradas` SHALL have a column `metodos_pago jsonb not null` with default `'[]'`, holding payment-method snapshots valid only for that ticket, in the same format as `eventos.metodos_pago` (`{id, nombre, tipo, valor, url, comentarios, qr_url?, origen?}`). A check constraint `evento_entradas_metodos_pago_array_ck` MUST require a JSON array. Existing rows SHALL get `'[]'` with no backfill. No policy or grant SHALL change: the column is readable wherever the ticket row is readable, including by `anon`.
 
-Check constraints MUST enforce format only:
-- `tipo_entrada` in (`sencilla`, `multiple`)
-- `nombre` null or non-blank
-- `valor` null or >= 0
-- `valida_desde < valida_hasta` when both are set
-- `eventos_id_bundle` is an array, and is empty unless `tipo_entrada = 'multiple'`
+#### Scenario: Default on existing and new rows
+- **WHEN** the migration is applied, or a ticket is inserted without `metodos_pago`
+- **THEN** the row SHALL have `metodos_pago = '[]'`
 
-A partial unique index MUST prevent two tickets of the same event from sharing a non-null `lower(btrim(nombre))`.
-
-#### Scenario: Format violations rejected
-- **WHEN** a ticket is written with `tipo_entrada = 'otro'`, `valor = -1`, `valida_desde >= valida_hasta`, or a `sencilla` ticket with a non-empty bundle
+#### Scenario: Non-array rejected
+- **WHEN** a ticket is written with `metodos_pago` set to a JSON object
 - **THEN** the statement SHALL fail with a check-constraint violation
 
-#### Scenario: Duplicate ticket name rejected
-- **WHEN** a second ticket named "general" is written for an event that already has a ticket named "General"
-- **THEN** the statement SHALL fail with a unique violation on `uq_evento_entradas_nombre`
+#### Scenario: Guest can read ticket methods
+- **WHEN** an anonymous client selects `metodos_pago` from the tickets of a public published event
+- **THEN** the rows SHALL be returned with their methods
 
-#### Scenario: Draft-incomplete ticket accepted by the table
-- **WHEN** a ticket is written with `nombre = null`, `valor = null`, or as a `multiple` ticket with an empty bundle
-- **THEN** the table SHALL accept it (completeness is enforced by the save RPC on final save)
-
-#### Scenario: Event deletion cascades to tickets
-- **WHEN** an event is deleted
-- **THEN** its tickets and their coupons SHALL be deleted
-
-### Requirement: Ticket coupons table
-The system SHALL provide `public.evento_entrada_cupones` with the following columns:
-- `id uuid` primary key
-- `entrada_id uuid not null`, FK to `evento_entradas(id)` `on delete cascade`
-- `evento_id uuid not null`, FK to `eventos(id)` `on delete cascade`
-- `tenant_id uuid not null`, FK to `tenants(id)` `on delete cascade`
-- `nombre varchar(100)`, `cupon varchar(30)` and `descuento numeric(5,2)`, all nullable
-- `valido_desde timestamptz` and `valido_hasta timestamptz`
-- `created_at` and `updated_at`, with the shared `set_updated_at()` trigger
-
-Check constraints MUST enforce:
-- `nombre` null or non-blank
-- `cupon` null or matching `^[A-Z0-9_-]{3,30}$`
-- `descuento` null or in `(0, 100]` (a percentage)
-- `valido_desde < valido_hasta` when both are set
-
-A partial unique index MUST prevent duplicate non-null `cupon` values within the same `evento_id`.
-
-#### Scenario: Invalid coupon format rejected
-- **WHEN** a coupon is written with `cupon = 'ab'`, `cupon = 'promo'` (lowercase), `descuento = 0`, or `descuento = 150`
-- **THEN** the statement SHALL fail with a check-constraint violation
-
-#### Scenario: Code unique per event across tickets
-- **WHEN** two different tickets of the same event get a coupon with code `PREVENTA`
-- **THEN** the second write SHALL fail with a unique violation on `uq_evento_entrada_cupones_codigo`
-
-#### Scenario: Same code allowed on another event
-- **WHEN** a coupon with code `PREVENTA` is written for a different event
-- **THEN** the write SHALL succeed
-
-#### Scenario: Ticket deletion cascades to coupons
-- **WHEN** a ticket is deleted
-- **THEN** its coupons SHALL be deleted
-
-### Requirement: Tickets and coupons access control
-RLS MUST be enabled on both tables. Access SHALL be as follows:
-- `evento_entradas` SELECT SHALL be granted to `anon` and `authenticated` only when the parent event is readable by the caller under the `eventos` RLS (`exists (select 1 from eventos e where e.id = evento_id)`).
-- `evento_entradas` INSERT, UPDATE and DELETE SHALL be allowed only when `tenant_id` is in `get_trainer_or_admin_tenants_for_authenticated_user()` and the parent event belongs to that same tenant.
-- `evento_entrada_cupones` SHALL have no `anon` grant. Every operation SHALL be allowed only to admins and trainers of the row's tenant, with `with check` verifying that the ticket belongs to the same event and tenant.
-
-#### Scenario: Anonymous reads tickets of public published events only
-- **WHEN** `anon` selects `evento_entradas`
-- **THEN** only tickets of events with `publico and activo and not borrador` SHALL be returned
-
-#### Scenario: Draft tickets hidden from members
-- **WHEN** a `usuario` member of T selects the tickets of a draft event of T
-- **THEN** no rows SHALL be returned
-
-#### Scenario: Coupons hidden from non-staff
-- **WHEN** `anon` selects `evento_entrada_cupones`
-- **THEN** the query SHALL fail for lack of privilege
-- **AND WHEN** a `usuario` member of T selects coupons of T's events
-- **THEN** zero rows SHALL be returned
-
-#### Scenario: Cross-tenant ticket insert rejected
-- **WHEN** an admin of T inserts a ticket with `tenant_id = T` and an `evento_id` belonging to tenant U
-- **THEN** the insert SHALL be rejected by RLS
-
-#### Scenario: Staff can manage tickets and coupons
-- **WHEN** an admin or trainer of T inserts, updates or deletes tickets and coupons of T's events
-- **THEN** the operations SHALL succeed
+## MODIFIED Requirements
 
 ### Requirement: Atomic event save RPC
 The system SHALL provide `public.guardar_evento_completo(p_tenant_id uuid, p_evento_id uuid, p_es_nuevo boolean, p_borrador boolean, p_evento jsonb, p_entradas jsonb) returns jsonb`. It MUST be declared `security invoker` with `set search_path = public`, executable by `authenticated` only. All of its writes SHALL happen in one transaction: any raised error MUST leave `eventos`, `evento_entradas`, `evento_entrada_cupones` and `evento_formularios` unchanged.
@@ -239,18 +153,3 @@ The function SHALL:
 #### Scenario: Ticket methods replaced on edit
 - **WHEN** a stored ticket with two methods is saved again with one method
 - **THEN** the ticket row SHALL store exactly that one method
-
-### Requirement: Ticket payment methods column
-`public.evento_entradas` SHALL have a column `metodos_pago jsonb not null` with default `'[]'`, holding payment-method snapshots valid only for that ticket, in the same format as `eventos.metodos_pago` (`{id, nombre, tipo, valor, url, comentarios, qr_url?, origen?}`). A check constraint `evento_entradas_metodos_pago_array_ck` MUST require a JSON array. Existing rows SHALL get `'[]'` with no backfill. No policy or grant SHALL change: the column is readable wherever the ticket row is readable, including by `anon`.
-
-#### Scenario: Default on existing and new rows
-- **WHEN** the migration is applied, or a ticket is inserted without `metodos_pago`
-- **THEN** the row SHALL have `metodos_pago = '[]'`
-
-#### Scenario: Non-array rejected
-- **WHEN** a ticket is written with `metodos_pago` set to a JSON object
-- **THEN** the statement SHALL fail with a check-constraint violation
-
-#### Scenario: Guest can read ticket methods
-- **WHEN** an anonymous client selects `metodos_pago` from the tickets of a public published event
-- **THEN** the rows SHALL be returned with their methods
