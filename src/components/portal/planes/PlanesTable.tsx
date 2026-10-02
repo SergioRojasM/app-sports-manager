@@ -1,5 +1,5 @@
 import { MultilineText } from '@/components/ui';
-import type { PlanTableItem, PlanWithDisciplinas } from '@/types/portal/planes.types';
+import type { PlanEstado, PlanTableItem, PlanWithDisciplinas } from '@/types/portal/planes.types';
 import { getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
 
 type PlanesTableProps = {
@@ -16,6 +16,12 @@ type PlanesTableProps = {
   showVisibilidad?: boolean;
   /** Optional render function for a custom action column per row */
   renderRowAction?: (plan: PlanTableItem) => React.ReactNode;
+};
+
+const ESTADO_BADGE_CLASS: Record<PlanEstado, string> = {
+  activo: 'border border-emerald-400/40 bg-emerald-900/25 text-emerald-200',
+  activo_no_visible: 'border border-amber-400/40 bg-amber-900/25 text-amber-200',
+  inactivo: 'border border-grit-glass-border bg-grit-card text-grit-subtext',
 };
 
 function formatCurrency(value: number): string {
@@ -153,17 +159,21 @@ export function PlanesTable({
                     <span
                       className={[
                         'inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium',
-                        row.activo
-                          ? 'border border-emerald-400/40 bg-emerald-900/25 text-emerald-200'
-                          : 'border border-grit-glass-border bg-grit-card text-grit-subtext',
+                        ESTADO_BADGE_CLASS[row.estado],
                       ].join(' ')}
                     >
-                      <span
-                        className={[
-                          'h-1.5 w-1.5 rounded-full',
-                          row.activo ? 'bg-emerald-300' : 'bg-grit-subtext/20',
-                        ].join(' ')}
-                      />
+                      {row.estado === 'activo_no_visible' ? (
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">
+                          visibility_off
+                        </span>
+                      ) : (
+                        <span
+                          className={[
+                            'h-1.5 w-1.5 rounded-full',
+                            row.activo ? 'bg-emerald-300' : 'bg-grit-subtext/20',
+                          ].join(' ')}
+                        />
+                      )}
                       {row.statusLabel}
                     </span>
                   </td>
