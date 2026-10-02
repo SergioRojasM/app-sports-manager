@@ -23,6 +23,8 @@ type EntrenamientosListProps = {
   scenarioNameById: Record<string, string>;
   canManage: boolean;
   onOpenActions: (trainingId: string) => void;
+  /** Direct booking from the card (US-0127); only rendered for non-managers on upcoming trainings. */
+  onReservar?: (trainingId: string) => void;
   onClearDateFilter: () => void;
 };
 
@@ -33,6 +35,7 @@ export function EntrenamientosList({
   scenarioNameById,
   canManage,
   onOpenActions,
+  onReservar,
   onClearDateFilter,
 }: EntrenamientosListProps) {
   const currentTimestamp = new Date().getTime();
@@ -67,6 +70,8 @@ export function EntrenamientosList({
         <ul className="space-y-3">
           {items.map((item) => {
             const isHistorical = item.instance.fecha_hora ? new Date(item.instance.fecha_hora).getTime() < currentTimestamp : false;
+            const isFull =
+              item.instance.cupo_maximo != null && (item.instance.reservas_activas ?? 0) >= item.instance.cupo_maximo;
 
             return (
               <li
@@ -189,6 +194,20 @@ export function EntrenamientosList({
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2">
+                  {onReservar && !canManage && !isHistorical ? (
+                    <button
+                      type="button"
+                      onClick={() => onReservar(item.instance.id)}
+                      disabled={isFull}
+                      aria-label={isFull ? `Cupo lleno: ${item.instance.nombre}` : `Reservar ${item.instance.nombre}`}
+                      className="inline-flex items-center gap-1 rounded-grit-md bg-grit-cyan px-2.5 py-1.5 text-xs font-semibold text-grit-bg hover:bg-grit-cyan/90 disabled:opacity-50"
+                    >
+                      <span className="material-symbols-outlined leading-none" style={{ fontSize: '14px' }} aria-hidden="true">
+                        bookmark_add
+                      </span>
+                      {isFull ? 'Cupo lleno' : 'Reservar'}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => onOpenActions(item.instance.id)}

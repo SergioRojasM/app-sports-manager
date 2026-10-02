@@ -53,6 +53,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
   const canManage = role === 'administrador' || role === 'entrenador';
   const [reservasPanelOpen, setReservasPanelOpen] = useState(false);
   const [reservasPanelInstance, setReservasPanelInstance] = useState<TrainingInstance | null>(null);
+  const [reservasPanelAutoReservar, setReservasPanelAutoReservar] = useState(false);
 
   const {
     loading,
@@ -244,13 +245,26 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
 
   const openReservasPanel = (instance: TrainingInstance) => {
     setReservasPanelInstance(instance);
+    setReservasPanelAutoReservar(false);
     setReservasPanelOpen(true);
     closeActionModal();
+  };
+
+  // Card "Reservar" (US-0127): open the panel and let it open the booking dialog once loaded
+  const openReservaDirecta = (trainingId: string) => {
+    const target = instanceMap.get(trainingId);
+    if (!target) {
+      return;
+    }
+    setReservasPanelInstance(target);
+    setReservasPanelAutoReservar(true);
+    setReservasPanelOpen(true);
   };
 
   const closeReservasPanel = () => {
     setReservasPanelOpen(false);
     setReservasPanelInstance(null);
+    setReservasPanelAutoReservar(false);
   };
 
   return (
@@ -327,6 +341,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
               scenarioNameById={scenarioNameById}
               canManage={canManage}
               onOpenActions={openActionModal}
+              onReservar={openReservaDirecta}
               onClearDateFilter={() => setSelectedDateKey(null)}
             />
           </div>
@@ -375,6 +390,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         tenantId={tenantId}
         instance={reservasPanelInstance}
         role={role}
+        autoReservar={reservasPanelAutoReservar}
         onClose={closeReservasPanel}
         onMutationComplete={() => void refresh()}
       />
