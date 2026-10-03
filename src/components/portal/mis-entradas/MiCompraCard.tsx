@@ -119,8 +119,15 @@ export function MiCompraCard({ compra, puedeCancelar, pendiente, error, onCancel
                 <span className="min-w-0 truncate text-grit-subtext">
                   {multiple ? (ticket.eventoNombre ?? 'Evento incluido') : 'Código'}
                 </span>
-                <span className={ticket.estado === 'anulada' ? 'font-mono text-grit-muted line-through' : 'font-mono font-bold tracking-wider text-grit-cyan'}>
-                  {ticket.codigo}
+                <span className="flex shrink-0 items-center gap-2">
+                  {ticket.ingresoAt && (
+                    <span className="rounded-grit-sm border border-emerald-400/40 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-emerald-300">
+                      Usada
+                    </span>
+                  )}
+                  <span className={ticket.estado === 'anulada' ? 'font-mono text-grit-muted line-through' : 'font-mono font-bold tracking-wider text-grit-cyan'}>
+                    {ticket.codigo}
+                  </span>
                 </span>
               </li>
             ))}

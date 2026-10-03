@@ -139,7 +139,7 @@ export function EventoComprasPage({ tenantId, eventoId }: EventoComprasPageProps
         }
       />
 
-      <EventoComprasStats stats={compras.stats} />
+      <EventoComprasStats stats={compras.stats} ingresos={compras.ingresos} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="flex flex-1 flex-col gap-1.5 font-grit-body text-xs font-semibold text-grit-subtext">

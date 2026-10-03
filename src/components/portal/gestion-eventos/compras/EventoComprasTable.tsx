@@ -2,6 +2,7 @@
 
 import { GritIcon, cx } from '@/components/ui';
 import { EventoCompraEstadoBadge } from '@/components/portal/eventos/compra';
+import { formatIngresoFechaHora } from '@/lib/portal/eventos-ingreso.utils';
 import { formatCop, formatDescuento } from '@/lib/portal/eventos.utils';
 import type { CompraAdminItem } from '@/types/portal/eventos-compras.types';
 
@@ -119,14 +120,24 @@ export function EventoComprasTable({
   );
 
   const entrada = (compra: CompraAdminItem) => (
-    <span className="text-grit-text">
-      {compra.entradaNombre}
-      {compra.entradaTipo === 'multiple' && (
-        <span className="ml-1.5 rounded-grit-sm border border-grit-cyan/40 bg-grit-cyan/[0.13] px-1.5 py-0.5 text-[10px] font-bold uppercase text-grit-cyan">
-          Múltiple
-        </span>
-      )}
-    </span>
+    <div>
+      <span className="text-grit-text">
+        {compra.entradaNombre}
+        {compra.entradaTipo === 'multiple' && (
+          <span className="ml-1.5 rounded-grit-sm border border-grit-cyan/40 bg-grit-cyan/[0.13] px-1.5 py-0.5 text-[10px] font-bold uppercase text-grit-cyan">
+            Múltiple
+          </span>
+        )}
+      </span>
+      {/* Door check-in time per used ticket (US-0131) */}
+      {compra.tickets
+        .filter((ticket) => ticket.ingresoAt)
+        .map((ticket) => (
+          <div key={ticket.codigo} className="mt-0.5 text-[11px] text-emerald-300">
+            <span className="font-mono">{ticket.codigo}</span> · Ingresó {formatIngresoFechaHora(ticket.ingresoAt as string)}
+          </div>
+        ))}
+    </div>
   );
 
   const total = (compra: CompraAdminItem) => (

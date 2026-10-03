@@ -254,7 +254,7 @@ A `23505` on `uq_evento_tickets_evento_email` SHALL be re-raised as `ENTRADA_DUP
 ### Requirement: Re-upload, cancel and validate RPCs
 The system SHALL provide these three RPCs, each `security definer`:
 - **`reenviar_comprobante_compra_evento(p_compra_id, p_comprobante_path)`** (authenticated): only the owner, only when `rechazada`. It re-checks the path, and per event it re-checks visibility, the unique-email rule and capacity (`ENTRADA_DUPLICADA` / `CUPO_AGOTADO`). Then it clears `motivo_rechazo` and applies the transition.
-- **`cancelar_compra_evento(p_compra_id)`** (authenticated): only the owner, only when `en_validacion` or `confirmada`. With the **main** event's `cancelacion_antelacion_horas`:
+- **`cancelar_compra_evento(p_compra_id)`** (authenticated): only the owner, only when `en_validacion` or `confirmada`. When any ticket of the purchase has `ingreso_at` set, it SHALL raise `CANCELACION_NO_PERMITIDA` (US-0131). Otherwise it applies the **main** event's `cancelacion_antelacion_horas`:
   - null → `CANCELACION_NO_PERMITIDA`;
   - otherwise allowed when `fecha_hora is null or now() <= fecha_hora - N h`, else `CANCELACION_NO_PERMITIDA`.
 
@@ -272,6 +272,10 @@ The system SHALL provide these three RPCs, each `security definer`:
 #### Scenario: Cancellation outside window
 - **WHEN** the policy is 48 h and the event starts in 24 h
 - **THEN** it SHALL raise `CANCELACION_NO_PERMITIDA`
+
+#### Scenario: Cancellation of a used ticket
+- **WHEN** the owner cancels within the window a purchase whose ticket already has `ingreso_at`
+- **THEN** it SHALL raise `CANCELACION_NO_PERMITIDA` and nothing SHALL change
 
 #### Scenario: Cancellation frees capacity
 - **WHEN** the owner cancels within the window
@@ -369,3 +373,22 @@ It SHALL map errors through `mapCompraError` to `EventoCompraServiceError(code, 
 #### Scenario: Unknown error
 - **WHEN** an unrecognized error is returned
 - **THEN** the service SHALL throw code `unknown`
+
+### Requirement: Ticket check-in columns
+`public.evento_tickets` SHALL have:
+- `ingreso_at timestamptz` (nullable);
+- `ingreso_por uuid` referencing `auth.users(id)` `on delete set null`;
+- check `evento_tickets_ingreso_ck`: `ingreso_at is null or estado = 'activa'`;
+- check `evento_tickets_ingreso_por_ck`: `ingreso_at is not null or ingreso_por is null`;
+- index `idx_evento_tickets_evento_ingreso (evento_id, ingreso_at)`.
+
+The columns SHALL be written only by `registrar_ingreso_evento` / `revertir_ingreso_evento`. Client write privileges SHALL stay revoked, and the existing select policies SHALL expose the columns to the ticket owner and tenant staff.
+
+#### Scenario: Used ticket cannot be voided
+- **WHEN** a ticket with `ingreso_at` set is updated to `estado = 'anulada'`
+- **THEN** the update SHALL fail on `evento_tickets_ingreso_ck`
+
+#### Scenario: Direct write denied
+- **WHEN** `authenticated` updates `evento_tickets.ingreso_at`
+- **THEN** the statement SHALL fail with a permission error
+

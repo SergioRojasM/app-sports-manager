@@ -64,6 +64,10 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
     (evento: EventoListItem) => router.push(`${basePath}/${evento.id}/compras`),
     [basePath, router],
   );
+  const onControlIngreso = useCallback(
+    (evento: EventoListItem) => router.push(`/portal/orgs/${tenantId}/control-ingreso/${evento.id}`),
+    [router, tenantId],
+  );
   const onDuplicar = useCallback(
     (evento: EventoListItem) => router.push(`${basePath}/nuevo?duplicar=${evento.id}`),
     [basePath, router],
@@ -162,6 +166,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
           onEliminar={onEliminar}
           onCambiarActivo={onCambiarActivo}
           onVerCompras={onVerCompras}
+          onControlIngreso={onControlIngreso}
           onDuplicar={onDuplicar}
         />
       );
@@ -199,6 +204,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
           onEliminar={onEliminar}
           onCambiarActivo={onCambiarActivo}
           onVerCompras={onVerCompras}
+          onControlIngreso={onControlIngreso}
           onDuplicar={onDuplicar}
         />
       );
@@ -212,6 +218,7 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
         onEliminar={onEliminar}
         onCambiarActivo={onCambiarActivo}
         onVerCompras={onVerCompras}
+        onControlIngreso={onControlIngreso}
         onDuplicar={onDuplicar}
       />
     );

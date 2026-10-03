@@ -2,8 +2,10 @@ import { createClient } from '@/services/supabase/client';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import type { EventoEntradaTipo, EventoEscenarioSnapshot, EventoMetodoPagoSnapshot } from '@/types/portal/eventos.types';
 import type { FormularioPerfilCampo, FormularioSeccion } from '@/types/portal/formularios.types';
+import { normalizarCodigoTicket } from '@/lib/portal/eventos-ingreso.utils';
 import {
   EventoCompraServiceError,
+  type AsistenteIngreso,
   type CompraAdminItem,
   type CompraResultado,
   type CuponValidacion,
@@ -13,8 +15,10 @@ import {
   type EventoFormularioRespuesta,
   type EventoFormularioSnapshot,
   type EventoTicketEstado,
+  type IngresoResultado,
   type IniciarCompraInput,
   type MiCompra,
+  type ResumenIngresos,
 } from '@/types/portal/eventos-compras.types';
 
 type PostgrestErrorLike = {
@@ -210,6 +214,7 @@ type MiCompraRow = {
         estado: EventoTicketEstado;
         asistente_nombre: string;
         asistente_email: string;
+        ingreso_at: string | null;
         created_at: string;
         evento: Pick<EventoEmbedRow, 'nombre' | 'nombre_tenant' | 'fecha_hora' | 'escenario_id' | 'punto_encuentro'> | null;
       }[]
@@ -258,6 +263,7 @@ function toMiCompra(row: MiCompraRow): MiCompra {
       estado: ticket.estado,
       asistenteNombre: ticket.asistente_nombre,
       asistenteEmail: ticket.asistente_email,
+      ingresoAt: ticket.ingreso_at,
       eventoNombre: ticket.evento?.nombre ?? null,
       fechaHora: ticket.evento?.fecha_hora ?? null,
       lugar: ticket.evento ? lugarDe(ticket.evento.escenario_id, ticket.evento.punto_encuentro) : null,
@@ -292,7 +298,7 @@ type CompraAdminRow = {
   motivo_rechazo: string | null;
   created_at: string;
   validado_at: string | null;
-  tickets: { evento_id: string; codigo: string; estado: EventoTicketEstado }[] | null;
+  tickets: { evento_id: string; codigo: string; estado: EventoTicketEstado; ingreso_at: string | null }[] | null;
   // A one-to-one embed (compra_id is unique) comes back as an object, or null
   respuesta: RespuestaRow | RespuestaRow[] | null;
 };
@@ -332,10 +338,48 @@ function toCompraAdminItem(row: CompraAdminRow): CompraAdminItem {
       eventoId: ticket.evento_id,
       codigo: ticket.codigo,
       estado: ticket.estado,
+      ingresoAt: ticket.ingreso_at,
     })),
     respuesta: toRespuesta(row.respuesta),
   };
 }
+
+// ─── Check-in (US-0131) ───
+
+type RpcIngresoResultado = {
+  resultado: IngresoResultado['resultado'];
+  ticket_id?: string | null;
+  codigo?: string | null;
+  asistente_nombre?: string | null;
+  asistente_email?: string | null;
+  entrada_nombre?: string | null;
+  evento_nombre?: string | null;
+  ingreso_at?: string | null;
+  ingreso_por_nombre?: string | null;
+};
+
+function toIngresoResultado(row: RpcIngresoResultado): IngresoResultado {
+  return {
+    resultado: row.resultado,
+    ticketId: row.ticket_id ?? null,
+    codigo: row.codigo ?? null,
+    asistenteNombre: row.asistente_nombre ?? null,
+    asistenteEmail: row.asistente_email ?? null,
+    entradaNombre: row.entrada_nombre ?? null,
+    eventoNombre: row.evento_nombre ?? null,
+    ingresoAt: row.ingreso_at ?? null,
+    ingresoPorNombre: row.ingreso_por_nombre ?? null,
+  };
+}
+
+type AsistenteIngresoRow = {
+  id: string;
+  codigo: string;
+  asistente_nombre: string;
+  asistente_email: string;
+  ingreso_at: string | null;
+  compra: { entrada_nombre: string } | null;
+};
 
 const EVENTO_EMBED_SELECT =
   'id, nombre, nombre_tenant, fecha_hora, duracion_minutos, escenario_id, punto_encuentro, banner_url, cancelacion_antelacion_horas';
@@ -344,11 +388,11 @@ const MIS_COMPRAS_SELECT =
   'id, tenant_id, evento_id, estado, entrada_nombre, entrada_tipo, total, cupon_codigo, descuento_pct, metodo_pago, ' +
   'motivo_rechazo, comprador_nombre, comprador_email, created_at, ' +
   `evento:eventos(${EVENTO_EMBED_SELECT}), ` +
-  'tickets:evento_tickets(id, evento_id, codigo, estado, asistente_nombre, asistente_email, created_at, ' +
+  'tickets:evento_tickets(id, evento_id, codigo, estado, asistente_nombre, asistente_email, ingreso_at, created_at, ' +
   'evento:eventos(nombre, nombre_tenant, fecha_hora, escenario_id, punto_encuentro))';
 
 const COMPRAS_ADMIN_SELECT =
-  '*, tickets:evento_tickets(evento_id, codigo, estado), ' +
+  '*, tickets:evento_tickets(evento_id, codigo, estado, ingreso_at), ' +
   'respuesta:evento_formulario_respuestas(id, datos_perfil, respuestas, archivos, ' +
   'formulario:evento_formularios(nombre, perfil_campos_requeridos, campos))';
 
@@ -580,6 +624,57 @@ export const eventoComprasService = {
     });
     if (error) throw mapCompraError(error);
     return toCompraResultado(data as RpcCompraResultado);
+  },
+
+  /** Records a door check-in; business outcomes come back in `resultado`, only auth errors throw (US-0131). */
+  async registrarIngreso(eventoId: string, codigo: string): Promise<IngresoResultado> {
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc('registrar_ingreso_evento', {
+      p_evento_id: eventoId,
+      p_codigo: normalizarCodigoTicket(codigo),
+    });
+    if (error) throw mapCompraError(error);
+    return toIngresoResultado(data as RpcIngresoResultado);
+  },
+
+  async revertirIngreso(ticketId: string): Promise<IngresoResultado> {
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc('revertir_ingreso_evento', { p_ticket_id: ticketId });
+    if (error) throw mapCompraError(error);
+    return toIngresoResultado(data as RpcIngresoResultado);
+  },
+
+  async resumenIngresos(eventoId: string): Promise<ResumenIngresos> {
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc('resumen_ingresos_evento', { p_evento_id: eventoId });
+    if (error) throw mapCompraError(error);
+    const row = (data ?? {}) as { activas?: number; ingresaron?: number; pendientes_pago?: number };
+    return {
+      activas: toNumber(row.activas),
+      ingresaron: toNumber(row.ingresaron),
+      pendientesPago: toNumber(row.pendientes_pago),
+    };
+  },
+
+  /** `activa` tickets of the event for the check-in list (RLS: tenant staff), by attendee name. */
+  async listAsistentesEvento(eventoId: string): Promise<AsistenteIngreso[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('evento_tickets')
+      .select('id, codigo, asistente_nombre, asistente_email, ingreso_at, compra:evento_compras(entrada_nombre)')
+      .eq('evento_id', eventoId)
+      .eq('estado', 'activa')
+      .order('asistente_nombre', { ascending: true });
+
+    if (error) throw mapCompraError(error);
+    return ((data ?? []) as unknown as AsistenteIngresoRow[]).map((row) => ({
+      ticketId: row.id,
+      codigo: row.codigo,
+      asistenteNombre: row.asistente_nombre,
+      asistenteEmail: row.asistente_email,
+      entradaNombre: row.compra?.entrada_nombre ?? '',
+      ingresoAt: row.ingreso_at,
+    }));
   },
 
   /** Short-lived signed URL for a proof or a form image. */
