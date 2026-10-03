@@ -103,7 +103,7 @@
   - `pendiente`, `anulada`, other-event and unknown codes;
   - a `usuario` member is redirected;
   - the sidebar entries for each role.
-- [ ] 8.2 Camera: scan the PDF QR from a phone over HTTPS (tunnel). Deny the permission, then confirm the fallback message and the manual input focus.
+- [x] 8.2 Camera: scan the PDF QR from a phone over HTTPS (tunnel). Deny the permission, then confirm the fallback message and the manual input focus.
 - [x] 8.3 Purchases page shows the entry time and the "Ingresaron" card. "Mis entradas" shows "Usada" and hides "Cancelar".
 
 ## 9. Documentation and delivery

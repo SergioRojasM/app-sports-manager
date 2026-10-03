@@ -77,12 +77,11 @@ Migration `20261008120000_evento_tickets_checkin.sql`:
   undo from the card, other-event and malformed codes, list filter, register and revert from
   the list, menu entries for both roles, admin action, purchases page, member redirect,
   non-UUID redirect, camera-unavailable fallback, and the 390 px layout.
+- Scanning with a real camera: tested by Sergio on a device.
 - `npx tsc --noEmit` passes. ESLint passes on every file of this change; `npm run lint` still
   reports 17 errors and 18 warnings in 31 files this change does not touch.
 
 ### Not tested
-- **Scanning with a real camera.** It needs a phone over HTTPS (for example through a tunnel).
-  Only the camera-unavailable path was exercised.
 - **"Usada" badge on screen.** The buyer's read of `ingreso_at` was checked through RLS in SQL,
   but "Mis entradas" was not opened as a buyer with a used ticket.
 - A `pendiente` or `anulada` code in the browser (covered by the SQL checks).
