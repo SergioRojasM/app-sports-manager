@@ -24,6 +24,7 @@ type EventosCalendarProps = {
   onEliminar: (evento: EventoListItem) => void;
   onCambiarActivo: (evento: EventoListItem) => void;
   onVerCompras: (evento: EventoListItem) => void;
+  onControlIngreso: (evento: EventoListItem) => void;
   onDuplicar: (evento: EventoListItem) => void;
 };
 
@@ -100,6 +101,7 @@ export function EventosCalendar({
   onEliminar,
   onCambiarActivo,
   onVerCompras,
+  onControlIngreso,
   onDuplicar,
 }: EventosCalendarProps) {
   const monthCells = buildMonthCells(monthStartDate);
@@ -280,6 +282,7 @@ export function EventosCalendar({
                     activo={evento.activo}
                     onCambiarActivo={() => onCambiarActivo(evento)}
                     onVerCompras={() => onVerCompras(evento)}
+                    onControlIngreso={() => onControlIngreso(evento)}
                     onDuplicar={() => onDuplicar(evento)}
                     onEditar={() => onEditar(evento)}
                     onCambiarEstado={(target) => onCambiarEstado(evento, target)}

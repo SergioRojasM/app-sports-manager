@@ -91,6 +91,7 @@ export function useMisEntradas() {
         estado: compra.estado,
         cancelacionAntelacionHoras: compra.evento?.cancelacionAntelacionHoras ?? null,
         fechaHora: compra.evento?.fechaHora ?? null,
+        algunTicketUsado: compra.tickets.some((ticket) => ticket.ingresoAt !== null),
       }),
     [],
   );

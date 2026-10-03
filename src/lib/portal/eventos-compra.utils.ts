@@ -27,12 +27,21 @@ export function ventaCerradaPorAntelacion(
   return now.getTime() > limite;
 }
 
-/** Same rule as `cancelar_compra_evento` (UI only): null policy → never; otherwise until `fecha_hora − N h`. */
+/**
+ * Same rule as `cancelar_compra_evento` (UI only): never once a ticket was used at the door (US-0131);
+ * null policy → never; otherwise until `fecha_hora − N h`.
+ */
 export function puedeCancelarCompra(
-  compra: { estado: EventoCompraEstado; cancelacionAntelacionHoras: number | null; fechaHora: string | null },
+  compra: {
+    estado: EventoCompraEstado;
+    cancelacionAntelacionHoras: number | null;
+    fechaHora: string | null;
+    algunTicketUsado?: boolean;
+  },
   now: Date = new Date(),
 ): boolean {
   if (compra.estado !== 'en_validacion' && compra.estado !== 'confirmada') return false;
+  if (compra.algunTicketUsado) return false;
   if (compra.cancelacionAntelacionHoras === null) return false;
   if (!compra.fechaHora) return true;
   const limite = new Date(compra.fechaHora).getTime() - compra.cancelacionAntelacionHoras * 3_600_000;

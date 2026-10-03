@@ -81,6 +81,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
     { label: 'Formularios', path: 'gestion-formularios', icon: 'description' },
     { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
     { label: 'Eventos', path: 'gestion-eventos', icon: 'event' },
+    { label: 'Eventos Check-in', path: 'control-ingreso', icon: 'qr_code_scanner' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
     { label: 'Suscripciones', path: 'gestion-suscripciones', icon: 'subscriptions' },
     { label: 'Equipo', path: 'gestion-equipo', icon: 'groups' },
@@ -96,6 +97,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
     { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
     { label: 'Reservas', path: 'gestion-reservas', icon: 'event_available' },
+    { label: 'Eventos Check-in', path: 'control-ingreso', icon: 'qr_code_scanner' },
   ],
 };
 

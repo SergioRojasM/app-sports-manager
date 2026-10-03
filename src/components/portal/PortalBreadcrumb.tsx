@@ -30,6 +30,7 @@ const SLUG_LABELS: Record<string, string> = {
   'mis-reservas': 'Mis reservas',
   'mis-entradas': 'Mis entradas',
   compras: 'Compras',
+  'control-ingreso': 'Control de ingreso',
   'mis-suscripciones': 'Mis suscripciones',
   'mis-suscripciones-y-pagos': 'Suscripciones y pagos',
   'landing-org': 'Organización',
@@ -91,6 +92,11 @@ export function PortalBreadcrumb() {
         if (uuidsSeen > 1 && parts[i - 1] === 'gestion-eventos') {
           // There is no page at /gestion-eventos/{id}; the crumb points at the edit wizard
           result.push({ label: 'Evento', href: `${accumulated}/editar`, isLast });
+          continue;
+        }
+        if (uuidsSeen > 1 && parts[i - 1] === 'control-ingreso') {
+          // Check-in screen of one event (US-0131)
+          result.push({ label: 'Evento', href: accumulated, isLast });
           continue;
         }
         const label = uuidsSeen === 1 ? tenantName : plantillaName;

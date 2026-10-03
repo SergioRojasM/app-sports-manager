@@ -8,6 +8,7 @@ type EventosGridProps = {
   onEliminar: (evento: EventoListItem) => void;
   onCambiarActivo: (evento: EventoListItem) => void;
   onVerCompras: (evento: EventoListItem) => void;
+  onControlIngreso: (evento: EventoListItem) => void;
   onDuplicar: (evento: EventoListItem) => void;
 };
 
@@ -37,6 +38,7 @@ export function EventosGrid({
   onEliminar,
   onCambiarActivo,
   onVerCompras,
+  onControlIngreso,
   onDuplicar,
 }: EventosGridProps) {
   return (
@@ -50,6 +52,7 @@ export function EventosGrid({
           onEliminar={() => onEliminar(evento)}
           onCambiarActivo={() => onCambiarActivo(evento)}
           onVerCompras={() => onVerCompras(evento)}
+          onControlIngreso={() => onControlIngreso(evento)}
           onDuplicar={() => onDuplicar(evento)}
         />
       ))}

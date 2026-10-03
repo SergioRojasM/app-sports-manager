@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toDateKeyInBogota } from '@/lib/portal/eventos.utils';
 import { eventosService } from '@/services/supabase/portal/eventos.service';
 import { disciplinesService } from '@/services/supabase/portal/disciplines.service';
 import {
@@ -39,6 +40,21 @@ type UseGestionEventosResult = {
   setCurrentPage: (page: number) => void;
 };
 
+type UseGestionEventosOptions = {
+  /** Drafts are left out of the list entirely (check-in screen, US-0131). */
+  excluirBorradores?: boolean;
+  /**
+   * "Próximos" counts from today 00:00 Bogotá instead of from now, so an event that already
+   * started today stays listed while its attendees are still arriving (US-0131).
+   */
+  proximosDesdeHoy?: boolean;
+};
+
+/** Bogotá has no DST, so its midnight is always 05:00 UTC. */
+function inicioDeHoyEnBogota(): number {
+  return new Date(`${toDateKeyInBogota(new Date())}T00:00:00-05:00`).getTime();
+}
+
 function isUpcoming(evento: EventoListItem, now: number): boolean {
   // Undated events are still being planned, so they count as upcoming
   return evento.fechaHora === null || new Date(evento.fechaHora).getTime() >= now;
@@ -53,7 +69,10 @@ function compareByFecha(direction: 1 | -1) {
   };
 }
 
-export function useGestionEventos(tenantId: string): UseGestionEventosResult {
+export function useGestionEventos(
+  tenantId: string,
+  { excluirBorradores = false, proximosDesdeHoy = false }: UseGestionEventosOptions = {},
+): UseGestionEventosResult {
   const [eventos, setEventos] = useState<EventoListItem[]>([]);
   const [disciplinas, setDisciplinas] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +89,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
         eventosService.listEventos(tenantId),
         disciplinesService.listDisciplinesByTenant(tenantId),
       ]);
-      setEventos(eventosData);
+      setEventos(excluirBorradores ? eventosData.filter((evento) => !evento.borrador) : eventosData);
       // Events store the discipline NAME (US-0119), so the option id is the name
       setDisciplinas(disciplinasData.map((disciplina) => ({ id: disciplina.nombre, label: disciplina.nombre })));
     } catch (err) {
@@ -79,7 +98,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
     } finally {
       setLoading(false);
     }
-  }, [tenantId]);
+  }, [tenantId, excluirBorradores]);
 
   useEffect(() => {
     void reload();
@@ -106,7 +125,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
   );
 
   const filteredEventos = useMemo(() => {
-    const now = Date.now();
+    const now = proximosDesdeHoy ? inicioDeHoyEnBogota() : Date.now();
 
     const result = eventos.filter((evento) => {
       if (!matchesCalendarFilters(evento)) return false;
@@ -116,7 +135,7 @@ export function useGestionEventos(tenantId: string): UseGestionEventosResult {
     });
 
     return result.sort(compareByFecha(filters.periodo === 'proximos' ? 1 : -1));
-  }, [eventos, matchesCalendarFilters, filters.periodo]);
+  }, [eventos, matchesCalendarFilters, filters.periodo, proximosDesdeHoy]);
 
   const stats = useMemo<EventosStats>(() => {
     const now = Date.now();

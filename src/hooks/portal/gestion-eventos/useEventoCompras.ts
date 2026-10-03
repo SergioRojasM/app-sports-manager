@@ -8,6 +8,7 @@ import type {
   CompraAdminItem,
   EventoComprasEstadoFiltro,
   EventoComprasStats,
+  ResumenIngresos,
 } from '@/types/portal/eventos-compras.types';
 
 export const EVENTO_COMPRAS_PAGE_SIZE = 20;
@@ -21,12 +22,13 @@ function normalizar(value: string): string {
 
 /**
  * Admin "Compras" page of one event (US-0121): the event, its purchases (RLS: staff), the sold
- * count against capacity, stats, estado + name/email filters and client-side pagination.
+ * count against capacity, stats (plus the check-in counters, US-0131), estado + name/email filters and client-side pagination.
  */
 export function useEventoCompras(tenantId: string, eventoId: string) {
   const [evento, setEvento] = useState<Evento | null>(null);
   const [compras, setCompras] = useState<CompraAdminItem[]>([]);
   const [vendidas, setVendidas] = useState(0);
+  const [ingresos, setIngresos] = useState<ResumenIngresos | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
@@ -43,16 +45,19 @@ export function useEventoCompras(tenantId: string, eventoId: string) {
       if (!reload.silent) setLoading(true);
       setError(null);
       try {
-        const [eventoRow, lista, count] = await Promise.all([
+        const [eventoRow, lista, count, resumenIngresos] = await Promise.all([
           eventosService.getEventoById(tenantId, eventoId),
           eventoComprasService.listComprasEvento(tenantId, eventoId),
           eventoComprasService.contarVendidas(eventoId),
+          // Check-in counters (US-0131); a missing event raises FORBIDDEN, so it must not fail the page
+          eventoComprasService.resumenIngresos(eventoId).catch(() => null),
         ]);
         if (cancelled) return;
         setEvento(eventoRow);
         setNotFound(eventoRow === null);
         setCompras(lista);
         setVendidas(count);
+        setIngresos(resumenIngresos);
       } catch (loadError) {
         console.error('useEventoCompras: load failed', loadError);
         if (!cancelled) setError('No se pudieron cargar las compras del evento.');
@@ -121,6 +126,7 @@ export function useEventoCompras(tenantId: string, eventoId: string) {
     refrescar,
     compras,
     vendidas,
+    ingresos,
     stats,
     filtradas,
     paginadas,

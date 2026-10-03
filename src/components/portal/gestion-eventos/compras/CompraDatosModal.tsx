@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { GritButton, GritIcon } from '@/components/ui';
 import { EventoModalShell } from '../EventoModalShell';
 import { FORMULARIO_PERFIL_CAMPO_LABELS, type FormularioPerfilCampo } from '@/types/portal/formularios.types';
+import { formatIngresoFechaHora } from '@/lib/portal/eventos-ingreso.utils';
 import type { CompraAdminItem } from '@/types/portal/eventos-compras.types';
 
 type CompraDatosModalProps = {
@@ -78,6 +79,19 @@ export function CompraDatosModal({ compra, onAbrirArchivo, onClose }: CompraDato
             <Fila label="Cuenta">{compra.registrado ? 'Registrado' : 'Invitado'}</Fila>
           </dl>
         </section>
+
+        {compra.tickets.length > 0 && (
+          <section>
+            <h3 className="mb-1 text-xs font-bold uppercase tracking-wide text-grit-subtext">Entradas</h3>
+            <dl>
+              {compra.tickets.map((ticket) => (
+                <Fila key={ticket.codigo} label={ticket.codigo}>
+                  {ticket.ingresoAt ? `Ingresó ${formatIngresoFechaHora(ticket.ingresoAt)}` : 'Sin ingreso'}
+                </Fila>
+              ))}
+            </dl>
+          </section>
+        )}
 
         {respuesta && Object.keys(respuesta.datosPerfil).length > 0 && (
           <section>

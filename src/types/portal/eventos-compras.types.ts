@@ -131,6 +131,8 @@ export type MiCompraTicket = {
   estado: EventoTicketEstado;
   asistenteNombre: string;
   asistenteEmail: string;
+  /** Door check-in time (US-0131); null = not used. */
+  ingresoAt: string | null;
   /** Null when the buyer can no longer read that event (e.g. it was deactivated). */
   eventoNombre: string | null;
   fechaHora: string | null;
@@ -192,7 +194,7 @@ export type CompraAdminItem = {
   motivoRechazo: string | null;
   createdAt: string;
   validadoAt: string | null;
-  tickets: { eventoId: string; codigo: string; estado: EventoTicketEstado }[];
+  tickets: { eventoId: string; codigo: string; estado: EventoTicketEstado; ingresoAt: string | null }[];
   respuesta: EventoFormularioRespuesta | null;
 };
 
@@ -203,6 +205,49 @@ export type EventoComprasStats = {
   confirmadas: number;
   ingresosConfirmados: number;
 };
+
+// ─── Check-in (US-0131) ───
+
+/** Outcome of `registrar_ingreso_evento`; `revertido` comes from `revertir_ingreso_evento`. */
+export type IngresoResultadoCodigo =
+  | 'ok'
+  | 'ya_ingreso'
+  | 'pendiente'
+  | 'anulada'
+  | 'otro_evento'
+  | 'no_encontrado'
+  | 'revertido';
+
+/** Ticket fields are null for `no_encontrado` (codes of other tenants reveal nothing). */
+export type IngresoResultado = {
+  resultado: IngresoResultadoCodigo;
+  ticketId: string | null;
+  codigo: string | null;
+  asistenteNombre: string | null;
+  asistenteEmail: string | null;
+  entradaNombre: string | null;
+  eventoNombre: string | null;
+  ingresoAt: string | null;
+  ingresoPorNombre: string | null;
+};
+
+export type ResumenIngresos = {
+  activas: number;
+  ingresaron: number;
+  pendientesPago: number;
+};
+
+/** One `activa` ticket of the event in the check-in attendee list. */
+export type AsistenteIngreso = {
+  ticketId: string;
+  codigo: string;
+  asistenteNombre: string;
+  asistenteEmail: string;
+  entradaNombre: string;
+  ingresoAt: string | null;
+};
+
+export type AsistentesIngresoFiltro = 'todos' | 'ingresaron' | 'pendientes';
 
 // ─── Ticket PDF ───
 

@@ -15,6 +15,8 @@ type EventoActionsMenuProps = {
   onCambiarActivo?: () => void;
   /** Published events only: opens the event's purchases page (US-0121). */
   onVerCompras?: () => void;
+  /** Published `confirmado` events only: opens the event's check-in screen (US-0131). */
+  onControlIngreso?: () => void;
   /** Opens the create wizard pre-filled with a copy of this event (US-0122). */
   onDuplicar?: () => void;
   onEditar: () => void;
@@ -32,8 +34,8 @@ type MenuAction = {
 
 type MenuPosition = { top?: number; bottom?: number; right: number };
 
-/** Approximate height of the six-item menu, used to decide whether it opens upward. */
-const MENU_HEIGHT_ESTIMATE = 260;
+/** Approximate height of the longest (seven-item) menu, used to decide whether it opens upward. */
+const MENU_HEIGHT_ESTIMATE = 300;
 
 function computePosition(trigger: HTMLElement): MenuPosition {
   const rect = trigger.getBoundingClientRect();
@@ -49,6 +51,7 @@ export function EventoActionsMenu({
   activo = true,
   onCambiarActivo,
   onVerCompras,
+  onControlIngreso,
   onDuplicar,
   onEditar,
   onCambiarEstado,
@@ -83,6 +86,9 @@ export function EventoActionsMenu({
         { key: 'editar', label: 'Editar', icon: 'edit', run: onEditar },
         ...duplicar,
         ...(onVerCompras ? [{ key: 'ver-compras', label: 'Ver compras', icon: 'receipt_long', run: onVerCompras }] : []),
+        ...(onControlIngreso && estado === 'confirmado'
+          ? [{ key: 'control-ingreso', label: 'Control de ingreso', icon: 'qr_code_scanner', run: onControlIngreso }]
+          : []),
         ...cambiarActivo,
         estado === 'confirmado'
           ? { key: 'cancelar', label: 'Cancelar evento', icon: 'event_busy', run: () => onCambiarEstado('cancelado') }
