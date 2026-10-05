@@ -2,24 +2,16 @@
 
 import { useMetodosPago } from '@/hooks/portal/tenant/useMetodosPago';
 import { MetodoPagoFormModal } from './MetodoPagoFormModal';
-import type { MetodoPago } from '@/types/portal/metodos-pago.types';
+import { METODO_PAGO_TIPO_LABELS, type MetodoPago } from '@/types/portal/metodos-pago.types';
 
 type TenantPaymentMethodsCardProps = {
   tenantId: string;
 };
 
-const TIPO_LABELS: Record<string, string> = {
-  transferencia: 'Transferencia',
-  efectivo: 'Efectivo',
-  tarjeta: 'Tarjeta',
-  pasarela: 'Pasarela',
-  otro: 'Otro',
-};
-
 function TipoBadge({ tipo }: { tipo: string }) {
   return (
     <span className="rounded-full bg-grit-cyan/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-cyan">
-      {TIPO_LABELS[tipo] ?? tipo}
+      {(METODO_PAGO_TIPO_LABELS as Record<string, string>)[tipo] ?? tipo}
     </span>
   );
 }
@@ -52,6 +44,17 @@ function MethodRow({
           <span className="text-sm font-medium text-grit-text truncate">{metodo.nombre}</span>
           <TipoBadge tipo={metodo.tipo} />
           <StatusBadge activo={metodo.activo} />
+          {metodo.qr_url ? (
+            <span
+              className="inline-flex items-center gap-0.5 rounded-full bg-grit-subtext/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-subtext"
+              title="Tiene imagen QR"
+            >
+              <span className="material-symbols-outlined text-xs" aria-hidden="true">
+                qr_code_2
+              </span>
+              QR
+            </span>
+          ) : null}
         </div>
         {metodo.valor ? (
           <p className="mt-0.5 text-xs text-grit-subtext truncate">{metodo.valor}</p>

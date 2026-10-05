@@ -44,10 +44,10 @@ const BASE_MENU_ITEM: MenuItem = {
   icon: 'corporate_fare',
 };
 
-const PUBLIC_TRAININGS_MENU_ITEM: MenuItem = {
-  label: 'Entrenamientos Públicos',
-  href: '/portal/entrenamientos-publicos',
-  icon: 'public',
+const EVENTOS_MENU_ITEM: MenuItem = {
+  label: 'Eventos',
+  href: '/portal/eventos',
+  icon: 'celebration',
 };
 
 const MIS_SUSCRIPCIONES_MENU_ITEM: MenuItem = {
@@ -62,6 +62,12 @@ const MIS_RESERVAS_MENU_ITEM: MenuItem = {
   icon: 'event_available',
 };
 
+const MIS_ENTRADAS_MENU_ITEM: MenuItem = {
+  label: 'Mis Entradas',
+  href: '/portal/mis-entradas',
+  icon: 'confirmation_number',
+};
+
 const SHARED_TENANT_ITEMS: Array<{ label: string; path: string; icon: string }> = [
   // { label: 'Perfil', path: 'perfil', icon: 'person' },
 ];
@@ -74,6 +80,8 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
     { label: 'Servicios', path: 'gestion-servicios', icon: 'category' },
     { label: 'Formularios', path: 'gestion-formularios', icon: 'description' },
     { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
+    { label: 'Eventos', path: 'gestion-eventos', icon: 'event' },
+    { label: 'Eventos Check-in', path: 'control-ingreso', icon: 'qr_code_scanner' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
     { label: 'Suscripciones', path: 'gestion-suscripciones', icon: 'subscriptions' },
     { label: 'Equipo', path: 'gestion-equipo', icon: 'groups' },
@@ -89,6 +97,7 @@ const ROLE_TENANT_ITEMS: Record<UserRole, Array<{ label: string; path: string; i
     { label: 'Entrenamientos', path: 'gestion-entrenamientos', icon: 'exercise' },
     { label: 'Planes', path: 'gestion-planes', icon: 'card_membership' },
     { label: 'Reservas', path: 'gestion-reservas', icon: 'event_available' },
+    { label: 'Eventos Check-in', path: 'control-ingreso', icon: 'qr_code_scanner' },
   ],
 };
 
@@ -97,9 +106,10 @@ export function resolvePortalMenu(role: UserRole, tenantId?: string): MenuItem[]
     return [
       INICIO_MENU_ITEM,
       BASE_MENU_ITEM,
-      PUBLIC_TRAININGS_MENU_ITEM,
+      EVENTOS_MENU_ITEM,
       MIS_SUSCRIPCIONES_MENU_ITEM,
       MIS_RESERVAS_MENU_ITEM,
+      MIS_ENTRADAS_MENU_ITEM,
     ];
   }
 

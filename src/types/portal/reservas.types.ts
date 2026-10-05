@@ -44,27 +44,6 @@ export type CreateReservaInput = {
   formulario_plantilla_id?: string | null;
   /** Collected answers keyed by each "datos" section's campo_nombre. */
   formulario_respuesta?: Record<string, string> | null;
-  /**
-   * Set when the target public training has `omitir_confirmacion_plan = true` and the
-   * athlete chose to continue booking despite lacking the required plan/service — lets
-   * `create()` insert the reservation as 'pendiente' instead of rejecting it outright.
-   * Re-verified server-side against the training's publication before being honored (US-0106).
-   */
-  permitir_pendiente_sin_plan?: boolean;
-  /**
-   * The plan purchase to create *together with* this booking, in one transaction (US-0110).
-   * Nothing has been written for it yet: the athlete picked a plan and filled in payment
-   * details, but the suscripcion/pago rows are only inserted by the booking RPC itself, so
-   * abandoning the flow before submitting leaves no orphaned pending subscription behind.
-   * The resulting subscription is linked back via `reservas.suscripcion_id`.
-   */
-  plan_pendiente_compra?: {
-    plan_id: string;
-    plan_tipo_id: string | null;
-    comentarios: string | null;
-    metodo_pago_id: string;
-    monto: number;
-  } | null;
 };
 
 export type UpdateReservaInput = {

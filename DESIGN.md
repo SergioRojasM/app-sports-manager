@@ -2,7 +2,7 @@
 name: GRIT Arena — UI Design Guide
 design_source: projectspec/designs/pencil/grit-arena-v2.pen
 code_source: src/app/globals.css · tailwind.config.ts · src/components/ui/grit/
-scope: Authenticated Portal (/portal/*) and the public training pages
+scope: Authenticated Portal (/portal/*) and the public event pages
 updated: 2026-09-23 (US-0116 + analitica-v2-design)
 ---
 
@@ -41,8 +41,8 @@ Two rules cover most of it:
 | Frame | Screen it drives |
 | --- | --- |
 | `zfVKC` | Operations dashboard — KPI cards, panels, tables (used by `analitica`) |
-| `OyIqr` | Public training detail |
-| `ql3Ij` | Public trainings marketplace |
+| `OyIqr` | Public detail page (originally public training detail; now drives the event detail) |
+| `ql3Ij` | Public listing with filters drawer (originally the trainings marketplace; now drives event discovery) |
 | `d41rX5` | Athlete trainings schedule |
 | `P43Yo` | Form preview / form builder header |
 
@@ -180,7 +180,7 @@ export function MiModuloPage({ tenantId }: { tenantId: string }) {
 
 ### Public pages
 
-`/entrenamientos-publicos/*` keeps the marketing `Header` and `Footer` and the
+`/eventos/*` keeps the marketing `Header` and `Footer` and the
 `landing-shell` wrapper (with its top padding for the fixed header). Inside
 that chrome, the content uses the same tokens and kit as the Portal. The
 marketing home (`/`) and `/auth/*` keep the older `landing-*` tokens and are

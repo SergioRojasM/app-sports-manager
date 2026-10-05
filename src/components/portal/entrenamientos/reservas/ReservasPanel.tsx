@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import { useReservas } from '@/hooks/portal/entrenamientos/reservas/useReservas';
 import { useReservaForm } from '@/hooks/portal/entrenamientos/reservas/useReservaForm';
@@ -13,6 +13,7 @@ import { toCsvString, downloadTextFile } from '@/lib/csv';
 import { downloadExcelWorkbook, type ExcelCellValue } from '@/lib/excel';
 import { ReservaStatusBadge } from './ReservaStatusBadge';
 import { ReservaFormModal } from './ReservaFormModal';
+import { ReservaRechazoModal } from './ReservaRechazoModal';
 import { AsistenciaStatusBadge } from './AsistenciaStatusBadge';
 import { AsistenciaFormModal } from './AsistenciaFormModal';
 import { FormularioRespuestaModal } from './FormularioRespuestaModal';
@@ -37,6 +38,8 @@ type ReservasPanelProps = {
   tenantId: string;
   instance: TrainingInstance | null;
   role: UserRole | null;
+  /** Opens the self-booking dialog once the panel has loaded — set by the training card's "Reservar" button (US-0127). */
+  autoReservar?: boolean;
   onClose: () => void;
   onMutationComplete?: () => void;
 };
@@ -62,10 +65,14 @@ export function ReservasPanel({
   tenantId,
   instance,
   role,
+  autoReservar = false,
   onClose,
   onMutationComplete,
 }: ReservasPanelProps) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  // Athlete of the last create attempt: the plan offer only applies when booking for oneself (US-0127)
+  const [rejectedAtletaId, setRejectedAtletaId] = useState<string | null>(null);
+  const autoReservarRef = useRef<'idle' | 'waiting' | 'done'>('idle');
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [selectedReservaForAsistencia, setSelectedReservaForAsistencia] = useState<ReservaView | null>(null);
   const [savingAsistencia, setSavingAsistencia] = useState(false);
@@ -170,6 +177,7 @@ export function ReservasPanel({
     disciplinaId: instance?.disciplina_id ?? null,
     atletaId: currentUserId,
     onCreateReserva: async (input) => {
+      setRejectedAtletaId(input.atleta_id);
       const success = await reservasHook.createReserva(input);
       if (success) {
         onMutationComplete?.();
@@ -249,6 +257,28 @@ export function ReservasPanel({
     await reservaForm.openCreate(currentUserId);
     setFormModalOpen(true);
   };
+
+  // Card "Reservar" (US-0127): open the self-booking dialog once per panel opening, after the
+  // panel data has loaded (isLoading must be seen true first — it is still false on the opening render).
+  useEffect(() => {
+    if (!open || !autoReservar) {
+      autoReservarRef.current = 'idle';
+      return;
+    }
+    if (autoReservarRef.current === 'done') return;
+    if (reservasHook.isLoading) {
+      autoReservarRef.current = 'waiting';
+      return;
+    }
+    if (autoReservarRef.current !== 'waiting' || !currentUserId) return;
+
+    autoReservarRef.current = 'done';
+    const { capacidad: loadedCapacidad, error: loadError } = reservasHook;
+    if (isAdmin || myReserva || isPast || loadError) return;
+    if (loadedCapacidad !== null && !loadedCapacidad.disponible) return;
+    void handleSelfBook();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, autoReservar, reservasHook.isLoading, currentUserId]);
 
   const handleAdminCreate = async () => {
     await reservaForm.openCreate();
@@ -748,22 +778,6 @@ export function ReservasPanel({
           </div>
         )}
 
-        {/* Booking rejection alert */}
-        {reservasHook.bookingRejection && (
-          <div className="mx-6 mt-4 flex items-start gap-2 rounded-grit-md border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-200">
-            <span className="material-symbols-outlined mt-0.5 text-base text-amber-300" aria-hidden="true">warning</span>
-            <span className="flex-1">{reservasHook.bookingRejection.message}</span>
-            <button
-              type="button"
-              onClick={reservasHook.clearRejection}
-              className="ml-2 shrink-0 rounded p-0.5 text-amber-300 hover:bg-amber-500/20 hover:text-amber-100"
-              aria-label="Cerrar alerta"
-            >
-              <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
-            </button>
-          </div>
-        )}
-
         {/* Actions bar */}
         <div className="border-b border-grit-glass-border px-6 py-3">
           {isAdmin ? (
@@ -1027,6 +1041,13 @@ export function ReservasPanel({
         loading={previewLoading}
         error={previewError}
         onClose={() => setPreviewOpen(false)}
+      />
+
+      <ReservaRechazoModal
+        rejection={reservasHook.bookingRejection}
+        tenantId={tenantId}
+        ofrecerPlan={!!reservasHook.bookingRejection?.ofrecerPlan && rejectedAtletaId === currentUserId}
+        onClose={reservasHook.clearRejection}
       />
     </>
   );

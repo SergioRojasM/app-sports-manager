@@ -2,9 +2,7 @@
 
 ## Purpose
 Allows tenant administrators to configure access restrictions on training sessions or recurring groups, controlling which athletes may book based on timing windows, subscription plans, disciplines, and discipline levels. Enforces these restrictions at booking and cancellation time.
-
 ## Requirements
-
 ### Requirement: Training booking restriction configuration
 The system SHALL allow tenant administrators to configure access restrictions on a training session or recurring group. Restrictions consist of two layers: (1) scalar timing fields (`reserva_antelacion_horas`, `cancelacion_antelacion_horas`) stored directly on the training/group record, and (2) access condition rows stored in `entrenamiento_restricciones` / `entrenamiento_grupo_restricciones`. Each restriction row carries up to four condition columns (`usuario_estado`, `plan_id`, `disciplina_id`, `validar_nivel_disciplina`). All non-null columns in a single row MUST be satisfied simultaneously (AND). An athlete MUST satisfy at least one row (OR). If no rows exist, booking is unrestricted.
 
@@ -47,7 +45,7 @@ Before inserting a booking into `reservas`, the service layer MUST evaluate the 
 
 For the `usuario_estado` condition: the service layer MUST query `miembros_tenant.estado` scoped to the training's `tenant_id` and the athlete's `usuario_id`. The athlete's tenant-scoped status MUST equal the `usuario_estado` value on the restriction row for the condition to pass. If no `miembros_tenant` row exists for the athlete in the tenant, the booking MUST be rejected with a membership-not-found message.
 
-When the rejection is `SERVICIO_REQUERIDO` or `UNIDADES_AGOTADAS` (a plan/service-only failure) and the target public training's `entrenamientos_publicos.omitir_confirmacion_plan` is `true` (re-verified server-side), the service layer MAY proceed with the booking instead of rejecting it, per the `plan-skip-confirmation-booking` capability — this is the only condition under which a `SERVICIO_REQUERIDO`/`UNIDADES_AGOTADAS` rejection does not block the booking outright.
+A `SERVICIO_REQUERIDO` or `UNIDADES_AGOTADAS` rejection MUST always block the booking. The service layer SHALL NOT read `entrenamientos_publicos.omitir_confirmacion_plan` and SHALL NOT create a `pendiente` booking when a restriction fails (US-0123).
 
 #### Scenario: Booking blocked by advance-notice timing
 - **WHEN** an atleta attempts to book a training with `reserva_antelacion_horas = 24` when less than 24 hours remain before `fecha_hora`
@@ -58,7 +56,7 @@ When the rejection is `SERVICIO_REQUERIDO` or `UNIDADES_AGOTADAS` (a plan/servic
 - **THEN** the timing check passes and remaining validations proceed
 
 #### Scenario: Booking blocked when no access row is satisfied
-- **WHEN** all existing restriction rows fail for the attempting atleta, and the training's public `omitir_confirmacion_plan` flag is not applicable (the failure is not a plan/service-only failure, or the flag is off)
+- **WHEN** all existing restriction rows fail for the attempting atleta
 - **THEN** the booking is rejected with the code and message of the first unmet condition in the first evaluated row, and no reservation row is inserted
 
 #### Scenario: Booking allowed when at least one access row is satisfied
@@ -105,11 +103,9 @@ When the rejection is `SERVICIO_REQUERIDO` or `UNIDADES_AGOTADAS` (a plan/servic
 - **WHEN** a restriction row has `usuario_estado = 'activo'` and no `miembros_tenant` row exists for the atleta in the training's tenant
 - **THEN** the booking is rejected with a message indicating that the athlete's membership in the organization could not be found
 
-#### Scenario: usuario_estado or nivel failures are never bypassed by the skip-confirmation flag
-- **WHEN** a training's public `omitir_confirmacion_plan` is `true`, but the first failing restriction row fails on `usuario_estado` or `validar_nivel_disciplina` (not on a service slot)
-- **THEN** the booking is rejected exactly as it would be without the flag — the skip-confirmation bypass only applies to a `SERVICIO_REQUERIDO`/`UNIDADES_AGOTADAS` rejection
-
----
+#### Scenario: Service or units failure always blocks the booking
+- **WHEN** the first failing restriction row fails with `SERVICIO_REQUERIDO` or `UNIDADES_AGOTADAS`
+- **THEN** the booking is rejected with that code and message, and no reservation row is inserted in any state
 
 ### Requirement: Restriction enforcement at cancellation time
 Before cancelling a booking, the service layer MUST check `cancelacion_antelacion_horas` on the related training. This check applies ONLY to atleta self-cancellation. Admin and coach cancellations bypass it. If `cancelacion_antelacion_horas` is non-null and less than that many hours remain before `fecha_hora`, the cancellation MUST be rejected.
@@ -155,3 +151,4 @@ Row Level Security MUST be enabled on `entrenamiento_restricciones` and `entrena
 #### Scenario: Cross-tenant restriction rows are invisible
 - **WHEN** an authenticated user queries `entrenamiento_restricciones`
 - **THEN** rows belonging to tenants they are not a member of are not returned
+

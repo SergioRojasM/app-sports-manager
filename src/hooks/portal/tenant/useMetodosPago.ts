@@ -1,11 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { createClient } from '@/services/supabase/client';
 import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
+import { storageService } from '@/services/supabase/portal/storage.service';
 import type {
   MetodoPago,
   CreateMetodoPagoInput,
   UpdateMetodoPagoInput,
+  MetodoPagoQrChange,
 } from '@/types/portal/metodos-pago.types';
 
 type UseMetodosPagoOptions = {
@@ -23,7 +26,10 @@ type UseMetodosPagoResult = {
   openCreate: () => void;
   openEdit: (m: MetodoPago) => void;
   closeForm: () => void;
-  submitForm: (data: CreateMetodoPagoInput | UpdateMetodoPagoInput) => Promise<void>;
+  submitForm: (
+    data: CreateMetodoPagoInput | UpdateMetodoPagoInput,
+    qr?: MetodoPagoQrChange,
+  ) => Promise<void>;
   openDelete: (m: MetodoPago) => void;
   closeDelete: () => void;
   confirmDelete: () => Promise<void>;
@@ -74,14 +80,49 @@ export function useMetodosPago({ tenantId }: UseMetodosPagoOptions): UseMetodosP
   }, [isSubmitting]);
 
   const submitForm = useCallback(
-    async (data: CreateMetodoPagoInput | UpdateMetodoPagoInput) => {
+    async (data: CreateMetodoPagoInput | UpdateMetodoPagoInput, qr?: MetodoPagoQrChange) => {
       setIsSubmitting(true);
       setError(null);
       try {
         if (editTarget) {
-          await metodosPagoService.updateMetodoPago(editTarget.id, data as UpdateMetodoPagoInput);
+          const updates = { ...data } as UpdateMetodoPagoInput;
+          if (qr?.file) {
+            try {
+              const { signedUrl } = await storageService.uploadMetodoPagoQr(
+                createClient(),
+                tenantId,
+                editTarget.id,
+                qr.file,
+              );
+              updates.qr_url = signedUrl;
+            } catch {
+              throw new Error('No fue posible subir la imagen. Intenta de nuevo.');
+            }
+          } else if (qr?.remove) {
+            updates.qr_url = null;
+          }
+          await metodosPagoService.updateMetodoPago(editTarget.id, updates);
         } else {
-          await metodosPagoService.createMetodoPago(data as CreateMetodoPagoInput);
+          const created = await metodosPagoService.createMetodoPago(data as CreateMetodoPagoInput);
+          if (qr?.file) {
+            // The path needs the method id, so the image goes up after the row exists
+            try {
+              const { signedUrl } = await storageService.uploadMetodoPagoQr(
+                createClient(),
+                tenantId,
+                created.id,
+                qr.file,
+              );
+              await metodosPagoService.updateMetodoPago(created.id, { qr_url: signedUrl });
+            } catch {
+              // Keep the form open on the created row so a retry updates instead of duplicating
+              setEditTarget(created);
+              await fetchMetodos();
+              // After the refetch: fetchMetodos clears the error
+              setError('El método se guardó, pero no fue posible subir la imagen. Intenta de nuevo.');
+              return;
+            }
+          }
         }
         setFormOpen(false);
         setEditTarget(null);
@@ -94,7 +135,7 @@ export function useMetodosPago({ tenantId }: UseMetodosPagoOptions): UseMetodosP
         setIsSubmitting(false);
       }
     },
-    [editTarget, fetchMetodos],
+    [editTarget, fetchMetodos, tenantId],
   );
 
   const openDelete = useCallback((m: MetodoPago) => {

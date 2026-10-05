@@ -52,7 +52,8 @@ type FormularioRespuestaModalProps = {
 const inputClass =
   'w-full rounded-[8px] border border-grit-glass-border bg-grit-bg/60 px-4 py-3 text-sm text-grit-text placeholder:text-grit-muted focus:border-grit-cyan focus:outline-none disabled:opacity-60';
 
-function FormularioCampoEditableField({
+/** Editable input per `campo_tipo`; also reused by the event checkout (US-0121). */
+export function FormularioCampoEditableField({
   seccion,
   value,
   error,

@@ -1,5 +1,6 @@
 export { ReservasPanel } from './ReservasPanel';
 export { ReservaFormModal } from './ReservaFormModal';
+export { ReservaRechazoModal } from './ReservaRechazoModal';
 export { ReservaStatusBadge } from './ReservaStatusBadge';
 export { AsistenciaFormModal } from './AsistenciaFormModal';
 export { AsistenciaStatusBadge } from './AsistenciaStatusBadge';

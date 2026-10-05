@@ -8,3 +8,4 @@ export { suscripcionesService } from './suscripciones.service';
 export { pagosService } from './pagos.service';
 export { asistenciasService } from './asistencias.service';
 export { analiticaService } from './analitica.service';
+export { eventosService } from './eventos.service';

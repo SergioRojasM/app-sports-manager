@@ -169,16 +169,6 @@ export function EntrenamientoWizard({
               placeholder="Ej. Entrada principal del estadio, puerta norte..."
             />
           </div>
-
-          <div className="md:col-span-2">
-            <label className="mb-1 block text-xs text-grit-subtext">Visibilidad</label>
-            <div className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-subtext">
-              {values.visibilidad === 'publico' ? 'Público' : 'Privado'}
-            </div>
-            <p className="mt-1 text-xs text-grit-subtext">
-              Los entrenamientos se crean privados. Podrás publicarlos públicamente después, desde las opciones del entrenamiento.
-            </p>
-          </div>
         </div>
       </section>
 

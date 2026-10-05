@@ -92,13 +92,6 @@ export type AnaliticaOperations = {
     offeredCapacity: number;
     occupancyPercent: number | null;
   }>;
-  bookingByPublicStatus: Array<AnaliticaTrainingAverages & {
-    /** "Público" (published to the marketplace) or "Privado". */
-    label: string;
-    trainingCount: number;
-    validBookingCount: number;
-    occupancyPercent: number | null;
-  }>;
   topAthletesByBookings: Array<{
     athleteId: string;
     athleteName: string;

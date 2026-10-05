@@ -457,6 +457,7 @@ async function validateBookingRestrictions(
           code: 'SERVICIO_REQUERIDO',
           message: `Este entrenamiento requiere una suscripción activa con unidades disponibles en el servicio: ${svcName}.`,
           ...(svcNameRaw ? { servicioNombre: svcNameRaw } : {}),
+          ofrecerPlan: true,
         };
       }
     }
@@ -690,7 +691,6 @@ async function getEntrenamientoFechaHora(
 
 async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
   let matchedRow: EntrenamientoRestriccion | null = null;
-  let pendienteSinPlan = false;
 
   // Reference date for service-entitlement eligibility — the training's date, or today if unscheduled
   const fechaHora = await getEntrenamientoFechaHora(input.entrenamiento_id, input.tenant_id);
@@ -714,29 +714,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       input.tenant_id,
     );
     if (!restrictionResult.ok) {
-      // 1a. Skip-plan-confirmation path (US-0106): a SERVICIO_REQUERIDO/UNIDADES_AGOTADAS
-      // rejection on a public training published with omitir_confirmacion_plan = true may
-      // proceed as a 'pendiente' booking instead of blocking. Re-verified server-side —
-      // never trust input.permitir_pendiente_sin_plan alone.
-      const planFixable = restrictionResult.code === 'SERVICIO_REQUERIDO' || restrictionResult.code === 'UNIDADES_AGOTADAS';
-      if (planFixable && input.permitir_pendiente_sin_plan) {
-        const supabaseCheck = createClient();
-        const { data: publicacion } = await supabaseCheck
-          .from('entrenamientos_publicos')
-          .select('omitir_confirmacion_plan')
-          .eq('entrenamiento_id', input.entrenamiento_id)
-          .eq('tenant_id', input.tenant_id)
-          .eq('activo', true)
-          .maybeSingle();
-
-        if (publicacion?.omitir_confirmacion_plan) {
-          pendienteSinPlan = true;
-        } else {
-          return restrictionResult;
-        }
-      } else {
-        return restrictionResult;
-      }
+      return restrictionResult;
     } else {
       matchedRow = row;
     }
@@ -822,6 +800,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
         ...(exhaustedSvcName ? { servicioNombre: exhaustedSvcName } : {}),
+        ofrecerPlan: true,
       };
     }
 
@@ -901,22 +880,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     p_deductions: deductions,
     p_formulario_plantilla_id: input.formulario_plantilla_id ?? null,
     p_formulario_respuesta: input.formulario_respuesta ?? null,
-    p_permitir_pendiente: pendienteSinPlan,
     p_suscripcion_id: null,
-    // US-0110: the plan purchase rides along with the booking so the RPC creates the
-    // suscripcion, its servicios, the pago and the reserva in a single transaction.
-    // Nothing was written when the athlete picked the plan, so abandoning the flow
-    // midway leaves no orphaned pending subscription blocking their next attempt.
-    p_plan_purchase:
-      pendienteSinPlan && input.plan_pendiente_compra
-        ? {
-            plan_id: input.plan_pendiente_compra.plan_id,
-            plan_tipo_id: input.plan_pendiente_compra.plan_tipo_id,
-            comentarios: input.plan_pendiente_compra.comentarios,
-            metodo_pago_id: input.plan_pendiente_compra.metodo_pago_id,
-            monto: input.plan_pendiente_compra.monto,
-          }
-        : null,
   });
 
   if (error) {
@@ -925,6 +889,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'SERVICIO_REQUERIDO',
         message: 'La suscripción utilizada ya no está activa. No es posible completar la reserva.',
+        ofrecerPlan: true,
       };
     }
     if (error.code === 'P0001' && error.message?.includes('UNIDADES_AGOTADAS')) {
@@ -932,6 +897,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
+        ofrecerPlan: true,
       };
     }
     // US-0110: the deferred plan purchase is re-validated inside the RPC, at submit time,

@@ -5,8 +5,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/hooks/auth/useAuth";
-import { GUIDED_SIGNUP_STEPS, parseGuidedParams } from "@/lib/portal/entrenamientos-publicos/guidedBooking";
-import { GuidedBookingStepper } from "@/components/ui/GuidedBookingStepper";
 
 type SignupFormProps = {
   nextPath?: string;
@@ -16,7 +14,6 @@ export function SignupForm({ nextPath }: SignupFormProps) {
   const router = useRouter();
   const { signUp, signInWithGoogle, errorMessage: authErrorMessage } = useAuth();
 
-  const guidedTarget = useMemo(() => (nextPath ? parseGuidedParams(nextPath) : null), [nextPath]);
   const loginHref = nextPath ? `/auth/login?next=${encodeURIComponent(nextPath)}` : "/auth/login";
 
   const [email, setEmail] = useState("");
@@ -86,14 +83,6 @@ export function SignupForm({ nextPath }: SignupFormProps) {
         </h2>
         <p className="text-sm text-slate-400">Únete a GRIT Arena y empieza a optimizar el rendimiento de tu equipo.</p>
       </div>
-
-      {guidedTarget && (
-        <GuidedBookingStepper
-          steps={GUIDED_SIGNUP_STEPS}
-          currentStep={successMessage ? 2 : 1}
-          trainingNombre={guidedTarget.nombre}
-        />
-      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {errorMessage && (
