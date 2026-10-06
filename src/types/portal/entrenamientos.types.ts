@@ -1,6 +1,7 @@
 import type { EntrenamientoCategoriaInput, EntrenamientoGrupoCategoria, EntrenamientoCategoria } from './entrenamiento-categorias.types';
 import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccion, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 import type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido } from './entrenamiento-plantillas.types';
+import type { Scenario } from './scenarios.types';
 
 export type { EntrenamientoGrupoCategoria, EntrenamientoCategoria };
 export type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido };
@@ -93,6 +94,24 @@ export type TrainingInstance = {
   restricciones?: EntrenamientoRestriccion[];
   created_at: string;
   updated_at: string;
+};
+
+/** One training occurrence with what the event wizard needs to pre-fill a draft from it (US-0132). */
+export type EntrenamientoParaEvento = {
+  id: string;
+  nombre: string | null;
+  descripcion: string | null;
+  punto_encuentro: string | null;
+  formulario_externo: string | null;
+  formulario_id: string | null;
+  fecha_hora: string | null;
+  duracion_minutos: number | null;
+  cupo_maximo: number | null;
+  reserva_antelacion_horas: number | null;
+  cancelacion_antelacion_horas: number | null;
+  disciplina: { nombre: string } | null;
+  escenario: Pick<Scenario, 'id' | 'nombre' | 'tipo' | 'ubicacion' | 'direccion' | 'coordenadas' | 'capacidad' | 'image_url'> | null;
+  entrenador: { id: string; nombre: string | null; apellido: string | null; email: string | null } | null;
 };
 
 export type TrainingGroupWithDetails = TrainingGroup & {

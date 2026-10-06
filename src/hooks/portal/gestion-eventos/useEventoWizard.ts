@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/services/supabase/client';
+import { entrenamientosService } from '@/services/supabase/portal/entrenamientos.service';
 import { eventosService } from '@/services/supabase/portal/eventos.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import {
@@ -20,9 +21,11 @@ import {
   validateEventoDraft,
   type EventoValidationMode,
 } from '@/lib/portal/eventos-wizard.utils';
+import { draftFromEntrenamiento, esEntrenamientoFuturo } from '@/lib/portal/entrenamiento-evento.utils';
 import {
   EventoServiceError,
   type EventoCuponDraft,
+  type EventoDesdeEntrenamientoAjustes,
   type EventoDraft,
   type EventoDuplicadoAjustes,
   type EventoEntradaDraft,
@@ -57,6 +60,18 @@ type DuplicadoState = {
   ajustes: EventoDuplicadoAjustes;
 };
 
+/** Source training of an unsaved draft (US-0132); dropped once the event is saved for the first time. */
+type OrigenEntrenamientoState = {
+  id: string;
+  nombre: string;
+  /** The training's own capacity, shown next to the event's (they are not shared). */
+  cupoMaximo: number | null;
+  ajustes: EventoDesdeEntrenamientoAjustes;
+};
+
+/** Which source the "not found" state refers to. */
+export type EventoWizardNotFoundKind = 'evento' | 'entrenamiento' | 'entrenamiento-pasado';
+
 type ShownValidation = { mode: EventoValidationMode; steps: ReadonlySet<EventoWizardStep> } | null;
 
 export type EventoWizardSavingKind = 'borrador' | 'final' | null;
@@ -69,6 +84,8 @@ type UseEventoWizardArgs = {
   eventoId?: string;
   /** Create mode only: the event to pre-fill the new draft from (US-0122). */
   duplicarDeId?: string;
+  /** Create mode only, when not duplicating: the future training to pre-fill the new draft from (US-0132). */
+  desdeEntrenamientoId?: string;
   /** Ids of the tenant's active form templates (final-save check). */
   formulariosActivosIds: ReadonlySet<string>;
   /** Ids of the tenant's existing events, once loaded; used to drop deleted bundle members. */
@@ -91,10 +108,12 @@ export function useEventoWizard({
   tenantId,
   eventoId: eventoIdProp,
   duplicarDeId: duplicarDeIdProp,
+  desdeEntrenamientoId: desdeEntrenamientoIdProp,
   formulariosActivosIds,
   eventosExistentesIds,
 }: UseEventoWizardArgs) {
   const duplicarDeId = eventoIdProp ? undefined : duplicarDeIdProp;
+  const desdeEntrenamientoId = eventoIdProp || duplicarDeId ? undefined : desdeEntrenamientoIdProp;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -109,11 +128,15 @@ export function useEventoWizard({
   const [esBorrador, setEsBorrador] = useState(true);
   const [draft, setDraft] = useState<EventoDraft>(() => handoff.current?.draft ?? emptyEventoDraft());
   const [baseline, setBaseline] = useState(() => serializeDraft(handoff.current?.draft ?? emptyEventoDraft()));
-  const [loading, setLoading] = useState((Boolean(eventoIdProp) && !handoff.current) || Boolean(duplicarDeId));
+  const [loading, setLoading] = useState(
+    (Boolean(eventoIdProp) && !handoff.current) || Boolean(duplicarDeId) || Boolean(desdeEntrenamientoId),
+  );
   const [duplicado, setDuplicado] = useState<DuplicadoState | null>(null);
+  const [origenEntrenamiento, setOrigenEntrenamiento] = useState<OrigenEntrenamientoState | null>(null);
   // Last complete event date: the reference for shifting ticket and coupon window ends when the date moves
   const fechaAncla = useRef('');
   const [notFound, setNotFound] = useState(false);
+  const [notFoundKind, setNotFoundKind] = useState<EventoWizardNotFoundKind>('evento');
   const [loadError, setLoadError] = useState<string | null>(null);
   const [ultimoGuardado, setUltimoGuardado] = useState<string | null>(handoff.current?.ultimoGuardado ?? null);
   const [borradorGuardadoFlash, setBorradorGuardadoFlash] = useState(Boolean(handoff.current));
@@ -142,11 +165,37 @@ export function useEventoWizard({
 
   const load = useCallback(async () => {
     const sourceId = eventoIdProp ?? duplicarDeId;
-    if (!sourceId) return;
+    if (!sourceId && !desdeEntrenamientoId) return;
     setLoading(true);
     setLoadError(null);
     setNotFound(false);
     try {
+      if (!sourceId && desdeEntrenamientoId) {
+        // Unsaved draft from a training: like a copy, the baseline stays the empty draft (dirty from the start)
+        const entrenamiento = await entrenamientosService.getEntrenamientoParaEvento(tenantId, desdeEntrenamientoId);
+        if (!entrenamiento) {
+          setNotFoundKind('entrenamiento');
+          setNotFound(true);
+          return;
+        }
+        // Re-checked here, not only in the trainings modal: the URL may be stale or typed by hand
+        if (!esEntrenamientoFuturo(entrenamiento.fecha_hora, Date.now())) {
+          setNotFoundKind('entrenamiento-pasado');
+          setNotFound(true);
+          return;
+        }
+        const desde = draftFromEntrenamiento(entrenamiento);
+        fechaAncla.current = desde.fechaOriginal;
+        setDraft(desde.draft);
+        setOrigenEntrenamiento({
+          id: entrenamiento.id,
+          nombre: entrenamiento.nombre ?? '',
+          cupoMaximo: entrenamiento.cupo_maximo,
+          ajustes: desde.ajustes,
+        });
+        return;
+      }
+      if (!sourceId) return;
       const evento = await eventosService.getEventoCompleto(tenantId, sourceId);
       if (!evento) {
         setNotFound(true);
@@ -174,15 +223,21 @@ export function useEventoWizard({
       setUltimoGuardado(evento.borrador ? evento.updated_at : null);
     } catch (err) {
       console.error('Failed to load evento:', err);
-      setLoadError(err instanceof EventoServiceError ? err.message : 'No se pudo cargar el evento.');
+      setLoadError(
+        err instanceof EventoServiceError
+          ? err.message
+          : desdeEntrenamientoId
+            ? 'No se pudo cargar el entrenamiento.'
+            : 'No se pudo cargar el evento.',
+      );
     } finally {
       setLoading(false);
     }
-  }, [duplicarDeId, eventoIdProp, tenantId]);
+  }, [desdeEntrenamientoId, duplicarDeId, eventoIdProp, tenantId]);
 
   useEffect(() => {
     if (!eventoIdProp) {
-      if (duplicarDeId) void load();
+      if (duplicarDeId || desdeEntrenamientoId) void load();
       return;
     }
     if (handoff.current) {
@@ -193,7 +248,7 @@ export function useEventoWizard({
       return;
     }
     void load();
-  }, [duplicarDeId, eventoIdProp, load]);
+  }, [desdeEntrenamientoId, duplicarDeId, eventoIdProp, load]);
 
   // Bundled events deleted since the last save are dropped, with a warning on the ticket card
   useEffect(() => {
@@ -578,6 +633,7 @@ export function useEventoWizard({
         setBaseline(serializeDraft(saved));
         setShownValidation(null);
         setDuplicado(null);
+        setOrigenEntrenamiento(null);
 
         if (!borrador) {
           const guardado = esNuevo || esBorrador ? 'creado' : 'editado';
@@ -644,6 +700,8 @@ export function useEventoWizard({
     reload: load,
     duplicadoDe: duplicado ? { id: duplicado.id, nombre: duplicado.nombre } : null,
     duplicadoAjustes: duplicado?.ajustes ?? null,
+    notFoundKind,
+    origenEntrenamiento,
     draft,
     isDirty,
     step,
