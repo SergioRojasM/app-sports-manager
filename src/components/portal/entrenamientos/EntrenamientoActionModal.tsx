@@ -11,6 +11,10 @@ type EntrenamientoActionModalProps = {
   onDelete: () => void;
   onViewDetail: () => void;
   onViewReservas?: () => void;
+  /** Admin only (US-0132): opens the create-event wizard pre-filled from this training. */
+  onPublicarEnEventos?: () => void;
+  canPublicarEnEventos?: boolean;
+  publicarEnEventosDisabledReason?: string;
 };
 
 export function EntrenamientoActionModal({
@@ -26,6 +30,9 @@ export function EntrenamientoActionModal({
   onDelete,
   onViewDetail,
   onViewReservas,
+  onPublicarEnEventos,
+  canPublicarEnEventos = false,
+  publicarEnEventosDisabledReason,
 }: EntrenamientoActionModalProps) {
   if (!open) {
     return null;
@@ -63,6 +70,26 @@ export function EntrenamientoActionModal({
             >
               <p className="text-sm font-semibold text-grit-text">Ver reservas</p>
               <p className="mt-0.5 text-xs text-grit-subtext">Consulta las reservas de este entrenamiento.</p>
+            </button>
+          )}
+
+          {onPublicarEnEventos && (
+            <button
+              type="button"
+              onClick={onPublicarEnEventos}
+              disabled={!canPublicarEnEventos}
+              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
+                canPublicarEnEventos
+                  ? 'border-grit-glass-border bg-grit-bg/70 hover:border-grit-cyan/70'
+                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
+              }`}
+            >
+              <p className="text-sm font-semibold text-grit-text">Publicar en eventos</p>
+              <p className="mt-0.5 text-xs text-grit-subtext">
+                {canPublicarEnEventos
+                  ? 'Abre el asistente de eventos con los datos de este entrenamiento.'
+                  : (publicarEnEventosDisabledReason ?? 'Acción no disponible.')}
+              </p>
             </button>
           )}
 

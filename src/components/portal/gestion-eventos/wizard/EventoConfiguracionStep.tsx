@@ -64,6 +64,13 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
     [updateField],
   );
   const disciplinaStale = draft.disciplina !== '' && !options.disciplinas.some((option) => option.label === draft.disciplina);
+  // Created from a training (US-0132): the capacity belongs to the event alone, said where it is edited
+  const origen = wizard.origenEntrenamiento;
+  const cupoHint = origen
+    ? `Cupo propio del evento, no compartido con el entrenamiento "${origen.nombre}"${
+        origen.cupoMaximo !== null ? ` (cupo ${origen.cupoMaximo})` : ''
+      }. Vacío = cupo ilimitado.`
+    : 'Vacío = cupo ilimitado.';
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -273,7 +280,7 @@ export function EventoConfiguracionStep({ wizard, options, disabled }: EventoCon
               errorKey={ERROR_KEYS.cupoMaximo}
               label="Cupo máximo"
               error={errors[ERROR_KEYS.cupoMaximo]}
-              hint="Vacío = cupo ilimitado."
+              hint={cupoHint}
               hintId="evento-cupo-hint"
             >
               <input
