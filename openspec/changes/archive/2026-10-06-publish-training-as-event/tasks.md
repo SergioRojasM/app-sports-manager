@@ -75,9 +75,9 @@
 ## 7. Verification
 
 - [x] 7.1 Run `npx tsc --noEmit` and `npm run lint` and fix any issues. No test runner is configured; do not run `build`
-- [ ] 7.2 Manual happy path: as an admin, take a future training with a trainer, internal form, scenario and capacity → "Publicar en eventos" → check the copied fields, the notice and the capacity hint → "Guardar borrador" (URL becomes `/editar`, notice and hint gone) → add a ticket and a payment method → "Publicar evento"
-- [ ] 7.3 Manual check that capacity is not shared: buy a ticket on the new event and confirm that the training's available spots are unchanged, and vice versa
-- [ ] 7.4 Manual edge cases:
+- [x] 7.2 Manual happy path: as an admin, take a future training with a trainer, internal form, scenario and capacity → "Publicar en eventos" → check the copied fields, the notice and the capacity hint → "Guardar borrador" (URL becomes `/editar`, notice and hint gone) → add a ticket and a payment method → "Publicar evento"
+- [x] 7.3 Manual check that capacity is not shared: buy a ticket on the new event and confirm that the training's available spots are unchanged, and vice versa
+- [x] 7.4 Manual edge cases:
   - past training: disabled option, and `?desdeEntrenamiento=` opened directly → "Este entrenamiento ya pasó";
   - series occurrence (its own date);
   - description over 300 characters;
