@@ -31,15 +31,19 @@ The system SHALL require the user to select a payment method from the dropdown b
 - **THEN** the system SHALL display the selected method's `valor` (if non-null), `url` as a clickable link opening in a new tab (if non-null), and `comentarios` as helper text (if non-null)
 
 ### Requirement: Selected payment method SHALL be persisted when creating the pago record
-The system SHALL include the `metodo_pago_id` of the selected method in the payload when creating the `pagos` record linked to the new subscription. The value SHALL be stored in the `pagos.metodo_pago_id` FK column.
+The system SHALL pass the `metodo_pago_id` of the selected method to the `comprar_suscripcion` RPC, which SHALL store it in the `pagos.metodo_pago_id` FK column of the new payment. The RPC SHALL reject a method that is not an active `tenant_metodos_pago` row of the purchase's tenant with `METODO_PAGO_INVALIDO`.
 
 #### Scenario: pago record captures metodo_pago_id on successful subscription
 - **WHEN** the user confirms a subscription with a selected payment method
 - **THEN** the system SHALL create the `pagos` row with `metodo_pago_id` set to the selected method's `id`
 
 #### Scenario: pagos row is created with metodo_pago_id on successful flow
-- **WHEN** the subscription and pago creation succeed
+- **WHEN** the purchase succeeds
 - **THEN** the system SHALL show the existing success message and close the modal, and the `pagos` row SHALL have `metodo_pago_id` populated
+
+#### Scenario: Method deactivated while the modal is open
+- **WHEN** the selected method was deactivated or deleted before the user confirms
+- **THEN** the purchase SHALL fail without creating any record and the modal SHALL show "El método de pago seleccionado ya no está disponible. Elige otro."
 
 ### Requirement: `pagos` table SHALL store a typed FK reference to `tenant_metodos_pago`
 The system's database SHALL include a `metodo_pago_id uuid` column on `pagos`, implemented as a foreign key referencing `tenant_metodos_pago(id)` with `ON DELETE SET NULL`. The legacy `pagos_metodo_pago_ck` constraint SHALL be dropped. The legacy `metodo_pago varchar` column SHALL be kept but new code SHALL NOT write to it.

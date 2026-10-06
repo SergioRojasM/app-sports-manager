@@ -362,22 +362,29 @@ The `useSuscripcion` hook SHALL maintain `selectedTipoId: string | null` state. 
 ---
 
 ### Requirement: Subscription request submission
-On "Confirmar", the system SHALL insert one `suscripciones` record and one linked `pagos` record. Both records MUST have `estado = 'pendiente'`. The `suscripciones` insert MUST snapshot the selected `plan_tipo.clases_incluidas` into `clases_plan`. The `pagos` insert MUST capture `plan_tipo.precio` in `monto` (falling back to `planes.precio` if the subtype has no `precio`) and set `comprobante_url = null`.
+On "Confirmar", the system SHALL create one `suscripciones` record and one linked `pagos` record through a single call to the `comprar_suscripcion` RPC. Both records MUST have `estado = 'pendiente'`. The payment's `monto` MUST be set by the server from the selected `plan_tipo.precio` (0 for a plan without subtypes). The creation MUST be atomic: either both records exist or neither does.
 
 #### Scenario: Successful subscription request
 - **WHEN** a `usuario` confirms a subscription request after selecting a subtype
-- **THEN** a `suscripciones` row SHALL be inserted with `estado = 'pendiente'`, `atleta_id = auth.uid()`, `plan_id = selectedPlan.id`, `plan_tipo_id = selectedTipo.id`, and `clases_plan = selectedTipo.clases_incluidas`
-- **THEN** a `pagos` row SHALL be inserted with `estado = 'pendiente'`, `suscripcion_id` referencing the new subscription, `monto = selectedTipo.precio ?? selectedPlan.precio`, and `comprobante_url = null`
+- **THEN** a `suscripciones` row SHALL exist with `estado = 'pendiente'`, `atleta_id = auth.uid()`, `plan_id = selectedPlan.id` and `plan_tipo_id = selectedTipo.id`
+- **THEN** a `pagos` row SHALL exist with `estado = 'pendiente'`, `suscripcion_id` referencing the new subscription and `monto = selectedTipo.precio`
 - **THEN** the modal SHALL close and a success message SHALL be shown: _"Solicitud enviada. El administrador revisará tu suscripción."_
 
-#### Scenario: Subscription insert fails
-- **WHEN** the `createSuscripcion` call returns an error
-- **THEN** the modal SHALL remain open and display an inline error message without creating any records
+#### Scenario: Purchase fails
+- **WHEN** the `comprarSuscripcion` call returns an error
+- **THEN** the modal SHALL remain open and display an inline error message, and no `suscripciones` or `pagos` record SHALL exist
 
-#### Scenario: Payment insert fails after subscription insert succeeds
-- **WHEN** `createSuscripcion` succeeds but `createPago` returns an error
-- **THEN** an inline error message SHALL be shown inside the modal
-- **THEN** the orphan `suscripciones` row with `estado = 'pendiente'` SHALL remain in the database
+#### Scenario: Plan no longer available
+- **WHEN** the RPC rejects the purchase with `PLAN_NO_DISPONIBLE` or `SUBTIPO_NO_DISPONIBLE`
+- **THEN** the modal SHALL show "Este plan ya no está disponible. Actualiza la lista e inténtalo nuevamente."
+
+#### Scenario: Pending request already exists
+- **WHEN** the RPC rejects the purchase with `SUSCRIPCION_PENDIENTE_EXISTENTE`
+- **THEN** the modal SHALL show "Ya tienes una solicitud pendiente para este plan."
+
+#### Scenario: No orphan subscription
+- **WHEN** the payment cannot be created
+- **THEN** no `suscripciones` row SHALL remain
 
 ---
 
