@@ -55,6 +55,7 @@ export type TenantEditFormValues = {
   banner_url: string;
   max_solicitudes: string;
   requiere_perfil_completo: string;
+  publico: string;
 };
 
 export type TenantEditPayload = {
@@ -70,6 +71,7 @@ export type TenantEditPayload = {
   banner_url: string | null;
   max_solicitudes: number;
   requiere_perfil_completo: boolean;
+  publico: boolean;
 };
 
 export type TenantEditResult = {
@@ -105,4 +107,6 @@ export type PortalTenantListItem = {
   identity: TenantIdentityPayload;
   canAccess: boolean;
   userMembershipRole: TenantRole | null;
+  /** `tenants.publico` — a private organization is only listed for its members (US-0133). */
+  isPublic: boolean;
 };

@@ -184,6 +184,33 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
         );
       })}
 
+      {/* publico — marketplace visibility (US-0133) */}
+      <div className="space-y-1.5">
+        <span id="publico-desc" className="block text-[11px] text-grit-muted">
+          Cuando está activo, la organización aparece en «Organizaciones disponibles» y cualquier usuario puede solicitar
+          acceso. Si lo desactivas, solo la verán sus miembros y no recibirá nuevas solicitudes.
+        </span>
+        <label className="flex cursor-pointer items-center gap-3">
+          <input
+            id="publico"
+            name="publico"
+            type="checkbox"
+            checked={values.publico === 'true'}
+            onChange={(event) => onChange('publico', event.target.checked ? 'true' : 'false')}
+            disabled={isSubmitting}
+            aria-describedby="publico-desc"
+            className="h-4 w-4 rounded border-grit-glass-border bg-grit-bg accent-grit-cyan disabled:opacity-50"
+          />
+          <span className="text-sm font-medium text-grit-text">Organización pública</span>
+        </label>
+        {values.publico !== 'true' ? (
+          <p className="text-xs font-medium text-amber-300" role="status">
+            Las solicitudes pendientes se conservan y puedes seguir gestionándolas. Para sumar miembros nuevos usa
+            «Agregar miembro» en Gestión de equipo.
+          </p>
+        ) : null}
+      </div>
+
       {/* max_solicitudes — numeric field */}
       <div className="space-y-1.5">
         <label htmlFor="max_solicitudes" className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">

@@ -141,12 +141,20 @@ export const solicitudesService = {
     // Guard 3: check if tenant requires a complete user profile
     const { data: tenantFlag, error: tenantFlagError } = await supabase
       .from('tenants')
-      .select('requiere_perfil_completo')
+      .select('requiere_perfil_completo, publico')
       .eq('id', input.tenant_id)
       .single();
 
     if (tenantFlagError) {
       throw new SolicitudesServiceError('unknown', 'Error al verificar la configuración de la organización.');
+    }
+
+    // A private organization does not receive access requests (US-0133)
+    if (tenantFlag?.publico === false) {
+      throw new SolicitudesServiceError(
+        'private_org',
+        'Esta organización no está recibiendo solicitudes de acceso.',
+      );
     }
 
     if (tenantFlag?.requiere_perfil_completo) {

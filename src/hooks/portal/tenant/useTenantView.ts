@@ -49,10 +49,12 @@ export function useTenantView(options: UseTenantViewOptions = {}): UseTenantView
 
     try {
       if (mode === 'directory') {
-        const [tenants, memberships] = await Promise.all([
-          tenantService.listVisibleTenantsForPortal(supabase),
-          tenantService.listUserTenantMemberships(supabase, user.id),
-        ]);
+        // Memberships first: a private organization is only listed for its members
+        const memberships = await tenantService.listUserTenantMemberships(supabase, user.id);
+        const tenants = await tenantService.listVisibleTenantsForPortal(
+          supabase,
+          memberships.map((membership) => membership.tenantId),
+        );
 
         setTenants(tenantService.mapPortalTenants(tenants, memberships));
         setData(null);

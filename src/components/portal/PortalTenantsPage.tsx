@@ -3,7 +3,7 @@
 import { useTenantView } from '@/hooks/portal/tenant/useTenantView';
 import { TenantDirectoryList } from '@/components/portal/tenant/TenantDirectoryList';
 import { InvitacionesPendientesSection } from '@/components/portal/invitaciones/InvitacionesPendientesSection';
-import { GritPageHeader } from '@/components/ui';
+import { GritEmptyState, GritPageHeader } from '@/components/ui';
 
 function LoadingState() {
   return (
@@ -40,7 +40,11 @@ export function PortalTenantsPage() {
         </div>
       ) : null}
 
-      {!loading && !error ? <TenantDirectoryList organizations={tenants} /> : null}
+      {!loading && !error && tenants.length === 0 ? (
+        <GritEmptyState icon="shield" title="No hay organizaciones disponibles por ahora." />
+      ) : null}
+
+      {!loading && !error && tenants.length > 0 ? <TenantDirectoryList organizations={tenants} /> : null}
     </section>
   );
 }

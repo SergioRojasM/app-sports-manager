@@ -29,6 +29,7 @@ type TenantRow = {
   x_url: string | null;
   max_solicitudes: number;
   requiere_perfil_completo: boolean;
+  publico: boolean;
   updated_at?: string | null;
 };
 
@@ -72,6 +73,7 @@ function mapTenantToEditFormValues(tenant: TenantRow): TenantEditFormValues {
     x_url: toEditableString(tenant.x_url),
     max_solicitudes: String(tenant.max_solicitudes ?? 2),
     requiere_perfil_completo: String(tenant.requiere_perfil_completo ?? false),
+    publico: String(tenant.publico ?? true),
   };
 }
 
@@ -128,7 +130,7 @@ export const tenantService = {
   async fetchTenantById(supabase: SupabaseClient, tenantId: string): Promise<TenantRow> {
     const { data, error } = await supabase
       .from('tenants')
-      .select('id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes, requiere_perfil_completo')
+      .select('id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes, requiere_perfil_completo, publico')
       .eq('id', tenantId)
       .single();
 
@@ -235,14 +237,23 @@ export const tenantService = {
     return (data as { max_solicitudes: number }).max_solicitudes ?? 2;
   },
 
-  async listVisibleTenantsForPortal(supabase: SupabaseClient): Promise<TenantRow[]> {
-    const { data, error } = await supabase
+  /** Public organizations plus the ones the user belongs to (US-0133). */
+  async listVisibleTenantsForPortal(
+    supabase: SupabaseClient,
+    memberTenantIds: string[],
+  ): Promise<TenantRow[]> {
+    const query = supabase
       .from('tenants')
       .select(
-        'id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes',
+        'id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes, publico',
       )
-      .neq('nombre', 'public')
-      .order('fecha_creacion', { ascending: true });
+      .neq('nombre', 'public');
+
+    const { data, error } = await (
+      memberTenantIds.length > 0
+        ? query.or(`publico.eq.true,id.in.(${memberTenantIds.join(',')})`)
+        : query.eq('publico', true)
+    ).order('fecha_creacion', { ascending: true });
 
     if (error) {
       throw new Error('Tenant list not found');
@@ -346,6 +357,7 @@ export const tenantService = {
         },
         canAccess: Boolean(membership),
         userMembershipRole: membership?.role ?? null,
+        isPublic: tenant.publico,
       };
     });
   },

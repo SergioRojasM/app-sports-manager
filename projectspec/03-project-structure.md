@@ -48,7 +48,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── eventos/[event_id]/page.tsx  # Portal event page (EventoDetallePortalPage in Suspense) (US-0120)
 │   │       ├── notificaciones/page.tsx   # In-app notifications history of the signed-in user (NotificacionesPage), any authenticated portal user (US-0125)
 │   │       └── orgs/
-│   │           ├── page.tsx              # Organizations discovery (all authenticated users)
+│   │           ├── page.tsx              # Organizations discovery (all authenticated users): public organizations (`tenants.publico`) + the user's own; private ones are hidden from non-members (US-0133)
 │   │           └── [tenant_id]/
 │   │               ├── layout.tsx        # Membership + role gate for tenant entry; a `pendiente_activacion` membership redirects to /portal/activar-cuenta/[tenant_id] (US-0114)
 │   │               ├── page.tsx          # Redirect to tenant role landing
@@ -110,7 +110,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   ├── tenant/                   # Feature slice (portal/tenant)
 │   │   │   │   ├── TenantIdentityCard.tsx
 │   │   │   │   ├── TenantContactCard.tsx
-│   │   │   │   ├── TenantDirectoryList.tsx
+│   │   │   │   ├── TenantDirectoryList.tsx       # Renders TenantDirectoryCard per organization: "Ingresar" link (members) or SolicitarAccesoButton + VerPlanesButton (US-0133)
+│   │   │   │   ├── TenantDirectoryCard.tsx       # Directory-only card adapted from EventoPublicoCard: banner/placeholder, logo circle, "Miembro" chip + cyan border for members, "Privada" chip when !isPublic, "Desde {mes} de {año}", stacked primary/secondary actions (US-0133); TenantIdentityCard stays for gestion-organizacion
 │   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods; "QR" indicator on methods with qr_url (US-0128)
 │   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method; optional "Imagen QR" field (JPEG/PNG/WebP ≤ 2 MB, preview, Cambiar/Quitar) — uploaded on save through onSubmit(data, qr) (US-0128); `variant="evento"` hides "Activo" and retitles the form for methods that only exist in an event snapshot (US-0130)
 │   │   │   │   ├── MetodoPagoQrImage.tsx          # Payer-facing QR image of a payment method: white background, opens in a new tab, hidden on load error; used by SuscripcionModal and EventoMetodoPagoCard (US-0128)
@@ -379,7 +380,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   └── portal/
 │   │       ├── usePortalNavigation.ts    # Shared portal logic
 │   │       ├── tenant/
-│   │       │   ├── useTenantView.ts
+│   │       │   ├── useTenantView.ts              # directory mode loads memberships first, then the visibility-filtered tenant list (US-0133)
+│   │       │   ├── useTenantBrandingImages.ts    # Logo/banner sources with a one-time signed-URL fallback; shared by TenantIdentityCard and TenantDirectoryCard (US-0133)
 │   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago; submitForm(data, qr) uploads the QR image (create: insert → upload → update qr_url; a failed upload keeps the form open on the created row) (US-0128)
 │   │       │   ├── useReglasSuspension.ts  # CRUD state + 3-rule limit guard for tenant_reglas_suspension
 │   │       │   └── useOrgLogoUpload.ts    # File select, MIME/size validation, preview URL, upload trigger for org logo
@@ -488,7 +490,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── auth.ts
 │   │       ├── portal/                   # Portal bounded-context services
 │   │       │   ├── index.ts
-│   │       │   ├── tenant.service.ts
+│   │       │   ├── tenant.service.ts           # listVisibleTenantsForPortal(supabase, memberTenantIds): publico = true OR member; `publico` in the edit form mapping (US-0133)
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts  # entrenamientos/entrenamientos_grupo select/insert/update all carry formulario_id, formulario_obligatorio, and a formulario_plantilla:formularios_plantillas(nombre) embed for display (US-0086); getEntrenamientoParaEvento(tenantId, id) — one occurrence with disciplina / escenario / entrenador embeds, normalized, for the event pre-fill (US-0132)
@@ -500,7 +502,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── suscripciones.service.ts  # createSuscripcion (calls populate_suscripcion_servicios RPC when plan_tipo_id is set — US-0063; maps a 42501 RLS rejection to SuscripcionServiceError 'plan_unavailable' — US-0093), hasPendingSuscripcion, getSuscripcionServicios (returns SuscripcionServicio[] for a given suscripcion_id)
 │   │       │   └── pagos.service.ts  # updateComprobantePath resets estado to 'pendiente' and clears motivo_rechazo on resubmission, so a rejected payment re-enters review (US-0106)
 │   │       │   └── equipo.service.ts
-│   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests)
+│   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests); createSolicitud rejects private organizations with code `private_org` (US-0133; also enforced by the solicitudes_insert_own RLS policy)
 │   │       │   └── invitaciones.service.ts     # Admin: v_invitaciones_tenant_admin select, cancelar RPC, fetch to /api routes; recipient: get_mis_invitaciones_pendientes, get_invitacion_para_aceptar, activar_invitacion_tenant, activar_alta_administrada (US-0114)
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
@@ -527,7 +529,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   ├── auth.types.ts
 │   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089); EVENTOS_MENU_ITEM ("Eventos" → /portal/eventos, icon celebration) right after it (US-0120) — the no-tenant menu ends with "Mis Reservas" then "Mis Entradas" (`confirmation_number`, /portal/mis-entradas, US-0121) — "Eventos Check-in" (`qr_code_scanner`, path `control-ingreso`) after "Eventos" for administrador and after "Reservas" for entrenador (US-0131)
 │   │   └── portal/
-│   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url)
+│   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url); `publico` on both edit types and PortalTenantListItem.isPublic (US-0133)
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts   # TrainingFormularioTipo (ninguno/externo/interno), TrainingFormularioFormState, TrainingGroup/TrainingInstance carry formulario_id/formulario_obligatorio/formulario_plantilla (US-0086); EntrenamientoParaEvento (US-0132)

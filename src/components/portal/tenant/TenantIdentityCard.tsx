@@ -1,11 +1,8 @@
 'use client';
 
-import { useCallback, useState } from 'react';
 import Link from 'next/link';
+import { useTenantBrandingImages } from '@/hooks/portal/tenant/useTenantBrandingImages';
 import type { TenantIdentityPayload } from '@/types/portal/tenant.types';
-import { createClient } from '@/services/supabase/client';
-import { storageService } from '@/services/supabase/portal/storage.service';
-import { buildOrgLogoPath, buildOrgBannerPath } from '@/types/portal/storage.types';
 
 type TenantIdentityCardProps = {
   identity: TenantIdentityPayload;
@@ -43,55 +40,7 @@ export function TenantIdentityCard({
   customAction,
   secondaryAction,
 }: TenantIdentityCardProps) {
-  const [logoSrc, setLogoSrc] = useState(identity.logoUrl);
-  const [logoFailed, setLogoFailed] = useState(false);
-  const [bannerSrc, setBannerSrc] = useState(identity.bannerUrl);
-  const [bannerFailed, setBannerFailed] = useState(false);
-
-  const handleLogoError = useCallback(async () => {
-    if (logoFailed) return; // Only try once
-    setLogoFailed(true);
-
-    try {
-      const supabase = createClient();
-      // Try common extensions
-      for (const ext of ['png', 'jpg', 'webp']) {
-        const path = buildOrgLogoPath(identity.tenantId, ext);
-        try {
-          const url = await storageService.getSignedUrl(supabase, path);
-          setLogoSrc(url);
-          return;
-        } catch {
-          // Try next extension
-        }
-      }
-    } catch {
-      // All attempts failed — fallback to shield icon
-      setLogoSrc(null);
-    }
-  }, [identity.tenantId, logoFailed]);
-
-  const handleBannerError = useCallback(async () => {
-    if (bannerFailed) return;
-    setBannerFailed(true);
-
-    try {
-      const supabase = createClient();
-      for (const ext of ['png', 'jpg', 'webp']) {
-        const path = buildOrgBannerPath(identity.tenantId, ext);
-        try {
-          const url = await storageService.getSignedUrl(supabase, path);
-          setBannerSrc(url);
-          return;
-        } catch {
-          // Try next extension
-        }
-      }
-    } catch {
-      // All attempts failed — fallback to gradient
-    }
-    setBannerSrc(null);
-  }, [identity.tenantId, bannerFailed]);
+  const { logoSrc, bannerSrc, onLogoError, onBannerError } = useTenantBrandingImages(identity);
 
   return (
     <article className="overflow-hidden rounded-grit-md border border-grit-glass-border bg-grit-card shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
@@ -102,7 +51,7 @@ export function TenantIdentityCard({
             src={bannerSrc}
             alt={`${identity.name} banner`}
             className="absolute inset-0 h-full w-full object-cover"
-            onError={() => void handleBannerError()}
+            onError={onBannerError}
           />
         ) : null}
         <div className="absolute left-4 top-2">
@@ -113,7 +62,7 @@ export function TenantIdentityCard({
                 src={logoSrc}
                 alt={`${identity.name} logo`}
                 className="h-full w-full object-cover"
-                onError={() => void handleLogoError()}
+                onError={onLogoError}
               />
             ) : (
               <span className="material-symbols-outlined text-2xl text-grit-subtext" aria-hidden="true">
