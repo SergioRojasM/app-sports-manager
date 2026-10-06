@@ -40,6 +40,7 @@ const SLUG_LABELS: Record<string, string> = {
   'gestion-equipo': 'Equipo',
   'gestion-suscripciones': 'Suscripciones',
   'activar-cuenta': 'Activar cuenta',
+  'completar-perfil': 'Completar perfil',
   inicio: 'Inicio',
 };
 

@@ -1,3 +1,4 @@
+import type { FormularioPerfilCampo } from '@/types/portal/formularios.types';
 export type TenantIdentityPayload = {
   tenantId: string;
   name: string;
@@ -96,6 +97,10 @@ export type TenantAccessDecision = {
   role: TenantRole | null;
   /** True when the caller's membership exists but is `pendiente_activacion` (US-0114). */
   pendingActivation: boolean;
+  /** True when the tenant has `requiere_perfil_completo` and the caller's profile is missing a required field (US-0136). */
+  profileIncomplete: boolean;
+  /** Missing profile fields, empty unless `profileIncomplete` (US-0136). */
+  profileMissingFields: FormularioPerfilCampo[];
 };
 
 /** Platform-owned per-tenant entitlements read from `admin_tenants` (US-0114). */

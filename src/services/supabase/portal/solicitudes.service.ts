@@ -1,4 +1,5 @@
 import { createClient } from '@/services/supabase/client';
+import { PERFIL_COMPLETO_SELECT, isPerfilCompleto, type PerfilCompletoRow } from '@/lib/portal/perfil-completo';
 import {
   SolicitudesServiceError,
   type AceptarSolicitudInput,
@@ -160,7 +161,7 @@ export const solicitudesService = {
     if (tenantFlag?.requiere_perfil_completo) {
       const { data: userProfile, error: profileError } = await supabase
         .from('usuarios')
-        .select('nombre, apellido, telefono, fecha_nacimiento, tipo_identificacion, numero_identificacion, fecha_exp_identificacion, rh')
+        .select(PERFIL_COMPLETO_SELECT)
         .eq('id', input.usuario_id)
         .single();
 
@@ -168,18 +169,7 @@ export const solicitudesService = {
         throw new SolicitudesServiceError('unknown', 'Error al verificar el perfil del usuario.');
       }
 
-      const isComplete =
-        userProfile &&
-        userProfile.nombre?.trim() &&
-        userProfile.apellido?.trim() &&
-        userProfile.telefono?.trim() &&
-        userProfile.fecha_nacimiento &&
-        userProfile.tipo_identificacion?.trim() &&
-        userProfile.numero_identificacion?.trim() &&
-        userProfile.fecha_exp_identificacion &&
-        userProfile.rh?.trim();
-
-      if (!isComplete) {
+      if (!isPerfilCompleto(userProfile as PerfilCompletoRow | null)) {
         throw new SolicitudesServiceError(
           'incomplete_profile',
           'Esta organización requiere que completes tu perfil antes de solicitar acceso.',

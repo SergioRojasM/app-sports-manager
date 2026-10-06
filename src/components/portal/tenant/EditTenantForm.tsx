@@ -242,8 +242,9 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
           id="requiere-perfil-desc"
           className="block text-[11px] text-grit-muted"
         >
-          Cuando está activo, los usuarios deberán completar su perfil (nombre, apellido, teléfono, fecha de nacimiento,
-          tipo y número de identificación, fecha de expedición y RH) para poder enviar una solicitud de acceso.
+          Cuando está activo, todos los miembros —incluidos los invitados y los que ya pertenecen a la organización—
+          deberán completar su perfil (nombre, apellido, teléfono, fecha de nacimiento, tipo y número de
+          identificación, fecha de expedición y grupo sanguíneo) para solicitar acceso e ingresar.
         </span>
         <label className="flex cursor-pointer items-center gap-3">
           <input
@@ -257,7 +258,7 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
             className="h-4 w-4 rounded border-grit-glass-border bg-grit-bg accent-grit-cyan disabled:opacity-50"
           />
           <span className="text-sm font-medium text-grit-text">
-            Requerir perfil completo para solicitar acceso
+            Requerir perfil completo para ingresar a la organización
           </span>
         </label>
       </div>

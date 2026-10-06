@@ -39,6 +39,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── perfil/page.tsx           # User profile (global, not tenant-scoped)
 │   │       ├── invitaciones/[invitacion_id]/page.tsx  # Recipient: review and accept a tenant invitation (US-0114)
 │   │       ├── activar-cuenta/[tenant_id]/page.tsx    # Provisioned member: replace the temporary password and activate the pending membership (US-0114)
+│   │       ├── completar-perfil/[tenant_id]/page.tsx  # Member of a tenant that requires a complete profile: fill in the missing fields before entering; redirects away when not a member, pending activation, or nothing to complete (US-0136)
 │   │       ├── (atleta)/                 # Portal-level athlete area (US-0093) — no role gate: roles are per-tenant and public-plan buyers hold no membership; pages are self-scoped by atleta_id = auth.uid()
 │   │       │   ├── layout.tsx            # Pass-through; auth is enforced by the parent portal shell
 │   │       │   ├── mis-suscripciones/page.tsx  # Cross-tenant "Mis Suscripciones" (replaces the tenant-scoped route)
@@ -50,7 +51,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users): public organizations (`tenants.publico`) + the user's own; private ones are hidden from non-members (US-0133)
 │   │           └── [tenant_id]/
-│   │               ├── layout.tsx        # Membership + role gate for tenant entry; a `pendiente_activacion` membership redirects to /portal/activar-cuenta/[tenant_id] (US-0114)
+│   │               ├── layout.tsx        # Membership + role gate for tenant entry; a `pendiente_activacion` membership redirects to /portal/activar-cuenta/[tenant_id] (US-0114); a member with an incomplete profile in a tenant with `requiere_perfil_completo` redirects to /portal/completar-perfil/[tenant_id], all roles (US-0136)
 │   │               ├── page.tsx          # Redirect to tenant role landing
 │   │               ├── (administrador)/
 │   │               │   ├── layout.tsx        # Role guard: redirects non-administrador users to /portal/orgs/[tenant_id]
@@ -321,6 +322,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PerfilHeader.tsx
 │   │   │       ├── PerfilPersonalForm.tsx   # Optional `visibleFields?: FormularioPerfilCampo[]` prop filters rendered fields (numero_identificacion follows tipo_identificacion's visibility); omitted renders every field as before (US-0103)
 │   │   │       ├── PerfilDeportivoForm.tsx  # Same `visibleFields?: FormularioPerfilCampo[]` prop addition; returns null when neither peso_kg nor altura_cm is visible (US-0103)
+│   │   │       ├── CompletarPerfilPage.tsx  # Gated profile completion for a tenant with requiere_perfil_completo: only the server-resolved missing fields via PerfilPersonalForm, "Guardar y continuar" → router.replace to the organization (US-0136)
 │   │   │       └── index.ts
 │   │   │   └── mis-suscripciones/          # Feature slice (portal/mis-suscripciones — cross-tenant subscription & payment view, renamed from mis-suscripciones-y-pagos in US-0093)
 │   │   │       ├── MisSuscripcionesYPagosPage.tsx  # List container with filters, empty states; props { suscripciones, userId } — tenant comes per row
@@ -466,7 +468,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── analitica/
 │   │           └── useAnalitica.ts           # Loads one aggregate RPC response per applied date range; preserves stale data during refresh (US-0115)
 │   │       └── perfil/
-│   │           └── usePerfil.ts
+│   │           └── usePerfil.ts              # Optional `{ requiredFields }` option makes those fields mandatory in submit() (tipo_identificacion covers type + number); omitted keeps the nombre/apellido-only rule (US-0136)
 │   │       └── planes-publicos/            # Feature hooks for the public plan catalog (US-0093)
 │   │           └── usePlanesPublicos.ts    # Loads getPlanesPublicos + listDisciplinesByTenant on modal open (enabled flag); keeps active subtypes via getActiveTipos; accent/case-insensitive in-memory search across plan, subtype AND service names; optional initialSearch option seeds search's initial state (US-0101)
 │   │       └── mis-suscripciones/
@@ -490,7 +492,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── auth.ts
 │   │       ├── portal/                   # Portal bounded-context services
 │   │       │   ├── index.ts
-│   │       │   ├── tenant.service.ts           # listVisibleTenantsForPortal(supabase, memberTenantIds): publico = true OR member; `publico` in the edit form mapping (US-0133)
+│   │       │   ├── tenant.service.ts           # listVisibleTenantsForPortal(supabase, memberTenantIds): publico = true OR member; `publico` in the edit form mapping (US-0133); canUserAccessTenant also reads tenants.requiere_perfil_completo and, when on, the caller's profile → profileIncomplete / profileMissingFields without changing allowed/role; fails open on read errors (US-0136)
 │   │       │   └── scenarios.service.ts
 │   │       │   └── disciplines.service.ts
 │   │       │   └── entrenamientos.service.ts  # entrenamientos/entrenamientos_grupo select/insert/update all carry formulario_id, formulario_obligatorio, and a formulario_plantilla:formularios_plantillas(nombre) embed for display (US-0086); getEntrenamientoParaEvento(tenantId, id) — one occurrence with disciplina / escenario / entrenador embeds, normalized, for the event pre-fill (US-0132)
@@ -502,7 +504,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── suscripciones.service.ts  # createSuscripcion (calls populate_suscripcion_servicios RPC when plan_tipo_id is set — US-0063; maps a 42501 RLS rejection to SuscripcionServiceError 'plan_unavailable' — US-0093), hasPendingSuscripcion, getSuscripcionServicios (returns SuscripcionServicio[] for a given suscripcion_id)
 │   │       │   └── pagos.service.ts  # updateComprobantePath resets estado to 'pendiente' and clears motivo_rechazo on resubmission, so a rejected payment re-enters review (US-0106)
 │   │       │   └── equipo.service.ts
-│   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests); createSolicitud rejects private organizations with code `private_org` (US-0133; also enforced by the solicitudes_insert_own RLS policy)
+│   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests); createSolicitud rejects private organizations with code `private_org` (US-0133; also enforced by the solicitudes_insert_own RLS policy); Guard 3 uses the shared perfil-completo rule (US-0136)
 │   │       │   └── invitaciones.service.ts     # Admin: v_invitaciones_tenant_admin select, cancelar RPC, fetch to /api routes; recipient: get_mis_invitaciones_pendientes, get_invitacion_para_aceptar, activar_invitacion_tenant, activar_alta_administrada (US-0114)
 │   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
@@ -529,7 +531,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   ├── auth.types.ts
 │   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089); EVENTOS_MENU_ITEM ("Eventos" → /portal/eventos, icon celebration) right after it (US-0120) — the no-tenant menu ends with "Mis Reservas" then "Mis Entradas" (`confirmation_number`, /portal/mis-entradas, US-0121) — "Eventos Check-in" (`qr_code_scanner`, path `control-ingreso`) after "Eventos" for administrador and after "Reservas" for entrenador (US-0131)
 │   │   └── portal/
-│   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url); `publico` on both edit types and PortalTenantListItem.isPublic (US-0133)
+│   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url); `publico` on both edit types and PortalTenantListItem.isPublic (US-0133); TenantAccessDecision.profileIncomplete / profileMissingFields (US-0136)
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
 │   │       └── entrenamientos.types.ts   # TrainingFormularioTipo (ninguno/externo/interno), TrainingFormularioFormState, TrainingGroup/TrainingInstance carry formulario_id/formulario_obligatorio/formulario_plantilla (US-0086); EntrenamientoParaEvento (US-0132)
@@ -576,6 +578,7 @@ Following structure reflects the current implementation and the target scalable 
 │           ├── invitaciones-delivery.ts     # server-only: deliverInvitation() — inviteUserByEmail + outcome recording shared by create/resend routes (US-0114)
 │           ├── invitaciones-errors.ts       # Client-safe: onboarding RPC SQLSTATE/message → HTTP status + error code, Spanish user messages (US-0114)
 │           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
+│           ├── perfil-completo.ts           # Client-safe single definition of the tenant "complete profile" rule: PERFIL_COMPLETO_SELECT, getPerfilCamposFaltantes() (FormularioPerfilCampo keys), isPerfilCompleto(); used by canUserAccessTenant and createSolicitud Guard 3 (US-0136)
 │           ├── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
 │           ├── disciplina-visual.ts         # getDisciplinaVisual(nombre) → { icon, colorClass } — accent/case-insensitive name matching to the design's discipline colours, `sports` + cyan fallback (US-0116)
 │           ├── eventos.utils.ts             # Bogotá date keys/month ranges (fixed -05:00, no DST) and event formatters (fecha, hora, duración, cupo, precio) (US-0118); datetime-local ⇄ ISO helpers, formatCop, aplicarDescuento, formatDescuento (US-0119)

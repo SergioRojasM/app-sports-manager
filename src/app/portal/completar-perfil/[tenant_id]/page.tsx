@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/services/supabase/server';
 import { getCachedTenantAccess } from '@/lib/portal/tenant-access.cache';
+import { CompletarPerfilPage } from '@/components/portal/perfil';
 
-type TenantLayoutProps = {
-  children: React.ReactNode;
+type CompletarPerfilRouteProps = {
   params: Promise<{ tenant_id: string }>;
 };
 
-export default async function TenantLayout({ children, params }: TenantLayoutProps) {
+export default async function CompletarPerfilRoute({ params }: CompletarPerfilRouteProps) {
   const { tenant_id: tenantId } = await params;
 
   const supabase = await createClient();
@@ -29,9 +29,17 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
     redirect('/portal/orgs');
   }
 
-  if (decision.profileIncomplete) {
-    redirect(`/portal/completar-perfil/${tenantId}`);
+  if (!decision.profileIncomplete) {
+    redirect(`/portal/orgs/${tenantId}`);
   }
 
-  return <>{children}</>;
+  const { data: tenant } = await supabase.from('tenants').select('nombre').eq('id', tenantId).maybeSingle();
+
+  return (
+    <CompletarPerfilPage
+      tenantId={tenantId}
+      tenantNombre={tenant?.nombre ?? 'Esta organización'}
+      missingFields={decision.profileMissingFields}
+    />
+  );
 }
