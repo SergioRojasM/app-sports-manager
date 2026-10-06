@@ -18,6 +18,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── invitaciones/route.ts                              # POST: crear_invitacion_tenant (user session) → auth.admin.inviteUserByEmail; identical 202 whether or not the email already has an account (in-app delivery)
 │   │   │       ├── invitaciones/[invitacion_id]/reenviar/route.ts     # POST: reenviar_invitacion_tenant → re-send, same 202 contract
 │   │   │       └── miembros/aprovisionar/route.ts                     # POST: reservar_alta_administrada → auth.admin.createUser (server-generated password, email_confirm) → completar_alta_administrada; compensates with deleteUser; returns the password once (Cache-Control: no-store)
+│   │   │   └── internal/notificaciones/despachar/route.ts            # POST (US-0125): notifications dispatcher, no user session — `Authorization: Bearer NOTIFICACIONES_DISPATCH_SECRET` (timingSafeEqual; 503 unset, 401 wrong, 405 other verbs), runtime nodejs, maxDuration 60 → despacharNotificaciones(); called by the database through pg_net (outbox insert trigger + pg_cron every minute)
 │   │   ├── auth/                         # Authentication routes
 │   │   │   ├── login/
 │   │   │   ├── signup/
@@ -45,6 +46,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── mis-entradas/page.tsx       # Cross-tenant "Mis Entradas": event tickets, payment status, PDF; links guest purchases made with the verified account email (US-0121)
 │   │       ├── eventos/page.tsx          # Portal event discovery (EventosPublicosPage in Suspense): public events of every tenant + private events of the user's tenants (US-0120)
 │   │       ├── eventos/[event_id]/page.tsx  # Portal event page (EventoDetallePortalPage in Suspense) (US-0120)
+│   │       ├── notificaciones/page.tsx   # In-app notifications history of the signed-in user (NotificacionesPage), any authenticated portal user (US-0125)
 │   │       └── orgs/
 │   │           ├── page.tsx              # Organizations discovery (all authenticated users)
 │   │           └── [tenant_id]/
@@ -90,8 +92,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EventoDetalleBreadcrumb.tsx  # ⌂ Inicio › Eventos › {nombre} + right-aligned "Volver"
 │   │   │       └── index.ts
 │   │   ├── portal/
-│   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v2 Navbar styling (grit-arena-v2 oUFl9); no breadcrumb inside (US-0116)
-│   │   │   ├── PortalBreadcrumb.tsx      # Standalone row rendered by portal/layout.tsx at the top of <main> (design AOIa5), visible + wrapping on mobile; SLUG_LABELS map (US-0116); /portal/eventos/{uuid} renders "Evento" (US-0120) — labels `mis-entradas` → "Mis entradas", `compras` → "Compras" (US-0121) — `control-ingreso` → "Control de ingreso", and the event UUID under it → "Evento" (US-0131)
+│   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v2 Navbar styling (grit-arena-v2 oUFl9); no breadcrumb inside (US-0116) — the bell is `NotificacionesBell` (US-0125)
+│   │   │   ├── PortalBreadcrumb.tsx      # Standalone row rendered by portal/layout.tsx at the top of <main> (design AOIa5), visible + wrapping on mobile; SLUG_LABELS map (US-0116); /portal/eventos/{uuid} renders "Evento" (US-0120) — labels `mis-entradas` → "Mis entradas", `compras` → "Compras" (US-0121) — `control-ingreso` → "Control de ingreso", and the event UUID under it → "Evento" (US-0131) — `notificaciones` → "Notificaciones" (US-0125)
 │   │   │   ├── PortalNavMenu.tsx         # Glass dropdown; active item = cyan gradient + glass-border ("Nav Operación" style)
 │   │   │   ├── RoleBasedMenu.tsx
 │   │   │   ├── UserAvatarMenu.tsx
@@ -340,6 +342,12 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── MiCompraCard.tsx                # Event, ticket, total, method, estado badge, codes (one per event for Múltiple), motivo_rechazo, policy line; Descargar PDF / Reenviar comprobante / Cancelar / Ver evento — US-0131: "Usada" badge next to each checked-in code
 │   │   │       ├── ReenviarComprobanteModal.tsx / CancelarCompraModal.tsx  # Reuse EventoModalShell; inline errors
 │   │   │       └── index.ts
+│   │   │   └── notificaciones/              # Feature slice (portal/notificaciones — in-app inbox, US-0125)
+│   │   │       ├── NotificacionesBell.tsx          # Header bell: unread badge (hidden at 0, 1–9, "9+"), aria-label with the count, aria-live announcement, owns the panel (Escape / outside click, focus back to the bell); useNotificaciones({ limit: 10, realtime: true }); exports esUrlInterna (only same-origin paths are followed)
+│   │   │       ├── NotificacionesPanel.tsx         # Glass dropdown (role=dialog): 10 latest, "Marcar todas como leídas", loading / empty ("No tienes notificaciones") / role=alert error + "Reintentar", "Ver todas" → /portal/notificaciones
+│   │   │       ├── NotificacionItem.tsx            # Row button: unread dot + "Nueva" label (never colour alone), title, message (2-line clamp when `dense`), relative time (Intl.RelativeTimeFormat 'es')
+│   │   │       ├── NotificacionesPage.tsx          # History: GritPageHeader + "Marcar todas como leídas", GritCard list, 20 per page (Anterior / Página X de Y / Siguiente, hidden with one page), loading / empty / error states
+│   │   │       └── index.ts
 │   │   │   └── mis-reservas/               # Feature slice (portal/mis-reservas — cross-tenant athlete reservation history, US-0074, moved cross-tenant in US-0097)
 │   │   │       ├── MisReservasPage.tsx             # Main page: filters, table, banner, CSV export (atleta_id-scoped, no tenant param)
 │   │   │       ├── MisReservasFiltersPanel.tsx     # Server-side filter panel: date range, attendance, discipline (derived from loaded rows), Organización (shown only when >1 org)
@@ -469,6 +477,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │           └── useAsistentesIngreso.ts   # listAsistentesEvento + search / filter / 20-row paging, silent refrescar after writes
 │   │       └── mis-entradas/
 │   │           └── useMisEntradas.ts          # US-0121: vincularComprasInvitado() then listMisCompras(); Próximas/Pasadas tabs + estado filter; cancel / re-upload with per-item pending state and errors (silent reload after an action)
+│   │       └── notificaciones/
+│   │           └── useNotificaciones.ts       # US-0125: useNotificaciones({ limit, realtime? }) — one page of the inbox + unread count, optimistic marcarLeida / marcarTodasLeidas, page / totalPages; `realtime` (bell only: one channel per tab) prepends inserts and reloads on reconnect; reloads on tab focus; bell and page instances sync through the `notificaciones:sync` window event; never throws (error + noLeidas = 0)
 │   │
 │   ├── services/                         # Outbound adapters (API)
 │   │   └── supabase/
@@ -498,6 +508,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
 │   │       │   └── eventos.service.ts  # eventosService: listEventos(tenantId, {desde?, hasta?}) — no embeds since US-0119: disciplina/escenario/entrenadores are snapshots on the row (trainer names joined ", "); getEventoById; getEventoCompleto (event + evento_entradas + evento_entrada_cupones, sorted); guardarEventoCompleto (RPC guardar_evento_completo, draft or final, returns the client_key → id map); updateEstadoEvento; updateActivoEvento (quick activar/desactivar, US-0120); deleteEvento. createEvento/updateEvento were removed in US-0119. US-0120 adds the only cross-tenant reads: listEventosPublicados({soloPublicos}) and getEventoPublicado(id, {soloPublicos}) — explicit filters activo ∧ ¬borrador ∧ estado='confirmado' ∧ (fecha_hora ≥ now ∨ null) (+ publico on landing surfaces), because RLS alone lets admins/trainers read their drafts; explicit projections (include nombre_tenant and metodos_pago, never formulario_id/creado_por/omitir_confirmacion_compra); limit(500); malformed ids → null without a request; TENANT_INVALIDO → invalid_reference. Zero-row writes and PGRST116 map to 'forbidden'; RPC exception codes (METODO_PAGO_REQUERIDO, …) and 23505 constraint names map to specific Spanish messages / codes not_found, duplicate_entrada, duplicate_cupon (US-0118 / US-0119) — US-0121: the public list projection includes `cancelacion_antelacion_horas`; deleteEvento maps 23503 → `has_purchases`
 │   │       │   └── eventos-compras.service.ts  # US-0121 eventoComprasService: listEntradasVendibles, listNombresEventosBundle, getFormularioEvento (vigente evento_formularios snapshot, readable by guests), validarCupon, iniciarCompra → subirArchivoCompra → finalizarCompra, vincularComprasInvitado, listMisCompras / getMiTicketEnEvento (always filtered by the caller's id — RLS alone would also return staff rows), reenviarComprobante, cancelarCompra, listComprasEvento (embeds answers + their snapshot version), contarVendidas, validarCompra, getArchivoUrl (300 s); mapCompraError — listEntradasVendibles also returns each ticket's metodosPago (US-0130) — US-0131: registrarIngreso (normalizes the code first), revertirIngreso, resumenIngresos, listAsistentesEvento (activa tickets + compra.entrada_nombre, RLS staff); `ingreso_at` → `ingresoAt` in listComprasEvento / listMisCompras ticket embeds
+│   │       │   └── notificaciones.service.ts  # US-0125 notificacionesService (browser client): getUsuarioId, listar({limit, offset}) → {items, total}, contarNoLeidas, marcarLeida / marcarTodasLeidas (RPCs), suscribir(usuarioId, onInsert, onReconnect) → unsubscribe (Realtime postgres_changes INSERT on notificaciones, filter usuario_id) — the only Realtime usage in src/
 │   │       │   └── analitica.service.ts  # Browser RPC adapter for get_tenant_bi_dashboard only; maps 42501/22007 without exposing bi schema facts (US-0115)
 │   │       │                             #   The RPC aggregates private `bi` fact views (no grants to anon/authenticated):
 │   │       │                             #   fct_pagos, fct_entrenamientos, fct_reservas, fct_asistencia, fct_suscripciones, and fct_miembros
@@ -539,6 +550,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── entrenamiento-restricciones.types.ts # EntrenamientoRestriccion (with servicio_1_id…servicio_4_id, descripcion; plan_id/disciplina_id kept @deprecated), restriction inputs, BookingRejectionCode (SERVICIO_REQUERIDO, UNIDADES_AGOTADAS, PERFIL_INCOMPLETO — US-0095), BookingResult; BookingRejection.servicioNombre (optional, SERVICIO_REQUERIDO/UNIDADES_AGOTADAS only) feeds the pre-filtered plan catalog (US-0101); BookingRejection.ofrecerPlan — set by reservasService.create on "no plan / no units" rejections, drives the plan offer in ReservaRechazoModal (US-0127)
 │   │       └── eventos.types.ts  # CronogramaItem / IncluyeItem / PrecioItem (owned here since US-0123), Evento (DB row; US-0119 snapshots EventoEscenarioSnapshot / EventoEntrenadorSnapshot[] / EventoMetodoPagoSnapshot[], borrador, formulario_id), EventoEntrada / EventoEntradaCupon / EventoCompleto, GuardarEventoPayload / GuardarEventoResult, wizard draft types (EventoDraft / EventoEntradaDraft / EventoCuponDraft with clientKey + raw-string amounts and Bogotá datetime-local strings), EVENTO_WIZARD_STEPS, EventoListItem (+ borrador, disciplinaNombre nullable), EventoEstado, EventosVista, EventosPeriodo, EventosClientFilters (estado incl. 'borrador', disciplina by name), EventosStats (+ borradores), EventoServiceError; US-0120 adds Evento.nombre_tenant, EventoPublicoListItem (incl. nombreTenant, escenario, entrenadores, metodosPago) / EventoPublicoDetalle, EventoEntradasModo, EventoEntradaSeleccion (purchase seam), EventosPublicosDateChip; reuses CronogramaItem/IncluyeItem/PrecioItem from entrenamientos-publicos.types (US-0118 / US-0119) — US-0121: `cancelacionAntelacionHoras` lives on EventoPublicoListItem (the checkout opens from cards); EventoServiceErrorCode gains `has_purchases`; US-0130: EventoMetodoPagoSnapshot.origen ('tenant' | 'evento'), metodos_pago on EventoEntrada / the RPC ticket payload, metodosPago on EventoEntradaDraft, EventoMetodoPagoTarget; EventoDesdeEntrenamientoAjustes (US-0132)
 │   │       └── eventos-compras.types.ts  # US-0121: EventoCompraEstado (+ labels), EventoTicketEstado, EntradaVendible, CuponValidacion, EventoFormularioSnapshot / EventoFormularioRespuesta, CompradorInput, IniciarCompraInput, CompraResultado, MiCompra, CompraAdminItem, TicketPdfData, EventoCompraServiceError — US-0131: IngresoResultadoCodigo / IngresoResultado / ResumenIngresos / AsistenteIngreso / AsistentesIngresoFiltro; `ingresoAt` on MiCompraTicket and CompraAdminItem tickets
+│   │       └── notificaciones.types.ts  # US-0125: Notificacion, NotificacionesListado; server side: NotificacionOutboxRow, NotificacionEmail ({asunto, html, texto, adjuntos}), NotificacionAdjunto, NotificacionHandler, DespachoResultado
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias; SuscripcionAdminRow.es_miembro (computed from miembros_tenant existence, not stored) and SuscripcionTab ('miembros' | 'no_miembros') (US-0098)
 │   │       └── mis-suscripciones.types.ts  # MiSuscripcionRow (incl. tenant_id + tenant_nombre — US-0093), MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
@@ -549,9 +561,15 @@ Following structure reflects the current implementation and the target scalable 
 │       ├── csv.ts                           # RFC 4180 CSV generation (toCsvString, downloadTextFile) — used by ReservasPanel CSV export
 │       ├── slugify.ts                        # slugify(value): snake_case key (diacritics stripped, leading digits trimmed) — used to auto-compute campo_nombre for "Datos" sections (US-0085)
 │       ├── validators.ts
+│       ├── notificaciones/                  # server-only email side of the notifications module (US-0125)
+│       │   ├── despachador.ts               # despacharNotificaciones(limite = 20): reclamar_notificaciones_outbox → handler → enviarEmail → resolver_notificacion_outbox, one row at a time, each resolved on its own; error codes `handler_not_found` / `skipped` / `resend_*`; one audit line per row, never an address
+│       │   ├── registro.ts                  # resolverHandler(modulo, tipo) — handlers keyed `modulo.tipo`; a new module registers its handlers here
+│       │   ├── resend.ts                    # enviarEmail({ para, asunto, html, texto, adjuntos, idempotencyKey }) through Resend (outbox id as Idempotency-Key); EnvioEmailError(code); `resend_not_configured` without RESEND_API_KEY / EMAIL_FROM; outside production, `EMAIL_DEV_MAILPIT_URL` sends to the local Mailpit HTTP API instead (nothing leaves the machine)
+│       │   ├── plantillas/layout.ts         # escapeHtml, renderLayout({ titulo, cuerpoHtml, cta? }), renderFilas, renderParrafo — shared inline-styled layout
+│       │   └── modulos/eventos.ts           # eventos.compra_recibida / compra_confirmada (ticket PDF attached) / compra_rechazada / compra_cancelada / compra_nueva_admin; buyer handlers read the purchase at send time through the `_compra_resultado` RPC (service role)
 │       └── portal/
 │           ├── password-generator.ts        # server-only: generateTemporaryPassword() — 16 chars, crypto.randomInt, every character class (US-0114)
-│           ├── audit-log.ts                 # server-only: logAuditEvent() — one JSON line with allow-listed fields only; never emails, passwords, tokens, or raw errors (US-0114)
+│           ├── audit-log.ts                 # server-only: logAuditEvent() — one JSON line with allow-listed fields only; never emails, passwords, tokens, or raw errors (US-0114) — US-0125: `notificacion_enviada` / `notificacion_fallida`; `tenant_id` and `actor_id` nullable (system jobs)
 │           ├── privileged-route.ts          # server-only: route helpers — body parsing, no-store responses, APP_URL-based invite redirectTo, email-exists detection (US-0114)
 │           ├── invitaciones-delivery.ts     # server-only: deliverInvitation() — inviteUserByEmail + outcome recording shared by create/resend routes (US-0114)
 │           ├── invitaciones-errors.ts       # Client-safe: onboarding RPC SQLSTATE/message → HTTP status + error code, Spanish user messages (US-0114)
@@ -565,7 +583,7 @@ Following structure reflects the current implementation and the target scalable 
 │           ├── eventos-compra.utils.ts      # US-0121: entradaVendible / ventaCerradaPorAntelacion / puedeCancelarCompra (same rule as the RPC, UI only), 30-min hold check, email + birth-date validators, proof/image validation (types, 5 MB), slugify, MiCompra / CompraResultado → TicketPdfData mappers — US-0131: puedeCancelarCompra also returns false when `algunTicketUsado`
 │           ├── eventos-ingreso.utils.ts     # US-0131: normalizarCodigoTicket ('ev-abcd2345' / 'ABCD2345' → 'EV-ABCD2345', mirrors the SQL helper), esCodigoTicketValido (^EV-[A-HJ-NP-Z2-9]{8}$), ingresoResultadoMeta (tone / icon / title / detail / permiteDeshacer), formatIngresoHora / formatIngresoFechaHora (Bogotá), resultadoNoEncontrado
 │           ├── control-ingreso.guard.ts     # server-only: requireCheckinStaff(tenantId) — (shared) also admits `usuario`; only administrador / entrenador pass (US-0131)
-│           ├── eventos-ticket-pdf.ts        # US-0121: politicaCancelacionTexto(horas) + descargarEntradasPdf(tickets, fileName) — client-side A5 PDF, one page per ticket, jspdf + qrcode loaded by dynamic import; QR only for `activa`, "PENDIENTE DE VALIDACIÓN" banner for `pendiente`
+│           ├── eventos-ticket-pdf.ts        # US-0121: politicaCancelacionTexto(horas) + descargarEntradasPdf(tickets, fileName) — client-side A5 PDF, one page per ticket, jspdf + qrcode loaded by dynamic import; QR only for `activa`, "PENDIENTE DE VALIDACIÓN" banner for `pendiente` — US-0125: construirEntradasPdf(tickets) → jsPDF | null holds the drawing (no DOM API) and is shared with the emailed attachment; descargarEntradasPdf calls it and saves
 │           ├── formulario-secciones-grouping.ts  # buildFormularioRenderPlan() — groups a flat, order-derived FormularioSeccion[] into 'seccion' cards (positional, no parent FK) + 'mitad'-width pairing; shared by FormularioSeccionesBuilder, FormularioSeccionesGrouped (preview), and FormularioRespuestaModal (live booking) so all three render identically (US-0108)
 │
 ├── public/                      # Static assets
@@ -701,7 +719,7 @@ Supabase (database)
 
 Policies use `get_member_tenants_for_authenticated_user()` / `get_trainer_or_admin_tenants_for_authenticated_user()` — both return a `tenant_id` column (not `id`, unlike `get_admin_tenants_for_authenticated_user()` which returns `setof tenants`).
 
-### Event purchases (`evento_formularios`, `evento_compras`, `evento_tickets`, `evento_formulario_respuestas`, `evento_notificaciones` — US-0121)
+### Event purchases (`evento_formularios`, `evento_compras`, `evento_tickets`, `evento_formulario_respuestas` — US-0121)
 
 Ticket purchase for logged-in users and guests. **Clients only read**; every write goes through `SECURITY DEFINER` RPCs that re-validate visibility, sale window, price, coupon, payment method, form, uniqueness and capacity. Migrations `20261001115000` … `20261001120200`.
 
@@ -710,7 +728,7 @@ Ticket purchase for logged-in users and guests. **Clients only read**; every wri
 - `evento_compras` — one purchase = one buyer (`comprador_nombre` / `comprador_email` / `comprador_fecha_nacimiento`, `comprador_usuario_id` null for guests), ticket and price snapshots, `metodo_pago` snapshot (never `efectivo`), `comprobante_path`, `estado`: `pendiente_pago` (30-min capacity hold) → `en_validacion` → `confirmada` | `rechazada` (→ `en_validacion` on re-upload) | `cancelada`; `pendiente_pago` → `expirada`. `evento_id` is `on delete restrict`: an event with sales cannot be hard-deleted.
 - `evento_tickets` — one per event of the purchase (a *Múltiple* ticket issues one per bundled event), `codigo` `EV-XXXXXXXX`, `estado` `pendiente` | `activa` | `anulada`. `uq_evento_tickets_evento_email` (partial, `estado <> 'anulada'`) = one live ticket per email per event.
 - `evento_formulario_respuestas` — one row per purchase (`compra_id` unique): `datos_perfil`, `respuestas`, `archivos` (image paths), tied to the exact snapshot version answered (`evento_formulario_id`, `on delete restrict`).
-- `evento_notificaciones` — outbox (`compra_recibida` | `compra_confirmada` | `compra_rechazada` | `compra_cancelada`, `estado = 'pendiente'`). **Filled, never sent** in this phase; no client grants.
+- Notifications: `evento_notificaciones` was dropped by US-0125. `_encolar_notificacion(compra, tipo)` (same signature, same 7 call sites) now writes to the generic notifications module — see "Notifications module" below.
 
 RLS: `select` only for `authenticated` — the buyer (`comprador_usuario_id` / `usuario_id` = `auth.uid()`) or the tenant's admins and trainers. `anon` has no grant on the purchase tables.
 
@@ -725,6 +743,32 @@ RPCs (errors are raised as `CODE` or `CODE:<event name>` and mapped by `mapCompr
 | `validar_compra_evento(compra, aprobar, motivo)` | authenticated (tenant staff) | `en_validacion` → `confirmada` / `rechazada` (reason required) |
 | `vincular_compras_invitado()` | authenticated | Links guest purchases made with the caller's email. **Requires `auth.users.email_confirmed_at`** — production must keep "Confirm email" enabled (local `enable_confirmations = false` auto-confirms) |
 | `expirar_compras_evento_pendientes()` | none | pg_cron `expirar-compras-eventos`, every 5 min (expiry also runs lazily inside `iniciar_compra_evento`) |
+
+### Notifications module (`notificaciones_outbox`, `notificaciones` — US-0125)
+
+Cross-cutting email + in-app notifications; first consumer: event purchases. Migration `20261009120000_notificaciones_modulo.sql`.
+
+```
+purchase RPC ──> _encolar_notificacion() ──> _notificar_email()  ──> notificaciones_outbox
+                                        └──> _notificar_in_app() ──> notificaciones ──Realtime──> header bell
+notificaciones_outbox ── insert trigger (pg_net) + pg_cron every minute ──> POST /api/internal/notificaciones/despachar ──> Resend
+```
+
+- `notificaciones_outbox` — email outbox: `modulo`, `tipo`, `destinatario_email`, `entidad_tipo` / `entidad_id`, `payload`, `estado` (`pendiente` | `procesando` | `enviada` | `error`), `intentos`, `ultimo_error`, `proximo_intento_at`, `bloqueada_at`, `proveedor_id`. RLS enabled, no policies, no client grants.
+- `notificaciones` — per-user in-app inbox (the unused legacy table was dropped and recreated): `usuario_id`, `tenant_id`, `modulo`, `tipo`, `titulo`, `mensaje`, `url`, `leida`, `leida_at`. `authenticated` may only `select` own rows (`notificaciones_select_own`); in the `supabase_realtime` publication.
+
+| Function | Callable by | Notes |
+|---|---|---|
+| `_notificar_email(tenant, modulo, tipo, email, usuario, entidad_tipo, entidad_id, payload)` / `_notificar_in_app(usuario, tenant, modulo, tipo, titulo, mensaje, url, entidad_tipo, entidad_id)` | none (internal) | What another module calls from its RPCs. Email is lowercased; blank emails are skipped |
+| `_admins_tenant(tenant)` | none (internal) | `administrador` members whose `estado <> 'pendiente_activacion'` |
+| `reclamar_notificaciones_outbox(limite)` / `resolver_notificacion_outbox(id, ok, proveedor_id, error)` | service_role | Claim with `for update skip locked` (due `pendiente` rows + `procesando` older than 10 min). Retries after 1 min, 5 min, 30 min, 2 h; the 5th failure is `error` |
+| `marcar_notificacion_leida(id)` / `marcar_notificaciones_leidas()` | authenticated | Own rows only |
+| `despachar_notificaciones_pendientes()` | none | pg_cron `despachar-notificaciones`, every minute; calls out only when a row is due |
+
+- **Dispatch:** `_disparar_despacho()` reads `notificaciones_dispatch_url` and `notificaciones_dispatch_secret` from Supabase Vault and calls the route with `net.http_post`. It never raises and does nothing without the secrets (default local setup), so a purchase can never fail because of a notification.
+- **Events matrix:** buyer gets email + in-app (in-app only with an account) on `compra_recibida`, `compra_confirmada`, `compra_rechazada`, `compra_cancelada`; tenant administrators get `compra_nueva_admin` (email + in-app) on `compra_recibida` and on confirmations no staff member performed (`validado_at is distinct from now()`). Buyer links → `/portal/mis-entradas`; admin links → the event's `compras` page.
+- **Adding a module:** call the two helpers from its RPCs and register `modulo.tipo` handlers in `src/lib/notificaciones/registro.ts`.
+- **Remote rollout (manual):** Resend API key for `grit-arena.com`, the three env variables in Vercel, `pg_net` enabled, the two Vault secrets, then the migration.
 
 **Door check-in (US-0131, migration `20261008120000_evento_tickets_checkin.sql`):** `evento_tickets.ingreso_at` / `ingreso_por` (→ `auth.users`, `on delete set null`); checks `evento_tickets_ingreso_ck` (`ingreso_at is null or estado = 'activa'`, so a used ticket can never be voided) and `evento_tickets_ingreso_por_ck`; index `(evento_id, ingreso_at)`. One entry per ticket, undo allowed, no log table. `cancelar_compra_evento` raises `CANCELACION_NO_PERMITIDA` when any ticket of the purchase was used.
 
@@ -983,6 +1027,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 # Server-only — NEVER prefix with NEXT_PUBLIC_ (US-0114)
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # the project's service-role key (not a personal access token)
 APP_URL=http://localhost:3000                     # trusted origin for Auth email links; production: https://www.grit-arena.com
+
+# Notifications module (US-0125)
+RESEND_API_KEY=                                   # empty = emails are not sent (outbox rows fail with resend_not_configured)
+EMAIL_FROM="GRIT Arena <no-reply@grit-arena.com>"
+NOTIFICACIONES_DISPATCH_SECRET=your-random-secret # bearer of POST /api/internal/notificaciones/despachar; same value as the Vault secret notificaciones_dispatch_secret
+EMAIL_DEV_MAILPIT_URL=http://127.0.0.1:54324      # development only (ignored in production): emails go to the local Mailpit instead of Resend
 
 # Optional: Analytics, monitoring, etc.
 NEXT_PUBLIC_GA_ID=your-ga-id

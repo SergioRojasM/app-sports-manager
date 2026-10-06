@@ -7,7 +7,9 @@ export type AuditEvento =
   | 'alta_administrada_creada'
   | 'alta_administrada_fallida'
   | 'alta_administrada_compensada'
-  | 'alta_administrada_compensacion_fallida';
+  | 'alta_administrada_compensacion_fallida'
+  | 'notificacion_enviada'
+  | 'notificacion_fallida';
 
 export type AuditResultado = 'ok' | 'rechazado' | 'error';
 
@@ -17,8 +19,10 @@ export type AuditResultado = 'ok' | 'rechazado' | 'error';
  */
 export type AuditEvent = {
   evento: AuditEvento;
-  tenant_id: string;
-  actor_id: string;
+  /** Null for notifications that belong to no tenant (US-0125). */
+  tenant_id: string | null;
+  /** Null for system jobs such as the notifications dispatcher (US-0125). */
+  actor_id: string | null;
   objetivo_id?: string | null;
   resultado: AuditResultado;
   codigo?: string | null;

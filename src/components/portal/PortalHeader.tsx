@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { UserAvatarMenu } from '@/components/portal/UserAvatarMenu';
 import { PortalNavMenu } from '@/components/portal/PortalNavMenu';
-import { GritIcon } from '@/components/ui';
+import { NotificacionesBell } from '@/components/portal/notificaciones';
 import type { PortalDisplayProfile, UserRole } from '@/types/portal.types';
 
 type PortalHeaderProps = {
@@ -29,16 +29,7 @@ export function PortalHeader({ profile, role }: PortalHeaderProps) {
       {/* Right: actions */}
       <div className="flex items-center gap-3.5">
         {/* Notifications */}
-        <button
-          aria-label="Notificaciones"
-          className="relative flex h-9 w-9 items-center justify-center rounded-full border border-grit-glass-border bg-grit-glass text-grit-subtext transition-colors hover:text-grit-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"
-        >
-          <GritIcon name="notifications" size={16} />
-          <span
-            aria-hidden="true"
-            className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-grit-cyan"
-          />
-        </button>
+        <NotificacionesBell />
 
         {/* Avatar */}
         <UserAvatarMenu profile={profile} />
