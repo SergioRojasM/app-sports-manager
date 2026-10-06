@@ -237,15 +237,11 @@ Before confirming a subscription, the system SHALL check whether the authenticat
 ---
 
 ### Requirement: Subscription request submission
-On "Confirmar", the system SHALL insert one `suscripciones` record and one linked `pagos` record using the selected `plan_tipo`'s fields. Both records MUST have `estado = 'pendiente'`. The `suscripciones` insert SHALL use `selectedTipo.clases_incluidas` for `clases_plan` and store `plan_tipo_id`. The `pagos` insert SHALL use `selectedTipo.precio` for `monto`. The system SHALL NOT fall back to plan-level `precio` or `clases_incluidas` fields. If a proof file was selected, the system SHALL upload it to `orgs/{tenantId}/users/{userId}/receipts/{pago.id}.{ext}` and patch `pagos.comprobante_path` with the resulting storage path. If no file was selected, `comprobante_path` SHALL be `null`.
+On "Confirmar", the system SHALL create one `suscripciones` record and one linked `pagos` record through a single call to the `comprar_suscripcion` RPC, using the selected `plan_tipo`. Both records MUST have `estado = 'pendiente'`. The subscription SHALL store `plan_tipo_id`. The payment's `monto` SHALL be set by the server from `plan_tipos.precio`; the system SHALL NOT fall back to plan-level `precio` or `clases_incluidas` fields. If a proof file was selected, the system SHALL upload it to `orgs/{tenantId}/users/{userId}/receipts/{pagoId}.{ext}` **before** calling the RPC, with a payment id generated in the browser, and pass the resulting path so the payment is created with `comprobante_path` set. If no file was selected, or the upload failed, `comprobante_path` SHALL be `null`.
 
 #### Scenario: Subscription created with tipo precio
 - **WHEN** a user confirms a subscription request with a selected plan_tipo
-- **THEN** the `pagos.monto` SHALL be set to `selectedTipo.precio`
-
-#### Scenario: Subscription created with tipo clases_incluidas
-- **WHEN** a user confirms a subscription request with a selected plan_tipo
-- **THEN** the `suscripciones.clases_plan` SHALL be set to `selectedTipo.clases_incluidas` (may be null for unlimited)
+- **THEN** the `pagos.monto` SHALL equal that subtype's `precio`, taken on the server
 
 #### Scenario: No fallback to plan-level fields
 - **WHEN** a subscription is submitted
@@ -253,24 +249,19 @@ On "Confirmar", the system SHALL insert one `suscripciones` record and one linke
 
 #### Scenario: Successful subscription request with proof file
 - **WHEN** a `usuario` confirms a subscription request with a valid proof file
-- **THEN** a `suscripciones` row SHALL be inserted with `estado = 'pendiente'`, `atleta_id = auth.uid()`, `plan_id = selectedPlan.id`, and `clases_plan = selectedTipo.clases_incluidas`
-- **THEN** a `pagos` row SHALL be inserted with `estado = 'pendiente'`, `suscripcion_id` referencing the new subscription, and `monto = selectedTipo.precio`
-- **THEN** the proof file SHALL be uploaded and `pagos.comprobante_path` SHALL be patched to the storage path
+- **THEN** the proof file SHALL be uploaded first
+- **THEN** a `suscripciones` row SHALL exist with `estado = 'pendiente'`, `atleta_id = auth.uid()` and `plan_id = selectedPlan.id`
+- **THEN** a `pagos` row SHALL exist with `estado = 'pendiente'`, `suscripcion_id` referencing the new subscription, `monto = selectedTipo.precio` and `comprobante_path` equal to the uploaded path
 - **THEN** the modal SHALL close and a success message SHALL be shown: _"Solicitud enviada. El administrador revisará tu suscripción."_
 
 #### Scenario: Successful subscription request without proof file
 - **WHEN** a `usuario` confirms a subscription request without selecting a file
-- **THEN** a `suscripciones` and a `pagos` row SHALL be inserted with `comprobante_path = null`
+- **THEN** a `suscripciones` and a `pagos` row SHALL exist with `comprobante_path = null`
 - **THEN** the modal SHALL close and a success message SHALL be shown
 
-#### Scenario: Subscription insert fails
-- **WHEN** the `createSuscripcion` call returns an error
-- **THEN** the modal SHALL remain open and display an inline error message without creating any records
-
-#### Scenario: Payment insert fails after subscription insert succeeds
-- **WHEN** `createSuscripcion` succeeds but `createPago` returns an error
-- **THEN** an inline error message SHALL be shown inside the modal
-- **THEN** the orphan `suscripciones` row with `estado = 'pendiente'` SHALL remain in the database
+#### Scenario: Purchase fails
+- **WHEN** the `comprarSuscripcion` call returns an error
+- **THEN** the modal SHALL remain open and display an inline error message, and no `suscripciones` or `pagos` record SHALL exist
 
 ---
 
