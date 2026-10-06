@@ -94,7 +94,7 @@ Tasks are listed page → component → hook → service → types. Groups 3 and
 - [x] 11.8 Two concurrent dispatcher calls never send the same row; a row left in `procesando` for more than 10 minutes is reclaimed
 - [x] 11.9 Without Vault secrets, purchases succeed and no HTTP call is made; with an unreachable URL, purchase RPCs still succeed; the cron makes no call when nothing is due
 - [x] 11.10 UI: badge values (0, 1–9, `9+`); real-time arrival as administrator from a purchase in another session; click marks read and navigates; "Marcar todas como leídas"; history pagination and empty state; `Escape`, outside click and focus return; header still renders when the request fails
-- [ ] 11.11 Ticket PDF download from the checkout confirmation step and from "Mis entradas" is unchanged
+- [x] 11.11 Ticket PDF download from the checkout confirmation step and from "Mis entradas" is unchanged (validated by the product owner)
 - [x] 11.12 Run `npx tsc --noEmit` and `npm run lint` and fix every error. Do not run `build`
 
 ## 12. Documentation and delivery
