@@ -26,9 +26,12 @@ Buyers hold proof of purchase and a valid entry ticket without having to open th
 ### Current State
 
 - **Email**: the application sends no email of its own. Resend is used only as the SMTP provider behind Supabase Auth (invite, signup confirmation, password reset). There is no `resend` dependency, no `RESEND_API_KEY` and no application email template.
-- **Events outbox**: the purchase RPCs in `supabase/migrations/20261001120100_eventos_compras_rpc.sql` call `_encolar_notificacion(p_compra_id, p_tipo)` at 7 points and fill `public.evento_notificaciones`. **Nothing consumes that table**, it only addresses the buyer, and it has no retry, error or provider-id columns.
-- **In-app**: the bell in `src/components/portal/PortalHeader.tsx:31-41` is a static button with a hard-coded dot (no handler, no data). A legacy table `public.notificaciones` exists (`20260221000100_migracion_inicial_bd.sql:374-386`) but is unused, has no `tenant_id` or link column, restricts `tipo` to `reserva|pago|entrenamiento|general`, and its policy is `for select to authenticated using (true)` (any user can read every row).
-- **Ticket**: the ticket PDF (jsPDF + `qrcode`) is built only in the browser by `descargarEntradasPdf` in `src/lib/portal/eventos-ticket-pdf.ts` and ends in `doc.save()`.
+- **Events outbox**: the purchase RPCs call `_encolar_notificacion(p_compra_id, p_tipo)` at 7 live points and fill `public.evento_notificaciones`. **Nothing consumes that table**, it only addresses the buyer, and it has no retry, error or provider-id columns. `_encolar_notificacion` is defined in `supabase/migrations/20261001120100_eventos_compras_rpc.sql:100`; the current bodies of the calling RPCs live in three migrations:
+  - `20261001120100_eventos_compras_rpc.sql` — `finalizar_compra_evento` (2 calls), `reenviar_comprobante_compra_evento` (1), `validar_compra_evento` (2)
+  - `20261007120000_evento_entradas_metodos_pago.sql` — `iniciar_compra_evento` (1, redefined by US-0130)
+  - `20261008120000_evento_tickets_checkin.sql` — `cancelar_compra_evento` (1, redefined by US-0131)
+- **In-app**: the bell in `src/components/portal/PortalHeader.tsx:31-41` is a static button with a hard-coded dot (no handler, no data). `PortalHeader` receives `profile: PortalDisplayProfile`, which has no user id. A legacy table `public.notificaciones` exists (`20260221000100_migracion_inicial_bd.sql:374-386`) but is unused, has no `tenant_id` or link column, restricts `tipo` to `reserva|pago|entrenamiento|general`, and its policy is `for select to authenticated using (true)` (any user can read every row).
+- **Ticket**: the ticket PDF (jsPDF + `qrcode`) is built only in the browser by `descargarEntradasPdf` in `src/lib/portal/eventos-ticket-pdf.ts` and ends in `doc.save()`. Apart from `doc.save()` the drawing code uses no browser API (`jspdf` and `qrcode` are loaded with dynamic `import()`), so it can run in a Node route handler. Callers: `EventoCompraPasoConfirmacion.tsx` and `mis-entradas/MiCompraCard.tsx`.
 - **Infrastructure**: `pg_cron` is enabled (4 jobs); `pg_net` is not. There are no Edge Functions, no Realtime usage in `src/`, no test runner. Deployment target is Vercel (production origin `https://www.grit-arena.com`).
 
 ### Proposed Changes
@@ -52,7 +55,9 @@ notificaciones_outbox ──insert trigger (pg_net) + pg_cron every minute──
 | Purchase rejected | Email `compra_rechazada` (includes `motivo_rechazo`) + in-app | none |
 | Purchase cancelled by buyer | Email `compra_cancelada` + in-app | none |
 
-- "Tenant administrators" = every `miembros_tenant` row of the purchase's tenant whose role is `administrador` and whose `estado <> 'pendiente_activacion'`. Trainers are not notified.
+- "Tenant administrators" = every `miembros_tenant` row of the purchase's tenant joined to `roles` on `rol_id` with `roles.nombre = 'administrador'` and `miembros_tenant.estado <> 'pendiente_activacion'`; the address is `usuarios.email`. Trainers are not notified.
+- A *Múltiple* purchase issues one ticket per bundled event: it still produces **one** buyer email (one PDF, one page per ticket, each page with its own event's name, date and place) and notifies only the administrators of the purchase's `tenant_id`.
+- Door check-in (US-0131) sends nothing; a used ticket (`ingreso_at` set) is drawn like any other `activa` ticket.
 - Guests (no `comprador_usuario_id`) receive email only.
 - Expiry of the 30-minute hold sends nothing (unchanged).
 
@@ -61,7 +66,7 @@ notificaciones_outbox ──insert trigger (pg_net) + pg_cron every minute──
 - Provider: Resend HTTP API through the `resend` npm package. Sender from `EMAIL_FROM`, value `GRIT Arena <no-reply@grit-arena.com>`.
 - Templates are plain TypeScript functions returning `{ asunto, html, texto, adjuntos }`, sharing one HTML layout. Copy is Spanish, numbers and dates use `es-CO` and the America/Bogota timezone (`formatCop`, `formatEventoFecha`, `formatEventoHora` from `src/lib/portal/eventos.utils.ts`). Every interpolated value is HTML-escaped.
 - Buyer emails attach the ticket PDF generated on the server from the purchase's current rows (not from the outbox payload), one page per non-voided ticket. File name `entradas-{codigo of first ticket}.pdf`.
-- The administrator email links to `{APP_URL}/portal/orgs/{tenant_id}/gestion-eventos/{evento_id}/compras`.
+- The administrator email links to `{APP_URL}/portal/orgs/{tenant_id}/gestion-eventos/{evento_id}/compras`, with the origin taken from `getAppUrl()` in `src/lib/portal/privileged-route.ts`.
 - Each send passes the outbox row id as Resend `Idempotency-Key`.
 - When `RESEND_API_KEY` is not set (local development), the dispatcher logs subject and outbox id and resolves the row as failed with error `resend_not_configured`; it never throws.
 
@@ -78,7 +83,7 @@ notificaciones_outbox ──insert trigger (pg_net) + pg_cron every minute──
 - The header bell shows the real unread count (hidden when 0, `9+` above 9) and opens a panel with the 10 most recent notifications: title, message, relative time, unread marker.
 - Clicking a notification marks it read and navigates to its `url`. "Marcar todas como leídas" marks all. "Ver todas" opens `/portal/notificaciones` with the paginated history (20 per page) and an empty state.
 - New notifications arrive in real time (Supabase Realtime `postgres_changes`, `INSERT` on `notificaciones` filtered by `usuario_id`). The list is reloaded on channel reconnect and when the tab regains focus.
-- Notifications are per user and cross-tenant (the bell lives in the portal shell). Buyer notifications link to `/portal/mis-entradas`; administrator notifications link to the event's purchases page.
+- Notifications are per user and cross-tenant (the bell lives in the portal shell). The hook resolves the user id with `supabase.auth.getUser()` on the browser client; `PortalHeader` props and `src/app/portal/layout.tsx` are not changed. Buyer notifications link to `/portal/mis-entradas`; administrator notifications link to the event's purchases page.
 - A visual design for the bell, panel and page must be approved before building components (rule in `openspec/config.yaml`).
 
 #### Extensibility contract
@@ -89,7 +94,7 @@ Adding notifications to another module requires only: (1) calling `_notificar_em
 
 ## Database Changes
 
-One new migration, `supabase/migrations/{timestamp}_notificaciones_modulo.sql`, wrapped in `begin; ... commit;`. Local only; the remote project is updated manually.
+One new migration, `supabase/migrations/20261009120000_notificaciones_modulo.sql` (the latest existing one is `20261008120000_evento_tickets_checkin.sql`), wrapped in `begin; ... commit;`. Local only; the remote project is updated manually.
 
 ### 1. `public.notificaciones_outbox` (email outbox)
 
@@ -162,8 +167,8 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 |---|---|---|
 | `_notificar_email(p_tenant_id, p_modulo, p_tipo, p_email, p_usuario_id, p_entidad_tipo, p_entidad_id, p_payload)` | internal (revoked from clients) | Insert one outbox row; lowercases the email; skips null/blank emails |
 | `_notificar_in_app(p_usuario_id, p_tenant_id, p_modulo, p_tipo, p_titulo, p_mensaje, p_url, p_entidad_tipo, p_entidad_id)` | internal | Insert one in-app row |
-| `_admins_tenant(p_tenant_id)` returns `table(usuario_id uuid, email text)` | internal | Active `administrador` members of a tenant |
-| `_encolar_notificacion(p_compra_id uuid, p_tipo text)` | internal, **same signature** | Rewritten: buyer email, buyer in-app when `comprador_usuario_id` is not null, and one `compra_nueva_admin` email + in-app per administrator when `p_tipo = 'compra_recibida'` or (`p_tipo = 'compra_confirmada'` and `validado_por is null`). The 7 call sites are not edited. Payload keeps the existing keys plus `compra_id` and `tenant_id` |
+| `_admins_tenant(p_tenant_id)` returns `table(usuario_id uuid, email text)` | internal | `miembros_tenant mt join roles r on r.id = mt.rol_id join usuarios u on u.id = mt.usuario_id` where `mt.tenant_id = p_tenant_id`, `r.nombre = 'administrador'` and `mt.estado <> 'pendiente_activacion'` |
+| `_encolar_notificacion(p_compra_id uuid, p_tipo text)` | internal, **same signature** | Rewritten: buyer email, buyer in-app when `comprador_usuario_id` is not null, and one `compra_nueva_admin` email + in-app per administrator when `p_tipo = 'compra_recibida'` or (`p_tipo = 'compra_confirmada'` and `validado_at is distinct from now()`, i.e. not confirmed by staff in this transaction — `validado_por` cannot be used because a rejected purchase keeps it and can later auto-confirm on proof re-upload). The 7 call sites are not edited. Payload keeps the existing keys plus `compra_id` and `tenant_id` |
 | `reclamar_notificaciones_outbox(p_limite int)` returns `setof notificaciones_outbox` | service role only | Claims due `pendiente` rows and `procesando` rows locked more than 10 min, `for update skip locked`, sets `procesando`, `bloqueada_at = now()` |
 | `resolver_notificacion_outbox(p_id uuid, p_ok boolean, p_proveedor_id text, p_error text)` | service role only | Success: `enviada`, `enviada_at`, `proveedor_id`. Failure: `intentos + 1`, `ultimo_error` (truncated to 500 chars), back to `pendiente` with the next retry time, or `error` after 5 attempts |
 | `marcar_notificacion_leida(p_id uuid)` | `authenticated` | Marks one own notification read; no-op for rows of another user |
@@ -187,7 +192,7 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 - **Verb + path**: `POST /api/internal/notificaciones/despachar` (`runtime = 'nodejs'`, `maxDuration = 60`); other verbs return 405.
 - **Auth**: `Authorization: Bearer {NOTIFICACIONES_DISPATCH_SECRET}`, compared with `crypto.timingSafeEqual`. Missing/invalid → `401`. Secret not configured → `503`.
 - **Input**: none.
-- **Return**: `200 { procesadas: number, enviadas: number, fallidas: number }` through `jsonNoStore`.
+- **Return**: `200 { procesadas: number, enviadas: number, fallidas: number }` through `jsonNoStore`; the 405 uses `methodNotAllowed()` (both from `src/lib/portal/privileged-route.ts`).
 
 ### Server library — `src/lib/notificaciones/` (every file `import 'server-only'`)
 | File | Export | Contract |
@@ -196,7 +201,9 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 | `registro.ts` | `resolverHandler(modulo, tipo)` → `NotificacionHandler \| null` | Unknown key resolves the row as failed with `handler_not_found` |
 | `plantillas/layout.ts` | `renderLayout({ titulo, cuerpoHtml, cta? })`, `escapeHtml(value)` | Shared branded layout |
 | `modulos/eventos.ts` | handlers for `eventos.compra_recibida`, `compra_confirmada`, `compra_rechazada`, `compra_cancelada`, `compra_nueva_admin` | Buyer handlers load purchase + tickets + event with `createServiceClient()` and attach the PDF |
-| `despachador.ts` | `despacharNotificaciones(limite = 20)` → `{ procesadas, enviadas, fallidas }` | Claim → render → send → resolve; logs through `src/lib/portal/audit-log.ts` without email addresses |
+| `despachador.ts` | `despacharNotificaciones(limite = 20)` → `{ procesadas, enviadas, fallidas }` | Claim → render → send → resolve; logs one `logAuditEvent` per row (`evento`: `notificacion_enviada` / `notificacion_fallida`, `objetivo_id` = outbox row id, `codigo` = error code, `actor_id: null`), never an email address |
+
+`src/lib/portal/audit-log.ts`: add the two events to `AuditEvento` and widen `tenant_id` and `actor_id` of `AuditEvent` to `string | null` (the dispatcher has no actor and outbox rows may have no tenant).
 
 ### Ticket PDF — `src/lib/portal/eventos-ticket-pdf.ts`
 - New `construirEntradasPdf(tickets: TicketPdfData[]): Promise<jsPDF | null>` holding the current drawing logic.
@@ -214,7 +221,7 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 | `suscribir` | `usuarioId: string, onInsert: (n: Notificacion) => void, onReconnect: () => void` | `() => void` (unsubscribe) | Realtime honours RLS |
 
 ### Environment variables (server only)
-`RESEND_API_KEY`, `EMAIL_FROM`, `NOTIFICACIONES_DISPATCH_SECRET`. Added to `.env.example` with empty values.
+`RESEND_API_KEY`, `EMAIL_FROM`, `NOTIFICACIONES_DISPATCH_SECRET`. Added to `.env.example` with empty values, in the existing "Server-only" block. `APP_URL` and `SUPABASE_SERVICE_ROLE_KEY` already exist and are reused.
 
 ---
 
@@ -222,7 +229,7 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 
 | Area | File | Change |
 |------|------|--------|
-| Migration | `supabase/migrations/{timestamp}_notificaciones_modulo.sql` | Outbox, in-app table, functions, trigger, cron, `pg_net`, drop `evento_notificaciones` |
+| Migration | `supabase/migrations/20261009120000_notificaciones_modulo.sql` | Outbox, in-app table, functions, trigger, cron, `pg_net`, drop `evento_notificaciones` |
 | Dependency | `package.json` | Add `resend` |
 | Env | `.env.example` | Add the 3 variables |
 | Lib (server) | `src/lib/notificaciones/resend.ts` | New |
@@ -231,10 +238,11 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 | Lib (server) | `src/lib/notificaciones/plantillas/layout.ts` | New |
 | Lib (server) | `src/lib/notificaciones/modulos/eventos.ts` | New |
 | Lib | `src/lib/portal/eventos-ticket-pdf.ts` | Extract `construirEntradasPdf` |
+| Lib (server) | `src/lib/portal/audit-log.ts` | Add `notificacion_enviada` / `notificacion_fallida`; `tenant_id` and `actor_id` nullable |
 | API route | `src/app/api/internal/notificaciones/despachar/route.ts` | New dispatcher endpoint |
 | Types | `src/types/portal/notificaciones.types.ts` | `Notificacion`, outbox row, handler types |
 | Service | `src/services/supabase/portal/notificaciones.service.ts` | New |
-| Hook | `src/hooks/portal/notificaciones/useNotificaciones.ts` | New: list, unread count, realtime, mark read |
+| Hook | `src/hooks/portal/notificaciones/useNotificaciones.ts` | New: resolves the user id, list, unread count, realtime, mark read |
 | Component | `src/components/portal/notificaciones/NotificacionesBell.tsx` | New: bell + badge + panel toggle |
 | Component | `src/components/portal/notificaciones/NotificacionesPanel.tsx` | New: dropdown list |
 | Component | `src/components/portal/notificaciones/NotificacionItem.tsx` | New |
@@ -243,7 +251,7 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 | Component | `src/components/portal/PortalHeader.tsx` | Replace the static bell with `NotificacionesBell` |
 | Component | `src/components/portal/PortalBreadcrumb.tsx` | Add `notificaciones` → "Notificaciones" to `SLUG_LABELS` |
 | Page | `src/app/portal/notificaciones/page.tsx` | New thin page rendering `NotificacionesPage` |
-| Docs | `projectspec/03-project-structure.md` | Document module, tables, route, env vars; remove `evento_notificaciones` |
+| Docs | `projectspec/03-project-structure.md` | Document module, tables, route, env vars; remove `evento_notificaciones` from the "Event purchases" section |
 | Spec | `openspec/specs/team-events-purchase-data/spec.md` | Outbox requirement now points to the generic module |
 
 ---
@@ -257,21 +265,22 @@ No insert/update/delete policy: writes go through SECURITY DEFINER functions.
 5. Rejecting a purchase sends the buyer an email containing the rejection reason; cancelling sends a cancellation email. Neither notifies administrators.
 6. A guest purchase (no session) receives the emails at the typed address and creates no in-app row for the buyer.
 7. An authenticated buyer gets an in-app notification for each of the buyer transitions, linking to `/portal/mis-entradas`.
-8. Each administrator gets an in-app notification per purchase linking to `/portal/orgs/{tenant_id}/gestion-eventos/{evento_id}/compras`; members with role `entrenador` or `usuario`, and members in `pendiente_activacion`, get neither email nor in-app notification.
-9. With the portal open as administrator, a purchase made in another session increases the bell counter and adds the item to the panel without reloading the page.
-10. The bell shows no badge with 0 unread, the exact number from 1 to 9, and `9+` above 9.
-11. Clicking a notification marks it read (counter decreases) and navigates to its URL; "Marcar todas como leídas" sets the counter to 0.
-12. `/portal/notificaciones` lists the user's notifications newest first, 20 per page, and shows an empty state when there are none.
-13. A user can never read or mark another user's notifications: a direct `select` returns only own rows and `marcar_notificacion_leida` with a foreign id changes nothing.
-14. `POST /api/internal/notificaciones/despachar` without a valid bearer returns `401` and sends nothing; any other HTTP verb returns `405`.
-15. When Resend fails, the row returns to `pendiente` with `intentos` incremented, `ultimo_error` filled and `proximo_intento_at` moved forward (1 min, 5 min, 30 min, 2 h); after the 5th failure it ends in `error` and is not retried.
-16. A row that was sent successfully is never sent twice, including when two dispatcher calls run concurrently.
-17. A failure or timeout of the dispatcher call never makes a purchase, validation, rejection or cancellation RPC fail.
-18. With no Vault configuration, inserting outbox rows raises no error and performs no HTTP call.
-19. When no outbox row is due, the cron job performs no HTTP call.
-20. `public.evento_notificaciones` no longer exists and none of its former rows is sent.
-21. Downloading the ticket PDF from the checkout confirmation step and from "Mis entradas" produces the same document as before the refactor.
-22. `npx tsc --noEmit` and `npm run lint` pass.
+8. A *Múltiple* purchase produces one buyer email whose PDF has one page per bundled event's ticket.
+9. Each administrator gets an in-app notification per purchase linking to `/portal/orgs/{tenant_id}/gestion-eventos/{evento_id}/compras`; members with role `entrenador` or `usuario`, and members in `pendiente_activacion`, get neither email nor in-app notification.
+10. With the portal open as administrator, a purchase made in another session increases the bell counter and adds the item to the panel without reloading the page.
+11. The bell shows no badge with 0 unread, the exact number from 1 to 9, and `9+` above 9.
+12. Clicking a notification marks it read (counter decreases) and navigates to its URL; "Marcar todas como leídas" sets the counter to 0.
+13. `/portal/notificaciones` lists the user's notifications newest first, 20 per page, and shows an empty state when there are none.
+14. A user can never read or mark another user's notifications: a direct `select` returns only own rows and `marcar_notificacion_leida` with a foreign id changes nothing.
+15. `POST /api/internal/notificaciones/despachar` without a valid bearer returns `401` and sends nothing; any other HTTP verb returns `405`.
+16. When Resend fails, the row returns to `pendiente` with `intentos` incremented, `ultimo_error` filled and `proximo_intento_at` moved forward (1 min, 5 min, 30 min, 2 h); after the 5th failure it ends in `error` and is not retried.
+17. A row that was sent successfully is never sent twice, including when two dispatcher calls run concurrently.
+18. A failure or timeout of the dispatcher call never makes a purchase, validation, rejection or cancellation RPC fail.
+19. With no Vault configuration, inserting outbox rows raises no error and performs no HTTP call.
+20. When no outbox row is due, the cron job performs no HTTP call.
+21. `public.evento_notificaciones` no longer exists and none of its former rows is sent.
+22. Downloading the ticket PDF from the checkout confirmation step and from "Mis entradas" produces the same document as before the refactor.
+23. `npx tsc --noEmit` and `npm run lint` pass.
 
 ---
 

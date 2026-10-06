@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import { BodyPortal } from '@/components/portal/gestion-eventos/EventoModalShell';
 import { PlanesPublicosModal } from './PlanesPublicosModal';
 
 type VerPlanesButtonProps = {
@@ -31,12 +32,15 @@ export function VerPlanesButton({ tenantId, tenantNombre }: VerPlanesButtonProps
         Ver planes
       </button>
 
-      <PlanesPublicosModal
-        open={open}
-        tenantId={tenantId}
-        tenantNombre={tenantNombre}
-        onClose={handleClose}
-      />
+      {/* On document.body: the organization card's backdrop-blur traps `fixed` children */}
+      <BodyPortal>
+        <PlanesPublicosModal
+          open={open}
+          tenantId={tenantId}
+          tenantNombre={tenantNombre}
+          onClose={handleClose}
+        />
+      </BodyPortal>
     </>
   );
 }

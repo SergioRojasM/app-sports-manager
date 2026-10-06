@@ -1,4 +1,5 @@
 import { formatCop, formatEventoFecha, formatEventoHora } from '@/lib/portal/eventos.utils';
+import type { jsPDF } from 'jspdf';
 import type { TicketPdfData } from '@/types/portal/eventos-compras.types';
 
 /** Cancellation policy line shown in the checkout, the PDF and "Mis Entradas" (US-0121). */
@@ -38,12 +39,13 @@ const COLORS = {
 };
 
 /**
- * Builds the ticket PDF in the browser (A5 portrait, one page per ticket) and triggers the download.
+ * Builds the ticket PDF (A5 portrait, one page per ticket), or `null` when no ticket is left to draw.
  * Only `activa` tickets carry a QR code; `pendiente` ones are marked as not valid for entry.
+ * No DOM API is used, so the same code draws the browser download and the emailed attachment (US-0125).
  */
-export async function descargarEntradasPdf(tickets: TicketPdfData[], fileName: string): Promise<void> {
+export async function construirEntradasPdf(tickets: TicketPdfData[]): Promise<jsPDF | null> {
   const validos = tickets.filter((ticket) => ticket.estado !== 'anulada');
-  if (validos.length === 0) return;
+  if (validos.length === 0) return null;
 
   // Loaded on demand so neither library lands in the page bundles
   const [{ jsPDF }, QRCode] = await Promise.all([import('jspdf'), import('qrcode')]);
@@ -169,5 +171,11 @@ export async function descargarEntradasPdf(tickets: TicketPdfData[], fileName: s
     doc.text(politica, margin, pageHeight - 14);
   }
 
-  doc.save(fileName);
+  return doc;
+}
+
+/** Builds the ticket PDF in the browser and triggers the download. */
+export async function descargarEntradasPdf(tickets: TicketPdfData[], fileName: string): Promise<void> {
+  const doc = await construirEntradasPdf(tickets);
+  doc?.save(fileName);
 }

@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { TenantIdentityCard } from '@/components/portal/tenant/TenantIdentityCard';
+import Link from 'next/link';
+import { TenantDirectoryCard } from '@/components/portal/tenant/TenantDirectoryCard';
 import { SolicitarAccesoButton } from '@/components/portal/tenant/SolicitarAccesoButton';
 import { VerPlanesButton } from '@/components/portal/planes-publicos';
 import type { PortalTenantListItem } from '@/types/portal/tenant.types';
@@ -43,24 +44,26 @@ export function TenantDirectoryList({ organizations }: TenantDirectoryListProps)
           />
         );
 
-        if (organization.canAccess && role) {
-          return (
-            <TenantIdentityCard
-              key={organization.identity.tenantId}
-              identity={organization.identity}
-              actionLabel="Ingresar"
-              actionHref={getDefaultTenantPath(organization.identity.tenantId, role)}
-              actionVariant="access"
-              secondaryAction={verPlanesAction}
-            />
-          );
-        }
+        const isMember = Boolean(organization.canAccess && role);
 
         return (
-          <TenantIdentityCard
+          <TenantDirectoryCard
             key={organization.identity.tenantId}
             identity={organization.identity}
-            customAction={<SolicitarAccesoButton tenantId={organization.identity.tenantId} />}
+            isMember={isMember}
+            isPublic={organization.isPublic}
+            primaryAction={
+              isMember && role ? (
+                <Link
+                  href={getDefaultTenantPath(organization.identity.tenantId, role)}
+                  className="inline-flex w-full items-center justify-center rounded-grit-md bg-grit-cyan px-4 py-2 font-grit-body text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan-light"
+                >
+                  Ingresar
+                </Link>
+              ) : (
+                <SolicitarAccesoButton tenantId={organization.identity.tenantId} />
+              )
+            }
             secondaryAction={verPlanesAction}
           />
         );
