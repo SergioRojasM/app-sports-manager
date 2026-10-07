@@ -42,8 +42,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
     invitacionId,
     tenantId,
     actorId: user.id,
-    email,
-    nombre,
     evento: 'invitacion_creada',
   });
 }
