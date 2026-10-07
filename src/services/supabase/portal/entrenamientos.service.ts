@@ -4,6 +4,7 @@ import {
   TrainingServiceError,
   type CreateTrainingSeriesInput,
   type DeleteTrainingWithScopeInput,
+  type EntrenamientoParaEvento,
   type GenerateSeriesInstancesInput,
   type SelectOption,
   type TrainingGroup,
@@ -34,6 +35,12 @@ type PostgrestErrorLike = {
 function toNullable(value: string | null | undefined): string | null {
   const trimmed = value?.trim() ?? '';
   return trimmed.length > 0 ? trimmed : null;
+}
+
+/** PostgREST returns a to-one embed as an object, or as a one-element array when it cannot infer the cardinality. */
+function firstEmbed<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
 }
 
 function mapServiceError(error: PostgrestErrorLike): TrainingServiceError {
@@ -1037,6 +1044,39 @@ export const entrenamientosService = {
       .order('orden', { ascending: true });
     if (error) throw mapServiceError(error);
     return data ?? [];
+  },
+
+  /** One training occurrence with its discipline, scenario and trainer, to pre-fill a new event (US-0132). */
+  async getEntrenamientoParaEvento(tenantId: string, entrenamientoId: string): Promise<EntrenamientoParaEvento | null> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('entrenamientos')
+      .select(
+        'id, nombre, descripcion, punto_encuentro, formulario_externo, formulario_id, fecha_hora, duracion_minutos, cupo_maximo, reserva_antelacion_horas, cancelacion_antelacion_horas, disciplina:disciplinas(nombre), escenario:escenarios(id, nombre, tipo, ubicacion, direccion, coordenadas, capacidad, image_url), entrenador:usuarios!entrenamientos_entrenador_id_fkey(id, nombre, apellido, email)',
+      )
+      .eq('tenant_id', tenantId)
+      .eq('id', entrenamientoId)
+      .maybeSingle();
+
+    if (error) {
+      throw mapServiceError(error);
+    }
+    if (!data) {
+      return null;
+    }
+
+    const row = data as unknown as Omit<EntrenamientoParaEvento, 'disciplina' | 'escenario' | 'entrenador'> & {
+      disciplina: EntrenamientoParaEvento['disciplina'] | EntrenamientoParaEvento['disciplina'][];
+      escenario: EntrenamientoParaEvento['escenario'] | EntrenamientoParaEvento['escenario'][];
+      entrenador: EntrenamientoParaEvento['entrenador'] | EntrenamientoParaEvento['entrenador'][];
+    };
+
+    return {
+      ...row,
+      disciplina: firstEmbed(row.disciplina),
+      escenario: firstEmbed(row.escenario),
+      entrenador: firstEmbed(row.entrenador),
+    };
   },
 
   async listDisciplineOptions(tenantId: string): Promise<SelectOption[]> {

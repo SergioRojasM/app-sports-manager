@@ -1,9 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useEntrenamientos } from '@/hooks/portal/entrenamientos/useEntrenamientos';
 import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
+import { esEntrenamientoFuturo } from '@/lib/portal/entrenamiento-evento.utils';
 import { EntrenamientoFormModal } from './EntrenamientoFormModal';
 import { EntrenamientoDetalleModal } from './EntrenamientoDetalleModal';
 import { EntrenamientoScopeModal } from './EntrenamientoScopeModal';
@@ -47,7 +49,10 @@ function toSelectedDateLabel(dateKey: string): string {
   }).format(new Date(`${dateKey}T12:00:00.000Z`));
 }
 
+const PUBLICAR_EN_EVENTOS_SOLO_FUTUROS = 'Solo los entrenamientos futuros se pueden publicar como evento.';
+
 export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
+  const router = useRouter();
   const currentTimestamp = new Date().getTime();
   const { role } = useTenantAccess(tenantId);
   const canManage = role === 'administrador' || role === 'entrenador';
@@ -198,8 +203,10 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
       return {
         canEdit: false,
         canDelete: false,
+        canPublicarEnEventos: false,
         editDisabledReason: 'No hay entrenamiento seleccionado.',
         deleteDisabledReason: 'No hay entrenamiento seleccionado.',
+        publicarEnEventosDisabledReason: 'No hay entrenamiento seleccionado.',
       };
     }
 
@@ -207,9 +214,13 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
       ? new Date(selectedInstanceForAction.fecha_hora).getTime() < currentTimestamp
       : false;
 
+    const canPublicarEnEventos = esEntrenamientoFuturo(selectedInstanceForAction.fecha_hora, currentTimestamp);
+
     return {
       canEdit: !isHistorical,
       canDelete: !isHistorical,
+      canPublicarEnEventos,
+      publicarEnEventosDisabledReason: canPublicarEnEventos ? undefined : PUBLICAR_EN_EVENTOS_SOLO_FUTUROS,
       editDisabledReason: isHistorical
           ? 'No se pueden editar entrenamientos pasados.'
           : undefined,
@@ -227,6 +238,16 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
 
   const closeActionModal = () => {
     setSelectedInstanceForAction(null);
+  };
+
+  // US-0132: the event wizard pre-fills a new, unsaved event from this occurrence
+  const publicarEnEventos = () => {
+    const target = selectedInstanceForAction;
+    if (!target || !esEntrenamientoFuturo(target.fecha_hora, Date.now())) {
+      return;
+    }
+    closeActionModal();
+    router.push(`/portal/orgs/${tenantId}/gestion-eventos/nuevo?desdeEntrenamiento=${target.id}`);
   };
 
   const handleSelectDate = (dateKey: string) => {
@@ -383,6 +404,9 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
             ? () => openReservasPanel(selectedInstanceForAction)
             : undefined
         }
+        onPublicarEnEventos={role === 'administrador' ? publicarEnEventos : undefined}
+        canPublicarEnEventos={selectedActionContext.canPublicarEnEventos}
+        publicarEnEventosDisabledReason={selectedActionContext.publicarEnEventosDisabledReason}
       />
 
       <ReservasPanel

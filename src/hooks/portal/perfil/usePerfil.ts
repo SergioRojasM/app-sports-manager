@@ -8,6 +8,7 @@ import {
   upsertPerfilDeportivo,
 } from '@/services/supabase/portal/perfil.service';
 import { PerfilServiceError } from '@/types/portal/perfil.types';
+import type { FormularioPerfilCampo } from '@/types/portal/formularios.types';
 import type {
   PerfilDeportivo,
   PerfilFieldErrors,
@@ -75,7 +76,25 @@ const EMPTY_FORM: PerfilFormValues = {
   altura_cm: '',
 };
 
-export function usePerfil(): UsePerfilResult {
+export type UsePerfilOptions = {
+  /** Extra fields `submit()` must find filled, on top of nombre/apellido (US-0136). */
+  requiredFields?: FormularioPerfilCampo[];
+};
+
+/** `tipo_identificacion` covers both the type and the number inputs, like PerfilPersonalForm. */
+const REQUIRED_FIELD_CHECKS: Partial<Record<FormularioPerfilCampo, [PerfilFormField, string][]>> = {
+  telefono: [['telefono', 'El teléfono es obligatorio.']],
+  fecha_nacimiento: [['fecha_nacimiento', 'La fecha de nacimiento es obligatoria.']],
+  tipo_identificacion: [
+    ['tipo_identificacion', 'El tipo de identificación es obligatorio.'],
+    ['numero_identificacion', 'El número de identificación es obligatorio.'],
+  ],
+  fecha_exp_identificacion: [['fecha_exp_identificacion', 'La fecha de expedición es obligatoria.']],
+  rh: [['rh', 'El grupo sanguíneo es obligatorio.']],
+};
+
+export function usePerfil(options?: UsePerfilOptions): UsePerfilResult {
+  const requiredFields = options?.requiredFields;
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,6 +181,11 @@ export function usePerfil(): UsePerfilResult {
     const errors: PerfilFieldErrors = {};
     if (!formValues.nombre.trim()) errors.nombre = 'El nombre es obligatorio.';
     if (!formValues.apellido.trim()) errors.apellido = 'El apellido es obligatorio.';
+    for (const campo of requiredFields ?? []) {
+      for (const [field, message] of REQUIRED_FIELD_CHECKS[campo] ?? []) {
+        if (!formValues[field].trim()) errors[field] = message;
+      }
+    }
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -207,7 +231,7 @@ export function usePerfil(): UsePerfilResult {
     } finally {
       setIsSubmitting(false);
     }
-  }, [userId, formValues]);
+  }, [userId, formValues, requiredFields]);
 
   return {
     loading,

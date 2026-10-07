@@ -1,3 +1,4 @@
+import type { FormularioPerfilCampo } from '@/types/portal/formularios.types';
 export type TenantIdentityPayload = {
   tenantId: string;
   name: string;
@@ -55,6 +56,7 @@ export type TenantEditFormValues = {
   banner_url: string;
   max_solicitudes: string;
   requiere_perfil_completo: string;
+  publico: string;
 };
 
 export type TenantEditPayload = {
@@ -70,6 +72,7 @@ export type TenantEditPayload = {
   banner_url: string | null;
   max_solicitudes: number;
   requiere_perfil_completo: boolean;
+  publico: boolean;
 };
 
 export type TenantEditResult = {
@@ -94,6 +97,10 @@ export type TenantAccessDecision = {
   role: TenantRole | null;
   /** True when the caller's membership exists but is `pendiente_activacion` (US-0114). */
   pendingActivation: boolean;
+  /** True when the tenant has `requiere_perfil_completo` and the caller's profile is missing a required field (US-0136). */
+  profileIncomplete: boolean;
+  /** Missing profile fields, empty unless `profileIncomplete` (US-0136). */
+  profileMissingFields: FormularioPerfilCampo[];
 };
 
 /** Platform-owned per-tenant entitlements read from `admin_tenants` (US-0114). */
@@ -105,4 +112,6 @@ export type PortalTenantListItem = {
   identity: TenantIdentityPayload;
   canAccess: boolean;
   userMembershipRole: TenantRole | null;
+  /** `tenants.publico` — a private organization is only listed for its members (US-0133). */
+  isPublic: boolean;
 };

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GritButton, GritEmptyState, GritIcon, GritPageHeader, GritTag } from '@/components/ui';
-import { useEventoWizard } from '@/hooks/portal/gestion-eventos/useEventoWizard';
+import { useEventoWizard, type EventoWizardNotFoundKind } from '@/hooks/portal/gestion-eventos/useEventoWizard';
 import { useEventoWizardOptions } from '@/hooks/portal/gestion-eventos/useEventoWizardOptions';
 import { EventoConfiguracionStep } from './EventoConfiguracionStep';
 import { EventoEntradasStep } from './EventoEntradasStep';
@@ -21,6 +21,26 @@ type EventoWizardPageProps = {
   eventoId?: string;
   /** Create mode only: pre-fills the wizard with a copy of this event (US-0122). */
   duplicarDeId?: string;
+  /** Create mode only, when not duplicating: pre-fills the wizard from this future training (US-0132). */
+  desdeEntrenamientoId?: string;
+};
+
+const NOT_FOUND_COPY: Record<EventoWizardNotFoundKind, { icon: string; title: string; description: string }> = {
+  evento: {
+    icon: 'event_busy',
+    title: 'Evento no encontrado',
+    description: 'El evento no existe o no pertenece a esta organización.',
+  },
+  entrenamiento: {
+    icon: 'event_busy',
+    title: 'Entrenamiento no encontrado',
+    description: 'El entrenamiento no existe o pertenece a otra organización.',
+  },
+  'entrenamiento-pasado': {
+    icon: 'history',
+    title: 'Este entrenamiento ya pasó',
+    description: 'Solo los entrenamientos futuros se pueden publicar como evento.',
+  },
 };
 
 const RELATIVE_TICK_MS = 30_000;
@@ -39,7 +59,7 @@ function formatUltimoGuardado(iso: string, now: number): string {
 }
 
 /** Full-page create/edit wizard for team events (US-0119). */
-export function EventoWizardPage({ tenantId, eventoId, duplicarDeId }: EventoWizardPageProps) {
+export function EventoWizardPage({ tenantId, eventoId, duplicarDeId, desdeEntrenamientoId }: EventoWizardPageProps) {
   const router = useRouter();
   const options = useEventoWizardOptions(tenantId);
   const eventosExistentesIds = useMemo(
@@ -50,6 +70,7 @@ export function EventoWizardPage({ tenantId, eventoId, duplicarDeId }: EventoWiz
     tenantId,
     eventoId,
     duplicarDeId,
+    desdeEntrenamientoId,
     formulariosActivosIds: options.formulariosActivosIds,
     eventosExistentesIds,
   });
@@ -57,6 +78,7 @@ export function EventoWizardPage({ tenantId, eventoId, duplicarDeId }: EventoWiz
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [duplicadoNoticeDismissed, setDuplicadoNoticeDismissed] = useState(false);
+  const [origenNoticeDismissed, setOrigenNoticeDismissed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef<EventoWizardStep>(wizard.step);
@@ -112,12 +134,13 @@ export function EventoWizardPage({ tenantId, eventoId, duplicarDeId }: EventoWiz
   }
 
   if (wizard.notFound) {
+    const notFoundCopy = NOT_FOUND_COPY[wizard.notFoundKind];
     return (
       <GritEmptyState
-        icon="event_busy"
-        title="Evento no encontrado"
+        icon={notFoundCopy.icon}
+        title={notFoundCopy.title}
         titleAs="h1"
-        description="El evento no existe o no pertenece a esta organización."
+        description={notFoundCopy.description}
         action={
           <GritButton variant="secondary" size="sm" icon="arrow_back" href={listPath}>
             Volver a eventos
@@ -131,7 +154,7 @@ export function EventoWizardPage({ tenantId, eventoId, duplicarDeId }: EventoWiz
     return (
       <GritEmptyState
         icon="error"
-        title="No se pudo cargar el evento"
+        title={desdeEntrenamientoId && wizard.loadError ? 'No se pudo cargar el entrenamiento' : 'No se pudo cargar el evento'}
         titleAs="h1"
         description={wizard.loadError ?? options.error}
         descriptionClassName="text-grit-danger"
@@ -203,6 +226,51 @@ export function EventoWizardPage({ tenantId, eventoId, duplicarDeId }: EventoWiz
           <button
             type="button"
             onClick={() => setDuplicadoNoticeDismissed(true)}
+            aria-label="Cerrar mensaje"
+            className="rounded-grit-sm p-1 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-text"
+          >
+            <GritIcon name="close" size={16} />
+          </button>
+        </div>
+      )}
+
+      {wizard.origenEntrenamiento && !origenNoticeDismissed && (
+        <div
+          role="status"
+          className="flex items-start justify-between gap-3 rounded-grit-md border border-grit-cyan/40 bg-grit-cyan/10 px-4 py-3 font-grit-body text-sm text-grit-text"
+        >
+          <span className="flex items-start gap-2">
+            <GritIcon name="fitness_center" size={18} className="mt-0.5 shrink-0 text-grit-cyan" />
+            <span className="space-y-1">
+              <span className="block">
+                Estás publicando como evento el entrenamiento &quot;{wizard.origenEntrenamiento.nombre}&quot;. No se
+                guarda nada hasta que pulses &quot;Guardar borrador&quot; o &quot;Publicar evento&quot;.
+              </span>
+              <span className="block">
+                La capacidad no es compartida: el evento tiene su propio cupo, independiente del entrenamiento. Las
+                reservas del entrenamiento y las entradas del evento se cuentan por separado; ajusta ambos cupos si
+                juntos no deben superar la capacidad real.
+              </span>
+              <span className="block">
+                Define las entradas (paso 2) y los métodos de pago (paso 3): un entrenamiento no tiene precios.
+              </span>
+              {wizard.origenEntrenamiento.ajustes.descripcionMovida && (
+                <span className="block">
+                  La descripción del entrenamiento supera 300 caracteres: la movimos a &quot;Descripción larga&quot;.
+                  Escribe una descripción corta.
+                </span>
+              )}
+              {wizard.origenEntrenamiento.ajustes.formularioExternoOmitido && (
+                <span className="block">
+                  El entrenamiento usa un enlace de formulario externo, que los eventos no admiten. Elige un formulario
+                  interno si lo necesitas.
+                </span>
+              )}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setOrigenNoticeDismissed(true)}
             aria-label="Cerrar mensaje"
             className="rounded-grit-sm p-1 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-text"
           >

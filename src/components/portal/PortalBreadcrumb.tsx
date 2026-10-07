@@ -29,6 +29,7 @@ const SLUG_LABELS: Record<string, string> = {
   analitica: 'Analítica',
   'mis-reservas': 'Mis reservas',
   'mis-entradas': 'Mis entradas',
+  notificaciones: 'Notificaciones',
   compras: 'Compras',
   'control-ingreso': 'Control de ingreso',
   'mis-suscripciones': 'Mis suscripciones',
@@ -39,6 +40,7 @@ const SLUG_LABELS: Record<string, string> = {
   'gestion-equipo': 'Equipo',
   'gestion-suscripciones': 'Suscripciones',
   'activar-cuenta': 'Activar cuenta',
+  'completar-perfil': 'Completar perfil',
   inicio: 'Inicio',
 };
 

@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { createClient } from '@/services/supabase/server';
 
-const ALLOWED_TYPES: EmailOtpType[] = ['invite'];
+// `invite` for a brand-new account; `recovery` for one created by an earlier invitation and never
+// used (US-0137). Both land on the password page.
+const ALLOWED_TYPES: EmailOtpType[] = ['invite', 'recovery'];
 const FALLBACK_PATH = '/portal/orgs';
 
 /** Accepts only a same-origin path from `redirect_to`, whether given as a path or an absolute URL. */
@@ -29,8 +31,9 @@ function redirectTo(path: string) {
 }
 
 /**
- * Landing route for the customized invite email: verifies the token hash server-side and
- * sets the session cookie, then sends the invitee to choose a password before accepting.
+ * Landing route of the team-invitation email (sent by the notifications module, US-0137): verifies
+ * the token hash server-side and sets the session cookie, then sends the invitee to choose a
+ * password before accepting.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);

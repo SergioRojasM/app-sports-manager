@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { ScenarioFormModal } from '@/components/portal/scenarios/ScenarioFormModal';
 import { useScenarios } from '@/hooks/portal/scenarios/useScenarios';
 import { BodyPortal } from '../EventoModalShell';
+import { toEscenarioSnapshot } from '@/lib/portal/eventos-wizard.utils';
 import { Field, SelectShell, fieldA11y, selectClass } from './fields';
 import type { Scenario } from '@/types/portal/scenarios.types';
 import type { EventoEscenarioSnapshot } from '@/types/portal/eventos.types';
@@ -18,23 +19,10 @@ type EventoEscenarioSelectorProps = {
   disabled?: boolean;
 };
 
-function toSnapshot(scenario: Scenario): EventoEscenarioSnapshot {
-  return {
-    id: scenario.id,
-    nombre: scenario.nombre,
-    tipo: scenario.tipo,
-    ubicacion: scenario.ubicacion,
-    direccion: scenario.direccion,
-    coordenadas: scenario.coordenadas,
-    capacidad: scenario.capacidad,
-    image_url: scenario.image_url,
-  };
-}
-
 /** Active scenarios + "Sin escenario" + inline creation through the existing ScenarioFormModal (US-0119). */
 export function EventoEscenarioSelector({ tenantId, value, onChange, disabled }: EventoEscenarioSelectorProps) {
   // Auto-select the scenario created from the inline modal
-  const handleCreated = useCallback((scenario: Scenario) => onChange(toSnapshot(scenario)), [onChange]);
+  const handleCreated = useCallback((scenario: Scenario) => onChange(toEscenarioSnapshot(scenario)), [onChange]);
 
   const scenarios = useScenarios({ tenantId, onCreated: handleCreated });
   const activos = scenarios.scenarios.filter((scenario) => scenario.activo);
@@ -53,7 +41,7 @@ export function EventoEscenarioSelector({ tenantId, value, onChange, disabled }:
     }
     if (value && selected === value.id) return;
     const scenario = activos.find((item) => item.id === selected);
-    if (scenario) onChange(toSnapshot(scenario));
+    if (scenario) onChange(toEscenarioSnapshot(scenario));
   };
 
   return (

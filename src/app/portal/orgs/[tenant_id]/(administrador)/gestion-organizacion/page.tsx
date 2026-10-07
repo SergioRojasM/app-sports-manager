@@ -1,6 +1,7 @@
 import { TenantInfoCards } from '@/components/portal/tenant/TenantInfoCards';
 import { TenantPaymentMethodsCard } from '@/components/portal/tenant/TenantPaymentMethodsCard';
 import { TenantReglasSuspensionCard } from '@/components/portal/tenant/TenantReglasSuspensionCard';
+import { TenantReglasNotificacionCard } from '@/components/portal/tenant/TenantReglasNotificacionCard';
 import { GritPageHeader } from '@/components/ui';
 
 type GestionOrganizacionTenantPageProps = {
@@ -21,6 +22,7 @@ export default async function GestionOrganizacionTenantPage({
         <TenantPaymentMethodsCard tenantId={tenantId} />
         <TenantReglasSuspensionCard tenantId={tenantId} />
       </div>
+      <TenantReglasNotificacionCard tenantId={tenantId} />
     </section>
   );
 }

@@ -282,6 +282,14 @@ export type EventoDuplicadoAjustes = {
   fechaLimpiada: boolean;
 };
 
+/** What `draftFromEntrenamiento` could not carry over as-is from the source training (US-0132). */
+export type EventoDesdeEntrenamientoAjustes = {
+  /** The description exceeded 300 characters and went whole to "Descripción larga". */
+  descripcionMovida: boolean;
+  /** The training used an external form link, which events do not support. */
+  formularioExternoOmitido: boolean;
+};
+
 /**
  * Validation errors keyed by field path: `nombre`, `entradas`, `entrada.{clientKey}.valor`,
  * `cupon.{clientKey}.cupon`, `metodosPago`, … Values are Spanish messages.

@@ -29,5 +29,9 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
     redirect('/portal/orgs');
   }
 
+  if (decision.profileIncomplete) {
+    redirect(`/portal/completar-perfil/${tenantId}`);
+  }
+
   return <>{children}</>;
 }

@@ -39,8 +39,6 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     invitacionId: data.invitacion_id,
     tenantId,
     actorId: user.id,
-    email: data.email,
-    nombre: data.nombre,
     evento: 'invitacion_reenviada',
   });
 }

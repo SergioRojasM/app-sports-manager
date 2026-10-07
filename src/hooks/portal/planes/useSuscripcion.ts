@@ -1,8 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { suscripcionesService } from '@/services/supabase/portal/suscripciones.service';
-import { pagosService } from '@/services/supabase/portal/pagos.service';
 import { storageService } from '@/services/supabase/portal/storage.service';
 import { metodosPagoService } from '@/services/supabase/portal/metodos-pago.service';
 import { createClient } from '@/services/supabase/client';
@@ -49,6 +48,9 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
   const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([]);
   const [metodosPagoError, setMetodosPagoError] = useState<string | null>(null);
   const [selectedTipoId, setSelectedTipoId] = useState<string | null>(null);
+  // Payment id of the purchase in progress (US-0134): generated here so the proof can be uploaded to
+  // its path BEFORE the RPC, and kept while the modal is open so a retry overwrites the same file
+  const pagoIdRef = useRef<string | null>(null);
 
   const selectTipo = useCallback((id: string) => {
     setSelectedTipoId(id);
@@ -57,6 +59,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
 
   const openModal = useCallback(async (plan: PlanWithDisciplinas) => {
     setSelectedPlan(plan);
+    pagoIdRef.current = crypto.randomUUID();
     // Auto-select the plan's sole active subtype — skips the no-op Step 1 picker in
     // SuscripcionModal when there's nothing to actually choose between (US-0105).
     const activeTipos = getActiveTipos(plan);
@@ -144,48 +147,34 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
           return false;
         }
 
-        // Step 1: Create suscripcion
-        const suscripcion = await suscripcionesService.createSuscripcion({
-          tenant_id: tenantId,
-          atleta_id: user.id,
-          plan_id: selectedPlan.id,
-          plan_tipo_id: selectedTipo?.id ?? null,
-          comentarios: data.comentarios.trim() || null,
-          estado: 'pendiente',
-        });
+        const pagoId = pagoIdRef.current ?? crypto.randomUUID();
+        pagoIdRef.current = pagoId;
 
-        // Step 2: Create pago linked to the suscripcion
-        try {
-          const pago = await pagosService.createPago({
-            tenant_id: tenantId,
-            suscripcion_id: suscripcion.id,
-            monto: selectedTipo?.precio ?? 0,
-            comprobante_path: null,
-            estado: 'pendiente',
-            metodo_pago_id: data.metodo_pago_id,
-          });
-
-          // Step 3: Upload payment proof if file was provided
-          if (data.file) {
-            try {
-              const result = await storageService.uploadPaymentProof(
-                supabase,
-                tenantId,
-                user.id,
-                pago.id,
-                data.file,
-              );
-              await pagosService.updateComprobantePath(supabase, pago.id, result.path);
-            } catch {
-              // Non-blocking: subscription and pago were created successfully
-              // The proof upload failed but the request is still valid
-            }
+        // Step 1: upload the proof first, so the payment is created with it already attached.
+        // Non-blocking: if the upload fails the request is still valid and goes without a proof.
+        let comprobantePath: string | null = null;
+        if (data.file) {
+          try {
+            const result = await storageService.uploadPaymentProof(supabase, tenantId, user.id, pagoId, data.file, {
+              upsert: true,
+            });
+            comprobantePath = result.path;
+          } catch {
+            comprobantePath = null;
           }
-        } catch {
-          // Pago insert failed — suscripcion is orphaned but benign (pendiente state)
-          setError('Se creó la suscripción pero hubo un error al registrar el pago. Contacta al administrador.');
-          return false;
         }
+
+        // Step 2: subscription + payment in one atomic RPC (the server sets athlete and amount)
+        await suscripcionesService.comprarSuscripcion({
+          tenantId,
+          planId: selectedPlan.id,
+          planTipoId: selectedTipo?.id ?? null,
+          metodoPagoId: data.metodo_pago_id || null,
+          comentarios: data.comentarios.trim() || null,
+          pagoId,
+          comprobantePath,
+        });
+        pagoIdRef.current = null;
 
         // Only reached when no caller is chaining this purchase (the deferred branch above
         // returns early), so the generic review message is always the right ending here.
@@ -195,7 +184,7 @@ export function useSuscripcion({ tenantId }: UseSuscripcionOptions): UseSuscripc
         setSelectedTipoId(null);
         return true;
       } catch (err) {
-        if (err instanceof SuscripcionServiceError && err.code === 'plan_unavailable') {
+        if (err instanceof SuscripcionServiceError) {
           setError(err.message);
         } else {
           setError('No fue posible enviar la solicitud. Inténtalo nuevamente.');

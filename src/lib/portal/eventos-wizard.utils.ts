@@ -1,11 +1,13 @@
 import { fromDateTimeLocalInBogota, toDateKeyInBogota, toDateTimeLocalInBogota } from '@/lib/portal/eventos.utils';
 import type { PrecioItem } from '@/types/portal/eventos.types';
+import type { Scenario } from '@/types/portal/scenarios.types';
 import type {
   EventoCompleto,
   EventoCuponDraft,
   EventoDraft,
   EventoDuplicadoAjustes,
   EventoEntradaDraft,
+  EventoEscenarioSnapshot,
   EventoListItem,
   EventoPublicoDetalle,
   EventoWizardErrors,
@@ -89,7 +91,23 @@ export function emptyCuponDraft(): EventoCuponDraft {
   };
 }
 
-function numberToInput(value: number | null): string {
+/** Venue snapshot stored on the event (US-0119); shared by the selector and the training pre-fill (US-0132). */
+export function toEscenarioSnapshot(
+  scenario: Pick<Scenario, 'id' | 'nombre' | 'tipo' | 'ubicacion' | 'direccion' | 'coordenadas' | 'capacidad' | 'image_url'>,
+): EventoEscenarioSnapshot {
+  return {
+    id: scenario.id,
+    nombre: scenario.nombre,
+    tipo: scenario.tipo,
+    ubicacion: scenario.ubicacion,
+    direccion: scenario.direccion,
+    coordenadas: scenario.coordenadas,
+    capacidad: scenario.capacidad,
+    image_url: scenario.image_url,
+  };
+}
+
+export function numberToInput(value: number | null): string {
   return value === null || value === undefined ? '' : String(value);
 }
 
