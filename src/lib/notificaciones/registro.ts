@@ -1,6 +1,7 @@
 import 'server-only';
 import { eventosHandlers } from '@/lib/notificaciones/modulos/eventos';
 import { suscripcionesHandlers } from '@/lib/notificaciones/modulos/suscripciones';
+import { suscripcionesVencimientoHandlers } from '@/lib/notificaciones/modulos/suscripciones-vencimiento';
 import type { NotificacionHandler } from '@/types/portal/notificaciones.types';
 
 /**
@@ -10,6 +11,7 @@ import type { NotificacionHandler } from '@/types/portal/notificaciones.types';
 const HANDLERS: Record<string, NotificacionHandler> = {
   ...eventosHandlers,
   ...suscripcionesHandlers,
+  ...suscripcionesVencimientoHandlers,
 };
 
 export function resolverHandler(modulo: string, tipo: string): NotificacionHandler | null {
