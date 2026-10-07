@@ -85,7 +85,7 @@ Administrator in-app notification (`url = '/portal/orgs/{tenant_id}/gestion-susc
 
 Administrator email: subject = the title followed by ` — {atleta}`; rows Atleta, Correo del atleta, Plan, Fecha de vencimiento; button "Ver suscripciones" → `{APP_URL}/portal/orgs/{tenant_id}/gestion-suscripciones`; no renewal paragraph. Same skip rule as the athlete email.
 
-Athlete email: subject = the title followed by ` — {plan}`; rows Organización, Plan, Fecha de vencimiento; button "Ver mis suscripciones" → `{APP_URL}/portal/mis-suscripciones`. For `vencimiento_pre` the paragraph is "Renueva tu plan para no perder el acceso."; for `vencimiento_pos`, "Renueva tu plan para volver a reservar." The handler returns `null` (row `skipped`) when the subscription no longer exists, or when at send time it is no longer `activa` (pre) / `vencida` (pos).
+Athlete email: subject = the title followed by ` — {plan}`; rows Organización, Plan, Fecha de vencimiento; button "Ver mis suscripciones" → `{APP_URL}/portal/mis-suscripciones`. For `vencimiento_pre` the paragraph is "Renueva tu plan para no perder el acceso."; for `vencimiento_pos`, "Renueva tu plan para volver a reservar." The handler returns `null` (row `skipped`) when the subscription no longer exists, when at send time it is no longer `activa` (pre) / `vencida` (pos), or when its `fecha_fin` changed since the alert was computed.
 
 #### UI — "Notificaciones automáticas" card in Gestión de organización
 
