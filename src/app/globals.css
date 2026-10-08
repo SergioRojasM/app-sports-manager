@@ -83,6 +83,25 @@ body {
   font-family: var(--font-montserrat), sans-serif;
 }
 
+/* Thin cyan scrollbar for the portal sidebar / drawer navigation (US-0138) */
+.grit-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(20 219 196 / 0.6) transparent;
+}
+
+.grit-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.grit-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.grit-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(20 219 196 / 0.6);
+  border-radius: 2px;
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-style: normal;

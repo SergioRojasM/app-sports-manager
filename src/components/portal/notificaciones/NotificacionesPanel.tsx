@@ -34,7 +34,7 @@ export function NotificacionesPanel({
       id={id}
       role="dialog"
       aria-label="Notificaciones"
-      className="absolute right-0 top-full z-50 mt-2 flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-grit-lg border border-grit-glass-border bg-grit-bg/95 shadow-xl backdrop-blur-md"
+      className="absolute right-4 top-full z-50 mt-2 flex w-[360px] max-w-[calc(100vw-2rem)] sm:right-0 flex-col overflow-hidden rounded-grit-lg border border-grit-glass-border bg-grit-bg/95 shadow-xl backdrop-blur-md"
     >
       <div className="flex items-center justify-between gap-3 border-b border-grit-glass-border px-3.5 py-3">
         <h2 className="font-grit-title text-base font-bold text-grit-text">Notificaciones</h2>
