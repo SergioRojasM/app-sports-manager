@@ -1,21 +1,10 @@
 'use client';
 
-import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { cx, gritFocusRing } from '@/components/ui';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { BodyPortal, cx, gritFocusRing } from '@/components/ui';
 
-const subscribeNoop = () => () => {};
-
-/**
- * Renders children on document.body. Wizard sections and cards use backdrop-blur, which makes
- * them the containing block for `fixed` descendants — a modal rendered inside them would be
- * clipped to the card and painted under the sticky footer (US-0119).
- */
-export function BodyPortal({ children }: { children: ReactNode }) {
-  // false during SSR/hydration, true on the client — avoids touching `document` on the server
-  const isClient = useSyncExternalStore(subscribeNoop, () => true, () => false);
-  return isClient ? createPortal(children, document.body) : null;
-}
+// Moved to the UI kit (US-0138); re-exported so existing imports keep working
+export { BodyPortal };
 
 type EventoDangerButtonProps = {
   onClick: () => void;

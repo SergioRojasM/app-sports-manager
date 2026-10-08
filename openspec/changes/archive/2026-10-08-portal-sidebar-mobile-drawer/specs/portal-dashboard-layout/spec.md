@@ -1,8 +1,5 @@
-# Capability: portal-dashboard-layout
+## MODIFIED Requirements
 
-## Purpose
-Defines the authenticated Portal shell: the shared layout under `/portal/*`, its fixed v2 navbar, the breadcrumb row, the avatar/role menus, route protection and post-login redirects, plus the visual system the shell follows (`grit-arena-v2.pen`).
-## Requirements
 ### Requirement: Shared portal layout wraps all child routes
 `src/app/portal/layout.tsx` SHALL be a Next.js App Router Server Component layout. It SHALL compose:
 - a `PortalNavigationProvider` (client) that wraps the shell;
@@ -58,71 +55,6 @@ It SHALL keep the v2 Navbar styling (`grit-arena-v2.pen` nodes `oUFl9` / `d41rX5
 
 ---
 
-### Requirement: User avatar dropdown menu
-`UserAvatarMenu` SHALL be a Client Component nested inside `PortalHeader`. Clicking the avatar MUST toggle an accessible dropdown containing exactly two options: "Profile" and "Logout". The dropdown MUST be closeable via keyboard (Escape) and click-outside.
-
-#### Scenario: Avatar dropdown opens on click
-- **WHEN** the user clicks the avatar button
-- **THEN** a dropdown SHALL appear with "Profile" and "Logout" menu items
-
-#### Scenario: Dropdown closes on Escape
-- **WHEN** the dropdown is open and the user presses Escape
-- **THEN** the dropdown SHALL close and focus SHALL return to the avatar button
-
-#### Scenario: Dropdown closes on click outside
-- **WHEN** the dropdown is open and the user clicks outside of it
-- **THEN** the dropdown SHALL close
-
-#### Scenario: Logout terminates session
-- **WHEN** the user clicks "Logout" in the dropdown
-- **THEN** the system SHALL call `authService.signOut()`, clear the `portal_role` cookie, and redirect to `/auth/login`
-
----
-
-### Requirement: Route protection for /portal/*
-`middleware.ts` SHALL include `/portal` in `protectedPaths`. Any unauthenticated request to a `/portal/*` route MUST be redirected to `/auth/login` with the original path preserved in the `?next=` query parameter.
-
-#### Scenario: Unauthenticated access is blocked
-- **WHEN** a user without a valid session navigates to any `/portal/*` URL
-- **THEN** the middleware SHALL redirect to `/auth/login?next=<original-path>`
-
-#### Scenario: Authenticated access proceeds
-- **WHEN** a user with a valid session navigates to any `/portal/*` URL
-- **THEN** the middleware SHALL allow the request to proceed without redirect
-
----
-
-### Requirement: Post-login redirect to /portal
-After a successful login, the application MUST redirect the user to `/portal`. The post-login redirect in `useAuth` (or `LoginForm`) SHALL be updated from `/dashboard` to `/portal`.
-
-#### Scenario: Successful login lands on portal
-- **WHEN** a user successfully authenticates via the login form
-- **THEN** they SHALL be redirected to `/portal`
-
-#### Scenario: Next parameter is respected after login
-- **WHEN** a user is redirected to login with `?next=/portal/perfil` and subsequently authenticates
-- **THEN** they SHALL be redirected to `/portal/perfil`
-
----
-
-### Requirement: /dashboard route redirects to /portal
-`src/app/dashboard/page.tsx` SHALL be replaced with a Next.js `redirect('/portal')` call. Any request to `/dashboard` MUST be forwarded to `/portal` with an HTTP redirect.
-
-#### Scenario: /dashboard redirects to /portal
-- **WHEN** a user (authenticated or not) navigates to `/dashboard`
-- **THEN** they SHALL be redirected to `/portal`
-
----
-
-### Requirement: Portal loading placeholder
-A `src/app/portal/loading.tsx` file SHALL exist as a Next.js loading UI for the portal segment. It MUST display a minimal loading indicator while the portal layout is streaming.
-
-#### Scenario: Loading state displays during layout fetch
-- **WHEN** the portal layout is loading (e.g., cookie fallback triggers a DB query)
-- **THEN** the loading component SHALL be shown to the user
-
----
-
 ### Requirement: Visual design aligned with dashboard.html
 The portal shell (layout, sidebar, drawer, header, menus, breadcrumb) SHALL follow the design reference `projectspec/designs/pencil/grit-arena-v2.pen`:
 - `.grit-shell` background (`#07111F` with cyan/teal radial glows);
@@ -144,20 +76,7 @@ Top-level navigation items SHALL use padding 10/12px, 10px radius, gap 12px, 14p
 - **WHEN** the user is on a route that matches a top-level menu item
 - **THEN** that item SHALL display the cyan gradient, border and cyan icon
 
-### Requirement: Portal breadcrumb row below the header
-`portal/layout.tsx` SHALL render `PortalBreadcrumb` as a standalone row at the top of the scrollable `<main>` (below `PortalHeader`, above the page), styled per `AOIa5`: `home` icon 13px, `›` separators, 13px 500 subtext crumbs, last crumb 700 `grit-text` with `aria-current="page"`, horizontal padding 16/24/48px, top padding 16px, inside `nav[aria-label="Ruta de navegación"] > ol`. It SHALL keep the existing rule of rendering nothing when there is only one segment, SHALL wrap on narrow viewports and truncate the last crumb (`max-w-[60vw]`). `SLUG_LABELS` SHALL add `analitica`, `mis-reservas`, `mis-suscripciones`, `mis-suscripciones-y-pagos`, `landing-org`, `invitaciones` and `gestion-reservas`. `SLUG_LABELS` SHALL NOT contain `entrenamientos-publicos` (US-0123). Segment and href resolution logic SHALL NOT change.
-
-#### Scenario: Breadcrumb visible on mobile
-- **WHEN** a user views `/portal/orgs/{tenant}/gestion-equipo` at 375px
-- **THEN** the breadcrumb row SHALL be visible, wrap without horizontal scroll, and the header avatar and notifications SHALL remain clickable
-
-#### Scenario: New slug labels
-- **WHEN** a user views `/portal/orgs/{tenant}/analitica`
-- **THEN** the last crumb SHALL read "Analítica"
-
-#### Scenario: Single-segment path has no breadcrumb
-- **WHEN** the pathname resolves to only the root "Inicio" segment
-- **THEN** the breadcrumb row SHALL render nothing (existing rule)
+## ADDED Requirements
 
 ### Requirement: Persistent desktop sidebar
 At viewport widths ≥1024px, `PortalSidebar` SHALL render as `<aside aria-label="Navegación principal">`. It is 280px wide, full height, with `bg-grit-sidebar` fill and a `grit-glass-border` right border. Content, from top to bottom:
@@ -198,4 +117,3 @@ The name block SHALL link to `/portal/perfil`. A logout icon button (`aria-label
 #### Scenario: Logout from footer
 - **WHEN** the user clicks the logout icon in the footer
 - **THEN** the session SHALL be terminated as with the avatar menu's "Logout"
-

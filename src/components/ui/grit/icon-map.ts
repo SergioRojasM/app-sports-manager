@@ -28,6 +28,16 @@ export const GRIT_ICON_MAP = {
   bell: 'notifications',
   'chevron-down': 'expand_more',
   waves: 'pool',
+  'building-2': 'corporate_fare',
+  trophy: 'emoji_events',
+  'credit-card': 'credit_card',
+  ticket: 'confirmation_number',
+  'sliders-horizontal': 'tune',
+  'chevron-up': 'expand_less',
+  'chevron-right': 'chevron_right',
+  x: 'close',
+  menu: 'menu',
+  'log-out': 'logout',
 } as const;
 
 export type GritDesignIconName = keyof typeof GRIT_ICON_MAP;

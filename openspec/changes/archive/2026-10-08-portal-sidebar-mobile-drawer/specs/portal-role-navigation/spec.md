@@ -1,8 +1,5 @@
-# portal-role-navigation Specification
+## MODIFIED Requirements
 
-## Purpose
-Defines the role-aware portal sidebar menu and the default post-login and portal-root redirects to /portal/inicio.
-## Requirements
 ### Requirement: Role-based sidebar menu
 The portal navigation (rendered by `PortalNavContent` in both `PortalSidebar` and `PortalMobileDrawer`) SHALL be composed of two sections.
 
@@ -76,27 +73,7 @@ The portal navigation (rendered by `PortalNavContent` in both `PortalSidebar` an
 - **WHEN** the per-tenant role is still loading
 - **THEN** a skeleton block SHALL be rendered in place of the ORGANIZACIÓN section, and no tenant links SHALL be rendered
 
-### Requirement: Default post-login redirect to /portal/inicio
-The bootstrap route (`/portal/bootstrap`) SHALL redirect authenticated users to `/portal/inicio` by default when no `next` parameter is provided. The portal layout SHALL use `/portal/inicio` as the default bootstrap target when cookies are missing or invalid.
-
-#### Scenario: Bootstrap redirects to /portal/inicio by default
-- **WHEN** an authenticated user hits `/portal/bootstrap` without a `next` parameter
-- **THEN** the system SHALL redirect to `/portal/inicio`
-
-#### Scenario: Bootstrap respects explicit next parameter
-- **WHEN** an authenticated user hits `/portal/bootstrap?next=/portal/orgs/some-id`
-- **THEN** the system SHALL redirect to `/portal/orgs/some-id` (the explicit next value)
-
-#### Scenario: Portal layout uses /portal/inicio as bootstrap target
-- **WHEN** the portal layout detects missing or invalid cookies
-- **THEN** the system SHALL redirect to `/portal/bootstrap?next=/portal/inicio`
-
-### Requirement: Portal root redirects to /portal/inicio
-The portal root page (`/portal/page.tsx`) SHALL redirect to `/portal/inicio` instead of displaying a static placeholder.
-
-#### Scenario: Visiting /portal redirects to /portal/inicio
-- **WHEN** a user navigates to `/portal`
-- **THEN** the system SHALL redirect to `/portal/inicio`
+## ADDED Requirements
 
 ### Requirement: Organization section header shows the tenant name without a logo
 The ORGANIZACIÓN section SHALL start with a toggle button (`aria-expanded`, `aria-controls`) that shows:
@@ -164,3 +141,8 @@ The navigation SHALL compute the active href over all global and tenant leaf hre
 - **WHEN** the pathname is `/portal/mis-entradas`
 - **THEN** "Mis Entradas" SHALL be the only link with `aria-current="page"`
 
+## REMOVED Requirements
+
+### Requirement: Eventos Check-in menu entry
+**Reason**: The flat "Eventos Check-in" entry is replaced by the grouped tree. Check-in now lives under the Eventos group as "Check-in", for administrador and entrenador.
+**Migration**: The `control-ingreso` route is unchanged. Access it through ORGANIZACIÓN › Eventos › Check-in, as defined in the "Role-based sidebar menu" requirement.
