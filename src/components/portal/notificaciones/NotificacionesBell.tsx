@@ -61,7 +61,9 @@ export function NotificacionesBell() {
       : `Notificaciones, ${noLeidas} sin leer`;
 
   return (
-    <div ref={containerRef} className="relative">
+    // Below `sm` the panel anchors to the header instead of the bell: the avatar and the
+    // drawer hamburger sit to its right, so a bell-anchored panel overflows the left edge (US-0138)
+    <div ref={containerRef} className="sm:relative">
       <button
         ref={buttonRef}
         type="button"

@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/services/supabase/server';
 import { PortalHeader } from '@/components/portal/PortalHeader';
+import { PortalSidebar } from '@/components/portal/PortalSidebar';
+import { PortalNavigationProvider } from '@/components/portal/PortalNavigationProvider';
 import { PortalBreadcrumb } from '@/components/portal/PortalBreadcrumb';
 import { GritPageContainer } from '@/components/ui';
 import type { UserRole, PortalDisplayProfile } from '@/types/portal.types';
@@ -25,14 +27,13 @@ export default async function PortalLayout({
   const roleCookie = cookieStore.get('portal_role')?.value;
   const profileCookie = cookieStore.get('portal_profile')?.value;
 
-  let role: UserRole;
   let displayProfile: PortalDisplayProfile;
 
   const isRoleValid = roleCookie && VALID_ROLES.includes(roleCookie as UserRole);
 
   if (isRoleValid && profileCookie) {
-    // Happy path: read everything from cookies — no DB call
-    role = roleCookie as UserRole;
+    // Happy path: read everything from cookies — no DB call. The menu resolves the
+    // per-tenant role itself (usePortalNavigation), so the role cookie only gates entry.
     try {
       displayProfile = JSON.parse(
         Buffer.from(profileCookie, 'base64').toString('utf-8'),
@@ -45,14 +46,20 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="grit-shell flex h-screen flex-col overflow-hidden font-grit-body">
-      <PortalHeader profile={displayProfile} role={role} />
-      <main className="flex-1 overflow-y-auto">
-        {/* Breadcrumb row (design `AOIa5`) scrolls with the content; page padding
-            comes from GritPageContainer so every Portal page shares it (US-0116) */}
-        <PortalBreadcrumb />
-        <GritPageContainer>{children}</GritPageContainer>
-      </main>
-    </div>
+    <PortalNavigationProvider>
+      {/* Two-column shell: persistent sidebar ≥1024px, mobile drawer below it (US-0138) */}
+      <div className="grit-shell flex h-screen overflow-hidden font-grit-body">
+        <PortalSidebar profile={displayProfile} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <PortalHeader profile={displayProfile} />
+          <main id="portal-main" className="flex-1 overflow-y-auto">
+            {/* Breadcrumb row (design `AOIa5`) scrolls with the content; page padding
+                comes from GritPageContainer so every Portal page shares it (US-0116) */}
+            <PortalBreadcrumb />
+            <GritPageContainer>{children}</GritPageContainer>
+          </main>
+        </div>
+      </div>
+    </PortalNavigationProvider>
   );
 }

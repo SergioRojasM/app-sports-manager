@@ -12,7 +12,7 @@ Following structure reflects the current implementation and the target scalable 
 │   ├── app/                              # Inbound adapters (routing / delivery)
 │   │   ├── layout.tsx                    # Root layout with providers
 │   │   ├── page.tsx                      # Landing/home
-│   │   ├── globals.css                   # Global styles & Tailwind imports; `--grit-*` design tokens (1:1 with grit-arena-v2.pen variables) + `.grit-shell` background (US-0116)
+│   │   ├── globals.css                   # Global styles & Tailwind imports; `--grit-*` design tokens (1:1 with grit-arena-v2.pen variables) + `.grit-shell` background (US-0116) — `.grit-scrollbar` thin cyan scrollbar for the portal sidebar / drawer navigation (US-0138)
 │   │   ├── api/                          # Privileged route handlers (server-only; the ONLY place the service-role client is used) (US-0114)
 │   │   │   └── portal/orgs/[tenant_id]/
 │   │   │       ├── invitaciones/route.ts                              # POST: crear_invitacion_tenant (user session) → deliverInvitation() queues the delivery through the notifications module (US-0137); identical 202 whether or not the email already has an account
@@ -93,10 +93,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EventoDetalleBreadcrumb.tsx  # ⌂ Inicio › Eventos › {nombre} + right-aligned "Volver"
 │   │   │       └── index.ts
 │   │   ├── portal/
-│   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v2 Navbar styling (grit-arena-v2 oUFl9); no breadcrumb inside (US-0116) — the bell is `NotificacionesBell` (US-0125)
+│   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v2 Navbar styling (grit-arena-v2 oUFl9); no breadcrumb inside (US-0116) — the bell is `NotificacionesBell` (US-0125) — US-0138: no nav dropdown; logo `lg:hidden` (it lives in PortalSidebar); hamburger (`Abrir menú`, `lg:hidden`) on the right owns the drawer open state and renders PortalMobileDrawer on first open
 │   │   │   ├── PortalBreadcrumb.tsx      # Standalone row rendered by portal/layout.tsx at the top of <main> (design AOIa5), visible + wrapping on mobile; SLUG_LABELS map (US-0116); /portal/eventos/{uuid} renders "Evento" (US-0120) — labels `mis-entradas` → "Mis entradas", `compras` → "Compras" (US-0121) — `control-ingreso` → "Control de ingreso", and the event UUID under it → "Evento" (US-0131) — `notificaciones` → "Notificaciones" (US-0125)
-│   │   │   ├── PortalNavMenu.tsx         # Glass dropdown; active item = cyan gradient + glass-border ("Nav Operación" style)
-│   │   │   ├── RoleBasedMenu.tsx
+│   │   │   ├── PortalNavigationProvider.tsx  # Client context mounted by portal/layout.tsx: runs usePortalNavigation once for the sidebar and the drawer; `usePortalNavigationContext()` (US-0138)
+│   │   │   ├── PortalSidebar.tsx         # Desktop navigation (`hidden lg:flex`, 280px, `bg-grit-sidebar`, design E73seM): logo, scrollable PortalNavContent, PortalSidebarUser (US-0138)
+│   │   │   ├── PortalMobileDrawer.tsx    # <1024px drawer (design AGzMs): BodyPortal, z-[60], slides in from the right, `h-dvh` with its own scroll region, scroll lock on body + #portal-main, focus trap, closes on X / scrim / Escape / navigation / ≥1024px (US-0138)
+│   │   │   ├── PortalNavContent.tsx      # Shared nav body (`variant: sidebar | drawer`): "MENÚ" global links + collapsible "ORGANIZACIÓN" tree (tenant name only — never the logo), collapsible "MENÚ" section and groups (only the active group starts expanded), single active link (US-0138)
+│   │   │   ├── PortalSidebarUser.tsx     # Sidebar/drawer footer: avatar or initials, name, tenant role label (email outside a tenant), link to /portal/perfil, logout (US-0138)
 │   │   │   ├── UserAvatarMenu.tsx
 │   │   │   ├── inicio/                   # Feature slice (portal/inicio — user home dashboard)
 │   │   │   │   ├── InicioPage.tsx
@@ -360,6 +363,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       └── index.ts
 │   │   └── ui/
 │   │       ├── MultilineText.tsx        # Renders a string with whitespace-pre-wrap (preserves line breaks), optional maxLength truncation, `as` tag prop (p/span/div) — US-0099
+│   │       ├── BodyPortal.tsx           # Renders children on document.body (escapes backdrop-blur containing blocks); moved from EventoModalShell, which re-exports it (US-0138)
 │   │       ├── grit/                    # grit-arena-v2 presentational kit (US-0116) — no data fetching; values taken from grit-arena-v2.pen
 │   │       │   ├── GritCard.tsx         # variant glass|card|highlight, padding sm|md|lg|xl (16/20/24/28), radius 16, `as`
 │   │       │   ├── GritButton.tsx       # primary|secondary|outline-accent|ghost, sm|md, radius 10; renders <Link>/<a external> when href is set; loading/disabled; cyan focus ring
@@ -382,7 +386,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   └── eventos/
 │   │   │       └── useEventosLanding.ts   # listEventosPublicados({soloPublicos: true}) → { items, loading, error, refetch } (US-0120)
 │   │   └── portal/
-│   │       ├── usePortalNavigation.ts    # Shared portal logic
+│   │       ├── usePortalNavigation.ts    # Portal navigation state (US-0138): globalItems, tenantNav (per-tenant role via useTenantAccess, tenant name via useTenantNameState, resolved tree), tenantLoading, activeHref (longest prefix), activeGroupId — consumed through PortalNavigationProvider
 │   │       ├── tenant/
 │   │       │   ├── useTenantView.ts              # directory mode loads memberships first, then the visibility-filtered tenant list (US-0133)
 │   │       │   ├── useTenantBrandingImages.ts    # Logo/banner sources with a one-time signed-URL fallback; shared by TenantIdentityCard and TenantDirectoryCard (US-0133)
@@ -533,7 +537,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │
 │   ├── types/                            # Domain & contracts
 │   │   ├── auth.types.ts
-│   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089); EVENTOS_MENU_ITEM ("Eventos" → /portal/eventos, icon celebration) right after it (US-0120) — the no-tenant menu ends with "Mis Reservas" then "Mis Entradas" (`confirmation_number`, /portal/mis-entradas, US-0121) — "Eventos Check-in" (`qr_code_scanner`, path `control-ingreso`) after "Eventos" for administrador and after "Reservas" for entrenador (US-0131)
+│   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089); EVENTOS_MENU_ITEM ("Eventos" → /portal/eventos, icon celebration) right after it (US-0120) — the no-tenant menu ends with "Mis Reservas" then "Mis Entradas" (`confirmation_number`, /portal/mis-entradas, US-0121) — "Eventos Check-in" (`qr_code_scanner`, path `control-ingreso`) after "Eventos" for administrador and after "Reservas" for entrenador (US-0131) — US-0138 replaces the flat menus (`resolvePortalMenu`, `ROLE_TENANT_ITEMS` removed): `GLOBAL_MENU_ITEMS` (Inicio, Organizaciones, Eventos, Mis Suscripciones, Mis Reservas, Mis Entradas — shown inside and outside a tenant), `TENANT_NAV_TREE` (groups Administración / Equipo / Entrenamientos / Eventos + leaves Planes for usuario and Analítica for administrador, per-leaf `roles`, no "Equipo › Reservas"), `resolveGlobalMenu`, `resolveTenantNav(role, tenantId)`, `findActiveHref` (longest-prefix match)
 │   │   └── portal/
 │   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url); `publico` on both edit types and PortalTenantListItem.isPublic (US-0133); TenantAccessDecision.profileIncomplete / profileMissingFields (US-0136)
 │   │       └── scenarios.types.ts
@@ -652,7 +656,7 @@ types/portal/<feature-name>.types.ts            # Contracts and view models
 ```
 
 Rules:
-- Keep shell/shared portal components outside feature folders (`PortalHeader`, `PortalNavMenu`, etc.).
+- Keep shell/shared portal components outside feature folders (`PortalHeader`, `PortalSidebar`, etc.).
 - Never call Supabase directly from page/components.
 - Feature folder names use kebab-case (e.g., `organization-view`, `training-management`).
 
@@ -1082,7 +1086,7 @@ src/
 - **Fonts**: `font-grit-title` (Rajdhani) for headings, KPI values and prices; `font-grit-body` (Montserrat) everywhere else.
 - **Radii**: use `rounded-grit-{xs,sm,md,lg,xl,2xl}` (6–16px). Never `rounded-lg`/`rounded-xl` in Portal code — `tailwind.config.ts` overrides them to 32/48px for landing/auth.
 - **Translucent tokens** (`grit-glass`, `grit-card`, `grit-glass-border`) take no `/opacity` modifier; solid ones (`grit-cyan`, `grit-bg`, …) do.
-- **Pages**: `portal/layout.tsx` provides `.grit-shell`, the breadcrumb row and one `GritPageContainer`; page components render one `h1` (via `GritPageHeader`) and no outer page padding. Modal backdrops: `bg-grit-bg/70 backdrop-blur-sm`.
+- **Pages**: `portal/layout.tsx` provides `.grit-shell`, the two-column shell (`PortalSidebar` ≥1024px + header/`<main id="portal-main">`, US-0138), the breadcrumb row and one `GritPageContainer`; page components render one `h1` (via `GritPageHeader`) and no outer page padding. Modal backdrops: `bg-grit-bg/70 backdrop-blur-sm`.
 - **Deprecated** (landing/auth only, do not use in Portal): `turquoise`, `accent-teal`, `navy-*`, `card-dark`, `.glass`, `.glass-card`, `landing-*`.
 
 ## Code Style Rules
