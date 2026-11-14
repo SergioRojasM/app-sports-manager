@@ -254,10 +254,12 @@ export const eventosService = {
    * Cross-tenant discovery listing (US-0120). `soloPublicos` is always true on the anonymous
    * landing surfaces, even when the browser has a session.
    */
-  async listEventosPublicados(options: { soloPublicos: boolean }): Promise<EventoPublicoListItem[]> {
+  async listEventosPublicados(options: { soloPublicos: boolean; limit?: number }): Promise<EventoPublicoListItem[]> {
+    // `limit` lets small surfaces (app home ribbon, US-0140) fetch only what they show
+    const limit = Math.min(options.limit ?? EVENTOS_PUBLICOS_LIMIT, EVENTOS_PUBLICOS_LIMIT);
     const { data, error } = await publicadosQuery(EVENTOS_PUBLICOS_LIST_SELECT, options.soloPublicos)
       .order('fecha_hora', { ascending: true, nullsFirst: false })
-      .limit(EVENTOS_PUBLICOS_LIMIT);
+      .limit(limit);
 
     if (error) {
       throw mapServiceError(error);

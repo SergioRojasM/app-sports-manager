@@ -11,8 +11,8 @@ Following structure reflects the current implementation and the target scalable 
 ├── src/
 │   ├── app/                              # Inbound adapters (routing / delivery)
 │   │   ├── layout.tsx                    # Root layout with providers
-│   │   ├── page.tsx                      # Landing/home
-│   │   ├── globals.css                   # Global styles & Tailwind imports; `--grit-*` design tokens (1:1 with grit-arena-v2.pen variables) + `.grit-shell` background (US-0116) — `.grit-scrollbar` thin cyan scrollbar for the portal sidebar / drawer navigation (US-0138)
+│   │   ├── page.tsx                      # Public app home (US-0140): server-reads the session (getUser → isAuthenticated, failure = anonymous) and renders <HomePage/>; no redirect for signed-in users
+│   │   ├── globals.css                   # Global styles & Tailwind imports; `--grit-*` design tokens (1:1 with grit-arena-v2.pen variables) + `.grit-shell` background (US-0116) — `.grit-scrollbar` thin cyan scrollbar for the portal sidebar / drawer navigation (US-0138) — `home-marquee` keyframes + `.home-marquee` / `.home-marquee-wrap` (pause on hover/focus-within) / `.home-marquee-copy`, all disabled under prefers-reduced-motion (US-0140)
 │   │   ├── api/                          # Privileged route handlers (server-only; the ONLY place the service-role client is used) (US-0114)
 │   │   │   └── portal/orgs/[tenant_id]/
 │   │   │       ├── invitaciones/route.ts                              # POST: crear_invitacion_tenant (user session) → deliverInvitation() queues the delivery through the notifications module (US-0137); identical 202 whether or not the email already has an account
@@ -86,7 +86,20 @@ Following structure reflects the current implementation and the target scalable 
 │   │
 │   ├── components/                       # Presentation layer
 │   │   ├── auth/
-│   │   ├── landing/
+│   │   ├── home/                         # Public app home at `/` (US-0140) — Pencil frames T9KXek (desktop) / XWAjJ (mobile) / ldXx5 (states)
+│   │   │   ├── HomePage.tsx              # Composes header, hero, events ribbon, organizations, club CTA, footer; receives isAuthenticated
+│   │   │   ├── HomeHeader.tsx            # Fixed header (glass after 24px via useHeaderScrolled); Eventos / Organizaciones (#organizaciones); "Iniciar sesión" or "Mi portal"; <1024px menu (aria-expanded, Escape closes)
+│   │   │   ├── HomeHero.tsx              # Centered eyebrow, single h1, subtitle, CTAs "Ver eventos" + session-aware secondary, scroll hint
+│   │   │   ├── HeroVideoBackground.tsx   # Poster next/image always + muted looping <video> (webm/mp4 in public/home) mounted only when usePrefersReducedMotion() === false; vignette/top/bottom overlays
+│   │   │   ├── EventosCintaSection.tsx   # #eventos: up to 12 public events; desktop CSS marquee (≥4 items, duplicated aria-hidden copy with tabIndex -1, duration items×6s); mobile snap carousel + IntersectionObserver dots; skeleton / empty block ("Pronto habrá nuevos eventos")
+│   │   │   ├── EventoCintaCard.tsx       # Link to /eventos/{id}?from=/; cover <img> or discipline placeholder; Bogotá date badge ("POR DEFINIR"); discipline chip (getDisciplinaVisual); formatPrecioCinta; featured = first item ("PRÓXIMO" ribbon, cyan glow)
+│   │   │   ├── EventosCintaSkeleton.tsx  # 3 pulse cards
+│   │   │   ├── OrganizacionesSection.tsx # #organizaciones: up to 6 orgs (useOrganizacionesDestacadas), centered grid (narrower with <3), mobile snap carousel; hidden when empty/error; CTA anon → /auth/login?next=/portal/orgs + lock hint, signed in → /portal/orgs
+│   │   │   ├── OrganizacionCard.tsx      # Banner + 76px logo overlapping it via useTenantBrandingImages (initials fallback), name, 2-line description (default text), ≤2 discipline chips, "{n} atletas"; links to /portal/orgs only when signed in
+│   │   │   ├── ClubCtaBand.tsx           # "Conoce GRIT Arena" → getLandingUrl() (new tab, noopener noreferrer)
+│   │   │   ├── HomeFooter.tsx            # Logo, Eventos, Iniciar sesión, Contacto (mailto), WhatsApp, copyright
+│   │   │   └── index.ts
+│   │   ├── landing/                      # Shell still used by the public pages /eventos, /equipos, /atletas (Header: "Eventos" + "Organizaciones" → /#organizaciones, US-0140; Footer; ComingSoonPage). The marketing sections were removed in US-0140 (they live in the grit-arena/landing repo, US-0139)
 │   │   │   └── eventos/                  # Feature slice (landing/eventos — anonymous event discovery, US-0120)
 │   │   │       ├── EventosLandingPage.tsx       # Landing shell + EventosPublicosGrid (no filters); "Obtener entrada" via useObtenerEntrada('landing-listado') + ObtenerEntradaModal
 │   │   │       ├── EventoDetalleLandingPage.tsx # Landing Header/Footer shell; useEventoDetalle(id, {soloPublicos: true}); `from` origin (same-origin only, else /eventos); breadcrumb + EventoDetalleStates or EventoDetalleBody; ObtenerEntradaModal + EventoEntradasModal ('invitado')
@@ -382,6 +395,11 @@ Following structure reflects the current implementation and the target scalable 
 │   │
 │   ├── hooks/                            # Application core (use cases)
 │   │   ├── auth/
+│   │   ├── home/                         # App home (US-0140)
+│   │   │   ├── useHomeEventos.ts         # listEventosPublicados({soloPublicos: true, limit: 12}) → { items, loading, error }
+│   │   │   ├── useOrganizacionesDestacadas.ts # organizacionesPublicasService.listDestacadas(6) → { items, loading, error }
+│   │   │   ├── usePrefersReducedMotion.ts # null until known, then matchMedia('(prefers-reduced-motion: reduce)') with live updates
+│   │   │   └── useHeaderScrolled.ts      # window.scrollY > threshold (passive listener)
 │   │   ├── landing/
 │   │   │   └── eventos/
 │   │   │       └── useEventosLanding.ts   # listEventosPublicados({soloPublicos: true}) → { items, loading, error, refetch } (US-0120)
@@ -517,6 +535,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
+│   │       │   ├── organizaciones-publicas.service.ts # US-0140: organizacionesPublicasService.listDestacadas(limit=6) → rpc('listar_organizaciones_destacadas') (browser client, works for anon), snake→camel mapping
 │   │       │   └── eventos.service.ts  # eventosService: listEventos(tenantId, {desde?, hasta?}) — no embeds since US-0119: disciplina/escenario/entrenadores are snapshots on the row (trainer names joined ", "); getEventoById; getEventoCompleto (event + evento_entradas + evento_entrada_cupones, sorted); guardarEventoCompleto (RPC guardar_evento_completo, draft or final, returns the client_key → id map); updateEstadoEvento; updateActivoEvento (quick activar/desactivar, US-0120); deleteEvento. createEvento/updateEvento were removed in US-0119. US-0120 adds the only cross-tenant reads: listEventosPublicados({soloPublicos}) and getEventoPublicado(id, {soloPublicos}) — explicit filters activo ∧ ¬borrador ∧ estado='confirmado' ∧ (fecha_hora ≥ now ∨ null) (+ publico on landing surfaces), because RLS alone lets admins/trainers read their drafts; explicit projections (include nombre_tenant and metodos_pago, never formulario_id/creado_por/omitir_confirmacion_compra); limit(500); malformed ids → null without a request; TENANT_INVALIDO → invalid_reference. Zero-row writes and PGRST116 map to 'forbidden'; RPC exception codes (METODO_PAGO_REQUERIDO, …) and 23505 constraint names map to specific Spanish messages / codes not_found, duplicate_entrada, duplicate_cupon (US-0118 / US-0119) — US-0121: the public list projection includes `cancelacion_antelacion_horas`; deleteEvento maps 23503 → `has_purchases`
 │   │       │   └── eventos-compras.service.ts  # US-0121 eventoComprasService: listEntradasVendibles, listNombresEventosBundle, getFormularioEvento (vigente evento_formularios snapshot, readable by guests), validarCupon, iniciarCompra → subirArchivoCompra → finalizarCompra, vincularComprasInvitado, listMisCompras / getMiTicketEnEvento (always filtered by the caller's id — RLS alone would also return staff rows), reenviarComprobante, cancelarCompra, listComprasEvento (embeds answers + their snapshot version), contarVendidas, validarCompra, getArchivoUrl (300 s); mapCompraError — listEntradasVendibles also returns each ticket's metodosPago (US-0130) — US-0131: registrarIngreso (normalizes the code first), revertirIngreso, resumenIngresos, listAsistentesEvento (activa tickets + compra.entrada_nombre, RLS staff); `ingreso_at` → `ingresoAt` in listComprasEvento / listMisCompras ticket embeds
 │   │       │   └── notificaciones.service.ts  # US-0125 notificacionesService (browser client): getUsuarioId, listar({limit, offset}) → {items, total}, contarNoLeidas, marcarLeida / marcarTodasLeidas (RPCs), suscribir(usuarioId, onInsert, onReconnect) → unsubscribe (Realtime postgres_changes INSERT on notificaciones, filter usuario_id) — the only Realtime usage in src/
@@ -539,6 +558,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │   ├── auth.types.ts
 │   │   ├── portal.types.ts               # Shared portal contracts (INICIO_MENU_ITEM, PUBLIC_TRAININGS_MENU_ITEM, resolvePortalMenu, etc.) — PUBLIC_TRAININGS_MENU_ITEM appended only to the !tenantId branch (US-0089); EVENTOS_MENU_ITEM ("Eventos" → /portal/eventos, icon celebration) right after it (US-0120) — the no-tenant menu ends with "Mis Reservas" then "Mis Entradas" (`confirmation_number`, /portal/mis-entradas, US-0121) — "Eventos Check-in" (`qr_code_scanner`, path `control-ingreso`) after "Eventos" for administrador and after "Reservas" for entrenador (US-0131) — US-0138 replaces the flat menus (`resolvePortalMenu`, `ROLE_TENANT_ITEMS` removed): `GLOBAL_MENU_ITEMS` (Inicio, Organizaciones, Eventos, Mis Suscripciones, Mis Reservas, Mis Entradas — shown inside and outside a tenant), `TENANT_NAV_TREE` (groups Administración / Equipo / Entrenamientos / Eventos + leaves Planes for usuario and Analítica for administrador, per-leaf `roles`, no "Equipo › Reservas"), `resolveGlobalMenu`, `resolveTenantNav(role, tenantId)`, `findActiveHref` (longest-prefix match)
 │   │   └── portal/
+│   │       ├── organizaciones-publicas.types.ts # US-0140: OrganizacionDestacada / OrganizacionDestacadaRow (public fields only)
 │   │       ├── tenant.types.ts            # TenantIdentityPayload (bannerUrl), TenantEditFormValues (banner_url), TenantEditPayload (banner_url); `publico` on both edit types and PortalTenantListItem.isPublic (US-0133); TenantAccessDecision.profileIncomplete / profileMissingFields (US-0136)
 │   │       └── scenarios.types.ts
 │   │       └── disciplines.types.ts
@@ -571,6 +591,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
+│       ├── home/
+│       │   └── home.utils.ts                # US-0140: formatFechaBadge (Bogotá day + uppercase month), formatPrecioCinta ("Gratis" when the cheapest ticket is free), getIniciales, formatAtletas, getLandingUrl (NEXT_PUBLIC_LANDING_URL)
 │       ├── csv.ts                           # RFC 4180 CSV generation (toCsvString, downloadTextFile) — used by ReservasPanel CSV export
 │       ├── slugify.ts                        # slugify(value): snake_case key (diacritics stripped, leading digits trimmed) — used to auto-compute campo_nombre for "Datos" sections (US-0085)
 │       ├── validators.ts
@@ -698,6 +720,7 @@ Supabase (database)
 | `populate_suscripcion_servicios(p_suscripcion_id, p_plan_tipo_id)` | Inserts `suscripcion_servicios` rows from `plan_tipos_servicios` at subscription creation time; idempotent via `ON CONFLICT DO NOTHING` (US-0063) | Called via RPC from `suscripciones.service.ts` and `gestion-suscripciones.service.ts` |
 | `comprar_suscripcion(p_tenant_id, p_plan_id, p_plan_tipo_id, p_metodo_pago_id, p_comentarios, p_pago_id, p_comprobante_path)` | US-0134, `authenticated`: the only way an athlete buys a plan (the `suscripciones_insert_own` / `pagos_insert_own` policies were dropped). One transaction: `can_subscribe_to_plan`, subtype check, duplicate pending request under an advisory lock, payment method of the tenant, proof path = the caller's `orgs/{tenant}/users/{uid}/receipts/{p_pago_id}.{ext}` and present in storage; inserts `suscripciones` (`pendiente`), service units and `pagos` (`monto` = `plan_tipos.precio`, proof already set); enqueues the purchase notifications. Returns `{suscripcion_id, pago_id}` |
 | `get_member_tenants_for_authenticated_user()` | Tenant ids where the caller holds any `miembros_tenant` row, any role/state (US-0093) | RLS policy expressions |
+| `listar_organizaciones_destacadas(p_limit default 6)` | US-0140, `anon` + `authenticated` (`language sql stable`, revoked from public): the only anonymous read of organizations — `tenants` RLS stays authenticated-only. Returns `id, nombre, descripcion, logo_url, banner_url, disciplinas` (≤3 active, alphabetical) and `total_atletas` (active `usuario` members) for `publico` tenants except the internal `public` tenant, ordered by athletes desc then name; limit clamped 1..24 | `organizaciones-publicas.service.ts` (app home) |
 | `can_read_plan(p_plan_id)` | Plan is public AND active, OR caller is a member of its tenant, OR caller already holds a subscription to it — the last branch keeps a buyer's own rows readable after an un-publish (US-0093) As of US-0126 the plain-membership branch (and the public branch) also require `visible_atletas`; trainers/administrators of the tenant read every plan, so an "Activo no visible" plan is hidden from athlete members and non-members only | SELECT policies on `planes`, `plan_tipos`, `planes_disciplina` |
 | `can_read_plan_tipo(p_plan_tipo_id)` | Delegates to `can_read_plan` through the subtype's parent plan (US-0093) | SELECT policy on `plan_tipos_servicios` |
 | `can_read_servicio(p_servicio_id)` | Caller is a member of the service's tenant, OR the service is granted by a public active plan's subtype, OR the caller already holds units of it (US-0093) | SELECT policy on `servicios` |
@@ -1055,6 +1078,9 @@ EMAIL_FROM="GRIT Arena <no-reply@grit-arena.com>"
 NOTIFICACIONES_DISPATCH_SECRET=your-random-secret # bearer of POST /api/internal/notificaciones/despachar; same value as the Vault secret notificaciones_dispatch_secret
 EMAIL_DEV_MAILPIT_URL=http://127.0.0.1:54324      # development only (ignored in production): emails go to the local Mailpit instead of Resend
 
+# External marketing landing (separate repo grit-arena/landing, US-0139) — "Conoce GRIT Arena" on the app home (US-0140)
+NEXT_PUBLIC_LANDING_URL=https://grit-arena.com   # default when unset
+
 # Optional: Analytics, monitoring, etc.
 NEXT_PUBLIC_GA_ID=your-ga-id
 ```
@@ -1084,7 +1110,7 @@ src/
 
 - The public marketing site (platform description, modules, benefits, pricing) lives in a **separate repository**: `grit-arena/landing` (static Next.js export, no Supabase). It links to this app through `NEXT_PUBLIC_APP_URL` (`/auth/login`, `/eventos`).
 - This app keeps everything with data or auth: login, portal and the public pages `/eventos`, `/eventos/[event_id]`, `/equipos`, `/atletas`.
-- `src/app/page.tsx`, the marketing sections in `src/components/landing/`, `src/hooks/landing/useScrollReveal.ts`, `public/landing/**` and the `landing-*` CSS are **pending removal** by a follow-up story (root `/` will redirect to login/portal; components still used by the public pages move to `src/components/public/`). Do not add new marketing content here.
+- The app root `/` is the **public app home** (US-0140, `src/components/home/`): video hero, upcoming public events ribbon and public organizations showcase. It does not redirect signed-in users. The old marketing sections, `useScrollReveal`, `public/landing/**` and their CSS utilities were removed in US-0140; `src/components/landing/{Header,Footer,ComingSoonPage,eventos}` remain as the shell of `/eventos`, `/equipos`, `/atletas`. Do not add marketing content here.
 
 ## Visual Design System (US-0116)
 
