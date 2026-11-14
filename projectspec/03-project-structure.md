@@ -1080,6 +1080,12 @@ src/
 - [Supabase Setup](supabase-setup.md) - Complete Supabase configuration
 - [Tech Spec](tech-spec.md) - Technology stack details
 
+### Marketing landing (US-0139)
+
+- The public marketing site (platform description, modules, benefits, pricing) lives in a **separate repository**: `grit-arena/landing` (static Next.js export, no Supabase). It links to this app through `NEXT_PUBLIC_APP_URL` (`/auth/login`, `/eventos`).
+- This app keeps everything with data or auth: login, portal and the public pages `/eventos`, `/eventos/[event_id]`, `/equipos`, `/atletas`.
+- `src/app/page.tsx`, the marketing sections in `src/components/landing/`, `src/hooks/landing/useScrollReveal.ts`, `public/landing/**` and the `landing-*` CSS are **pending removal** by a follow-up story (root `/` will redirect to login/portal; components still used by the public pages move to `src/components/public/`). Do not add new marketing content here.
+
 ## Visual Design System (US-0116)
 
 - **Source of truth**: `projectspec/designs/pencil/grit-arena-v2.pen`. Portal code uses only `grit-*` tokens (`bg-grit-bg`, `text-grit-text|subtext|muted`, `grit-cyan`, `bg-grit-glass|card`, `border-grit-glass-border`, `grit-danger|success`, `grit-discipline-*`) and the `@/components/ui` grit kit.
