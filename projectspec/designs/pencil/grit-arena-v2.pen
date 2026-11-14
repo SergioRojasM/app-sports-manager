@@ -1,5 +1,5 @@
 {
-  "version": "2.20",
+  "version": "2.22",
   "children": [
     {
       "type": "frame",
@@ -14524,7 +14524,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Escenarios",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -14546,7 +14547,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Disciplinas",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -14568,7 +14570,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Servicios",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -14590,7 +14593,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Planes",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         }
@@ -14702,7 +14706,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Miembros",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -14724,7 +14729,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Suscripciones",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -14746,7 +14752,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Reservas",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         }
@@ -14858,7 +14865,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Calendario",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -14880,7 +14888,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Reservas",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -14902,7 +14911,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Formularios",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         }
@@ -15014,7 +15024,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Calendario",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -15036,7 +15047,8 @@
                                               "fill": "$text-subtext",
                                               "content": "Check-in",
                                               "fontFamily": "$font-body",
-                                              "fontSize": 12.5
+                                              "fontSize": 12.5,
+                                              "fontWeight": "normal"
                                             }
                                           ]
                                         }
@@ -15222,7 +15234,8 @@
                           "fill": "$text-subtext",
                           "content": "Portal",
                           "fontFamily": "$font-body",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "icon",
@@ -15241,7 +15254,8 @@
                           "fill": "$text-subtext",
                           "content": "Club Elite",
                           "fontFamily": "$font-body",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "icon",
@@ -15260,7 +15274,8 @@
                           "fill": "$text-subtext",
                           "content": "Administración",
                           "fontFamily": "$font-body",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "icon",
@@ -16731,7 +16746,8 @@
                                           "fill": "$text-subtext",
                                           "content": "Suscripciones",
                                           "fontFamily": "$font-body",
-                                          "fontSize": 13.5
+                                          "fontSize": 13.5,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     },
@@ -16753,7 +16769,8 @@
                                           "fill": "$text-subtext",
                                           "content": "Reservas",
                                           "fontFamily": "$font-body",
-                                          "fontSize": 13.5
+                                          "fontSize": 13.5,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
@@ -16862,7 +16879,8 @@
                                           "fill": "$text-subtext",
                                           "content": "Calendario",
                                           "fontFamily": "$font-body",
-                                          "fontSize": 13.5
+                                          "fontSize": 13.5,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     },
@@ -16884,7 +16902,8 @@
                                           "fill": "$text-subtext",
                                           "content": "Reservas",
                                           "fontFamily": "$font-body",
-                                          "fontSize": 13.5
+                                          "fontSize": 13.5,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     },
@@ -16906,7 +16925,8 @@
                                           "fill": "$text-subtext",
                                           "content": "Formularios",
                                           "fontFamily": "$font-body",
-                                          "fontSize": 13.5
+                                          "fontSize": 13.5,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
@@ -17157,6 +17177,4771 @@
                   "fill": "$text-subtext"
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "T9KXek",
+      "x": 8144,
+      "y": 0,
+      "name": "App Home — Desktop",
+      "clip": true,
+      "width": 1440,
+      "fill": "$bg-navy",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Z67k8",
+          "name": "Hero",
+          "clip": true,
+          "width": "fill_container",
+          "height": 860,
+          "fill": [
+            {
+              "type": "image",
+              "enabled": true,
+              "url": "images/grit-hero-poster.jpg",
+              "mode": "cover"
+            },
+            {
+              "type": "gradient",
+              "gradientType": "radial",
+              "enabled": true,
+              "rotation": 0,
+              "size": {
+                "width": 1.1,
+                "height": 1
+              },
+              "colors": [
+                {
+                  "color": "#07111FE6",
+                  "position": 0
+                },
+                {
+                  "color": "#07111FA0",
+                  "position": 0.45
+                },
+                {
+                  "color": "#07111F40",
+                  "position": 1
+                }
+              ]
+            },
+            {
+              "type": "gradient",
+              "gradientType": "linear",
+              "enabled": true,
+              "rotation": 180,
+              "size": {
+                "height": 1
+              },
+              "colors": [
+                {
+                  "color": "#07111F99",
+                  "position": 0
+                },
+                {
+                  "color": "#07111F00",
+                  "position": 0.18
+                },
+                {
+                  "color": "#07111F00",
+                  "position": 0.7
+                },
+                {
+                  "color": "#07111F",
+                  "position": 1
+                }
+              ]
+            }
+          ],
+          "layout": "vertical",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ygqIQ",
+              "name": "Header",
+              "width": "fill_container",
+              "padding": [
+                24,
+                40
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hX3vY",
+                  "name": "Logo",
+                  "width": 168,
+                  "height": 42,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/logo-navbar.png",
+                    "mode": "contain"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "aegXI",
+                  "name": "Nav Links",
+                  "gap": 40,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "EhELI",
+                      "name": "Eventos",
+                      "fill": "$text-subtext",
+                      "content": "Eventos",
+                      "fontFamily": "$font-title",
+                      "fontSize": 17,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "Q8JIV",
+                      "name": "Organizaciones",
+                      "fill": "$text-subtext",
+                      "content": "Organizaciones",
+                      "fontFamily": "$font-title",
+                      "fontSize": 17,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.6
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "pIPoo",
+                  "name": "Login Button",
+                  "fill": "$accent-cyan",
+                  "cornerRadius": 10,
+                  "padding": [
+                    11,
+                    22
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qLAD1",
+                      "name": "Label",
+                      "fill": "#07111F",
+                      "content": "Iniciar sesión",
+                      "fontFamily": "$font-title",
+                      "fontSize": 17,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "z5YU2m",
+              "name": "Hero Content",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 28,
+              "padding": [
+                0,
+                40,
+                40,
+                40
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "D52xS",
+                  "name": "Eyebrow",
+                  "fill": "#0F1F3080",
+                  "cornerRadius": 999,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "background_blur",
+                    "radius": 12
+                  },
+                  "gap": 12,
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "l8rYXj",
+                      "name": "Live Dot",
+                      "fill": "$accent-cyan",
+                      "width": 8,
+                      "height": 8,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#14DBC4",
+                        "blur": 10
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "W0HxU6",
+                      "name": "Eyebrow Text",
+                      "fill": "#49F5E2",
+                      "content": "EVENTOS  ·  CLUBES  ·  ENTRENAMIENTOS",
+                      "fontFamily": "$font-title",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                      "letterSpacing": 3.5
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "RG6qH",
+                  "name": "Title",
+                  "fill": "$text-primary",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#07111FCC",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 40
+                  },
+                  "textGrowth": "fixed-width",
+                  "width": 980,
+                  "content": "La plataforma donde\nel deporte evoluciona",
+                  "lineHeight": 0.95,
+                  "textAlign": "center",
+                  "fontFamily": "$font-title",
+                  "fontSize": 88,
+                  "fontWeight": "700",
+                  "letterSpacing": -1.5,
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "H2hUrJ",
+                  "name": "Divider",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#14DBC400",
+                        "position": 0
+                      },
+                      {
+                        "color": "#14DBC4",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#14DBC400",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 96,
+                  "height": 3
+                },
+                {
+                  "type": "text",
+                  "id": "g80Lb",
+                  "name": "Subtitle",
+                  "fill": "$text-subtext",
+                  "textGrowth": "fixed-width",
+                  "width": 620,
+                  "content": "Descubre eventos, entrena con tu club y gestiona tus entradas en un solo lugar.",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "$font-body",
+                  "fontSize": 19,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "qqnK8",
+                  "name": "CTAs",
+                  "gap": 16,
+                  "padding": [
+                    12,
+                    0,
+                    0,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "TqrEe",
+                      "name": "Primary CTA",
+                      "fill": "$accent-cyan",
+                      "cornerRadius": 12,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#14DBC455",
+                        "offset": {
+                          "x": 0,
+                          "y": 8
+                        },
+                        "blur": 32
+                      },
+                      "gap": 10,
+                      "padding": [
+                        16,
+                        30
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "wGzYl",
+                          "name": "Label",
+                          "fill": "#07111F",
+                          "content": "Ver eventos",
+                          "fontFamily": "$font-title",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "iFpGV",
+                          "name": "Arrow",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "arrow-right",
+                          "library": "lucide",
+                          "fill": "#07111F"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "c4Lcr",
+                      "name": "Secondary CTA",
+                      "fill": "#07111F66",
+                      "cornerRadius": 12,
+                      "stroke": "#14DBC4",
+                      "strokeWidth": 1.5,
+                      "effect": {
+                        "type": "background_blur",
+                        "radius": 12
+                      },
+                      "padding": [
+                        16,
+                        30
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "a2bli",
+                          "name": "Label",
+                          "fill": "$accent-cyan",
+                          "content": "Iniciar sesión",
+                          "fontFamily": "$font-title",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "dQfrt",
+              "name": "Scroll Hint",
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                0,
+                0,
+                36,
+                0
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "X1IJ5c",
+                  "name": "Scroll Label",
+                  "fill": "#8A9AAB",
+                  "content": "DESLIZA",
+                  "fontFamily": "$font-title",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "icon",
+                  "id": "SBBNn",
+                  "name": "Chevron",
+                  "width": 20,
+                  "height": 20,
+                  "icon": "chevrons-down",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "w84jdA",
+          "name": "Eventos Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 44,
+          "padding": [
+            56,
+            0,
+            120,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "PbFbL",
+              "name": "Section Header",
+              "width": "fill_container",
+              "padding": [
+                0,
+                80
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "z36bbZ",
+                  "name": "Heading",
+                  "width": 700,
+                  "layout": "vertical",
+                  "gap": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "tRiOA",
+                      "name": "Eyebrow",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "id": "Za8II",
+                          "name": "Eyebrow Line",
+                          "fill": "$accent-cyan",
+                          "width": 28,
+                          "height": 2
+                        },
+                        {
+                          "type": "text",
+                          "id": "p5yxSy",
+                          "name": "Eyebrow Text",
+                          "fill": "#49F5E2",
+                          "content": "PRÓXIMOS EVENTOS",
+                          "fontFamily": "$font-title",
+                          "fontSize": 14,
+                          "fontWeight": "700",
+                          "letterSpacing": 3.5
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "V4BWv",
+                      "name": "Section Title",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Vive el deporte en vivo",
+                      "lineHeight": 1,
+                      "fontFamily": "$font-title",
+                      "fontSize": 52,
+                      "fontWeight": "700",
+                      "fontStyle": "italic"
+                    },
+                    {
+                      "type": "text",
+                      "id": "LwqVH",
+                      "name": "Section Subtitle",
+                      "fill": "$text-subtext",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Carreras, travesías y clínicas de los clubes de GRIT Arena. Asegura tu entrada en minutos.",
+                      "lineHeight": 1.6,
+                      "fontFamily": "$font-body",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UYGzh",
+                  "name": "See All Events",
+                  "cornerRadius": 12,
+                  "stroke": "#14DBC4",
+                  "strokeWidth": 1.5,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    22
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ZeUaS",
+                      "name": "Label",
+                      "fill": "$accent-cyan",
+                      "content": "Ver todos los eventos",
+                      "fontFamily": "$font-title",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "gA1Qt",
+                      "name": "Arrow",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-right",
+                      "library": "lucide",
+                      "fill": "$accent-cyan"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hfFW2",
+              "name": "Premium Ribbon Band",
+              "clip": true,
+              "width": "fill_container",
+              "height": 470,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#0F1F3000",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0F1F3080",
+                    "position": 0.5
+                  },
+                  {
+                    "color": "#0F1F3000",
+                    "position": 1
+                  }
+                ]
+              },
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "XKdbn",
+                  "x": 0,
+                  "y": 20,
+                  "name": "Band Line Top",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#14DBC400",
+                        "position": 0
+                      },
+                      {
+                        "color": "#14DBC499",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#14DBC400",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 1440,
+                  "height": 1
+                },
+                {
+                  "type": "rectangle",
+                  "id": "HyefZ",
+                  "x": 0,
+                  "y": 449,
+                  "name": "Band Line Bottom",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#14DBC400",
+                        "position": 0
+                      },
+                      {
+                        "color": "#14DBC499",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#14DBC400",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 1440,
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "pT3oh",
+                  "x": -150,
+                  "y": 46,
+                  "name": "Marquee Track",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "id": "n5E1wq",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Travesía Lago Calima 3K",
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 300,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1771197265627-ade16a570752?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "GEWm3": {
+                          "content": "14"
+                        },
+                        "ejnni": {
+                          "content": "NOV"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-swim"
+                        },
+                        "MQ7ti": {
+                          "content": "Natación"
+                        },
+                        "HaJmW": {
+                          "content": "Travesía Lago Calima 3K"
+                        },
+                        "OOy0x": {
+                          "content": "Club Acuático Valle"
+                        },
+                        "Xy4es": {
+                          "content": "Lago Calima · Darién"
+                        },
+                        "uerVN": {
+                          "content": "COP 120.000"
+                        },
+                        "cxwIk": {
+                          "enabled": false
+                        }
+                      }
+                    },
+                    {
+                      "id": "H2emqi",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Media Maratón — Entrenamiento oficial",
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 300,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1729913931143-b8215ea99afc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "GEWm3": {
+                          "content": "23"
+                        },
+                        "ejnni": {
+                          "content": "NOV"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-run"
+                        },
+                        "MQ7ti": {
+                          "content": "Running"
+                        },
+                        "HaJmW": {
+                          "content": "Media Maratón — Entrenamiento oficial"
+                        },
+                        "OOy0x": {
+                          "content": "Bogotá Runners Club"
+                        },
+                        "Xy4es": {
+                          "content": "Parque Simón Bolívar · Bogotá"
+                        },
+                        "uerVN": {
+                          "content": "COP 80.000"
+                        },
+                        "cxwIk": {
+                          "enabled": false
+                        }
+                      }
+                    },
+                    {
+                      "id": "EO4EU",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Triatlón Sprint Santa Marta",
+                      "width": 340,
+                      "stroke": "#14DBC4",
+                      "strokeWidth": 1.5,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#14DBC455",
+                        "offset": {
+                          "x": 0,
+                          "y": 12
+                        },
+                        "blur": 48
+                      },
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 340,
+                          "height": 210,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1596460456678-760115935178?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEyMzh8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "TsLE6": {
+                          "width": 340
+                        },
+                        "GEWm3": {
+                          "content": "30"
+                        },
+                        "ejnni": {
+                          "content": "NOV"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-cycle"
+                        },
+                        "MQ7ti": {
+                          "content": "Triatlón"
+                        },
+                        "HaJmW": {
+                          "content": "Triatlón Sprint Santa Marta"
+                        },
+                        "OOy0x": {
+                          "content": "Caribe Tri Team"
+                        },
+                        "Xy4es": {
+                          "content": "Bahía de Taganga · Santa Marta"
+                        },
+                        "uerVN": {
+                          "content": "COP 250.000"
+                        },
+                        "cxwIk": {
+                          "enabled": true,
+                          "x": 218
+                        }
+                      }
+                    },
+                    {
+                      "id": "g0aSNL",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Gran Fondo Alto de Letras",
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 300,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1609605988071-0d1cfd25044e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "GEWm3": {
+                          "content": "07"
+                        },
+                        "ejnni": {
+                          "content": "DIC"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-cycle"
+                        },
+                        "MQ7ti": {
+                          "content": "Ciclismo"
+                        },
+                        "HaJmW": {
+                          "content": "Gran Fondo Alto de Letras"
+                        },
+                        "OOy0x": {
+                          "content": "Andes Cycling"
+                        },
+                        "Xy4es": {
+                          "content": "Mariquita → Letras · Tolima"
+                        },
+                        "uerVN": {
+                          "content": "COP 180.000"
+                        },
+                        "cxwIk": {
+                          "enabled": false
+                        }
+                      }
+                    },
+                    {
+                      "id": "AlzTd",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Hyrox Simulation Day",
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 300,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1625152034794-fbe874cb0a37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "GEWm3": {
+                          "content": "13"
+                        },
+                        "ejnni": {
+                          "content": "DIC"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-functional"
+                        },
+                        "MQ7ti": {
+                          "content": "Funcional"
+                        },
+                        "HaJmW": {
+                          "content": "Hyrox Simulation Day"
+                        },
+                        "OOy0x": {
+                          "content": "Box Medellín Élite"
+                        },
+                        "Xy4es": {
+                          "content": "El Poblado · Medellín"
+                        },
+                        "uerVN": {
+                          "content": "Gratis"
+                        },
+                        "cxwIk": {
+                          "enabled": false
+                        }
+                      }
+                    },
+                    {
+                      "id": "cWLlF",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Trail Nocturno Cerros Orientales",
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 300,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1755289446025-d04dfe8f0fe3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwMDB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "GEWm3": {
+                          "content": "20"
+                        },
+                        "ejnni": {
+                          "content": "DIC"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-run"
+                        },
+                        "MQ7ti": {
+                          "content": "Running"
+                        },
+                        "HaJmW": {
+                          "content": "Trail Nocturno Cerros Orientales"
+                        },
+                        "OOy0x": {
+                          "content": "Montaña Viva"
+                        },
+                        "Xy4es": {
+                          "content": "Quebrada La Vieja · Bogotá"
+                        },
+                        "uerVN": {
+                          "content": "COP 65.000"
+                        },
+                        "cxwIk": {
+                          "enabled": false
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "AMEp9",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Fade Left",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#07111F",
+                        "position": 0
+                      },
+                      {
+                        "color": "#07111FB3",
+                        "position": 0.45
+                      },
+                      {
+                        "color": "#07111F00",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 220,
+                  "height": 470
+                },
+                {
+                  "type": "rectangle",
+                  "id": "MLjPO",
+                  "x": 1220,
+                  "y": 0,
+                  "name": "Fade Right",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#07111F",
+                        "position": 0
+                      },
+                      {
+                        "color": "#07111FB3",
+                        "position": 0.45
+                      },
+                      {
+                        "color": "#07111F00",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 220,
+                  "height": 470
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "K4oU5",
+              "name": "Marquee Controls",
+              "width": "fill_container",
+              "gap": 10,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "eyAod",
+                  "name": "Dot 1",
+                  "fill": "#14DBC433",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "xfS2d",
+                  "name": "Dot 2",
+                  "fill": "#14DBC433",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "sBWDy",
+                  "name": "Dot 3",
+                  "fill": "$accent-cyan",
+                  "width": 28,
+                  "height": 8
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "knXwt",
+                  "name": "Dot 4",
+                  "fill": "#14DBC433",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "CAV5X",
+                  "name": "Dot 5",
+                  "fill": "#14DBC433",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "i9swb",
+                  "name": "Dot 6",
+                  "fill": "#14DBC433",
+                  "width": 8,
+                  "height": 8
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Z2VlC",
+          "name": "Organizaciones Section",
+          "width": "fill_container",
+          "fill": [
+            "#0A1626",
+            {
+              "type": "gradient",
+              "gradientType": "radial",
+              "enabled": true,
+              "rotation": 0,
+              "size": {
+                "width": 1.2,
+                "height": 0.9
+              },
+              "colors": [
+                {
+                  "color": "#14DBC41F",
+                  "position": 0
+                },
+                {
+                  "color": "#14DBC400",
+                  "position": 1
+                }
+              ],
+              "center": {
+                "y": 0
+              }
+            }
+          ],
+          "stroke": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": -90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#14DBC400",
+                "position": 0
+              },
+              {
+                "color": "#14DBC466",
+                "position": 0.5
+              },
+              {
+                "color": "#14DBC400",
+                "position": 1
+              }
+            ]
+          },
+          "strokeWidth": {
+            "top": 1
+          },
+          "layout": "vertical",
+          "gap": 52,
+          "padding": [
+            110,
+            80,
+            120,
+            80
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "r5pnL",
+              "name": "Heading",
+              "width": 900,
+              "layout": "vertical",
+              "gap": 14,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "nlXO5",
+                  "name": "Eyebrow",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "HzOHA",
+                      "name": "Eyebrow Line L",
+                      "fill": "$accent-cyan",
+                      "width": 28,
+                      "height": 2
+                    },
+                    {
+                      "type": "text",
+                      "id": "WSEWL",
+                      "name": "Eyebrow Text",
+                      "fill": "#49F5E2",
+                      "content": "ORGANIZACIONES",
+                      "fontFamily": "$font-title",
+                      "fontSize": 14,
+                      "fontWeight": "700",
+                      "letterSpacing": 3.5
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "F4awm5",
+                      "name": "Eyebrow Line R",
+                      "fill": "$accent-cyan",
+                      "width": 28,
+                      "height": 2
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "vU9UU",
+                  "name": "Section Title",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Clubes que entrenan con GRIT Arena",
+                  "lineHeight": 1,
+                  "textAlign": "center",
+                  "fontFamily": "$font-title",
+                  "fontSize": 52,
+                  "fontWeight": "700",
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "text",
+                  "id": "kVcFE",
+                  "name": "Section Subtitle",
+                  "fill": "$text-subtext",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Encuentra tu club, reserva entrenamientos y sigue tu progreso con tu equipo.",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "sij6n",
+              "name": "Org Grid",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wSK81",
+                  "name": "Row 1",
+                  "width": "fill_container",
+                  "gap": 24,
+                  "children": [
+                    {
+                      "id": "FD52I",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Bogotá Runners Club",
+                      "width": "fill_container",
+                      "descendants": {
+                        "iykNv": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1694793190686-2c61df42f081?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwOTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Bogotá Runners Club"
+                        },
+                        "UhsZs": {
+                          "content": "Bogotá"
+                        },
+                        "zu74y": {
+                          "content": "Comunidad de corredores que entrena 5 días a la semana con planes para 10K, media y maratón."
+                        },
+                        "y7DT4c": {
+                          "content": "Running"
+                        },
+                        "aNftV": {
+                          "content": "Trail"
+                        },
+                        "ZrbiH": {
+                          "content": "248 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#07111F",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#14DBC440",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#14DBC400",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#14DBC4",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "zp4B7",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "footprints",
+                              "library": "lucide",
+                              "fill": "#14DBC4"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "WEge7",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Club Acuático Valle",
+                      "width": "fill_container",
+                      "descendants": {
+                        "iykNv": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1667357788291-ecb462359f57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwOTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Club Acuático Valle"
+                        },
+                        "UhsZs": {
+                          "content": "Cali"
+                        },
+                        "zu74y": {
+                          "content": "Natación en piscina y aguas abiertas para todas las edades, con entrenadores certificados."
+                        },
+                        "y7DT4c": {
+                          "content": "Natación"
+                        },
+                        "aNftV": {
+                          "content": "Aguas abiertas"
+                        },
+                        "ZrbiH": {
+                          "content": "176 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#0B2A4A",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#49F5E240",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#49F5E200",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#49F5E2",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "s6OVk",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "waves",
+                              "library": "lucide",
+                              "fill": "#49F5E2"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "hkb9e",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Andes Cycling",
+                      "width": "fill_container",
+                      "descendants": {
+                        "iykNv": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1707903441379-136c36ad4282?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwOTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Andes Cycling"
+                        },
+                        "UhsZs": {
+                          "content": "Manizales"
+                        },
+                        "zu74y": {
+                          "content": "Rodadas de ruta y montaña por la cordillera, con salidas guiadas cada fin de semana."
+                        },
+                        "y7DT4c": {
+                          "content": "Ciclismo"
+                        },
+                        "aNftV": {
+                          "content": "MTB"
+                        },
+                        "ZrbiH": {
+                          "content": "312 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#10202F",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#FFFFFF40",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#FFFFFF00",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#FFFFFF",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "n8qzQ",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "bike",
+                              "library": "lucide",
+                              "fill": "#FFFFFF"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NXdAI",
+                  "name": "Row 2",
+                  "width": "fill_container",
+                  "gap": 24,
+                  "children": [
+                    {
+                      "id": "eLb0g",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Caribe Tri Team",
+                      "width": "fill_container",
+                      "descendants": {
+                        "iykNv": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1598822738715-32eff3ad99b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwOTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Caribe Tri Team"
+                        },
+                        "UhsZs": {
+                          "content": "Santa Marta"
+                        },
+                        "zu74y": {
+                          "content": "Equipo de triatlón con sesiones de natación, bici y carrera frente al mar Caribe."
+                        },
+                        "y7DT4c": {
+                          "content": "Triatlón"
+                        },
+                        "aNftV": {
+                          "content": "Natación"
+                        },
+                        "ZrbiH": {
+                          "content": "94 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#07111F",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#F2B84B40",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#F2B84B00",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#F2B84B",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "aIDWZ",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "medal",
+                              "library": "lucide",
+                              "fill": "#F2B84B"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "RR8NZ",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Box Medellín Élite",
+                      "width": "fill_container",
+                      "descendants": {
+                        "iykNv": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1785781048590-13ccbc4ed011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwOTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Box Medellín Élite"
+                        },
+                        "UhsZs": {
+                          "content": "Medellín"
+                        },
+                        "zu74y": {
+                          "content": "Entrenamiento funcional de alta intensidad y preparación para competencias Hyrox."
+                        },
+                        "y7DT4c": {
+                          "content": "Funcional"
+                        },
+                        "aNftV": {
+                          "content": "Fuerza"
+                        },
+                        "ZrbiH": {
+                          "content": "205 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#16090C",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#FF6B6B40",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#FF6B6B00",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#FF6B6B",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "FYXUE",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "dumbbell",
+                              "library": "lucide",
+                              "fill": "#FF6B6B"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "iOyYx",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Montaña Viva",
+                      "width": "fill_container",
+                      "descendants": {
+                        "iykNv": {
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1697364297597-a368c7751713?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwOTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Montaña Viva"
+                        },
+                        "UhsZs": {
+                          "content": "Bogotá"
+                        },
+                        "zu74y": {
+                          "content": "Trail running y caminatas de alta montaña en los cerros y páramos de Cundinamarca."
+                        },
+                        "y7DT4c": {
+                          "content": "Trail"
+                        },
+                        "aNftV": {
+                          "content": "Montaña"
+                        },
+                        "ZrbiH": {
+                          "content": "131 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#0C1A14",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#6BCB7740",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#6BCB7700",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#6BCB77",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Zgbvg",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "mountain-snow",
+                              "library": "lucide",
+                              "fill": "#6BCB77"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "XAfnz",
+              "name": "CTA Block",
+              "layout": "vertical",
+              "gap": 14,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "YaRad",
+                  "name": "See All Orgs",
+                  "fill": "$accent-cyan",
+                  "cornerRadius": 12,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#14DBC444",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 32
+                  },
+                  "gap": 10,
+                  "padding": [
+                    16,
+                    30
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "K4dry8",
+                      "name": "Label",
+                      "fill": "#07111F",
+                      "content": "Ver todas las organizaciones",
+                      "fontFamily": "$font-title",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "afIfl",
+                      "name": "Arrow",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "arrow-right",
+                      "library": "lucide",
+                      "fill": "#07111F"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "x80dH",
+                  "name": "Login Hint",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "bB7xX",
+                      "name": "Lock",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "#8A9AAB"
+                    },
+                    {
+                      "type": "text",
+                      "id": "t4Oxi",
+                      "name": "Hint",
+                      "fill": "#8A9AAB",
+                      "content": "Inicia sesión para ver todas las organizaciones y unirte a la tuya.",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "wyEnE",
+          "name": "Club CTA Wrap",
+          "width": "fill_container",
+          "fill": "$bg-navy",
+          "padding": [
+            96,
+            80
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "JzyKD",
+              "name": "Club CTA Band",
+              "width": "fill_container",
+              "fill": [
+                "#0F1F30",
+                {
+                  "type": "gradient",
+                  "gradientType": "linear",
+                  "enabled": true,
+                  "rotation": -90,
+                  "size": {
+                    "height": 1
+                  },
+                  "colors": [
+                    {
+                      "color": "#14DBC42E",
+                      "position": 0
+                    },
+                    {
+                      "color": "#14DBC400",
+                      "position": 0.7
+                    }
+                  ]
+                }
+              ],
+              "cornerRadius": 20,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "padding": [
+                44,
+                56
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ivglX",
+                  "name": "Text",
+                  "width": 720,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vXKXo",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "¿Tienes un club o equipo deportivo?",
+                      "fontFamily": "$font-title",
+                      "fontSize": 34,
+                      "fontWeight": "700",
+                      "fontStyle": "italic"
+                    },
+                    {
+                      "type": "text",
+                      "id": "CglHb",
+                      "name": "Body",
+                      "fill": "$text-subtext",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Gestiona atletas, entrenamientos, pagos y eventos en una sola plataforma.",
+                      "lineHeight": 1.6,
+                      "fontFamily": "$font-body",
+                      "fontSize": 16,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "L614E",
+                  "name": "Know GRIT",
+                  "cornerRadius": 12,
+                  "stroke": "#14DBC4",
+                  "strokeWidth": 1.5,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    24
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "U5kvRu",
+                      "name": "Label",
+                      "fill": "$accent-cyan",
+                      "content": "Conoce GRIT Arena",
+                      "fontFamily": "$font-title",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "GVrJF",
+                      "name": "Ext",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-up-right",
+                      "library": "lucide",
+                      "fill": "$accent-cyan"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "cZY1v",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "#060E1A",
+          "stroke": "#FFFFFF0D",
+          "strokeWidth": {
+            "top": 1
+          },
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            48,
+            80,
+            36,
+            80
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "rl3Ep",
+              "name": "Footer Top",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "c9yPbD",
+                  "name": "Logo",
+                  "width": 150,
+                  "height": 38,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/logo-navbar.png",
+                    "mode": "contain"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "pvWss",
+                  "name": "Links",
+                  "gap": 36,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "R61oz",
+                      "name": "Eventos",
+                      "fill": "$text-subtext",
+                      "content": "Eventos",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uYtPx",
+                      "name": "Iniciar sesión",
+                      "fill": "$text-subtext",
+                      "content": "Iniciar sesión",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nlOWZ",
+                      "name": "Contacto",
+                      "fill": "$text-subtext",
+                      "content": "Contacto",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ZLjRj",
+                  "name": "Social",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Pexmn",
+                      "name": "instagram",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "#FFFFFF08",
+                      "cornerRadius": 999,
+                      "stroke": "#FFFFFF1A",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "Q7wavs",
+                          "name": "instagram icon",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "instagram",
+                          "library": "lucide",
+                          "fill": "$text-subtext"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GgtJN",
+                      "name": "facebook",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "#FFFFFF08",
+                      "cornerRadius": 999,
+                      "stroke": "#FFFFFF1A",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "dgAf7",
+                          "name": "facebook icon",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "facebook",
+                          "library": "lucide",
+                          "fill": "$text-subtext"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "C5jKZ",
+                      "name": "message-circle",
+                      "width": 38,
+                      "height": 38,
+                      "fill": "#FFFFFF08",
+                      "cornerRadius": 999,
+                      "stroke": "#FFFFFF1A",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "tRuvq",
+                          "name": "message-circle icon",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "message-circle",
+                          "library": "lucide",
+                          "fill": "$text-subtext"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "TtrmK",
+              "name": "Rule",
+              "fill": "#FFFFFF0D",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "text",
+              "id": "uOVJl",
+              "name": "Copyright",
+              "fill": "#8A9AAB",
+              "content": "© 2026 GRIT Arena. Todos los derechos reservados.",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "C9T8S",
+      "x": 8144,
+      "y": -640,
+      "name": "Event Card",
+      "reusable": true,
+      "clip": true,
+      "width": 300,
+      "fill": "$card-fill",
+      "cornerRadius": 16,
+      "stroke": "$glass-border",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "lbZHy",
+          "name": "Cover",
+          "clip": true,
+          "width": "fill_container",
+          "height": 190,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "itQ5b",
+              "x": 0,
+              "y": 0,
+              "name": "Cover Image",
+              "metadata": {
+                "type": "unsplash",
+                "username": "odalv",
+                "link": "https://unsplash.com/@odalv",
+                "author": "ᛟᛞᚨᛚᚹ"
+              },
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "https://images.unsplash.com/photo-1725270627645-c656ecb2f09c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTA5NzV8&ixlib=rb-4.1.0&q=80&w=1080",
+                "mode": "cover"
+              },
+              "width": 300,
+              "height": 190
+            },
+            {
+              "type": "rectangle",
+              "id": "TsLE6",
+              "x": 0,
+              "y": 0,
+              "name": "Cover Shade",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#07111F00",
+                    "position": 0.35
+                  },
+                  {
+                    "color": "#0B1826",
+                    "position": 1
+                  }
+                ]
+              },
+              "width": 300,
+              "height": 190
+            },
+            {
+              "type": "frame",
+              "id": "GaFlV",
+              "x": 16,
+              "y": 16,
+              "name": "Date Badge",
+              "width": 58,
+              "fill": "#07111FCC",
+              "cornerRadius": 12,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "background_blur",
+                "radius": 10
+              },
+              "layout": "vertical",
+              "padding": [
+                8,
+                0
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "GEWm3",
+                  "name": "Day",
+                  "fill": "$text-primary",
+                  "content": "23",
+                  "lineHeight": 1,
+                  "fontFamily": "$font-title",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "ejnni",
+                  "name": "Month",
+                  "fill": "$accent-cyan",
+                  "content": "NOV",
+                  "fontFamily": "$font-title",
+                  "fontSize": 13,
+                  "fontWeight": "700",
+                  "letterSpacing": 2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "WMaqu",
+              "x": 16,
+              "y": 150,
+              "name": "Discipline Chip",
+              "fill": "#07111FCC",
+              "cornerRadius": 8,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "gap": 6,
+              "padding": [
+                5,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "D1JAU",
+                  "name": "Discipline Dot",
+                  "fill": "$discipline-run",
+                  "width": 7,
+                  "height": 7
+                },
+                {
+                  "type": "text",
+                  "id": "MQ7ti",
+                  "name": "Discipline",
+                  "fill": "$text-primary",
+                  "content": "Running",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ZDxdh",
+          "name": "Body",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            14,
+            18,
+            18,
+            18
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "HaJmW",
+              "name": "Event Name",
+              "fill": "$text-primary",
+              "textGrowth": "fixed-width-height",
+              "width": "fill_container",
+              "height": 46,
+              "content": "Media Maratón de Bogotá — Entrenamiento oficial",
+              "lineHeight": 1.05,
+              "fontFamily": "$font-title",
+              "fontSize": 22,
+              "fontWeight": "700",
+              "fontStyle": "italic"
+            },
+            {
+              "type": "frame",
+              "id": "XHV26",
+              "name": "Meta",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 7,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UKDLc",
+                  "name": "Organization",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "h7O0P",
+                      "name": "Organization Icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "shield",
+                      "library": "lucide",
+                      "fill": "#8A9AAB"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OOy0x",
+                      "name": "Organization Text",
+                      "fill": "$text-subtext",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Bogotá Runners Club",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "EHZon",
+                  "name": "Location",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "oUdEC",
+                      "name": "Location Icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "map-pin",
+                      "library": "lucide",
+                      "fill": "#8A9AAB"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Xy4es",
+                      "name": "Location Text",
+                      "fill": "$text-subtext",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Parque Simón Bolívar · Bogotá",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "kk04D",
+              "name": "Divider",
+              "fill": "#14DBC426",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "nhDvG",
+              "name": "Footer",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "m2MwH",
+                  "name": "Price",
+                  "layout": "vertical",
+                  "gap": 1,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "J3fFJm",
+                      "name": "Price Label",
+                      "fill": "#8A9AAB",
+                      "content": "DESDE",
+                      "fontFamily": "$font-title",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 1.5
+                    },
+                    {
+                      "type": "text",
+                      "id": "uerVN",
+                      "name": "Price Value",
+                      "fill": "$accent-cyan",
+                      "content": "COP 80.000",
+                      "fontFamily": "$font-title",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "McXVU",
+                  "name": "Go Button",
+                  "width": 40,
+                  "height": 40,
+                  "fill": "#14DBC41F",
+                  "cornerRadius": 999,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "mNK94",
+                      "name": "Go Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-up-right",
+                      "library": "lucide",
+                      "fill": "$accent-cyan"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "cxwIk",
+          "layoutPosition": "absolute",
+          "x": 178,
+          "y": 22,
+          "name": "Premium Ribbon",
+          "enabled": false,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": -90,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#49F5E2",
+                "position": 0
+              },
+              {
+                "color": "#14DBC4",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": [
+            999,
+            0,
+            0,
+            999
+          ],
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#14DBC466",
+            "offset": {
+              "x": 0,
+              "y": 4
+            },
+            "blur": 16
+          },
+          "gap": 6,
+          "padding": [
+            6,
+            12
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "uywXJ",
+              "name": "Ribbon Icon",
+              "width": 13,
+              "height": 13,
+              "icon": "crown",
+              "library": "lucide",
+              "fill": "#07111F"
+            },
+            {
+              "type": "text",
+              "id": "N5XWh",
+              "name": "Ribbon Text",
+              "fill": "#07111F",
+              "content": "PREMIUM",
+              "fontFamily": "$font-title",
+              "fontSize": 12,
+              "fontWeight": "700",
+              "letterSpacing": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ojyQD",
+      "x": 8504,
+      "y": -640,
+      "name": "Organization Card",
+      "reusable": true,
+      "clip": true,
+      "width": 400,
+      "fill": "$card-fill",
+      "cornerRadius": 16,
+      "stroke": "$glass-border",
+      "strokeWidth": 1,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "lOBmk",
+          "name": "Banner",
+          "clip": true,
+          "width": "fill_container",
+          "height": 110,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "iykNv",
+              "x": 0,
+              "y": 0,
+              "name": "Banner Image",
+              "opacity": 0.85,
+              "metadata": {
+                "type": "unsplash",
+                "username": "michael75",
+                "link": "https://unsplash.com/@michael75",
+                "author": "Michael"
+              },
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "https://images.unsplash.com/photo-1716500274932-316e22427f27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTEwNjR8&ixlib=rb-4.1.0&q=80&w=1080",
+                "mode": "cover"
+              },
+              "width": 400,
+              "height": 110
+            },
+            {
+              "type": "rectangle",
+              "id": "GNfFP",
+              "x": 0,
+              "y": 0,
+              "name": "Banner Shade",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#0B182633",
+                    "position": 0
+                  },
+                  {
+                    "color": "#0B1826",
+                    "position": 1
+                  }
+                ]
+              },
+              "width": 400,
+              "height": 110
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lUpS0",
+          "name": "Body",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            0,
+            22,
+            22,
+            22
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Hgc9F",
+              "name": "Identity",
+              "width": "fill_container",
+              "gap": 14,
+              "padding": [
+                14,
+                0,
+                0,
+                92
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "doXxc",
+                  "name": "Name Block",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 3,
+                  "padding": [
+                    0,
+                    0,
+                    4,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "mlucS",
+                      "name": "Org Name",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Bogotá Runners Club",
+                      "fontFamily": "$font-title",
+                      "fontSize": 22,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mrXrE",
+                      "name": "City Row",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "yINNM",
+                          "name": "City Icon",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "map-pin",
+                          "library": "lucide",
+                          "fill": "#8A9AAB"
+                        },
+                        {
+                          "type": "text",
+                          "id": "UhsZs",
+                          "name": "City",
+                          "fill": "#8A9AAB",
+                          "content": "Bogotá",
+                          "fontFamily": "$font-body",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "zu74y",
+              "name": "Description",
+              "fill": "$text-subtext",
+              "textGrowth": "fixed-width-height",
+              "width": "fill_container",
+              "height": 42,
+              "content": "Comunidad de corredores que entrena 5 días a la semana con planes para 10K, media y maratón.",
+              "lineHeight": 1.55,
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "qqFy0",
+              "name": "Footer",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hwVLj",
+                  "name": "Chips",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "mQirP",
+                      "name": "Chip A",
+                      "fill": "#14DBC41A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        5,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "y7DT4c",
+                          "name": "Chip A Text",
+                          "fill": "$accent-cyan",
+                          "content": "Running",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Nde4m",
+                      "name": "Chip B",
+                      "fill": "#14DBC41A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        5,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "aNftV",
+                          "name": "Chip B Text",
+                          "fill": "$accent-cyan",
+                          "content": "Trail",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "SVmVF",
+                  "name": "Members",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "BwwI1",
+                      "name": "Members Icon",
+                      "width": 15,
+                      "height": 15,
+                      "icon": "users",
+                      "library": "lucide",
+                      "fill": "#8A9AAB"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZrbiH",
+                      "name": "Members Count",
+                      "fill": "$text-subtext",
+                      "content": "248 atletas",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "f38mWt",
+          "layoutPosition": "absolute",
+          "x": 22,
+          "y": 70,
+          "name": "Logo",
+          "width": 76,
+          "height": 76,
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": -135,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#14DBC4",
+                "position": 0
+              },
+              {
+                "color": "#0FA3AB",
+                "position": 1
+              }
+            ]
+          },
+          "cornerRadius": 20,
+          "stroke": "#0B1826",
+          "strokeWidth": 4,
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000066",
+            "offset": {
+              "x": 0,
+              "y": 6
+            },
+            "blur": 20
+          },
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "UDXMm",
+              "name": "Initials",
+              "fill": "#07111F",
+              "content": "BR",
+              "fontFamily": "$font-title",
+              "fontSize": 28,
+              "fontWeight": "700",
+              "fontStyle": "italic"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "XWAjJ",
+      "x": 9704,
+      "y": 0,
+      "name": "App Home — Mobile",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg-navy",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "F6y74K",
+          "name": "Hero",
+          "clip": true,
+          "width": "fill_container",
+          "height": 720,
+          "fill": [
+            {
+              "type": "image",
+              "enabled": true,
+              "url": "images/grit-hero-poster.jpg",
+              "mode": "cover",
+              "transform": [
+                2.2,
+                0,
+                0,
+                1,
+                -0.05,
+                0
+              ]
+            },
+            {
+              "type": "gradient",
+              "gradientType": "radial",
+              "enabled": true,
+              "rotation": 0,
+              "size": {
+                "width": 1.6,
+                "height": 0.9
+              },
+              "colors": [
+                {
+                  "color": "#07111FE0",
+                  "position": 0
+                },
+                {
+                  "color": "#07111F99",
+                  "position": 0.5
+                },
+                {
+                  "color": "#07111F40",
+                  "position": 1
+                }
+              ],
+              "center": {
+                "y": 0.55
+              }
+            },
+            {
+              "type": "gradient",
+              "gradientType": "linear",
+              "enabled": true,
+              "rotation": 180,
+              "size": {
+                "height": 1
+              },
+              "colors": [
+                {
+                  "color": "#07111F99",
+                  "position": 0
+                },
+                {
+                  "color": "#07111F00",
+                  "position": 0.15
+                },
+                {
+                  "color": "#07111F00",
+                  "position": 0.65
+                },
+                {
+                  "color": "#07111F",
+                  "position": 1
+                }
+              ]
+            }
+          ],
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "fipi6",
+              "name": "Header",
+              "width": "fill_container",
+              "padding": [
+                18,
+                20
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ACnp0",
+                  "name": "Logo",
+                  "width": 120,
+                  "height": 30,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "images/logo-navbar.png",
+                    "mode": "contain"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "gQL8y",
+                  "name": "Menu Button",
+                  "width": 42,
+                  "height": 42,
+                  "fill": "#0F1F30B0",
+                  "cornerRadius": 12,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "RJFmL",
+                      "name": "Menu",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "menu",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PVMqC",
+              "name": "Hero Content",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 22,
+              "padding": [
+                0,
+                20,
+                28,
+                20
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Nr3pb",
+                  "name": "Eyebrow",
+                  "fill": "#0F1F3080",
+                  "cornerRadius": 999,
+                  "stroke": "$glass-border",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    7,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "REMXY",
+                      "name": "Live Dot",
+                      "fill": "$accent-cyan",
+                      "width": 7,
+                      "height": 7
+                    },
+                    {
+                      "type": "text",
+                      "id": "arAnI",
+                      "name": "Eyebrow Text",
+                      "fill": "#49F5E2",
+                      "content": "EVENTOS · CLUBES · ENTRENAMIENTOS",
+                      "fontFamily": "$font-title",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 2
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "ix8ip",
+                  "name": "Title",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "La plataforma donde el deporte evoluciona",
+                  "lineHeight": 0.98,
+                  "textAlign": "center",
+                  "fontFamily": "$font-title",
+                  "fontSize": 46,
+                  "fontWeight": "700",
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "dLV0q",
+                  "name": "Divider",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#14DBC400",
+                        "position": 0
+                      },
+                      {
+                        "color": "#14DBC4",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#14DBC400",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 72,
+                  "height": 3
+                },
+                {
+                  "type": "text",
+                  "id": "uPnF3",
+                  "name": "Subtitle",
+                  "fill": "$text-subtext",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Descubre eventos, entrena con tu club y gestiona tus entradas en un solo lugar.",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "lg9ko",
+                  "name": "CTAs",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": [
+                    8,
+                    0,
+                    0,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Bf6XP",
+                      "name": "Primary CTA",
+                      "width": "fill_container",
+                      "fill": "$accent-cyan",
+                      "cornerRadius": 12,
+                      "gap": 10,
+                      "padding": [
+                        15,
+                        0
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ew8nE",
+                          "name": "Label",
+                          "fill": "#07111F",
+                          "content": "Ver eventos",
+                          "fontFamily": "$font-title",
+                          "fontSize": 19,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "lvHrx",
+                          "name": "Arrow",
+                          "width": 19,
+                          "height": 19,
+                          "icon": "arrow-right",
+                          "library": "lucide",
+                          "fill": "#07111F"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "s1VzS",
+                      "name": "Secondary CTA",
+                      "width": "fill_container",
+                      "fill": "#07111F66",
+                      "cornerRadius": 12,
+                      "stroke": "#14DBC4",
+                      "strokeWidth": 1.5,
+                      "padding": [
+                        15,
+                        0
+                      ],
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "u8ilD",
+                          "name": "Label",
+                          "fill": "$accent-cyan",
+                          "content": "Iniciar sesión",
+                          "fontFamily": "$font-title",
+                          "fontSize": 19,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "AOM2V",
+          "name": "Eventos Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            40,
+            0,
+            72,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "jIb2L",
+              "name": "Heading",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                0,
+                20
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "kvbe7",
+                  "name": "Eyebrow",
+                  "gap": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "qUmJL",
+                      "name": "Line",
+                      "fill": "$accent-cyan",
+                      "width": 22,
+                      "height": 2
+                    },
+                    {
+                      "type": "text",
+                      "id": "pOWSe",
+                      "name": "Eyebrow Text",
+                      "fill": "#49F5E2",
+                      "content": "PRÓXIMOS EVENTOS",
+                      "fontFamily": "$font-title",
+                      "fontSize": 12,
+                      "fontWeight": "700",
+                      "letterSpacing": 3
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "QXQHO",
+                  "name": "Section Title",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Vive el deporte en vivo",
+                  "lineHeight": 1,
+                  "fontFamily": "$font-title",
+                  "fontSize": 36,
+                  "fontWeight": "700",
+                  "fontStyle": "italic"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Mkn50",
+              "name": "Premium Ribbon Band",
+              "clip": true,
+              "width": "fill_container",
+              "height": 420,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "IWX9j",
+                  "x": 0,
+                  "y": 8,
+                  "name": "Band Line Top",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#14DBC400",
+                        "position": 0
+                      },
+                      {
+                        "color": "#14DBC499",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#14DBC400",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 390,
+                  "height": 1
+                },
+                {
+                  "type": "rectangle",
+                  "id": "sZtdV",
+                  "x": 0,
+                  "y": 411,
+                  "name": "Band Line Bottom",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -90,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#14DBC400",
+                        "position": 0
+                      },
+                      {
+                        "color": "#14DBC499",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#14DBC400",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": 390,
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "t4Xad",
+                  "x": 20,
+                  "y": 26,
+                  "name": "Marquee Track",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "id": "i6T8ck",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Triatlón Sprint Santa Marta",
+                      "width": 280,
+                      "stroke": "#14DBC4",
+                      "strokeWidth": 1.5,
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 280,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1576858574144-9ae1ebcf5ae5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTExMzl8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "GEWm3": {
+                          "content": "30"
+                        },
+                        "ejnni": {
+                          "content": "NOV"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-cycle"
+                        },
+                        "MQ7ti": {
+                          "content": "Triatlón"
+                        },
+                        "HaJmW": {
+                          "content": "Triatlón Sprint Santa Marta"
+                        },
+                        "OOy0x": {
+                          "content": "Caribe Tri Team"
+                        },
+                        "Xy4es": {
+                          "content": "Bahía de Taganga · Santa Marta"
+                        },
+                        "uerVN": {
+                          "content": "COP 250.000"
+                        },
+                        "cxwIk": {
+                          "enabled": true,
+                          "x": 158
+                        }
+                      }
+                    },
+                    {
+                      "id": "NFSNM",
+                      "type": "ref",
+                      "ref": "C9T8S",
+                      "name": "Event — Gran Fondo Alto de Letras",
+                      "width": 280,
+                      "descendants": {
+                        "itQ5b": {
+                          "width": 280,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1675213442208-0b8ab1eb2007?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTExNDB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "GEWm3": {
+                          "content": "07"
+                        },
+                        "ejnni": {
+                          "content": "DIC"
+                        },
+                        "D1JAU": {
+                          "fill": "$discipline-cycle"
+                        },
+                        "MQ7ti": {
+                          "content": "Ciclismo"
+                        },
+                        "HaJmW": {
+                          "content": "Gran Fondo Alto de Letras"
+                        },
+                        "OOy0x": {
+                          "content": "Andes Cycling"
+                        },
+                        "Xy4es": {
+                          "content": "Mariquita → Letras · Tolima"
+                        },
+                        "uerVN": {
+                          "content": "COP 180.000"
+                        },
+                        "cxwIk": {
+                          "enabled": false,
+                          "x": 158
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "R5yNaN",
+              "name": "Swipe Dots",
+              "width": "fill_container",
+              "gap": 8,
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "b6ULu7",
+                  "name": "Dot",
+                  "fill": "$accent-cyan",
+                  "width": 22,
+                  "height": 7
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "vEgs9",
+                  "name": "Dot",
+                  "fill": "#14DBC433",
+                  "width": 7,
+                  "height": 7
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "B0KK9L",
+                  "name": "Dot",
+                  "fill": "#14DBC433",
+                  "width": 7,
+                  "height": 7
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "KIiIE",
+                  "name": "Dot",
+                  "fill": "#14DBC433",
+                  "width": 7,
+                  "height": 7
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "Zb649",
+                  "name": "Dot",
+                  "fill": "#14DBC433",
+                  "width": 7,
+                  "height": 7
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "g1Hxo",
+                  "name": "Dot",
+                  "fill": "#14DBC433",
+                  "width": 7,
+                  "height": 7
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aIKc4",
+              "name": "See All Wrap",
+              "width": "fill_container",
+              "padding": [
+                0,
+                20
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "QOXNA",
+                  "name": "See All Events",
+                  "width": "fill_container",
+                  "cornerRadius": 12,
+                  "stroke": "#14DBC4",
+                  "strokeWidth": 1.5,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fliot",
+                      "name": "Label",
+                      "fill": "$accent-cyan",
+                      "content": "Ver todos los eventos",
+                      "fontFamily": "$font-title",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "WBD56",
+                      "name": "Arrow",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-right",
+                      "library": "lucide",
+                      "fill": "$accent-cyan"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zByl7",
+          "name": "Organizaciones Section",
+          "width": "fill_container",
+          "fill": [
+            "#0A1626",
+            {
+              "type": "gradient",
+              "gradientType": "radial",
+              "enabled": true,
+              "rotation": 0,
+              "size": {
+                "width": 1.6,
+                "height": 0.6
+              },
+              "colors": [
+                {
+                  "color": "#14DBC41F",
+                  "position": 0
+                },
+                {
+                  "color": "#14DBC400",
+                  "position": 1
+                }
+              ],
+              "center": {
+                "y": 0
+              }
+            }
+          ],
+          "stroke": "#14DBC433",
+          "strokeWidth": {
+            "top": 1
+          },
+          "layout": "vertical",
+          "gap": 28,
+          "padding": [
+            64,
+            0
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "BXis0",
+              "name": "Heading",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "padding": [
+                0,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "bDrYd",
+                  "name": "Eyebrow Text",
+                  "fill": "#49F5E2",
+                  "content": "ORGANIZACIONES",
+                  "fontFamily": "$font-title",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "text",
+                  "id": "Me3fr",
+                  "name": "Section Title",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Clubes que entrenan con GRIT Arena",
+                  "lineHeight": 1,
+                  "textAlign": "center",
+                  "fontFamily": "$font-title",
+                  "fontSize": 34,
+                  "fontWeight": "700",
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "text",
+                  "id": "DaJgJ",
+                  "name": "Section Subtitle",
+                  "fill": "$text-subtext",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Encuentra tu club y entrena con tu equipo.",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "$font-body",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tRyEc",
+              "name": "Org Carousel",
+              "clip": true,
+              "width": "fill_container",
+              "height": 345,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "sOaCp",
+                  "x": 20,
+                  "y": 0,
+                  "name": "Track",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "id": "i15Sxg",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Bogotá Runners Club",
+                      "width": 310,
+                      "descendants": {
+                        "iykNv": {
+                          "width": 310,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1616967446045-2294957fab2b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTExNjN8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Bogotá Runners Club"
+                        },
+                        "UhsZs": {
+                          "content": "Bogotá"
+                        },
+                        "zu74y": {
+                          "content": "Comunidad de corredores que entrena 5 días a la semana con planes para 10K, media y maratón.",
+                          "height": 63
+                        },
+                        "y7DT4c": {
+                          "content": "Running"
+                        },
+                        "aNftV": {
+                          "content": "Trail"
+                        },
+                        "ZrbiH": {
+                          "content": "248 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#07111F",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#14DBC440",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#14DBC400",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#14DBC4",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "J2VNCm",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "footprints",
+                              "library": "lucide",
+                              "fill": "#14DBC4"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "id": "Rjdha",
+                      "type": "ref",
+                      "ref": "ojyQD",
+                      "name": "Org — Club Acuático Valle",
+                      "width": 310,
+                      "descendants": {
+                        "iykNv": {
+                          "width": 310,
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1775993167757-f919582c62da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3OTQ2OTExNjN8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "cover"
+                          }
+                        },
+                        "mlucS": {
+                          "content": "Club Acuático Valle"
+                        },
+                        "UhsZs": {
+                          "content": "Cali"
+                        },
+                        "zu74y": {
+                          "content": "Natación en piscina y aguas abiertas para todas las edades, con entrenadores certificados.",
+                          "height": 63
+                        },
+                        "y7DT4c": {
+                          "content": "Natación"
+                        },
+                        "aNftV": {
+                          "content": "Aguas abiertas"
+                        },
+                        "ZrbiH": {
+                          "content": "176 atletas"
+                        },
+                        "f38mWt": {
+                          "fill": [
+                            "#0B2A4A",
+                            {
+                              "type": "gradient",
+                              "gradientType": "radial",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "width": 1.4,
+                                "height": 1.4
+                              },
+                              "colors": [
+                                {
+                                  "color": "#49F5E240",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#49F5E200",
+                                  "position": 1
+                                }
+                              ],
+                              "center": {
+                                "x": 0.3,
+                                "y": 0.2
+                              }
+                            }
+                          ],
+                          "stroke": "#49F5E2",
+                          "strokeWidth": 2,
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "PNw5i",
+                              "name": "Logo Mark",
+                              "width": 38,
+                              "height": 38,
+                              "icon": "waves",
+                              "library": "lucide",
+                              "fill": "#49F5E2"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "M7qZxc",
+              "name": "CTA Block",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                0,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ffTXR",
+                  "name": "See All Orgs",
+                  "width": "fill_container",
+                  "fill": "$accent-cyan",
+                  "cornerRadius": 12,
+                  "gap": 10,
+                  "padding": [
+                    15,
+                    0
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ZXG4i",
+                      "name": "Label",
+                      "fill": "#07111F",
+                      "content": "Ver todas las organizaciones",
+                      "fontFamily": "$font-title",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "uvwTq",
+                      "name": "Arrow",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-right",
+                      "library": "lucide",
+                      "fill": "#07111F"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rwxbb",
+                  "name": "Login Hint",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "UPxxG",
+                      "name": "Lock",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "lock",
+                      "library": "lucide",
+                      "fill": "#8A9AAB"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Hf2Xr",
+                      "name": "Hint",
+                      "fill": "#8A9AAB",
+                      "content": "Requiere iniciar sesión",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jDEXm",
+          "name": "Club CTA Wrap",
+          "width": "fill_container",
+          "padding": [
+            56,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Z0YSLf",
+              "name": "Club CTA Band",
+              "width": "fill_container",
+              "fill": [
+                "#0F1F30",
+                {
+                  "type": "gradient",
+                  "gradientType": "linear",
+                  "enabled": true,
+                  "rotation": 180,
+                  "size": {
+                    "height": 1
+                  },
+                  "colors": [
+                    {
+                      "color": "#14DBC42E",
+                      "position": 0
+                    },
+                    {
+                      "color": "#14DBC400",
+                      "position": 0.8
+                    }
+                  ]
+                }
+              ],
+              "cornerRadius": 18,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 18,
+              "padding": 28,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "BECVw",
+                  "name": "Title",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "¿Tienes un club o equipo deportivo?",
+                  "lineHeight": 1.05,
+                  "fontFamily": "$font-title",
+                  "fontSize": 28,
+                  "fontWeight": "700",
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "text",
+                  "id": "NDh8I",
+                  "name": "Body",
+                  "fill": "$text-subtext",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Gestiona atletas, entrenamientos, pagos y eventos en una sola plataforma.",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font-body",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "wkoTT",
+                  "name": "Know GRIT",
+                  "width": "fill_container",
+                  "cornerRadius": 12,
+                  "stroke": "#14DBC4",
+                  "strokeWidth": 1.5,
+                  "gap": 10,
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zZeaD",
+                      "name": "Label",
+                      "fill": "$accent-cyan",
+                      "content": "Conoce GRIT Arena",
+                      "fontFamily": "$font-title",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "RopaB",
+                      "name": "Ext",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-up-right",
+                      "library": "lucide",
+                      "fill": "$accent-cyan"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "D32AE1",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "#060E1A",
+          "stroke": "#FFFFFF0D",
+          "strokeWidth": {
+            "top": 1
+          },
+          "layout": "vertical",
+          "gap": 22,
+          "padding": [
+            36,
+            20,
+            28,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "mG9pw",
+              "name": "Logo",
+              "width": 130,
+              "height": 32,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "images/logo-navbar.png",
+                "mode": "contain"
+              }
+            },
+            {
+              "type": "frame",
+              "id": "FXCDj",
+              "name": "Links",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jUCgl",
+                  "name": "Eventos",
+                  "fill": "$text-subtext",
+                  "content": "Eventos",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "g7RIa",
+                  "name": "Iniciar sesión",
+                  "fill": "$text-subtext",
+                  "content": "Iniciar sesión",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "QWJTy",
+                  "name": "Contacto",
+                  "fill": "$text-subtext",
+                  "content": "Contacto",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aElW4",
+              "name": "Social",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "oO8f7",
+                  "name": "instagram",
+                  "width": 38,
+                  "height": 38,
+                  "fill": "#FFFFFF08",
+                  "cornerRadius": 999,
+                  "stroke": "#FFFFFF1A",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "zSkOd",
+                      "name": "instagram icon",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "instagram",
+                      "library": "lucide",
+                      "fill": "$text-subtext"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "V4xUdy",
+                  "name": "facebook",
+                  "width": 38,
+                  "height": 38,
+                  "fill": "#FFFFFF08",
+                  "cornerRadius": 999,
+                  "stroke": "#FFFFFF1A",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "b3vWqn",
+                      "name": "facebook icon",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "facebook",
+                      "library": "lucide",
+                      "fill": "$text-subtext"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kImIg",
+                  "name": "message-circle",
+                  "width": 38,
+                  "height": 38,
+                  "fill": "#FFFFFF08",
+                  "cornerRadius": 999,
+                  "stroke": "#FFFFFF1A",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nh50Z",
+                      "name": "message-circle icon",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "message-circle",
+                      "library": "lucide",
+                      "fill": "$text-subtext"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "O0IhqO",
+              "name": "Copyright",
+              "fill": "#8A9AAB",
+              "content": "© 2026 GRIT Arena",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ldXx5",
+      "x": 10214,
+      "y": 0,
+      "name": "App Home — Estados y notas",
+      "clip": true,
+      "width": 1100,
+      "fill": "$bg-navy",
+      "layout": "vertical",
+      "gap": 40,
+      "padding": 56,
+      "children": [
+        {
+          "type": "text",
+          "id": "u67tx",
+          "name": "Label CINTA DE EVENTOS — CARGANDO",
+          "fill": "#8A9AAB",
+          "content": "CINTA DE EVENTOS — CARGANDO",
+          "fontFamily": "$font-title",
+          "fontSize": 14,
+          "fontWeight": "700",
+          "letterSpacing": 3
+        },
+        {
+          "type": "frame",
+          "id": "G9Aft2",
+          "name": "Skeleton Row",
+          "width": "fill_container",
+          "gap": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "R2rgY",
+              "name": "Skeleton Card",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "$card-fill",
+              "cornerRadius": 16,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "N5EcPZ",
+                  "name": "Sk Cover",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -60,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#122233",
+                        "position": 0
+                      },
+                      {
+                        "color": "#1A2E44",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#122233",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": "fill_container",
+                  "height": 190
+                },
+                {
+                  "type": "frame",
+                  "id": "olTvY",
+                  "name": "Sk Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "vtQeC",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 220,
+                      "height": 20
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "L3dYq",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 150,
+                      "height": 20
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "UBGKZ",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 180,
+                      "height": 12
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "VM76M",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 200,
+                      "height": 12
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wrub0",
+                      "name": "Sk Footer",
+                      "width": "fill_container",
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "VgEcp",
+                          "name": "Sk Price",
+                          "fill": "#16283A",
+                          "width": 110,
+                          "height": 22
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "RAhZO",
+                          "name": "Sk Go",
+                          "fill": "#16283A",
+                          "width": 40,
+                          "height": 40
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "pLOB8",
+              "name": "Skeleton Card",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "$card-fill",
+              "cornerRadius": 16,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "G5s3XX",
+                  "name": "Sk Cover",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -60,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#122233",
+                        "position": 0
+                      },
+                      {
+                        "color": "#1A2E44",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#122233",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": "fill_container",
+                  "height": 190
+                },
+                {
+                  "type": "frame",
+                  "id": "NDPCL",
+                  "name": "Sk Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "O42HZf",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 220,
+                      "height": 20
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "elpuh",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 150,
+                      "height": 20
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "WKgtx",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 180,
+                      "height": 12
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "wFyqa",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 200,
+                      "height": 12
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eO7Y0",
+                      "name": "Sk Footer",
+                      "width": "fill_container",
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "jNiwy",
+                          "name": "Sk Price",
+                          "fill": "#16283A",
+                          "width": 110,
+                          "height": 22
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "bgdW4",
+                          "name": "Sk Go",
+                          "fill": "#16283A",
+                          "width": 40,
+                          "height": 40
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ZuWhj",
+              "name": "Skeleton Card",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "$card-fill",
+              "cornerRadius": 16,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "s9ClT",
+                  "name": "Sk Cover",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": -60,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#122233",
+                        "position": 0
+                      },
+                      {
+                        "color": "#1A2E44",
+                        "position": 0.5
+                      },
+                      {
+                        "color": "#122233",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "width": "fill_container",
+                  "height": 190
+                },
+                {
+                  "type": "frame",
+                  "id": "j1TihS",
+                  "name": "Sk Body",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "PS4Ka",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 220,
+                      "height": 20
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "XuLTa",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 150,
+                      "height": 20
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "X4bcn",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 180,
+                      "height": 12
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "i9lsKl",
+                      "name": "Sk Line",
+                      "fill": "#16283A",
+                      "width": 200,
+                      "height": 12
+                    },
+                    {
+                      "type": "frame",
+                      "id": "his3n",
+                      "name": "Sk Footer",
+                      "width": "fill_container",
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 6,
+                          "id": "KayYD",
+                          "name": "Sk Price",
+                          "fill": "#16283A",
+                          "width": 110,
+                          "height": 22
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "bwQOl",
+                          "name": "Sk Go",
+                          "fill": "#16283A",
+                          "width": 40,
+                          "height": 40
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "B4YBFD",
+          "name": "Label CINTA DE EVENTOS — SIN EVENTOS",
+          "fill": "#8A9AAB",
+          "content": "CINTA DE EVENTOS — SIN EVENTOS",
+          "fontFamily": "$font-title",
+          "fontSize": 14,
+          "fontWeight": "700",
+          "letterSpacing": 3
+        },
+        {
+          "type": "frame",
+          "id": "zV9UA",
+          "name": "Empty State",
+          "width": "fill_container",
+          "fill": "#0F1F3080",
+          "cornerRadius": 20,
+          "stroke": "#14DBC433",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            56,
+            40
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "xXvd8",
+              "name": "Icon Wrap",
+              "width": 64,
+              "height": 64,
+              "fill": "#14DBC41A",
+              "cornerRadius": 999,
+              "stroke": "$glass-border",
+              "strokeWidth": 1,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "gFgLv",
+                  "name": "Calendar",
+                  "width": 28,
+                  "height": 28,
+                  "icon": "calendar-clock",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "R38wu",
+              "name": "Empty Title",
+              "fill": "$text-primary",
+              "content": "Pronto habrá nuevos eventos",
+              "fontFamily": "$font-title",
+              "fontSize": 28,
+              "fontWeight": "700",
+              "fontStyle": "italic"
+            },
+            {
+              "type": "text",
+              "id": "LGH2j",
+              "name": "Empty Body",
+              "fill": "$text-subtext",
+              "textGrowth": "fixed-width",
+              "width": 520,
+              "content": "Los clubes están preparando su próxima fecha. Mientras tanto, explora el calendario completo.",
+              "lineHeight": 1.6,
+              "textAlign": "center",
+              "fontFamily": "$font-body",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "jZ6bB",
+              "name": "Empty CTA",
+              "cornerRadius": 12,
+              "stroke": "#14DBC4",
+              "strokeWidth": 1.5,
+              "gap": 10,
+              "padding": [
+                13,
+                22
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "DSyjs",
+                  "name": "Label",
+                  "fill": "$accent-cyan",
+                  "content": "Ver eventos",
+                  "fontFamily": "$font-title",
+                  "fontSize": 17,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "icon",
+                  "id": "IPqXy",
+                  "name": "Arrow",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "arrow-right",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "LdgcB",
+          "name": "Label NOTAS DE IMPLEMENTACIÓN",
+          "fill": "#8A9AAB",
+          "content": "NOTAS DE IMPLEMENTACIÓN",
+          "fontFamily": "$font-title",
+          "fontSize": 14,
+          "fontWeight": "700",
+          "letterSpacing": 3
+        },
+        {
+          "type": "frame",
+          "id": "mwq5t",
+          "name": "Notes Row",
+          "width": "fill_container",
+          "gap": 20,
+          "children": [
+            {
+              "type": "note",
+              "id": "Rigkp",
+              "name": "Note",
+              "width": "fill_container",
+              "height": 300,
+              "content": "HERO\n• Fondo: <video> grit-hero-loop.webm/.mp4, autoplay muted loop playsInline, object-fit cover.\n• Poster = images/grit-hero-poster.jpg (también con prefers-reduced-motion).\n• Overlay radial oscuro centrado + degradado inferior hacia #07111F.\n• CTA primario → /eventos · secundario → /auth/login.\n• Con sesión activa: '/' redirige a /portal (o mostrar 'Ir a mi portal')."
+            },
+            {
+              "type": "note",
+              "id": "OFQGz",
+              "name": "Note",
+              "width": "fill_container",
+              "height": 300,
+              "content": "CINTA PREMIUM DE EVENTOS\n• Datos: eventos públicos próximos (EventoPublicoListItem), máx. 12, orden por fecha.\n• Desktop: marquee infinito (duplicar lista), ~40px/s, pausa en hover/focus, bordes con fade.\n• Mobile: scroll-snap horizontal con swipe + dots.\n• Tarjeta destacada: cinta PREMIUM + borde/glow cian (criterio a definir: evento destacado).\n• Click tarjeta → /eventos/[id] · 'Ver todos' → /eventos.\n• Estados: skeleton (cargando), vacío (arriba)."
+            },
+            {
+              "type": "note",
+              "id": "obUgK",
+              "name": "Note",
+              "width": "fill_container",
+              "height": 300,
+              "content": "ORGANIZACIONES\n• Mostrar 6 organizaciones con su LOGO (tenants.logo_url) superpuesto al banner (banner_url), nombre, ciudad, descripción, disciplinas y # atletas.\n• Logo: 76×76, radio 20, borde 4px #0B1826, object-fit cover.\n• Sin logo → iniciales sobre degradado cian (fallback del componente).\n• Requiere lectura pública de tenants para anon: vista/RPC con solo campos públicos (RLS).\n• 'Ver todas las organizaciones' → /auth/login?next=/portal/orgs.\n• Mobile: carrusel horizontal con scroll-snap."
             }
           ]
         }

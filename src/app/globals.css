@@ -190,76 +190,10 @@ body {
     color: var(--landing-primary-light);
   }
 
-  .landing-hero-overlay {
-    background:
-      radial-gradient(circle at 18% 42%, rgba(7, 17, 31, 0.56) 0%, rgba(7, 17, 31, 0.32) 24%, rgba(7, 17, 31, 0.08) 50%, rgba(7, 17, 31, 0) 70%),
-      linear-gradient(90deg, rgba(7, 17, 31, 0.38) 0%, rgba(7, 17, 31, 0.22) 34%, rgba(7, 17, 31, 0.06) 62%, rgba(7, 17, 31, 0.28) 100%),
-      linear-gradient(180deg, rgba(7, 17, 31, 0.08) 0%, rgba(7, 17, 31, 0.38) 100%);
-  }
-
-  .landing-hero-glow {
-    background: radial-gradient(circle at center, rgba(20, 219, 196, 0.22) 0%, rgba(20, 219, 196, 0) 68%);
-  }
-
   .landing-panel {
     border: 1px solid rgba(33, 50, 71, 0.9);
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(19, 32, 52, 0.82) 100%);
     backdrop-filter: blur(14px);
-  }
-
-  .landing-value-item {
-    border: 1px solid rgba(33, 50, 71, 0.95);
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(22, 35, 56, 0.9) 100%);
-    backdrop-filter: blur(10px);
-  }
-
-  .landing-reveal {
-    transition:
-      opacity 700ms ease-out,
-      transform 700ms ease-out;
-  }
-
-  .landing-operation-mockup {
-    border: 1px solid rgba(33, 50, 71, 0.9);
-    border-radius: 24px;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(20, 219, 196, 0.14) 0%, rgba(20, 219, 196, 0) 55%),
-      linear-gradient(180deg, rgba(19, 32, 52, 0.8) 0%, rgba(9, 20, 35, 0.9) 100%);
-  }
-
-  .landing-operation-image-pop {
-    transform: perspective(1200px) rotateY(-8deg) rotateX(4deg) rotateZ(-2deg);
-    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 24px rgba(20, 219, 196, 0.08));
-    transition: transform 500ms ease-out;
-  }
-
-  .landing-operation-image-pop:hover {
-    transform: perspective(1200px) rotateY(-3deg) rotateX(1.5deg) rotateZ(-0.5deg);
-  }
-
-  @media (max-width: 639px) {
-    .landing-operation-image-pop,
-    .landing-operation-image-pop:hover {
-      transform: perspective(1200px) rotateY(-4deg) rotateX(2deg) rotateZ(-1deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .landing-reveal,
-    .landing-operation-image-pop {
-      transition: none;
-    }
-
-    .landing-reveal {
-      opacity: 1 !important;
-      transform: none !important;
-    }
-  }
-
-  .landing-step-connector {
-    height: 1px;
-    width: 28px;
-    background: rgba(33, 50, 71, 0.5);
   }
 }
 
@@ -318,3 +252,37 @@ body {
   }
 }
 
+
+/* App home events ribbon (US-0140): seamless marquee over a duplicated track */
+@keyframes home-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.home-marquee {
+  animation: home-marquee var(--home-marquee-duration, 60s) linear infinite;
+}
+
+.home-marquee-wrap:hover .home-marquee,
+.home-marquee-wrap:focus-within .home-marquee {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-marquee {
+    animation: none;
+  }
+
+  .home-marquee-copy {
+    display: none;
+  }
+
+  .home-marquee-wrap {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+}
