@@ -1,23 +1,26 @@
-import Header from '@/components/landing/Header';
-import HeroSection from '@/components/landing/HeroSection';
-import ProblemSolutionSection from '@/components/landing/ProblemSolutionSection';
-import OperationSection from '@/components/landing/operation';
-import AdministrationSection from '@/components/landing/administration';
-import PricingSection from '@/components/landing/PricingSection';
-import Footer from '@/components/landing/Footer';
+import type { Metadata } from 'next';
+import { HomePage } from '@/components/home';
+import { createClient } from '@/services/supabase/server';
 
-export default function Home() {
-  return (
-    <div className="landing-shell selection:bg-[var(--landing-primary)] selection:text-slate-950">
-      <Header />
-      <HeroSection />
-      <ProblemSolutionSection />
-      <OperationSection />
-      <AdministrationSection />
-      <PricingSection />
-      <Footer />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: 'GRIT Arena — Eventos y clubes deportivos',
+  description: 'Descubre eventos deportivos, entrena con tu club y gestiona tus entradas en GRIT Arena.',
+};
+
+async function readIsAuthenticated(): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    return Boolean(data.user);
+  } catch (error) {
+    // The home is public: a session read failure just renders the anonymous variant
+    console.error('Home: failed to read the session', error);
+    return false;
+  }
 }
 
-
+/** Public app home (US-0140). No redirect: anonymous and signed-in users both land here. */
+export default async function Home() {
+  const isAuthenticated = await readIsAuthenticated();
+  return <HomePage isAuthenticated={isAuthenticated} />;
+}
