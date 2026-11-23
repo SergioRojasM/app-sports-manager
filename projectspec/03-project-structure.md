@@ -1070,7 +1070,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 # Server-only — NEVER prefix with NEXT_PUBLIC_ (US-0114)
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # the project's service-role key (not a personal access token)
-APP_URL=http://localhost:3000                     # trusted origin for Auth email links; production: https://www.grit-arena.com
+APP_URL=http://localhost:3000                     # trusted origin for Auth email links; production: https://app.grit-arena.com
 
 # Notifications module (US-0125)
 RESEND_API_KEY=                                   # empty = emails are not sent (outbox rows fail with resend_not_configured)
