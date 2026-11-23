@@ -12,7 +12,7 @@ Following structure reflects the current implementation and the target scalable 
 │   ├── app/                              # Inbound adapters (routing / delivery)
 │   │   ├── layout.tsx                    # Root layout with providers
 │   │   ├── page.tsx                      # Public app home (US-0140): server-reads the session (getUser → isAuthenticated, failure = anonymous) and renders <HomePage/>; no redirect for signed-in users
-│   │   ├── globals.css                   # Global styles & Tailwind imports; `--grit-*` design tokens (1:1 with grit-arena-v2.pen variables) + `.grit-shell` background (US-0116) — `.grit-scrollbar` thin cyan scrollbar for the portal sidebar / drawer navigation (US-0138) — `home-marquee` keyframes + `.home-marquee` / `.home-marquee-wrap` (pause on hover/focus-within) / `.home-marquee-copy`, all disabled under prefers-reduced-motion (US-0140)
+│   │   ├── globals.css                   # Global styles & Tailwind imports; `--grit-*` design tokens (grit-arena-v3.pen values under the v2 names, US-0141; introduced in US-0116) + `.grit-shell` v3 canvas with bottom-right cyan glow — `.grit-scrollbar` thin neutral scrollbar for the portal sidebar / drawer navigation (US-0138) — `.grit-select-chevron` for `gritPillSelectClass` (US-0141) — `home-marquee` keyframes + `.home-marquee` / `.home-marquee-wrap` (pause on hover/focus-within) / `.home-marquee-copy`, all disabled under prefers-reduced-motion (US-0140)
 │   │   ├── api/                          # Privileged route handlers (server-only; the ONLY place the service-role client is used) (US-0114)
 │   │   │   └── portal/orgs/[tenant_id]/
 │   │   │       ├── invitaciones/route.ts                              # POST: crear_invitacion_tenant (user session) → deliverInvitation() queues the delivery through the notifications module (US-0137); identical 202 whether or not the email already has an account
@@ -106,13 +106,13 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── EventoDetalleBreadcrumb.tsx  # ⌂ Inicio › Eventos › {nombre} + right-aligned "Volver"
 │   │   │       └── index.ts
 │   │   ├── portal/
-│   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v2 Navbar styling (grit-arena-v2 oUFl9); no breadcrumb inside (US-0116) — the bell is `NotificacionesBell` (US-0125) — US-0138: no nav dropdown; logo `lg:hidden` (it lives in PortalSidebar); hamburger (`Abrir menú`, `lg:hidden`) on the right owns the drawer open state and renders PortalMobileDrawer on first open
-│   │   │   ├── PortalBreadcrumb.tsx      # Standalone row rendered by portal/layout.tsx at the top of <main> (design AOIa5), visible + wrapping on mobile; SLUG_LABELS map (US-0116); /portal/eventos/{uuid} renders "Evento" (US-0120) — labels `mis-entradas` → "Mis entradas", `compras` → "Compras" (US-0121) — `control-ingreso` → "Control de ingreso", and the event UUID under it → "Evento" (US-0131) — `notificaciones` → "Notificaciones" (US-0125)
+│   │   │   ├── PortalHeader.tsx          # Shared portal shell components — v3 Topbar (`vwVLa`): transparent, borderless, 56px; holds `PortalBreadcrumb variant="topbar"` at ≥1024px (US-0141) — the bell is `NotificacionesBell` (US-0125) — US-0138: no nav dropdown; logo `lg:hidden` (it lives in PortalSidebar); hamburger (`GritIconButton` `Abrir menú`, `lg:hidden`) on the right owns the drawer open state and renders PortalMobileDrawer on first open
+│   │   │   ├── PortalBreadcrumb.tsx      # `variant: 'topbar' | 'inline'` (US-0141): topbar inside PortalHeader ≥1024px; inline row at the top of <main> below 1024px (wraps); v3 Breadcrumb `c3k2e` styles; SLUG_LABELS map (US-0116); /portal/eventos/{uuid} renders "Evento" (US-0120) — labels `mis-entradas` → "Mis entradas", `compras` → "Compras" (US-0121) — `control-ingreso` → "Control de ingreso", and the event UUID under it → "Evento" (US-0131) — `notificaciones` → "Notificaciones" (US-0125)
 │   │   │   ├── PortalNavigationProvider.tsx  # Client context mounted by portal/layout.tsx: runs usePortalNavigation once for the sidebar and the drawer; `usePortalNavigationContext()` (US-0138)
-│   │   │   ├── PortalSidebar.tsx         # Desktop navigation (`hidden lg:flex`, 280px, `bg-grit-sidebar`, design E73seM): logo, scrollable PortalNavContent, PortalSidebarUser (US-0138)
+│   │   │   ├── PortalSidebar.tsx         # Desktop navigation (`hidden lg:flex`): floating 240px v3 sidebar (`Vl7zI`/`N3E8S`, `rounded-grit-3xl`, gradient surface, 16px viewport inset from portal/layout) — logo `/logo-grit-arena-dark.png`, scrollable PortalNavContent, PortalSidebarUser (US-0138, v3 US-0141)
 │   │   │   ├── PortalMobileDrawer.tsx    # <1024px drawer (design AGzMs): BodyPortal, z-[60], slides in from the right, `h-dvh` with its own scroll region, scroll lock on body + #portal-main, focus trap, closes on X / scrim / Escape / navigation / ≥1024px (US-0138)
-│   │   │   ├── PortalNavContent.tsx      # Shared nav body (`variant: sidebar | drawer`): "MENÚ" global links + collapsible "ORGANIZACIÓN" tree (tenant name only — never the logo), collapsible "MENÚ" section and groups (only the active group starts expanded), single active link (US-0138)
-│   │   │   ├── PortalSidebarUser.tsx     # Sidebar/drawer footer: avatar or initials, name, tenant role label (email outside a tenant), link to /portal/perfil, logout (US-0138)
+│   │   │   ├── PortalNavContent.tsx      # Shared nav body (`variant: sidebar | drawer`): Org Switcher (`weLbQ`; tenant initial + name, links to /portal/orgs — never the logo), collapsible "MI CUENTA" global links, always-expanded "ORGANIZACIÓN" tree with collapsible groups (only the active group starts expanded), single active link with the v3 gradient pill + live dot (US-0138, v3 US-0141)
+│   │   │   ├── PortalSidebarUser.tsx     # Sidebar/drawer footer — v3 User Card (`XLHCz`): GritAvatar, name, tenant role label in cyan (email outside a tenant), link to /portal/perfil, logout GritIconButton (US-0138, v3 US-0141)
 │   │   │   ├── UserAvatarMenu.tsx
 │   │   │   ├── inicio/                   # Feature slice (portal/inicio — user home dashboard)
 │   │   │   │   ├── InicioPage.tsx
@@ -377,19 +377,27 @@ Following structure reflects the current implementation and the target scalable 
 │   │   └── ui/
 │   │       ├── MultilineText.tsx        # Renders a string with whitespace-pre-wrap (preserves line breaks), optional maxLength truncation, `as` tag prop (p/span/div) — US-0099
 │   │       ├── BodyPortal.tsx           # Renders children on document.body (escapes backdrop-blur containing blocks); moved from EventoModalShell, which re-exports it (US-0138)
-│   │       ├── grit/                    # grit-arena-v2 presentational kit (US-0116) — no data fetching; values taken from grit-arena-v2.pen
-│   │       │   ├── GritCard.tsx         # variant glass|card|highlight, padding sm|md|lg|xl (16/20/24/28), radius 16, `as`
-│   │       │   ├── GritButton.tsx       # primary|secondary|outline-accent|ghost, sm|md, radius 10; renders <Link>/<a external> when href is set; loading/disabled; cyan focus ring
-│   │       │   ├── GritTag.tsx          # Uppercase pill (accent|neutral) with optional icon
-│   │       │   ├── GritBadge.tsx        # Small info chip (card fill + glass border)
-│   │       │   ├── GritIconTile.tsx     # 34|40|48 px icon container, rounded|circle, card|accent tone
+│   │       ├── grit/                    # grit-arena-v3 presentational kit (US-0116, v3 US-0141) — no data fetching; values from grit-arena-v3.pen (board ljQp3); see DESIGN.md
+│   │       │   ├── GritCard.tsx         # variant card|glass|highlight|inset, padding none|sm|md|lg|xl (0/16/20/24/28), radius 22 (inset 16), `as`
+│   │       │   ├── GritButton.tsx       # pill; primary|secondary|outline-accent|ghost; sm|md|lg = 31/37/42px (primary lg glows = page CTA); <Link>/<a external> with href; loading/disabled
+│   │       │   ├── GritIconButton.tsx   # round icon-only button/link, sm|md|lg = 30/38/44, default|ghost, required `label` (aria-label) — US-0141
+│   │       │   ├── GritTag.tsx          # Status/role pill (11px/600, not uppercase): accent|neutral|warning|danger|violet, `dot`, icon, colorClass
+│   │       │   ├── GritBadge.tsx        # Neutral info chip (Chip / Default look)
+│   │       │   ├── GritChip.tsx         # Toggle filter chip, `active` → aria-pressed, optional icon — US-0141
+│   │       │   ├── GritSegmented.tsx    # 'use client'; soft|solid segmented control / tabs with count, role=group + aria-pressed, scrolls on narrow screens — US-0141
+│   │       │   ├── GritSearchField.tsx  # Pill type=search input, md|lg (37/44), requires aria-label or aria-labelledby — US-0141
+│   │       │   ├── GritKpiCard.tsx      # Horizontal KPI card (icon chip, Exo 2 300 36px value, label, detail, highlight) — US-0141
+│   │       │   ├── GritAvatar.tsx       # 32|34|38 round avatar, neutral|soft|solid, initials from name or decorative image — US-0141
+│   │       │   ├── GritProgress.tsx     # 6px progress bar + JetBrains Mono %, role=progressbar, clamps 0–100 — US-0141
+│   │       │   ├── GritPagination.tsx   # 'use client'; table pager with summary, ellipsis over 7 pages, nav[aria-label=Paginación]; exports getPaginationItems — US-0141
+│   │       │   ├── GritIconTile.tsx     # 34|40|48 px icon container (12px radius) or circle; card|accent|warning|violet|danger tone
 │   │       │   ├── GritInfoRow.tsx      # Icon tile + label/value pair
-│   │       │   ├── GritSectionHeading.tsx # Rajdhani h2 (md 20px / lg 22px) + subtitle + action slot
-│   │       │   ├── GritPageHeader.tsx   # The page's single h1 (eyebrow, title + cyan titleAccent, subtitle, actions)
-│   │       │   ├── GritPageContainer.tsx # 1440 max width, 16/24/48 side padding, 32 gap — applied once by portal/layout.tsx to every Portal page
+│   │       │   ├── GritSectionHeading.tsx # Exo 2 500 h2 (md 17px / lg 19px) + muted subtitle + action slot
+│   │       │   ├── GritPageHeader.tsx   # The page's single h1: Exo 2 300 40px (30 mobile), cyan titleAccent (`italic` = accent only), eyebrow, subtitle, actions
+│   │       │   ├── GritPageContainer.tsx # 1440 max width, 16/24/32 side padding, 12 top / 32 bottom, 20 gap — applied once by portal/layout.tsx
 │   │       │   ├── GritDivider.tsx, GritIcon.tsx (Material Symbols @ weight 300), GritEmptyState.tsx
-│   │       │   ├── icon-map.ts          # Design Lucide name → Material Symbols ligature (single swap point)
-│   │       │   ├── styles.ts            # cx(), gritInputClass, gritSelectClass, gritFocusRing
+│   │       │   ├── icon-map.ts          # Design Lucide name → Material Symbols ligature (single swap point; includes every v3 icon)
+│   │       │   ├── styles.ts            # cx(), gritInputClass/gritSelectClass (derived form fields), gritPillSelectClass, gritFocusRing, gritTable{Head,HeadCell,Row,Cell}Class
 │   │       │   └── index.ts             # Re-exported from components/ui/index.ts
 │   │       └── index.ts
 │   │
@@ -1112,13 +1120,13 @@ src/
 - This app keeps everything with data or auth: login, portal and the public pages `/eventos`, `/eventos/[event_id]`, `/equipos`, `/atletas`.
 - The app root `/` is the **public app home** (US-0140, `src/components/home/`): video hero, upcoming public events ribbon and public organizations showcase. It does not redirect signed-in users. The old marketing sections, `useScrollReveal`, `public/landing/**` and their CSS utilities were removed in US-0140; `src/components/landing/{Header,Footer,ComingSoonPage,eventos}` remain as the shell of `/eventos`, `/equipos`, `/atletas`. Do not add marketing content here.
 
-## Visual Design System (US-0116)
+## Visual Design System (US-0116, v3 US-0141)
 
-- **Source of truth**: `projectspec/designs/pencil/grit-arena-v2.pen`. Portal code uses only `grit-*` tokens (`bg-grit-bg`, `text-grit-text|subtext|muted`, `grit-cyan`, `bg-grit-glass|card`, `border-grit-glass-border`, `grit-danger|success`, `grit-discipline-*`) and the `@/components/ui` grit kit.
-- **Fonts**: `font-grit-title` (Rajdhani) for headings, KPI values and prices; `font-grit-body` (Montserrat) everywhere else.
-- **Radii**: use `rounded-grit-{xs,sm,md,lg,xl,2xl}` (6–16px). Never `rounded-lg`/`rounded-xl` in Portal code — `tailwind.config.ts` overrides them to 32/48px for landing/auth.
+- **Source of truth**: `projectspec/designs/pencil/grit-arena-v3.pen` (component board `ljQp3`); the full contract — tokens, kit, shell, patterns and the page-migration checklist — is the repo-root `DESIGN.md`. Portal code uses only `grit-*` tokens (`bg-grit-bg`, `text-grit-text|subtext|muted`, `grit-cyan`, `grit-on-brand`, `grit-surface*`, `grit-line`, `grit-warning|violet|danger|success`, `grit-discipline-*`) and the `@/components/ui` grit kit. US-0141 moved tokens, kit and shell to v3; pages migrate in their own stories.
+- **Fonts**: `font-grit-title` (Exo 2 — light 300 for h1/KPIs, 500 for section titles) for headings, KPI values and prices; `font-grit-body` (Montserrat) everywhere else; `font-grit-mono` (JetBrains Mono) for tabular numbers. Rajdhani remains only for landing/auth.
+- **Radii**: use `rounded-grit-{xs,sm,md,lg,xl,2xl,3xl}` (6–14px, 22px cards, 28px shell) and `rounded-full` for every control. Never `rounded-lg`/`rounded-xl` in Portal code — `tailwind.config.ts` overrides them to 32/48px for landing/auth.
 - **Translucent tokens** (`grit-glass`, `grit-card`, `grit-glass-border`) take no `/opacity` modifier; solid ones (`grit-cyan`, `grit-bg`, …) do.
-- **Pages**: `portal/layout.tsx` provides `.grit-shell`, the two-column shell (`PortalSidebar` ≥1024px + header/`<main id="portal-main">`, US-0138), the breadcrumb row and one `GritPageContainer`; page components render one `h1` (via `GritPageHeader`) and no outer page padding. Modal backdrops: `bg-grit-bg/70 backdrop-blur-sm`.
+- **Pages**: `portal/layout.tsx` provides `.grit-shell`, the two-column shell (floating `PortalSidebar` ≥1024px with a 16px inset + transparent topbar/`<main id="portal-main">`, US-0138/US-0141), the breadcrumb (topbar ≥1024px, inline row below) and one `GritPageContainer`; page components render one `h1` (via `GritPageHeader`) and no outer page padding. Modal backdrops: `bg-grit-bg/70 backdrop-blur-sm`.
 - **Deprecated** (landing/auth only, do not use in Portal): `turquoise`, `accent-teal`, `navy-*`, `card-dark`, `.glass`, `.glass-card`, `landing-*`.
 
 ## Code Style Rules

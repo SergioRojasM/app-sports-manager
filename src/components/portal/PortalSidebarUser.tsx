@@ -1,9 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { GritIcon, cx, gritFocusRing } from '@/components/ui';
+import { GritAvatar, GritIconButton, cx, gritFocusRing } from '@/components/ui';
 import { useAuth } from '@/hooks/auth/useAuth';
 import type { PortalDisplayProfile, UserRole } from '@/types/portal.types';
 
@@ -20,12 +19,11 @@ type PortalSidebarUserProps = {
   onNavigate?: () => void;
 };
 
-/** User footer of the sidebar and the mobile drawer (US-0138). */
+/** User footer of the sidebar and the mobile drawer — v3 User Card `XLHCz` (US-0138, v3 US-0141). */
 export function PortalSidebarUser({ profile, tenantRole, onNavigate }: PortalSidebarUserProps) {
   const router = useRouter();
   const { signOut } = useAuth();
   const fullName = `${profile.nombre} ${profile.apellido}`.trim();
-  const initials = `${profile.nombre?.[0] ?? ''}${profile.apellido?.[0] ?? ''}`.toUpperCase();
 
   // Same flow as UserAvatarMenu's "Cerrar sesión"
   const handleLogout = async () => {
@@ -36,39 +34,28 @@ export function PortalSidebarUser({ profile, tenantRole, onNavigate }: PortalSid
   };
 
   return (
-    <div className="flex items-center gap-3 px-1">
+    <div className="flex items-center gap-2 rounded-[20px] border border-white/[0.07] bg-white/[0.03] py-2 pl-2 pr-2.5">
       <Link
         href="/portal/perfil"
         onClick={onNavigate}
-        className={cx('flex min-w-0 flex-1 items-center gap-3 rounded-grit-md p-1 transition-colors hover:bg-grit-cyan/5', gritFocusRing)}
+        className={cx('flex min-w-0 flex-1 items-center gap-2.5 rounded-[14px] p-1 transition-colors hover:bg-white/[0.04]', gritFocusRing)}
       >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-grit-glass-border bg-grit-cyan/10">
-          {profile.foto_url ? (
-            <Image src={profile.foto_url} alt="" width={36} height={36} className="h-full w-full object-cover" />
-          ) : (
-            <span className="font-grit-body text-xs font-bold text-grit-cyan">
-              {initials || <GritIcon name="person" size={16} />}
-            </span>
-          )}
-        </span>
+        <GritAvatar name={fullName} src={profile.foto_url} size={32} tone="soft" />
         <span className="flex min-w-0 flex-col gap-0.5 font-grit-body">
           <span className="truncate text-[13px] font-semibold text-grit-text">{fullName}</span>
-          <span className="truncate text-[11px] text-grit-subtext">
+          <span className={cx('truncate text-[10px]', tenantRole ? 'text-grit-cyan' : 'text-grit-muted')}>
             {tenantRole ? ROLE_LABELS[tenantRole] : profile.email}
           </span>
         </span>
       </Link>
-      <button
-        type="button"
-        aria-label="Cerrar sesión"
+      <GritIconButton
+        icon="logout"
+        label="Cerrar sesión"
+        size="sm"
+        variant="ghost"
         onClick={handleLogout}
-        className={cx(
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-grit-md text-grit-subtext transition-colors hover:bg-grit-danger/10 hover:text-grit-danger',
-          gritFocusRing,
-        )}
-      >
-        <GritIcon name="logout" size={18} />
-      </button>
+        className="bg-transparent hover:bg-grit-danger/10 hover:text-grit-danger"
+      />
     </div>
   );
 }

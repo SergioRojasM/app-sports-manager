@@ -47,15 +47,17 @@ export default async function PortalLayout({
 
   return (
     <PortalNavigationProvider>
-      {/* Two-column shell: persistent sidebar ≥1024px, mobile drawer below it (US-0138) */}
-      <div className="grit-shell flex h-screen overflow-hidden font-grit-body">
+      {/* Two-column shell: floating sidebar ≥1024px (16px inset, v3 US-0141), mobile drawer below it (US-0138) */}
+      <div className="grit-shell flex h-screen overflow-hidden font-grit-body lg:p-4 lg:pr-0">
         <PortalSidebar profile={displayProfile} />
         <div className="flex min-w-0 flex-1 flex-col">
           <PortalHeader profile={displayProfile} />
           <main id="portal-main" className="flex-1 overflow-y-auto">
-            {/* Breadcrumb row (design `AOIa5`) scrolls with the content; page padding
-                comes from GritPageContainer so every Portal page shares it (US-0116) */}
-            <PortalBreadcrumb />
+            {/* ≥1024px the breadcrumb lives in the topbar; below it, it is the first row of the content.
+                Page padding comes from GritPageContainer so every Portal page shares it (US-0116) */}
+            <div className="lg:hidden">
+              <PortalBreadcrumb variant="inline" />
+            </div>
             <GritPageContainer>{children}</GritPageContainer>
           </main>
         </div>

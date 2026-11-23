@@ -38,23 +38,31 @@ const config: Config = {
         "landing-text-muted": "#7F8EA3",
         "landing-border": "#213247",
         "landing-divider": "#1A293A",
-        // grit-arena-v2 design tokens (US-0116). Solid colours are hex so opacity
-        // modifiers (bg-grit-cyan/15) work; translucent ones reference the CSS vars
-        // in globals.css and must be used without an opacity modifier.
+        // grit-arena-v3 design tokens (US-0141; names kept from v2 / US-0116). Solid
+        // colours are hex so opacity modifiers (bg-grit-cyan/15) work; translucent ones
+        // reference the CSS vars in globals.css and must be used without an opacity modifier.
         grit: {
-          bg: "#07111F",
+          bg: "#080C10",
           cyan: "#14DBC4",
-          "cyan-light": "#49F5E2",
+          "cyan-light": "#2BE3D0",
           teal: "#0FA3AB",
-          text: "#E6EDF3",
-          subtext: "#BAC7D5",
-          muted: "#8A9AAB",
+          text: "#F3F7F8",
+          subtext: "#B3BFC5",
+          muted: "#8593A0",
           glass: "var(--grit-glass-fill)",
           "glass-border": "var(--grit-glass-border)",
           card: "var(--grit-card-fill)",
-          sidebar: "var(--grit-sidebar-fill)",
+          sidebar: "#0B1116",
           success: "#3DDC97",
-          danger: "#FF6B6B",
+          danger: "#FF8A80",
+          "on-brand": "#04121A",
+          line: "#1F2A31",
+          surface: "#111A21",
+          "surface-deep": "#0B1116",
+          "surface-accent": "#14302D",
+          warning: "#FFC46B",
+          violet: "#B9A3FF",
+          avatar: "#1E3A3F",
           discipline: {
             swim: "#14DBC4",
             cycle: "#0FA3AB",
@@ -69,8 +77,9 @@ const config: Config = {
         display: ["var(--font-lexend)", "sans-serif"],
         "landing-display": ["var(--font-rajdhani)", "sans-serif"],
         "landing-body": ["var(--font-montserrat)", "sans-serif"],
-        "grit-title": ["var(--font-rajdhani)", "sans-serif"],
+        "grit-title": ["var(--font-exo2)", "sans-serif"],
         "grit-body": ["var(--font-montserrat)", "sans-serif"],
+        "grit-mono": ["var(--font-jetbrains-mono)", "monospace"],
       },
       borderRadius: {
         // Legacy overrides relied on by landing/auth — do NOT use rounded-lg/xl in
@@ -82,7 +91,8 @@ const config: Config = {
         "grit-md": "10px",
         "grit-lg": "12px",
         "grit-xl": "14px",
-        "grit-2xl": "16px",
+        "grit-2xl": "22px", // v3 card / panel / KPI radius
+        "grit-3xl": "28px", // v3 sidebar, drawer, hero
       },
     },
   },

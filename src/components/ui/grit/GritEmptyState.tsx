@@ -15,7 +15,7 @@ type GritEmptyStateProps = {
   className?: string;
 };
 
-/** Loading / error / not-found / empty placeholder built from kit primitives (US-0116). */
+/** Loading / error / not-found / empty placeholder built from kit primitives (v3, US-0141). */
 export function GritEmptyState({
   icon,
   title,
@@ -26,10 +26,10 @@ export function GritEmptyState({
   className,
 }: GritEmptyStateProps) {
   return (
-    <GritCard variant="glass" padding="xl" className={cx('flex flex-col items-center gap-4 text-center', className)}>
+    <GritCard variant="card" padding="xl" className={cx('flex flex-col items-center gap-4 text-center', className)}>
       <GritIconTile icon={icon} size={48} tone="accent" />
       <div className="flex flex-col gap-1.5">
-        <Title className="font-grit-title text-xl font-bold text-grit-text">{title}</Title>
+        <Title className="font-grit-title text-xl font-medium text-grit-text">{title}</Title>
         {description && (
           <p className={cx('font-grit-body text-[13px] font-medium', descriptionClassName ?? 'text-grit-subtext')}>
             {description}

@@ -79,7 +79,7 @@ Feature-level components on the board (`zRDg2` Event Card / Hero, `R1QegD` Event
 4. Documentation: `DESIGN.md`, `projectspec/03-project-structure.md`.
 5. One static asset: `public/logo-grit-arena-dark.png` (copied from `projectspec/designs/pencil/images/logo-grit-arena-dark.png`).
 
-**Must not change**: any `page.tsx`/`layout.tsx` other than the two above, any feature folder under `src/components/portal/<feature>/` (apart from the three notificaciones chrome files), `src/hooks/**`, `src/services/**`, `src/types/**`, `src/lib/**`, `supabase/**`, the marketing landing (`/`), `/auth/*`, and any `landing-*` token. Kit component **props stay backward compatible**: every existing call site must compile and render without edits. New props and components are additive.
+**Must not change**: any `page.tsx`/`layout.tsx` other than the two above, any feature folder under `src/components/portal/<feature>/` (apart from the three notificaciones chrome files), `src/hooks/**`, `src/services/**`, `src/types/**`, `src/lib/**`, `supabase/**`, `src/components/home/**`, `/auth/*`, and any `landing-*` token. The public app home `/` (US-0140) is built on `grit-*` tokens, so it takes the v3 look through the token change without its files being edited (decided 2026-11-23). Kit component **props stay backward compatible**: every existing call site must compile and render without edits. New props and components are additive.
 
 Pages reach v3 through two channels: (a) kit components restyle themselves, and (b) the tokens they already use change value. Whatever a page builds by hand with hard-coded geometry (for example `rounded-grit-md` buttons or `font-grit-title font-bold` KPIs) keeps that geometry until its own page story. That gap is expected; `DESIGN.md` §10 lists the replacements.
 
@@ -277,7 +277,7 @@ None. No service, server action, route handler or hook is created or modified.
 
 **Tokens & fonts**
 3. In the browser, `getComputedStyle(document.documentElement)` returns the v3 values for every variable in the §1 tables, and `.grit-shell` paints `#080C10` with the bottom-right cyan glow.
-4. Any element with `font-grit-title` renders in Exo 2 (verified in DevTools → Computed → rendered font). The landing (`/`) and `/auth/login` still render Rajdhani/Lexend and are pixel-identical to `main` (screenshot comparison).
+4. Any element with `font-grit-title` renders in Exo 2 (verified in DevTools → Computed → rendered font). `/auth/login` still renders Rajdhani/Lexend and is pixel-identical to `develop` (screenshot comparison). The public app home `/` takes the v3 look (Exo 2, v3 ink colours).
 5. `rounded-grit-2xl` computes to 22px and `rounded-grit-3xl` to 28px. `rounded-grit-xs`…`xl` are unchanged.
 
 **Kit**
@@ -318,7 +318,7 @@ None. No service, server action, route handler or hook is created or modified.
 - [ ] Restyle the shell: `PortalSidebar`, `PortalNavContent`, `PortalSidebarUser`, `PortalHeader`, `PortalBreadcrumb`, `PortalMobileDrawer`, `UserAvatarMenu`, notificaciones chrome; adjust `src/app/portal/layout.tsx`
 - [ ] `npm run lint` + `npm run build`
 - [ ] Take "after" screenshots of the same routes; check AC 14–21 (layout, keyboard, drawer, dropdowns, notifications states) as admin, entrenador and atleta
-- [ ] Confirm `/` and `/auth/login` are unchanged
+- [ ] Confirm `/auth/login` is unchanged and `/` renders the v3 look correctly
 - [ ] Run `git diff --name-only` against the allowed file list (AC 1)
 - [ ] Rewrite `DESIGN.md` (§5) and update `03-project-structure.md`
 - [ ] Record any visual gaps found on pages (hand-rolled controls still in v2 geometry) as candidates for page-migration stories
@@ -344,4 +344,4 @@ None. No service, server action, route handler or hook is created or modified.
 - Sub-item icons in the tenant menu (requires changing `portal.types.ts`).
 - Updating `src/components/portal/analitica/chart-theme.ts` hex values to v3 (analítica page story).
 - Switching the icon set from Material Symbols to `lucide-react`.
-- The marketing landing (`/`), `/auth/*` and their `landing-*` tokens.
+- `/auth/*` and the `landing-*` tokens (the public app home `/` changes only through the shared tokens).

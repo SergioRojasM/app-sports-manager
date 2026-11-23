@@ -1,14 +1,32 @@
+export { GritAvatar } from './GritAvatar';
 export { GritBadge } from './GritBadge';
 export { GritButton } from './GritButton';
 export { GritCard } from './GritCard';
+export { GritChip } from './GritChip';
 export { GritDivider } from './GritDivider';
 export { GritEmptyState } from './GritEmptyState';
 export { GritIcon } from './GritIcon';
-export { GritIconTile } from './GritIconTile';
+export { GritIconButton } from './GritIconButton';
+export { GritIconTile, type GritIconTileTone } from './GritIconTile';
 export { GritInfoRow } from './GritInfoRow';
+export { GritKpiCard } from './GritKpiCard';
 export { GritPageContainer } from './GritPageContainer';
 export { GritPageHeader } from './GritPageHeader';
+export { GritPagination, getPaginationItems } from './GritPagination';
+export { GritProgress } from './GritProgress';
+export { GritSearchField } from './GritSearchField';
 export { GritSectionHeading } from './GritSectionHeading';
-export { GritTag } from './GritTag';
+export { GritSegmented, type GritSegmentedOption } from './GritSegmented';
+export { GritTag, type GritTagTone } from './GritTag';
 export { GRIT_ICON_MAP, type GritDesignIconName } from './icon-map';
-export { cx, gritFocusRing, gritInputClass, gritSelectClass } from './styles';
+export {
+  cx,
+  gritFocusRing,
+  gritInputClass,
+  gritPillSelectClass,
+  gritSelectClass,
+  gritTableCellClass,
+  gritTableHeadCellClass,
+  gritTableHeadClass,
+  gritTableRowClass,
+} from './styles';

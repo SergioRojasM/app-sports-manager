@@ -1,6 +1,6 @@
 'use client';
 
-import { cx } from '@/components/ui';
+import { GritIconTile, cx } from '@/components/ui';
 import type { Notificacion } from '@/types/portal/notificaciones.types';
 
 const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' });
@@ -27,7 +27,7 @@ type NotificacionItemProps = {
   dense?: boolean;
 };
 
-/** One notification row, shared by the header panel and the history page (US-0125). */
+/** One notification row, shared by the header panel and the history page (US-0125; v3 Notification Item `o7ity`, US-0141). */
 export function NotificacionItem({ notificacion, onSelect, dense = false }: NotificacionItemProps) {
   const { leida } = notificacion;
 
@@ -36,25 +36,22 @@ export function NotificacionItem({ notificacion, onSelect, dense = false }: Noti
       type="button"
       onClick={() => onSelect(notificacion)}
       className={cx(
-        'flex w-full items-start gap-3 text-left transition-colors hover:bg-grit-cyan/10 focus-visible:bg-grit-cyan/10 focus-visible:outline-none',
-        dense ? 'px-3.5 py-3' : 'px-5 py-4',
-        !leida && 'bg-grit-cyan/[0.05]',
+        'flex w-full items-start gap-3 text-left transition-colors hover:bg-white/[0.04] focus-visible:bg-white/[0.04] focus-visible:outline-none',
+        dense ? 'px-5 py-3' : 'px-5 py-4',
+        !leida && 'bg-gradient-to-r from-grit-cyan/[0.06] to-transparent',
       )}
     >
-      <span
-        aria-hidden="true"
-        className={cx('mt-1.5 h-2 w-2 flex-shrink-0 rounded-full', leida ? 'bg-transparent' : 'bg-grit-cyan')}
-      />
+      <GritIconTile icon="notifications" size={38} tone={leida ? 'card' : 'accent'} />
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span
           className={cx(
-            'font-grit-body text-sm leading-snug',
+            'font-grit-body text-[13px] leading-snug',
             leida ? 'font-medium text-grit-subtext' : 'font-semibold text-grit-text',
           )}
         >
           {notificacion.titulo}
         </span>
-        <span className={cx('break-words font-grit-body text-xs leading-relaxed text-grit-subtext', dense && 'line-clamp-2')}>
+        <span className={cx('break-words font-grit-body text-xs leading-relaxed text-grit-muted', dense && 'line-clamp-2')}>
           {notificacion.mensaje}
         </span>
         <span className="flex items-center gap-1.5 font-grit-body text-[11px] text-grit-muted">
@@ -63,7 +60,7 @@ export function NotificacionItem({ notificacion, onSelect, dense = false }: Noti
           {!leida && (
             <>
               <span aria-hidden="true">·</span>
-              <span className="font-bold uppercase tracking-[0.5px] text-grit-cyan">Nueva</span>
+              <span className="font-semibold text-grit-cyan">Nueva</span>
             </>
           )}
         </span>

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import { BodyPortal, GritDivider, GritIcon, cx, gritFocusRing } from '@/components/ui';
+import { BodyPortal, GritDivider, GritIconButton, cx, gritFocusRing } from '@/components/ui';
 import { PortalNavContent } from '@/components/portal/PortalNavContent';
 import { PortalSidebarUser } from '@/components/portal/PortalSidebarUser';
 import { usePortalNavigationContext } from '@/components/portal/PortalNavigationProvider';
@@ -172,7 +172,8 @@ export function PortalMobileDrawer({ open, onClose, profile, returnFocusRef }: P
           aria-modal="true"
           aria-label="Menú de navegación"
           className={cx(
-            'absolute right-0 top-0 flex h-dvh w-[336px] max-w-[86vw] flex-col gap-4 border-l border-grit-glass-border bg-grit-bg px-4 pb-5 pt-[18px] shadow-[-12px_0_40px_rgba(0,0,0,0.6)]',
+            // v3 sidebar surface (gradient, 28px left corners, neutral stroke) — US-0141
+            'absolute right-0 top-0 flex h-dvh w-[336px] max-w-[86vw] flex-col gap-4 rounded-l-grit-3xl border-l border-white/[0.10] bg-gradient-to-b from-grit-surface to-grit-sidebar px-4 pb-5 pt-[18px] shadow-[-12px_0_40px_rgba(0,0,0,0.6)]',
             'transition-transform duration-200 ease-out motion-reduce:transition-none',
             visible ? 'translate-x-0' : 'translate-x-full',
           )}
@@ -180,21 +181,10 @@ export function PortalMobileDrawer({ open, onClose, profile, returnFocusRef }: P
           <div className="flex items-center justify-between pl-2">
             <Link href="/portal" onClick={onClose} className={cx('flex items-center rounded-grit-sm', gritFocusRing)}>
               <div className="relative h-8 w-32">
-                <Image src="/logo-navbar.png" alt="GRIT Arena" fill className="object-contain object-left" />
+                <Image src="/logo-grit-arena-dark.png" alt="GRIT Arena" fill className="object-contain object-left" />
               </div>
             </Link>
-            <button
-              ref={closeButtonRef}
-              type="button"
-              aria-label="Cerrar menú"
-              onClick={onClose}
-              className={cx(
-                'flex h-[38px] w-[38px] items-center justify-center rounded-grit-md border border-grit-glass-border bg-grit-glass text-grit-text transition-colors hover:bg-grit-cyan/10',
-                gritFocusRing,
-              )}
-            >
-              <GritIcon name="close" size={18} />
-            </button>
+            <GritIconButton ref={closeButtonRef} icon="close" label="Cerrar menú" onClick={onClose} />
           </div>
 
           <div ref={scrollRef} className="grit-scrollbar -mr-2 min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2">
@@ -202,7 +192,7 @@ export function PortalMobileDrawer({ open, onClose, profile, returnFocusRef }: P
             <div
               aria-hidden
               className={cx(
-                'pointer-events-none sticky bottom-0 -mt-14 h-14 bg-gradient-to-t from-grit-bg to-transparent transition-opacity',
+                'pointer-events-none sticky bottom-0 -mt-14 h-14 bg-gradient-to-t from-grit-sidebar to-transparent transition-opacity',
                 hasMoreBelow ? 'opacity-100' : 'opacity-0',
               )}
             />

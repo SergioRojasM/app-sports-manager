@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
-import { GritIcon } from '@/components/ui';
+import { GritIcon, cx, gritFocusRing } from '@/components/ui';
 import { useTenantName } from '@/hooks/portal/tenant/useTenantName';
 import { useFormularioPlantillaName } from '@/hooks/portal/formularios/useFormularioPlantillaName';
 
@@ -50,7 +50,15 @@ type BreadcrumbSegment = {
   isLast: boolean;
 };
 
-export function PortalBreadcrumb() {
+type PortalBreadcrumbProps = {
+  /**
+   * topbar = inside PortalHeader at ≥1024px (v3 Topbar `vwVLa`) · inline = standalone row at the
+   * top of <main> below 1024px. The layout shows exactly one of them per breakpoint (US-0141).
+   */
+  variant?: 'topbar' | 'inline';
+};
+
+export function PortalBreadcrumb({ variant = 'inline' }: PortalBreadcrumbProps) {
   const pathname = usePathname();
 
   const tenantId = useMemo(() => {
@@ -114,26 +122,31 @@ export function PortalBreadcrumb() {
   // Only render when there is more than the root "Inicio"
   if (segments.length <= 1) return null;
 
-  // Standalone row under the header (design `AOIa5`), aligned with GritPageContainer
-  // and visible on mobile, where it wraps instead of hiding (US-0116)
+  const isTopbar = variant === 'topbar';
+
+  // v3 Breadcrumb (`c3k2e`): muted crumbs and chevrons, the current page in subtext (US-0141)
   return (
-    <div className="mx-auto w-full max-w-[1440px] px-4 pt-4 sm:px-6 lg:px-12">
+    <div className={isTopbar ? 'min-w-0' : 'mx-auto w-full max-w-[1440px] px-4 pt-3 sm:px-6'}>
       <nav aria-label="Ruta de navegación">
-        <ol className="flex flex-wrap items-center gap-2 font-grit-body text-[13px] font-medium text-grit-subtext">
+        <ol
+          className={cx(
+            'flex items-center gap-2 font-grit-body text-xs text-grit-muted',
+            isTopbar ? 'flex-nowrap' : 'flex-wrap',
+          )}
+        >
           {segments.map((seg, i) => (
-            <li key={`${i}-${seg.href}`} className="flex min-w-0 items-center gap-2">
-              {i > 0 && (
-                <span aria-hidden="true" className="select-none">
-                  ›
-                </span>
-              )}
-              {i === 0 && <GritIcon name="home" size={13} />}
+            <li key={`${i}-${seg.href}`} className={cx('flex items-center gap-2', isTopbar ? 'min-w-0 shrink' : 'min-w-0')}>
+              {i > 0 && <GritIcon name="chevron_right" size={12} className="shrink-0" />}
+              {i === 0 && <GritIcon name="home" size={13} className="shrink-0" />}
               {seg.isLast ? (
-                <span className="max-w-[60vw] truncate font-bold text-grit-text" aria-current="page">
+                <span className="max-w-[60vw] truncate font-medium text-grit-subtext lg:max-w-[320px]" aria-current="page">
                   {seg.label}
                 </span>
               ) : (
-                <Link href={seg.href} className="transition-colors hover:text-grit-cyan">
+                <Link
+                  href={seg.href}
+                  className={cx('truncate rounded-grit-xs transition-colors hover:text-grit-text', isTopbar && 'max-w-[180px]', gritFocusRing)}
+                >
                   {seg.label}
                 </Link>
               )}

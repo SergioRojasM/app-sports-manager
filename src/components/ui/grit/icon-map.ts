@@ -1,7 +1,7 @@
 /**
- * grit-arena-v2.pen draws its icons with Lucide; the app renders Material
- * Symbols Outlined. This is the single translation table (US-0116) — swapping
- * to lucide-react later only means changing GritIcon + this map.
+ * grit-arena-v3.pen (like v2) draws its icons with Lucide; the app renders Material
+ * Symbols Outlined. This is the single translation table (US-0116, v3 additions
+ * US-0141) — swapping to lucide-react later only means changing GritIcon + this map.
  */
 export const GRIT_ICON_MAP = {
   house: 'home',
@@ -38,6 +38,46 @@ export const GRIT_ICON_MAP = {
   x: 'close',
   menu: 'menu',
   'log-out': 'logout',
+  // v3 additions (US-0141) — every Lucide icon drawn in grit-arena-v3.pen
+  plus: 'add',
+  search: 'search',
+  ellipsis: 'more_horiz',
+  'chevron-left': 'chevron_left',
+  'chevrons-up-down': 'unfold_more',
+  list: 'list',
+  'list-filter': 'filter_list',
+  'layout-grid': 'grid_view',
+  'calendar-range': 'date_range',
+  'calendar-plus': 'calendar_add_on',
+  'calendar-x': 'event_busy',
+  'alarm-clock': 'alarm',
+  hourglass: 'hourglass_empty',
+  timer: 'timer',
+  activity: 'monitoring',
+  footprints: 'directions_run',
+  bike: 'directions_bike',
+  mountain: 'landscape',
+  sailboat: 'sailing',
+  medal: 'military_tech',
+  wallet: 'account_balance_wallet',
+  receipt: 'receipt_long',
+  download: 'download',
+  'refresh-cw': 'refresh',
+  'badge-check': 'verified',
+  'circle-x': 'cancel',
+  'circle-dot': 'radio_button_checked',
+  'circle-dashed': 'pending',
+  ban: 'block',
+  info: 'info',
+  sparkles: 'auto_awesome',
+  bookmark: 'bookmark',
+  star: 'star',
+  heart: 'favorite',
+  map: 'map',
+  pencil: 'edit',
+  'file-pen-line': 'edit_document',
+  'scan-line': 'qr_code_scanner',
+  'settings-2': 'tune',
 } as const;
 
 export type GritDesignIconName = keyof typeof GRIT_ICON_MAP;
