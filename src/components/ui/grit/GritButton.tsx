@@ -4,7 +4,8 @@ import { GritIcon } from './GritIcon';
 import { cx, gritFocusRing } from './styles';
 
 type GritButtonVariant = 'primary' | 'secondary' | 'outline-accent' | 'ghost';
-type GritButtonSize = 'sm' | 'md';
+/** sm 31px (Button / Small) · md 37px (Button / Primary) · lg 42px (Button / Primary Glow). */
+type GritButtonSize = 'sm' | 'md' | 'lg';
 
 type GritButtonBaseProps = {
   children: ReactNode;
@@ -33,23 +34,28 @@ type GritButtonAsLink = GritButtonBaseProps & {
 type GritButtonProps = GritButtonAsButton | GritButtonAsLink;
 
 const VARIANT_CLASSES: Record<GritButtonVariant, string> = {
-  primary: 'bg-grit-cyan font-bold text-grit-bg hover:bg-grit-cyan-light',
-  secondary: 'border border-grit-glass-border bg-transparent font-bold text-grit-text hover:border-grit-cyan/60 hover:text-grit-cyan',
-  'outline-accent': 'border border-grit-cyan bg-transparent font-bold text-grit-cyan hover:bg-grit-cyan/10',
-  ghost: 'bg-transparent font-semibold text-grit-subtext hover:bg-grit-cyan/10 hover:text-grit-text',
+  primary: 'bg-grit-cyan text-grit-on-brand hover:bg-grit-cyan-light',
+  secondary: 'border border-white/[0.12] bg-white/[0.04] text-grit-text hover:bg-white/[0.08] [&>.material-symbols-outlined]:text-grit-subtext',
+  'outline-accent': 'border border-grit-cyan/35 bg-grit-cyan/[0.08] text-grit-cyan hover:bg-grit-cyan/15',
+  ghost: 'bg-transparent text-grit-subtext hover:bg-white/[0.04] hover:text-grit-text',
 };
 
 const SIZE_CLASSES: Record<GritButtonSize, string> = {
-  sm: 'gap-1.5 px-4 py-2.5 text-xs',
-  md: 'gap-2 px-[22px] py-3.5 text-sm',
+  sm: 'min-h-[31px] gap-2 px-3.5 py-2 text-xs',
+  md: 'min-h-[37px] gap-2 px-[18px] py-2.5 text-xs',
+  lg: 'min-h-[42px] gap-2 px-[22px] py-3 text-[13px]',
 };
 
-const ICON_SIZE: Record<GritButtonSize, number> = { sm: 13, md: 15 };
+/** Primary fills get a 1px top highlight; at `lg` they also glow (Button / Primary Glow — one per view). */
+const PRIMARY_SHADOW = 'shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]';
+const PRIMARY_GLOW = 'shadow-[0_8px_24px_rgba(20,219,196,0.35),inset_0_1px_0_rgba(255,255,255,0.4)]';
+
+const ICON_SIZE: Record<GritButtonSize, number> = { sm: 14, md: 15, lg: 16 };
 
 type LinkOnlyProps = Omit<GritButtonAsLink, keyof GritButtonBaseProps>;
 type ButtonOnlyProps = Omit<GritButtonAsButton, keyof GritButtonBaseProps>;
 
-/** Button / link-button from the design's Primary, Secondary and Maps buttons (radius 10, US-0116). */
+/** Pill button / link-button from the v3 Button components (`DdNsJ`, `zG7Qt`, `yC90U`, `a8wf1a`, US-0141). */
 export function GritButton({
   children,
   variant = 'primary',
@@ -61,10 +67,11 @@ export function GritButton({
   ...rest
 }: GritButtonProps) {
   const classes = cx(
-    'inline-flex items-center justify-center rounded-grit-md font-grit-body leading-none transition disabled:cursor-not-allowed disabled:opacity-60',
+    'inline-flex shrink-0 items-center justify-center rounded-full font-grit-body font-semibold leading-none transition disabled:cursor-not-allowed disabled:opacity-60',
     gritFocusRing,
     VARIANT_CLASSES[variant],
     SIZE_CLASSES[size],
+    variant === 'primary' && (size === 'lg' ? PRIMARY_GLOW : PRIMARY_SHADOW),
     fullWidth && 'w-full',
     className,
   );

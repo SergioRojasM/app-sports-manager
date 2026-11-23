@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { GritIcon } from '@/components/ui';
+import { GritAvatar, GritIcon, cx, gritFocusRing } from '@/components/ui';
 import type { PortalDisplayProfile } from '@/types/portal.types';
 
 type UserAvatarMenuProps = {
@@ -49,39 +48,27 @@ export function UserAvatarMenu({ profile }: UserAvatarMenuProps) {
     router.refresh();
   };
 
-  const initials = profile.nombre ? profile.nombre[0].toUpperCase() : '';
-
   return (
     <div ref={containerRef} className="relative">
+      {/* v3 Avatar / Topbar (`gNnuk`): 38px solid-cyan circle with dark initials or the photo (US-0141) */}
       <button
         ref={buttonRef}
+        type="button"
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Menú de usuario"
-        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-grit-cyan transition-all hover:shadow-[0_0_12px_rgba(20,219,196,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"
+        className={cx('rounded-full transition-shadow hover:shadow-[0_0_12px_rgba(20,219,196,0.35)]', gritFocusRing)}
         onClick={() => setOpen((prev) => !prev)}
       >
-        {profile.foto_url ? (
-          <Image
-            src={profile.foto_url}
-            alt={`${profile.nombre} ${profile.apellido}`}
-            width={36}
-            height={36}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="font-grit-title text-sm font-bold text-grit-cyan">
-            {initials || <GritIcon name="person" size={16} />}
-          </span>
-        )}
+        <GritAvatar name={`${profile.nombre ?? ''} ${profile.apellido ?? ''}`} src={profile.foto_url} size={38} tone="solid" />
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2 flex w-56 flex-col gap-1 overflow-hidden rounded-grit-lg border border-grit-glass-border bg-grit-bg/95 p-2 shadow-xl backdrop-blur-md"
+          className="absolute right-0 top-full z-50 mt-2 flex w-56 flex-col gap-1 overflow-hidden rounded-[18px] border border-white/[0.10] bg-grit-glass p-2 shadow-[0_20px_48px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl"
         >
-          <div className="border-b border-grit-glass-border px-3.5 pb-2.5 pt-1.5">
+          <div className="border-b border-white/[0.06] px-3.5 pb-2.5 pt-1.5">
             <p className="truncate font-grit-body text-sm font-semibold text-grit-text">
               {profile.nombre} {profile.apellido}
             </p>
@@ -90,7 +77,7 @@ export function UserAvatarMenu({ profile }: UserAvatarMenuProps) {
           <Link
             href="/portal/perfil"
             role="menuitem"
-            className="flex items-center gap-3.5 rounded-grit-md px-3.5 py-2.5 font-grit-body text-sm font-medium text-grit-subtext transition-colors hover:bg-grit-cyan/10 hover:text-grit-text"
+            className="flex items-center gap-3 rounded-full px-3.5 py-2.5 font-grit-body text-[13px] font-medium text-grit-subtext transition-colors hover:bg-white/[0.04] hover:text-grit-text"
             onClick={() => setOpen(false)}
           >
             <GritIcon name="person" size={18} />
@@ -98,7 +85,7 @@ export function UserAvatarMenu({ profile }: UserAvatarMenuProps) {
           </Link>
           <button
             role="menuitem"
-            className="flex w-full items-center gap-3.5 rounded-grit-md px-3.5 py-2.5 font-grit-body text-sm font-medium text-grit-subtext transition-colors hover:bg-grit-danger/10 hover:text-grit-danger"
+            className="flex w-full items-center gap-3 rounded-full px-3.5 py-2.5 font-grit-body text-[13px] font-medium text-grit-subtext transition-colors hover:bg-grit-danger/10 hover:text-grit-danger"
             onClick={handleLogout}
           >
             <GritIcon name="logout" size={18} />

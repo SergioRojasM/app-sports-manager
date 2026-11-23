@@ -17,21 +17,30 @@
   --landing-text-muted: #7f8ea3;
   --landing-border: #213247;
   --landing-divider: #1a293a;
-  /* grit-arena-v2 design tokens (US-0116) — mirror the variables of
-     projectspec/designs/pencil/grit-arena-v2.pen 1:1. New Portal code uses these. */
-  --grit-bg-navy: #07111f;
-  --grit-accent-cyan: #14dbc4;
-  --grit-accent-cyan-light: #49f5e2;
+  /* grit-arena-v3 design tokens (US-0141) — mirror projectspec/designs/pencil/grit-arena-v3.pen
+     (variables $canvas, $ink*, $line, $brand*, $on-brand + component board ljQp3).
+     Names are kept from v2 so every consumer picks up the new values. Portal code uses these. */
+  --grit-bg-navy: #080c10; /* $canvas */
+  --grit-accent-cyan: #14dbc4; /* $brand */
+  --grit-accent-cyan-light: #2be3d0; /* $brand-deep — hover of cyan fills */
   --grit-accent-teal: #0fa3ab;
-  --grit-text-primary: #e6edf3;
-  --grit-text-subtext: #bac7d5;
-  --grit-text-muted: #8a9aab;
-  --grit-glass-fill: rgba(15, 31, 48, 0.69);
-  --grit-glass-border: rgba(20, 219, 196, 0.25);
-  --grit-card-fill: rgba(11, 24, 38, 0.8);
-  --grit-sidebar-fill: rgba(6, 14, 26, 0.8);
+  --grit-text-primary: #f3f7f8; /* $ink */
+  --grit-text-subtext: #b3bfc5; /* $ink-2 */
+  --grit-text-muted: #8593a0; /* $ink-3 */
+  --grit-glass-fill: rgba(17, 26, 33, 0.85);
+  --grit-glass-border: rgba(255, 255, 255, 0.12); /* neutral hairline (was cyan in v2) */
+  --grit-card-fill: rgba(17, 26, 33, 0.8);
+  --grit-sidebar-fill: #0b1116;
   --grit-success: #3ddc97;
-  --grit-danger: #ff6b6b;
+  --grit-danger: #ff8a80;
+  --grit-on-brand: #04121a; /* $on-brand — text/icons on cyan fills */
+  --grit-line: #1f2a31; /* $line — opaque hairline */
+  --grit-surface: #111a21; /* card gradient start */
+  --grit-surface-deep: #0b1116; /* card gradient end */
+  --grit-surface-accent: #14302d; /* highlighted card gradient start */
+  --grit-warning: #ffc46b;
+  --grit-violet: #b9a3ff;
+  --grit-avatar-fill: #1e3a3f;
   --grit-discipline-swim: #14dbc4;
   --grit-discipline-cycle: #0fa3ab;
   --grit-discipline-run: #f2b84b;
@@ -73,20 +82,21 @@ body {
   font-family: var(--font-montserrat), sans-serif;
 }
 
-/* grit-arena-v2 shell background: navy + the design's "BG Glow" ellipses (US-0116) */
+/* grit-arena-v3 shell background: $canvas + the screen frames' two radial fills —
+   cyan glow toward the bottom-right, faint white glow at the top (US-0141) */
 .grit-shell {
   background:
-    radial-gradient(circle at 92% 0%, rgba(20, 219, 196, 0.14), transparent 35%),
-    radial-gradient(circle at 0% 55%, rgba(15, 163, 171, 0.1), transparent 30%),
+    radial-gradient(ellipse 120% 130% at 95% 95%, rgba(20, 219, 196, 0.12), transparent 60%),
+    radial-gradient(ellipse 100% 80% at 30% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
     var(--grit-bg-navy);
   color: var(--grit-text-primary);
   font-family: var(--font-montserrat), sans-serif;
 }
 
-/* Thin cyan scrollbar for the portal sidebar / drawer navigation (US-0138) */
+/* Thin neutral scrollbar for the portal sidebar / drawer navigation (US-0138, v3 US-0141) */
 .grit-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgb(20 219 196 / 0.6) transparent;
+  scrollbar-color: rgb(255 255 255 / 0.14) transparent;
 }
 
 .grit-scrollbar::-webkit-scrollbar {
@@ -98,8 +108,16 @@ body {
 }
 
 .grit-scrollbar::-webkit-scrollbar-thumb {
-  background: rgb(20 219 196 / 0.6);
+  background: rgb(255 255 255 / 0.14);
   border-radius: 2px;
+}
+
+/* Chevron for gritPillSelectClass (v3 Dropdown Filter); stroke = --grit-text-muted (US-0141) */
+.grit-select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238593A0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 14px;
 }
 
 .material-symbols-outlined {

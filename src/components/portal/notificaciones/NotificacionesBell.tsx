@@ -72,13 +72,13 @@ export function NotificacionesBell() {
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         onClick={() => setOpen((prev) => !prev)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full border border-grit-glass-border bg-grit-glass text-grit-subtext transition-colors hover:text-grit-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan"
+        className="relative flex h-[38px] w-[38px] items-center justify-center rounded-full border border-grit-line text-grit-subtext transition-colors hover:bg-white/[0.04] hover:text-grit-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grit-cyan/70"
       >
         <GritIcon name="notifications" size={16} />
         {noLeidas > 0 && (
           <span
             aria-hidden="true"
-            className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-grit-cyan px-1 font-grit-body text-[10px] font-bold leading-none text-grit-bg"
+            className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-grit-cyan px-1 font-grit-body text-[10px] font-bold leading-none text-grit-on-brand shadow-[0_0_8px_rgba(20,219,196,0.6)]"
           >
             {noLeidas > 9 ? '9+' : noLeidas}
           </span>
