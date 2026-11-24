@@ -1,82 +1,144 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  GritButton,
+  GritChip,
+  GritEmptyState,
+  GritIconButton,
+  GritPageHeader,
+  GritSearchField,
+  GritSectionHeading,
+} from '@/components/ui';
 import { useEventosPublicos } from '@/hooks/portal/eventos/useEventosPublicos';
 import { useObtenerEntrada } from '@/hooks/portal/eventos/useObtenerEntrada';
+import { getDisciplinaVisual } from '@/lib/portal/disciplina-visual';
 import { EVENTOS_DEFAULT_WINDOW_DAYS, buildEventoPortalDetalleHref } from '@/lib/portal/eventos-publicos.utils';
+import type { EventoPublicoListItem } from '@/types/portal/eventos.types';
 import { EventoEntradasModal } from './EventoEntradasModal';
-import { EventosDisponiblesWidget } from './EventosDisponiblesWidget';
+import { EventosPortalFeatured } from './EventosPortalFeatured';
+import { EventosPortalGrid } from './EventosPortalGrid';
 import { EventosPublicosFiltersDrawer } from './EventosPublicosFiltersDrawer';
-import { EventosPublicosGrid } from './EventosPublicosGrid';
 
 const LISTADO_PATH = '/portal/eventos';
 
-/** Portal event discovery (US-0120), modeled on the public-trainings marketplace. */
+const buildDetalleHref = (evento: EventoPublicoListItem) => buildEventoPortalDetalleHref(evento.id, { from: LISTADO_PATH });
+
+/** Portal event discovery (US-0120), grit-arena-v3 frame `zY4v8`. */
 export function EventosPublicosPage() {
   const eventos = useEventosPublicos();
   const obtenerEntrada = useObtenerEntrada({ surface: 'portal' });
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const items = eventos.items;
+  const hero = items[0] ?? null;
+  const compact = items.slice(1, 3);
+  const rest = items.slice(3);
+  const hasData = !eventos.loading && !eventos.error;
+
   return (
-    <div className="relative min-h-[80vh]">
-      <div className="sticky top-4 z-10 mb-8 flex flex-wrap items-center justify-between gap-4 rounded-grit-2xl bg-grit-bg/40 px-4 py-2 backdrop-blur">
-        <div className="flex flex-wrap items-center gap-4">
-          <h1 className="font-grit-title text-3xl font-bold italic leading-tight text-grit-text sm:text-[36px]">
-            Eventos <span className="text-grit-cyan">Públicos</span>
-          </h1>
-          <EventosDisponiblesWidget count={eventos.items.length} />
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setFiltersOpen(true)}
-          className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-4 py-2 font-grit-body text-sm font-semibold text-grit-text transition hover:border-grit-cyan/50"
-        >
-          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
-            tune
-          </span>
-          Filtrar
-        </button>
-      </div>
-
-      {eventos.isDefaultDateRange && !eventos.loading && !eventos.error && (
-        <p className="-mt-4 mb-6 font-grit-body text-xs text-grit-subtext">
-          Se muestran los eventos de los próximos {EVENTOS_DEFAULT_WINDOW_DAYS} días. Si quieres ver más, filtra por fechas.
-        </p>
-      )}
-
-      <div className="relative">
-        {eventos.loading && (
-          <div className="flex items-center justify-center py-24">
-            <p className="font-grit-body text-sm text-grit-subtext">Cargando eventos…</p>
+    <div className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Tu próximo"
+        titleAccent="reto."
+        actions={
+          <div className="flex w-full items-center gap-2.5 sm:w-auto">
+            <GritSearchField
+              size="lg"
+              aria-label="Buscar evento o ciudad"
+              placeholder="Buscar evento o ciudad"
+              value={eventos.search}
+              onChange={(event) => eventos.setSearch(event.target.value)}
+              className="min-w-0 flex-1 sm:w-[320px] sm:flex-none"
+            />
+            <span className="relative">
+              <GritIconButton icon="tune" label="Filtros" size="lg" onClick={() => setFiltersOpen(true)} aria-haspopup="dialog" />
+              {eventos.hasDrawerFilters ? (
+                <span aria-hidden="true" className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full border-2 border-grit-bg bg-grit-cyan" />
+              ) : null}
+              {eventos.hasDrawerFilters ? <span className="sr-only">(filtros activos)</span> : null}
+            </span>
           </div>
-        )}
+        }
+      />
 
-        {!eventos.loading && eventos.error && (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
-            <p className="font-grit-body text-sm text-grit-danger">{eventos.error}</p>
-            <button
-              type="button"
-              onClick={() => void eventos.refetch()}
-              className="rounded-grit-md border border-grit-glass-border px-3 py-2 font-grit-body text-xs font-semibold text-grit-text"
+      {eventos.disciplinaOptions.length > 0 ? (
+        <div role="group" aria-label="Disciplinas" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
+          <GritChip active={eventos.disciplina === null} icon="grid_view" onClick={() => eventos.setDisciplina(null)}>
+            Todos
+          </GritChip>
+          {eventos.disciplinaOptions.map((nombre) => (
+            <GritChip
+              key={nombre}
+              active={eventos.disciplina === nombre}
+              icon={getDisciplinaVisual(nombre).icon}
+              onClick={() => eventos.setDisciplina(nombre)}
             >
-              Reintentar
-            </button>
-          </div>
-        )}
+              {nombre}
+            </GritChip>
+          ))}
+        </div>
+      ) : null}
 
-        {!eventos.loading && !eventos.error && (
-          <EventosPublicosGrid
-            featuredItem={eventos.featuredItem}
-            standardItems={eventos.standardItems}
-            buildDetalleHref={(evento) => buildEventoPortalDetalleHref(evento.id, { from: LISTADO_PATH })}
-            onObtenerEntrada={obtenerEntrada.obtenerEntrada}
-            obtenerEntradaDisabled={obtenerEntrada.disabled}
-            hasActiveFilters={eventos.hasActiveFilters}
-            onClearFilters={eventos.clearFilters}
+      {eventos.loading ? <GritEmptyState icon="hourglass_top" title="Cargando eventos…" /> : null}
+
+      {!eventos.loading && eventos.error ? (
+        <GritEmptyState
+          icon="error"
+          title="No fue posible cargar los eventos."
+          action={
+            <GritButton variant="secondary" size="sm" icon="refresh" onClick={() => void eventos.refetch()}>
+              Reintentar
+            </GritButton>
+          }
+        />
+      ) : null}
+
+      {hasData && !hero ? (
+        eventos.hasActiveFilters ? (
+          <GritEmptyState
+            icon="filter_alt_off"
+            title="No hay eventos que coincidan con los filtros"
+            action={
+              <GritButton variant="secondary" size="sm" icon="restart_alt" onClick={eventos.clearFilters}>
+                Limpiar filtros
+              </GritButton>
+            }
           />
-        )}
-      </div>
+        ) : (
+          <GritEmptyState icon="celebration" title="No hay eventos disponibles por ahora." />
+        )
+      ) : null}
+
+      {hasData && hero ? (
+        <EventosPortalFeatured
+          hero={hero}
+          compact={compact}
+          buildDetalleHref={buildDetalleHref}
+          onObtenerEntrada={obtenerEntrada.obtenerEntrada}
+          obtenerEntradaDisabled={obtenerEntrada.disabled}
+        />
+      ) : null}
+
+      {hasData && rest.length > 0 ? (
+        <section aria-labelledby="eventos-proximos-titulo" className="flex flex-col gap-4">
+          <GritSectionHeading
+            title={
+              <span id="eventos-proximos-titulo">
+                {eventos.isDefaultDateRange ? `Próximos ${EVENTOS_DEFAULT_WINDOW_DAYS} días` : 'Más eventos'}
+              </span>
+            }
+            size="md"
+            className="[&_h2]:font-grit-body [&_h2]:text-base [&_h2]:font-medium"
+            action={
+              <GritButton variant="secondary" size="sm" icon="calendar_month" onClick={() => setFiltersOpen(true)}>
+                Ver calendario
+              </GritButton>
+            }
+          />
+          <EventosPortalGrid eventos={rest} buildDetalleHref={buildDetalleHref} />
+        </section>
+      ) : null}
 
       <EventosPublicosFiltersDrawer
         open={filtersOpen}
@@ -89,14 +151,9 @@ export function EventosPublicosPage() {
         onSetDateRange={eventos.setDateRange}
         onClearDateRange={eventos.clearDateRange}
         onApplyDateChip={eventos.applyDateChip}
-        search={eventos.search}
-        onChangeSearch={eventos.setSearch}
         tenantId={eventos.tenantId}
         onChangeTenantId={eventos.setTenantId}
         tenantOptions={eventos.tenantOptions}
-        disciplina={eventos.disciplina}
-        onChangeDisciplina={eventos.setDisciplina}
-        disciplinaOptions={eventos.disciplinaOptions}
         onClearFilters={eventos.clearFilters}
       />
 

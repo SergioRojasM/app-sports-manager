@@ -32,7 +32,7 @@ type ReservaPlanCellProps = Pick<
  * Plan the booking's service units were deducted from, with that subscription's
  * validity window as a muted second line (US-0112).
  *
- * Shared by ReservasManagementTable and MisReservasTable so both render the
+ * Used by ReservasManagementTable (MisReservasTable was replaced by MisReservasList); renders the
  * plan — and in particular its dates — identically.
  */
 export function ReservaPlanCell({

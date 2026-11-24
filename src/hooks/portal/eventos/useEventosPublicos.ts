@@ -162,6 +162,8 @@ export function useEventosPublicos() {
   }, [dateFrom, dateTo]);
 
   const hasActiveFilters = !isDefaultDateRange || search.trim() !== '' || tenantId !== null || disciplina !== null;
+  /** Filters that live in the drawer (date range, organization) — drives the dot on the "Filtros" button. */
+  const hasDrawerFilters = !isDefaultDateRange || tenantId !== null;
 
   return {
     loading,
@@ -188,6 +190,7 @@ export function useEventosPublicos() {
     disciplina,
     setDisciplina,
     hasActiveFilters,
+    hasDrawerFilters,
     clearFilters,
     refetch: load,
   };

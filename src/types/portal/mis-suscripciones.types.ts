@@ -19,6 +19,8 @@ export interface MiSuscripcionRow {
   tenant_id: string;
   tenant_nombre: string;
   plan_nombre: string;
+  /** `planes.descripcion` — one line under the plan name on the v3 card. */
+  plan_descripcion: string | null;
   estado: SuscripcionEstado;
   fecha_inicio: string | null;
   fecha_fin: string | null;

@@ -47,7 +47,7 @@ export function CancelarCompraModal({ compra, pending, error, onConfirm, onClose
       <PoliticaCancelacion horas={compra.evento?.cancelacionAntelacionHoras ?? null} />
       <p>Tus códigos dejarán de ser válidos y tu cupo quedará libre.</p>
       {error && (
-        <p role="alert" className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
+        <p role="alert" className="rounded-grit-lg border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
           {error}
         </p>
       )}

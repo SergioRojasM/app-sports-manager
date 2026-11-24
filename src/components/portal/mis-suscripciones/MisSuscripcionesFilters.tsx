@@ -1,76 +1,38 @@
 'use client';
 
-import type { SuscripcionEstado, PagoEstado } from '@/types/portal/mis-suscripciones.types';
+import { GritSegmented, gritPillSelectClass, type GritSegmentedOption } from '@/components/ui';
 import type { TenantOption } from '@/hooks/portal/mis-suscripciones/useMisSuscripciones';
+import type { PagoEstado, SuscripcionEstado } from '@/types/portal/mis-suscripciones.types';
 
 type SuscripcionFilter = SuscripcionEstado | 'all';
 type PagoFilter = PagoEstado | 'all';
 
 type MisSuscripcionesFiltersProps = {
   suscripcionEstadoFilter: SuscripcionFilter;
-  onSuscripcionEstadoChange: (v: SuscripcionFilter) => void;
+  onSuscripcionEstadoChange: (value: SuscripcionFilter) => void;
   pagoEstadoFilter: PagoFilter;
-  onPagoEstadoChange: (v: PagoFilter) => void;
+  onPagoEstadoChange: (value: PagoFilter) => void;
   tenantFilter: string;
-  onTenantChange: (v: string) => void;
+  onTenantChange: (value: string) => void;
   tenantOptions: TenantOption[];
 };
 
-type Chip<T> = { label: string; value: T };
-
-const SUSCRIPCION_CHIPS: Chip<SuscripcionFilter>[] = [
-  { label: 'Todas', value: 'all' },
-  { label: 'Pendiente', value: 'pendiente' },
-  { label: 'Activa', value: 'activa' },
-  { label: 'Vencida', value: 'vencida' },
-  { label: 'Cancelada', value: 'cancelada' },
+const ESTADO_OPTIONS: ReadonlyArray<GritSegmentedOption<SuscripcionFilter>> = [
+  { value: 'all', label: 'Todas' },
+  { value: 'pendiente', label: 'Pendiente' },
+  { value: 'activa', label: 'Activa' },
+  { value: 'vencida', label: 'Vencida' },
+  { value: 'cancelada', label: 'Cancelada' },
 ];
 
-const PAGO_CHIPS: Chip<PagoFilter>[] = [
-  { label: 'Todos', value: 'all' },
-  { label: 'Pendiente', value: 'pendiente' },
-  { label: 'Validado', value: 'validado' },
-  { label: 'Rechazado', value: 'rechazado' },
+const PAGO_OPTIONS: { value: PagoFilter; label: string }[] = [
+  { value: 'all', label: 'Pago: Todos' },
+  { value: 'pendiente', label: 'Pago: Pendiente' },
+  { value: 'validado', label: 'Pago: Validado' },
+  { value: 'rechazado', label: 'Pago: Rechazado' },
 ];
 
-function ChipGroup<T extends string>({
-  label,
-  chips,
-  active,
-  onChange,
-}: {
-  label: string;
-  chips: Chip<T>[];
-  active: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <span className="text-xs font-medium text-grit-subtext">{label}</span>
-      <div className="flex flex-wrap gap-2">
-        {chips.map((chip) => {
-          const isActive = active === chip.value;
-          return (
-            <button
-              key={chip.value}
-              type="button"
-              onClick={() => onChange(chip.value)}
-              aria-pressed={isActive}
-              className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
-                isActive
-                  ? 'bg-grit-cyan/20 text-grit-cyan border border-grit-cyan/50'
-                  : 'bg-grit-card text-grit-subtext border border-transparent hover:text-grit-text'
-              }`}
-            >
-              {chip.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
+/** Header filters of /portal/mis-suscripciones (grit-arena-v3 `y9e6Kk`): status segmented + pill selects. */
 export function MisSuscripcionesFilters({
   suscripcionEstadoFilter,
   onSuscripcionEstadoChange,
@@ -81,39 +43,41 @@ export function MisSuscripcionesFilters({
   tenantOptions,
 }: MisSuscripcionesFiltersProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
-      <ChipGroup
-        label="Estado suscripción"
-        chips={SUSCRIPCION_CHIPS}
-        active={suscripcionEstadoFilter}
+    <div className="flex w-full min-w-0 flex-wrap items-center gap-2.5 sm:w-auto">
+      <GritSegmented
+        variant="solid"
+        ariaLabel="Filtrar por estado"
+        options={ESTADO_OPTIONS}
+        value={suscripcionEstadoFilter}
         onChange={onSuscripcionEstadoChange}
+        className="max-w-full"
       />
-      <ChipGroup
-        label="Estado pago"
-        chips={PAGO_CHIPS}
-        active={pagoEstadoFilter}
-        onChange={onPagoEstadoChange}
-      />
-
+      <select
+        aria-label="Filtrar por estado del pago"
+        value={pagoEstadoFilter}
+        onChange={(event) => onPagoEstadoChange(event.target.value as PagoFilter)}
+        className={gritPillSelectClass}
+      >
+        {PAGO_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
       {tenantOptions.length > 1 ? (
-        <div className="space-y-1.5">
-          <label htmlFor="mis-suscripciones-tenant" className="text-xs font-medium text-grit-subtext">
-            Organización
-          </label>
-          <select
-            id="mis-suscripciones-tenant"
-            value={tenantFilter}
-            onChange={(event) => onTenantChange(event.target.value)}
-            className="block rounded-md border border-grit-glass-border bg-grit-bg px-3 py-1 text-xs text-grit-text focus:border-grit-cyan focus:outline-none"
-          >
-            <option value="all">Todas</option>
-            {tenantOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          aria-label="Filtrar por organización"
+          value={tenantFilter}
+          onChange={(event) => onTenantChange(event.target.value)}
+          className={gritPillSelectClass}
+        >
+          <option value="all">Todas las organizaciones</option>
+          {tenantOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.nombre}
+            </option>
+          ))}
+        </select>
       ) : null}
     </div>
   );

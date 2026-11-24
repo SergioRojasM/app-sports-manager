@@ -1,5 +1,8 @@
 import { toDateKeyInBogota } from '@/lib/portal/eventos.utils';
 import type { EventoPublicoListItem, EventosPublicosDateChip } from '@/types/portal/eventos.types';
+import { matchesSearch } from '@/lib/text/normalize-search';
+
+export { normalizeSearch } from '@/lib/text/normalize-search';
 
 /** Days shown by the portal listing before the user picks a range (US-0120). */
 export const EVENTOS_DEFAULT_WINDOW_DAYS = 60;
@@ -48,27 +51,20 @@ export function computeEventosChipRange(
   return { dateFrom: addDaysKeyInBogota(monday, 5), dateTo: addDaysKeyInBogota(monday, 6) };
 }
 
-function normalizeSearch(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase();
-}
-
 /** Case- and accent-insensitive match over the fields a visitor would search by. */
 export function matchesEventoSearch(item: EventoPublicoListItem, needle: string): boolean {
-  const normalizedNeedle = normalizeSearch(needle.trim());
-  if (!normalizedNeedle) return true;
-
-  return [
-    item.nombre,
-    item.descripcion,
-    item.nombreTenant,
-    item.disciplinaNombre,
-    item.escenarioNombre,
-    item.puntoEncuentro,
-    item.entrenadorNombre,
-  ].some((field) => field != null && normalizeSearch(field).includes(normalizedNeedle));
+  return matchesSearch(
+    [
+      item.nombre,
+      item.descripcion,
+      item.nombreTenant,
+      item.disciplinaNombre,
+      item.escenarioNombre,
+      item.puntoEncuentro,
+      item.entrenadorNombre,
+    ],
+    needle,
+  );
 }
 
 /**
