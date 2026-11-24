@@ -114,15 +114,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   ├── PortalNavContent.tsx      # Shared nav body (`variant: sidebar | drawer`): Org Switcher (`weLbQ`; tenant initial + name, links to /portal/orgs — never the logo), collapsible "MI CUENTA" global links, always-expanded "ORGANIZACIÓN" tree with collapsible groups (only the active group starts expanded), single active link with the v3 gradient pill + live dot (US-0138, v3 US-0141)
 │   │   │   ├── PortalSidebarUser.tsx     # Sidebar/drawer footer — v3 User Card (`XLHCz`): GritAvatar, name, tenant role label in cyan (email outside a tenant), link to /portal/perfil, logout GritIconButton (US-0138, v3 US-0141)
 │   │   │   ├── UserAvatarMenu.tsx
-│   │   │   ├── inicio/                   # Feature slice (portal/inicio — user home dashboard)
-│   │   │   │   ├── InicioPage.tsx
-│   │   │   │   ├── InicioStatsCards.tsx
-│   │   │   │   ├── InicioFeaturedTraining.tsx
-│   │   │   │   ├── InicioProximosEntrenamientos.tsx
-│   │   │   │   ├── InicioSuscripciones.tsx  # "use client" — filter chips
-│   │   │   │   ├── InicioOrganizaciones.tsx
-│   │   │   │   ├── InicioQuickActions.tsx
-│   │   │   │   ├── InicioPagosPendientesAlert.tsx
+│   │   │   ├── inicio/                   # Feature slice (portal/inicio — user home dashboard, v3 frame `lhbhK`)
+│   │   │   │   ├── InicioPage.tsx           # Bento layout: welcome · KPI row · agenda | (suscripciones + organizaciones), xl:[1fr_400px]; resolves the "Reservar sesión" href (single org → entrenamientos-disponibles, else /portal/orgs)
+│   │   │   │   ├── InicioWelcome.tsx        # GritPageHeader "Bienvenido, {nombre}" (the page's only h1)
+│   │   │   │   ├── InicioStatsCards.tsx     # 4 × GritKpiCard layout="stacked" with hints (soonest expiry, "Esta semana", "Estás al día" / "{n} por validar", org names) and shortcuts
+│   │   │   │   ├── InicioAgendaSemanal.tsx  # "use client" — 7-day agenda: range pill, week strip (aria-pressed day buttons with session dots), day rows, empty overlay with hour lines
+│   │   │   │   ├── InicioAgendaItem.tsx     # Agenda row (time column + inset card, discipline bar, GritTag status) → /portal/orgs/{id}/entrenamientos-disponibles
+│   │   │   │   ├── InicioSuscripciones.tsx  # "use client" — GritSegmented (solid) filter, list rows, status/payment GritTag, date-only formatting
+│   │   │   │   ├── InicioOrganizaciones.tsx # Rows with logo tile + role GritTag (Administrador / Entrenador / Atleta)
+│   │   │   │   ├── InicioOrgLogo.tsx        # "use client" — logo image with onError → initial fallback
+│   │   │   │   ├── InicioPanelEmpty.tsx     # In-panel empty state (icon ring + title + text); promote to the kit if reused
 │   │   │   │   └── index.ts
 │   │   │   ├── tenant/                   # Feature slice (portal/tenant)
 │   │   │   │   ├── TenantIdentityCard.tsx
@@ -386,7 +387,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── GritChip.tsx         # Toggle filter chip, `active` → aria-pressed, optional icon — US-0141
 │   │       │   ├── GritSegmented.tsx    # 'use client'; soft|solid segmented control / tabs with count, role=group + aria-pressed, scrolls on narrow screens — US-0141
 │   │       │   ├── GritSearchField.tsx  # Pill type=search input, md|lg (37/44), requires aria-label or aria-labelledby — US-0141
-│   │       │   ├── GritKpiCard.tsx      # Horizontal KPI card (icon chip, Exo 2 300 36px value, label, detail, highlight) — US-0141
+│   │       │   ├── GritKpiCard.tsx      # Horizontal KPI card (icon chip, Exo 2 300 36px value, label, detail, highlight) — US-0141; `layout="stacked"` tall card (icon chip + shortcut `href`/`hrefLabel`, 56px value, label, `hint` + `hintTone`) from Inicio `lhbhK`
 │   │       │   ├── GritAvatar.tsx       # 32|34|38 round avatar, neutral|soft|solid, initials from name or decorative image — US-0141
 │   │       │   ├── GritProgress.tsx     # 6px progress bar + JetBrains Mono %, role=progressbar, clamps 0–100 — US-0141
 │   │       │   ├── GritPagination.tsx   # 'use client'; table pager with summary, ellipsis over 7 pages, nav[aria-label=Paginación]; exports getPaginationItems — US-0141
@@ -408,6 +409,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   ├── useOrganizacionesDestacadas.ts # organizacionesPublicasService.listDestacadas(6) → { items, loading, error }
 │   │   │   ├── usePrefersReducedMotion.ts # null until known, then matchMedia('(prefers-reduced-motion: reduce)') with live updates
 │   │   │   └── useHeaderScrolled.ts      # window.scrollY > threshold (passive listener)
+│   │   ├── portal/inicio/
+│   │   │   └── useAgendaSemanal.ts       # Selected day (initialised to the server's hoyKey), sessions grouped by Bogotá day, per-day counts, ventanaVacia
 │   │   ├── landing/
 │   │   │   └── eventos/
 │   │   │       └── useEventosLanding.ts   # listEventosPublicados({soloPublicos: true}) → { items, loading, error, refetch } (US-0120)
@@ -557,7 +560,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── metodos-pago.service.ts          # CRUD for tenant_metodos_pago (incl. qr_url, US-0128)
 │   │       │   └── reglas-suspension.service.ts      # CRUD for tenant_reglas_suspension
 │   │       │   └── reglas-notificacion.service.ts    # US-0135 reglasNotificacionService: listReglas / createRegla / updateRegla / deleteRegla; maps 23505 → duplicate, MAX_REGLAS_NOTIFICACION → max_reached, 42501 → forbidden
-│   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries
+│   │       │   └── inicio.service.ts      # Server-side cross-tenant dashboard queries; fetchInicioStats / fetchProximosEntrenamientos take the 7-day agenda window (desde/hasta) — bookings count and agenda share it (defensive 100-row cap)
 │   │       │   └── storage.service.ts     # uploadOrgLogo, uploadOrgBanner, uploadMetodoPagoQr (orgs/{tenantId}/metodos-pago/{metodoId}/qr-{ts}.{ext}, new object per upload, US-0128), uploadPaymentProof (upsert option; receipts are writable by an active member OR any subscription holder of the tenant, so non-member buyers of public plans can submit proof — US-0093), getSignedUrl — wraps Supabase Storage API for org-assets bucket; uploadFormularioRespuestaImage uploads a "imagen"-type form-response file under the booking athlete's own users/{atletaId}/formularios/ path (US-0087); readable by any authenticated user via the public_training_banner_read storage policy (US-0089); uploadEventoBanner uploads to orgs/{tenantId}/eventos/{eventoId}.{ext} (upsert, 1-year signed URL stored in eventos.banner_url), readable via event_banner_read (US-0119); copyEventoBanner (US-0122): downloads a duplicated event's inherited banner and re-uploads it under the new event's path
 │   │       │   └── mis-suscripciones.service.ts  # fetchMisSuscripciones — the user's subscriptions across ALL tenants with tenant + plan + pago + suscripcion_servicios joins, scoped by atleta_id only (RLS enforces ownership); replaces the tenant-scoped fetch (US-0093)
 │   │       └── portal.ts                 # Transitional/legacy entrypoint
@@ -595,7 +598,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │       └── gestion-suscripciones.types.ts  # SuscripcionAdminRow includes plan_tipo_id, plan_tipo_nombre, plan_tipo_vigencia_dias; SuscripcionAdminRow.es_miembro (computed from miembros_tenant existence, not stored) and SuscripcionTab ('miembros' | 'no_miembros') (US-0098)
 │   │       └── mis-suscripciones.types.ts  # MiSuscripcionRow (incl. tenant_id + tenant_nombre — US-0093), MiPagoRow — user-facing subscription + payment view types
 │   │       └── perfil.types.ts
-│   │       └── inicio.types.ts            # Dashboard view model interfaces
+│   │       └── inicio.types.ts            # Dashboard view model interfaces + InicioVentana / InicioAgendaDia (agenda window)
 │   │
 │   └── lib/                              # Pure utilities
 │       ├── utils.ts
@@ -622,6 +625,8 @@ Following structure reflects the current implementation and the target scalable 
 │           ├── tenant-access.cache.ts       # React cache()-wrapped getCachedTenantAccess — deduplicates canUserAccessTenant DB call across nested tenant layouts
 │           ├── perfil-completo.ts           # Client-safe single definition of the tenant "complete profile" rule: PERFIL_COMPLETO_SELECT, getPerfilCamposFaltantes() (FormularioPerfilCampo keys), isPerfilCompleto(); used by canUserAccessTenant and createSolicitud Guard 3 (US-0136)
 │           ├── bogota-date.ts               # bogotaDayStartIso/bogotaDayEndIso — converts a "YYYY-MM-DD" Bogotá calendar day into -05:00-offset ISO boundaries for timestamptz range queries (US-0075)
+│           ├── inicio-agenda.ts             # buildAgendaVentana(now) → 7-day Bogotá window (desde = now, hasta = end of day 7, day keys, DOW labels, "15 – 21 nov" range), agruparPorDia, formatAgendaHora ("5:30 am"), formatFechaCorta / formatDiaMes for date-only values
+│           ├── portal-profile-cookie.ts     # readPortalProfileName() — first name from the `portal_profile` cookie (no DB call), all-caps names title-cased, '' on failure
 │           ├── disciplina-visual.ts         # getDisciplinaVisual(nombre) → { icon, colorClass } — accent/case-insensitive name matching to the design's discipline colours, `sports` + cyan fallback (US-0116)
 │           ├── eventos.utils.ts             # Bogotá date keys/month ranges (fixed -05:00, no DST) and event formatters (fecha, hora, duración, cupo, precio) (US-0118); datetime-local ⇄ ISO helpers, formatCop, aplicarDescuento, formatDescuento (US-0119)
 │           ├── eventos-wizard.utils.ts      # Pure wizard logic (US-0119): empty/draftFromEventoCompleto/draftToPayload, preview adapters toDetallePreviewItem (→ EventoPublicoDetalle with nombreTenant since US-0120) / toCardPreviewItem / previewPrecio, validateEventoDraft (mode 'borrador' = name + format only, 'final' = + completeness; same rules as the RPC), ERROR_KEYS / stepOfErrorKey, limits; draftFromEventoDuplicado(evento, now) → "Copia de …" name, new ticket/coupon identities, past event date cleared (returned as fechaOriginal); shiftWithEventoFecha moves a window end by the event-date delta (US-0122); toEscenarioSnapshot + numberToInput exported (US-0132)

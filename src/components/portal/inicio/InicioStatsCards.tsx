@@ -1,74 +1,72 @@
-import type { InicioStats } from '@/types/portal/inicio.types';
+import { GritKpiCard } from '@/components/ui';
+import { formatDiaMes } from '@/lib/portal/inicio-agenda';
+import type { InicioMembresia, InicioStats, InicioSuscripcion } from '@/types/portal/inicio.types';
 
-type StatCard = {
-  label: string;
-  value: number;
-  icon: string;
-  colorClass: string;
-  bgClass: string;
-  accentClass: string;
+type InicioStatsCardsProps = {
+  stats: InicioStats;
+  suscripciones: InicioSuscripcion[];
+  membresias: InicioMembresia[];
 };
 
-function buildCards(stats: InicioStats): StatCard[] {
-  return [
-    {
-      label: 'Suscripciones Activas',
-      value: stats.suscripcionesActivas,
-      icon: 'card_membership',
-      colorClass: 'text-grit-teal',
-      bgClass: 'bg-grit-teal/20',
-      accentClass: 'border-t-2 border-grit-teal/40',
-    },
-    {
-      label: 'Próximos Entrenamientos',
-      value: stats.proximosEntrenamientos,
-      icon: 'directions_run',
-      colorClass: 'text-grit-teal',
-      bgClass: 'bg-grit-teal/20',
-      accentClass: 'border-t-2 border-grit-teal/40',
-    },
-    {
-      label: 'Pagos Pendientes',
-      value: stats.pagosPendientes,
-      icon: 'payments',
-      colorClass: 'text-yellow-400',
-      bgClass: 'bg-yellow-500/20',
-      accentClass: 'border-t-2 border-yellow-500/40',
-    },
-    {
-      label: 'Organizaciones',
-      value: stats.organizaciones,
-      icon: 'corporate_fare',
-      colorClass: 'text-grit-teal',
-      bgClass: 'bg-grit-teal/20',
-      accentClass: 'border-t-2 border-grit-teal/40',
-    },
-  ];
+function suscripcionesHint(activas: number, suscripciones: InicioSuscripcion[]): string {
+  if (activas === 0) return 'Sin planes activos';
+  const vencimientos = suscripciones
+    .filter((s) => s.estado === 'activa' && s.fecha_fin)
+    .map((s) => (s.fecha_fin as string).slice(0, 10))
+    .sort();
+  return vencimientos.length > 0 ? `Vence el ${formatDiaMes(vencimientos[0])}` : 'Sin vencimiento';
 }
 
-export function InicioStatsCards({ stats }: { stats: InicioStats }) {
-  const cards = buildCards(stats);
+function organizacionesHint(total: number, membresias: InicioMembresia[]): string {
+  const primera = membresias[0]?.org_nombre;
+  if (total === 0 || !primera) return 'Sin organizaciones';
+  return total === 1 ? primera : `${primera} y ${total - 1} más`;
+}
+
+/** KPI row of `/portal/inicio` (frame `lhbhK` › `N1yQj`). */
+export function InicioStatsCards({ stats, suscripciones, membresias }: InicioStatsCardsProps) {
+  const pagos = stats.pagosPendientes;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {cards.map((card) => (
-        <div
-          key={card.label}
-          className={`border border-grit-glass-border bg-grit-card backdrop-blur-md stat-card rounded-grit-2xl p-4 flex items-center gap-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${card.accentClass}`}
-        >
-          <div
-            className={`size-11 rounded-md ${card.bgClass} flex items-center justify-center ${card.colorClass}`}
-          >
-            <span className="material-symbols-outlined text-2xl">{card.icon}</span>
-          </div>
-          <div>
-            <p className="text-grit-subtext text-[10px] font-bold uppercase tracking-wider">
-              {card.label}
-            </p>
-            <h3 className="font-grit-title text-xl font-bold">{card.value}</h3>
-          </div>
-        </div>
-      ))}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <GritKpiCard
+        layout="stacked"
+        icon="credit_card"
+        value={stats.suscripcionesActivas}
+        label="Suscripciones activas"
+        hint={suscripcionesHint(stats.suscripcionesActivas, suscripciones)}
+        href="/portal/mis-suscripciones"
+        hrefLabel="Ver suscripciones activas"
+      />
+      <GritKpiCard
+        layout="stacked"
+        icon="directions_run"
+        value={stats.proximosEntrenamientos}
+        label="Próximos entrenamientos"
+        hint="Esta semana"
+        href="/portal/mis-reservas"
+        hrefLabel="Ver próximos entrenamientos"
+      />
+      <GritKpiCard
+        layout="stacked"
+        highlight
+        icon="account_balance_wallet"
+        value={pagos}
+        label="Pagos pendientes"
+        hint={pagos === 0 ? 'Estás al día' : `${pagos} por validar`}
+        hintTone={pagos === 0 ? 'accent' : 'warning'}
+        href="/portal/mis-suscripciones"
+        hrefLabel="Ver pagos pendientes"
+      />
+      <GritKpiCard
+        layout="stacked"
+        icon="corporate_fare"
+        value={stats.organizaciones}
+        label="Organizaciones"
+        hint={organizacionesHint(stats.organizaciones, membresias)}
+        href="/portal/orgs"
+        hrefLabel="Ver organizaciones"
+      />
     </div>
   );
 }
