@@ -1,103 +1,120 @@
 'use client';
 
-import type { MiSuscripcionRow } from '@/types/portal/mis-suscripciones.types';
-import { SuscripcionEstadoBadge } from '@/components/portal/gestion-suscripciones/SuscripcionEstadoBadge';
-import { PagoCard } from './PagoCard';
+import { GritAvatar, GritCard, GritIcon, GritTag, cx, type GritTagTone } from '@/components/ui';
+import { todayKeyInBogota } from '@/lib/portal/eventos-publicos.utils';
+import { formatRangoFechas, getPeriodo } from '@/lib/portal/mis-suscripciones-periodo';
+import type { MiSuscripcionRow, SuscripcionEstado } from '@/types/portal/mis-suscripciones.types';
+import type { SuscripcionServicioDisplay } from '@/types/portal/suscripciones.types';
+import { SuscripcionPagoZone } from './SuscripcionPagoZone';
 
 type SuscripcionCardProps = {
   suscripcion: MiSuscripcionRow;
-  tenantId: string;
   userId: string;
 };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-AR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-}
+const ESTADO_TAG: Record<SuscripcionEstado, { label: string; tone: GritTagTone }> = {
+  activa: { label: 'Activa', tone: 'accent' },
+  pendiente: { label: 'Pendiente', tone: 'warning' },
+  vencida: { label: 'Vencida', tone: 'neutral' },
+  cancelada: { label: 'Cancelada', tone: 'danger' },
+};
 
-export function SuscripcionCard({ suscripcion, tenantId, userId }: SuscripcionCardProps) {
-  const { plan_nombre, tenant_nombre, estado, fecha_inicio, fecha_fin, pago, servicios } =
-    suscripcion;
+function ServicioTile({ servicio }: { servicio: SuscripcionServicioDisplay }) {
+  const { servicio_nombre: nombre, unidades_incluidas: incluidas, unidades_restantes: restantes } = servicio;
+  const limited = incluidas !== null && incluidas > 0;
+  const exhausted = limited && (restantes ?? 0) <= 0;
+  const pct = limited ? Math.max(0, Math.min(100, ((restantes ?? 0) / incluidas) * 100)) : 0;
 
   return (
-    <div className="border bg-grit-card backdrop-blur-md rounded-grit-2xl p-4 border-grit-glass-border hover:border-grit-cyan/20 transition-all">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-1">
-        <h3 className="font-grit-title text-sm font-semibold text-grit-teal truncate">{plan_nombre}</h3>
-        <SuscripcionEstadoBadge estado={estado} />
-      </div>
-
-      {/* Organization */}
-      <p className="mb-1 flex items-center gap-1 text-xs text-grit-subtext">
-        <span className="material-symbols-outlined text-sm" aria-hidden="true">
-          corporate_fare
-        </span>
-        {tenant_nombre}
-      </p>
-
-      {/* Dates */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-grit-subtext">
-        <span>
-          <span className="text-grit-muted">Inicio:</span>{' '}
-          {fecha_inicio ? formatDate(fecha_inicio) : '—'}
-        </span>
-        <span>
-          <span className="text-grit-muted">Fin:</span>{' '}
-          {fecha_fin ? formatDate(fecha_fin) : '—'}
+    <li className="flex min-w-0 flex-col gap-1.5 rounded-[14px] border border-white/[0.06] bg-white/[0.025] px-3 py-2.5">
+      <div className="flex items-center justify-between gap-3">
+        <span className="truncate font-grit-body text-xs font-medium text-grit-text">{nombre || 'Servicio'}</span>
+        <span className={cx('shrink-0 font-grit-title text-sm font-medium', exhausted ? 'text-grit-danger' : 'text-grit-text')}>
+          {limited ? `${restantes ?? 0}/${incluidas}` : '∞'}
         </span>
       </div>
-
-      {/* Services section */}
-      {servicios.length > 0 ? (
-        <div className="mt-2">
-          <p className="text-xs text-grit-muted mb-1">Servicios:</p>
-          <div className="space-y-1.5">
-            {servicios.map((srv) => {
-              const isExhausted = srv.unidades_restantes === 0 && srv.unidades_incluidas !== null;
-              const showBar = srv.unidades_incluidas !== null && srv.unidades_incluidas > 0;
-              const pct = showBar
-                ? Math.min(100, ((srv.unidades_restantes ?? 0) / srv.unidades_incluidas!) * 100)
-                : 0;
-
-              return (
-                <div key={srv.servicio_id}>
-                  <div className="flex justify-between text-[10px] text-grit-subtext mb-0.5">
-                    <span>{srv.servicio_nombre}</span>
-                    <span className={isExhausted ? 'text-grit-danger font-bold' : ''}>
-                      {srv.unidades_restantes ?? '∞'} / {srv.unidades_incluidas ?? '∞'}
-                    </span>
-                  </div>
-                  {showBar ? (
-                    <div className="w-full h-1.5 bg-grit-card rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${
-                          isExhausted
-                            ? 'bg-rose-500'
-                            : 'bg-gradient-to-r from-grit-teal to-grit-cyan'
-                        }`}
-                        style={{ width: `${pct}%` }}
-                        aria-label={`Unidades restantes de ${srv.servicio_nombre}`}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
+      {limited ? (
+        <div
+          role="progressbar"
+          aria-label={`Unidades restantes de ${nombre}`}
+          aria-valuemin={0}
+          aria-valuemax={incluidas}
+          aria-valuenow={restantes ?? 0}
+          className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]"
+        >
+          <div
+            className={cx('h-full rounded-full', exhausted ? 'bg-grit-danger' : 'bg-grit-cyan shadow-[0_0_8px_rgba(20,219,196,0.5)]')}
+            style={{ width: `${pct}%` }}
+          />
         </div>
       ) : null}
+    </li>
+  );
+}
 
-      {/* Payment section */}
-      {pago ? (
-        <PagoCard pago={pago} tenantId={tenantId} userId={userId} />
-      ) : (
-        <p className="mt-2 text-xs italic text-grit-muted">
-          Sin registro de pago para esta suscripción.
-        </p>
-      )}
-    </div>
+/** Subscription card of /portal/mis-suscripciones (grit-arena-v3 `ciyBV`): cover · period + services · payment. */
+export function SuscripcionCard({ suscripcion, userId }: SuscripcionCardProps) {
+  const { plan_nombre, plan_descripcion, tenant_nombre, estado, fecha_inicio, fecha_fin, servicios } = suscripcion;
+  const tag = ESTADO_TAG[estado];
+  const rango = formatRangoFechas(fecha_inicio, fecha_fin);
+  const periodo = getPeriodo(fecha_inicio, fecha_fin, todayKeyInBogota());
+
+  return (
+    <GritCard as="article" variant="card" padding="none" className="grid grid-cols-1 overflow-hidden xl:grid-cols-[300px_minmax(0,1fr)_240px]">
+      <div className="flex flex-col justify-between gap-3 px-[22px] py-[18px]">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h2 className="truncate font-grit-title text-[26px] font-semibold italic leading-tight text-grit-text">{plan_nombre}</h2>
+          {plan_descripcion ? <p className="truncate font-grit-body text-[11px] text-grit-subtext">{plan_descripcion}</p> : null}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] py-[5px] pl-[5px] pr-2.5">
+            <GritAvatar name={tenant_nombre} tone="org" size={20} />
+            <span className="truncate font-grit-body text-[11px] font-semibold text-grit-text">{tenant_nombre}</span>
+          </span>
+          <GritTag tone={tag.tone} dot>
+            {tag.label}
+          </GritTag>
+        </div>
+      </div>
+
+      <div className="flex min-w-0 flex-col gap-3 border-t border-white/[0.07] px-6 py-[18px] xl:border-l xl:border-t-0">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 font-grit-body text-xs text-grit-subtext">
+              <GritIcon name="calendar_month" size={13} className="text-grit-muted" />
+              {rango ?? 'Sin fechas'}
+            </span>
+            {periodo.estado !== 'sin_fechas' ? <span className="font-grit-body text-[11px] text-grit-muted">{periodo.label}</span> : null}
+          </div>
+          {periodo.estado !== 'sin_fechas' ? (
+            <div
+              role="progressbar"
+              aria-label="Avance del periodo"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={periodo.pct}
+              aria-valuetext={periodo.label}
+              className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]"
+            >
+              <div
+                className={cx('h-full rounded-full', periodo.estado === 'finalizado' ? 'bg-white/20' : 'bg-grit-cyan')}
+                style={{ width: `${periodo.pct}%` }}
+              />
+            </div>
+          ) : null}
+        </div>
+        {servicios.length > 0 ? (
+          <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {servicios.map((servicio) => (
+              <ServicioTile key={servicio.servicio_id} servicio={servicio} />
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
+      <div className="border-t border-white/[0.07] px-[22px] py-[18px] xl:border-l xl:border-t-0">
+        <SuscripcionPagoZone suscripcion={suscripcion} userId={userId} />
+      </div>
+    </GritCard>
   );
 }

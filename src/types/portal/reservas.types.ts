@@ -133,3 +133,18 @@ export type MisReservasFilters = {
   disciplinaNombre?: string;
   limit?: number;
 };
+
+/** Stats strip of /portal/mis-reservas (grit-arena-v3 `aVWHV`), over the filtered rows. */
+export type MisReservasStats = {
+  reservas: number;
+  asistidas: number;
+  noAsistio: number;
+  canceladas: number;
+};
+
+/** Bookings of one Bogotá month, newest first (overline "SEPTIEMBRE 2026"). */
+export type MisReservasMonthGroup = {
+  key: string;
+  label: string;
+  rows: ReservaReportRow[];
+};

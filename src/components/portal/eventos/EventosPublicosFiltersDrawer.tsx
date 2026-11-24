@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { GritButton, GritChip, GritIconButton, cx, gritFocusRing, gritSelectClass } from '@/components/ui';
 import {
   computeEventosChipRange,
   dateKeyFromParts,
@@ -71,18 +72,16 @@ type EventosPublicosFiltersDrawerProps = {
   onSetDateRange: (from: string | null, to: string | null) => void;
   onClearDateRange: () => void;
   onApplyDateChip: (chip: EventosPublicosDateChip) => void;
-  search: string;
-  onChangeSearch: (value: string) => void;
   tenantId: string | null;
   onChangeTenantId: (tenantId: string | null) => void;
   tenantOptions: EventosTenantOption[];
-  disciplina: string | null;
-  onChangeDisciplina: (disciplina: string | null) => void;
-  disciplinaOptions: string[];
   onClearFilters: () => void;
 };
 
-/** Filters drawer for /portal/eventos (US-0120), adapted from the public-trainings drawer. */
+/**
+ * Filters drawer for /portal/eventos (US-0120): date range and organization. Search and discipline
+ * live on the page itself (grit-arena-v3 frame `zY4v8`).
+ */
 export function EventosPublicosFiltersDrawer({
   open,
   onClose,
@@ -94,14 +93,9 @@ export function EventosPublicosFiltersDrawer({
   onSetDateRange,
   onClearDateRange,
   onApplyDateChip,
-  search,
-  onChangeSearch,
   tenantId,
   onChangeTenantId,
   tenantOptions,
-  disciplina,
-  onChangeDisciplina,
-  disciplinaOptions,
   onClearFilters,
 }: EventosPublicosFiltersDrawerProps) {
   const todayKey = todayKeyInBogota();
@@ -146,9 +140,6 @@ export function EventosPublicosFiltersDrawer({
     return `${SHORT_DATE_FORMATTER.format(keyToUtcDate(dateFrom))} – ${SHORT_DATE_FORMATTER.format(keyToUtcDate(dateTo))}`;
   })();
 
-  const selectClass =
-    'w-full rounded-grit-md border border-grit-glass-border bg-grit-card px-3 py-2 font-grit-body text-sm text-grit-text focus:border-grit-cyan focus:outline-none';
-
   return (
     <div className="fixed inset-0 z-50">
       <button
@@ -161,76 +152,47 @@ export function EventosPublicosFiltersDrawer({
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Filtrar eventos"
-        className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col overflow-y-auto border-l border-grit-glass-border bg-grit-bg shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        aria-labelledby="eventos-filtros-titulo"
+        className="absolute inset-y-0 right-0 flex w-full max-w-sm flex-col overflow-y-auto border-l border-white/[0.10] bg-grit-glass shadow-[0_20px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl"
       >
-        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
-          <h2 className="font-grit-title text-xl font-bold italic text-grit-text">Filtrar</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar"
-            className="rounded-grit-md border border-grit-glass-border bg-grit-card p-2 text-grit-subtext transition hover:text-grit-text"
-          >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              close
-            </span>
-          </button>
+        <header className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
+          <h2 id="eventos-filtros-titulo" className="font-grit-title text-xl font-medium text-grit-text">
+            Filtros
+          </h2>
+          <GritIconButton icon="close" label="Cerrar" onClick={onClose} />
         </header>
 
         <div className="flex flex-1 flex-col gap-5 p-5">
-          <div className="grid grid-cols-2 gap-2">
+          <div role="group" aria-label="Fechas rápidas" className="grid grid-cols-2 gap-2">
             {DATE_CHIPS.map((chip) => {
               const chipRange = computeEventosChipRange(chip.value);
               const selected = dateFrom === chipRange.dateFrom && dateTo === chipRange.dateTo;
               return (
-                <button
-                  key={chip.value}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => onApplyDateChip(chip.value)}
-                  className={`rounded-grit-md border px-3 py-2 font-grit-body text-xs font-semibold transition ${
-                    selected
-                      ? 'border-grit-cyan bg-grit-cyan text-grit-bg'
-                      : 'border-grit-glass-border bg-grit-card text-grit-subtext hover:border-grit-cyan/50'
-                  }`}
-                >
+                <GritChip key={chip.value} active={selected} onClick={() => onApplyDateChip(chip.value)} className="justify-center">
                   {chip.label}
-                </button>
+                </GritChip>
               );
             })}
           </div>
 
-          <div className="h-px w-full bg-grit-glass-border" />
+          <div className="h-px w-full bg-white/[0.06]" />
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <button
-                type="button"
+              <GritIconButton
+                icon="chevron_left"
+                label="Mes anterior"
+                size="sm"
+                variant="ghost"
                 onClick={onGoToPrevMonth}
                 disabled={isPrevDisabled}
-                aria-label="Mes anterior"
-                className="rounded-grit-sm p-1 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-30"
-              >
-                <span className="material-symbols-outlined text-base" aria-hidden="true">
-                  chevron_left
-                </span>
-              </button>
+              />
               <span className="font-grit-body text-sm font-semibold capitalize text-grit-text">{monthLabel}</span>
-              <button
-                type="button"
-                onClick={onGoToNextMonth}
-                aria-label="Mes siguiente"
-                className="rounded-grit-sm p-1 text-grit-subtext transition hover:text-grit-text"
-              >
-                <span className="material-symbols-outlined text-base" aria-hidden="true">
-                  chevron_right
-                </span>
-              </button>
+              <GritIconButton icon="chevron_right" label="Mes siguiente" size="sm" variant="ghost" onClick={onGoToNextMonth} />
             </div>
             <div className="grid grid-cols-7 gap-1 text-center">
               {WEEKDAY_LABELS.map((label) => (
-                <span key={label} className="font-grit-body text-[11px] font-semibold text-grit-subtext">
+                <span key={label} className="font-grit-body text-[11px] font-semibold text-grit-muted">
                   {label}
                 </span>
               ))}
@@ -248,17 +210,19 @@ export function EventosPublicosFiltersDrawer({
                     aria-label={FULL_DATE_FORMATTER.format(keyToUtcDate(cell.dateKey))}
                     aria-pressed={isEndpoint}
                     onClick={() => handleDayClick(cell.dateKey)}
-                    className={`flex h-7 items-center justify-center rounded-grit-sm font-grit-body text-xs transition ${
+                    className={cx(
+                      'flex h-8 items-center justify-center rounded-full font-grit-body text-xs transition',
+                      gritFocusRing,
                       isEndpoint
-                        ? 'bg-grit-cyan font-bold text-grit-bg'
+                        ? 'bg-grit-cyan font-bold text-grit-on-brand'
                         : isWithinRange
-                          ? 'bg-grit-cyan/25 text-grit-text'
+                          ? 'bg-grit-cyan/[0.18] text-grit-text'
                           : cell.isToday
-                            ? 'border border-grit-cyan text-grit-text'
+                            ? 'border border-grit-cyan/60 text-grit-text'
                             : cell.disabled
-                              ? 'cursor-not-allowed text-grit-subtext/30'
-                              : 'text-grit-text hover:bg-grit-card'
-                    }`}
+                              ? 'cursor-not-allowed text-grit-muted/40'
+                              : 'text-grit-text hover:bg-white/[0.06]',
+                    )}
                   >
                     {cell.day}
                   </button>
@@ -268,18 +232,14 @@ export function EventosPublicosFiltersDrawer({
             <div className="mt-2 flex items-center justify-between">
               <span className="font-grit-body text-xs text-grit-subtext">{rangeSummary}</span>
               {(dateFrom || dateTo) && (
-                <button
-                  type="button"
-                  onClick={onClearDateRange}
-                  className="font-grit-body text-xs font-semibold text-grit-cyan hover:underline"
-                >
+                <GritButton variant="ghost" size="sm" onClick={onClearDateRange}>
                   Limpiar fechas
-                </button>
+                </GritButton>
               )}
             </div>
           </div>
 
-          <div className="h-px w-full bg-grit-glass-border" />
+          <div className="h-px w-full bg-white/[0.06]" />
 
           <div>
             <label htmlFor="eventos-publicos-tenant" className="mb-1.5 block font-grit-body text-xs font-semibold text-grit-subtext">
@@ -289,7 +249,7 @@ export function EventosPublicosFiltersDrawer({
               id="eventos-publicos-tenant"
               value={tenantId ?? ''}
               onChange={(event) => onChangeTenantId(event.target.value || null)}
-              className={selectClass}
+              className={cx(gritSelectClass, 'grit-select-chevron')}
             >
               <option value="">Todas</option>
               {tenantOptions.map((option) => (
@@ -299,61 +259,15 @@ export function EventosPublicosFiltersDrawer({
               ))}
             </select>
           </div>
-
-          <div>
-            <label htmlFor="eventos-publicos-disciplina" className="mb-1.5 block font-grit-body text-xs font-semibold text-grit-subtext">
-              Disciplina
-            </label>
-            <select
-              id="eventos-publicos-disciplina"
-              value={disciplina ?? ''}
-              onChange={(event) => onChangeDisciplina(event.target.value || null)}
-              className={selectClass}
-            >
-              <option value="">Todas</option>
-              {disciplinaOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="eventos-publicos-search" className="mb-1.5 block font-grit-body text-xs font-semibold text-grit-subtext">
-              Buscar evento
-            </label>
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-grit-subtext" aria-hidden="true">
-                search
-              </span>
-              <input
-                id="eventos-publicos-search"
-                type="text"
-                value={search}
-                onChange={(event) => onChangeSearch(event.target.value)}
-                placeholder="Nombre, organización, lugar..."
-                className="w-full rounded-grit-md border border-grit-glass-border bg-grit-card py-2 pl-9 pr-3 font-grit-body text-sm text-grit-text placeholder:text-grit-subtext/60 focus:border-grit-cyan focus:outline-none"
-              />
-            </div>
-          </div>
         </div>
 
-        <footer className="flex gap-2 border-t border-grit-glass-border px-5 py-4">
-          <button
-            type="button"
-            onClick={onClearFilters}
-            className="flex-1 rounded-grit-md border border-grit-glass-border px-4 py-2 font-grit-body text-sm font-semibold text-grit-text transition hover:border-grit-cyan/50"
-          >
+        <footer className="flex gap-2 border-t border-white/[0.06] px-5 py-4">
+          <GritButton variant="secondary" fullWidth onClick={onClearFilters} className="flex-1">
             Limpiar filtros
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-grit-md bg-grit-cyan px-4 py-2 font-grit-body text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan-light"
-          >
+          </GritButton>
+          <GritButton fullWidth onClick={onClose} className="flex-1">
             Ver resultados
-          </button>
+          </GritButton>
         </footer>
       </aside>
     </div>

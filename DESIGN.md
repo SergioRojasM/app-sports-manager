@@ -50,11 +50,11 @@ shell (§7), so only the content area is page-specific.
 | --- | --- | --- |
 | `lhbhK` | App · Inicio v9 | `/portal/inicio` — migrated (agenda row derived from `dBJ8K`) |
 | `V2eGcp` | App · Inicio v10 (collapsed sidebar) | `/portal/inicio` — collapsed sidebar not built yet (§9) |
-| `kMj4F` | App · Organizaciones (marketplace) | `/portal/orgs` |
-| `zY4v8` | App · Eventos (marketplace) | `/portal/eventos` |
-| `LSqV5` | App · Mis suscripciones | `/portal/mis-suscripciones` |
-| `x9xdbA` | App · Mis reservas | `/portal/mis-reservas` |
-| `v1lcBA` | App · Mis entradas | `/portal/mis-entradas` |
+| `kMj4F` | App · Organizaciones (marketplace) | `/portal/orgs` — migrated (no discipline chips, distance, rating, favorites or DESTACADO: no data) |
+| `zY4v8` | App · Eventos (marketplace) | `/portal/eventos` — migrated (header calendar button folded into "Ver calendario") |
+| `LSqV5` | App · Mis suscripciones | `/portal/mis-suscripciones` — migrated ("Renovar" opens the plans catalog) |
+| `x9xdbA` | App · Mis reservas | `/portal/mis-reservas` — migrated (no row ⋯ menu) |
+| `v1lcBA` | App · Mis entradas | `/portal/mis-entradas` — migrated (no add-to-calendar button) |
 | `SSjFs` | App · Notificaciones (tiempo real) | header bell panel · `/portal/notificaciones` |
 | `aYwNn` | Admin · Configuración | `orgs/[tenant_id]/gestion-organizacion` |
 | `qG0T5` | Admin · Escenarios | `orgs/[tenant_id]/gestion-escenarios` |
@@ -278,9 +278,13 @@ Button rules:
 | `GritSegmented` | `options` `{value,label,count?,icon?}[]`, `value`, `onChange`, `variant` soft·solid (`soft`), **`ariaLabel`** | `LW0MQ` / `rhTJ3` (soft) · `g2bgr` View Switch (solid). Buttons with `aria-pressed` in a labelled `role="group"`; scrolls horizontally inside its track on narrow screens |
 | `GritChip` | `active`, `icon`, button props | `xKTkP` / `bHakw`. Toggle chip (`aria-pressed`); active = cyan fill + glow |
 | `GritKpiCard` | `icon`, `value`, `label`, `detail`, `highlight`, `valueClassName`, `layout`, `hint`, `hintTone`, `href` + `hrefLabel` | `GO5Yf` / `pbTiS`. Default `layout="inline"`: round icon chip, Exo 2 300 36px value, 12px label. `layout="stacked"` (Inicio `lhbhK`): 28px radius, 36px accent icon chip + optional round shortcut (`href` requires `hrefLabel`), Exo 2 300 56px value, 13/500 label, 12px `hint` toned `muted` / `accent` / `warning`. `highlight` for the one featured KPI; tone the value with `text-grit-success` / `text-grit-warning` |
-| `GritAvatar` | `name`, `src`, `size` 32·34·38 (`34`), `tone` neutral·soft·solid (`neutral`) | `sFaSi` / `gNnuk`. Initials from `name` (person icon if empty); image is decorative (`alt=""`) because the name is always shown beside it |
+| `GritAvatar` | `name`, `src`, `size` 32·34·38 people / 20·26·36·42·52 club marks (`34`), `tone` neutral·soft·solid·org (`neutral`) | `sFaSi` / `gNnuk` / club mark `orsH4`. Initials from `name` (person icon if empty, shield for `org`); image is decorative (`alt=""`) because the name is always shown beside it, and falls back to the initials when it fails to load. `org` = dark 80% fill, cyan 50% stroke, cyan Exo 2 700 italic initials scaled with the circle |
 | `GritProgress` | `value` 0–100 (clamped), **`label`**, `showValue` (`true`), `tone` accent·warning·danger | `fU6ex`. 6px track, JetBrains Mono %, `role="progressbar"` |
 | `GritPagination` | `page` (1-based), `totalPages`, `onPageChange`, `summary` | `Alk2W`. Renders nothing for ≤1 page; ellipsis above 7 pages; `nav[aria-label="Paginación"]` + `aria-current` |
+| `GritMediaCard` | `image`, `imageAlt`, `placeholderIcon`, `radius` lg·xl = 24/28 (`lg`), `stroke` neutral·accent (`neutral`), `top`, `bottom`, `padding` 14·16·20·22·24 (`14`), `as` | Photo surface of the event / club cards. Full-bleed photo under the v3 top (55% → 0 at 30%) and bottom (0 at 35% → 95%) shades; placeholder (dark gradient + icon) when the image is missing or fails. Decorative photo unless `imageAlt` |
+| `GritOverlayPill` | `tone` glass·brand (`glass`), `icon`, `iconTone` accent·ink, `size` md·lg (`md`), `href` / `onClick`, `ariaLabel` | Over-photo pill (`YxmsK`, `hShSC`, `L3ojFF`): glass = `grit-bg/45` + white 20% stroke + 14px blur; brand = cyan fill. Span, `Link` or `button`. `gritOverlayPillClass` styles external triggers the same way |
+| `GritDateTile` | `dateIso`, `size` sm·md·lg = 56×46 / 48×52 / 64×59 (`md`), `tone` overlay·accent·muted (`overlay`) | `jLgGe` / `r9UZz` / `tsbPt`. Day (Exo 2) over 3-letter month (700, tracked), Bogotá; "Por definir" for `null`; `role="img"` with the long date |
+| `GritEventCard` | `variant` hero·compact·grid, `title`, `href`, `image`, `dateIso`, `badges`, `organizer`, `meta`, `price`, `actions`, `headingLevel` (`3`) | `zRDg2` / `R1QegD` / `uCKmV`. Generic content only (map domain → props in feature code). grid = the whole card is one link; compact = round arrow link stretched over the card; hero = title link + separate `actions` (never nested in a link) |
 
 ### Which component for which job
 
@@ -517,10 +521,6 @@ same prop style), then move its row to §4.
 
 | Pattern | Node | Measurements |
 | --- | --- | --- |
-| Event Card / Hero | `zRDg2` | 744×330, radius 28, padding 24, `#05080B` fill, cyan 50%→8% stroke; full-bleed photo + two shades (bottom: transparent at 35% → `#05080B` 95%; top: `#05080B` 55% → transparent at 30%); top row = badges + 64px **date tile**; bottom row = info (gap 12) + actions (gap 10) |
-| Event Card / Compacta | `R1QegD` | 360×157, radius 24, padding 16, white 18%→4% stroke; top = discipline pill + 48px date tile; bottom = name (Exo 2 20/500) + 34px round arrow button |
-| Event Card (grid) | `uCKmV` | 268×312, radius 24, padding 14; top = 48px date tile + price pill; bottom = name (Montserrat 15/600) + meta row (gap 6) |
-| Over-photo pill / date tile / round button | inside the cards | `#080C10` at 45% fill, white 20% stroke, `backdrop-blur` 14px; pill padding 7/12; date tile radius 16, padding 8/0 |
 | Next Event Panel | `s2Gt8L` | 320 wide, radius 26, card gradient, cyan 40%→5% stroke; 200px cover (photo + fade to `grit-surface-deep`) with tags and name; body padding 16/18/18, gap 14; meters as `inset` surfaces (padding 14, gap 9) with `GritProgress`; actions stacked (gap 8) at the bottom |
 | Live Toast | `PzYwn` | 370 wide, radius 18, padding 14/16, gap 12; `grit-surface-deep` at 95% + blur 20, cyan 40% stroke, `0 20px 50px` shadow; 34px solid-cyan round icon, title 13/600, body 11px muted, 14px close icon |
 | Collapsed sidebar | `J0Zbc` (screen `V2eGcp`) | 80 wide, radius 28, padding 22/0/14, gap 24; 48px round nav buttons; active = radial cyan 20%→3% fill + cyan 35% stroke + glow; 40px user avatar; 28px round expand toggle (`grit-surface`, white 18% stroke) on the edge. Needs persisted UI state |

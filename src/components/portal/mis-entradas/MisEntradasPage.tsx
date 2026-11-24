@@ -1,6 +1,7 @@
 'use client';
 
-import { GritButton, GritEmptyState, GritPageHeader, cx, gritSelectClass } from '@/components/ui';
+import { GritButton, GritEmptyState, GritPageHeader, GritSegmented, gritPillSelectClass } from '@/components/ui';
+import { useEventosSugeridos } from '@/hooks/portal/mis-entradas/useEventosSugeridos';
 import { useMisEntradas } from '@/hooks/portal/mis-entradas/useMisEntradas';
 import {
   EVENTO_COMPRA_ESTADOS,
@@ -8,24 +9,56 @@ import {
   type EventoCompraEstado,
   type MisEntradasTab,
 } from '@/types/portal/eventos-compras.types';
+import { EventosSugeridos } from './EventosSugeridos';
 import { MiCompraCard } from './MiCompraCard';
 
-const TABS: { id: MisEntradasTab; label: string }[] = [
-  { id: 'proximas', label: 'Próximas' },
-  { id: 'pasadas', label: 'Pasadas' },
-];
-
 /**
- * "Mis Entradas" (US-0121): the user's event purchases across organizations. Guest purchases made
+ * "Mis entradas" (US-0121, grit-arena-v3 frame `v1lcBA`): the user's event purchases across
+ * organizations as ticket cards with a QR stub, plus upcoming suggestions. Guest purchases made
  * with the account's verified email are linked on load.
  */
 export function MisEntradasPage() {
   const misEntradas = useMisEntradas();
   const { loading, error, compras, filtradas, conteo, tab, estado } = misEntradas;
+  const sugeridos = useEventosSugeridos(compras);
+  const hasCompras = !loading && !error && compras.length > 0;
 
   return (
-    <div className="flex flex-col gap-6">
-      <GritPageHeader title="Mis Entradas" subtitle="Tus entradas a eventos: estado del pago, códigos y descarga en PDF." />
+    <div className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Mis"
+        titleAccent="entradas."
+        italic
+        actions={
+          hasCompras ? (
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2.5 sm:w-auto">
+              <GritSegmented<MisEntradasTab>
+                ariaLabel="Entradas por fecha"
+                variant="solid"
+                options={[
+                  { value: 'proximas', label: 'Próximas', count: conteo.proximas },
+                  { value: 'pasadas', label: 'Pasadas', count: conteo.pasadas },
+                ]}
+                value={tab}
+                onChange={misEntradas.setTab}
+              />
+              <select
+                aria-label="Filtrar por estado"
+                value={estado}
+                onChange={(event) => misEntradas.setEstado(event.target.value as EventoCompraEstado | 'todos')}
+                className={gritPillSelectClass}
+              >
+                <option value="todos">Estado: Todos</option>
+                {EVENTO_COMPRA_ESTADOS.map((item) => (
+                  <option key={item} value={item}>
+                    Estado: {EVENTO_COMPRA_ESTADO_LABELS[item]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : undefined
+        }
+      />
 
       {loading ? (
         <GritEmptyState icon="hourglass_top" title="Cargando tus entradas…" />
@@ -52,65 +85,26 @@ export function MisEntradasPage() {
             </GritButton>
           }
         />
+      ) : filtradas.length === 0 ? (
+        <GritEmptyState icon="filter_alt_off" title={`No hay entradas ${tab === 'proximas' ? 'próximas' : 'pasadas'} con este filtro.`} />
       ) : (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div role="tablist" aria-label="Entradas por fecha" className="flex gap-1 rounded-grit-md border border-grit-glass-border bg-grit-card p-1">
-              {TABS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === item.id}
-                  onClick={() => misEntradas.setTab(item.id)}
-                  className={cx(
-                    'rounded-grit-sm px-4 py-2 font-grit-body text-xs font-bold transition',
-                    tab === item.id ? 'bg-grit-cyan text-grit-bg' : 'text-grit-subtext hover:text-grit-text',
-                  )}
-                >
-                  {item.label} ({conteo[item.id]})
-                </button>
-              ))}
-            </div>
-            <label className="flex items-center gap-2 font-grit-body text-xs font-semibold text-grit-subtext">
-              Estado
-              <select
-                value={estado}
-                onChange={(event) => misEntradas.setEstado(event.target.value as EventoCompraEstado | 'todos')}
-                className={cx(gritSelectClass, 'w-48')}
-              >
-                <option value="todos">Todos</option>
-                {EVENTO_COMPRA_ESTADOS.map((item) => (
-                  <option key={item} value={item}>
-                    {EVENTO_COMPRA_ESTADO_LABELS[item]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          {filtradas.length === 0 ? (
-            <p className="rounded-grit-lg border border-grit-glass-border bg-grit-card p-4 font-grit-body text-sm text-grit-subtext">
-              No hay entradas {tab === 'proximas' ? 'próximas' : 'pasadas'} con este filtro.
-            </p>
-          ) : (
-            <div role="tabpanel" className="flex flex-col gap-4">
-              {filtradas.map((compra) => (
-                <MiCompraCard
-                  key={compra.id}
-                  compra={compra}
-                  puedeCancelar={misEntradas.puedeCancelar(compra)}
-                  pendiente={misEntradas.pendiente[compra.id]}
-                  error={misEntradas.accionError[compra.id]}
-                  onCancelar={() => misEntradas.cancelar(compra)}
-                  onReenviar={(file) => misEntradas.reenviarComprobante(compra, file)}
-                  onLimpiarError={() => misEntradas.limpiarError(compra.id)}
-                />
-              ))}
-            </div>
-          )}
-        </>
+        <div className="flex flex-col gap-4">
+          {filtradas.map((compra) => (
+            <MiCompraCard
+              key={compra.id}
+              compra={compra}
+              puedeCancelar={misEntradas.puedeCancelar(compra)}
+              pendiente={misEntradas.pendiente[compra.id]}
+              error={misEntradas.accionError[compra.id]}
+              onCancelar={() => misEntradas.cancelar(compra)}
+              onReenviar={(file) => misEntradas.reenviarComprobante(compra, file)}
+              onLimpiarError={() => misEntradas.limpiarError(compra.id)}
+            />
+          ))}
+        </div>
       )}
+
+      {!loading ? <EventosSugeridos eventos={sugeridos} /> : null}
     </div>
   );
 }

@@ -2,7 +2,9 @@
 
 ## Purpose
 Defines how a tenant administrator controls whether the organization is listed in the organizations marketplace ("Organizaciones disponibles") and can receive access requests, and how the directory card presents organizations, membership and privacy.
+
 ## Requirements
+
 ### Requirement: `tenants` table SHALL have a `publico` column
 `public.tenants` SHALL have a column `publico boolean not null default true`. The migration SHALL leave every existing tenant with `publico = true`. Only administrators of the tenant SHALL be able to change the value, through the existing `tenants_update_admin_only` policy. The `tenants_select_authenticated` policy SHALL remain unchanged.
 
@@ -88,60 +90,8 @@ Setting `tenants.publico` to `false` or back to `true` SHALL NOT change any row 
 - **WHEN** a private organization has a public event or a pending invitation for a non-member
 - **THEN** the organization name SHALL still be shown on the event and in the pending invitations section
 
-### Requirement: Directory SHALL render organizations with `TenantDirectoryCard`
-`TenantDirectoryList` SHALL render each organization with `TenantDirectoryCard` (props `identity`, `isMember`, `isPublic`, `primaryAction`, `secondaryAction`), keeping the existing grid and alphabetical order. The card SHALL follow the structure of `EventoPublicoCard` without importing it: a `rounded-grit-2xl` bordered `<article>`; a banner area on top showing the banner image or, when absent or failed, a gradient placeholder with a shield icon; the logo in a 48 px circle over the banner's bottom-left corner, or a shield icon when absent or failed; a body with the name as an italic `<h3>`, the description clamped to two lines only when present, and "Desde {mes} de {año}" formatted with `es-CO` only when the founding date is valid; and the actions pinned to the bottom, stacked at full width. Banner and logo images SHALL have Spanish `alt` text naming the organization. The card SHALL NOT render "—" placeholders, the uppercase description pill or the English "Founded" row.
-
-For members, `primaryAction` SHALL be the "Ingresar" link to the role's default tenant path; for non-members it SHALL be `SolicitarAccesoButton`. `secondaryAction` SHALL be `VerPlanesButton` in both cases. `TenantIdentityCard` SHALL keep its current appearance on `gestion-organizacion`.
-
-#### Scenario: Card with banner, logo and description
-- **WHEN** an organization has banner, logo, description and founding date
-- **THEN** the card SHALL show the banner on top, the logo over it, the italic name, the clamped description and the "Desde …" line in Spanish
-
-#### Scenario: Card without optional data
-- **WHEN** an organization has no banner, logo, description or founding date
-- **THEN** the card SHALL show the gradient placeholder and shield icons and SHALL NOT render empty rows or "—"
-
-#### Scenario: Broken image falls back
-- **WHEN** a banner or logo URL fails to load and the signed-URL retry also fails
-- **THEN** the card SHALL show the corresponding placeholder
-
-#### Scenario: Existing actions keep working
-- **WHEN** a user interacts with "Ingresar", "Solicitar acceso" (confirmation, pending, blocked, incomplete-profile and history states) or "Ver planes" inside the new card
-- **THEN** each SHALL behave as it did in the previous card
-
-#### Scenario: Cards align in a row
-- **WHEN** cards with different amounts of content share a grid row
-- **THEN** their action areas SHALL be aligned at the bottom
-
-#### Scenario: Narrow viewport
-- **WHEN** the directory is viewed at 360 px width
-- **THEN** there SHALL be no horizontal scroll and chips and long names SHALL wrap
-
-#### Scenario: gestion-organizacion card is unchanged
-- **WHEN** an administrator opens `gestion-organizacion`
-- **THEN** the organization card SHALL look the same as before this change
-
-### Requirement: Directory card SHALL show membership and privacy badges
-`TenantDirectoryCard` SHALL show, over the top-left of the banner, a chip with the `verified` icon and the text **"Miembro"** when `isMember` is true, for any role, and SHALL apply the highlighted cyan border to that card. It SHALL show a chip with the `lock` icon and the text **"Privada"** when `isPublic` is false. Cards of organizations where the user is not a member SHALL show neither chip nor the highlighted border. Chip icons SHALL be decorative (`aria-hidden`), so the status is conveyed by text.
-
-#### Scenario: Member of a public organization
-- **WHEN** the user has a membership in an organization with `publico = true`
-- **THEN** its card SHALL show "Miembro" and the highlighted border, and SHALL NOT show "Privada"
-
-#### Scenario: Member of a private organization
-- **WHEN** the user has a membership in an organization with `publico = false`
-- **THEN** its card SHALL show both "Miembro" and "Privada"
-
-#### Scenario: Non-member
-- **WHEN** the user has no membership in a listed organization
-- **THEN** its card SHALL show no chip and the default border
-
-#### Scenario: Badge is role-independent
-- **WHEN** the user's membership role is `administrador`, `entrenador` or `usuario`
-- **THEN** the chip text SHALL be "Miembro" in all three cases
-
 ### Requirement: Tenant branding image fallback SHALL be shared
-A hook `useTenantBrandingImages(identity)` in `src/hooks/portal/tenant/` SHALL return `{ logoSrc, bannerSrc, onLogoError, onBannerError }` and SHALL implement the existing fallback: on the first load error of each image, try a signed URL for the organization asset path with extensions `png`, `jpg`, `webp`, and resolve to `null` when none works. `TenantIdentityCard` and `TenantDirectoryCard` SHALL both use this hook.
+A hook `useTenantBrandingImages(identity)` in `src/hooks/portal/tenant/` SHALL return `{ logoSrc, bannerSrc, onLogoError, onBannerError }` and SHALL implement the existing fallback: on the first load error of each image, try a signed URL for the organization asset path with extensions `png`, `jpg`, `webp`, and resolve to `null` when none works. `TenantIdentityCard` and both marketplace cards (member and explore) SHALL use this hook.
 
 #### Scenario: Stored URL expired but the asset exists
 - **WHEN** a logo URL fails to load and the asset exists in storage
@@ -150,3 +100,84 @@ A hook `useTenantBrandingImages(identity)` in `src/hooks/portal/tenant/` SHALL r
 #### Scenario: Retry happens once
 - **WHEN** the replacement URL also fails
 - **THEN** the hook SHALL NOT retry again and `logoSrc` SHALL be `null`
+
+### Requirement: Organization marketplace page layout
+`/portal/orgs` SHALL show the single `h1` "Encuentra tu club." with "club." as the accent, a search field "Buscar club o disciplina", the pending-invitations section, and two sections:
+- **"Tus clubes"**: organizations where the user is a member, meaning they have a role and access is allowed;
+- **"Explora clubes"**: all other listed organizations.
+
+Each section SHALL be sorted by name and hidden when it has no items.
+
+#### Scenario: Member and non-member organizations
+- **WHEN** the user is a member of "Grit Arena" and the directory also lists "Tri Andes" and "Pace Club"
+- **THEN** "Grit Arena" SHALL appear under "Tus clubes" and "Pace Club" then "Tri Andes" under "Explora clubes"
+
+#### Scenario: No memberships
+- **WHEN** the user has no memberships
+- **THEN** the "Tus clubes" section SHALL NOT be rendered
+
+#### Scenario: Single heading
+- **WHEN** the page renders
+- **THEN** it SHALL contain exactly one `h1`
+
+### Requirement: Organization marketplace search
+The search SHALL filter both sections client-side by organization name and description, ignoring case and accents. When nothing matches, the page SHALL show "No encontramos clubes con «{texto}»" with a "Limpiar búsqueda" action that empties the field.
+
+#### Scenario: Accent-insensitive search
+- **WHEN** the user types "natacion"
+- **THEN** an organization described as "Club de natación" SHALL be listed
+
+#### Scenario: No match
+- **WHEN** the search matches no organization and the user clicks "Limpiar búsqueda"
+- **THEN** the field SHALL be empty and every organization SHALL be listed again
+
+### Requirement: Member club card
+Each organization under "Tus clubes" SHALL be a large photo card in a two-column grid (one column below 1024px), showing:
+- the banner or a dark placeholder;
+- a "MIEMBRO" pill, plus "PRIVADA" when private;
+- a round arrow link "Ingresar a {nombre}";
+- the logo or initials mark;
+- the name and a one-line description;
+- "Ver planes" and "Ingresar".
+
+Both links go to the role's default path.
+
+#### Scenario: Member card actions
+- **WHEN** a user with role `usuario` clicks "Ingresar" on "Grit Arena"
+- **THEN** they SHALL navigate to the default path of that role in "Grit Arena"
+
+#### Scenario: Private member organization
+- **WHEN** the member organization has `publico = false`
+- **THEN** its card SHALL show both "MIEMBRO" and "PRIVADA"
+
+#### Scenario: Missing images
+- **WHEN** the organization has no banner and its logo fails to load
+- **THEN** the card SHALL show the dark placeholder and the initials mark, without broken images
+
+### Requirement: Explore club card
+Each organization under "Explora clubes" SHALL be a photo card in a grid: 4 columns from 1280px, 2 from 640px, otherwise 1. It SHALL show:
+- the banner or the placeholder;
+- the organization mark;
+- the name (15/600) and a one-line description when present;
+- the actions "Ver planes" and "Solicitar acceso".
+
+"Solicitar acceso" SHALL keep all its existing states: confirmation, pending, blocked, incomplete profile and request history.
+
+#### Scenario: Request access from the card
+- **WHEN** a non-member clicks "Solicitar acceso" on "Pace Club" and confirms
+- **THEN** the request SHALL be created and the button SHALL show the pending state, as before this change
+
+#### Scenario: See plans
+- **WHEN** the user clicks "Ver planes" on any card
+- **THEN** the organization's plans dialog SHALL open, and closing it SHALL return focus to the button
+
+### Requirement: Organization marketplace states
+While loading, the page SHALL show a loading state. On failure it SHALL show the error and a "Reintentar" button that reloads the directory. When the directory is empty, it SHALL show "No hay organizaciones disponibles por ahora." Every image SHALL have Spanish alt text naming the organization, or be decorative when the name is printed next to it.
+
+#### Scenario: Retry
+- **WHEN** the directory request fails and the user clicks "Reintentar"
+- **THEN** the directory SHALL be requested again
+
+#### Scenario: Narrow viewport
+- **WHEN** the page is viewed at 360px
+- **THEN** there SHALL be no horizontal scroll and long names SHALL truncate or wrap within their card

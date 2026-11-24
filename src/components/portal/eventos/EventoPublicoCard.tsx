@@ -11,7 +11,7 @@ import {
   formatEventoHora,
   formatEventoPrecio,
 } from '@/lib/portal/eventos.utils';
-import { toHttpUrl } from '@/lib/portal/eventos-publicos.utils';
+import { getEventoLugarLabel } from '@/lib/portal/eventos-card-model';
 import { EventoBannerModal } from './EventoBannerModal';
 import type { EventoPublicoListItem } from '@/types/portal/eventos.types';
 
@@ -47,10 +47,7 @@ export function EventoPublicoCard({
   const [bannerFailed, setBannerFailed] = useState(false);
   const visual = getDisciplinaVisual(evento.disciplinaNombre);
   const showBanner = Boolean(evento.bannerUrl) && !bannerFailed;
-  // A meeting point that is a maps link is shown as a label; the link itself lives on the detail page
-  const puntoEncuentro = toHttpUrl(evento.puntoEncuentro) ? 'Punto de encuentro' : evento.puntoEncuentro;
-  const lugar = evento.escenarioNombre ?? puntoEncuentro ?? 'Lugar por definir';
-  const lugarDetalle = evento.escenarioNombre && !toHttpUrl(evento.escenarioUbicacion) ? evento.escenarioUbicacion : null;
+  const { lugar, lugarDetalle } = getEventoLugarLabel(evento);
   const duracion = formatDuracion(evento.duracionMinutos);
 
   return (

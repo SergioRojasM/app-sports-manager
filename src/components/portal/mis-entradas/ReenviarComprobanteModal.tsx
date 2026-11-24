@@ -55,7 +55,7 @@ export function ReenviarComprobanteModal({ compra, pending, error, onSubmit, onC
           setFileError(invalid);
           setFile(invalid ? null : selected);
         }}
-        className="w-full text-xs text-grit-subtext file:mr-3 file:rounded-grit-md file:border file:border-grit-glass-border file:bg-grit-card file:px-3 file:py-2 file:font-semibold file:text-grit-text"
+        className="w-full text-xs text-grit-subtext file:mr-3 file:rounded-full file:border file:border-white/[0.12] file:bg-white/[0.04] file:px-3 file:py-2 file:font-semibold file:text-grit-text"
       />
       {file && (
         <p role="status" className="flex items-center gap-2 text-xs text-grit-text">
@@ -65,7 +65,7 @@ export function ReenviarComprobanteModal({ compra, pending, error, onSubmit, onC
         </p>
       )}
       {(fileError || error) && (
-        <p role="alert" className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
+        <p role="alert" className="rounded-grit-lg border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
           {fileError ?? error}
         </p>
       )}

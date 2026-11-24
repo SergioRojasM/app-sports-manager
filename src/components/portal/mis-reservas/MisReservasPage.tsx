@@ -1,118 +1,118 @@
 'use client';
 
-import { useMisReservas } from '@/hooks/portal/mis-reservas/useMisReservas';
-import { MisReservasFiltersPanel } from './MisReservasFiltersPanel';
-import { MisReservasTable } from './MisReservasTable';
+import { GritButton, GritEmptyState, GritIcon, GritPageHeader, GritPagination } from '@/components/ui';
+import { MIS_RESERVAS_CAP, useMisReservas } from '@/hooks/portal/mis-reservas/useMisReservas';
+import { MisReservasFilterBar } from './MisReservasFilterBar';
+import { MisReservasList } from './MisReservasList';
+import { MisReservasStats } from './MisReservasStats';
 
 type MisReservasPageProps = {
   atletaId: string;
 };
 
+/** Cross-tenant booking history (grit-arena-v3 frame `x9xdbA`). */
 export function MisReservasPage({ atletaId }: MisReservasPageProps) {
-  const {
-    loading,
-    error,
-    disciplines,
-    tenantOptions,
-    filters,
-    updateFilter,
-    applyFilters,
-    clearFilters,
-    hasActiveFilters,
-    currentPage,
-    pageSize,
-    totalFiltered,
-    totalPages,
-    setCurrentPage,
-    setPageSize,
-    paginatedRows,
-    exportCsv,
-    resultCount,
-  } = useMisReservas(atletaId);
+  const reservas = useMisReservas(atletaId);
+  const { loading, error, rows, hasActiveFilters, resultCount, currentPage, totalPages, pageSize, totalFiltered } = reservas;
+
+  const firstLoad = loading && rows.length === 0 && !error;
+  const showList = rows.length > 0;
+  const start = (currentPage - 1) * pageSize + 1;
+  const end = Math.min(currentPage * pageSize, totalFiltered);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Mis Reservas</h1>
-          <p className="text-sm text-grit-subtext">
-            Consulta tu historial de reservas de entrenamientos en todas tus organizaciones.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={exportCsv}
-          disabled={resultCount === 0}
-          className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border px-4 py-2 text-xs font-medium text-grit-subtext transition-colors hover:border-grit-glass-border hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span className="material-symbols-outlined text-base">download</span>
-          Exportar CSV
-        </button>
-      </div>
-
-      {/* Filters */}
-      <MisReservasFiltersPanel
-        filters={filters}
-        onFilterChange={updateFilter}
-        onApply={applyFilters}
-        onClear={clearFilters}
-        disciplines={disciplines}
-        tenantOptions={tenantOptions}
-        hasActiveFilters={hasActiveFilters}
+    <div className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Mis"
+        titleAccent="reservas."
+        italic
+        actions={
+          <GritButton variant="secondary" icon="download" onClick={reservas.exportCsv} disabled={resultCount === 0}>
+            Exportar CSV
+          </GritButton>
+        }
       />
 
-      {/* Info banner */}
-      {!loading && !error && (
-        <div className="rounded-grit-md border border-sky-500/30 bg-sky-950/30 px-4 py-2.5 text-xs text-sky-300">
-          {hasActiveFilters
-            ? `Mostrando ${resultCount} reservas encontradas.`
-            : resultCount > 0
-              ? 'Mostrando tus últimas 100 reservas. Para obtener más resultados, utiliza los filtros.'
-              : null}
-        </div>
-      )}
+      <MisReservasFilterBar
+        filters={reservas.filters}
+        onFilterChange={reservas.updateFilter}
+        onApplyCustomRange={reservas.applyCustomRange}
+        disciplines={reservas.disciplines}
+        tenantOptions={reservas.tenantOptions}
+      />
 
-      {/* Error state */}
-      {error && (
-        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-danger/30 p-6 text-sm text-grit-danger">
-          <p>{error}</p>
-          <button
-            type="button"
-            onClick={applyFilters}
-            className="mt-3 rounded-grit-md border border-grit-danger/40 px-3 py-1 text-xs text-grit-danger transition-colors hover:border-grit-danger/40 hover:text-grit-danger"
-          >
+      {error && showList ? (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-grit-danger/30 bg-grit-danger/10 px-4 py-3">
+          <p className="font-grit-body text-xs text-grit-danger">No se pudieron actualizar tus reservas. {error}</p>
+          <GritButton variant="secondary" size="sm" icon="refresh" onClick={reservas.retry}>
             Reintentar
-          </button>
+          </GritButton>
         </div>
-      )}
+      ) : null}
 
-      {/* Loading state */}
-      {loading && (
-        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-          Cargando reservas...
-        </div>
-      )}
+      {firstLoad ? <GritEmptyState icon="hourglass_top" title="Cargando reservas…" /> : null}
 
-      {/* Empty state */}
-      {!loading && !error && resultCount === 0 && (
-        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-          No tienes reservas registradas todavía.
-        </div>
-      )}
-
-      {/* Table */}
-      {!loading && !error && resultCount > 0 && (
-        <MisReservasTable
-          rows={paginatedRows}
-          currentPage={currentPage}
-          pageSize={pageSize}
-          totalPages={totalPages}
-          totalFiltered={totalFiltered}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={setPageSize}
+      {error && !showList ? (
+        <GritEmptyState
+          icon="error"
+          title="No se pudieron cargar tus reservas"
+          description={error}
+          descriptionClassName="text-grit-danger"
+          action={
+            <GritButton variant="secondary" size="sm" icon="refresh" onClick={reservas.retry}>
+              Reintentar
+            </GritButton>
+          }
         />
-      )}
+      ) : null}
+
+      {!loading && !error && rows.length === 0 ? (
+        hasActiveFilters ? (
+          <GritEmptyState
+            icon="filter_alt_off"
+            title="No hay reservas con estos filtros"
+            action={
+              <GritButton variant="secondary" size="sm" icon="restart_alt" onClick={reservas.clearFilters}>
+                Limpiar filtros
+              </GritButton>
+            }
+          />
+        ) : (
+          <GritEmptyState
+            icon="event_busy"
+            title="Aún no tienes reservas"
+            description="Cuando reserves un entrenamiento, lo verás aquí."
+            action={
+              <GritButton href="/portal/orgs" icon="explore">
+                Ver organizaciones
+              </GritButton>
+            }
+          />
+        )
+      ) : null}
+
+      {showList ? (
+        <div className={loading ? 'flex flex-col gap-5 opacity-60 transition-opacity' : 'flex flex-col gap-5'} aria-busy={loading}>
+          <MisReservasStats stats={reservas.stats} />
+          <MisReservasList groups={reservas.pageGroups} />
+          <div className="flex flex-col gap-3">
+            <p className="flex items-center gap-2 px-2 font-grit-body text-[11px] text-grit-muted">
+              <GritIcon name="info" size={13} />
+              {reservas.isCapped
+                ? `Mostrando tus últimas ${MIS_RESERVAS_CAP} reservas. Usa los filtros para ver más.`
+                : `Mostrando ${resultCount} ${resultCount === 1 ? 'reserva' : 'reservas'}.`}
+            </p>
+            {totalPages > 1 ? (
+              <GritPagination
+                page={currentPage}
+                totalPages={totalPages}
+                onPageChange={reservas.setCurrentPage}
+                summary={`Mostrando ${start}–${end} de ${totalFiltered} reservas`}
+              />
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

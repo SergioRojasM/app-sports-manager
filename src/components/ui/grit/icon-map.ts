@@ -78,6 +78,13 @@ export const GRIT_ICON_MAP = {
   'file-pen-line': 'edit_document',
   'scan-line': 'qr_code_scanner',
   'settings-2': 'tune',
+  // v3 additions (athlete pages) — kMj4F / zY4v8 / LSqV5 / x9xdbA / v1lcBA
+  'qr-code': 'qr_code_2',
+  'circle-slash': 'do_not_disturb_on',
+  'refresh-ccw': 'autorenew',
+  'layout-grid-2': 'grid_view',
+  'map-pinned': 'pin_drop',
+  'circle-alert': 'error',
 } as const;
 
 export type GritDesignIconName = keyof typeof GRIT_ICON_MAP;
