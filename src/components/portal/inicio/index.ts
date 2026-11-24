@@ -1,8 +1,7 @@
 export { InicioPage } from './InicioPage';
+export { InicioWelcome } from './InicioWelcome';
 export { InicioStatsCards } from './InicioStatsCards';
-export { InicioFeaturedTraining } from './InicioFeaturedTraining';
-export { InicioProximosEntrenamientos } from './InicioProximosEntrenamientos';
+export { InicioAgendaSemanal } from './InicioAgendaSemanal';
+export { InicioAgendaItem } from './InicioAgendaItem';
 export { InicioSuscripciones } from './InicioSuscripciones';
 export { InicioOrganizaciones } from './InicioOrganizaciones';
-export { InicioQuickActions } from './InicioQuickActions';
-export { InicioPagosPendientesAlert } from './InicioPagosPendientesAlert';

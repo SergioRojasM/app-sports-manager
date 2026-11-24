@@ -48,7 +48,7 @@ shell (§7), so only the content area is page-specific.
 
 | Frame | Screen | Route |
 | --- | --- | --- |
-| `lhbhK` | App · Inicio v9 | `/portal/inicio` |
+| `lhbhK` | App · Inicio v9 | `/portal/inicio` — migrated (agenda row derived from `dBJ8K`) |
 | `V2eGcp` | App · Inicio v10 (collapsed sidebar) | `/portal/inicio` — collapsed sidebar not built yet (§9) |
 | `kMj4F` | App · Organizaciones (marketplace) | `/portal/orgs` |
 | `zY4v8` | App · Eventos (marketplace) | `/portal/eventos` |
@@ -159,7 +159,7 @@ Weights carry the v3 look — **titles are light**, not bold:
 | Role | Spec |
 | --- | --- |
 | Page `h1` | Exo 2 **300**, 40px (30px < 640px), accent part cyan |
-| KPI value | Exo 2 300, 36px in `GritKpiCard`, 30px inline |
+| KPI value | Exo 2 300, 36px in `GritKpiCard` (56px with `layout="stacked"`), 30px inline |
 | Entity title (org name, detail header) | Exo 2 500, 24px |
 | Section / panel title | Exo 2 500, 19px (`lg`) / 17px (`md`) |
 | Card name | Montserrat 600, 15px (Exo 2 500 20px on photo cards) |
@@ -277,7 +277,7 @@ Button rules:
 | `GritSearchField` | `size` md·lg = 37/44 (`md`), all `<input>` props, **`aria-label` or `aria-labelledby`** (required by type), `className` on the wrapper | `l3ixX` / `N4tyD`. Pill `type="search"` with leading icon. A placeholder is not a label |
 | `GritSegmented` | `options` `{value,label,count?,icon?}[]`, `value`, `onChange`, `variant` soft·solid (`soft`), **`ariaLabel`** | `LW0MQ` / `rhTJ3` (soft) · `g2bgr` View Switch (solid). Buttons with `aria-pressed` in a labelled `role="group"`; scrolls horizontally inside its track on narrow screens |
 | `GritChip` | `active`, `icon`, button props | `xKTkP` / `bHakw`. Toggle chip (`aria-pressed`); active = cyan fill + glow |
-| `GritKpiCard` | `icon`, `value`, `label`, `detail`, `highlight`, `valueClassName` | `GO5Yf` / `pbTiS`. Horizontal: round icon chip, Exo 2 300 36px value, 12px label. `highlight` for the one featured KPI; tone the value with `text-grit-success` / `text-grit-warning` |
+| `GritKpiCard` | `icon`, `value`, `label`, `detail`, `highlight`, `valueClassName`, `layout`, `hint`, `hintTone`, `href` + `hrefLabel` | `GO5Yf` / `pbTiS`. Default `layout="inline"`: round icon chip, Exo 2 300 36px value, 12px label. `layout="stacked"` (Inicio `lhbhK`): 28px radius, 36px accent icon chip + optional round shortcut (`href` requires `hrefLabel`), Exo 2 300 56px value, 13/500 label, 12px `hint` toned `muted` / `accent` / `warning`. `highlight` for the one featured KPI; tone the value with `text-grit-success` / `text-grit-warning` |
 | `GritAvatar` | `name`, `src`, `size` 32·34·38 (`34`), `tone` neutral·soft·solid (`neutral`) | `sFaSi` / `gNnuk`. Initials from `name` (person icon if empty); image is decorative (`alt=""`) because the name is always shown beside it |
 | `GritProgress` | `value` 0–100 (clamped), **`label`**, `showValue` (`true`), `tone` accent·warning·danger | `fU6ex`. 6px track, JetBrains Mono %, `role="progressbar"` |
 | `GritPagination` | `page` (1-based), `totalPages`, `onPageChange`, `summary` | `Alk2W`. Renders nothing for ≤1 page; ellipsis above 7 pages; `nav[aria-label="Paginación"]` + `aria-current` |

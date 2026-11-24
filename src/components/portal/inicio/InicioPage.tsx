@@ -1,43 +1,39 @@
-import type { InicioDashboardData } from '@/types/portal/inicio.types';
+import type { InicioDashboardData, InicioVentana } from '@/types/portal/inicio.types';
+import { InicioWelcome } from './InicioWelcome';
 import { InicioStatsCards } from './InicioStatsCards';
-import { InicioFeaturedTraining } from './InicioFeaturedTraining';
-import { InicioProximosEntrenamientos } from './InicioProximosEntrenamientos';
+import { InicioAgendaSemanal } from './InicioAgendaSemanal';
 import { InicioSuscripciones } from './InicioSuscripciones';
 import { InicioOrganizaciones } from './InicioOrganizaciones';
-import { InicioQuickActions } from './InicioQuickActions';
-import { InicioPagosPendientesAlert } from './InicioPagosPendientesAlert';
-import { GritPageHeader } from '@/components/ui';
 
-export function InicioPage({ data }: { data: InicioDashboardData }) {
-  const featured = data.proximosEntrenamientos[0] ?? null;
+type InicioPageProps = {
+  data: InicioDashboardData;
+  /** First name for the welcome heading ('' when unknown). */
+  nombre: string;
+  ventana: InicioVentana;
+};
+
+/** `/portal/inicio` — v3 bento layout from frame `lhbhK` (welcome · KPI row · agenda | subscriptions + organizations). */
+export function InicioPage({ data, nombre, ventana }: InicioPageProps) {
+  const reservarHref =
+    data.membresias.length === 1
+      ? `/portal/orgs/${data.membresias[0].tenant_id}/entrenamientos-disponibles`
+      : '/portal/orgs';
 
   return (
-    <div className="space-y-6">
-      <GritPageHeader
-        eyebrow="Inicio"
-        title="Tu"
-        titleAccent="resumen"
-        subtitle="Tus suscripciones, organizaciones y próximos entrenamientos en un solo lugar."
-      />
+    <div className="flex flex-col gap-6">
+      <InicioWelcome nombre={nombre} />
 
-      {/* Stats row — full width */}
-      <InicioStatsCards stats={data.stats} />
+      <InicioStatsCards stats={data.stats} suscripciones={data.suscripciones} membresias={data.membresias} />
 
-      {/* Main grid: left 1/3 + right 2/3 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left column */}
-        <div className="lg:col-span-1 space-y-6">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
+        <InicioAgendaSemanal
+          ventana={ventana}
+          entrenamientos={data.proximosEntrenamientos}
+          reservarHref={reservarHref}
+        />
+        <div className="flex min-w-0 flex-col gap-4">
           <InicioSuscripciones suscripciones={data.suscripciones} />
           <InicioOrganizaciones membresias={data.membresias} />
-          {/* <InicioQuickActions /> */}
-          
-        </div>
-
-        {/* Right column */}
-        <div className="lg:col-span-2 space-y-6">
-          <InicioFeaturedTraining entrenamiento={featured} />
-          <InicioProximosEntrenamientos entrenamientos={data.proximosEntrenamientos} />
-          {/* <InicioPagosPendientesAlert pagos={data.pagosPendientes} /> */}
         </div>
       </div>
     </div>

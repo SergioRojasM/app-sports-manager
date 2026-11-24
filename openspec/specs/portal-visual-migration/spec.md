@@ -12,7 +12,7 @@ Every component under `src/components/portal/**` and `src/app/portal/**` SHALL u
 - **THEN** it SHALL return no matches
 
 ### Requirement: Consistent page scaffolding
-`src/app/portal/layout.tsx` SHALL wrap every Portal page in a single `GritPageContainer` (so page components MUST NOT add their own outer page padding), and each page SHALL render its title through `GritPageHeader`, producing exactly one `h1` per page. Modals SHALL use a `bg-grit-bg/70 backdrop-blur-sm` overlay and a `GritCard variant="glass"` panel with 16px radius and `GritButton` actions. Inputs and selects SHALL use `gritInputClass` / `gritSelectClass`.
+`src/app/portal/layout.tsx` SHALL wrap every Portal page in a single `GritPageContainer` (so page components MUST NOT add their own outer page padding), and each page SHALL render its title through `GritPageHeader`, producing exactly one `h1` per page. Modals SHALL use a `bg-grit-bg/70 backdrop-blur-sm` overlay and a `GritCard variant="glass"` panel with the v3 card radius (22px, `rounded-grit-2xl`) and `GritButton` actions. Inputs and selects SHALL use `gritInputClass` / `gritSelectClass`.
 
 #### Scenario: Single h1 per page
 - **WHEN** any `/portal/*` page is rendered
@@ -20,7 +20,7 @@ Every component under `src/components/portal/**` and `src/app/portal/**` SHALL u
 
 #### Scenario: Modal styling
 - **WHEN** any Portal modal opens
-- **THEN** its panel SHALL use the glass card styling and its primary action SHALL be a `GritButton variant="primary"`
+- **THEN** its panel SHALL use the glass card styling with a 22px radius and its primary action SHALL be a `GritButton variant="primary"`
 
 ### Requirement: Migration preserves functionality
 The migration MUST be visual-only: no route, link target, click handler, form validation, hook or service call SHALL change. It SHALL ship in groups (a) inicio/perfil/invitaciones/PortalTenantsPage, (b) athlete modules + entrenamientos-publicos, (c) entrenamientos/gestion-reservas/planes/disciplines/scenarios/servicios, (d) tenant/gestion-equipo/gestion-suscripciones, (e) formularios, (f) analitica. Each group is compared against its `.pen` reference frame (`d41rX5`, `ql3Ij`, `P43Yo`, `zfVKC`).
