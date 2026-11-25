@@ -6,17 +6,15 @@ Defines the plan duplication flow that allows tenant administrators to create a 
 ## Requirements
 
 ### Requirement: Administrator can duplicate an existing plan from the plans table
-The system SHALL allow a tenant administrator to duplicate an existing membership plan by clicking a "Duplicar" button on any plan row. The duplication SHALL open the plan creation modal pre-filled with all source plan data so the administrator can review and modify before saving.
+The system SHALL allow a tenant administrator to duplicate an existing membership plan by activating the "Duplicar" action on any plan card. The duplication SHALL open the plan creation drawer pre-filled with all source plan data so the administrator can review and modify before saving.
 
 #### Scenario: Duplicate button triggers pre-filled modal
-- **WHEN** an administrator clicks the "Duplicar" button on a plan row
-- **THEN** the system SHALL open the plan form modal in `'duplicate'` mode with all source plan fields pre-loaded
+- **WHEN** an administrator activates the "Duplicar" action on a plan card
+- **THEN** the system SHALL open the plan form drawer in `'duplicate'` mode with all source plan fields pre-loaded
 
 #### Scenario: Duplicate button absent in read-only table
-- **WHEN** `PlanesTable` is rendered with `readOnly={true}`
-- **THEN** the system SHALL NOT render the "Duplicar" button on any row
-
----
+- **WHEN** the plan cards are rendered in read-only mode (roles `usuario` and `entrenador`)
+- **THEN** the system SHALL NOT render the "Duplicar" action on any card
 
 ### Requirement: Duplicate modal pre-fills name with "Copia de" prefix
 The system SHALL pre-fill the plan name field with `"Copia de " + sourceName`, where `sourceName` is the source plan's `nombre` truncated to a maximum of 91 characters, ensuring the total does not exceed the 100-character `nombre` constraint.

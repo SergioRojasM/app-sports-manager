@@ -44,11 +44,15 @@ The plan form modal SHALL replace the "Plan activo" checkbox with a labelled "Es
 - **THEN** the form shows the inline error "Un plan no visible no puede ser público."
 
 ### Requirement: Plans table SHALL show the Activo no visible status
-The administrator plans table SHALL render a distinct status badge for hidden plans with the text "Activo no visible" and a `visibility_off` icon, so the state is not conveyed by color alone.
+The administrator plan cards SHALL convey a hidden plan (`activo = true`, `visible_atletas = false`) with the "Activo" status tag and an "Oculto" visibility pill with an `eye-off` icon, so the state is not conveyed by color alone. An inactive plan SHALL show the "Inactivo" status tag.
 
 #### Scenario: Hidden plan badge
-- **WHEN** the administrator views the plans table containing a hidden plan
-- **THEN** that row shows the amber "Activo no visible" badge with the icon, and the Visibilidad column shows "Privado"
+- **WHEN** the administrator views the plans grid containing a hidden plan
+- **THEN** that card shows the "Activo" status tag and the "Oculto" visibility pill with its icon, regardless of `es_publico`
+
+#### Scenario: Inactive plan
+- **WHEN** the administrator views a plan with `activo = false`
+- **THEN** that card shows the "Inactivo" status tag
 
 ### Requirement: Hidden plans SHALL NOT be readable by athletes or non-members
 Row-level security SHALL allow reading a plan with `visible_atletas = false` only to administrators and trainers of its tenant and to users who already hold a subscription to it. The same rule SHALL apply to its `plan_tipos`, `planes_disciplina` and `plan_tipos_servicios` rows.

@@ -6,11 +6,11 @@ Defines how tenant administrators manage the payment methods their athletes use 
 ## Requirements
 
 ### Requirement: Tenant administrator can view and manage payment methods from organization management page
-The system SHALL render a "Métodos de Pago" card on the `/portal/orgs/[tenant_id]/(administrador)/gestion-organizacion` page, below existing tenant info cards. The card SHALL display all payment methods (active and inactive) for the tenant, sorted by `orden ASC, nombre ASC`.
+The system SHALL render a "Métodos de pago" section on the `/portal/orgs/[tenant_id]/(administrador)/gestion-organizacion` page, with the subtitle "Cómo te pagan tus atletas." and an "Agregar" action. The section SHALL display all payment methods (active and inactive) for the tenant, sorted by `orden ASC, nombre ASC`, as list rows.
 
 #### Scenario: Payment methods card renders for tenant with methods
 - **WHEN** an authenticated administrator opens the organization management page and the tenant has one or more payment methods
-- **THEN** the system SHALL render each method as a row showing: name, type badge, value, URL link icon (if present), status badge (activo/inactivo), and edit/delete action buttons
+- **THEN** the system SHALL render each method as a row showing: a type icon, the name, a type tag, a status tag ("Activo" or "Pausado"), an open-link action (only when a URL is set), and edit and delete actions with accessible names that include the method name
 
 #### Scenario: Payment methods card renders empty state
 - **WHEN** an authenticated administrator opens the organization management page and the tenant has no payment methods
@@ -23,6 +23,10 @@ The system SHALL render a "Métodos de Pago" card on the `/portal/orgs/[tenant_i
 #### Scenario: Page remains a composition-only server component
 - **WHEN** the organization management page is rendered
 - **THEN** the page SHALL delegate all data access to `TenantPaymentMethodsCard` and SHALL NOT call Supabase directly
+
+#### Scenario: Value is shown as secondary text
+- **WHEN** a method has a `valor` (for example an account number)
+- **THEN** the row SHALL show it as secondary text under the name
 
 ### Requirement: Tenant administrator can create a new payment method
 The system SHALL allow an administrator to create a payment method for their tenant via a form modal opened from the "Métodos de Pago" card. The record SHALL be persisted to `tenant_metodos_pago` scoped to the active `tenant_id`.
@@ -169,12 +173,23 @@ The system SHALL use the `tenant_metodos_pago` table with RLS policies enforcing
 - **THEN** no field of the method SHALL be updated and the modal SHALL show "No fue posible subir la imagen. Intenta de nuevo."
 
 ### Requirement: Payment methods list SHALL flag methods that have a QR image
-`TenantPaymentMethodsCard` SHALL show a "QR" indicator (icon `qr_code_2` plus the text "QR", `title="Tiene imagen QR"`) on each method whose `qr_url` is set.
+`TenantPaymentMethodsCard` SHALL show a "QR" tag (with `title="Tiene imagen QR"`) among the tags of each method whose `qr_url` is set.
 
 #### Scenario: Method with image
 - **WHEN** the list renders a method with `qr_url`
-- **THEN** the row SHALL show the "QR" indicator next to its badges
+- **THEN** the row SHALL show the "QR" tag next to its type and status tags
 
 #### Scenario: Method without image
 - **WHEN** the list renders a method without `qr_url`
-- **THEN** the row SHALL NOT show the "QR" indicator
+- **THEN** the row SHALL NOT show the "QR" tag
+
+### Requirement: Payment method deletion uses a confirmation dialog
+Deleting a payment method SHALL ask for confirmation in an accessible dialog that names the method. Cancelling SHALL delete nothing and return focus to the delete action.
+
+#### Scenario: Confirm deletion
+- **WHEN** the administrator activates delete on "Transferencia Nequi" and confirms
+- **THEN** the method SHALL be deleted and removed from the list
+
+#### Scenario: Cancel deletion
+- **WHEN** the administrator cancels the dialog
+- **THEN** the method SHALL remain and focus SHALL return to its delete action

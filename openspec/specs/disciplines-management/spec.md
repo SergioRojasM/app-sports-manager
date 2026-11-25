@@ -17,19 +17,31 @@ The system SHALL provide a tenant-scoped disciplines management screen at `/port
 - **THEN** the page entrypoint SHALL delegate orchestration to hook/service layers and SHALL NOT call Supabase directly
 
 ### Requirement: Disciplines list displays tenant-scoped table with operational states
-The system SHALL load and display tenant disciplines in table format with columns `Discipline`, `Category`, `Status`, and `Actions`, plus header/subtitle and primary `Add Discipline` CTA. The list SHALL include loading, empty, and error states and SHALL support search/filter over discipline name and description.
+The system SHALL show the page heading "Tus disciplinas.", a search field labelled "Buscar disciplina" and a "Nueva disciplina" primary action, and SHALL list tenant disciplines in a side list headed "N DISCIPLINAS" with an "Activas" / "Todas" filter. Each list item SHALL show the discipline icon, name and the meta "N niveles · N atletas". The list SHALL include loading, empty, no-match and error states and SHALL support search over discipline name and description.
 
 #### Scenario: Disciplines found for tenant
 - **WHEN** tenant disciplines are returned from the data source
-- **THEN** the system SHALL render the disciplines table with required columns and row actions
+- **THEN** the system SHALL render the list with one item per discipline matching the filter and search, ordered by name
 
 #### Scenario: No disciplines available
 - **WHEN** no disciplines exist for the tenant
-- **THEN** the system SHALL render an explicit empty state for disciplines management
+- **THEN** the system SHALL render an explicit empty state for disciplines management with a create action
 
 #### Scenario: Disciplines are loading
 - **WHEN** disciplines data fetch is in progress
 - **THEN** the system SHALL render a loading state instead of empty/error fallback content
+
+#### Scenario: Activas filter is the default
+- **WHEN** the administrator opens the page
+- **THEN** the "Activas" filter SHALL be selected and inactive disciplines SHALL be hidden until "Todas" is selected
+
+#### Scenario: Item meta counts
+- **WHEN** a discipline has 3 active levels and 38 athletes with an assigned level
+- **THEN** its list item SHALL read "3 niveles · 38 atletas"
+
+#### Scenario: Counts unavailable
+- **WHEN** the athlete counts fail to load
+- **THEN** the list SHALL render and the athlete part of the meta SHALL be omitted
 
 ### Requirement: Create and edit discipline flows use a shared right-side modal
 The system SHALL support both create and edit discipline workflows through a single right-side modal component that changes mode by state (`create` or `edit`). The modal SHALL support close via backdrop, close button, and `Esc` when not submitting, and SHALL expose submit/cancel controls with disabled/loading behavior.
@@ -72,21 +84,40 @@ The system SHALL enforce mutation authorization for disciplines using database-l
 - **WHEN** an authenticated user without admin membership for the target tenant submits create/update/delete
 - **THEN** the database policy SHALL deny the mutation and no data SHALL be persisted
 
-### Requirement: DisciplinesTable row SHALL expose an expand toggle to reveal the levels panel
-Each row in `DisciplinesTable` SHALL render a chevron icon button that toggles the visibility of `NivelesDisciplinaPanel` inline below the row. The toggle SHALL be visible only to users with `administrador` role (matching the existing gate on the Disciplines page). Expanding a row triggers a lazy fetch of `nivel_disciplina` rows for that discipline and tenant. Once fetched, the data is cached in component state for the life of the modal/page session.
+### Requirement: Discipline selection drives a detail panel
+Selecting a list item SHALL show that discipline in a detail panel next to the list (stacked below it under `lg`) and SHALL store the selection in the `disciplina` query parameter. Without a valid parameter, the first listed discipline SHALL be selected.
 
-#### Scenario: Administrator expands a discipline row to view levels
-- **WHEN** an authenticated administrator clicks the expand toggle on a discipline row
-- **THEN** the system SHALL render `NivelesDisciplinaPanel` inline below that row with the levels for that discipline
+#### Scenario: Select a discipline
+- **WHEN** the administrator selects "Acuatlón"
+- **THEN** the detail panel SHALL show "Acuatlón", the item SHALL be marked with `aria-current="true"`, and the URL SHALL contain `?disciplina=<id>`
 
-#### Scenario: Only one panel can be expanded at a time (or multiple — either is acceptable)
-- **WHEN** the administrator expands a second discipline row
-- **THEN** `NivelesDisciplinaPanel` SHALL be rendered for the newly expanded row; the previous row's panel state is independent
+#### Scenario: Reload keeps the selection
+- **WHEN** the page is opened with `?disciplina=<id>` of an existing discipline
+- **THEN** that discipline SHALL be selected even if it is not the first one
 
-#### Scenario: Expand toggle is not affected by existing DisciplinesTable actions
-- **WHEN** the expand toggle is added to the table
-- **THEN** all existing row actions (edit, toggle active, delete) SHALL continue to function without regression
+#### Scenario: Unknown or filtered-out selection
+- **WHEN** the `disciplina` parameter does not match a listed discipline
+- **THEN** the first listed discipline SHALL be selected and the parameter SHALL be replaced
 
-#### Scenario: Levels fetch is triggered on first expand only
-- **WHEN** an administrator collapses and re-expands a discipline row
-- **THEN** the system SHALL use the cached levels data and SHALL NOT issue a second Supabase query
+#### Scenario: Mobile selection
+- **WHEN** the viewport is narrower than `lg` and the administrator selects an item
+- **THEN** the page SHALL scroll to the detail panel and move focus to its heading
+
+### Requirement: Discipline detail panel
+The detail panel SHALL show the discipline icon, name, an "Activa" / "Inactiva" tag, the description (or "Sin descripción"), an "Editar" action, a delete action named "Eliminar {nombre}", and the stats "Atletas con nivel" and "Niveles activos".
+
+#### Scenario: Detail content
+- **WHEN** "Acuatlón" is selected, is active, has 3 active levels and 38 athletes with a level
+- **THEN** the panel SHALL show "Acuatlón", the "Activa" tag, "38" under "Atletas con nivel" and "3" under "Niveles activos"
+
+#### Scenario: Edit from the detail
+- **WHEN** the administrator activates "Editar"
+- **THEN** the discipline drawer SHALL open in edit mode prefilled with the selected discipline
+
+#### Scenario: Delete from the detail
+- **WHEN** the administrator confirms "Eliminar Acuatlón" in the confirmation dialog and the discipline has no dependent records
+- **THEN** the discipline SHALL be deleted and the next listed discipline SHALL be selected
+
+#### Scenario: Delete blocked by dependencies
+- **WHEN** the deletion fails because plans, trainings or levels reference the discipline
+- **THEN** the discipline SHALL remain and an alert SHALL explain the dependency
