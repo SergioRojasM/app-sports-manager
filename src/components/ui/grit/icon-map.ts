@@ -85,6 +85,17 @@ export const GRIT_ICON_MAP = {
   'layout-grid-2': 'grid_view',
   'map-pinned': 'pin_drop',
   'circle-alert': 'error',
+  // v3 additions (events + check-in) — ZYxt2 / LV7I0 / xjlmU
+  'scan-qr-code': 'qr_code_scanner',
+  'calendar-search': 'event_upcoming',
+  'circle-check-big': 'task_alt',
+  'clock-arrow-up': 'update',
+  'clock-4': 'schedule',
+  'undo-2': 'undo',
+  'log-in': 'login',
+  'arrow-down-up': 'swap_vert',
+  'arrow-left': 'arrow_back',
+  camera: 'photo_camera',
 } as const;
 
 export type GritDesignIconName = keyof typeof GRIT_ICON_MAP;

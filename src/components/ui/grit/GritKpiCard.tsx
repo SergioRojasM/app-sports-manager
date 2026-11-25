@@ -14,6 +14,8 @@ type GritKpiCardBaseProps = {
   detail?: ReactNode;
   /** Featured KPI: highlight surface (KPI Card / Destacada). */
   highlight?: boolean;
+  /** Icon colour of the `inline` chip: accent (default) · danger (Cancelados) · muted (Borradores), as in `ZYxt2`. */
+  iconTone?: 'accent' | 'danger' | 'muted';
   /** Tone the value, e.g. `text-grit-success` / `text-grit-warning`. */
   valueClassName?: string;
   /**
@@ -40,6 +42,8 @@ const HINT_TONES: Record<GritKpiHintTone, string> = {
   warning: 'text-grit-warning',
 };
 
+const ICON_TONES = { accent: 'text-grit-cyan', danger: 'text-grit-danger', muted: 'text-grit-subtext' } as const;
+
 /** KPI card from v3 KPI Card / KPI Card Destacada (`GO5Yf`, `pbTiS`, US-0141) and the tall Inicio KPI (`lhbhK`). */
 export function GritKpiCard({
   icon,
@@ -48,6 +52,7 @@ export function GritKpiCard({
   detail,
   highlight,
   valueClassName,
+  iconTone = 'accent',
   layout = 'inline',
   hint,
   hintTone = 'muted',
@@ -92,7 +97,12 @@ export function GritKpiCard({
       padding="none"
       className={cx('flex items-center gap-3.5 px-[18px] py-4', className)}
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04] text-grit-cyan">
+      <span
+        className={cx(
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.04]',
+          ICON_TONES[iconTone],
+        )}
+      >
         <GritIcon name={icon} size={17} />
       </span>
       <span className={cx('shrink-0 font-grit-title text-[36px] font-light leading-none text-grit-text', valueClassName)}>

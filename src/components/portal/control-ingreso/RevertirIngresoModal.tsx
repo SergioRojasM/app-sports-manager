@@ -1,6 +1,6 @@
 'use client';
 
-import { GritButton } from '@/components/ui';
+import { GritAlert, GritButton } from '@/components/ui';
 import { EventoDangerButton, EventoModalShell } from '@/components/portal/gestion-eventos/EventoModalShell';
 import type { AsistenteIngreso } from '@/types/portal/eventos-compras.types';
 
@@ -35,11 +35,7 @@ export function RevertirIngresoModal({ asistente, isSubmitting, error, onConfirm
         <span className="font-mono">{asistente.codigo}</span>)?
       </p>
       <p>La entrada volverá a quedar disponible para ingresar.</p>
-      {error && (
-        <p role="alert" className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
-          {error}
-        </p>
-      )}
+      {error && <GritAlert tone="danger">{error}</GritAlert>}
     </EventoModalShell>
   );
 }

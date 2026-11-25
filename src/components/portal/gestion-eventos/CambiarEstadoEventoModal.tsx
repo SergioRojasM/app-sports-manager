@@ -1,6 +1,6 @@
 'use client';
 
-import { GritButton } from '@/components/ui';
+import { GritAlert, GritButton } from '@/components/ui';
 import { useCambiarEstadoEvento } from '@/hooks/portal/gestion-eventos/useCambiarEstadoEvento';
 import { formatEventoFecha, formatEventoHora } from '@/lib/portal/eventos.utils';
 import { EventoDangerButton, EventoModalShell } from './EventoModalShell';
@@ -51,11 +51,7 @@ export function CambiarEstadoEventoModal({ tenantId, evento, target, onClose, on
           ? 'Los miembros verán el evento como cancelado.'
           : 'El evento volverá a estar confirmado para los miembros.'}
       </p>
-      {error && (
-        <p role="alert" className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
-          {error}
-        </p>
-      )}
+      {error && <GritAlert tone="danger">{error}</GritAlert>}
     </EventoModalShell>
   );
 }

@@ -3,7 +3,8 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { GritIcon } from './GritIcon';
 import { cx, gritFocusRing } from './styles';
 
-type GritButtonVariant = 'primary' | 'secondary' | 'outline-accent' | 'ghost';
+/** danger = destructive confirm (secondary shape, danger tint) — never a solid red fill. */
+type GritButtonVariant = 'primary' | 'secondary' | 'outline-accent' | 'ghost' | 'danger';
 /** sm 31px (Button / Small) · md 37px (Button / Primary) · lg 42px (Button / Primary Glow). */
 type GritButtonSize = 'sm' | 'md' | 'lg';
 
@@ -38,6 +39,7 @@ const VARIANT_CLASSES: Record<GritButtonVariant, string> = {
   secondary: 'border border-white/[0.12] bg-white/[0.04] text-grit-text hover:bg-white/[0.08] [&>.material-symbols-outlined]:text-grit-subtext',
   'outline-accent': 'border border-grit-cyan/35 bg-grit-cyan/[0.08] text-grit-cyan hover:bg-grit-cyan/15',
   ghost: 'bg-transparent text-grit-subtext hover:bg-white/[0.04] hover:text-grit-text',
+  danger: 'border border-grit-danger/35 bg-grit-danger/[0.08] text-grit-danger hover:bg-grit-danger/15',
 };
 
 const SIZE_CLASSES: Record<GritButtonSize, string> = {

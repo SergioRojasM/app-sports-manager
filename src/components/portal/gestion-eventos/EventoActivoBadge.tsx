@@ -1,4 +1,4 @@
-import { GritIcon, cx } from '@/components/ui';
+import { GritTag } from '@/components/ui';
 
 type EventoActivoBadgeProps = {
   activo: boolean;
@@ -6,23 +6,20 @@ type EventoActivoBadgeProps = {
   overlay?: boolean;
 };
 
-/** "Activo" / "Inactivo" pill. Inactive events are hidden from members and visitors. */
+/** "Activo" / "Inactivo" tag. Inactive events are hidden from members and visitors. */
 export function EventoActivoBadge({ activo, overlay = false }: EventoActivoBadgeProps) {
+  const tag = (
+    <GritTag tone={activo ? 'accent' : 'warning'} icon={activo ? 'visibility' : 'visibility_off'}>
+      {activo ? 'Activo' : 'Inactivo'}
+    </GritTag>
+  );
+
   return (
     <span
       title={activo ? 'Publicado en el panel de eventos públicos' : 'Solo visible para el administrador'}
-      className={cx(
-        'inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5 font-grit-body text-xs font-semibold',
-        activo ? 'border-grit-success/40 text-grit-success' : 'border-amber-400/60 text-amber-300',
-        overlay
-          ? cx('shadow-sm backdrop-blur-sm', activo ? 'bg-grit-bg/85' : 'bg-grit-bg/90')
-          : activo
-            ? 'bg-grit-success/10'
-            : 'bg-amber-400/10',
-      )}
+      className={overlay ? 'inline-flex rounded-full bg-grit-bg/85 backdrop-blur-sm' : 'inline-flex'}
     >
-      <GritIcon name={activo ? 'visibility' : 'visibility_off'} size={14} />
-      {activo ? 'Activo' : 'Inactivo'}
+      {tag}
     </span>
   );
 }

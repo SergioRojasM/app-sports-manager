@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { GritIcon, cx, gritFocusRing } from '@/components/ui';
+import { GritIcon, GritIconButton, cx } from '@/components/ui';
 import type { EventoEstado } from '@/types/portal/eventos.types';
 
 type EventoActionsMenuProps = {
@@ -154,21 +154,17 @@ export function EventoActionsMenu({
 
   return (
     <>
-      <button
+      <GritIconButton
         ref={triggerRef}
-        type="button"
+        icon="more_horiz"
+        label={`Acciones para ${eventoNombre}`}
+        size="sm"
+        variant="ghost"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        aria-label={`Acciones para ${eventoNombre}`}
         onClick={toggle}
-        className={cx(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-grit-sm text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-text',
-          gritFocusRing,
-        )}
-      >
-        <GritIcon name="more_vert" size={18} />
-      </button>
+      />
 
       {/* Portalled: cards/table clip overflow and backdrop-blur ancestors would trap a fixed element */}
       {position &&
@@ -180,7 +176,7 @@ export function EventoActionsMenu({
             aria-label={`Acciones para ${eventoNombre}`}
             onKeyDown={handleMenuKeyDown}
             style={{ top: position.top, bottom: position.bottom, right: position.right }}
-            className="fixed z-40 min-w-[180px] overflow-hidden rounded-grit-md border border-grit-glass-border bg-grit-bg py-1 shadow-xl"
+            className="fixed z-40 min-w-[200px] overflow-hidden rounded-[16px] border border-white/[0.10] bg-grit-surface-deep/95 p-1.5 shadow-[0_20px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl"
           >
             {actions.map((action, index) => (
               <button
@@ -191,15 +187,16 @@ export function EventoActionsMenu({
                 type="button"
                 role="menuitem"
                 onClick={() => {
-                  close(false);
+                  // Focus goes back to the trigger first, so a modal opened by the action returns it there
+                  close(true);
                   action.run();
                 }}
                 className={cx(
-                  'flex w-full items-center gap-2 px-3 py-2 text-left font-grit-body text-sm transition focus:outline-none focus-visible:bg-grit-cyan/10',
-                  action.danger ? 'text-grit-danger hover:bg-grit-danger/10' : 'text-grit-text hover:bg-grit-cyan/10',
+                  'flex w-full items-center gap-2.5 rounded-[10px] px-3 py-2 text-left font-grit-body text-[13px] transition focus:outline-none focus-visible:bg-white/[0.06]',
+                  action.danger ? 'text-grit-danger hover:bg-grit-danger/10' : 'text-grit-text hover:bg-white/[0.04]',
                 )}
               >
-                <GritIcon name={action.icon} size={16} />
+                <GritIcon name={action.icon} size={16} className={action.danger ? undefined : 'text-grit-subtext'} />
                 {action.label}
               </button>
             ))}

@@ -32,7 +32,7 @@ Three rules cover most of it:
 | --- | --- |
 | Design file (source of truth) | `projectspec/designs/pencil/grit-arena-v3.pen` |
 | Component board (every reusable piece) | frame `ljQp3` "Componentes · GRIT Arena App" |
-| CSS variables, `.grit-shell`, `.grit-scrollbar` | `src/app/globals.css` |
+| CSS variables, `.grit-shell`, `.grit-scrollbar`, `.grit-scan-line` | `src/app/globals.css` |
 | Tailwind tokens (colours, fonts, radii) | `tailwind.config.ts` (`theme.extend`) |
 | Fonts (`next/font`) | `src/app/layout.tsx` |
 | Component kit | `src/components/ui/grit/` — import from `@/components/ui` |
@@ -66,8 +66,8 @@ shell (§7), so only the content area is page-specific.
 | `p5Ms22` | Admin · Entrenamientos (calendario) | `orgs/[tenant_id]/gestion-entrenamientos` |
 | `kPW3x` | Admin · Entrenamientos · Reservas | `orgs/[tenant_id]/gestion-reservas` |
 | `nnCrm` | Admin · Entrenamientos · Formularios | `orgs/[tenant_id]/gestion-formularios` |
-| `ZYxt2` · `g9lnB` | Admin · Eventos (calendario · semana) | `orgs/[tenant_id]/gestion-eventos` |
-| `LV7I0` · `xjlmU` | Admin · Check-in (eventos · lista grande) | `orgs/[tenant_id]/control-ingreso` · `control-ingreso/[evento_id]` |
+| `ZYxt2` · `g9lnB` | Admin · Eventos (calendario · semana) | `orgs/[tenant_id]/gestion-eventos` — `ZYxt2` migrated (Tarjetas / Lista composed from the kit); week view `g9lnB` not built yet |
+| `LV7I0` · `xjlmU` | Admin · Check-in (eventos · lista grande) | `orgs/[tenant_id]/control-ingreso` · `control-ingreso/[evento_id]` — `LV7I0` and `xjlmU` migrated (result card and latest check-ins composed from the kit) |
 | `IZudm` | Admin · Analítica | `orgs/[tenant_id]/analitica` |
 
 Routes without a v3 frame (`perfil`, `invitaciones`, `activar-cuenta`,
@@ -231,24 +231,24 @@ reproduces in its doc comment.
 | Component | Key props (defaults) | v3 node · notes |
 | --- | --- | --- |
 | `GritCard` | `variant` card·glass·highlight·inset (`glass`), `padding` none·sm·md·lg·xl = 0/16/20/24/28 (`lg`), `as` (`div`) | See §3. Pass `variant="card"` for page content — the `glass` default is meant for overlays |
-| `GritPageHeader` | `title`, `titleAccent`, `italic`, `eyebrow`, `subtitle`, `actions` | `lnMVj` / `jHJwK`. The page's only `h1`: Exo 2 300, 40px (30px mobile). `titleAccent` is cyan; `italic` slants the accent only. `actions` holds the page tools and at most one `GritButton size="lg"` |
+| `GritPageHeader` | `title`, `titleAccent`, `italic`, `titleVariant` light·display (`light`), `titleAdornment`, `eyebrow`, `subtitle`, `actions` | `lnMVj` / `jHJwK`. The page's only `h1`: Exo 2 300, 40px (30px mobile). `titleAccent` is cyan; `italic` slants the accent only. `titleVariant="display"` = Exo 2 600 italic for a record name (`xjlmU` "GRIT 10K"); `titleAdornment` (a status pill) sits beside the `h1`, outside it. `actions` holds the page tools and at most one `GritButton size="lg"` |
 | `GritSectionHeading` | `title`, `subtitle`, `action`, `size` md·lg = 17/19px (`lg`), `as` h2·h3 (`h2`) | Panel title, Exo 2 500; subtitle 12px muted; `action` right-aligned |
 | `GritPageContainer` | — | Applied once by the Portal layout (padding 12/32/32/32, gap 20, max 1440). Use directly only outside `/portal` |
 | `GritDivider` | — | 1px `white/[0.06]` rule |
 | `GritEmptyState` | `icon`, `title`, `description`, `action`, `titleAs`, `descriptionClassName` | Loading / error / empty / not-found, on a `card` surface |
+| `GritAlert` | `tone` success·warning·danger·info (`info`), `icon`, `action`, `onDismiss` | Derived (no v3 frame): inline banner, token at 10% fill / 35% stroke, 16px radius. success/info → `role="status"`, warning/danger → `role="alert"`. Use for page feedback (saved, toggled, failed refresh) above existing content |
 
 ### Actions
 
 | Component | Key props (defaults) | v3 node · notes |
 | --- | --- | --- |
-| `GritButton` | `variant` primary·secondary·outline-accent·ghost (`primary`), `size` sm·md·lg = 31/37/42px (`md`), `icon`, `iconPosition`, `fullWidth`, `loading`, `loadingLabel`, `href`, `external` | `a8wf1a` / `zG7Qt` / `DdNsJ` / `yC90U`. Always a pill, 600 weight. `primary` = cyan fill + `grit-on-brand` text; at `lg` it glows (page CTA). `secondary` = `white/[0.04]` + `white/[0.12]` stroke. `outline-accent` = cyan-tinted. `ghost` = text only. Renders `<button>`, `<Link>`, or `<a target="_blank" rel="noopener noreferrer">` when `external` |
+| `GritButton` | `variant` primary·secondary·outline-accent·ghost·danger (`primary`), `size` sm·md·lg = 31/37/42px (`md`), `icon`, `iconPosition`, `fullWidth`, `loading`, `loadingLabel`, `href`, `external` | `a8wf1a` / `zG7Qt` / `DdNsJ` / `yC90U`. Always a pill, 600 weight. `primary` = cyan fill + `grit-on-brand` text; at `lg` it glows (page CTA). `secondary` = `white/[0.04]` + `white/[0.12]` stroke. `outline-accent` = cyan-tinted. `ghost` = text only. `danger` = danger-tinted pill for destructive confirms. Renders `<button>`, `<Link>`, or `<a target="_blank" rel="noopener noreferrer">` when `external` |
 
 Button rules:
 
 - One filled `primary` per view region, and at most one `size="lg"` per page.
 - Text on a cyan fill is `text-grit-on-brand`, never white.
-- A destructive action is `variant="secondary"` with `text-grit-danger`, not a
-  red fill.
+- A destructive action is `variant="danger"` (danger-tinted pill), never a red fill.
 
 ### Labels and indicators
 
@@ -265,9 +265,9 @@ Button rules:
 | Export | Use |
 | --- | --- |
 | `gritInputClass`, `gritSelectClass` | Form fields: 12px radius, `white/[0.04]` fill, `white/[0.12]` stroke, 13px, cyan focus. **Derived** — v3 has no form frame yet; revisit when one is designed |
-| `gritPillSelectClass` | Toolbar `<select>` (Dropdown Filter `XSFT7`): pill, 35px |
+| `gritPillSelectClass` | Toolbar `<select>` (Dropdown Filter `XSFT7`): pill, 35px. For a leading icon or the 29px compact size use the `GritPillSelect` component |
 | `gritFocusRing`, `cx` | Shared focus ring; class joiner |
-| `gritTableHeadClass`, `gritTableHeadCellClass`, `gritTableRowClass`, `gritTableCellClass` | Table / Head + Row (`v3ijUr`, `jpBWr`): head row `white/[0.02]`, 10px uppercase muted headers with 1.3px tracking, `white/[0.06]` row hairlines, 13px cells. Put the `<table>` in `GritCard variant="card" padding="none" className="overflow-hidden"` |
+| `gritTableHeadClass`, `gritTableHeadCellClass`, `gritTableRowClass`, `gritTableCellClass` (+ `gritTableHeadCellCompactClass` / `gritTableCellCompactClass`, 14px side padding for 8+ columns) | Table / Head + Row (`v3ijUr`, `jpBWr`): head row `white/[0.02]`, 10px uppercase muted headers with 1.3px tracking, `white/[0.06]` row hairlines, 13px cells. Put the `<table>` in `GritCard variant="card" padding="none" className="overflow-hidden"` |
 
 ### Controls and data (added in v3)
 
@@ -277,14 +277,17 @@ Button rules:
 | `GritSearchField` | `size` md·lg = 37/44 (`md`), all `<input>` props, **`aria-label` or `aria-labelledby`** (required by type), `className` on the wrapper | `l3ixX` / `N4tyD`. Pill `type="search"` with leading icon. A placeholder is not a label |
 | `GritSegmented` | `options` `{value,label,count?,icon?}[]`, `value`, `onChange`, `variant` soft·solid (`soft`), **`ariaLabel`** | `LW0MQ` / `rhTJ3` (soft) · `g2bgr` View Switch (solid). Buttons with `aria-pressed` in a labelled `role="group"`; scrolls horizontally inside its track on narrow screens |
 | `GritChip` | `active`, `icon`, button props | `xKTkP` / `bHakw`. Toggle chip (`aria-pressed`); active = cyan fill + glow |
-| `GritKpiCard` | `icon`, `value`, `label`, `detail`, `highlight`, `valueClassName`, `layout`, `hint`, `hintTone`, `href` + `hrefLabel` | `GO5Yf` / `pbTiS`. Default `layout="inline"`: round icon chip, Exo 2 300 36px value, 12px label. `layout="stacked"` (Inicio `lhbhK`): 28px radius, 36px accent icon chip + optional round shortcut (`href` requires `hrefLabel`), Exo 2 300 56px value, 13/500 label, 12px `hint` toned `muted` / `accent` / `warning`. `highlight` for the one featured KPI; tone the value with `text-grit-success` / `text-grit-warning` |
+| `GritKpiCard` | `icon`, `iconTone` accent·danger·muted (`accent`, inline only), `value`, `label`, `detail`, `highlight`, `valueClassName`, `layout`, `hint`, `hintTone`, `href` + `hrefLabel` | `GO5Yf` / `pbTiS`. Default `layout="inline"`: round icon chip, Exo 2 300 36px value, 12px label. `layout="stacked"` (Inicio `lhbhK`): 28px radius, 36px accent icon chip + optional round shortcut (`href` requires `hrefLabel`), Exo 2 300 56px value, 13/500 label, 12px `hint` toned `muted` / `accent` / `warning`. `highlight` for the one featured KPI; tone the value with `text-grit-success` / `text-grit-warning` |
 | `GritAvatar` | `name`, `src`, `size` 32·34·38 people / 20·26·36·42·52 club marks (`34`), `tone` neutral·soft·solid·org (`neutral`) | `sFaSi` / `gNnuk` / club mark `orsH4`. Initials from `name` (person icon if empty, shield for `org`); image is decorative (`alt=""`) because the name is always shown beside it, and falls back to the initials when it fails to load. `org` = dark 80% fill, cyan 50% stroke, cyan Exo 2 700 italic initials scaled with the circle |
 | `GritProgress` | `value` 0–100 (clamped), **`label`**, `showValue` (`true`), `tone` accent·warning·danger | `fU6ex`. 6px track, JetBrains Mono %, `role="progressbar"` |
+| `GritProgressRing` | `value` (null → "—"), `max`, `caption`, **`label`**, `size` (`96`) | `LV7I0` `G1a17B`. SVG ring (white 8% track, cyan arc with glow), "value/max" Exo 2 24 + 10px caption, `role="progressbar"` |
+| `GritPillSelect` | **`label`** (sr-only), `icon`, `size` sm·md = 29/35px (`md`), `onChange(value)`, `<option>` children | `XSFT7` / `ZYxt2` `gQPV3` / `LV7I0` `UjgJj`. Pill `<select>` with a leading cyan icon; options carry the visible text ("Estado: Todos") |
 | `GritPagination` | `page` (1-based), `totalPages`, `onPageChange`, `summary` | `Alk2W`. Renders nothing for ≤1 page; ellipsis above 7 pages; `nav[aria-label="Paginación"]` + `aria-current` |
-| `GritMediaCard` | `image`, `imageAlt`, `placeholderIcon`, `radius` lg·xl = 24/28 (`lg`), `stroke` neutral·accent (`neutral`), `top`, `bottom`, `padding` 14·16·20·22·24 (`14`), `as` | Photo surface of the event / club cards. Full-bleed photo under the v3 top (55% → 0 at 30%) and bottom (0 at 35% → 95%) shades; placeholder (dark gradient + icon) when the image is missing or fails. Decorative photo unless `imageAlt` |
-| `GritOverlayPill` | `tone` glass·brand (`glass`), `icon`, `iconTone` accent·ink, `size` md·lg (`md`), `href` / `onClick`, `ariaLabel` | Over-photo pill (`YxmsK`, `hShSC`, `L3ojFF`): glass = `grit-bg/45` + white 20% stroke + 14px blur; brand = cyan fill. Span, `Link` or `button`. `gritOverlayPillClass` styles external triggers the same way |
+| `GritMediaCard` | `image`, `imageAlt`, `placeholderIcon`, `radius` lg·xl·none = 24/28/0 (`lg`), `stroke` neutral·accent·none (`neutral`; `none` + `radius="none"` = a photo zone inside a larger card), `top`, `bottom`, `padding` 14·16·20·22·24 (`14`), `as` | Photo surface of the event / club cards. Full-bleed photo under the v3 top (55% → 0 at 30%) and bottom (0 at 35% → 95%) shades; placeholder (dark gradient + icon) when the image is missing or fails. Decorative photo unless `imageAlt` |
+| `GritOverlayPill` | `tone` glass·brand·danger (`glass`), `icon`, `iconTone` accent·ink, `size` md·lg (`md`), `href` / `onClick`, `ariaLabel` | Over-photo pill (`YxmsK`, `hShSC`, `L3ojFF`): glass = `grit-bg/45` + white 20% stroke + 14px blur; brand = cyan fill. Span, `Link` or `button`. `gritOverlayPillClass` styles external triggers the same way |
 | `GritDateTile` | `dateIso`, `size` sm·md·lg = 56×46 / 48×52 / 64×59 (`md`), `tone` overlay·accent·muted (`overlay`) | `jLgGe` / `r9UZz` / `tsbPt`. Day (Exo 2) over 3-letter month (700, tracked), Bogotá; "Por definir" for `null`; `role="img"` with the long date |
 | `GritEventCard` | `variant` hero·compact·grid, `title`, `href`, `image`, `dateIso`, `badges`, `organizer`, `meta`, `price`, `actions`, `headingLevel` (`3`) | `zRDg2` / `R1QegD` / `uCKmV`. Generic content only (map domain → props in feature code). grid = the whole card is one link; compact = round arrow link stretched over the card; hero = title link + separate `actions` (never nested in a link) |
+| `GritNextEventPanel` | `label`, `image`, `coverAction` {icon,label,href\|onClick}, `title`, `subtitle`, `tags`, `meters` {icon,label,value,total?,caption?}[], `actions`, `headingLevel` (`2`) | `s2Gt8L` (frame `ZYxt2`). 320 wide, radius 26; 200px photo cover fading into the surface with a glass label pill + 32px round action; inset meters (value + "/ total", 5px glowing track with `role="progressbar"`, or a caption when there is no total); actions stacked at the bottom |
 
 ### Which component for which job
 
@@ -296,11 +299,13 @@ Button rules:
 | A view switch (tarjetas / lista / calendario) | `GritSegmented variant="solid"` |
 | Open-ended categories (disciplines, tags) | A row of `GritChip` |
 | Search in a toolbar or header | `GritSearchField` (`lg` in a page header, `md` in a toolbar) |
-| A filter dropdown in a toolbar | `<select className={gritPillSelectClass}>` |
+| A filter dropdown in a toolbar | `<select className={gritPillSelectClass}>`, or `GritPillSelect` with an icon |
 | An icon-only action (row menu, close, search toggle) | `GritIconButton` |
 | The page's main action | `GritButton size="lg"` in `GritPageHeader actions` — once per page |
 | A headline number | `GritKpiCard` (a row of 3–4, at most one `highlight`) |
 | A ratio in a table cell | `GritProgress` |
+| A ratio as the focal number of a card (check-in) | `GritProgressRing` |
+| Page feedback (saved, toggled, failed) | `GritAlert` |
 
 ---
 
@@ -521,7 +526,6 @@ same prop style), then move its row to §4.
 
 | Pattern | Node | Measurements |
 | --- | --- | --- |
-| Next Event Panel | `s2Gt8L` | 320 wide, radius 26, card gradient, cyan 40%→5% stroke; 200px cover (photo + fade to `grit-surface-deep`) with tags and name; body padding 16/18/18, gap 14; meters as `inset` surfaces (padding 14, gap 9) with `GritProgress`; actions stacked (gap 8) at the bottom |
 | Live Toast | `PzYwn` | 370 wide, radius 18, padding 14/16, gap 12; `grit-surface-deep` at 95% + blur 20, cyan 40% stroke, `0 20px 50px` shadow; 34px solid-cyan round icon, title 13/600, body 11px muted, 14px close icon |
 | Collapsed sidebar | `J0Zbc` (screen `V2eGcp`) | 80 wide, radius 28, padding 22/0/14, gap 24; 48px round nav buttons; active = radial cyan 20%→3% fill + cyan 35% stroke + glow; 40px user avatar; 28px round expand toggle (`grit-surface`, white 18% stroke) on the edge. Needs persisted UI state |
 | Notifications: day groups + tabs + footer | `FidFw` | Group labels "AHORA" / "AYER" as overlines (padding 12/20/6); segmented tabs under the header; footer with settings link and "Ver todas". Needs data shaping — a notifications story |

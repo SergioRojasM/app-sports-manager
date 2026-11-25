@@ -40,3 +40,9 @@ export const gritTableRowClass = 'border-t border-white/[0.06] transition-colors
 
 /** <td>: 13px primary text. Secondary columns add `text-grit-subtext`. */
 export const gritTableCellClass = 'px-[22px] py-4 font-grit-body text-[13px] text-grit-text';
+
+/** Compact <th> / <td> (14px side padding) for tables with 8+ columns that must fit 1120px without scrolling. */
+export const gritTableHeadCellCompactClass =
+  'px-3.5 py-[13px] text-left font-grit-body text-[10px] font-semibold uppercase tracking-[1.3px] text-grit-muted';
+
+export const gritTableCellCompactClass = 'px-3.5 py-3.5 font-grit-body text-[13px] text-grit-text';

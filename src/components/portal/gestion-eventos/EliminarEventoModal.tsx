@@ -1,6 +1,6 @@
 'use client';
 
-import { GritButton } from '@/components/ui';
+import { GritAlert, GritButton } from '@/components/ui';
 import { useEliminarEvento } from '@/hooks/portal/gestion-eventos/useEliminarEvento';
 import { formatEventoFecha, formatEventoHora } from '@/lib/portal/eventos.utils';
 import { EventoDangerButton, EventoModalShell } from './EventoModalShell';
@@ -39,11 +39,7 @@ export function EliminarEventoModal({ tenantId, evento, onClose, onSuccess }: El
         ¿Seguro que deseas eliminar <strong className="text-grit-text">{evento.nombre}</strong> ({fecha})?
       </p>
       <p>Esta acción no se puede deshacer.</p>
-      {error && (
-        <p role="alert" className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 text-xs text-grit-danger">
-          {error}
-        </p>
-      )}
+      {error && <GritAlert tone="danger">{error}</GritAlert>}
     </EventoModalShell>
   );
 }

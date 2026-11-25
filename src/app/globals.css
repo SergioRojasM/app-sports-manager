@@ -120,6 +120,27 @@ body {
   background-size: 14px 14px;
 }
 
+/* Check-in scanner line (xjlmU `Hv9G9`): sweeps the 170px QR frame; static mid-frame under reduced motion */
+@keyframes grit-scan {
+  0%,
+  100% {
+    transform: translateY(-64px);
+  }
+  50% {
+    transform: translateY(64px);
+  }
+}
+
+.grit-scan-line {
+  animation: grit-scan 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grit-scan-line {
+    animation: none;
+  }
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-style: normal;

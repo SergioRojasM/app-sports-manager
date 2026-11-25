@@ -2,8 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
-import { GritButton, GritEmptyState, GritIcon } from '@/components/ui';
+import { GritAlert, GritButton, GritEmptyState } from '@/components/ui';
 import { useAsistentesIngreso } from '@/hooks/portal/control-ingreso/useAsistentesIngreso';
 import { useControlIngreso } from '@/hooks/portal/control-ingreso/useControlIngreso';
 import type { AsistenteIngreso } from '@/types/portal/eventos-compras.types';
@@ -12,12 +11,13 @@ import { CodigoManualForm } from './CodigoManualForm';
 import { IngresoResultadoCard } from './IngresoResultadoCard';
 import { IngresoResumenHeader } from './IngresoResumenHeader';
 import { RevertirIngresoModal } from './RevertirIngresoModal';
+import { UltimosIngresos } from './UltimosIngresos';
 
 // Camera + worker only on this page, never during SSR
 const QrScanner = dynamic(() => import('./QrScanner'), {
   ssr: false,
   loading: () => (
-    <div className="flex min-h-40 w-full items-center justify-center rounded-grit-2xl border border-grit-glass-border bg-black font-grit-body text-sm text-grit-subtext">
+    <div className="flex h-[384px] w-full items-center justify-center rounded-grit-2xl border border-white/[0.08] bg-white/[0.03] font-grit-body text-[13px] text-grit-subtext">
       Cargando lector…
     </div>
   ),
@@ -28,14 +28,17 @@ type ControlIngresoPageProps = {
   eventoId: string;
 };
 
-/** Door check-in screen of one event: scanner, manual entry, result, counters and attendees (US-0131). */
+/**
+ * Door check-in screen of one event (US-0131, grit-arena-v3 `xjlmU`): header with counters, a scanner
+ * column (camera, manual code, result, latest check-ins) and the attendee panel.
+ */
 export function ControlIngresoPage({ tenantId, eventoId }: ControlIngresoPageProps) {
-  const lista = useAsistentesIngreso(eventoId);
+  const [rowPendingId, setRowPendingId] = useState<string | null>(null);
+  const lista = useAsistentesIngreso(eventoId, { pausado: rowPendingId !== null });
   const { refrescar } = lista;
   const control = useControlIngreso(tenantId, eventoId, { onChange: refrescar });
 
   const manualRef = useRef<HTMLInputElement>(null);
-  const [rowPendingId, setRowPendingId] = useState<string | null>(null);
   const [revertirTarget, setRevertirTarget] = useState<AsistenteIngreso | null>(null);
   const [revertirError, setRevertirError] = useState<string | null>(null);
   const [cardError, setCardError] = useState<string | null>(null);
@@ -93,21 +96,13 @@ export function ControlIngresoPage({ tenantId, eventoId }: ControlIngresoPagePro
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <Link
-        href={listadoHref}
-        className="inline-flex w-fit items-center gap-1 font-grit-body text-[13px] font-semibold text-grit-subtext transition hover:text-grit-cyan"
-      >
-        <GritIcon name="arrow_back" size={15} />
-        Volver a eventos
-      </Link>
+    <div className="flex flex-col gap-[18px]">
+      <IngresoResumenHeader evento={control.evento} resumen={control.resumen} listadoHref={listadoHref} />
 
-      <IngresoResumenHeader nombre={control.evento.nombre} fechaHora={control.evento.fecha_hora} resumen={control.resumen} />
+      <div className="grid gap-4 lg:grid-cols-[400px_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <QrScanner onDetect={onDetect} onError={onCameraError} />
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <QrScanner onDetect={onDetect} onError={onCameraError} />
-
-        <div className="flex flex-col gap-4">
           <CodigoManualForm
             inputRef={manualRef}
             disabled={control.pending}
@@ -118,21 +113,18 @@ export function ControlIngresoPage({ tenantId, eventoId }: ControlIngresoPagePro
           />
 
           {control.error && (
-            <div
-              role="alert"
-              className="flex flex-wrap items-center justify-between gap-2 rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 font-grit-body text-xs text-grit-danger"
+            <GritAlert
+              tone="danger"
+              action={
+                <GritButton variant="secondary" size="sm" icon="refresh" onClick={control.reintentar}>
+                  Reintentar
+                </GritButton>
+              }
             >
               {control.error}
-              <GritButton variant="secondary" size="sm" icon="refresh" onClick={control.reintentar}>
-                Reintentar
-              </GritButton>
-            </div>
+            </GritAlert>
           )}
-          {cardError && (
-            <p role="alert" className="rounded-grit-md border border-grit-danger/25 bg-grit-danger/10 px-3 py-2 font-grit-body text-xs text-grit-danger">
-              {cardError}
-            </p>
-          )}
+          {cardError && <GritAlert tone="danger">{cardError}</GritAlert>}
 
           <IngresoResultadoCard
             resultado={control.resultado}
@@ -143,18 +135,20 @@ export function ControlIngresoPage({ tenantId, eventoId }: ControlIngresoPagePro
               control.siguiente();
             }}
           />
-        </div>
-      </div>
 
-      <AsistentesIngresoTable
-        lista={lista}
-        pendingTicketId={rowPendingId}
-        onRegistrar={(asistente) => void registrarDesdeLista(asistente)}
-        onRevertir={(asistente) => {
-          setRevertirError(null);
-          setRevertirTarget(asistente);
-        }}
-      />
+          <UltimosIngresos recientes={lista.recientes} />
+        </div>
+
+        <AsistentesIngresoTable
+          lista={lista}
+          pendingTicketId={rowPendingId}
+          onRegistrar={(asistente) => void registrarDesdeLista(asistente)}
+          onRevertir={(asistente) => {
+            setRevertirError(null);
+            setRevertirTarget(asistente);
+          }}
+        />
+      </div>
 
       {revertirTarget && (
         <RevertirIngresoModal

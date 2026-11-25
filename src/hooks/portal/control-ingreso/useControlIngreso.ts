@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useVisibleInterval } from '@/hooks/portal/useVisibleInterval';
+import { CHECKIN_POLL_MS } from '@/hooks/portal/control-ingreso/useAsistentesIngreso';
 import { esCodigoTicketValido, normalizarCodigoTicket, resultadoNoEncontrado } from '@/lib/portal/eventos-ingreso.utils';
 import { eventosService } from '@/services/supabase/portal/eventos.service';
 import { eventoComprasService } from '@/services/supabase/portal/eventos-compras.service';
@@ -93,6 +95,9 @@ export function useControlIngreso(tenantId: string, eventoId: string, { onChange
       mensajeDe(err, 'resumen');
     }
   }, [eventoId]);
+
+  // "En vivo": counters follow other doors' check-ins; skipped while a write is in flight
+  useVisibleInterval(() => void refrescarResumen(), CHECKIN_POLL_MS, Boolean(evento) && !pending);
 
   const mostrar = useCallback((value: IngresoResultado) => {
     bloqueado.current = true;
