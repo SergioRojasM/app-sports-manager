@@ -19,6 +19,7 @@ export const GRIT_ICON_MAP = {
   'arrow-right': 'arrow_forward',
   zap: 'bolt',
   dumbbell: 'fitness_center',
+  gauge: 'speed',
   'layout-dashboard': 'dashboard',
   'chart-column': 'bar_chart',
   settings: 'settings',

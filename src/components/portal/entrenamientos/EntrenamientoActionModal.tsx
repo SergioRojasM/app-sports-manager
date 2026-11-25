@@ -1,3 +1,9 @@
+'use client';
+
+import { useId } from 'react';
+import { BodyPortal, GritButton, GritCard, GritIconButton, cx } from '@/components/ui';
+import { useGritDialogFocus } from '@/components/ui/grit/useGritDialogFocus';
+
 type EntrenamientoActionModalProps = {
   open: boolean;
   trainingName: string;
@@ -17,6 +23,17 @@ type EntrenamientoActionModalProps = {
   publicarEnEventosDisabledReason?: string;
 };
 
+type Accion = {
+  key: string;
+  label: string;
+  icon: string;
+  hint: string;
+  enabled: boolean;
+  danger?: boolean;
+  onClick: () => void;
+};
+
+/** Actions of a training (v3 modal pattern, DESIGN.md §9): opened from every session in the calendar views. */
 export function EntrenamientoActionModal({
   open,
   trainingName,
@@ -34,112 +51,111 @@ export function EntrenamientoActionModal({
   canPublicarEnEventos = false,
   publicarEnEventosDisabledReason,
 }: EntrenamientoActionModalProps) {
+  const titleId = useId();
+  const panelRef = useGritDialogFocus<HTMLDivElement>({ open, onClose });
+
   if (!open) {
     return null;
   }
 
+  const acciones: Accion[] = [
+    {
+      key: 'detalle',
+      label: 'Ver detalle',
+      icon: 'visibility',
+      hint: 'Consulta la información completa de este entrenamiento.',
+      enabled: true,
+      onClick: onViewDetail,
+    },
+  ];
+  if (onViewReservas) {
+    acciones.push({
+      key: 'reservas',
+      label: 'Ver reservas',
+      icon: 'group',
+      hint: 'Consulta las reservas de este entrenamiento.',
+      enabled: true,
+      onClick: onViewReservas,
+    });
+  }
+  if (onPublicarEnEventos) {
+    acciones.push({
+      key: 'publicar',
+      label: 'Publicar en eventos',
+      icon: 'campaign',
+      hint: canPublicarEnEventos
+        ? 'Abre el asistente de eventos con los datos de este entrenamiento.'
+        : (publicarEnEventosDisabledReason ?? 'Acción no disponible.'),
+      enabled: canPublicarEnEventos,
+      onClick: onPublicarEnEventos,
+    });
+  }
+  if (canManage) {
+    acciones.push(
+      {
+        key: 'editar',
+        label: 'Editar',
+        icon: 'edit',
+        hint: canEdit ? 'Permite ajustar datos del entrenamiento único.' : (editDisabledReason ?? 'Acción no disponible.'),
+        enabled: canEdit,
+        onClick: onEdit,
+      },
+      {
+        key: 'eliminar',
+        label: 'Eliminar',
+        icon: 'delete',
+        hint: canDelete ? 'Permite eliminar según las reglas de alcance.' : (deleteDisabledReason ?? 'Acción no disponible.'),
+        enabled: canDelete,
+        danger: true,
+        onClick: onDelete,
+      },
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <button
-        type="button"
-        aria-label="Cerrar modal de acciones"
-        onClick={onClose}
-        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
-      />
+    <BodyPortal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
+        <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          tabIndex={-1}
+          className="w-full max-w-[420px] outline-none"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <GritCard variant="glass" padding="lg" className="flex flex-col gap-5">
+            <header className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-grit-body text-[11px] font-semibold uppercase tracking-[1.3px] text-grit-cyan">
+                  {canManage ? '¿Qué deseas hacer?' : 'Acciones disponibles'}
+                </p>
+                <h2 id={titleId} className="mt-1 break-words font-grit-title text-xl font-medium text-grit-text">
+                  {trainingName}
+                </h2>
+              </div>
+              <GritIconButton icon="close" label="Cerrar" size="sm" variant="ghost" onClick={onClose} />
+            </header>
 
-      <div className="relative z-10 w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-card p-5 shadow-xl">
-        <h3 className="font-grit-title text-lg font-semibold text-grit-text">{canManage ? '¿Qué deseas hacer?' : 'Acciones disponibles'}</h3>
-        <p className="mt-1 text-sm text-grit-subtext">{canManage ? 'Selecciona una acción para el entrenamiento.' : 'Puedes consultar las reservas de este entrenamiento.'}</p>
-        <p className="mt-2 text-sm font-semibold text-grit-text">{trainingName}</p>
-
-        <div className="mt-5 space-y-2">
-          <button
-            type="button"
-            onClick={onViewDetail}
-            className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-3 text-left transition hover:border-grit-cyan/70"
-          >
-            <p className="text-sm font-semibold text-grit-text">Ver detalle</p>
-            <p className="mt-0.5 text-xs text-grit-subtext">Consulta la información completa de este entrenamiento.</p>
-          </button>
-
-          {onViewReservas && (
-            <button
-              type="button"
-              onClick={onViewReservas}
-              className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-3 text-left transition hover:border-grit-cyan/70"
-            >
-              <p className="text-sm font-semibold text-grit-text">Ver reservas</p>
-              <p className="mt-0.5 text-xs text-grit-subtext">Consulta las reservas de este entrenamiento.</p>
-            </button>
-          )}
-
-          {onPublicarEnEventos && (
-            <button
-              type="button"
-              onClick={onPublicarEnEventos}
-              disabled={!canPublicarEnEventos}
-              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
-                canPublicarEnEventos
-                  ? 'border-grit-glass-border bg-grit-bg/70 hover:border-grit-cyan/70'
-                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
-              }`}
-            >
-              <p className="text-sm font-semibold text-grit-text">Publicar en eventos</p>
-              <p className="mt-0.5 text-xs text-grit-subtext">
-                {canPublicarEnEventos
-                  ? 'Abre el asistente de eventos con los datos de este entrenamiento.'
-                  : (publicarEnEventosDisabledReason ?? 'Acción no disponible.')}
-              </p>
-            </button>
-          )}
-
-          {canManage && (
-            <button
-              type="button"
-              onClick={onEdit}
-              disabled={!canEdit}
-              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
-                canEdit
-                  ? 'border-grit-glass-border bg-grit-bg/70 hover:border-grit-cyan/70'
-                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
-              }`}
-            >
-              <p className="text-sm font-semibold text-grit-text">Editar</p>
-              <p className="mt-0.5 text-xs text-grit-subtext">
-                {canEdit ? 'Permite ajustar datos del entrenamiento único.' : (editDisabledReason ?? 'Acción no disponible.')}
-              </p>
-            </button>
-          )}
-
-          {canManage && (
-            <button
-              type="button"
-              onClick={onDelete}
-              disabled={!canDelete}
-              className={`w-full rounded-grit-md border px-4 py-3 text-left transition ${
-                canDelete
-                  ? 'border-grit-danger/40 bg-rose-500/10 hover:border-grit-danger/70'
-                  : 'cursor-not-allowed border-grit-glass-border bg-grit-bg/40 opacity-70'
-              }`}
-            >
-              <p className={`text-sm font-semibold ${canDelete ? 'text-grit-danger' : 'text-grit-text'}`}>Eliminar</p>
-              <p className={`mt-0.5 text-xs ${canDelete ? 'text-grit-danger/80' : 'text-grit-subtext'}`}>
-                {canDelete ? 'Permite eliminar según las reglas de alcance.' : (deleteDisabledReason ?? 'Acción no disponible.')}
-              </p>
-            </button>
-          )}
-        </div>
-
-        <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
-          >
-            Cancelar
-          </button>
+            <ul className="flex flex-col gap-2.5">
+              {acciones.map((accion) => (
+                <li key={accion.key} className="flex flex-col gap-1">
+                  <GritButton
+                    variant={accion.danger && accion.enabled ? 'danger' : 'secondary'}
+                    icon={accion.icon}
+                    fullWidth
+                    disabled={!accion.enabled}
+                    onClick={accion.onClick}
+                  >
+                    {accion.label}
+                  </GritButton>
+                  <p className={cx('px-1 font-grit-body text-xs', accion.enabled ? 'text-grit-muted' : 'text-grit-subtext')}>{accion.hint}</p>
+                </li>
+              ))}
+            </ul>
+          </GritCard>
         </div>
       </div>
-    </div>
+    </BodyPortal>
   );
 }

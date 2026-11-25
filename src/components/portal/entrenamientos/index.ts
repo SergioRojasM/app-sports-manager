@@ -1,6 +1,13 @@
 export { EntrenamientosPage } from './EntrenamientosPage';
 export { EntrenamientosCalendar } from './EntrenamientosCalendar';
 export { EntrenamientosList } from './EntrenamientosList';
+export { EntrenamientosSemana } from './EntrenamientosSemana';
+export { EntrenamientoBloque } from './EntrenamientoBloque';
+export { EntrenamientosAgendaDia } from './EntrenamientosAgendaDia';
+export { EntrenamientoAgendaItem } from './EntrenamientoAgendaItem';
+export { EntrenamientosKpis } from './EntrenamientosKpis';
+export { EntrenamientosHeaderTools } from './EntrenamientosHeaderTools';
+export { EntrenamientosPeriodoHeader } from './EntrenamientosPeriodoHeader';
 export { EntrenamientoWizard } from './EntrenamientoWizard';
 export { EntrenamientoFormModal } from './EntrenamientoFormModal';
 export { EntrenamientoScopeModal } from './EntrenamientoScopeModal';

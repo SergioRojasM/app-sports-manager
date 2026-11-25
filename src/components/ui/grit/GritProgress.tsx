@@ -9,6 +9,8 @@ type GritProgressProps = {
   showValue?: boolean;
   tone?: 'accent' | 'warning' | 'danger';
   className?: string;
+  /** Track width override (default `w-[100px]`), e.g. `min-w-12 flex-1` to fill a row. */
+  trackClassName?: string;
 };
 
 const FILL = {
@@ -18,7 +20,7 @@ const FILL = {
 } as const;
 
 /** Thin progress bar with a mono percentage, from v3 Progress / Asistencia (`fU6ex`, US-0141). */
-export function GritProgress({ value, label, showValue = true, tone = 'accent', className }: GritProgressProps) {
+export function GritProgress({ value, label, showValue = true, tone = 'accent', className, trackClassName = 'w-[100px] shrink-0' }: GritProgressProps) {
   const clamped = Math.round(Math.min(100, Math.max(0, Number.isFinite(value) ? value : 0)));
   return (
     <div className={cx('flex items-center gap-2.5', className)}>
@@ -28,7 +30,7 @@ export function GritProgress({ value, label, showValue = true, tone = 'accent', 
         aria-valuenow={clamped}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="h-1.5 w-[100px] shrink-0 overflow-hidden rounded-full bg-white/[0.06]"
+        className={cx('h-1.5 overflow-hidden rounded-full bg-white/[0.06]', trackClassName)}
       >
         <div className={cx('h-full rounded-full', FILL[tone])} style={{ width: `${clamped}%` }} />
       </div>
