@@ -131,6 +131,56 @@ export type SelectOption = {
   label: string;
 };
 
+/* ── v3 calendar page (US-0142) ── */
+
+/** View of `gestion-entrenamientos`, synced to `?vista=`. */
+export type EntrenamientosVista = 'semana' | 'mes' | 'lista';
+
+/** Visible period: a Monday–Sunday week (semana / lista) or the 42-cell month grid (mes). */
+export type EntrenamientosPeriodo = {
+  /** First Bogotá day key (`YYYY-MM-DD`) loaded. */
+  from: string;
+  /** Last Bogotá day key loaded (inclusive). */
+  to: string;
+  /** "16 – 22 nov 2026" or "Noviembre 2026". */
+  label: string;
+  /** `YYYY-MM-01` of the displayed month (mes only). */
+  monthStartDate: string | null;
+};
+
+/** One day of the week view header. */
+export type DiaSemana = {
+  key: string;
+  /** "LUN" … "DOM". */
+  dow: string;
+  dia: number;
+  /** "Viernes 20 de noviembre". */
+  nombreLargo: string;
+  esHoy: boolean;
+};
+
+/** A row of the week grid: one hour, or a collapsed run of empty hours (`desde` inclusive, `hasta` exclusive). */
+export type FilaHoraria =
+  | { tipo: 'hora'; hora: number; top: number; alto: number }
+  | { tipo: 'banda'; id: string; desde: number; hasta: number; top: number; alto: number };
+
+/** Discipline colour tone, assigned by the discipline's position in the tenant's sorted options. */
+export type DisciplinaTono = 'accent' | 'violet' | 'warning' | 'danger' | 'success' | 'teal';
+
+export type EntrenamientosKpis = {
+  sesiones: number;
+  disciplinas: number;
+  reservas: number;
+  sesionesLlenas: number;
+  /** Σ reservas / Σ cupo of the sessions that define one; null when none does. */
+  ocupacionPct: number | null;
+  cupos: number;
+  entrenadores: number;
+};
+
+/** Status tag of a session in the day agenda and the list view. */
+export type EntrenamientoAgendaEstado = 'proxima' | 'lleno' | 'cancelado' | 'finalizado';
+
 export type TrainingWizardRuleFormValue = {
   tipo_bloque: 'una_vez_dia' | 'franja_repeticion' | 'horas_especificas';
   hora_inicio: string;
