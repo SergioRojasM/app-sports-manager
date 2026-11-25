@@ -64,7 +64,7 @@ Following structure reflects the current implementation and the target scalable 
 │   │               │   ├── gestion-eventos/nuevo/page.tsx               # Admin: create-event wizard (EventoWizardPage without eventoId) in Suspense — it reads ?paso= (US-0119); `?duplicar={eventoId}` (UUID only) pre-fills it with an unsaved copy of that event (US-0122); `?desdeEntrenamiento={entrenamientoId}` (UUID only, ignored when `duplicar` is set) pre-fills it from a future training (US-0132)
 │   │               │   ├── gestion-eventos/[evento_id]/editar/page.tsx  # Admin: edit-event wizard (EventoWizardPage keyed by eventoId); also where a new event lands after its first "Guardar borrador" (US-0119)
 │   │               │   ├── gestion-eventos/[evento_id]/compras/page.tsx # Admin: purchases of one event — validate / reject payments (EventoComprasPage, US-0121)
-│   │               │   ├── gestion-organizacion/page.tsx   # TenantInfoCards + payment methods / suspension rules grid + full-width TenantReglasNotificacionCard (US-0135)
+│   │               │   ├── gestion-organizacion/page.tsx   # Renders GestionOrganizacionPage (grit-arena-v3 `aYwNn`)
 │   │               │   ├── gestion-servicios/page.tsx   # Admin: services catalog CRUD (US-0062)
 │   │               │   └── gestion-suscripciones/page.tsx
 │   │               │   └── analitica/page.tsx           # Admin-only BI dashboard: Resumen, Ingresos, Operación y Equipo (US-0115)
@@ -126,29 +126,36 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │   │   ├── InicioPanelEmpty.tsx     # In-panel empty state (icon ring + title + text); promote to the kit if reused
 │   │   │   │   └── index.ts
 │   │   │   ├── tenant/                   # Feature slice (portal/tenant)
-│   │   │   │   ├── TenantIdentityCard.tsx
-│   │   │   │   ├── TenantContactCard.tsx
+│   │   │   │   ├── GestionOrganizacionPage.tsx   # grit-arena-v3 `aYwNn` "Tu organización.": header + "Editar organización", identity/contact row (lg 380 | 1fr), payment methods + suspension rules row, notifications; owns useTenantView, useTenantMiembrosCount, the logo/banner uploads and the edit drawer
+│   │   │   │   ├── TenantInfoCards.tsx           # Identity + contact row with loading / error ("Reintentar") / empty states (GritEmptyState)
+│   │   │   │   ├── TenantIdentityCard.tsx        # `MhFv0`: banner cover (GritMediaCard zone), 56px logo or initial, name, Pública/Privada GritTag, description, meta tiles "Fundada" (Mar 2026, Bogotá) and "Miembros" (count or "—"); formatFundada exported
+│   │   │   │   ├── TenantContactCard.tsx         # `ONRJQ`: correo / teléfono / web | Instagram / Facebook / X; copy (clipboard + aria-live "Correo copiado") or open (new tab, noopener) actions; empty item → "Conectar" opens the edit drawer; displayUrl exported
+│   │   │   │   ├── TenantSettingsSection.tsx     # Settings section frame (GritCard card, padding 22, icon GritSectionHeading + action) + SectionMessage (inline loading / error with "Reintentar" / empty)
+│   │   │   │   ├── EditTenantDrawer.tsx          # GritDrawer lg around EditTenantForm (Cancelar / Guardar cambios)
+│   │   │   │   ├── EditTenantForm.tsx            # GritField fields, logo/banner previews, publico and requiere_perfil_completo as GritSwitch
 │   │   │   │   ├── ClubMemberCard.tsx            # grit-arena-v3 `K1KpU`: "Tus clubes" photo card (GritMediaCard xl/accent) — MIEMBRO (+ PRIVADA) overlay pills, round "Ingresar a {nombre}" link, 52px org mark, name + one-line description, VerPlanesButton overlay + "Ingresar" → getDefaultTenantPath
 │   │   │   │   ├── ClubExploreCard.tsx           # grit-arena-v3 `UrDey`: "Explora clubes" photo card — 36px org mark, name, one-line description, VerPlanesButton overlay + SolicitarAccesoButton size="sm"
 │   │   │   │   ├── club-card.utils.ts            # firstDescriptionLine(description) — one-line meta of the club cards
-│   │   │   │   ├── TenantPaymentMethodsCard.tsx  # Admin card: CRUD list of tenant payment methods; "QR" indicator on methods with qr_url (US-0128)
-│   │   │   │   ├── MetodoPagoFormModal.tsx        # Right-side form modal for create/edit payment method; optional "Imagen QR" field (JPEG/PNG/WebP ≤ 2 MB, preview, Cambiar/Quitar) — uploaded on save through onSubmit(data, qr) (US-0128); `variant="evento"` hides "Activo" and retitles the form for methods that only exist in an event snapshot (US-0130)
+│   │   │   │   ├── TenantPaymentMethodsCard.tsx  # `qS2AM` settings section "Métodos de pago": list rows (type icon tile, name, valor, GritTags type / Activo·Pausado / QR), ghost open / edit / delete actions, GritConfirmDialog delete, section states (US-0128)
+│   │   │   │   ├── MetodoPagoFormModal.tsx        # GritDrawer form for create/edit payment method (GritField / GritSwitch); optional "Imagen QR" field (JPEG/PNG/WebP ≤ 2 MB, preview, Cambiar/Quitar) — uploaded on save through onSubmit(data, qr) (US-0128); `variant="evento"` hides "Activo" and retitles the form for methods that only exist in an event snapshot (US-0130)
 │   │   │   │   ├── MetodoPagoQrImage.tsx          # Payer-facing QR image of a payment method: white background, opens in a new tab, hidden on load error; used by SuscripcionModal and EventoMetodoPagoCard (US-0128)
-│   │   │   │   ├── TenantReglasSuspensionCard.tsx # Admin card: CRUD list of suspension rules (max 3)
-│   │   │   │   ├── ReglaSuspensionFormModal.tsx   # Right-side form modal for create/edit suspension rule
-│   │   │   │   ├── TenantReglasNotificacionCard.tsx # US-0135 admin card "Notificaciones automáticas" (same look as the suspension card): rules grouped "Antes / Después del vencimiento" ordered by dias, recipients + channels + Activa/Inactiva per row, "Agregar" disabled when both types have 3 rules, delete confirmation, loading / error ("Reintentar") / empty states, sending-hour footnote; returns focus to the trigger
-│   │   │   │   ├── ReglaNotificacionFormModal.tsx   # US-0135 right-side form, mounted per opening (keyed): Tipo (radio, read-only on edit, full types disabled), Días 1–60, Destinatarios (select), Canales (≥1), Activa; inline role=alert errors
+│   │   │   │   ├── TenantReglasSuspensionCard.tsx # `GFsAW` settings section: rule rows (Activa/Inactiva GritTag), max 3 ("Agregar" disabled + hint), empty state with the suggested rule "Usar" (REGLA_SUSPENSION_SUGERIDA prefill), GritConfirmDialog delete
+│   │   │   │   ├── ReglaSuspensionFormModal.tsx   # GritDrawer form for create/edit suspension rule; `initialValues` prefill in create mode
+│   │   │   │   ├── TenantReglasNotificacionCard.tsx # US-0135 "Notificaciones automáticas" — grit-arena-v3 `vR0ZM`: <ol> timeline of rule tiles (ordenarReglasTimeline: pre by dias desc, then pos asc; big "N días" + caption, recipients, "En la plataforma" / "Email" tags, inline GritSwitch with rollback, ghost edit / delete), chevrons between tiles at xl, "Agregar" disabled when both types have 3 rules, GritConfirmDialog delete, section states, sending-hour footnote
+│   │   │   │   ├── ReglaNotificacionFormModal.tsx   # US-0135 GritDrawer form, mounted per opening (keyed): Tipo (radio, read-only on edit, full types disabled), Días 1–60, Destinatarios (select), Canales (≥1), Activa; inline role=alert errors
 │   │   │   │   └── SolicitarAccesoButton.tsx  # 5-state access request button: idle/pending/blocked/incomplete_profile/member — v3 GritButton markup, `size` / `fullWidth` props (grit-arena-v3 athlete pages)
-│   │   │   └── scenarios/                # Feature slice (portal/scenarios)
-│   │   │       ├── ScenariosPage.tsx
-│   │   │       ├── ScenarioCard.tsx
-│   │   │       └── ScenarioFormModal.tsx
-│   │   │   └── disciplines/              # Feature slice (portal/disciplines)
-│   │   │       ├── DisciplinesPage.tsx
-│   │   │       ├── DisciplinesTable.tsx
-│   │   │       ├── DisciplineFormModal.tsx
-│   │   │       ├── NivelesDisciplinaPanel.tsx   # Collapsible panel per discipline row for level CRUD
-│   │   │       └── NivelDisciplinaFormModal.tsx  # Right-side modal for create/edit level
+│   │   │   └── scenarios/                # Feature slice (portal/scenarios) — grit-arena-v3 `qG0T5`
+│   │   │       ├── ScenariosPage.tsx           # "Tus escenarios." header (search + "Crear escenario"), success GritAlert, loading / error / empty / no-match states, card grid (sm 2 / xl 3) + GritAddTile "Agregar escenario", GritConfirmDialog delete
+│   │   │       ├── ScenariosHeaderFilters.tsx  # Type filter with counts (GritSegmented ≤5 types, GritPillSelect above) + "N cupos totales" / "N horarios activos"
+│   │   │       ├── ScenarioCard.tsx            # `mEIoa`: 150px GritMediaCard photo zone with tipo + Activo/Inactivo overlay pills, name, location, 2-line description, capacity / "N horarios", ghost map (only with location) / edit / delete
+│   │   │       └── ScenarioFormModal.tsx       # GritDrawer lg: GritField fields, inset "Horarios" editor (GritSwitch disponible, ghost remove), "Escenario activo" GritSwitch; also opened inline by the events wizard
+│   │   │   └── disciplines/              # Feature slice (portal/disciplines) — grit-arena-v3 `fXuVP` workspace
+│   │   │       ├── DisciplinesPage.tsx          # "Tus disciplinas." header (search + "Nueva disciplina"), states, grid lg 380 | 1fr (list + detail), GritConfirmDialog delete; on narrow screens a selection scrolls to and focuses the detail heading
+│   │   │       ├── DisciplinesList.tsx          # `INksa` nav: "N DISCIPLINAS" + GritSegmented Activas / Todas (counts), items (discipline icon tile, name, "N niveles · N atletas", aria-current), tip line
+│   │   │       ├── DisciplineDetail.tsx         # `Ln3Be`: icon, name (h2, focusable), Activa/Inactiva GritTag, description, Editar + delete, stats "Atletas con nivel" / "Niveles activos", NivelesLadder (not keyed: the hook caches per discipline)
+│   │   │       ├── NivelesLadder.tsx            # `ngPAB`: "Niveles de progresión" + "Agregar nivel", distribution bar (role=img text alternative), ascending tiles "01…" (name, "N atletas", Inactivo tag, edit / delete, "Mover antes / después" keeping focus), GritAddTile "Nivel 0N" (next orden), level drawer + GritConfirmDialog
+│   │   │       ├── DisciplineFormModal.tsx      # GritDrawer form (Nombre, Descripción, "Disciplina activa" GritSwitch)
+│   │   │       └── NivelDisciplinaFormModal.tsx # GritDrawer form mounted per opening (keyed); `initialOrden` prefill
 │   │   │   └── entrenamientos/           # Feature slice (portal/entrenamientos)
 │   │   │       ├── EntrenamientosPage.tsx  # Trainings management shell: list + calendar, action/detail/form modals, ReservasPanel. No publish action (US-0123); owns `reservasPanelAutoReservar` + `openReservaDirecta`, wiring the card "Reservar" button to ReservasPanel's `autoReservar` (US-0127); admin-only "Publicar en eventos" → gestion-eventos/nuevo?desdeEntrenamiento={id}, enabled only for future trainings via esEntrenamientoFuturo (US-0132)
 │   │   │       ├── EntrenamientosCalendar.tsx   # Dot colors driven by discipline
@@ -175,20 +182,19 @@ Following structure reflects the current implementation and the target scalable 
 │   │   │       ├── PlanesPublicosModal.tsx # Public catalog dialog: search input (plans AND services), loading/empty/no-results/error states; reuses useSuscripcion + SuscripcionModal for the acquisition; optional initialSearch prop pre-fills/resets the search on every open (not just first mount) for callers that want a pre-filtered catalog (US-0101); optional onSubscribed callback forwarded to useSuscripcion, lets a caller chain into its own next step after purchase instead of the generic close (US-0106); US-0110 re-types it to (purchase: PendingPlanPurchaseDraft) => void — it now hands over the FILLED-IN, UNSAVED purchase rather than a created suscripcion id, so the caller persists it as part of its own flow (callers omitting it keep the immediate-purchase behavior)
 │   │   │       ├── PlanPublicoCard.tsx     # One public plan: modalidad, disciplines, benefits, "Adquirir"; subtypes live in a native <details> disclosure summarizing count + lowest price (precio COP + vigencia_dias + granted services, "ilimitado" when unidades is null), auto-expanded while a search term is active
 │   │   │       └── index.ts
-│   │   │   └── planes/                   # Feature slice (portal/planes)
-│   │   │       ├── PlanesPage.tsx
-│   │   │       ├── PlanesTable.tsx         # Props: onEdit, onDuplicate?, onDelete?, showVisibilidad?, renderRowAction? — showVisibilidad renders the admin-only Visibilidad column (Público/Privado); readOnly can't gate it because the athlete view also passes readOnly={false} (US-0093) Status badge has three variants driven by `row.estado` — Activo / amber "Activo no visible" (`visibility_off` icon) / Inactivo (US-0126)
-│   │   │       ├── PlanesHeaderFilters.tsx
-│   │   │       ├── PlanFormModal.tsx        # mode: 'create' | 'edit' | 'duplicate' — "Estado" select (Activo / Activo no visible / Inactivo) via `onChangeEstado`; "Plan público" is disabled while the plan is not visible to athletes (US-0126)
-│   │   │       ├── PlanTipoServiciosSection.tsx  # Services assignment rows inside plan tipo sub-form (US-0062)
-│   │   │       ├── PlanesViewPage.tsx
-│   │   │       ├── PlanesRolePage.tsx
+│   │   │   └── planes/                   # Feature slice (portal/planes) — grit-arena-v3 `J7Lw7d` plan cards
+│   │   │       ├── PlanesPage.tsx           # Admin: "Planes de membresía." header (search + "Nuevo plan"), success / error GritAlerts, states, card grid (sm 2 / xl 4), GritConfirmDialog delete
+│   │   │       ├── PlanCard.tsx             # `vn0ug`, mode admin | readonly: modality GritTag, visibility chip (Público / Privado / Oculto, admin only), Activo / Inactivo, name, discipline chips (`disciplinaNames`, "Sin disciplinas"), price from the cheapest active subtype ("Sin precio" + hint), subtype rows, INCLUYE (services check + benefits gift), admin ghost edit / duplicate / delete or a footer `action`
+│   │   │       ├── PlanFormModal.tsx        # GritDrawer lg, mode: 'create' | 'edit' | 'duplicate' — subtype editor (GritField per field, GritSwitch activo), benefits, "Estado" select (Activo / Activo no visible / Inactivo) via `onChangeEstado`; "Plan público" GritSwitch disabled while the plan is not visible to athletes (US-0126); disciplines checklist
+│   │   │       ├── PlanTipoServiciosSection.tsx  # Services assignment rows inside a plan tipo (service select, units — blank = unlimited, ghost remove) (US-0062)
+│   │   │       ├── PlanesViewPage.tsx       # usuario / entrenador: read-only PlanCard grid; "Adquirir" (usuario, unless defined subtypes are all inactive) → SuscripcionModal
+│   │   │       ├── PlanesRolePage.tsx       # Role switch (admin → PlanesPage, others → PlanesViewPage); GritEmptyState while the role loads
 │   │   │       ├── SuscripcionModal.tsx  # Two-step subtype-then-payment flow; Step 1 (subtype picker) is skipped and the modal opens directly on Step 2 when the plan has exactly one active subtype (auto-selected by useSuscripcion.openModal), tracked via hasSubtypeChoice = activeTipos.length > 1 (US-0105)
 │   │   │       └── index.ts
 │   │   │   └── servicios/                # Feature slice (portal/servicios — US-0062)
-│   │   │       ├── ServiciosPage.tsx      # Admin CRUD page for tenant services catalog
-│   │   │       ├── ServiciosTable.tsx     # Table: nombre, descripcion, activo badge, edit/delete actions
-│   │   │       ├── ServicioFormModal.tsx  # Right-side slide modal for create/edit service
+│   │   │       ├── ServiciosPage.tsx      # grit-arena-v3 `v8mqZG` "Tus servicios.": search + "Nuevo servicio", GritSegmented Todos / Activos / Inactivos (counts) + hint, success / switch-error GritAlerts, states, GritConfirmDialog delete
+│   │   │       ├── ServiciosTable.tsx     # `cBqMX` gritTable*: SERVICIO (tile, name, description) · PLANES (count bubble + plan/planes, "—" when unknown) · ACTIVO (GritSwitch "Activar {nombre}") · ghost edit / delete; scrolls inside its card below md
+│   │   │       ├── ServicioFormModal.tsx  # GritDrawer form mounted per opening (keyed): Nombre, Descripción, "Servicio activo" GritSwitch
 │   │   │       └── index.ts
 │   │   │   └── formularios/               # Feature slice (portal/formularios — US-0084/US-0085)
 │   │   │       ├── FormulariosPage.tsx             # List page: create (redirects into editor) + delete + lazy preview
@@ -392,16 +398,16 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── MultilineText.tsx        # Renders a string with whitespace-pre-wrap (preserves line breaks), optional maxLength truncation, `as` tag prop (p/span/div) — US-0099
 │   │       ├── BodyPortal.tsx           # Renders children on document.body (escapes backdrop-blur containing blocks); moved from EventoModalShell, which re-exports it (US-0138)
 │   │       ├── grit/                    # grit-arena-v3 presentational kit (US-0116, v3 US-0141) — no data fetching; values from grit-arena-v3.pen (board ljQp3); see DESIGN.md
-│   │       │   ├── GritCard.tsx         # variant card|glass|highlight|inset, padding none|sm|md|lg|xl (0/16/20/24/28), radius 22 (inset 16), `as`
-│   │       │   ├── GritButton.tsx       # pill; primary|secondary|outline-accent|ghost; sm|md|lg = 31/37/42px (primary lg glows = page CTA); <Link>/<a external> with href; loading/disabled; `danger` variant (danger-tinted pill for destructive confirms, grit-arena-v3 eventos)
-│   │       │   ├── GritIconButton.tsx   # round icon-only button/link, sm|md|lg = 30/38/44, default|ghost, required `label` (aria-label) — US-0141
+│   │       │   ├── GritCard.tsx         # variant card|glass|highlight|inset, padding none|sm|md|lg|xl (0/16/20/24/28), radius 22 (inset 16), `as`; passes HTML attributes (aria-label / aria-labelledby for landmark surfaces)
+│   │       │   ├── GritButton.tsx       # pill; primary|secondary|outline-accent|ghost; sm|md|lg = 31/37/42px (primary lg glows = page CTA); <Link>/<a external> with href; loading/disabled; `danger` variant (danger-tinted pill for destructive confirms, grit-arena-v3 eventos); `ref` (React 19 ref-as-prop) on the button form
+│   │       │   ├── GritIconButton.tsx   # round icon-only button/link, sm|md|lg = 30/38/44, default|ghost, required `label` (aria-label) — US-0141; `external` with href → <a target=_blank rel=noopener noreferrer>
 │   │       │   ├── GritTag.tsx          # Status/role pill (11px/600, not uppercase): accent|neutral|warning|danger|violet, `dot`, icon, colorClass
 │   │       │   ├── GritBadge.tsx        # Neutral info chip (Chip / Default look)
 │   │       │   ├── GritChip.tsx         # Toggle filter chip, `active` → aria-pressed, optional icon — US-0141
 │   │       │   ├── GritSegmented.tsx    # 'use client'; soft|solid segmented control / tabs with count, role=group + aria-pressed, scrolls on narrow screens — US-0141
 │   │       │   ├── GritSearchField.tsx  # Pill type=search input, md|lg (37/44), requires aria-label or aria-labelledby — US-0141
 │   │       │   ├── GritKpiCard.tsx      # Horizontal KPI card (icon chip, Exo 2 300 36px value, label, detail, highlight) — US-0141; `layout="stacked"` tall card (icon chip + shortcut `href`/`hrefLabel`, 56px value, label, `hint` + `hintTone`) from Inicio `lhbhK`; `iconTone` accent|danger|muted (inline)
-│   │       │   ├── GritAvatar.tsx       # round avatar, 32|34|38 (people) and 20|26|36|42|52 (club marks), neutral|soft|solid|org, initials from name or decorative image with onError fallback (GritAvatarImage, 'use client') — US-0141, org tone in grit-arena-v3 athlete pages
+│   │       │   ├── GritAvatar.tsx       # round avatar, 32|34|38 (people) and 20|26|36|42|52|56 (club marks), `shape` circle|rounded (18px square logo, `aYwNn`), neutral|soft|solid|org, initials from name or decorative image with onError fallback (GritAvatarImage, 'use client') — US-0141, org tone in grit-arena-v3 athlete pages
 │   │       │   ├── GritMediaCard.tsx    # 'use client'; photo surface with v3 shades, lg|xl radius, neutral|accent stroke, top/bottom slots, placeholder on missing/failed image, onImageError; radius/stroke `none` = flush photo zone inside a larger card (check-in cards)
 │   │       │   ├── GritOverlayPill.tsx  # over-photo pill glass|brand, md|lg, span / Link / button; gritOverlayPillClass for external triggers; `danger` tone (CANCELADO)
 │   │       │   ├── GritDateTile.tsx     # day over 3-letter month in Bogotá, sm|md|lg, overlay|accent|muted, "Por definir" for null, role=img long date; getBogotaDateTileParts
@@ -410,16 +416,22 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   ├── GritPillSelect.tsx   # 'use client'; pill <select> with leading cyan icon, sm 29px / md 35px, sr-only label (filters of the events pages)
 │   │       │   ├── GritProgressRing.tsx # SVG ring "value/max" + caption (`LV7I0` `G1a17B`), role=progressbar; null → "—"
 │   │       │   ├── GritAlert.tsx        # Inline banner success|warning|danger|info (role status/alert), icon, action, onDismiss ("Cerrar mensaje")
+│   │       │   ├── GritSwitch.tsx       # 36×20 on/off toggle (`sM1rG` / `HY4nd`): <button role=switch aria-checked>, required `label` (aria-label, or visible with `showLabel`), disabled → aria-disabled
+│   │       │   ├── GritDrawer.tsx       # 'use client'; right-side form panel (glass, md 576 / lg 768, full width below sm): role=dialog + aria-labelledby, close button, scrollable body, sticky footer, `busy` blocks closing
+│   │       │   ├── GritConfirmDialog.tsx # 'use client'; centered role=alertdialog: title, message, Cancel (initial focus) + danger/primary confirm, `pending` disables both, inline `error`
+│   │       │   ├── useGritDialogFocus.ts # 'use client'; shared focus management of GritDrawer / GritConfirmDialog: focus in, Tab trap, Escape (unless busy), focus back to the opener
+│   │       │   ├── GritAddTile.tsx      # dashed "add" slot button (`qG0T5` `SmgQv`, `fXuVP` `siF01`): md 56px ring + Exo 2 19 title / sm 40px ring + 12/600 label, optional subtitle, h-full
+│   │       │   ├── GritField.tsx        # form field frame (label 12/600, hint 11px muted, error 12px danger with role=alert) + gritDescribedBy(id, hint, error)
 │   │       │   ├── GritProgress.tsx     # 6px progress bar + JetBrains Mono %, role=progressbar, clamps 0–100 — US-0141
 │   │       │   ├── GritPagination.tsx   # 'use client'; table pager with summary, ellipsis over 7 pages, nav[aria-label=Paginación]; exports getPaginationItems — US-0141
 │   │       │   ├── GritIconTile.tsx     # 34|40|48 px icon container (12px radius) or circle; card|accent|warning|violet|danger tone
 │   │       │   ├── GritInfoRow.tsx      # Icon tile + label/value pair
-│   │       │   ├── GritSectionHeading.tsx # Exo 2 500 h2 (md 17px / lg 19px) + muted subtitle + action slot; optional `id` (dialog aria-labelledby)
+│   │       │   ├── GritSectionHeading.tsx # Exo 2 500 h2 (md 17px / lg 19px) + muted subtitle + action slot; optional `id` (dialog aria-labelledby); optional `icon` (36px round chip, settings sections of `aYwNn`)
 │   │       │   ├── GritPageHeader.tsx   # The page's single h1: Exo 2 300 40px (30 mobile), cyan titleAccent (`italic` = accent only), eyebrow, subtitle, actions; `titleVariant="display"` (Exo 2 600 italic record name, `xjlmU`) + `titleAdornment` beside the h1
 │   │       │   ├── GritPageContainer.tsx # 1440 max width, 16/24/32 side padding, 12 top / 32 bottom, 20 gap — applied once by portal/layout.tsx
 │   │       │   ├── GritDivider.tsx, GritIcon.tsx (Material Symbols @ weight 300), GritEmptyState.tsx
 │   │       │   ├── icon-map.ts          # Design Lucide name → Material Symbols ligature (single swap point; includes every v3 icon)
-│   │       │   ├── styles.ts            # cx(), gritInputClass/gritSelectClass (derived form fields), gritPillSelectClass, gritFocusRing, gritTable{Head,HeadCell,Row,Cell}Class; compact table cells (gritTableHeadCellCompactClass / gritTableCellCompactClass)
+│   │       │   ├── styles.ts            # cx(), gritInputClass/gritSelectClass (derived form fields) + gritInputInvalidClass / gritSelectInvalidClass (danger stroke, full strings) + gritFileInputClass, gritPillSelectClass, gritFocusRing, gritTable{Head,HeadCell,Row,Cell}Class; compact table cells (gritTableHeadCellCompactClass / gritTableCellCompactClass)
 │   │       │   └── index.ts             # Re-exported from components/ui/index.ts
 │   │       └── index.ts
 │   │
@@ -438,22 +450,23 @@ Following structure reflects the current implementation and the target scalable 
 │   │   └── portal/
 │   │       ├── usePortalNavigation.ts    # Portal navigation state (US-0138): globalItems, tenantNav (per-tenant role via useTenantAccess, tenant name via useTenantNameState, resolved tree), tenantLoading, activeHref (longest prefix), activeGroupId — consumed through PortalNavigationProvider
 │   │       ├── tenant/
-│   │       │   ├── useTenantView.ts              # directory mode loads memberships first, then the visibility-filtered tenant list (US-0133)
+│   │       │   ├── useTenantView.ts              # directory mode loads memberships first, then the visibility-filtered tenant list (US-0133); tenant mode also returns `isPublic`
+│   │       │   ├── useTenantMiembrosCount.ts     # tenantService.countMiembros → { count (null on error), loading } for the "Miembros" tile
 │   │       │   ├── useTenantBrandingImages.ts    # Logo/banner sources with a one-time signed-URL fallback; shared by TenantIdentityCard and the marketplace club cards (US-0133)
 │   │       │   ├── useTenantDirectoryFilter.ts   # Marketplace search (name + description, accent-insensitive) and split into members (canAccess && role) / explore, sorted by name; splitTenantDirectory exported
-│   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago; submitForm(data, qr) uploads the QR image (create: insert → upload → update qr_url; a failed upload keeps the form open on the created row) (US-0128)
-│   │       │   ├── useReglasSuspension.ts  # CRUD state + 3-rule limit guard for tenant_reglas_suspension
-│   │       │   ├── useReglasNotificacion.ts  # US-0135: rules of tenant_reglas_notificacion, conteoPorTipo, modal state, handleCreate / handleUpdate / handleDelete → boolean (a failed save keeps the modal open with submitError), reload
+│   │       │   ├── useMetodosPago.ts      # Full CRUD state for tenant_metodos_pago; `reload`; submitForm(data, qr) uploads the QR image (create: insert → upload → update qr_url; a failed upload keeps the form open on the created row) (US-0128)
+│   │       │   ├── useReglasSuspension.ts  # CRUD state + 3-rule limit guard for tenant_reglas_suspension; `reload`
+│   │       │   ├── useReglasNotificacion.ts  # US-0135: rules of tenant_reglas_notificacion, conteoPorTipo, modal state, handleCreate / handleUpdate / handleDelete → boolean (a failed save keeps the modal open with submitError), reload; toggleActivo(rule, activo) optimistic with rollback + pendingIds + toggleError
 │   │       │   └── useOrgLogoUpload.ts    # File select, MIME/size validation, preview URL, upload trigger for org logo
 │   │       │   └── useOrgBannerUpload.ts   # File select, MIME/size validation, preview URL, upload trigger for org banner
 │   │       │   └── useTenantLogo.ts        # Fetches { nombre, logo_url } for a tenant, mirrors useTenantName's lightweight pattern; feeds FormularioHeaderEditor's logo/wordmark (US-0108)
 │   │       └── scenarios/
-│   │           └── useScenarios.ts
+│   │           └── useScenarios.ts       # list + form state; tipoFilter / tipoOptions / summary, accent-insensitive search, requestDelete → confirmDelete (ScenarioServiceError message), dismissSuccess
 │   │       └── disciplines/
-│   │           ├── useDisciplines.ts
+│   │           ├── useDisciplines.ts       # disciplines + Activas/Todas + accent-insensitive search (name order), selection ⇄ ?disciplina= (fallback to the first listed, URL replaced), nivelesActivos / atletas counts (allSettled, null on error), reloadConteos, form + requestDelete → confirmDelete
 │   │           └── useDisciplineForm.ts
 │   │       └── nivel-disciplina/
-│   │           └── useNivelesDisciplina.ts    # List + CRUD state for discipline levels
+│   │           └── useNivelesDisciplina.ts    # Levels of the selected discipline, cached per discipline in state (no refetch when returning); CRUD + onChanged; moveNivel swaps orden through a temporary max+1 position, reloading on any failure
 │   │       └── entrenamientos/
 │   │           ├── useEntrenamientos.ts   # Also exposes detail-view state (viewTarget, isViewModalOpen, viewLoading, requestViewInstance, closeViewModal), buildPlantillaContenidoFromInstance for "Guardar como plantilla" from the detail view, formulariosPlantillas (active, tenant-scoped) fetched alongside other selects, and formularioForm state/setters (US-0086); fetches publishedEntrenamientoIds alongside the rest of loadAll's Promise.all (US-0089)
 │   │           ├── useEntrenamientoForm.ts  # Includes restriction row state (add/remove/duplicate/update), timing fields, and a formularioForm slice (tipo ninguno/externo/interno, formulario_id, obligatorio) kept separate from TrainingWizardValues (US-0086)
@@ -465,14 +478,14 @@ Following structure reflects the current implementation and the target scalable 
 │               │   ├── useFormularioRespuestaForm.ts  # Loads attached plantilla's secciones (filters out the 4 header rows — US-0108), manages fill-out values/errors/per-field image upload, validate()/buildRespuesta() (US-0087); also fetches the target athlete's profile when perfil_campos_requeridos is non-empty, exposing perfilResumen/perfilFaltantes/perfilLoading/refetchPerfil — validate() fails while any requested field is missing (US-0095); validate() treats a required checkbox's "false" as missing, not just empty/undefined (US-0108)
 │               │   └── useAsistencias.ts  # Attendance map keyed by reserva_id; isEnabled guard skips fetch for atleta role
 │   │       └── planes/
-│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal; includes tiposServiceRows + updateTipoServiceRows (US-0062)
+│   │           ├── usePlanes.ts            # Exposes openCreateModal, openEditModal, openDuplicateModal; includes tiposServiceRows + updateTipoServiceRows (US-0062); requestDelete → confirmDelete (GritConfirmDialog, no window.confirm), dismissSuccess
 │   │           ├── usePlanForm.ts          # Exposes setFormFromPlan, setFormForDuplicate; manages tiposServiceRows parallel array (US-0062); `setEstado(PlanEstado)` maps the UI status to `activo` + `visible_atletas` (hidden clears `es_publico`; inactivo leaves `visible_atletas` untouched) (US-0126)
 │   │           ├── usePlanTipoServicios.ts # Manages service rows state for plan tipo service assignment (US-0062)
-│   │           ├── usePlanesView.ts        # Exposes getActiveTipos(plan) — canonical active-plan_tipos filter/sort, reused by useSuscripcion and SuscripcionModal; lists only `activo && visible_atletas` plans (US-0126)
+│   │           ├── usePlanesView.ts        # Exposes getActiveTipos(plan) — canonical active-plan_tipos filter/sort, reused by useSuscripcion and SuscripcionModal; lists only `activo && visible_atletas` plans (US-0126); `refresh` for the error state
 │   │           └── useSuscripcion.ts       # openModal auto-selects selectedTipoId when the plan has exactly one active subtype, via getActiveTipos (US-0105); optional onSubscribed callback fires after successful creation, skipping the generic success message for callers chaining their own next step (US-0106). US-0110 INVERTS that: when onSubscribed is provided, submit() creates NOTHING (no suscripcion, no pago, no proof upload) and instead hands the validated form data over as a PendingPlanPurchaseDraft for the caller to persist atomically later — fixing the orphaned-pending-subscription bug where abandoning a booking mid-flow left a request that blocked every retry. With onSubscribed omitted (standalone catalog purchase) the immediate-creation path is unchanged — US-0134: `submit` generates the payment id in the browser (ref kept while the modal is open), uploads the proof FIRST (`upsert: true`, non-blocking on failure) and then calls `comprarSuscripcion` once; shows the `SuscripcionServiceError` message
 │   │       └── servicios/            # Feature hooks for services catalog (US-0062)
-│   │           ├── useServicios.ts       # List + CRUD + modal coordination for servicios
-│   │           └── useServicioForm.ts    # Controlled form state for ServicioFormModal
+│   │           ├── useServicios.ts       # List + status filter / search / counts, planCounts from planesService.getPlanes (contarPlanesPorServicio; null on error), toggleActivo (optimistic + rollback, pendingIds), CRUD + requestDelete → confirmDelete
+│   │           └── useServicioForm.ts    # Controlled form state for ServicioFormModal, initialised from `initialValues` (form is keyed per opening)
 │   │       └── formularios/          # Feature hooks for form templates (US-0084/US-0085)
 │   │           ├── useFormularios.ts            # List + create + delete for plantillas (list page)
 │   │           ├── useFormularioForm.ts         # Controlled form state for FormularioFormModal (create-only: nombre + descripcion)
@@ -556,8 +569,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       ├── portal/                   # Portal bounded-context services
 │   │       │   ├── index.ts
 │   │       │   ├── tenant.service.ts           # listVisibleTenantsForPortal(supabase, memberTenantIds): publico = true OR member; `publico` in the edit form mapping (US-0133); canUserAccessTenant also reads tenants.requiere_perfil_completo and, when on, the caller's profile → profileIncomplete / profileMissingFields without changing allowed/role; fails open on read errors (US-0136)
-│   │       │   └── scenarios.service.ts
-│   │       │   └── disciplines.service.ts
+│   │       │   └── scenarios.service.ts   # deleteScenario maps FK 23503 to ScenarioServiceError('in_use')
+│   │       │   └── disciplines.service.ts   # any FK violation on delete → DisciplineServiceError('fk_dependency')
 │   │       │   └── entrenamientos.service.ts  # entrenamientos/entrenamientos_grupo select/insert/update all carry formulario_id, formulario_obligatorio, and a formulario_plantilla:formularios_plantillas(nombre) embed for display (US-0086); getEntrenamientoParaEvento(tenantId, id) — one occurrence with disciplina / escenario / entrenador embeds, normalized, for the event pre-fill (US-0132)
 │   │       │   └── reservas.service.ts   # CRUD + getCategoriasConDisponibilidad, getAtletaNivelId, per-category capacity check, getReservasReport (CSV export), getReservasManagement (cross-training query with server-side filters on reservas_reporte_view — US-0073), getMisReservas (athlete-scoped query on reservas_reporte_view filtered by atleta_id — US-0074; tenant_id filter now optional/cross-tenant, US-0097); all three report readers select('*') so they inherit US-0112's plan_nombre/plan_fecha_inicio/plan_fecha_fin columns (the plan a booking's units were deducted from plus that subscription's validity window, resolved in the view from the reserva_servicios ledger with a reservas.suscripcion_id fallback) with no code change; findServiceSubscriptionsToCharge now records suscripcionId for UNLIMITED entitlements too so the ledger attributes those bookings to a plan (the RPC still skips the deduction on unidades_restantes is null), validateBookingRestrictions (service-set based, returns matchedRow; also populates BookingRejection.servicioNombre on SERVICIO_REQUERIDO — US-0101), validateCancellationRestriction, findServiceSubscriptionsToCharge; create() and cancel() include isEntrenamientoPast guard and delegate to SECURITY DEFINER RPCs book_and_deduct_service_units / cancel_and_restore_service_units for atomic service-unit deduction/restoration; reserva_servicios ledger tracks which subscription units were deducted per booking; create() also forwards p_formulario_plantilla_id/p_formulario_respuesta and maps FORMULARIO_CAMPOS_FALTANTES (US-0087); also maps PERFIL_INCOMPLETO (US-0095); create()'s UNIDADES_AGOTADAS branch also resolves and populates BookingRejection.servicioNombre via a single-row servicios lookup (US-0101); create() always rejects a SERVICIO_REQUERIDO/UNIDADES_AGOTADAS failure and calls the RPC without deferred-purchase parameters (skip-plan path removed in US-0123/US-0124); getMyReserva/getCapacidad/getCategoriasConDisponibilidad/create()'s per-category count now exclude both 'cancelada' and 'rechazada' (US-0106)
 │   │       │   └── asistencias.service.ts  # getByEntrenamiento (returns reserva_id-keyed map), upsert (onConflict: reserva_id), deleteById
@@ -569,8 +582,8 @@ Following structure reflects the current implementation and the target scalable 
 │   │       │   └── equipo.service.ts
 │   │       │   └── solicitudes.service.ts      # CRUD for miembros_tenant_solicitudes (access requests); createSolicitud rejects private organizations with code `private_org` (US-0133; also enforced by the solicitudes_insert_own RLS policy); Guard 3 uses the shared perfil-completo rule (US-0136)
 │   │       │   └── invitaciones.service.ts     # Admin: v_invitaciones_tenant_admin select, cancelar RPC, fetch to /api routes; recipient: get_mis_invitaciones_pendientes, get_invitacion_para_aceptar, activar_invitacion_tenant, activar_alta_administrada (US-0114)
-│   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table
-│   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina
+│   │       │   └── nivel-disciplina.service.ts         # CRUD for nivel_disciplina table; listNivelesByTenant (all levels of the tenant, for the list meta)
+│   │       │   └── usuario-nivel-disciplina.service.ts # Upsert for usuario_nivel_disciplina; countAtletasPorNivel(tenantId) → { porDisciplina, porNivel }
 │   │       │   └── entrenamiento-categorias.service.ts # Create/sync/delete for entrenamiento_categorias
 │   │       │   └── gestion-suscripciones.service.ts  # Joins plan_tipos for plan_tipo_nombre / plan_tipo_vigencia_dias; crearSuscripcionAdmin calls populate_suscripcion_servicios RPC when plan_tipo_id is set (US-0063); throws GestionSuscripcionesServiceError 'populate_servicios_failed' on RPC failure; fetchSuscripcionesAdmin also queries miembros_tenant.usuario_id for the tenant (parallel query) and sets es_miembro per row — no FK/embed exists between suscripciones and miembros_tenant (US-0098); updatePagoEstado's reject path stores motivo_rechazo and calls RPC reject_pending_reservas_for_suscripcion; updateSuscripcionEstado's approve path calls RPC confirm_pending_reservas_for_suscripcion, and its cancel path calls reject_pending_reservas_for_suscripcion when the cancelled subscription was still pendiente (US-0106)
 │   │       │   ├── organizaciones-publicas.service.ts # US-0140: organizacionesPublicasService.listDestacadas(limit=6) → rpc('listar_organizaciones_destacadas') (browser client, works for anon), snake→camel mapping
@@ -663,6 +676,7 @@ Following structure reflects the current implementation and the target scalable 
 │           ├── eventos-card-model.ts        # getEventoLugarLabel (shared with EventoPublicoCard), getEventoCupoLabel, formatHoraCorta ("4:20 pm"), toEventoCardModel → portal GritEventCard data
 │           ├── mis-entradas-countdown.ts    # getCountdown (Bogotá days: "Faltan N días" / "Mañana" / "Hoy" / "Finalizado", null undated), formatFechaLarga ("Sábado 21 de noviembre · 4:20 pm") — option `{ estilo: 'en' }` → "En N días" (check-in cards)
 │           ├── gestion-eventos-calendario.ts # buildCalendarCells (42 Monday-first cells with adjacent days, inMonth, isWeekend), pillTone, MAX_PILLS_PER_DAY = 2, eventCountLabel / dayAriaLabel ("…, 2 eventos, 1 inactivo, 1 cancelado")
+│           ├── admin-catalogo.utils.ts      # grit-arena-v3 admin module helpers: normalizarTexto / coincideBusqueda (accent-insensitive), ordenarReglasTimeline, formatDias; scenarios: agruparTiposEscenario (case/accent-insensitive groups, most used spelling), MAX_TIPOS_SEGMENTED, resumenEscenarios, mapaEscenarioUrl (stored map link as-is, else Google Maps search), formatHorarios; disciplines: siguienteOrden, formatPosicion, formatAtletas, distribucionNiveles; services: contarPlanesPorServicio, planesLabel; plans: buildPlanCardModel (modality, visibility — oculto wins —, cheapest active price via formatCop, subtype labels, distinct services, benefits)
 │           ├── proximo-evento.ts            # pickProximoEvento: earliest published confirmado event dated today (00:00 Bogotá) or later
 │           ├── mis-reservas-agrupacion.ts   # groupReservasByMonth (Bogotá "SEPTIEMBRE 2026"), computeReservaStats, formatHoraBogota ("6:00 am"), formatFechaCorta ("1 sep"), reservaEstadoTag, isReservaDestacada, validateDateRange (≤60 days), formatRangoCorto, computePresetRange (Bogotá)
 │           ├── mis-suscripciones-periodo.ts # getPeriodo(inicio, fin, hoyKey) → futuro / en_curso ("Día N de M", pct) / finalizado / sin_fechas; formatRangoFechas ("18 ago – 17 sep 2026") — date-only via UTC day numbers
@@ -983,7 +997,8 @@ src/
 │   └── ScenarioFormModal.tsx
 ├── components/portal/disciplines/
 │   ├── DisciplinesPage.tsx
-│   ├── DisciplinesTable.tsx
+│   ├── DisciplinesList.tsx
+│   ├── DisciplineDetail.tsx
 │   └── DisciplineFormModal.tsx
 ├── hooks/portal/tenant/
 │   └── useTenantView.ts

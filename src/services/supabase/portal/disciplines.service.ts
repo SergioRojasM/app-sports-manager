@@ -36,8 +36,12 @@ function mapPostgrestError(error: { code?: string; constraint?: string } | null)
     return new DisciplineServiceError('duplicate_name', 'Ya existe una disciplina con ese nombre en esta organización.');
   }
 
-  if (error.code === '23503' && error.constraint === 'entrenamientos_disciplina_id_fkey') {
-    return new DisciplineServiceError('fk_dependency', 'No se puede eliminar la disciplina porque está asociada a entrenamientos.');
+  // Any FK violation on delete (trainings, training groups, plans, levels…); PostgREST errors carry no constraint name
+  if (error.code === '23503') {
+    return new DisciplineServiceError(
+      'fk_dependency',
+      'No se puede eliminar la disciplina porque tiene entrenamientos, planes o niveles asociados. Puedes desactivarla.',
+    );
   }
 
   if (error.code === '42501') {

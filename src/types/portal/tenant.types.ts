@@ -24,6 +24,8 @@ export type TenantViewData = {
   identity: TenantIdentityPayload;
   contact: TenantContactPayload;
   social: TenantSocialPayload;
+  /** `tenants.publico` — shown as the "Pública" / "Privada" tag on the management identity card. */
+  isPublic?: boolean;
 };
 
 export type TenantViewErrorCode =

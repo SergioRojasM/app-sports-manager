@@ -28,6 +28,7 @@ type UseReglasSuspensionResult = {
   handleCreate: (payload: ReglaSuspensionCreatePayload) => Promise<void>;
   handleUpdate: (id: string, payload: ReglaSuspensionUpdatePayload) => Promise<void>;
   handleDelete: (id: string) => Promise<void>;
+  reload: () => Promise<void>;
 };
 
 const MAX_RULES = 3;
@@ -159,5 +160,7 @@ export function useReglasSuspension({ tenantId }: UseReglasSuspensionOptions): U
     handleCreate,
     handleUpdate,
     handleDelete,
+    /** Reloads the list (the section's "Reintentar"). */
+    reload: fetchRules,
   };
 }

@@ -22,6 +22,7 @@ type UsePlanesViewResult = {
   error: string | null;
   planes: PlanTableItem[];
   disciplines: Discipline[];
+  refresh: () => Promise<void>;
 };
 
 function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): PlanTableItem {
@@ -123,5 +124,6 @@ export function usePlanesView({ tenantId }: UsePlanesViewOptions): UsePlanesView
     error,
     planes: tableItems,
     disciplines,
+    refresh: loadData,
   };
 }

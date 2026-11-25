@@ -1,13 +1,24 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { GritButton, GritConfirmDialog, GritIcon, GritIconButton, GritTag } from '@/components/ui';
 import { useReglasSuspension } from '@/hooks/portal/tenant/useReglasSuspension';
-import { ReglaSuspensionFormModal } from './ReglaSuspensionFormModal';
 import type { ReglaSuspension } from '@/types/portal/reglas-suspension.types';
+import { ReglaSuspensionFormModal } from './ReglaSuspensionFormModal';
+import { SectionMessage, TenantSettingsSection } from './TenantSettingsSection';
 
 type TenantReglasSuspensionCardProps = {
   tenantId: string;
 };
+
+/** Prefill of the suggested rule offered by the empty state (`aYwNn` `qLwyb`). */
+export const REGLA_SUSPENSION_SUGERIDA = {
+  nombre: '3 inasistencias seguidas',
+  num_inasistencias: 3,
+  por_suscripcion: true,
+  por_dias_atras: 0,
+  duracion: 7,
+} as const;
 
 function formatCondicion(rule: ReglaSuspension): string {
   const parts: string[] = [];
@@ -20,18 +31,6 @@ function formatDuracion(duracion: number): string {
   return duracion === 0 ? 'Permanente' : `${duracion} días`;
 }
 
-function StatusBadge({ activo }: { activo: boolean }) {
-  return activo ? (
-    <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-400">
-      Activa
-    </span>
-  ) : (
-    <span className="rounded-full bg-grit-subtext/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-subtext">
-      Inactiva
-    </span>
-  );
-}
-
 function RuleRow({
   rule,
   onEdit,
@@ -42,48 +41,29 @@ function RuleRow({
   onDelete: (r: ReglaSuspension) => void;
 }) {
   return (
-    <div
-      className={[
-        'flex items-center gap-3 rounded-grit-md bg-grit-bg/55 px-3 py-2.5',
-        !rule.activo ? 'opacity-50' : '',
-      ].join(' ')}
-    >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-grit-text truncate">{rule.nombre}</span>
-          <StatusBadge activo={rule.activo} />
+    <li className="flex items-center gap-3 rounded-[16px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <span className="truncate font-grit-body text-[13px] font-semibold text-grit-text">{rule.nombre}</span>
+          <GritTag tone={rule.activo ? 'accent' : 'neutral'} dot>
+            {rule.activo ? 'Activa' : 'Inactiva'}
+          </GritTag>
         </div>
-        <p className="mt-0.5 text-xs text-grit-subtext truncate">
-          {rule.num_inasistencias} inasistencia{rule.num_inasistencias !== 1 ? 's' : ''} · {formatCondicion(rule)} · {formatDuracion(rule.duracion)}
+        <p className="truncate font-grit-body text-[11px] text-grit-muted">
+          {rule.num_inasistencias} inasistencia{rule.num_inasistencias !== 1 ? 's' : ''} · {formatCondicion(rule)} ·{' '}
+          {formatDuracion(rule.duracion)}
         </p>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
-        <button
-          type="button"
-          onClick={() => onEdit(rule)}
-          className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-text"
-          title="Editar"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            edit
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(rule)}
-          className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-danger"
-          title="Eliminar"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            delete
-          </span>
-        </button>
+      <div className="flex shrink-0 items-center gap-1">
+        <GritIconButton icon="edit" label={`Editar ${rule.nombre}`} size="sm" variant="ghost" onClick={() => onEdit(rule)} />
+        <GritIconButton icon="delete" label={`Eliminar ${rule.nombre}`} size="sm" variant="ghost" onClick={() => onDelete(rule)} />
       </div>
-    </div>
+    </li>
   );
 }
 
+/** "Reglas de suspensión" settings section (`aYwNn` `GFsAW`). */
 export function TenantReglasSuspensionCard({ tenantId }: TenantReglasSuspensionCardProps) {
   const {
     rules,
@@ -99,13 +79,11 @@ export function TenantReglasSuspensionCard({ tenantId }: TenantReglasSuspensionC
     handleCreate,
     handleUpdate,
     handleDelete,
+    reload,
   } = useReglasSuspension({ tenantId });
 
   const [deleteTarget, setDeleteTarget] = useState<ReglaSuspension | null>(null);
-
-  const handleDeleteWithConfirm = useCallback((rule: ReglaSuspension) => {
-    setDeleteTarget(rule);
-  }, []);
+  const [useSuggestion, setUseSuggestion] = useState(false);
 
   const closeDeleteDialog = useCallback(() => {
     if (isSubmitting) return;
@@ -118,90 +96,69 @@ export function TenantReglasSuspensionCard({ tenantId }: TenantReglasSuspensionC
     setDeleteTarget(null);
   }, [deleteTarget, handleDelete]);
 
+  const openCreate = (suggested: boolean) => {
+    setUseSuggestion(suggested);
+    openCreateModal();
+  };
+
   const isAtLimit = rules.length >= 3;
+  const showListError = Boolean(error) && !isModalOpen && !deleteTarget;
 
   return (
     <>
-      <article className="overflow-hidden rounded-grit-md border border-grit-glass-border bg-grit-card shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
-        <header className="flex items-center justify-between border-b border-grit-glass-border px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span
-              className="material-symbols-outlined rounded-full bg-grit-cyan/20 p-2 text-[18px] text-grit-cyan"
-              aria-hidden="true"
-            >
-              gavel
-            </span>
-            <h3 className="font-grit-title text-base font-semibold text-grit-text">Reglas de Suspensión</h3>
-          </div>
-          <div className="relative group">
-            <button
-              type="button"
-              onClick={openCreateModal}
+      <TenantSettingsSection
+        icon="gavel"
+        title="Reglas de suspensión"
+        subtitle="Automatiza suspensiones por inasistencia."
+        action={
+          <span title={isAtLimit ? 'Máximo 3 reglas por organización' : undefined}>
+            <GritButton
+              size="sm"
+              variant="outline-accent"
+              icon="add"
+              onClick={() => openCreate(false)}
               disabled={isAtLimit}
               aria-disabled={isAtLimit}
-              className="inline-flex items-center gap-1.5 rounded-grit-md bg-grit-cyan px-3 py-1.5 text-xs font-semibold text-grit-bg transition hover:bg-grit-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-describedby={isAtLimit ? 'reglas-suspension-limite' : undefined}
             >
-              <span className="material-symbols-outlined text-sm" aria-hidden="true">
-                add
-              </span>
               Agregar
-            </button>
+            </GritButton>
             {isAtLimit ? (
-              <span className="pointer-events-none absolute -bottom-8 right-0 z-10 hidden whitespace-nowrap rounded bg-grit-card px-2 py-1 text-xs text-grit-subtext shadow-lg group-hover:block">
+              <span id="reglas-suspension-limite" className="sr-only">
                 Máximo 3 reglas por organización
               </span>
             ) : null}
-          </div>
-        </header>
-
-        <div className="p-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <span className="material-symbols-outlined animate-spin text-2xl text-grit-subtext" aria-hidden="true">
-                progress_activity
+          </span>
+        }
+      >
+        {isLoading ? (
+          <SectionMessage kind="loading" title="Cargando reglas…" />
+        ) : showListError && rules.length === 0 ? (
+          <SectionMessage kind="error" title={error} onRetry={() => void reload()} />
+        ) : rules.length === 0 ? (
+          <SectionMessage kind="empty" icon="playlist_remove" title="Aún no hay reglas configuradas">
+            <div className="flex w-full max-w-md flex-wrap items-center justify-between gap-2.5 rounded-full border border-grit-cyan/25 bg-grit-cyan/[0.06] py-1.5 pl-3.5 pr-1.5 text-left">
+              <span className="flex min-w-0 items-center gap-2.5 font-grit-body text-xs text-grit-subtext">
+                <GritIcon name="auto_awesome" size={14} className="text-grit-cyan" />
+                Sugerida: suspender tras 3 inasistencias seguidas
               </span>
+              <GritButton size="sm" onClick={() => openCreate(true)} aria-label="Usar la regla sugerida">
+                Usar
+              </GritButton>
             </div>
-          ) : error && rules.length === 0 ? (
-            <div
-              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-              role="alert"
-            >
-              {error}
-            </div>
-          ) : rules.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <span
-                className="material-symbols-outlined text-3xl text-grit-muted"
-                aria-hidden="true"
-              >
-                rule
-              </span>
-              <p className="text-sm text-grit-subtext">
-                No hay reglas configuradas.
-              </p>
-              <p className="text-xs text-grit-muted">
-                Agrega una regla para automatizar la suspensión de atletas por inasistencias.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {error ? (
-                <div
-                  className="mb-2 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-                  role="alert"
-                >
-                  {error}
-                </div>
-              ) : null}
+          </SectionMessage>
+        ) : (
+          <>
+            {showListError ? <SectionMessage kind="error" title={error} onRetry={() => void reload()} /> : null}
+            <ul className="flex flex-col gap-2">
               {rules.map((r) => (
-                <RuleRow key={r.id} rule={r} onEdit={openEditModal} onDelete={handleDeleteWithConfirm} />
+                <RuleRow key={r.id} rule={r} onEdit={openEditModal} onDelete={setDeleteTarget} />
               ))}
-            </div>
-          )}
-        </div>
-      </article>
+            </ul>
+          </>
+        )}
+      </TenantSettingsSection>
 
-      {/* Form Modal */}
       <ReglaSuspensionFormModal
         open={isModalOpen}
         tenantId={tenantId}
@@ -212,63 +169,23 @@ export function TenantReglasSuspensionCard({ tenantId }: TenantReglasSuspensionC
         onClose={closeModal}
         onCreate={handleCreate}
         onUpdate={handleUpdate}
+        initialValues={useSuggestion ? REGLA_SUSPENSION_SUGERIDA : undefined}
       />
 
-      {/* Delete Confirmation */}
-      {deleteTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
-            onClick={closeDeleteDialog}
-            aria-hidden="true"
-          />
-          <div
-            className="border bg-grit-glass backdrop-blur-md relative z-10 mx-4 w-full max-w-md rounded-grit-2xl border-grit-glass-border p-6 shadow-2xl"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="delete-rs-title"
-          >
-            <h2 id="delete-rs-title" className="font-grit-title text-lg font-semibold text-grit-text">
-              Eliminar regla de suspensión
-            </h2>
-            <p className="mt-2 text-sm text-grit-subtext">
-              ¿Deseas eliminar <span className="font-semibold text-grit-text">{deleteTarget.nombre}</span>?
-              Esta acción no se puede deshacer.
-            </p>
-
-            {error ? (
-              <div
-                className="mt-3 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-                role="alert"
-              >
-                {error}
-              </div>
-            ) : null}
-
-            <div className="mt-5 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={closeDeleteDialog}
-                disabled={isSubmitting}
-                className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => void confirmDelete()}
-                disabled={isSubmitting}
-                className="inline-flex items-center gap-2 rounded-grit-md bg-rose-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmitting ? 'Eliminando...' : 'Eliminar'}
-                <span className="material-symbols-outlined text-base" aria-hidden="true">
-                  delete
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <GritConfirmDialog
+        open={deleteTarget !== null}
+        title="Eliminar regla de suspensión"
+        message={
+          <>
+            ¿Deseas eliminar <span className="font-semibold text-grit-text">{deleteTarget?.nombre}</span>? Esta acción no
+            se puede deshacer.
+          </>
+        }
+        pending={isSubmitting}
+        error={deleteTarget ? error : null}
+        onCancel={closeDeleteDialog}
+        onConfirm={() => void confirmDelete()}
+      />
     </>
   );
 }

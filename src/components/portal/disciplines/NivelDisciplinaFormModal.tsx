@@ -1,6 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import {
+  GritAlert,
+  GritButton,
+  GritDrawer,
+  GritField,
+  GritSwitch,
+  gritDescribedBy,
+  gritInputClass,
+  gritInputInvalidClass,
+} from '@/components/ui';
 import type {
   NivelDisciplinaFormValues,
   NivelDisciplinaFieldErrors,
@@ -15,6 +25,8 @@ type NivelDisciplinaFormModalProps = {
   tenantId: string;
   disciplinaId: string;
   initial?: NivelDisciplina | null;
+  /** Prefill of `orden` in create mode (the next free position of the ladder). */
+  initialOrden?: number;
   isSubmitting: boolean;
   submitError: string | null;
   onClose: () => void;
@@ -39,42 +51,33 @@ function validate(values: NivelDisciplinaFormValues): { valid: boolean; errors: 
   return { valid: Object.keys(errors).length === 0, errors };
 }
 
-const EMPTY: NivelDisciplinaFormValues = { nombre: '', orden: '', activo: true };
+/**
+ * Create / edit level form in the kit drawer. Mounted per opening and per target (keyed), so its
+ * fields start from `initial` / `initialOrden` without a reset effect.
+ */
+export function NivelDisciplinaFormModal(props: NivelDisciplinaFormModalProps) {
+  if (!props.open) return null;
+  return <NivelDisciplinaForm key={`${props.mode}-${props.initial?.id ?? 'nuevo'}`} {...props} />;
+}
 
-export function NivelDisciplinaFormModal({
-  open,
+function NivelDisciplinaForm({
   mode,
   tenantId,
   disciplinaId,
   initial,
+  initialOrden,
   isSubmitting,
   submitError,
   onClose,
   onCreate,
   onUpdate,
 }: NivelDisciplinaFormModalProps) {
-  const [values, setValues] = useState<NivelDisciplinaFormValues>(EMPTY);
+  const [values, setValues] = useState<NivelDisciplinaFormValues>(() =>
+    mode === 'edit' && initial
+      ? { nombre: initial.nombre, orden: String(initial.orden), activo: initial.activo }
+      : { nombre: '', orden: initialOrden ? String(initialOrden) : '', activo: true },
+  );
   const [fieldErrors, setFieldErrors] = useState<NivelDisciplinaFieldErrors>({});
-
-  useEffect(() => {
-    if (open && mode === 'edit' && initial) {
-      setValues({ nombre: initial.nombre, orden: String(initial.orden), activo: initial.activo });
-    } else if (open && mode === 'create') {
-      setValues(EMPTY);
-    }
-    setFieldErrors({});
-  }, [open, mode, initial]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isSubmitting) onClose();
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [isSubmitting, onClose, open]);
-
-  if (!open) return null;
 
   const handleSubmit = async () => {
     const { valid, errors } = validate(values);
@@ -101,118 +104,64 @@ export function NivelDisciplinaFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50">
-      <button
-        type="button"
-        aria-label="Cerrar formulario de nivel"
-        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
-        onClick={onClose}
-        disabled={isSubmitting}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={mode === 'create' ? 'Crear nivel' : 'Editar nivel'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
-      >
-        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
-          <div>
-            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
-              {mode === 'create' ? 'Crear nivel' : 'Editar nivel'}
-            </h2>
-            <p className="mt-1 text-xs text-grit-subtext">Define el nombre y orden del nivel de progresión.</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
-          </button>
-        </header>
-
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
-          <div>
-            <label htmlFor="nivel-nombre" className="mb-1 block text-xs text-grit-subtext">Nombre *</label>
-            <input
-              id="nivel-nombre"
-              type="text"
-              maxLength={50}
-              value={values.nombre}
-              onChange={(e) => setValues((prev) => ({ ...prev, nombre: e.target.value }))}
-              disabled={isSubmitting}
-              placeholder="Ej. Principiante"
-              className={[
-                'w-full rounded-grit-md border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition focus:ring-2',
-                fieldErrors.nombre
-                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-              ].join(' ')}
-            />
-            {fieldErrors.nombre ? <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">{fieldErrors.nombre}</p> : null}
-          </div>
-
-          <div>
-            <label htmlFor="nivel-orden" className="mb-1 block text-xs text-grit-subtext">Orden *</label>
-            <input
-              id="nivel-orden"
-              type="number"
-              min={1}
-              value={values.orden}
-              onChange={(e) => setValues((prev) => ({ ...prev, orden: e.target.value }))}
-              disabled={isSubmitting}
-              placeholder="1"
-              className={[
-                'w-full rounded-grit-md border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition focus:ring-2',
-                fieldErrors.orden
-                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-              ].join(' ')}
-            />
-            {fieldErrors.orden ? <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">{fieldErrors.orden}</p> : null}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              id="nivel-activo"
-              type="checkbox"
-              checked={values.activo}
-              onChange={(e) => setValues((prev) => ({ ...prev, activo: e.target.checked }))}
-              disabled={isSubmitting}
-              className="rounded border-grit-glass-border bg-grit-bg"
-            />
-            <label htmlFor="nivel-activo" className="text-sm text-grit-text">Nivel activo</label>
-          </div>
-
-          {submitError ? (
-            <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
-              {submitError}
-            </div>
-          ) : null}
-        </div>
-
-        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
-          >
+    <GritDrawer
+      open
+      onClose={onClose}
+      busy={isSubmitting}
+      title={mode === 'create' ? 'Crear nivel' : 'Editar nivel'}
+      subtitle="Los niveles ordenan la progresión de los atletas en la disciplina."
+      footer={
+        <>
+          <GritButton variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleSubmit()}
+          </GritButton>
+          <GritButton icon="save" onClick={() => void handleSubmit()} loading={isSubmitting} loadingLabel="Guardando…">
+            {mode === 'create' ? 'Crear nivel' : 'Guardar cambios'}
+          </GritButton>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <GritField htmlFor="nivel-nombre" label="Nombre" error={fieldErrors.nombre}>
+          <input
+            id="nivel-nombre"
+            type="text"
+            maxLength={50}
+            value={values.nombre}
+            onChange={(event) => setValues((v) => ({ ...v, nombre: event.target.value }))}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg"
-          >
-            {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear nivel' : 'Guardar cambios'}
-            <span className="material-symbols-outlined text-base" aria-hidden="true">save</span>
-          </button>
-        </footer>
-      </aside>
-    </div>
+            placeholder="Ej: Principiante"
+            aria-invalid={fieldErrors.nombre ? true : undefined}
+            aria-describedby={gritDescribedBy('nivel-nombre', undefined, fieldErrors.nombre)}
+            className={fieldErrors.nombre ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        <GritField htmlFor="nivel-orden" label="Orden" hint="Posición en la escalera de progresión (1 = primer nivel)." error={fieldErrors.orden}>
+          <input
+            id="nivel-orden"
+            type="number"
+            min={1}
+            step={1}
+            value={values.orden}
+            onChange={(event) => setValues((v) => ({ ...v, orden: event.target.value }))}
+            disabled={isSubmitting}
+            aria-invalid={fieldErrors.orden ? true : undefined}
+            aria-describedby={gritDescribedBy('nivel-orden', true, fieldErrors.orden)}
+            className={fieldErrors.orden ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        <GritSwitch
+          checked={values.activo}
+          onChange={(next) => setValues((v) => ({ ...v, activo: next }))}
+          disabled={isSubmitting}
+          label="Nivel activo"
+          showLabel
+        />
+
+        {submitError ? <GritAlert tone="danger">{submitError}</GritAlert> : null}
+      </div>
+    </GritDrawer>
   );
 }

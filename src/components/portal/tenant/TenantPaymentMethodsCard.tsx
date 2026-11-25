@@ -1,32 +1,22 @@
 'use client';
 
+import { GritButton, GritConfirmDialog, GritIconButton, GritIconTile, GritTag } from '@/components/ui';
 import { useMetodosPago } from '@/hooks/portal/tenant/useMetodosPago';
+import { METODO_PAGO_TIPO_LABELS, type MetodoPago, type MetodoPagoTipo } from '@/types/portal/metodos-pago.types';
 import { MetodoPagoFormModal } from './MetodoPagoFormModal';
-import { METODO_PAGO_TIPO_LABELS, type MetodoPago } from '@/types/portal/metodos-pago.types';
+import { SectionMessage, TenantSettingsSection } from './TenantSettingsSection';
 
 type TenantPaymentMethodsCardProps = {
   tenantId: string;
 };
 
-function TipoBadge({ tipo }: { tipo: string }) {
-  return (
-    <span className="rounded-full bg-grit-cyan/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-cyan">
-      {(METODO_PAGO_TIPO_LABELS as Record<string, string>)[tipo] ?? tipo}
-    </span>
-  );
-}
-
-function StatusBadge({ activo }: { activo: boolean }) {
-  return activo ? (
-    <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-400">
-      Activo
-    </span>
-  ) : (
-    <span className="rounded-full bg-grit-subtext/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-subtext">
-      Inactivo
-    </span>
-  );
-}
+const TIPO_ICON: Record<MetodoPagoTipo, string> = {
+  transferencia: 'account_balance',
+  efectivo: 'payments',
+  tarjeta: 'credit_card',
+  pasarela: 'link',
+  otro: 'account_balance_wallet',
+};
 
 function MethodRow({
   metodo,
@@ -38,68 +28,47 @@ function MethodRow({
   onDelete: (m: MetodoPago) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-grit-md bg-grit-bg/55 px-3 py-2.5">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-grit-text truncate">{metodo.nombre}</span>
-          <TipoBadge tipo={metodo.tipo} />
-          <StatusBadge activo={metodo.activo} />
+    <li className="flex items-center gap-3 rounded-[16px] border border-white/[0.06] bg-white/[0.025] px-3.5 py-3">
+      <GritIconTile icon={TIPO_ICON[metodo.tipo] ?? 'account_balance_wallet'} size={34} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex min-w-0 flex-col">
+          <span className="truncate font-grit-body text-[13px] font-semibold text-grit-text">{metodo.nombre}</span>
+          {metodo.valor ? <span className="truncate font-grit-body text-[11px] text-grit-muted">{metodo.valor}</span> : null}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <GritTag tone="neutral">{METODO_PAGO_TIPO_LABELS[metodo.tipo] ?? metodo.tipo}</GritTag>
+          <GritTag tone={metodo.activo ? 'accent' : 'neutral'} dot>
+            {metodo.activo ? 'Activo' : 'Pausado'}
+          </GritTag>
           {metodo.qr_url ? (
-            <span
-              className="inline-flex items-center gap-0.5 rounded-full bg-grit-subtext/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-grit-subtext"
-              title="Tiene imagen QR"
-            >
-              <span className="material-symbols-outlined text-xs" aria-hidden="true">
-                qr_code_2
-              </span>
-              QR
+            <span title="Tiene imagen QR">
+              <GritTag tone="neutral" icon="qr_code_2">
+                QR
+              </GritTag>
             </span>
           ) : null}
         </div>
-        {metodo.valor ? (
-          <p className="mt-0.5 text-xs text-grit-subtext truncate">{metodo.valor}</p>
-        ) : null}
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex shrink-0 items-center gap-1">
         {metodo.url ? (
-          <a
+          <GritIconButton
+            icon="open_in_new"
+            label={`Abrir enlace de ${metodo.nombre}`}
+            size="sm"
+            variant="ghost"
             href={metodo.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-cyan"
-            title="Abrir enlace"
-          >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              open_in_new
-            </span>
-          </a>
+            external
+          />
         ) : null}
-        <button
-          type="button"
-          onClick={() => onEdit(metodo)}
-          className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-text"
-          title="Editar"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            edit
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(metodo)}
-          className="rounded-grit-md p-1.5 text-grit-subtext transition hover:bg-grit-cyan/10 hover:text-grit-danger"
-          title="Eliminar"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            delete
-          </span>
-        </button>
+        <GritIconButton icon="edit" label={`Editar ${metodo.nombre}`} size="sm" variant="ghost" onClick={() => onEdit(metodo)} />
+        <GritIconButton icon="delete" label={`Eliminar ${metodo.nombre}`} size="sm" variant="ghost" onClick={() => onDelete(metodo)} />
       </div>
-    </div>
+    </li>
   );
 }
 
+/** "Métodos de pago" settings section (`aYwNn` `qS2AM`). */
 export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardProps) {
   const {
     metodos,
@@ -116,81 +85,46 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
     openDelete,
     closeDelete,
     confirmDelete,
+    reload,
   } = useMetodosPago({ tenantId });
+
+  const showListError = Boolean(error) && !formOpen && !deleteTarget;
 
   return (
     <>
-      <article className="overflow-hidden rounded-grit-md border border-grit-glass-border bg-grit-card shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
-        <header className="flex items-center justify-between border-b border-grit-glass-border px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span
-              className="material-symbols-outlined rounded-full bg-grit-cyan/20 p-2 text-[18px] text-grit-cyan"
-              aria-hidden="true"
-            >
-              payments
-            </span>
-            <h3 className="font-grit-title text-base font-semibold text-grit-text">Métodos de Pago</h3>
-          </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="inline-flex items-center gap-1.5 rounded-grit-md bg-grit-cyan px-3 py-1.5 text-xs font-semibold text-grit-bg transition hover:bg-grit-cyan/90"
-          >
-            <span className="material-symbols-outlined text-sm" aria-hidden="true">
-              add
-            </span>
+      <TenantSettingsSection
+        icon="account_balance_wallet"
+        title="Métodos de pago"
+        subtitle="Cómo te pagan tus atletas."
+        action={
+          <GritButton size="sm" variant="outline-accent" icon="add" onClick={openCreate}>
             Agregar
-          </button>
-        </header>
-
-        <div className="p-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <span className="material-symbols-outlined animate-spin text-2xl text-grit-subtext" aria-hidden="true">
-                progress_activity
-              </span>
-            </div>
-          ) : error && metodos.length === 0 ? (
-            <div
-              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-              role="alert"
-            >
-              {error}
-            </div>
-          ) : metodos.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <span
-                className="material-symbols-outlined text-3xl text-grit-muted"
-                aria-hidden="true"
-              >
-                credit_card_off
-              </span>
-              <p className="text-sm text-grit-subtext">
-                No hay métodos de pago configurados.
-              </p>
-              <p className="text-xs text-grit-muted">
-                Agrega un método para que los usuarios puedan seleccionarlo al suscribirse.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {error ? (
-                <div
-                  className="mb-2 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-                  role="alert"
-                >
-                  {error}
-                </div>
-              ) : null}
+          </GritButton>
+        }
+      >
+        {loading ? (
+          <SectionMessage kind="loading" title="Cargando métodos de pago…" />
+        ) : showListError && metodos.length === 0 ? (
+          <SectionMessage kind="error" title={error} onRetry={() => void reload()} />
+        ) : metodos.length === 0 ? (
+          <SectionMessage
+            kind="empty"
+            icon="credit_card_off"
+            title="No hay métodos de pago configurados."
+            description="Agrega uno para que tus usuarios puedan realizar pagos."
+          />
+        ) : (
+          <>
+            {showListError ? <SectionMessage kind="error" title={error} onRetry={() => void reload()} /> : null}
+            <ul className="flex flex-col gap-2">
               {metodos.map((m) => (
                 <MethodRow key={m.id} metodo={m} onEdit={openEdit} onDelete={openDelete} />
               ))}
-            </div>
-          )}
-        </div>
-      </article>
+            </ul>
+          </>
+        )}
+      </TenantSettingsSection>
 
-      {/* Form Modal */}
       <MetodoPagoFormModal
         open={formOpen}
         tenantId={tenantId}
@@ -201,61 +135,20 @@ export function TenantPaymentMethodsCard({ tenantId }: TenantPaymentMethodsCardP
         onSubmit={submitForm}
       />
 
-      {/* Delete Confirmation */}
-      {deleteTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
-            onClick={closeDelete}
-            aria-hidden="true"
-          />
-          <div
-            className="border bg-grit-glass backdrop-blur-md relative z-10 mx-4 w-full max-w-md rounded-grit-2xl border-grit-glass-border p-6 shadow-2xl"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="delete-mp-title"
-          >
-            <h2 id="delete-mp-title" className="font-grit-title text-lg font-semibold text-grit-text">
-              Eliminar método de pago
-            </h2>
-            <p className="mt-2 text-sm text-grit-subtext">
-              ¿Deseas eliminar <span className="font-semibold text-grit-text">{deleteTarget.nombre}</span>?
-              Los pagos asociados conservarán su registro, pero perderán la referencia a este método.
-            </p>
-
-            {error ? (
-              <div
-                className="mt-3 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-                role="alert"
-              >
-                {error}
-              </div>
-            ) : null}
-
-            <div className="mt-5 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={closeDelete}
-                disabled={isSubmitting}
-                className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => void confirmDelete()}
-                disabled={isSubmitting}
-                className="inline-flex items-center gap-2 rounded-grit-md bg-rose-500 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmitting ? 'Eliminando...' : 'Eliminar'}
-                <span className="material-symbols-outlined text-base" aria-hidden="true">
-                  delete
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <GritConfirmDialog
+        open={deleteTarget !== null}
+        title="Eliminar método de pago"
+        message={
+          <>
+            ¿Deseas eliminar <span className="font-semibold text-grit-text">{deleteTarget?.nombre}</span>? Los pagos
+            asociados conservarán su registro, pero perderán la referencia a este método.
+          </>
+        }
+        pending={isSubmitting}
+        error={deleteTarget ? error : null}
+        onCancel={closeDelete}
+        onConfirm={() => void confirmDelete()}
+      />
     </>
   );
 }

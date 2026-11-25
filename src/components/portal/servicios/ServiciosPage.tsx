@@ -1,53 +1,57 @@
 'use client';
 
-import { useServicios } from '@/hooks/portal/servicios/useServicios';
+import {
+  GritAlert,
+  GritButton,
+  GritConfirmDialog,
+  GritEmptyState,
+  GritIcon,
+  GritPageHeader,
+  GritSearchField,
+  GritSegmented,
+} from '@/components/ui';
+import { useServicios, type ServicioStatusFilter } from '@/hooks/portal/servicios/useServicios';
+import type { ServicioFormValues } from '@/types/portal/servicios.types';
 import { ServicioFormModal } from './ServicioFormModal';
 import { ServiciosTable } from './ServiciosTable';
-import type { Servicio, ServicioFormValues } from '@/types/portal/servicios.types';
 
 type ServiciosPageProps = {
   tenantId: string;
 };
 
-function LoadingState() {
-  return (
-    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-      Cargando servicios...
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-8 text-center">
-      <span className="material-symbols-outlined mb-3 block text-4xl text-grit-muted" aria-hidden="true">
-        category
-      </span>
-      <p className="text-sm font-medium text-grit-subtext">No hay servicios registrados.</p>
-      <p className="mt-1 text-xs text-grit-muted">
-        Crea tu primer servicio para asociarlo a los tipos de plan.
-      </p>
-    </div>
-  );
-}
-
+/** Services catalogue (`v8mqZG` Admin · Servicios). */
 export function ServiciosPage({ tenantId }: ServiciosPageProps) {
   const {
     servicios,
+    filteredServicios,
+    counts,
     isLoading,
     error,
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+    planCounts,
+    pendingIds,
+    toggleActivo,
+    toggleError,
+    clearToggleError,
     isModalOpen,
     editingServicio,
     submitError,
     successMessage,
-    deleteError,
+    dismissSuccess,
     openCreateModal,
     openEditModal,
     closeModal,
     createServicio,
     updateServicio,
-    deleteServicio,
-    clearDeleteError,
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
     refresh,
   } = useServicios({ tenantId });
 
@@ -67,76 +71,115 @@ export function ServiciosPage({ tenantId }: ServiciosPageProps) {
     });
   };
 
-  const handleDelete = (servicio: Servicio) => {
-    clearDeleteError();
-    const confirmed = window.confirm(
-      `¿Seguro que quieres eliminar el servicio "${servicio.nombre}"? Esta acción no se puede deshacer.`,
-    );
-    if (!confirmed) return;
-    void deleteServicio(servicio.id);
-  };
+  const hasFilters = searchTerm.trim() !== '' || statusFilter !== 'todos';
 
   return (
-    <section className="space-y-6">
-      <header className="flex items-start justify-between">
-        <div>
-          <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Servicios</h1>
-          <p className="mt-2 text-sm text-grit-subtext">
-            Gestiona el catálogo de servicios de la organización.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2.5 text-sm font-semibold text-grit-bg transition-all duration-200 hover:bg-grit-cyan/85 hover:shadow-lg hover:shadow-grit-cyan/25"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
-          Nuevo servicio
-        </button>
-      </header>
+    <section className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Tus"
+        titleAccent="servicios."
+        italic
+        actions={
+          <>
+            <GritSearchField
+              aria-label="Buscar servicio"
+              placeholder="Buscar servicio…"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="w-full sm:w-[240px]"
+            />
+            <GritButton icon="add" onClick={openCreateModal}>
+              Nuevo servicio
+            </GritButton>
+          </>
+        }
+      />
 
       {successMessage ? (
-        <div
-          className="rounded-grit-md border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200"
-          role="status"
-        >
+        <GritAlert tone="success" onDismiss={dismissSuccess}>
           {successMessage}
-        </div>
+        </GritAlert>
+      ) : null}
+      {toggleError ? (
+        <GritAlert tone="danger" onDismiss={clearToggleError}>
+          {toggleError}
+        </GritAlert>
       ) : null}
 
-      {deleteError ? (
-        <div
-          className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-          role="alert"
-        >
-          {deleteError}
+      {isLoading ? (
+        <div role="status">
+          <GritEmptyState icon="hourglass_empty" title="Cargando servicios…" />
         </div>
-      ) : null}
-
-      {isLoading ? <LoadingState /> : null}
-
-      {!isLoading && error ? (
-        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
-          <p className="text-sm text-grit-danger">{error}</p>
-          <button
-            type="button"
-            className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
-            onClick={() => void refresh()}
-          >
-            Reintentar
-          </button>
-        </div>
-      ) : null}
-
-      {!isLoading && !error && servicios.length === 0 ? <EmptyState /> : null}
-
-      {!isLoading && !error && servicios.length > 0 ? (
-        <ServiciosTable
-          rows={servicios}
-          onEdit={openEditModal}
-          onDelete={handleDelete}
+      ) : error ? (
+        <GritEmptyState
+          icon="error"
+          title="No pudimos cargar los servicios"
+          description={error}
+          descriptionClassName="text-grit-danger"
+          action={
+            <GritButton variant="secondary" icon="refresh" onClick={() => void refresh()}>
+              Reintentar
+            </GritButton>
+          }
         />
-      ) : null}
+      ) : servicios.length === 0 ? (
+        <GritEmptyState
+          icon="category"
+          title="Aún no tienes servicios"
+          description="Crea tu primer servicio para incluirlo en los subtipos de tus planes."
+          action={
+            <GritButton icon="add" onClick={openCreateModal}>
+              Nuevo servicio
+            </GritButton>
+          }
+        />
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            <GritSegmented<ServicioStatusFilter>
+              ariaLabel="Estado de los servicios"
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { value: 'todos', label: 'Todos', count: counts.todos },
+                { value: 'activos', label: 'Activos', count: counts.activos },
+                { value: 'inactivos', label: 'Inactivos', count: counts.inactivos },
+              ]}
+            />
+            <p className="flex items-center gap-2 font-grit-body text-xs text-grit-muted">
+              <GritIcon name="info" size={14} className="text-grit-cyan" />
+              Los servicios se agrupan dentro de tus planes
+            </p>
+          </div>
+          {filteredServicios.length === 0 && hasFilters ? (
+            <GritEmptyState
+              icon="search_off"
+              title="Sin resultados"
+              description="Ningún servicio coincide con la búsqueda o el filtro."
+              action={
+                <GritButton
+                  variant="secondary"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('todos');
+                  }}
+                >
+                  Limpiar filtros
+                </GritButton>
+              }
+            />
+          ) : (
+            <ServiciosTable
+              rows={filteredServicios}
+              planCounts={planCounts}
+              pendingIds={pendingIds}
+              onToggle={(servicio, activo) => void toggleActivo(servicio, activo)}
+              onEdit={openEditModal}
+              onDelete={requestDelete}
+            />
+          )}
+        </>
+      )}
 
       <ServicioFormModal
         open={isModalOpen}
@@ -145,6 +188,21 @@ export function ServiciosPage({ tenantId }: ServiciosPageProps) {
         submitError={submitError}
         onClose={closeModal}
         onSubmit={handleSubmit}
+      />
+
+      <GritConfirmDialog
+        open={deleteTarget !== null}
+        title="Eliminar servicio"
+        message={
+          <>
+            ¿Seguro que quieres eliminar <span className="font-semibold text-grit-text">{deleteTarget?.nombre}</span>? Esta
+            acción no se puede deshacer.
+          </>
+        }
+        pending={isDeleting}
+        error={deleteError}
+        onCancel={cancelDelete}
+        onConfirm={() => void confirmDelete()}
       />
     </section>
   );

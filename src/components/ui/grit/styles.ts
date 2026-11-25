@@ -8,11 +8,25 @@ export function cx(...classes: Array<string | false | null | undefined>): string
  * language (white 4% fill, white 12% stroke, 13px) with a 12px radius — multi-field
  * forms read poorly as pills. Search inputs use GritSearchField instead (US-0141).
  */
-export const gritInputClass =
-  'w-full rounded-grit-lg border border-white/[0.12] bg-white/[0.04] px-4 py-2.5 font-grit-body text-[13px] text-grit-text placeholder:text-grit-muted outline-none transition focus:border-grit-cyan/60 focus:ring-2 focus:ring-grit-cyan/20 disabled:cursor-not-allowed disabled:opacity-60';
+const GRIT_INPUT_BASE =
+  'w-full rounded-grit-lg border bg-white/[0.04] px-4 py-2.5 font-grit-body text-[13px] text-grit-text placeholder:text-grit-muted outline-none transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60';
+
+export const gritInputClass = `${GRIT_INPUT_BASE} border-white/[0.12] focus:border-grit-cyan/60 focus:ring-grit-cyan/20`;
+
+/**
+ * Same box with the danger stroke, for a field with a validation error. A full class string (not an
+ * override) because two utilities for the same property resolve by stylesheet order in Tailwind v4.
+ */
+export const gritInputInvalidClass = `${GRIT_INPUT_BASE} border-grit-danger/70 focus:border-grit-danger/70 focus:ring-grit-danger/20`;
 
 /** Native <select> styling, same box as gritInputClass. */
 export const gritSelectClass = `${gritInputClass} appearance-none pr-9`;
+
+/** gritSelectClass with the danger stroke. */
+export const gritSelectInvalidClass = `${gritInputInvalidClass} appearance-none pr-9`;
+
+/** File <input> in a form: same box, with a cyan-tinted "choose file" button. */
+export const gritFileInputClass = `${gritInputClass} file:mr-3 file:rounded-full file:border-0 file:bg-grit-cyan/15 file:px-3 file:py-1 file:font-grit-body file:text-xs file:font-semibold file:text-grit-cyan`;
 
 /**
  * Compact pill <select> for toolbars, from v3 Dropdown Filter (`XSFT7`). Draws its own

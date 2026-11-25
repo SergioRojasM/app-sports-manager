@@ -1,57 +1,28 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/services/supabase/client';
 import { disciplinesService } from '@/services/supabase/portal/disciplines.service';
+import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
+import {
+  usuarioNivelDisciplinaService,
+  type AtletasPorNivel,
+} from '@/services/supabase/portal/usuario-nivel-disciplina.service';
+import { coincideBusqueda } from '@/lib/portal/admin-catalogo.utils';
 import { useDisciplineForm } from './useDisciplineForm';
 import {
   DisciplineServiceError,
   type CreateDisciplineInput,
   type Discipline,
-  type DisciplineTableItem,
-  type DisciplinesViewModel,
   type UpdateDisciplineInput,
 } from '@/types/portal/disciplines.types';
+
+export type DisciplineStatusFilter = 'activas' | 'todas';
 
 type UseDisciplinesOptions = {
   tenantId: string;
 };
-
-type UseDisciplinesResult = DisciplinesViewModel & {
-  isSubmitting: boolean;
-  searchTerm: string;
-  setSearchTerm: (value: string) => void;
-  formValues: ReturnType<typeof useDisciplineForm>['formValues'];
-  fieldErrors: ReturnType<typeof useDisciplineForm>['fieldErrors'];
-  openCreateModal: () => void;
-  openEditModal: (discipline: Discipline) => void;
-  deleteDiscipline: (discipline: Discipline) => Promise<void>;
-  closeModal: () => void;
-  updateField: (field: 'nombre' | 'descripcion' | 'activo', value: string | boolean) => void;
-  submit: () => Promise<boolean>;
-  refresh: () => Promise<void>;
-};
-
-function buildCategory(discipline: Discipline): string {
-  const value = `${discipline.nombre} ${discipline.descripcion ?? ''}`.toLowerCase();
-  if (value.includes('team') || value.includes('equipo') || value.includes('fútbol') || value.includes('basket')) {
-    return 'Team';
-  }
-  if (value.includes('individual') || value.includes('tennis') || value.includes('natación')) {
-    return 'Individual';
-  }
-  return 'General';
-}
-
-function toTableItem(discipline: Discipline): DisciplineTableItem {
-  const status = discipline.activo ? 'active' : 'inactive';
-  return {
-    ...discipline,
-    categoria: buildCategory(discipline),
-    status,
-    statusLabel: status === 'active' ? 'Active' : 'Inactive',
-  };
-}
 
 function mapServiceErrorToMessage(error: unknown, fallbackMessage: string): string {
   if (error instanceof DisciplineServiceError) {
@@ -60,20 +31,60 @@ function mapServiceErrorToMessage(error: unknown, fallbackMessage: string): stri
   return fallbackMessage;
 }
 
-export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDisciplinesResult {
+/**
+ * Disciplines workspace (`fXuVP`): the tenant's disciplines with an "Activas / Todas" filter and
+ * search, the selected discipline mirrored in `?disciplina=`, derived counts (active levels and
+ * athletes with a level, each failure-isolated), the create / edit drawer state and the delete flow.
+ */
+export function useDisciplines({ tenantId }: UseDisciplinesOptions) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const selectedParam = searchParams.get('disciplina');
+
   const [disciplines, setDisciplines] = useState<Discipline[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<DisciplineStatusFilter>('activas');
+  const [nivelesActivos, setNivelesActivos] = useState<Record<string, number> | null>(null);
+  const [atletas, setAtletas] = useState<AtletasPorNivel | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [selectedDiscipline, setSelectedDiscipline] = useState<Discipline | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Discipline | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const form = useDisciplineForm();
 
   const supabase = useMemo(() => createClient(), []);
+
+  /** Active levels per discipline and athletes per level; a failure leaves that count null ("—"). */
+  const loadConteos = useCallback(async () => {
+    const [niveles, conteoAtletas] = await Promise.allSettled([
+      nivelDisciplinaService.listNivelesByTenant(tenantId),
+      usuarioNivelDisciplinaService.countAtletasPorNivel(tenantId),
+    ]);
+    if (niveles.status === 'fulfilled') {
+      const porDisciplina: Record<string, number> = {};
+      for (const nivel of niveles.value) {
+        if (nivel.activo) porDisciplina[nivel.disciplina_id] = (porDisciplina[nivel.disciplina_id] ?? 0) + 1;
+      }
+      setNivelesActivos(porDisciplina);
+    } else {
+      console.error('[useDisciplines] niveles', niveles.reason);
+      setNivelesActivos(null);
+    }
+    if (conteoAtletas.status === 'fulfilled') {
+      setAtletas(conteoAtletas.value);
+    } else {
+      console.error('[useDisciplines] atletas', conteoAtletas.reason);
+      setAtletas(null);
+    }
+  }, [tenantId]);
 
   const loadDisciplines = useCallback(async () => {
     setLoading(true);
@@ -88,7 +99,7 @@ export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDiscipli
         throw new Error('No active session');
       }
 
-      const payload = await disciplinesService.listDisciplinesByTenant(tenantId);
+      const [payload] = await Promise.all([disciplinesService.listDisciplinesByTenant(tenantId), loadConteos()]);
       setDisciplines(payload);
     } catch {
       setDisciplines([]);
@@ -96,39 +107,45 @@ export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDiscipli
     } finally {
       setLoading(false);
     }
-  }, [supabase, tenantId]);
+  }, [supabase, tenantId, loadConteos]);
 
   useEffect(() => {
-    let mounted = true;
-
-    const execute = async () => {
-      if (!mounted) return;
-      await loadDisciplines();
-    };
-
-    void execute();
-
-    return () => {
-      mounted = false;
-    };
+    void loadDisciplines();
   }, [loadDisciplines]);
 
-  const filteredDisciplines = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    const rows = disciplines.map(toTableItem);
+  const filteredDisciplines = useMemo(
+    () =>
+      disciplines
+        .filter((d) => (statusFilter === 'todas' || d.activo) && coincideBusqueda(searchTerm, [d.nombre, d.descripcion]))
+        .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
+    [disciplines, searchTerm, statusFilter],
+  );
 
-    if (!normalizedSearch) {
-      return rows;
-    }
+  // Selection: the `?disciplina=` id when it is listed, else the first listed discipline
+  const activeDiscipline = useMemo(
+    () => filteredDisciplines.find((d) => d.id === selectedParam) ?? filteredDisciplines[0] ?? null,
+    [filteredDisciplines, selectedParam],
+  );
 
-    return rows.filter((discipline) => {
-      const haystack = [discipline.nombre, discipline.descripcion ?? '', discipline.categoria]
-        .join(' ')
-        .toLowerCase();
+  const replaceSelection = useCallback(
+    (id: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (id) params.set('disciplina', id);
+      else params.delete('disciplina');
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
 
-      return haystack.includes(normalizedSearch);
-    });
-  }, [disciplines, searchTerm]);
+  // Keep the URL in sync when the parameter is missing, unknown or filtered out
+  useEffect(() => {
+    if (loading) return;
+    const expected = activeDiscipline?.id ?? null;
+    if (expected !== selectedParam) replaceSelection(expected);
+  }, [activeDiscipline, loading, replaceSelection, selectedParam]);
+
+  const selectDiscipline = useCallback((id: string) => replaceSelection(id), [replaceSelection]);
 
   const openCreateModal = useCallback(() => {
     setModalMode('create');
@@ -156,37 +173,36 @@ export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDiscipli
     setSubmitError(null);
   }, [isSubmitting]);
 
-  const deleteDiscipline = useCallback(
-    async (discipline: Discipline) => {
-      const shouldDelete = window.confirm(
-        `¿Seguro que quieres eliminar la disciplina "${discipline.nombre}"? Esta acción no se puede deshacer.`,
+  const requestDelete = useCallback((discipline: Discipline) => {
+    setDeleteError(null);
+    setSuccessMessage(null);
+    setDeleteTarget(discipline);
+  }, []);
+
+  const cancelDelete = useCallback(() => {
+    if (isDeleting) return;
+    setDeleteTarget(null);
+    setDeleteError(null);
+  }, [isDeleting]);
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await disciplinesService.deleteDiscipline(deleteTarget.id, tenantId);
+      setDeleteTarget(null);
+      // The selection falls back to the next listed discipline through the URL sync above
+      await loadDisciplines();
+      setSuccessMessage('Disciplina eliminada correctamente.');
+    } catch (caughtError) {
+      setDeleteError(
+        mapServiceErrorToMessage(caughtError, 'No fue posible eliminar la disciplina. Inténtalo nuevamente.'),
       );
-
-      if (!shouldDelete) {
-        return;
-      }
-
-      setSubmitError(null);
-      setSuccessMessage(null);
-
-      try {
-        await disciplinesService.deleteDiscipline(discipline.id, tenantId);
-
-        if (selectedDiscipline?.id === discipline.id) {
-          setModalOpen(false);
-          setSelectedDiscipline(null);
-        }
-
-        await loadDisciplines();
-        setSuccessMessage('Disciplina eliminada correctamente.');
-      } catch (caughtError) {
-        setSubmitError(
-          mapServiceErrorToMessage(caughtError, 'No fue posible eliminar la disciplina. Inténtalo nuevamente.'),
-        );
-      }
-    },
-    [loadDisciplines, selectedDiscipline?.id, tenantId],
-  );
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [deleteTarget, loadDisciplines, tenantId]);
 
   const submit = useCallback(async () => {
     setSubmitError(null);
@@ -200,6 +216,7 @@ export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDiscipli
     setIsSubmitting(true);
 
     try {
+      let savedId: string | null = selectedDiscipline?.id ?? null;
       if (modalMode === 'create') {
         const payload: CreateDisciplineInput = {
           tenantId,
@@ -208,7 +225,8 @@ export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDiscipli
           activo: form.formValues.activo,
         };
 
-        await disciplinesService.createDiscipline(payload);
+        const created = await disciplinesService.createDiscipline(payload);
+        savedId = created.id;
       }
 
       if (modalMode === 'edit' && selectedDiscipline) {
@@ -223,6 +241,11 @@ export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDiscipli
       }
 
       await loadDisciplines();
+      if (modalMode === 'create' && savedId) {
+        // Show the new discipline even if the "Activas" filter would hide an inactive one
+        if (!form.formValues.activo) setStatusFilter('todas');
+        replaceSelection(savedId);
+      }
       setSuccessMessage(
         modalMode === 'create'
           ? 'Disciplina creada correctamente.'
@@ -238,29 +261,53 @@ export function useDisciplines({ tenantId }: UseDisciplinesOptions): UseDiscipli
     } finally {
       setIsSubmitting(false);
     }
-  }, [form, loadDisciplines, modalMode, selectedDiscipline, tenantId]);
+  }, [form, loadDisciplines, modalMode, replaceSelection, selectedDiscipline, tenantId]);
+
+  const counts = useMemo(
+    () => ({
+      activas: disciplines.filter((d) => d.activo).length,
+      todas: disciplines.length,
+    }),
+    [disciplines],
+  );
 
   return {
     disciplines,
     filteredDisciplines,
+    counts,
     loading,
     error,
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+    activeDiscipline,
+    selectDiscipline,
+    /** Active levels per discipline id; null when the count failed. */
+    nivelesActivos,
+    /** Athletes with a level per discipline / per level; null when the count failed. */
+    atletas,
+    reloadConteos: loadConteos,
     modalOpen,
     modalMode,
     selectedDiscipline,
     submitError,
     successMessage,
+    dismissSuccess: () => setSuccessMessage(null),
     isSubmitting,
-    searchTerm,
-    setSearchTerm,
     formValues: form.formValues,
     fieldErrors: form.fieldErrors,
     openCreateModal,
     openEditModal,
-    deleteDiscipline,
     closeModal,
     updateField: form.updateField,
     submit,
     refresh: loadDisciplines,
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
   };
 }

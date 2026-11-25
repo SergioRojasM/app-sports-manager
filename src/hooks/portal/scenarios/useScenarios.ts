@@ -3,6 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/services/supabase/client';
 import { scenariosService } from '@/services/supabase/portal/scenarios.service';
+import {
+  agruparTiposEscenario,
+  coincideBusqueda,
+  normalizarTexto,
+  resumenEscenarios,
+  type ScenarioTipoOption,
+} from '@/lib/portal/admin-catalogo.utils';
 import type {
   CreateScenarioInput,
   Scenario,
@@ -15,6 +22,7 @@ import type {
   ScenariosViewModel,
   UpdateScenarioInput,
 } from '@/types/portal/scenarios.types';
+import { ScenarioServiceError } from '@/types/portal/scenarios.types';
 
 const EMPTY_SCHEDULE: ScenarioScheduleFormValue = {
   dia_semana: '',
@@ -95,9 +103,23 @@ type UseScenariosResult = ScenariosViewModel & {
   fieldErrors: ScenarioFieldErrors;
   scheduleErrors: ScenarioScheduleFieldErrors;
   setSearchTerm: (value: string) => void;
+  /** Normalised `tipo` key, or 'todos'. */
+  tipoFilter: string;
+  setTipoFilter: (value: string) => void;
+  /** Distinct types over all scenarios with their counts (independent of the filters). */
+  tipoOptions: ScenarioTipoOption[];
+  /** Totals of the listed scenarios: capacity and available schedules. */
+  summary: { cupos: number; horariosActivos: number };
   openCreateModal: () => void;
   openEditModal: (scenario: ScenarioWithAvailability) => void;
-  deleteScenario: (scenario: ScenarioWithAvailability) => Promise<void>;
+  /** Delete flow driven by GritConfirmDialog. */
+  deleteTarget: ScenarioWithAvailability | null;
+  isDeleting: boolean;
+  deleteError: string | null;
+  requestDelete: (scenario: ScenarioWithAvailability) => void;
+  cancelDelete: () => void;
+  confirmDelete: () => Promise<void>;
+  dismissSuccess: () => void;
   closeModal: () => void;
   updateField: (field: keyof ScenarioFormValues, value: string | boolean) => void;
   addSchedule: () => void;
@@ -116,6 +138,10 @@ export function useScenarios({ tenantId, onCreated }: UseScenariosOptions): UseS
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [tipoFilter, setTipoFilter] = useState('todos');
+  const [deleteTarget, setDeleteTarget] = useState<ScenarioWithAvailability | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [selectedScenario, setSelectedScenario] = useState<ScenarioWithAvailability | null>(null);
@@ -166,20 +192,19 @@ export function useScenarios({ tenantId, onCreated }: UseScenariosOptions): UseS
     };
   }, [loadScenarios]);
 
-  const filteredScenarios = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    if (!normalizedSearch) {
-      return scenarios;
-    }
+  const tipoOptions = useMemo(() => agruparTiposEscenario(scenarios), [scenarios]);
 
-    return scenarios.filter((scenario) => {
-      const haystack = [scenario.nombre, scenario.tipo, scenario.ubicacion ?? '', scenario.descripcion ?? '']
-        .join(' ')
-        .toLowerCase();
+  const filteredScenarios = useMemo(
+    () =>
+      scenarios.filter(
+        (scenario) =>
+          (tipoFilter === 'todos' || normalizarTexto(scenario.tipo) === tipoFilter) &&
+          coincideBusqueda(searchTerm, [scenario.nombre, scenario.tipo, scenario.ubicacion, scenario.descripcion]),
+      ),
+    [scenarios, searchTerm, tipoFilter],
+  );
 
-      return haystack.includes(normalizedSearch);
-    });
-  }, [scenarios, searchTerm]);
+  const summary = useMemo(() => resumenEscenarios(filteredScenarios), [filteredScenarios]);
 
   const resetFormState = useCallback(() => {
     setFormValues(EMPTY_FORM);
@@ -207,35 +232,43 @@ export function useScenarios({ tenantId, onCreated }: UseScenariosOptions): UseS
     setSuccessMessage(null);
   }, []);
 
-  const deleteScenario = useCallback(
-    async (scenario: ScenarioWithAvailability) => {
-      const shouldDelete = window.confirm(
-        `¿Seguro que quieres eliminar el escenario "${scenario.nombre}"? Esta acción no se puede deshacer.`,
+  const requestDelete = useCallback((scenario: ScenarioWithAvailability) => {
+    setDeleteError(null);
+    setSuccessMessage(null);
+    setDeleteTarget(scenario);
+  }, []);
+
+  const cancelDelete = useCallback(() => {
+    if (isDeleting) return;
+    setDeleteTarget(null);
+    setDeleteError(null);
+  }, [isDeleting]);
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await scenariosService.deleteScenario(deleteTarget.id, tenantId);
+      if (selectedScenario?.id === deleteTarget.id) {
+        setModalOpen(false);
+        setSelectedScenario(null);
+      }
+      setDeleteTarget(null);
+      await loadScenarios();
+      setSuccessMessage('Escenario eliminado correctamente.');
+    } catch (deleteFailure) {
+      setDeleteError(
+        deleteFailure instanceof ScenarioServiceError
+          ? deleteFailure.message
+          : 'No fue posible eliminar el escenario. Inténtalo nuevamente.',
       );
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [deleteTarget, loadScenarios, selectedScenario?.id, tenantId]);
 
-      if (!shouldDelete) {
-        return;
-      }
-
-      setSubmitError(null);
-      setSuccessMessage(null);
-
-      try {
-        await scenariosService.deleteScenario(scenario.id, tenantId);
-
-        if (selectedScenario?.id === scenario.id) {
-          setModalOpen(false);
-          setSelectedScenario(null);
-        }
-
-        await loadScenarios();
-        setSuccessMessage('Escenario eliminado correctamente.');
-      } catch {
-        setSubmitError('No fue posible eliminar el escenario. Inténtalo nuevamente.');
-      }
-    },
-    [loadScenarios, selectedScenario?.id, tenantId],
-  );
+  const dismissSuccess = useCallback(() => setSuccessMessage(null), []);
 
   const closeModal = useCallback(() => {
     setModalOpen(false);
@@ -464,6 +497,17 @@ export function useScenarios({ tenantId, onCreated }: UseScenariosOptions): UseS
   return {
     scenarios,
     filteredScenarios,
+    tipoFilter,
+    setTipoFilter,
+    tipoOptions,
+    summary,
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
+    dismissSuccess,
     loading,
     error,
     modalOpen,
@@ -479,7 +523,6 @@ export function useScenarios({ tenantId, onCreated }: UseScenariosOptions): UseS
     setSearchTerm,
     openCreateModal,
     openEditModal,
-    deleteScenario,
     closeModal,
     updateField,
     addSchedule,

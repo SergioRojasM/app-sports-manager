@@ -1,4 +1,5 @@
 import { createClient } from '@/services/supabase/client';
+import { ScenarioServiceError } from '@/types/portal/scenarios.types';
 import type {
   CreateScenarioInput,
   Scenario,
@@ -146,7 +147,13 @@ export const scenariosService = {
       .eq('tenant_id', tenantId);
 
     if (error) {
-      throw new Error('No fue posible eliminar el escenario.');
+      if (error.code === '23503') {
+        throw new ScenarioServiceError(
+          'in_use',
+          'No puedes eliminar este escenario porque tiene entrenamientos o eventos asociados.',
+        );
+      }
+      throw new ScenarioServiceError('unknown', 'No fue posible eliminar el escenario. Inténtalo nuevamente.');
     }
   },
 

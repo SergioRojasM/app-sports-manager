@@ -56,11 +56,11 @@ shell (§7), so only the content area is page-specific.
 | `x9xdbA` | App · Mis reservas | `/portal/mis-reservas` — migrated (no row ⋯ menu) |
 | `v1lcBA` | App · Mis entradas | `/portal/mis-entradas` — migrated (no add-to-calendar button) |
 | `SSjFs` | App · Notificaciones (tiempo real) | header bell panel · `/portal/notificaciones` |
-| `aYwNn` | Admin · Configuración | `orgs/[tenant_id]/gestion-organizacion` |
-| `qG0T5` | Admin · Escenarios | `orgs/[tenant_id]/gestion-escenarios` |
-| `fXuVP` | Admin · Disciplinas | `orgs/[tenant_id]/gestion-disciplinas` |
-| `v8mqZG` | Admin · Servicios | `orgs/[tenant_id]/gestion-servicios` |
-| `J7Lw7d` | Admin · Planes | `orgs/[tenant_id]/gestion-planes` |
+| `aYwNn` | Admin · Configuración | `orgs/[tenant_id]/gestion-organizacion` — migrated (no "Ver perfil público": no public org page; no sede / category; visibility tag instead of the category pill; channels In-app + Email, no WhatsApp) |
+| `qG0T5` | Admin · Escenarios | `orgs/[tenant_id]/gestion-escenarios` — migrated (type tabs built from the free-text `tipo`; no "Mantenimiento" status: Activo / Inactivo) |
+| `fXuVP` | Admin · Disciplinas | `orgs/[tenant_id]/gestion-disciplinas` — migrated (stats: "Atletas con nivel" + "Niveles activos" only; no level descriptions, "Ascenso automático", sessions or attendance; levels reordered with buttons, the drag handle is decorative) |
+| `v8mqZG` | Admin · Servicios | `orgs/[tenant_id]/gestion-servicios` — migrated (status tabs instead of type tabs; no TIPO / DISCIPLINA / CUPO / PRECIO columns; delete is a direct row action; no "Más usados este mes" / "Tiqueteras por agotarse" panels) |
+| `J7Lw7d` | Admin · Planes | `orgs/[tenant_id]/gestion-planes` — migrated, admin and read-only (usuario / entrenador) views (no KPI row, "Ingreso / mes" + sparkline or subscriber avatars: analytics deferred; status Activo / Inactivo instead of Borrador; the toast is a dismissible `GritAlert` without "Deshacer") |
 | `nIhrL` | Admin · Equipo · Miembros | `orgs/[tenant_id]/gestion-equipo` |
 | `PKOv8` | Admin · Equipo · Suscripciones | `orgs/[tenant_id]/gestion-suscripciones` |
 | `p5Ms22` | Admin · Entrenamientos (calendario) | `orgs/[tenant_id]/gestion-entrenamientos` |
@@ -230,9 +230,9 @@ reproduces in its doc comment.
 
 | Component | Key props (defaults) | v3 node · notes |
 | --- | --- | --- |
-| `GritCard` | `variant` card·glass·highlight·inset (`glass`), `padding` none·sm·md·lg·xl = 0/16/20/24/28 (`lg`), `as` (`div`) | See §3. Pass `variant="card"` for page content — the `glass` default is meant for overlays |
+| `GritCard` | `variant` card·glass·highlight·inset (`glass`), `padding` none·sm·md·lg·xl = 0/16/20/24/28 (`lg`), `as` (`div`), HTML attributes (`aria-label`…) | See §3. Pass `variant="card"` for page content — the `glass` default is meant for overlays |
 | `GritPageHeader` | `title`, `titleAccent`, `italic`, `titleVariant` light·display (`light`), `titleAdornment`, `eyebrow`, `subtitle`, `actions` | `lnMVj` / `jHJwK`. The page's only `h1`: Exo 2 300, 40px (30px mobile). `titleAccent` is cyan; `italic` slants the accent only. `titleVariant="display"` = Exo 2 600 italic for a record name (`xjlmU` "GRIT 10K"); `titleAdornment` (a status pill) sits beside the `h1`, outside it. `actions` holds the page tools and at most one `GritButton size="lg"` |
-| `GritSectionHeading` | `title`, `subtitle`, `action`, `size` md·lg = 17/19px (`lg`), `as` h2·h3 (`h2`) | Panel title, Exo 2 500; subtitle 12px muted; `action` right-aligned |
+| `GritSectionHeading` | `title`, `subtitle`, `action`, `size` md·lg = 17/19px (`lg`), `as` h2·h3 (`h2`), `id`, `icon` | Panel title, Exo 2 500; subtitle 12px muted; `action` right-aligned. `icon` = 36px round chip with a 16px cyan icon before the title (settings sections of `aYwNn`) |
 | `GritPageContainer` | — | Applied once by the Portal layout (padding 12/32/32/32, gap 20, max 1440). Use directly only outside `/portal` |
 | `GritDivider` | — | 1px `white/[0.06]` rule |
 | `GritEmptyState` | `icon`, `title`, `description`, `action`, `titleAs`, `descriptionClassName` | Loading / error / empty / not-found, on a `card` surface |
@@ -278,10 +278,15 @@ Button rules:
 | `GritSegmented` | `options` `{value,label,count?,icon?}[]`, `value`, `onChange`, `variant` soft·solid (`soft`), **`ariaLabel`** | `LW0MQ` / `rhTJ3` (soft) · `g2bgr` View Switch (solid). Buttons with `aria-pressed` in a labelled `role="group"`; scrolls horizontally inside its track on narrow screens |
 | `GritChip` | `active`, `icon`, button props | `xKTkP` / `bHakw`. Toggle chip (`aria-pressed`); active = cyan fill + glow |
 | `GritKpiCard` | `icon`, `iconTone` accent·danger·muted (`accent`, inline only), `value`, `label`, `detail`, `highlight`, `valueClassName`, `layout`, `hint`, `hintTone`, `href` + `hrefLabel` | `GO5Yf` / `pbTiS`. Default `layout="inline"`: round icon chip, Exo 2 300 36px value, 12px label. `layout="stacked"` (Inicio `lhbhK`): 28px radius, 36px accent icon chip + optional round shortcut (`href` requires `hrefLabel`), Exo 2 300 56px value, 13/500 label, 12px `hint` toned `muted` / `accent` / `warning`. `highlight` for the one featured KPI; tone the value with `text-grit-success` / `text-grit-warning` |
-| `GritAvatar` | `name`, `src`, `size` 32·34·38 people / 20·26·36·42·52 club marks (`34`), `tone` neutral·soft·solid·org (`neutral`) | `sFaSi` / `gNnuk` / club mark `orsH4`. Initials from `name` (person icon if empty, shield for `org`); image is decorative (`alt=""`) because the name is always shown beside it, and falls back to the initials when it fails to load. `org` = dark 80% fill, cyan 50% stroke, cyan Exo 2 700 italic initials scaled with the circle |
+| `GritAvatar` | `name`, `src`, `size` 32·34·38 people / 20·26·36·42·52·56 club marks (`34`), `tone` neutral·soft·solid·org (`neutral`), `shape` circle·rounded (`circle`) | `sFaSi` / `gNnuk` / club mark `orsH4`. Initials from `name` (person icon if empty, shield for `org`); image is decorative (`alt=""`) because the name is always shown beside it, and falls back to the initials when it fails to load. `org` = dark 80% fill, cyan 50% stroke, cyan Exo 2 700 italic initials scaled with the circle. `shape="rounded"` = 18px-radius square (organization logo, `aYwNn` `YfbBZ`) |
 | `GritProgress` | `value` 0–100 (clamped), **`label`**, `showValue` (`true`), `tone` accent·warning·danger | `fU6ex`. 6px track, JetBrains Mono %, `role="progressbar"` |
 | `GritProgressRing` | `value` (null → "—"), `max`, `caption`, **`label`**, `size` (`96`) | `LV7I0` `G1a17B`. SVG ring (white 8% track, cyan arc with glow), "value/max" Exo 2 24 + 10px caption, `role="progressbar"` |
 | `GritPillSelect` | **`label`** (sr-only), `icon`, `size` sm·md = 29/35px (`md`), `onChange(value)`, `<option>` children | `XSFT7` / `ZYxt2` `gQPV3` / `LV7I0` `UjgJj`. Pill `<select>` with a leading cyan icon; options carry the visible text ("Estado: Todos") |
+| `GritSwitch` | `checked`, `onChange(next)`, **`label`**, `showLabel` (`false`), `disabled` | Toggle `sM1rG` (`aYwNn`) / `HY4nd` (`v8mqZG`): 36×20 pill, padding 2, 16px knob; off = white 8% track, on = cyan track + on-brand knob. `<button role="switch" aria-checked>`; `label` is `aria-label` unless `showLabel` renders it beside the track |
+| `GritAddTile` | `title`, `subtitle`, `icon` (`add`), `size` md·sm (`md`), button props | `qG0T5` `SmgQv` / `fXuVP` `siF01`. Dashed slot closing a grid or row: 56px (md) / 40px (sm) cyan ring, Exo 2 19 title (md) or 12/600 label (sm). One `<button>`, `h-full` |
+| `GritDrawer` | `open`, `onClose`, `title`, `subtitle`, `busy`, `footer`, `size` md·lg = 576/768px (`md`) | Derived (§9 "Modals and drawers"): right-docked `glass` panel, full width below `sm`; `role="dialog"` + `aria-labelledby` on the `GritSectionHeading` title; scrollable body, sticky footer; focus moved in, Tab trapped, returned to the opener; `busy` ignores Escape / backdrop / close. Every create / edit form opens in one |
+| `GritConfirmDialog` | `open`, `title`, `message`, `confirmLabel` (`Eliminar`), `pendingLabel`, `cancelLabel`, `tone` danger·primary (`danger`), `pending`, `error`, `onConfirm`, `onCancel` | Derived: centered `glass` panel 420 wide, `role="alertdialog"`; initial focus on Cancel, Escape cancels, `pending` disables both actions. Replaces `window.confirm` |
+| `GritField` + `gritDescribedBy` | **`htmlFor`**, **`label`**, `hint`, `error`, `optional` | Derived (§9 "Forms"): label 12/600 `grit-subtext`, hint 11px `grit-muted` (`{id}-hint`), error 12px `grit-danger` with `role="alert"` (`{id}-error`). The control sets `aria-describedby={gritDescribedBy(id, hint, error)}` and uses `gritInputInvalidClass` / `gritSelectInvalidClass` when invalid |
 | `GritPagination` | `page` (1-based), `totalPages`, `onPageChange`, `summary` | `Alk2W`. Renders nothing for ≤1 page; ellipsis above 7 pages; `nav[aria-label="Paginación"]` + `aria-current` |
 | `GritMediaCard` | `image`, `imageAlt`, `placeholderIcon`, `radius` lg·xl·none = 24/28/0 (`lg`), `stroke` neutral·accent·none (`neutral`; `none` + `radius="none"` = a photo zone inside a larger card), `top`, `bottom`, `padding` 14·16·20·22·24 (`14`), `as` | Photo surface of the event / club cards. Full-bleed photo under the v3 top (55% → 0 at 30%) and bottom (0 at 35% → 95%) shades; placeholder (dark gradient + icon) when the image is missing or fails. Decorative photo unless `imageAlt` |
 | `GritOverlayPill` | `tone` glass·brand·danger (`glass`), `icon`, `iconTone` accent·ink, `size` md·lg (`md`), `href` / `onClick`, `ariaLabel` | Over-photo pill (`YxmsK`, `hShSC`, `L3ojFF`): glass = `grit-bg/45` + white 20% stroke + 14px blur; brand = cyan fill. Span, `Link` or `button`. `gritOverlayPillClass` styles external triggers the same way |
@@ -306,6 +311,10 @@ Button rules:
 | A ratio in a table cell | `GritProgress` |
 | A ratio as the focal number of a card (check-in) | `GritProgressRing` |
 | Page feedback (saved, toggled, failed) | `GritAlert` |
+| An on/off setting saved immediately (activo, canal) | `GritSwitch` |
+| A create / edit form | `GritDrawer` (form fields inside, Cancel + Save in `footer`) |
+| A destructive confirmation | `GritConfirmDialog` — never `window.confirm` |
+| An add-to-grid slot ("Agregar escenario", "Nivel 04") | `GritAddTile` |
 
 ---
 
@@ -473,9 +482,11 @@ and a narrow column of smaller panels (`size="md"`). Chart colours come from
 
 ### Settings sections (`aYwNn` Configuración)
 
-Rows of `GritCard card` sections, each with `GritSectionHeading` (title,
-subtitle, `action` = `GritButton size="sm" variant="outline-accent" icon="add"`
-or a secondary "Editar"). Read-only key/values inside use `GritInfoRow` or an
+Rows of `GritCard card` sections (padding 22, gap 18), each with
+`GritSectionHeading icon` (36px chip, title, subtitle, `action` =
+`GritButton size="sm" variant="outline-accent" icon="add"` or a secondary
+"Editar") — `TenantSettingsSection` composes this for the organization page. A
+setting saved immediately (a rule's activo) is a `GritSwitch` on the row. Read-only key/values inside use `GritInfoRow` or an
 `inset` card; lists of items inside use list rows (below). Big numbers inside a
 section use Exo 2 300 in cyan (`3 días`).
 
@@ -494,12 +505,20 @@ actions as `GritButton` (one `primary`). Close with `GritIconButton
 icon="close" label="Cerrar"`. Keep Escape-to-close, click-outside-to-close and
 focus return.
 
+Don't hand-roll this: forms open in `GritDrawer` and destructive confirmations
+in `GritConfirmDialog`. Both share the kit's focus management (focus in, Tab
+trapped, Escape, focus back to the opener) and a `busy` / `pending` state that
+blocks closing while a request runs.
+
 ### Forms — derived
 
 v3 has **no form frame yet**. Use `gritInputClass` / `gritSelectClass`
 (12px radius, `white/[0.04]` fill, `white/[0.12]` stroke, 13px, cyan focus),
 labels 12px/600 `grit-subtext`, helper text 11px `grit-muted`, inline errors
-12px `grit-danger`. When a form frame is designed, update `styles.ts` and this
+12px `grit-danger`. Frame every field with `GritField`; a field in error swaps to
+`gritInputInvalidClass` / `gritSelectInvalidClass` (full class strings — never
+stack a danger border on top of `gritInputClass`). Booleans are a labelled
+`GritSwitch showLabel`. When a form frame is designed, update `styles.ts` and this
 section — never restyle a field ad hoc.
 
 ### Empty, loading and error states

@@ -132,3 +132,16 @@ export type ScenariosViewModel = {
   submitError: string | null;
   successMessage: string | null;
 };
+
+export type ScenarioServiceErrorCode = 'in_use' | 'unknown';
+
+/** Typed failure of a scenario mutation; `in_use` = other records (trainings, events) reference it. */
+export class ScenarioServiceError extends Error {
+  constructor(
+    public readonly code: ScenarioServiceErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'ScenarioServiceError';
+  }
+}

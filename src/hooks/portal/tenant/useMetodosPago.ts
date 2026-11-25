@@ -33,6 +33,8 @@ type UseMetodosPagoResult = {
   openDelete: (m: MetodoPago) => void;
   closeDelete: () => void;
   confirmDelete: () => Promise<void>;
+  /** Reloads the list (the section's "Reintentar"). */
+  reload: () => Promise<void>;
 };
 
 export function useMetodosPago({ tenantId }: UseMetodosPagoOptions): UseMetodosPagoResult {
@@ -179,5 +181,6 @@ export function useMetodosPago({ tenantId }: UseMetodosPagoOptions): UseMetodosP
     openDelete,
     closeDelete,
     confirmDelete,
+    reload: fetchMetodos,
   };
 }

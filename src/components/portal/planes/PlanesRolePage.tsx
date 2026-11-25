@@ -3,6 +3,7 @@
 import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
 import { PlanesPage } from '@/components/portal/planes';
 import { PlanesViewPage } from '@/components/portal/planes/PlanesViewPage';
+import { GritEmptyState } from '@/components/ui';
 
 type PlanesRolePageProps = {
   tenantId: string;
@@ -13,8 +14,8 @@ export function PlanesRolePage({ tenantId }: PlanesRolePageProps) {
 
   if (loading || !role) {
     return (
-      <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-        Cargando...
+      <div role="status">
+        <GritEmptyState icon="hourglass_empty" title="Cargando planes…" />
       </div>
     );
   }

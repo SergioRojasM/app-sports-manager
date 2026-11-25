@@ -1,90 +1,77 @@
 'use client';
 
 import type { UserRole } from '@/types/portal.types';
+import { GritAlert, GritButton, GritEmptyState, GritPageHeader } from '@/components/ui';
 import { usePlanesView, getActiveTipos } from '@/hooks/portal/planes/usePlanesView';
 import { useSuscripcion } from '@/hooks/portal/planes/useSuscripcion';
-import { PlanesTable } from './PlanesTable';
+import { PlanCard } from './PlanCard';
 import { SuscripcionModal } from './SuscripcionModal';
-import { GritPageHeader } from '@/components/ui';
 
 type PlanesViewPageProps = {
   tenantId: string;
   role: UserRole;
 };
 
-function LoadingState() {
-  return (
-    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-      Cargando planes...
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-      No hay planes disponibles en este momento.
-    </div>
-  );
-}
-
+/** Read-only plans catalogue for athletes and trainers (`J7Lw7d` cards); "Adquirir" for athletes. */
 export function PlanesViewPage({ tenantId, role }: PlanesViewPageProps) {
-  const { loading, error, planes } = usePlanesView({ tenantId });
+  const { loading, error, planes, refresh } = usePlanesView({ tenantId });
   const suscripcion = useSuscripcion({ tenantId });
 
   const isUsuario = role === 'usuario';
 
   return (
-    <section className="space-y-6">
-      <GritPageHeader title="Planes de Membresía" subtitle="Consulta los planes disponibles en esta organización." />
+    <section className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Planes de"
+        titleAccent="membresía."
+        italic
+        subtitle="Consulta los planes disponibles en esta organización."
+      />
 
-      {suscripcion.successMessage ? (
-        <div
-          className="rounded-grit-md border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200"
-          role="status"
-        >
-          {suscripcion.successMessage}
+      {suscripcion.successMessage ? <GritAlert tone="success">{suscripcion.successMessage}</GritAlert> : null}
+
+      {loading ? (
+        <div role="status">
+          <GritEmptyState icon="hourglass_empty" title="Cargando planes…" />
         </div>
-      ) : null}
-
-      {loading ? <LoadingState /> : null}
-
-      {!loading && error ? (
-        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
-          <p className="text-sm text-grit-danger">{error}</p>
-        </div>
-      ) : null}
-
-      {!loading && !error && planes.length === 0 ? <EmptyState /> : null}
-
-      {!loading && !error && planes.length > 0 ? (
-        <PlanesTable
-          rows={planes}
-          readOnly={!isUsuario}
-          renderRowAction={
-            isUsuario
-              ? (plan) => {
-                  const planTipos = plan.plan_tipos ?? [];
-                  const hasDefinedSubtypes = planTipos.length > 0;
-                  const hasActiveSubtypes = getActiveTipos(plan).length > 0;
-
-                  // If subtypes are defined but none are active, hide the button
-                  if (hasDefinedSubtypes && !hasActiveSubtypes) return null;
-
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => void suscripcion.openModal(plan)}
-                      className="rounded-grit-md bg-grit-cyan px-3 py-1.5 text-xs font-semibold text-grit-bg transition hover:bg-grit-cyan/90"
-                    >
-                      Adquirir
-                    </button>
-                  );
-                }
-              : undefined
+      ) : error ? (
+        <GritEmptyState
+          icon="error"
+          title="No pudimos cargar los planes"
+          description={error}
+          descriptionClassName="text-grit-danger"
+          action={
+            <GritButton variant="secondary" icon="refresh" onClick={() => void refresh()}>
+              Reintentar
+            </GritButton>
           }
         />
-      ) : null}
+      ) : planes.length === 0 ? (
+        <GritEmptyState icon="card_membership" title="No hay planes disponibles en este momento." />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {planes.map((plan) => {
+            const planTipos = plan.plan_tipos ?? [];
+            // Defined subtypes but none active → the plan cannot be acquired
+            const canAcquire = isUsuario && !(planTipos.length > 0 && getActiveTipos(plan).length === 0);
+            return (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                disciplinaNames={plan.disciplinaNames}
+                mode="readonly"
+                action={
+                  canAcquire ? (
+                    <GritButton fullWidth icon="shopping_cart" onClick={() => void suscripcion.openModal(plan)}>
+                      Adquirir
+                    </GritButton>
+                  ) : undefined
+                }
+              />
+            );
+          })}
+        </div>
+      )}
 
       <SuscripcionModal
         open={suscripcion.modalOpen}

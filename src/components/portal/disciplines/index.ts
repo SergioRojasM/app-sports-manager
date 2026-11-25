@@ -1,4 +1,5 @@
 export { DisciplinesPage } from './DisciplinesPage';
-export { DisciplinesTable } from './DisciplinesTable';
+export { DisciplinesList } from './DisciplinesList';
+export { DisciplineDetail } from './DisciplineDetail';
+export { NivelesLadder } from './NivelesLadder';
 export { DisciplineFormModal } from './DisciplineFormModal';
-export { DisciplinesHeaderFilters } from './DisciplinesHeaderFilters';

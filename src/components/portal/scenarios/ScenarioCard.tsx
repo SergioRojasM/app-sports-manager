@@ -1,108 +1,74 @@
-import { MultilineText } from '@/components/ui';
+import { GritCard, GritIcon, GritIconButton, GritMediaCard, GritOverlayPill } from '@/components/ui';
+import { formatHorarios, mapaEscenarioUrl } from '@/lib/portal/admin-catalogo.utils';
 import type { ScenarioWithAvailability } from '@/types/portal/scenarios.types';
 
 type ScenarioCardProps = {
   scenario: ScenarioWithAvailability;
   onEdit: (scenario: ScenarioWithAvailability) => void;
-  onDelete: (scenario: ScenarioWithAvailability) => Promise<void>;
+  onDelete: (scenario: ScenarioWithAvailability) => void;
 };
 
-function truncateText(value: string | null | undefined, maxLength = 50): string {
-  if (!value) {
-    return 'No disponible';
-  }
-
-  const trimmed = value.trim();
-  if (trimmed.length <= maxLength) {
-    return trimmed;
-  }
-
-  return `${trimmed.slice(0, maxLength - 3)}...`;
-}
-
-function resolveStatusBadge(scenario: ScenarioWithAvailability) {
-  if (!scenario.activo) {
-    return {
-      label: 'Inactivo',
-      className: 'border-grit-danger/40 bg-rose-500/15 text-grit-danger',
-    };
-  }
-
-  return {
-    label: 'Activo',
-    className: 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200',
-  };
-}
-
+/**
+ * Scenario card (`qG0T5` `mEIoa`): 150px photo with tipo + status pills, name, location,
+ * description, then capacity / schedules and the map · edit · delete actions.
+ */
 export function ScenarioCard({ scenario, onEdit, onDelete }: ScenarioCardProps) {
-  const status = resolveStatusBadge(scenario);
+  const horarios = scenario.schedules.filter((schedule) => schedule.disponible).length;
+  const mapUrl = mapaEscenarioUrl(scenario);
+  const location = scenario.ubicacion ?? scenario.direccion;
 
   return (
-    <article className="border bg-grit-glass backdrop-blur-md group rounded-grit-2xl border-grit-glass-border bg-grit-card p-5 transition hover:border-grit-cyan/35">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-grit-title text-lg font-semibold text-grit-text">{scenario.nombre}</h3>
-          <p className="mt-1 inline-flex items-center gap-1 text-xs text-grit-subtext">
-            <span className="material-symbols-outlined text-sm text-grit-cyan" aria-hidden="true">
-              location_on
-            </span>
-            {scenario.ubicacion ?? 'Ubicación no definida'}
-          </p>
-          <div className="mt-1">
-            <MultilineText maxLength={50} className="text-xs text-cyan-300">
-              {scenario.descripcion ?? 'No disponible'}
-            </MultilineText>
+    <GritCard as="article" variant="card" padding="none" className="flex flex-col overflow-hidden">
+      <GritMediaCard
+        image={scenario.image_url}
+        placeholderIcon="stadium"
+        radius="none"
+        stroke="none"
+        padding={14}
+        className="h-[150px] shrink-0"
+        top={
+          <div className="flex flex-wrap gap-1.5">
+            <GritOverlayPill>{scenario.tipo}</GritOverlayPill>
+            <GritOverlayPill tone={scenario.activo ? 'brand' : 'glass'} icon={scenario.activo ? undefined : 'visibility_off'}>
+              {scenario.activo ? 'Activo' : 'Inactivo'}
+            </GritOverlayPill>
           </div>
+        }
+      />
+      <div className="flex flex-1 flex-col gap-2.5 px-[18px] pb-4 pt-3">
+        <h2 className="font-grit-title text-[19px] font-medium leading-tight text-grit-text">{scenario.nombre}</h2>
+        <p className="flex items-center gap-1.5 font-grit-body text-xs text-grit-subtext">
+          <GritIcon name="location_on" size={13} className="text-grit-cyan" />
+          <span className="truncate">{location ?? 'Ubicación no definida'}</span>
+        </p>
+        {scenario.descripcion ? (
+          <p className="line-clamp-2 font-grit-body text-xs text-grit-muted">{scenario.descripcion}</p>
+        ) : null}
+        <div className="mt-auto flex items-center gap-2 pt-2">
+          <p className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3.5 gap-y-1 font-grit-body text-xs font-semibold text-grit-text">
+            <span className="inline-flex items-center gap-1.5">
+              <GritIcon name="group" size={13} className="text-grit-cyan" />
+              <span className="sr-only">Capacidad:</span>
+              {scenario.capacidad ?? '—'}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <GritIcon name="alarm" size={13} className="text-grit-cyan" />
+              {formatHorarios(horarios)}
+            </span>
+          </p>
+          {mapUrl ? (
+            <GritIconButton icon="map" label={`Ver ${scenario.nombre} en mapa`} size="sm" variant="ghost" href={mapUrl} external />
+          ) : null}
+          <GritIconButton icon="edit" label={`Editar ${scenario.nombre}`} size="sm" variant="ghost" onClick={() => onEdit(scenario)} />
+          <GritIconButton
+            icon="delete"
+            label={`Eliminar escenario ${scenario.nombre}`}
+            size="sm"
+            variant="ghost"
+            onClick={() => onDelete(scenario)}
+          />
         </div>
-
-        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${status.className}`}>
-          {status.label}
-        </span>
       </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-2 text-sm text-grit-subtext sm:grid-cols-2">
-        <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
-            groups
-          </span>
-          Capacidad: {scenario.capacidad ?? 'N/D'}
-        </div>
-        <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
-            event_available
-          </span>
-          Horarios disponibles: {scenario.schedules.filter((schedule) => schedule.disponible).length}
-        </div>
-        <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
-            pin_drop
-          </span>
-          Dirección: {truncateText(scenario.direccion)}
-        </div>
-        <div className="inline-flex items-center gap-1.5">
-          <span className="material-symbols-outlined text-base text-grit-cyan" aria-hidden="true">
-            explore
-          </span>
-          Coordenadas: {truncateText(scenario.coordenadas)}
-        </div>
-      </div>
-
-      <div className="mt-5 flex gap-2">
-        <button
-          type="button"
-          onClick={() => void onDelete(scenario)}
-          className="flex-1 rounded-grit-md border border-grit-danger/35 bg-rose-500/10 px-3 py-2 text-sm font-medium text-grit-danger transition hover:bg-rose-500/20"
-        >
-          Eliminar
-        </button>
-        <button
-          type="button"
-          onClick={() => onEdit(scenario)}
-          className="flex-1 rounded-grit-md bg-grit-cyan px-3 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90"
-        >
-          Edit
-        </button>
-      </div>
-    </article>
+    </GritCard>
   );
 }
