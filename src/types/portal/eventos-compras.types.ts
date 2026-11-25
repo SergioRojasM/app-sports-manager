@@ -249,6 +249,11 @@ export type AsistenteIngreso = {
 
 export type AsistentesIngresoFiltro = 'todos' | 'ingresaron' | 'pendientes';
 
+/** Order of the check-in attendee list (grit-arena-v3 `xjlmU` "Pendientes primero"). */
+export type AsistentesIngresoOrden = 'pendientes' | 'nombre' | 'recientes';
+
+export type AsistentesIngresoConteos = { todos: number; ingresaron: number; pendientes: number };
+
 // ─── Ticket PDF ───
 
 /** One PDF page. Built from a `CompraResultado` (step 4) or a `MiCompra` (Mis Entradas). */

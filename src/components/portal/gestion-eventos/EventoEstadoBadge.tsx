@@ -1,4 +1,4 @@
-import { GritIcon, cx } from '@/components/ui';
+import { GritTag } from '@/components/ui';
 import { EVENTO_ESTADO_LABELS, type EventoEstado } from '@/types/portal/eventos.types';
 
 type EventoEstadoBadgeProps = {
@@ -9,26 +9,18 @@ type EventoEstadoBadgeProps = {
   overlay?: boolean;
 };
 
-const TONE_CLASSES: Record<EventoEstado, { base: string; tint: string }> = {
-  confirmado: { base: 'border-grit-success/40 text-grit-success', tint: 'bg-grit-success/10' },
-  cancelado: { base: 'border-grit-danger/40 text-grit-danger', tint: 'bg-grit-danger/10' },
-};
-
-const BORRADOR_TONE = { base: 'border-dashed border-grit-subtext/50 text-grit-subtext', tint: 'bg-grit-bg/80' };
-
+/** Estado of an event as a v3 status tag: confirmado accent · cancelado danger · borrador neutral. */
 export function EventoEstadoBadge({ estado, borrador = false, overlay = false }: EventoEstadoBadgeProps) {
-  const tone = borrador ? BORRADOR_TONE : TONE_CLASSES[estado];
-
-  return (
-    <span
-      className={cx(
-        'inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2.5 py-0.5 font-grit-body text-xs font-semibold',
-        tone.base,
-        overlay ? 'bg-grit-bg/90 shadow-sm backdrop-blur-sm' : tone.tint,
-      )}
-    >
-      {borrador && <GritIcon name="edit_note" size={14} />}
-      {borrador ? 'Borrador' : EVENTO_ESTADO_LABELS[estado]}
-    </span>
+  const tag = borrador ? (
+    <GritTag tone="neutral" icon="edit_note">
+      Borrador
+    </GritTag>
+  ) : (
+    <GritTag tone={estado === 'cancelado' ? 'danger' : 'accent'} dot>
+      {EVENTO_ESTADO_LABELS[estado]}
+    </GritTag>
   );
+
+  // The tags are translucent: over a photo they sit on an opaque dark pill
+  return overlay ? <span className="inline-flex rounded-full bg-grit-bg/85 backdrop-blur-sm">{tag}</span> : tag;
 }

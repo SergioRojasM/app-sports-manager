@@ -1,36 +1,31 @@
-import { GritIcon } from '@/components/ui';
+import { GritKpiCard } from '@/components/ui';
 import type { EventosStats } from '@/types/portal/eventos.types';
 
 type EventosStatsCardsProps = {
   stats: EventosStats;
+  loading?: boolean;
 };
 
-const CARDS: Array<{ label: string; icon: string; color: string; getValue: (stats: EventosStats) => number }> = [
-  { label: 'Total de eventos', icon: 'event', color: 'text-grit-cyan', getValue: (stats) => stats.total },
-  {
-    label: 'Próximos confirmados',
-    icon: 'event_available',
-    color: 'text-grit-success',
-    getValue: (stats) => stats.proximosConfirmados,
-  },
-  { label: 'Cancelados', icon: 'event_busy', color: 'text-grit-danger', getValue: (stats) => stats.cancelados },
-  { label: 'Borradores', icon: 'edit_note', color: 'text-grit-subtext', getValue: (stats) => stats.borradores },
-];
+const GRID = 'grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4';
 
-export function EventosStatsCards({ stats }: EventosStatsCardsProps) {
+/** KPI row of the events page (grit-arena-v3 `ZYxt2` `uksbZ`), over the unfiltered dataset. */
+export function EventosStatsCards({ stats, loading = false }: EventosStatsCardsProps) {
+  if (loading) {
+    return (
+      <div className={GRID} aria-hidden="true">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index} className="h-[72px] animate-pulse rounded-grit-2xl bg-white/[0.04]" />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {CARDS.map((card) => (
-        <div key={card.label} className="rounded-grit-2xl border border-grit-glass-border bg-grit-glass p-5 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <GritIcon name={card.icon} size={24} className={card.color} />
-            <div>
-              <p className="font-grit-body text-sm text-grit-subtext">{card.label}</p>
-              <p className="font-grit-title text-2xl font-bold text-grit-text">{card.getValue(stats)}</p>
-            </div>
-          </div>
-        </div>
-      ))}
+    <div className={GRID}>
+      <GritKpiCard icon="event" value={stats.total} label="Total de eventos" />
+      <GritKpiCard icon="event_available" value={stats.proximosConfirmados} label="Próximos confirmados" />
+      <GritKpiCard icon="event_busy" iconTone="danger" value={stats.cancelados} label="Cancelados" />
+      <GritKpiCard icon="edit_note" iconTone="muted" value={stats.borradores} label="Borradores" />
     </div>
   );
 }

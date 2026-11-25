@@ -13,10 +13,10 @@ type GritMediaCardProps = {
   onImageError?: () => void;
   /** Icon of the placeholder (no photo). */
   placeholderIcon?: string;
-  /** lg = 24px (grid / compact cards) · xl = 28px (hero / featured). */
-  radius?: 'lg' | 'xl';
-  /** neutral = white hairline · accent = cyan hairline (featured / member). */
-  stroke?: 'neutral' | 'accent';
+  /** lg = 24px (grid / compact cards) · xl = 28px (hero / featured) · none = a photo zone inside a larger card (`LV7I0`). */
+  radius?: 'lg' | 'xl' | 'none';
+  /** neutral = white hairline · accent = cyan hairline (featured / member) · none = no stroke or shadow (zone). */
+  stroke?: 'neutral' | 'accent' | 'none';
   /** Top row (badges, date tile, round buttons). */
   top?: ReactNode;
   /** Bottom row (identity, meta, actions). */
@@ -27,12 +27,13 @@ type GritMediaCardProps = {
   className?: string;
 };
 
-const RADIUS = { lg: 'rounded-[24px]', xl: 'rounded-grit-3xl' } as const;
+const RADIUS = { lg: 'rounded-[24px]', xl: 'rounded-grit-3xl', none: '' } as const;
 
 /* v3 strokes are vertical gradients; like GritCard, CSS approximates them with a hairline + inset top highlight. */
 const STROKE = {
   neutral: 'border border-white/[0.12] shadow-[0_20px_48px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.10)]',
   accent: 'border border-grit-cyan/40 shadow-[0_20px_48px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(20,219,196,0.30)]',
+  none: '',
 } as const;
 
 const PADDING = { 14: 'p-3.5', 16: 'p-4', 20: 'p-5', 22: 'p-[22px]', 24: 'p-6' } as const;

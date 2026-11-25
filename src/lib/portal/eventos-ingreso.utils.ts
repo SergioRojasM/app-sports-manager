@@ -1,5 +1,11 @@
 import { EVENTOS_TIME_ZONE, formatEventoHora } from '@/lib/portal/eventos.utils';
-import type { IngresoResultado, IngresoResultadoCodigo } from '@/types/portal/eventos-compras.types';
+import type {
+  AsistenteIngreso,
+  AsistentesIngresoConteos,
+  AsistentesIngresoOrden,
+  IngresoResultado,
+  IngresoResultadoCodigo,
+} from '@/types/portal/eventos-compras.types';
 
 /** Same shape as the RPC check: 'EV-' + 8 chars without I, O, 0 or 1 (US-0131). */
 const CODIGO_TICKET_REGEX = /^EV-[A-HJ-NP-Z2-9]{8}$/;
@@ -91,4 +97,34 @@ export function resultadoNoEncontrado(): IngresoResultado {
     ingresoAt: null,
     ingresoPorNombre: null,
   };
+}
+
+const porNombre = (a: AsistenteIngreso, b: AsistenteIngreso) => a.asistenteNombre.localeCompare(b.asistenteNombre, 'es');
+
+/** "pendientes": no entry first, each group by name · "nombre": A–Z · "recientes": newest entry first, no entry last. */
+export function ordenarAsistentes(asistentes: AsistenteIngreso[], orden: AsistentesIngresoOrden): AsistenteIngreso[] {
+  const copia = [...asistentes];
+  if (orden === 'nombre') return copia.sort(porNombre);
+  if (orden === 'pendientes') {
+    return copia.sort((a, b) => Number(a.ingresoAt !== null) - Number(b.ingresoAt !== null) || porNombre(a, b));
+  }
+  return copia.sort((a, b) => {
+    if (a.ingresoAt === b.ingresoAt) return porNombre(a, b);
+    if (a.ingresoAt === null) return 1;
+    if (b.ingresoAt === null) return -1;
+    return new Date(b.ingresoAt).getTime() - new Date(a.ingresoAt).getTime();
+  });
+}
+
+export function contarAsistentes(asistentes: AsistenteIngreso[]): AsistentesIngresoConteos {
+  const ingresaron = asistentes.filter((asistente) => asistente.ingresoAt !== null).length;
+  return { todos: asistentes.length, ingresaron, pendientes: asistentes.length - ingresaron };
+}
+
+/** The `limite` most recent check-ins, newest first ("Últimos ingresos"). */
+export function ultimosIngresos(asistentes: AsistenteIngreso[], limite = 5): AsistenteIngreso[] {
+  return ordenarAsistentes(
+    asistentes.filter((asistente) => asistente.ingresoAt !== null),
+    'recientes',
+  ).slice(0, limite);
 }

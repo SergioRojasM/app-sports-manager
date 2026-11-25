@@ -2,13 +2,16 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { GritButton, GritEmptyState, GritIcon, GritPageHeader } from '@/components/ui';
+import { GritAlert, GritButton, GritEmptyState, GritPageHeader } from '@/components/ui';
 import { useGestionEventos, EVENTOS_PAGE_SIZE } from '@/hooks/portal/gestion-eventos/useGestionEventos';
 import { useEventosVista } from '@/hooks/portal/gestion-eventos/useEventosVista';
 import { useEventosCalendar } from '@/hooks/portal/gestion-eventos/useEventosCalendar';
 import { useEventoGuardadoBanner } from '@/hooks/portal/gestion-eventos/useEventoGuardadoBanner';
 import { useCambiarActivoEvento } from '@/hooks/portal/gestion-eventos/useCambiarActivoEvento';
-import { EventosToolbar } from './EventosToolbar';
+import { useProximoEvento } from '@/hooks/portal/gestion-eventos/useProximoEvento';
+import { EventosHeaderTools } from './EventosHeaderTools';
+import { EventosFilterBar } from './EventosFilterBar';
+import { ProximoEventoPanel } from './ProximoEventoPanel';
 import { EventosStatsCards } from './EventosStatsCards';
 import { EventosGrid, EventosGridSkeleton } from './EventosGrid';
 import { EventosTable, EventosTableSkeleton } from './EventosTable';
@@ -44,6 +47,8 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
   });
 
   const { eventos, matchesCalendarFilters, setPeriodo } = gestion;
+  const proximo = useProximoEvento(eventos, { enabled: vista === 'calendario' && !gestion.loading });
+  const { reload: reloadProximo } = proximo;
   const undatedCount = useMemo(
     () => eventos.filter((evento) => evento.fechaHora === null && matchesCalendarFilters(evento)).length,
     [eventos, matchesCalendarFilters],
@@ -79,8 +84,11 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
   const handleMutationSuccess = useCallback(() => {
     setModal(null);
     void reload();
-    if (vista === 'calendario') void reloadCalendar();
-  }, [reload, reloadCalendar, vista]);
+    if (vista === 'calendario') {
+      void reloadCalendar();
+      reloadProximo();
+    }
+  }, [reload, reloadCalendar, reloadProximo, vista]);
 
   // Quick activar/desactivar: no modal, a short confirmation message and a refresh
   const [activoMessage, setActivoMessage] = useState<string | null>(null);
@@ -92,9 +100,12 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
           : `"${evento.nombre}" está inactivo: solo será visible para el administrador.`,
       );
       void reload();
-      if (vista === 'calendario') void reloadCalendar();
+      if (vista === 'calendario') {
+        void reloadCalendar();
+        reloadProximo();
+      }
     },
-    [reload, reloadCalendar, vista],
+    [reload, reloadCalendar, reloadProximo, vista],
   );
   const cambiarActivo = useCambiarActivoEvento({ tenantId, onSuccess: handleActivoSuccess });
   const { toggle: toggleActivo, clearError: clearActivoError } = cambiarActivo;
@@ -116,6 +127,14 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
       Nuevo evento
     </GritButton>
   );
+
+  const filterProps = {
+    filters: gestion.filters,
+    disciplinas: gestion.disciplinas,
+    onEstadoChange: gestion.setEstado,
+    onPeriodoChange: gestion.setPeriodo,
+    onDisciplinaChange: gestion.setDisciplina,
+  };
 
   const renderContent = () => {
     if (gestion.error) {
@@ -147,28 +166,34 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
 
     if (vista === 'calendario') {
       return (
-        <EventosCalendar
-          monthLabel={calendar.monthLabel}
-          monthStartDate={calendar.monthStartDate}
-          eventosByDate={calendar.eventosByDate}
-          selectedDateKey={calendar.selectedDateKey}
-          selectedDayEventos={calendar.selectedDayEventos}
-          undatedCount={undatedCount}
-          loading={calendar.loading}
-          error={calendar.error}
-          onPreviousMonth={calendar.goPrevious}
-          onNextMonth={calendar.goNext}
-          onSelectDate={calendar.selectDate}
-          onRetry={() => void calendar.reload()}
-          onShowUndated={showUndated}
-          onEditar={onEditar}
-          onCambiarEstado={onCambiarEstado}
-          onEliminar={onEliminar}
-          onCambiarActivo={onCambiarActivo}
-          onVerCompras={onVerCompras}
-          onControlIngreso={onControlIngreso}
-          onDuplicar={onDuplicar}
-        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <EventosCalendar
+            monthLabel={calendar.monthLabel}
+            monthStartDate={calendar.monthStartDate}
+            eventosByDate={calendar.eventosByDate}
+            selectedDateKey={calendar.selectedDateKey}
+            selectedDayEventos={calendar.selectedDayEventos}
+            undatedCount={undatedCount}
+            loading={calendar.loading}
+            error={calendar.error}
+            isCurrentMonth={calendar.isCurrentMonth}
+            filters={<EventosFilterBar {...filterProps} sinPeriodo layout="inline" />}
+            onPreviousMonth={calendar.goPrevious}
+            onNextMonth={calendar.goNext}
+            onToday={calendar.goToday}
+            onSelectDate={calendar.selectDate}
+            onRetry={() => void calendar.reload()}
+            onShowUndated={showUndated}
+            onEditar={onEditar}
+            onCambiarEstado={onCambiarEstado}
+            onEliminar={onEliminar}
+            onCambiarActivo={onCambiarActivo}
+            onVerCompras={onVerCompras}
+            onControlIngreso={onControlIngreso}
+            onDuplicar={onDuplicar}
+          />
+          {!gestion.loading && <ProximoEventoPanel tenantId={tenantId} evento={proximo.evento} resumen={proximo.resumen} />}
+        </div>
       );
     }
 
@@ -225,81 +250,45 @@ export function GestionEventosPage({ tenantId }: GestionEventosPageProps) {
   };
 
   return (
-    <section className="space-y-6">
-      <GritPageHeader title="Eventos" subtitle="Gestiona los eventos de tu equipo" actions={nuevoButton} />
+    <section className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Gestiona tus"
+        titleAccent="eventos."
+        italic
+        actions={
+          <EventosHeaderTools
+            vista={vista}
+            onVistaChange={setVista}
+            search={gestion.filters.search}
+            onSearchChange={gestion.setSearch}
+            onNuevo={onNuevo}
+          />
+        }
+      />
 
       {guardadoBanner.message && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-grit-md border border-grit-success/40 bg-grit-success/10 px-4 py-3 font-grit-body text-sm text-grit-success"
-        >
-          <span className="flex items-center gap-2">
-            <GritIcon name="check_circle" size={18} />
-            {guardadoBanner.message}
-          </span>
-          <button
-            type="button"
-            onClick={guardadoBanner.dismiss}
-            aria-label="Cerrar mensaje"
-            className="rounded-grit-sm p-1 text-grit-success transition hover:bg-grit-success/10"
-          >
-            <GritIcon name="close" size={16} />
-          </button>
-        </div>
+        <GritAlert tone="success" onDismiss={guardadoBanner.dismiss}>
+          {guardadoBanner.message}
+        </GritAlert>
       )}
 
       {activoMessage && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-3 rounded-grit-md border border-grit-success/40 bg-grit-success/10 px-4 py-3 font-grit-body text-sm text-grit-success"
-        >
-          <span className="flex items-center gap-2">
-            <GritIcon name="check_circle" size={18} />
-            {activoMessage}
-          </span>
-          <button
-            type="button"
-            onClick={() => setActivoMessage(null)}
-            aria-label="Cerrar mensaje"
-            className="rounded-grit-sm p-1 text-grit-success transition hover:bg-grit-success/10"
-          >
-            <GritIcon name="close" size={16} />
-          </button>
-        </div>
+        <GritAlert tone="success" onDismiss={() => setActivoMessage(null)}>
+          {activoMessage}
+        </GritAlert>
       )}
 
       {cambiarActivo.error && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-3 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 font-grit-body text-sm text-grit-danger"
-        >
-          <span className="flex items-center gap-2">
-            <GritIcon name="error" size={18} />
-            {cambiarActivo.error}
-          </span>
-          <button
-            type="button"
-            onClick={clearActivoError}
-            aria-label="Cerrar mensaje"
-            className="rounded-grit-sm p-1 text-grit-danger transition hover:bg-grit-danger/10"
-          >
-            <GritIcon name="close" size={16} />
-          </button>
-        </div>
+        <GritAlert tone="danger" onDismiss={clearActivoError}>
+          {cambiarActivo.error}
+        </GritAlert>
       )}
 
-      <EventosToolbar
-        vista={vista}
-        onVistaChange={setVista}
-        filters={gestion.filters}
-        disciplinas={gestion.disciplinas}
-        onSearchChange={gestion.setSearch}
-        onEstadoChange={gestion.setEstado}
-        onPeriodoChange={gestion.setPeriodo}
-        onDisciplinaChange={gestion.setDisciplina}
-      />
+      {!gestion.error && <EventosStatsCards stats={gestion.stats} loading={gestion.loading} />}
 
-      {!gestion.loading && !gestion.error && <EventosStatsCards stats={gestion.stats} />}
+      {vista !== 'calendario' && !gestion.error && (gestion.loading || gestion.eventos.length > 0) && (
+        <EventosFilterBar {...filterProps} onClear={gestion.clearFilters} hasActiveFilters={gestion.hasActiveFilters} />
+      )}
 
       {renderContent()}
 

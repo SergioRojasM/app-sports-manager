@@ -1,3 +1,4 @@
+export { GritAlert, type GritAlertTone } from './GritAlert';
 export { GritAvatar } from './GritAvatar';
 export { GritBadge } from './GritBadge';
 export { GritButton } from './GritButton';
@@ -13,11 +14,14 @@ export { GritIconTile, type GritIconTileTone } from './GritIconTile';
 export { GritInfoRow } from './GritInfoRow';
 export { GritKpiCard } from './GritKpiCard';
 export { GritMediaCard } from './GritMediaCard';
+export { GritNextEventPanel, type GritNextEventMeter } from './GritNextEventPanel';
 export { GritOverlayPill, gritOverlayPillClass } from './GritOverlayPill';
 export { GritPageContainer } from './GritPageContainer';
 export { GritPageHeader } from './GritPageHeader';
 export { GritPagination, getPaginationItems } from './GritPagination';
+export { GritPillSelect } from './GritPillSelect';
 export { GritProgress } from './GritProgress';
+export { GritProgressRing } from './GritProgressRing';
 export { GritSearchField } from './GritSearchField';
 export { GritSectionHeading } from './GritSectionHeading';
 export { GritSegmented, type GritSegmentedOption } from './GritSegmented';
@@ -30,7 +34,9 @@ export {
   gritPillSelectClass,
   gritSelectClass,
   gritTableCellClass,
+  gritTableCellCompactClass,
   gritTableHeadCellClass,
+  gritTableHeadCellCompactClass,
   gritTableHeadClass,
   gritTableRowClass,
 } from './styles';

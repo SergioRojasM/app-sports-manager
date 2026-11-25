@@ -3,11 +3,11 @@ import type { ReactNode } from 'react';
 import { GritIcon } from './GritIcon';
 import { cx, gritFocusRing } from './styles';
 
-type GritOverlayPillTone = 'glass' | 'brand';
+type GritOverlayPillTone = 'glass' | 'brand' | 'danger';
 
 type GritOverlayPillProps = {
   children: ReactNode;
-  /** glass = translucent pill over photos · brand = solid cyan status pill (PRÓXIMO, DESTACADO). */
+  /** glass = translucent pill over photos · brand = solid cyan status pill (PRÓXIMO, DESTACADO) · danger = solid danger status pill (CANCELADO). */
   tone?: GritOverlayPillTone;
   icon?: string;
   /** Icon colour for the glass tone: cyan (default) or ink. */
@@ -23,6 +23,7 @@ type GritOverlayPillProps = {
 const TONES: Record<GritOverlayPillTone, string> = {
   glass: 'border border-white/20 bg-grit-bg/45 text-grit-text backdrop-blur-[14px]',
   brand: 'bg-grit-cyan text-grit-on-brand',
+  danger: 'bg-grit-danger text-grit-on-brand',
 };
 
 const SIZES = {
@@ -51,7 +52,7 @@ export function GritOverlayPill({
     interactive && cx('transition hover:bg-grit-bg/70', gritFocusRing),
     className,
   );
-  const iconClass = tone === 'brand' ? 'text-grit-on-brand' : iconTone === 'accent' ? 'text-grit-cyan' : 'text-grit-text';
+  const iconClass = tone !== 'glass' ? 'text-grit-on-brand' : iconTone === 'accent' ? 'text-grit-cyan' : 'text-grit-text';
   const content = (
     <>
       {icon ? <GritIcon name={icon} size={sizing.icon} className={iconClass} /> : null}

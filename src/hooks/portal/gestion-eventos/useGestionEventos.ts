@@ -48,6 +48,8 @@ type UseGestionEventosOptions = {
    * started today stays listed while its attendees are still arriving (US-0131).
    */
   proximosDesdeHoy?: boolean;
+  /** Rows per page (default 20; the check-in selector shows 10 cards, grit-arena-v3 `LV7I0`). */
+  pageSize?: number;
 };
 
 /** Bogotá has no DST, so its midnight is always 05:00 UTC. */
@@ -71,7 +73,7 @@ function compareByFecha(direction: 1 | -1) {
 
 export function useGestionEventos(
   tenantId: string,
-  { excluirBorradores = false, proximosDesdeHoy = false }: UseGestionEventosOptions = {},
+  { excluirBorradores = false, proximosDesdeHoy = false, pageSize = EVENTOS_PAGE_SIZE }: UseGestionEventosOptions = {},
 ): UseGestionEventosResult {
   const [eventos, setEventos] = useState<EventoListItem[]>([]);
   const [disciplinas, setDisciplinas] = useState<SelectOption[]>([]);
@@ -149,7 +151,7 @@ export function useGestionEventos(
     };
   }, [eventos]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredEventos.length / EVENTOS_PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredEventos.length / pageSize));
 
   // Filters change the result set, so go back to the first page
   useEffect(() => {
@@ -161,8 +163,8 @@ export function useGestionEventos(
   }, [currentPage, totalPages]);
 
   const paginatedEventos = useMemo(
-    () => filteredEventos.slice((currentPage - 1) * EVENTOS_PAGE_SIZE, currentPage * EVENTOS_PAGE_SIZE),
-    [filteredEventos, currentPage],
+    () => filteredEventos.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredEventos, currentPage, pageSize],
   );
 
   const setSearch = useCallback((value: string) => setFilters((prev) => ({ ...prev, search: value })), []);

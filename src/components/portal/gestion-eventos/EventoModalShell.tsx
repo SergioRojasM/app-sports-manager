@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, type ReactNode } from 'react';
-import { BodyPortal, cx, gritFocusRing } from '@/components/ui';
+import { BodyPortal, GritButton, GritCard, GritIconButton, GritSectionHeading } from '@/components/ui';
 
 // Moved to the UI kit (US-0138); re-exported so existing imports keep working
 export { BodyPortal };
@@ -13,40 +13,45 @@ type EventoDangerButtonProps = {
   children: ReactNode;
 };
 
-/** Destructive confirm button (GritButton has no danger variant). */
+/** Destructive confirm button (`GritButton variant="danger"`, DESIGN.md §4 button rules). */
 export function EventoDangerButton({ onClick, loading, loadingLabel, children }: EventoDangerButtonProps) {
   return (
-    <button
-      type="button"
+    <GritButton
+      variant="danger"
+      size="sm"
       onClick={onClick}
-      disabled={loading}
-      aria-busy={loading || undefined}
-      className={cx(
-        'inline-flex items-center justify-center rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-2.5 font-grit-body text-xs font-bold text-grit-danger transition hover:bg-grit-danger/20 disabled:cursor-not-allowed disabled:opacity-60',
-        gritFocusRing,
-      )}
+      loading={loading}
+      loadingLabel={loadingLabel}
     >
-      {loading ? loadingLabel : children}
-    </button>
+      {children}
+    </GritButton>
   );
 }
 
 type EventoModalShellProps = {
   title: string;
   onClose: () => void;
-  /** While true, Escape and backdrop clicks are ignored. */
+  /** While true, Escape, backdrop clicks and the close button are ignored. */
   busy?: boolean;
   children: ReactNode;
   footer: ReactNode;
 };
 
-/** Dialog frame shared by the events modals: backdrop, focus on open, Escape to close. */
+/**
+ * Dialog frame shared by the events modals (DESIGN.md §9 "Modals and drawers"): blurred backdrop,
+ * glass panel, close button, focus moved in on open and returned to the opener on close.
+ */
 export function EventoModalShell({ title, onClose, busy = false, children, footer }: EventoModalShellProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
   useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     dialogRef.current?.focus();
+    return () => {
+      // Back to the menu item / button that opened the dialog, when it is still on the page
+      if (opener?.isConnected) opener.focus();
+    };
   }, []);
 
   useEffect(() => {
@@ -60,7 +65,7 @@ export function EventoModalShell({ title, onClose, busy = false, children, foote
   return (
     <BodyPortal>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 p-4 backdrop-blur-sm"
         onClick={() => {
           if (!busy) onClose();
         }}
@@ -71,14 +76,19 @@ export function EventoModalShell({ title, onClose, busy = false, children, foote
           aria-modal="true"
           aria-labelledby={titleId}
           tabIndex={-1}
-          className="mx-4 w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-glass p-6 shadow-2xl outline-none backdrop-blur-md"
+          className="w-full max-w-md outline-none"
           onClick={(event) => event.stopPropagation()}
         >
-          <h2 id={titleId} className="font-grit-title text-lg font-semibold text-grit-text">
-            {title}
-          </h2>
-          <div className="mt-3 space-y-2 font-grit-body text-sm text-grit-subtext">{children}</div>
-          <div className="mt-6 flex justify-end gap-3">{footer}</div>
+          <GritCard variant="glass" padding="lg">
+            <GritSectionHeading
+              id={titleId}
+              title={title}
+              size="md"
+              action={<GritIconButton icon="close" label="Cerrar" size="sm" variant="ghost" onClick={onClose} disabled={busy} />}
+            />
+            <div className="mt-3 space-y-2 font-grit-body text-[13px] text-grit-subtext">{children}</div>
+            <div className="mt-6 flex flex-wrap justify-end gap-2.5">{footer}</div>
+          </GritCard>
         </div>
       </div>
     </BodyPortal>

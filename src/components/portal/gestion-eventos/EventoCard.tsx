@@ -1,12 +1,8 @@
-import { GritIcon, GritTag, cx } from '@/components/ui';
+import type { ReactNode } from 'react';
+import { GritDateTile, GritIcon, GritMediaCard, GritOverlayPill, cx } from '@/components/ui';
 import { getDisciplinaVisual } from '@/lib/portal/disciplina-visual';
-import {
-  formatCupo,
-  formatDuracion,
-  formatEventoFecha,
-  formatEventoHora,
-  formatEventoPrecio,
-} from '@/lib/portal/eventos.utils';
+import { formatCupo, formatDuracion, formatEventoFecha, formatEventoPrecio } from '@/lib/portal/eventos.utils';
+import { formatHoraCorta } from '@/lib/portal/eventos-card-model';
 import { EventoActionsMenu } from './EventoActionsMenu';
 import { EventoActivoBadge } from './EventoActivoBadge';
 import { EventoEstadoBadge } from './EventoEstadoBadge';
@@ -28,15 +24,19 @@ type EventoCardProps = {
 
 const noop = () => {};
 
-function InfoLine({ icon, children }: { icon: string; children: React.ReactNode }) {
+function MetaLine({ icon, children }: { icon: string; children: ReactNode }) {
   return (
-    <p className="flex items-center gap-1.5 font-grit-body text-xs text-grit-subtext">
-      <GritIcon name={icon} size={14} className="text-grit-cyan" />
+    <p className="flex min-w-0 items-center gap-1.5 font-grit-body text-[11px] text-grit-subtext">
+      <GritIcon name={icon} size={12} className="shrink-0 text-grit-cyan" />
       <span className="truncate">{children}</span>
     </p>
   );
 }
 
+/**
+ * Management card of the "Tarjetas" view. No v3 frame: composed from the event-card family
+ * (`uCKmV`) — photo surface, opaque overlay tags, date tile, meta lines and price pill.
+ */
 export function EventoCard({
   evento,
   onEditar = noop,
@@ -52,88 +52,77 @@ export function EventoCard({
   const cancelado = !evento.borrador && evento.estado === 'cancelado';
   const lugar = evento.escenarioNombre ?? evento.puntoEncuentro;
   const duracion = formatDuracion(evento.duracionMinutos);
+  const precio = evento.borrador && evento.precio.length === 0 ? 'Precio por definir' : formatEventoPrecio(evento.precio);
+  const fecha = evento.fechaHora
+    ? `${formatEventoFecha(evento.fechaHora)} · ${formatHoraCorta(evento.fechaHora)}${duracion ? ` · ${duracion}` : ''}`
+    : 'Fecha por definir';
 
   return (
-    <article
+    <GritMediaCard
+      as="article"
+      image={evento.bannerUrl}
+      placeholderIcon={visual.icon}
+      padding={14}
       className={cx(
-        'flex flex-col overflow-hidden rounded-grit-2xl border transition',
+        'min-h-[360px]',
         // Inactive events are hidden from members and visitors: make that obvious at a glance
-        evento.activo ? 'border-grit-glass-border' : 'border-dashed border-amber-400/60',
-        cancelado && 'opacity-70',
+        !evento.activo && 'outline-2 outline-offset-2 outline-dashed outline-grit-warning/60',
+        cancelado && 'opacity-75',
       )}
-    >
-      <div className="relative h-40 w-full overflow-hidden">
-        {evento.bannerUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={evento.bannerUrl} alt="" className={cx('h-full w-full object-cover', cancelado && 'grayscale')} />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-grit-card to-grit-bg">
-            <GritIcon name={visual.icon} size={44} className={cx(visual.colorClass, 'opacity-60')} />
-          </div>
-        )}
-
-        {/* Opaque pills so they stay legible over any banner image */}
-        <div className="absolute left-3 top-3 flex max-w-[70%] flex-wrap gap-1.5">
-          <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} overlay />
-          <EventoActivoBadge activo={evento.activo} overlay />
-        </div>
-
-        <span className="absolute right-3 top-3 flex items-center gap-1 rounded-grit-sm border border-grit-glass-border bg-grit-bg/80 px-2.5 py-1 font-grit-body text-[10px] font-semibold uppercase tracking-wide text-grit-text">
-          <GritIcon name={visual.icon} size={12} className={visual.colorClass} />
-          {evento.disciplinaNombre ?? 'Sin disciplina'}
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-2 bg-grit-card p-4 backdrop-blur">
-        <div className="flex items-start justify-between gap-2">
-          <h3
-            className={cx(
-              'font-grit-title text-lg font-bold leading-tight',
-              cancelado ? 'text-grit-muted' : 'text-grit-text',
+      top={
+        <>
+          {/* Opaque tags so they stay legible over any banner image */}
+          <div className="flex min-w-0 flex-wrap gap-1.5">
+            <EventoEstadoBadge estado={evento.estado} borrador={evento.borrador} overlay />
+            <EventoActivoBadge activo={evento.activo} overlay />
+            {!evento.publico && (
+              <GritOverlayPill icon="lock" iconTone="ink">
+                Privado
+              </GritOverlayPill>
             )}
-          >
-            {evento.nombre}
-          </h3>
-          {!hideActions && (
-            <EventoActionsMenu
-              eventoNombre={evento.nombre}
-              estado={evento.estado}
-              borrador={evento.borrador}
-              activo={evento.activo}
-              onCambiarActivo={onCambiarActivo}
-              onVerCompras={onVerCompras}
-              onControlIngreso={onControlIngreso}
-              onDuplicar={onDuplicar}
-              onEditar={onEditar}
-              onCambiarEstado={onCambiarEstado}
-              onEliminar={onEliminar}
-            />
-          )}
-        </div>
-
-        {!evento.publico && (
-          <div className="flex flex-wrap gap-1.5">
-            <GritTag tone="neutral" icon="lock">
-              Privado
-            </GritTag>
           </div>
-        )}
-
-        <div className="flex flex-col gap-1.5">
-          <InfoLine icon="calendar_month">
-            {formatEventoFecha(evento.fechaHora)}
-            {evento.fechaHora ? ` · ${formatEventoHora(evento.fechaHora)}` : ''}
-            {duracion ? ` · ${duracion}` : ''}
-          </InfoLine>
-          {lugar && <InfoLine icon="location_on">{lugar}</InfoLine>}
-          {evento.entrenadorNombre && <InfoLine icon="person">{evento.entrenadorNombre}</InfoLine>}
-          <InfoLine icon="groups">{formatCupo(evento.cupoMaximo)}</InfoLine>
-        </div>
-
-        <p className="mt-auto pt-2 font-grit-title text-base font-bold text-grit-text">
-          {evento.borrador && evento.precio.length === 0 ? 'Precio por definir' : formatEventoPrecio(evento.precio)}
-        </p>
-      </div>
-    </article>
+          {!hideActions && (
+            <span className="shrink-0 rounded-full bg-grit-bg/60 backdrop-blur-sm">
+              <EventoActionsMenu
+                eventoNombre={evento.nombre}
+                estado={evento.estado}
+                borrador={evento.borrador}
+                activo={evento.activo}
+                onCambiarActivo={onCambiarActivo}
+                onVerCompras={onVerCompras}
+                onControlIngreso={onControlIngreso}
+                onDuplicar={onDuplicar}
+                onEditar={onEditar}
+                onCambiarEstado={onCambiarEstado}
+                onEliminar={onEliminar}
+              />
+            </span>
+          )}
+        </>
+      }
+      bottom={
+        <>
+          <div className="flex items-end justify-between gap-2">
+            <GritDateTile dateIso={evento.fechaHora} size="md" />
+            <GritOverlayPill size="lg">{precio}</GritOverlayPill>
+          </div>
+          <div className="flex min-w-0 flex-col gap-1">
+            <h3 className={cx('font-grit-body text-[15px] font-semibold leading-tight', cancelado ? 'text-grit-muted' : 'text-grit-text')}>
+              {evento.nombre}
+            </h3>
+            <p className="flex items-center gap-1.5 font-grit-body text-[11px] text-grit-subtext">
+              <GritIcon name={visual.icon} size={12} className="text-grit-cyan" />
+              {evento.disciplinaNombre ?? 'Sin disciplina'}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <MetaLine icon="calendar_today">{fecha}</MetaLine>
+            {lugar && <MetaLine icon="location_on">{lugar}</MetaLine>}
+            {evento.entrenadorNombre && <MetaLine icon="person">{evento.entrenadorNombre}</MetaLine>}
+            <MetaLine icon="group">{formatCupo(evento.cupoMaximo)}</MetaLine>
+          </div>
+        </>
+      }
+    />
   );
 }

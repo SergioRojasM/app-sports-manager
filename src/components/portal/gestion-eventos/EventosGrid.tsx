@@ -18,14 +18,7 @@ export function EventosGridSkeleton() {
   return (
     <div className={GRID_CLASSES} aria-hidden="true">
       {Array.from({ length: 6 }, (_, index) => (
-        <div key={index} className="overflow-hidden rounded-grit-2xl border border-grit-glass-border">
-          <div className="h-40 animate-pulse bg-grit-card" />
-          <div className="space-y-2 bg-grit-glass p-4">
-            <div className="h-5 w-2/3 animate-pulse rounded-grit-xs bg-grit-card" />
-            <div className="h-3 w-1/2 animate-pulse rounded-grit-xs bg-grit-card" />
-            <div className="h-3 w-1/3 animate-pulse rounded-grit-xs bg-grit-card" />
-          </div>
-        </div>
+        <div key={index} className="h-[360px] animate-pulse rounded-[24px] border border-white/[0.06] bg-white/[0.03]" />
       ))}
     </div>
   );

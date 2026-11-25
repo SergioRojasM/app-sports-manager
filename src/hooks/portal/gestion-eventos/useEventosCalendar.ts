@@ -29,6 +29,10 @@ type UseEventosCalendarResult = {
   error: string | null;
   goPrevious: () => void;
   goNext: () => void;
+  /** Back to the Bogotá current month, selecting today ("Hoy" pill, grit-arena-v3 `ZYxt2`). */
+  goToday: () => void;
+  /** The displayed month is the Bogotá current month. */
+  isCurrentMonth: boolean;
   selectDate: (dateKey: string) => void;
   reload: () => Promise<void>;
 };
@@ -79,6 +83,12 @@ export function useEventosCalendar({ tenantId, enabled, filter }: UseEventosCale
     setSelectedDateKey(null);
   }, []);
 
+  const goToday = useCallback(() => {
+    const now = new Date();
+    setMonthStartDate(toMonthStartInBogota(now));
+    setSelectedDateKey(toDateKeyInBogota(now));
+  }, []);
+
   return {
     monthStartDate,
     monthLabel: formatMonthLabel(monthStartDate),
@@ -89,6 +99,8 @@ export function useEventosCalendar({ tenantId, enabled, filter }: UseEventosCale
     error,
     goPrevious,
     goNext,
+    goToday,
+    isCurrentMonth: monthStartDate === toMonthStartInBogota(new Date()),
     selectDate: setSelectedDateKey,
     reload,
   };
