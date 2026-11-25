@@ -1,4 +1,9 @@
-## ADDED Requirements
+# Capability: payment-methods-management
+
+## Purpose
+Defines how tenant administrators manage the payment methods their athletes use to pay subscriptions and tickets.
+
+## Requirements
 
 ### Requirement: Tenant administrator can view and manage payment methods from organization management page
 The system SHALL render a "Métodos de Pago" card on the `/portal/orgs/[tenant_id]/(administrador)/gestion-organizacion` page, below existing tenant info cards. The card SHALL display all payment methods (active and inactive) for the tenant, sorted by `orden ASC, nombre ASC`.

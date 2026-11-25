@@ -1,10 +1,10 @@
-import type { ElementType, ReactNode } from 'react';
+import type { ElementType, HTMLAttributes, ReactNode } from 'react';
 import { cx } from './styles';
 
 type GritCardVariant = 'glass' | 'card' | 'highlight' | 'inset';
 type GritCardPadding = 'none' | 'sm' | 'md' | 'lg' | 'xl';
 
-type GritCardProps = {
+type GritCardProps = Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'> & {
   children: ReactNode;
   /**
    * card = data panels, tables, KPIs · glass = overlays (modals, dropdowns, filter drawers) ·
@@ -39,6 +39,11 @@ const PADDING_CLASSES: Record<GritCardPadding, string> = {
 };
 
 /** Surface container from the v3 card / panel frames (radius 22, design `ljQp3`, US-0141). */
-export function GritCard({ children, variant = 'glass', padding = 'lg', as: Tag = 'div', className }: GritCardProps) {
-  return <Tag className={cx(VARIANT_CLASSES[variant], PADDING_CLASSES[padding], className)}>{children}</Tag>;
+export function GritCard({ children, variant = 'glass', padding = 'lg', as: Tag = 'div', className, ...rest }: GritCardProps) {
+  // `rest` = HTML attributes such as aria-label / aria-labelledby for landmark surfaces (`as="nav"`)
+  return (
+    <Tag className={cx(VARIANT_CLASSES[variant], PADDING_CLASSES[padding], className)} {...rest}>
+      {children}
+    </Tag>
+  );
 }

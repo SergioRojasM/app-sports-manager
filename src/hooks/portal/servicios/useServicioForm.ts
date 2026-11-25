@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Servicio, ServicioFormValues } from '@/types/portal/servicios.types';
 
 const EMPTY_FORM: ServicioFormValues = {
@@ -14,22 +14,14 @@ type UseServicioFormOptions = {
 };
 
 export function useServicioForm({ initialValues }: UseServicioFormOptions = {}) {
-  const [values, setValues] = useState<ServicioFormValues>(EMPTY_FORM);
+  // The form is mounted per opening (keyed), so it starts from `initialValues` without a reset effect
+  const [values, setValues] = useState<ServicioFormValues>(() =>
+    initialValues
+      ? { nombre: initialValues.nombre, descripcion: initialValues.descripcion ?? '', activo: initialValues.activo }
+      : EMPTY_FORM,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (initialValues) {
-      setValues({
-        nombre: initialValues.nombre,
-        descripcion: initialValues.descripcion ?? '',
-        activo: initialValues.activo,
-      });
-    } else {
-      setValues(EMPTY_FORM);
-    }
-    setFieldError(null);
-  }, [initialValues]);
 
   const setField = useCallback(
     <K extends keyof ServicioFormValues>(field: K, value: ServicioFormValues[K]) => {

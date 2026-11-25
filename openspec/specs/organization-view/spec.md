@@ -1,4 +1,9 @@
-## MODIFIED Requirements
+# Capability: organization-view
+
+## Purpose
+Defines how organization data is read and managed: discovery cards and the administrator organization management page.
+
+## Requirements
 
 ### Requirement: Organization data is tenant-scoped and read-only
 The system SHALL resolve organization tenant context from authenticated membership relations (`public.miembros_tenant`) and SHALL support both discovery and management use cases within tenant constraints. Read operations for organization discovery SHALL return visible tenants from `public.tenants` excluding the canonical public tenant, and tenant management operations SHALL target only the active membership-selected `tenant_id`.
@@ -14,8 +19,6 @@ The system SHALL resolve organization tenant context from authenticated membersh
 #### Scenario: Tenant update persists only active tenant
 - **WHEN** an authorized admin submits valid organization changes for the active tenant
 - **THEN** the system SHALL update exactly one `public.tenants` record matching the active `tenant_id`
-
-## ADDED Requirements
 
 ### Requirement: Organization cards expose membership-aware actions
 The system SHALL render organization discovery cards using `OrganizationIdentityCard` and SHALL expose action states based on membership context: an access action for members with role and a subscribe placeholder action for non-members.

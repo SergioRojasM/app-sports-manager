@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { GritIcon } from './GritIcon';
 import { cx, gritFocusRing } from './styles';
 
@@ -23,6 +23,8 @@ type GritButtonAsButton = GritButtonBaseProps &
     href?: undefined;
     loading?: boolean;
     loadingLabel?: string;
+    /** React 19 ref-as-prop, e.g. to give a dialog's safe action the initial focus. */
+    ref?: Ref<HTMLButtonElement>;
   };
 
 type GritButtonAsLink = GritButtonBaseProps & {

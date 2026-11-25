@@ -1,6 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import {
+  GritAlert,
+  GritButton,
+  GritCard,
+  GritDrawer,
+  GritField,
+  GritIcon,
+  GritIconButton,
+  GritSectionHeading,
+  GritSwitch,
+  cx,
+  gritDescribedBy,
+  gritInputClass,
+  gritInputInvalidClass,
+  gritSelectClass,
+} from '@/components/ui';
 import type { Discipline } from '@/types/portal/disciplines.types';
 import {
   PLAN_ESTADO_LABELS,
@@ -62,40 +78,12 @@ export function PlanFormModal({
   onRemoveTipo,
   onUpdateTipoServiceRows,
 }: PlanFormModalProps) {
-  useEffect(() => {
-    if (!open) return;
-
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isSubmitting) {
-        onClose();
-      }
-    };
-
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [isSubmitting, onClose, open]);
-
-  // Beneficios tag input state (must be before early return)
   const [beneficioInput, setBeneficioInput] = useState('');
-
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      // Trigger enter animation on next frame
-      requestAnimationFrame(() => setVisible(true));
-    } else {
-      setVisible(false);
-    }
-  }, [open]);
-
-  if (!open) {
-    return null;
-  }
 
   const activeDisciplines = disciplines.filter((d) => d.activo);
   const estado = getPlanEstado(values);
   const isHidden = estado === 'activo_no_visible';
+  const title = mode === 'edit' ? 'Editar plan' : mode === 'duplicate' ? 'Duplicar plan' : 'Crear plan';
 
   const handleDisciplineToggle = (disciplinaId: string) => {
     const current = values.disciplinaIds;
@@ -127,441 +115,322 @@ export function PlanFormModal({
     }
   };
 
+  const legendClass = 'mb-2 font-grit-body text-xs font-semibold text-grit-subtext';
+
   return (
-    <div className="fixed inset-0 z-50">
-      <button
-        type="button"
-        aria-label="Cerrar formulario de plan"
-        className={[
-          'absolute inset-0 bg-grit-bg/70 backdrop-blur-sm transition-opacity duration-300',
-          visible ? 'opacity-100' : 'opacity-0',
-        ].join(' ')}
-        onClick={onClose}
-        disabled={isSubmitting}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={mode === 'edit' ? 'Editar plan' : mode === 'duplicate' ? 'Duplicar plan' : 'Crear plan'}
-        className={[
-          'absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out',
-          visible ? 'translate-x-0' : 'translate-x-full',
-        ].join(' ')}
-      >
-        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
-          <div>
-            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
-              {mode === 'edit' ? 'Editar plan' : mode === 'duplicate' ? 'Duplicar plan' : 'Crear plan'}
-            </h2>
-            <p className="mt-1 text-xs text-grit-subtext">
-              Configura los datos del plan para esta organización.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
+    <GritDrawer
+      open={open}
+      onClose={onClose}
+      busy={isSubmitting}
+      size="lg"
+      title={title}
+      subtitle="Configura los datos del plan para esta organización."
+      footer={
+        <>
+          <GritButton variant="secondary" onClick={onClose} disabled={isSubmitting}>
+            Cancelar
+          </GritButton>
+          <GritButton icon="save" onClick={() => void onSubmit()} loading={isSubmitting} loadingLabel="Guardando…">
+            {mode === 'edit' ? 'Guardar cambios' : 'Crear plan'}
+          </GritButton>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <GritField htmlFor="plan-nombre" label="Nombre" error={fieldErrors.nombre}>
+          <input
+            id="plan-nombre"
+            type="text"
+            value={values.nombre}
+            onChange={(event) => onChangeField('nombre', event.target.value)}
             disabled={isSubmitting}
-            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
+            placeholder="Plan Básico Mensual"
+            aria-invalid={fieldErrors.nombre ? true : undefined}
+            aria-describedby={gritDescribedBy('plan-nombre', undefined, fieldErrors.nombre)}
+            className={fieldErrors.nombre ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        <GritField htmlFor="plan-descripcion" label="Descripción" optional>
+          <textarea
+            id="plan-descripcion"
+            rows={3}
+            value={values.descripcion}
+            onChange={(event) => onChangeField('descripcion', event.target.value)}
+            disabled={isSubmitting}
+            placeholder="Descripción del plan"
+            className={gritInputClass}
+          />
+        </GritField>
+
+        <GritField htmlFor="plan-tipo" label="Modalidad">
+          <select
+            id="plan-tipo"
+            value={values.tipo}
+            onChange={(event) => onChangeField('tipo', event.target.value)}
+            disabled={isSubmitting}
+            className={cx('grit-select-chevron', gritSelectClass)}
           >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              close
-            </span>
-          </button>
-        </header>
+            <option value="">— Seleccionar modalidad —</option>
+            <option value="presencial">Presencial</option>
+            <option value="virtual">Virtual</option>
+            <option value="mixto">Mixto</option>
+          </select>
+        </GritField>
 
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
-          {/* Name */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="plan-nombre">
-              Nombre
-            </label>
-            <input
-              id="plan-nombre"
-              type="text"
-              value={values.nombre}
-              onChange={(event) => onChangeField('nombre', event.target.value)}
-              disabled={isSubmitting}
-              placeholder="Plan Básico Mensual"
-              className={[
-                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
-                fieldErrors.nombre
-                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-              ].join(' ')}
-            />
-            {fieldErrors.nombre ? (
-              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
-                {fieldErrors.nombre}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="plan-descripcion">
-              Descripción
-            </label>
-            <textarea
-              id="plan-descripcion"
-              rows={3}
-              value={values.descripcion}
-              onChange={(event) => onChangeField('descripcion', event.target.value)}
-              disabled={isSubmitting}
-              placeholder="Descripción opcional del plan"
-              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
-            />
-          </div>
-
-          {/* Type (virtual / presencial) */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="plan-tipo">
-              Tipo
-            </label>
-            <select
-              id="plan-tipo"
-              value={values.tipo}
-              onChange={(event) => onChangeField('tipo', event.target.value)}
-              disabled={isSubmitting}
-              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
-            >
-              <option value="">— Seleccionar tipo —</option>
-              <option value="presencial">Presencial</option>
-              <option value="virtual">Virtual</option>
-              <option value="mixto">Mixto</option>
-            </select>
-          </div>
-
-          {/* Subtipos (plan_tipos) inline rows */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
-                Subtipos de plan
-              </span>
-              <button
-                type="button"
-                onClick={onAddTipo}
-                disabled={isSubmitting}
-                className="inline-flex items-center gap-1 rounded-grit-md border border-grit-cyan/40 bg-grit-cyan/10 px-2.5 py-1.5 text-xs font-semibold text-grit-cyan transition hover:bg-grit-cyan/20 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">add</span>
+        <GritCard as="section" variant="inset" padding="sm" className="space-y-3">
+          <GritSectionHeading
+            as="h3"
+            size="md"
+            title="Subtipos de plan"
+            subtitle="Cada subtipo es una opción de suscripción con su precio y vigencia."
+            action={
+              <GritButton size="sm" variant="outline-accent" icon="add" onClick={onAddTipo} disabled={isSubmitting}>
                 Agregar subtipo
-              </button>
-            </div>
+              </GritButton>
+            }
+          />
 
-            {tiposGlobalError ? (
-              <p className="mb-2 text-xs font-medium text-grit-danger" role="alert">
-                {tiposGlobalError}
-              </p>
-            ) : null}
+          {tiposGlobalError ? <GritAlert tone="danger">{tiposGlobalError}</GritAlert> : null}
 
-            {tiposForm.length === 0 ? (
-              <p className="rounded-grit-md border border-grit-glass-border bg-grit-bg/40 px-4 py-3 text-sm text-grit-muted">
-                Sin subtipos. Agrega al menos uno para ofrecer opciones de suscripción.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {tiposForm.map((tipo, index) => {
-                  const errorsForRow = tiposErrors.filter((e) => e.index === index);
-                  const getError = (field: string) => errorsForRow.find((e) => e.field === field)?.message;
-
-                  return (
-                    <div
-                      key={tipo._id ?? `new-${index}`}
-                      className="rounded-grit-lg border border-grit-glass-border bg-grit-bg/60 p-3 space-y-2 transition-all duration-200 hover:border-grit-cyan/40 hover:bg-grit-bg/80 hover:shadow-lg hover:shadow-grit-cyan/5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-grit-subtext">
-                          Subtipo {index + 1}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <label className="flex items-center gap-1.5 text-xs text-grit-subtext">
-                            <input
-                              type="checkbox"
-                              checked={tipo.activo}
-                              onChange={(e) => onUpdateTipo(index, { activo: e.target.checked })}
-                              disabled={isSubmitting}
-                              className="rounded border-grit-glass-border bg-grit-bg"
-                            />
-                            Activo
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => onRemoveTipo(index)}
-                            disabled={isSubmitting}
-                            className="rounded p-1 text-grit-subtext transition hover:text-grit-danger disabled:cursor-not-allowed"
-                            aria-label={`Eliminar subtipo ${index + 1}`}
-                          >
-                            <span className="material-symbols-outlined text-base" aria-hidden="true">delete</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="col-span-2">
-                          <input
-                            type="text"
-                            value={tipo.nombre}
-                            onChange={(e) => onUpdateTipo(index, { nombre: e.target.value })}
-                            disabled={isSubmitting}
-                            placeholder="Nombre del subtipo"
-                            className={[
-                              'w-full rounded-grit-md border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-1',
-                              getError('nombre')
-                                ? 'border-grit-danger/80 focus:ring-grit-danger/35'
-                                : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-                            ].join(' ')}
-                          />
-                          {getError('nombre') ? (
-                            <p className="mt-0.5 text-xs text-grit-danger">{getError('nombre')}</p>
-                          ) : null}
-                        </div>
-
-                        <div>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={tipo.precio}
-                            onChange={(e) => onUpdateTipo(index, { precio: e.target.value })}
-                            disabled={isSubmitting}
-                            placeholder="Precio"
-                            className={[
-                              'w-full rounded-grit-md border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-1',
-                              getError('precio')
-                                ? 'border-grit-danger/80 focus:ring-grit-danger/35'
-                                : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-                            ].join(' ')}
-                          />
-                          {getError('precio') ? (
-                            <p className="mt-0.5 text-xs text-grit-danger">{getError('precio')}</p>
-                          ) : null}
-                        </div>
-
-                        <div>
-                          <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            value={tipo.vigencia_dias}
-                            onChange={(e) => onUpdateTipo(index, { vigencia_dias: e.target.value })}
-                            disabled={isSubmitting}
-                            placeholder="Vigencia (días)"
-                            className={[
-                              'w-full rounded-grit-md border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-1',
-                              getError('vigencia_dias')
-                                ? 'border-grit-danger/80 focus:ring-grit-danger/35'
-                                : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-                            ].join(' ')}
-                          />
-                          {getError('vigencia_dias') ? (
-                            <p className="mt-0.5 text-xs text-grit-danger">{getError('vigencia_dias')}</p>
-                          ) : null}
-                        </div>
-
-                        <div className="col-span-2">
-                          <input
-                            type="text"
-                            value={tipo.descripcion}
-                            onChange={(e) => onUpdateTipo(index, { descripcion: e.target.value })}
-                            disabled={isSubmitting}
-                            placeholder="Descripción (opcional)"
-                            className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-1 focus:ring-grit-cyan/35"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Services section for this plan tipo */}
-                      <PlanTipoServiciosSection
-                        index={index}
-                        serviceRows={tiposServiceRows[index] ?? []}
-                        availableServices={availableServices}
-                        isSubmitting={isSubmitting}
-                        onAddRow={() => {
-                          const current = tiposServiceRows[index] ?? [];
-                          onUpdateTipoServiceRows(index, [...current, { servicioId: '', unidades: null }]);
-                        }}
-                        onUpdateRow={(rowIndex, partial) => {
-                          const current = [...(tiposServiceRows[index] ?? [])];
-                          current[rowIndex] = { ...current[rowIndex], ...partial };
-                          onUpdateTipoServiceRows(index, current);
-                        }}
-                        onRemoveRow={(rowIndex) => {
-                          const current = (tiposServiceRows[index] ?? []).filter((_, i) => i !== rowIndex);
-                          onUpdateTipoServiceRows(index, current);
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Benefits (tag input) */}
-          <div>
-            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
-              Beneficios
-            </span>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={beneficioInput}
-                onChange={(event) => setBeneficioInput(event.target.value)}
-                onKeyDown={handleBeneficioKeyDown}
-                disabled={isSubmitting}
-                placeholder="Escribe un beneficio y presiona Enter"
-                className="flex-1 rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
-              />
-              <button
-                type="button"
-                onClick={addBeneficio}
-                disabled={isSubmitting || !beneficioInput.trim()}
-                className="rounded-grit-md border border-grit-cyan/40 bg-grit-cyan/10 px-3 py-2 text-sm font-semibold text-grit-cyan transition hover:bg-grit-cyan/20 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
-              </button>
-            </div>
-            {values.beneficios.length > 0 ? (
-              <ul className="mt-2 space-y-1.5">
-                {values.beneficios.map((beneficio, index) => (
-                  <li
-                    key={index}
-                    className="flex items-center justify-between gap-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/60 px-3 py-2 text-sm text-grit-text"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sm text-grit-cyan" aria-hidden="true">check_circle</span>
-                      {beneficio}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeBeneficio(index)}
-                      disabled={isSubmitting}
-                      className="rounded p-0.5 text-grit-subtext transition hover:text-grit-danger disabled:cursor-not-allowed"
-                      aria-label={`Eliminar beneficio: ${beneficio}`}
-                    >
-                      <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-
-          {/* Status: Activo / Activo no visible / Inactivo */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext" htmlFor="plan-estado">
-              Estado
-            </label>
-            <select
-              id="plan-estado"
-              value={estado}
-              onChange={(event) => onChangeEstado(event.target.value as PlanEstado)}
-              disabled={isSubmitting}
-              aria-describedby={isHidden ? 'plan-estado-help' : undefined}
-              className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition focus:border-grit-cyan focus:ring-2 focus:ring-grit-cyan/35"
-            >
-              {(Object.keys(PLAN_ESTADO_LABELS) as PlanEstado[]).map((key) => (
-                <option key={key} value={key}>
-                  {PLAN_ESTADO_LABELS[key]}
-                </option>
-              ))}
-            </select>
-            {isHidden ? (
-              <p id="plan-estado-help" className="mt-1 text-xs text-grit-subtext">
-                Los atletas no pueden ver ni adquirir este plan. Solo un administrador puede asignarlo
-                desde Gestión de suscripciones.
-              </p>
-            ) : null}
-          </div>
-
-          {/* Public toggle */}
-          <div>
-            <div className="flex items-center gap-2">
-              <input
-                id="plan-public"
-                type="checkbox"
-                checked={values.es_publico}
-                onChange={(event) => onChangeField('es_publico', event.target.checked)}
-                disabled={isSubmitting || !values.visible_atletas}
-                aria-describedby="plan-public-help"
-                className="rounded border-grit-glass-border bg-grit-bg"
-              />
-              <label htmlFor="plan-public" className="text-sm text-grit-text">
-                Plan público
-              </label>
-            </div>
-            <p id="plan-public-help" className="mt-1 pl-6 text-xs text-grit-subtext">
-              {values.visible_atletas
-                ? 'Los planes públicos pueden ser vistos y adquiridos por personas que no pertenecen a la organización.'
-                : 'Un plan no visible no puede ser público.'}
+          {tiposForm.length === 0 ? (
+            <p className="font-grit-body text-xs text-grit-muted">
+              Sin subtipos. Agrega al menos uno para ofrecer opciones de suscripción.
             </p>
-          </div>
+          ) : (
+            <div className="space-y-3">
+              {tiposForm.map((tipo, index) => {
+                const errorsForRow = tiposErrors.filter((e) => e.index === index);
+                const getError = (field: string) => errorsForRow.find((e) => e.field === field)?.message;
+                const id = (field: string) => `plan-tipo-${index}-${field}`;
 
-          {/* Disciplines multi-select */}
-          <div>
-            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
-              Disciplinas <span className="normal-case font-normal text-grit-muted">(opcional)</span>
-            </span>
-            {activeDisciplines.length === 0 ? (
-              <p className="rounded-grit-md border border-amber-400/40 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
-                No hay disciplinas activas disponibles. Crea disciplinas primero.
-              </p>
-            ) : (
-              <div className="max-h-48 space-y-2 overflow-y-auto rounded-grit-lg border border-grit-glass-border bg-grit-bg p-3">
-                {activeDisciplines.map((discipline) => (
-                  <label
-                    key={discipline.id}
-                    className="flex items-center gap-2 rounded-grit-md px-2 py-1.5 text-sm text-grit-text transition hover:bg-grit-card"
+                return (
+                  <div
+                    key={tipo._id ?? `new-${index}`}
+                    className="space-y-3 rounded-[14px] border border-white/[0.06] bg-white/[0.02] p-3"
                   >
-                    <input
-                      type="checkbox"
-                      checked={values.disciplinaIds.includes(discipline.id)}
-                      onChange={() => handleDisciplineToggle(discipline.id)}
-                      disabled={isSubmitting}
-                      className="rounded border-grit-glass-border bg-grit-bg"
-                    />
-                    {discipline.nombre}
-                  </label>
-                ))}
-              </div>
-            )}
-            {fieldErrors.disciplinaIds ? (
-              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
-                {fieldErrors.disciplinaIds}
-              </p>
-            ) : null}
-          </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-grit-body text-xs font-semibold text-grit-subtext">Subtipo {index + 1}</span>
+                      <div className="flex items-center gap-2">
+                        <GritSwitch
+                          checked={tipo.activo}
+                          onChange={(next) => onUpdateTipo(index, { activo: next })}
+                          disabled={isSubmitting}
+                          label={`Subtipo ${index + 1} activo`}
+                        />
+                        <GritIconButton
+                          icon="delete"
+                          label={`Eliminar subtipo ${index + 1}`}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onRemoveTipo(index)}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </div>
 
-          {submitError ? (
-            <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
-              {submitError}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <GritField htmlFor={id('nombre')} label="Nombre" error={getError('nombre')} className="sm:col-span-2">
+                        <input
+                          id={id('nombre')}
+                          type="text"
+                          value={tipo.nombre}
+                          onChange={(e) => onUpdateTipo(index, { nombre: e.target.value })}
+                          disabled={isSubmitting}
+                          placeholder="Ej: Mensual"
+                          aria-invalid={getError('nombre') ? true : undefined}
+                          aria-describedby={gritDescribedBy(id('nombre'), undefined, getError('nombre'))}
+                          className={getError('nombre') ? gritInputInvalidClass : gritInputClass}
+                        />
+                      </GritField>
+                      <GritField htmlFor={id('precio')} label="Precio" error={getError('precio')}>
+                        <input
+                          id={id('precio')}
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={tipo.precio}
+                          onChange={(e) => onUpdateTipo(index, { precio: e.target.value })}
+                          disabled={isSubmitting}
+                          placeholder="120000"
+                          aria-invalid={getError('precio') ? true : undefined}
+                          aria-describedby={gritDescribedBy(id('precio'), undefined, getError('precio'))}
+                          className={getError('precio') ? gritInputInvalidClass : gritInputClass}
+                        />
+                      </GritField>
+                      <GritField htmlFor={id('vigencia')} label="Vigencia (días)" error={getError('vigencia_dias')}>
+                        <input
+                          id={id('vigencia')}
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={tipo.vigencia_dias}
+                          onChange={(e) => onUpdateTipo(index, { vigencia_dias: e.target.value })}
+                          disabled={isSubmitting}
+                          placeholder="30"
+                          aria-invalid={getError('vigencia_dias') ? true : undefined}
+                          aria-describedby={gritDescribedBy(id('vigencia'), undefined, getError('vigencia_dias'))}
+                          className={getError('vigencia_dias') ? gritInputInvalidClass : gritInputClass}
+                        />
+                      </GritField>
+                      <GritField htmlFor={id('descripcion')} label="Descripción" optional className="sm:col-span-2">
+                        <input
+                          id={id('descripcion')}
+                          type="text"
+                          value={tipo.descripcion}
+                          onChange={(e) => onUpdateTipo(index, { descripcion: e.target.value })}
+                          disabled={isSubmitting}
+                          className={gritInputClass}
+                        />
+                      </GritField>
+                    </div>
+
+                    <PlanTipoServiciosSection
+                      index={index}
+                      serviceRows={tiposServiceRows[index] ?? []}
+                      availableServices={availableServices}
+                      isSubmitting={isSubmitting}
+                      onAddRow={() => {
+                        const current = tiposServiceRows[index] ?? [];
+                        onUpdateTipoServiceRows(index, [...current, { servicioId: '', unidades: null }]);
+                      }}
+                      onUpdateRow={(rowIndex, partial) => {
+                        const current = [...(tiposServiceRows[index] ?? [])];
+                        current[rowIndex] = { ...current[rowIndex], ...partial };
+                        onUpdateTipoServiceRows(index, current);
+                      }}
+                      onRemoveRow={(rowIndex) => {
+                        const current = (tiposServiceRows[index] ?? []).filter((_, i) => i !== rowIndex);
+                        onUpdateTipoServiceRows(index, current);
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
+          )}
+        </GritCard>
+
+        <GritField htmlFor="plan-beneficio" label="Beneficios" optional hint="Escribe un beneficio y presiona Enter.">
+          <div className="flex gap-2">
+            <input
+              id="plan-beneficio"
+              type="text"
+              value={beneficioInput}
+              onChange={(event) => setBeneficioInput(event.target.value)}
+              onKeyDown={handleBeneficioKeyDown}
+              disabled={isSubmitting}
+              placeholder="Ej: 10 % en eventos"
+              aria-describedby={gritDescribedBy('plan-beneficio', true)}
+              className={gritInputClass}
+            />
+            <GritIconButton
+              icon="add"
+              label="Agregar beneficio"
+              onClick={addBeneficio}
+              disabled={isSubmitting || !beneficioInput.trim()}
+            />
+          </div>
+          {values.beneficios.length > 0 ? (
+            <ul className="mt-1 space-y-1.5">
+              {values.beneficios.map((beneficio, index) => (
+                <li
+                  key={index}
+                  className="flex items-center justify-between gap-2 rounded-[12px] border border-white/[0.06] bg-white/[0.02] px-3 py-2 font-grit-body text-[13px] text-grit-text"
+                >
+                  <span className="flex items-center gap-2">
+                    <GritIcon name="redeem" size={14} className="text-grit-violet" />
+                    {beneficio}
+                  </span>
+                  <GritIconButton
+                    icon="close"
+                    label={`Eliminar beneficio: ${beneficio}`}
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => removeBeneficio(index)}
+                    disabled={isSubmitting}
+                  />
+                </li>
+              ))}
+            </ul>
           ) : null}
+        </GritField>
+
+        <GritField
+          htmlFor="plan-estado"
+          label="Estado"
+          hint={
+            isHidden
+              ? 'Los atletas no pueden ver ni adquirir este plan. Solo un administrador puede asignarlo desde Gestión de suscripciones.'
+              : undefined
+          }
+        >
+          <select
+            id="plan-estado"
+            value={estado}
+            onChange={(event) => onChangeEstado(event.target.value as PlanEstado)}
+            disabled={isSubmitting}
+            aria-describedby={gritDescribedBy('plan-estado', isHidden)}
+            className={cx('grit-select-chevron', gritSelectClass)}
+          >
+            {(Object.keys(PLAN_ESTADO_LABELS) as PlanEstado[]).map((key) => (
+              <option key={key} value={key}>
+                {PLAN_ESTADO_LABELS[key]}
+              </option>
+            ))}
+          </select>
+        </GritField>
+
+        <div className="flex flex-col gap-1.5">
+          <GritSwitch
+            id="plan-public"
+            checked={values.es_publico}
+            onChange={(next) => onChangeField('es_publico', next)}
+            disabled={isSubmitting || !values.visible_atletas}
+            label="Plan público"
+            showLabel
+            aria-describedby="plan-public-help"
+          />
+          <p id="plan-public-help" className="font-grit-body text-[11px] text-grit-muted">
+            {values.visible_atletas
+              ? 'Los planes públicos pueden ser vistos y adquiridos por personas que no pertenecen a la organización.'
+              : 'Un plan no visible no puede ser público.'}
+          </p>
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text transition-all duration-200 hover:border-grit-glass-border hover:bg-grit-bg hover:text-grit-text"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => void onSubmit()}
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg transition-all duration-200 hover:bg-grit-cyan/85 hover:shadow-lg hover:shadow-grit-cyan/25 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none"
-          >
-            {isSubmitting ? 'Guardando...' : mode === 'edit' ? 'Guardar cambios' : 'Crear plan'}
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              save
-            </span>
-          </button>
-        </footer>
-      </aside>
-    </div>
+        <fieldset disabled={isSubmitting}>
+          <legend className={legendClass}>
+            Disciplinas <span className="font-normal text-grit-muted">(opcional)</span>
+          </legend>
+          {activeDisciplines.length === 0 ? (
+            <GritAlert tone="warning">No hay disciplinas activas disponibles. Crea disciplinas primero.</GritAlert>
+          ) : (
+            <div className="grit-scrollbar max-h-48 space-y-1 overflow-y-auto rounded-grit-lg border border-white/[0.10] bg-white/[0.02] p-2">
+              {activeDisciplines.map((discipline) => (
+                <label
+                  key={discipline.id}
+                  className="flex items-center gap-2.5 rounded-[10px] px-2 py-1.5 font-grit-body text-[13px] text-grit-text transition hover:bg-white/[0.04]"
+                >
+                  <input
+                    type="checkbox"
+                    checked={values.disciplinaIds.includes(discipline.id)}
+                    onChange={() => handleDisciplineToggle(discipline.id)}
+                    className="h-4 w-4 shrink-0 accent-grit-cyan"
+                  />
+                  {discipline.nombre}
+                </label>
+              ))}
+            </div>
+          )}
+          {fieldErrors.disciplinaIds ? (
+            <p className="mt-1.5 font-grit-body text-xs text-grit-danger" role="alert">
+              {fieldErrors.disciplinaIds}
+            </p>
+          ) : null}
+        </fieldset>
+
+        {submitError ? <GritAlert tone="danger">{submitError}</GritAlert> : null}
+      </div>
+    </GritDrawer>
   );
 }

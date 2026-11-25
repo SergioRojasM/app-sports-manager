@@ -20,7 +20,12 @@ type GritIconButtonBaseProps = {
 type GritIconButtonAsButton = GritIconButtonBaseProps &
   Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'className' | 'aria-label'> & { href?: undefined };
 
-type GritIconButtonAsLink = GritIconButtonBaseProps & { href: string; onClick?: () => void };
+type GritIconButtonAsLink = GritIconButtonBaseProps & {
+  href: string;
+  /** Opens in a new tab with a safe rel (external URL, maps…). */
+  external?: boolean;
+  onClick?: () => void;
+};
 
 type GritIconButtonProps = GritIconButtonAsButton | GritIconButtonAsLink;
 
@@ -51,7 +56,14 @@ export const GritIconButton = forwardRef<HTMLButtonElement, GritIconButtonProps>
   const iconNode = <GritIcon name={icon} size={sizing.icon} />;
 
   if (rest.href !== undefined) {
-    const { href, onClick } = rest as Omit<GritIconButtonAsLink, keyof GritIconButtonBaseProps>;
+    const { href, external, onClick } = rest as Omit<GritIconButtonAsLink, keyof GritIconButtonBaseProps>;
+    if (external) {
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick} aria-label={label} className={classes}>
+          {iconNode}
+        </a>
+      );
+    }
     return (
       <Link href={href} onClick={onClick} aria-label={label} className={classes}>
         {iconNode}

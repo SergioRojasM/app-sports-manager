@@ -1,4 +1,9 @@
-## ADDED Requirements
+# Capability: tenant-suspension-rules
+
+## Purpose
+Defines the automatic suspension rules a tenant configures to suspend athletes after repeated absences.
+
+## Requirements
 
 ### Requirement: tenant_reglas_suspension table exists with correct structure
 The system SHALL have a `public.tenant_reglas_suspension` table with columns: `id uuid PK`, `tenant_id uuid FK→tenants`, `nombre varchar(100) NOT NULL`, `num_inasistencias integer NOT NULL DEFAULT 1`, `por_suscripcion boolean NOT NULL DEFAULT false`, `por_dias_atras integer NOT NULL DEFAULT 0`, `duracion integer NOT NULL DEFAULT 0`, `activo boolean NOT NULL DEFAULT true`, `created_at timestamptz`, `updated_at timestamptz`. The table SHALL have constraints: unique `(tenant_id, nombre)`, `num_inasistencias >= 1`, `por_dias_atras >= 0`, `duracion >= 0`, cascade delete on `tenant_id`. An index SHALL exist on `tenant_id`. The `miembros_tenant` table SHALL reference this table via `tenant_regla_suspension_id uuid NULL` with `ON DELETE SET NULL`.

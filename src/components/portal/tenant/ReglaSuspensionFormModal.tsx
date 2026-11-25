@@ -1,6 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import {
+  GritAlert,
+  GritButton,
+  GritDrawer,
+  GritField,
+  GritSwitch,
+  gritDescribedBy,
+  gritInputClass,
+  gritInputInvalidClass,
+} from '@/components/ui';
 import type {
   ReglaSuspension,
   ReglaSuspensionCreatePayload,
@@ -17,6 +27,8 @@ type ReglaSuspensionFormModalProps = {
   onClose: () => void;
   onCreate: (payload: ReglaSuspensionCreatePayload) => Promise<void>;
   onUpdate: (id: string, payload: ReglaSuspensionUpdatePayload) => Promise<void>;
+  /** Prefill for create mode, e.g. the suggested rule of the empty state ("Usar"). */
+  initialValues?: Partial<Pick<ReglaSuspension, 'nombre' | 'num_inasistencias' | 'por_suscripcion' | 'por_dias_atras' | 'duracion'>>;
 };
 
 type FieldErrors = {
@@ -27,7 +39,16 @@ type FieldErrors = {
   duracion?: string;
 };
 
-export function ReglaSuspensionFormModal({
+/**
+ * Mounted per opening and per target (keyed), so the fields start from `editTarget` /
+ * `initialValues` without a reset effect.
+ */
+export function ReglaSuspensionFormModal(props: ReglaSuspensionFormModalProps) {
+  if (!props.open) return null;
+  return <ReglaSuspensionForm key={`${props.mode}-${props.editTarget?.id ?? 'nueva'}`} {...props} />;
+}
+
+function ReglaSuspensionForm({
   open,
   tenantId,
   mode,
@@ -37,43 +58,16 @@ export function ReglaSuspensionFormModal({
   onClose,
   onCreate,
   onUpdate,
+  initialValues,
 }: ReglaSuspensionFormModalProps) {
-  const [nombre, setNombre] = useState('');
-  const [numInasistencias, setNumInasistencias] = useState('1');
-  const [porSuscripcion, setPorSuscripcion] = useState(false);
-  const [porDiasAtras, setPorDiasAtras] = useState('0');
-  const [duracion, setDuracion] = useState('0');
-  const [activo, setActivo] = useState(true);
+  const seed = mode === 'edit' && editTarget ? editTarget : initialValues;
+  const [nombre, setNombre] = useState(() => seed?.nombre ?? '');
+  const [numInasistencias, setNumInasistencias] = useState(() => String(seed?.num_inasistencias ?? 1));
+  const [porSuscripcion, setPorSuscripcion] = useState(() => seed?.por_suscripcion ?? false);
+  const [porDiasAtras, setPorDiasAtras] = useState(() => String(seed?.por_dias_atras ?? 0));
+  const [duracion, setDuracion] = useState(() => String(seed?.duracion ?? 0));
+  const [activo, setActivo] = useState(() => (mode === 'edit' && editTarget ? editTarget.activo : true));
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-
-  useEffect(() => {
-    if (open && editTarget && mode === 'edit') {
-      setNombre(editTarget.nombre);
-      setNumInasistencias(String(editTarget.num_inasistencias));
-      setPorSuscripcion(editTarget.por_suscripcion);
-      setPorDiasAtras(String(editTarget.por_dias_atras));
-      setDuracion(String(editTarget.duracion));
-      setActivo(editTarget.activo);
-      setFieldErrors({});
-    } else if (open && mode === 'create') {
-      setNombre('');
-      setNumInasistencias('1');
-      setPorSuscripcion(false);
-      setPorDiasAtras('0');
-      setDuracion('0');
-      setActivo(true);
-      setFieldErrors({});
-    }
-  }, [open, editTarget, mode]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isSubmitting) onClose();
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [open, isSubmitting, onClose]);
 
   const validate = useCallback((): FieldErrors => {
     const errors: FieldErrors = {};
@@ -143,273 +137,105 @@ export function ReglaSuspensionFormModal({
     }
   }, [validate, mode, editTarget, nombre, numInasistencias, porSuscripcion, porDiasAtras, duracion, activo, tenantId, onCreate, onUpdate]);
 
-  if (!open) return null;
-
   const parsedDiasDisplay = parseInt(porDiasAtras, 10);
   const parsedDuracionDisplay = parseInt(duracion, 10);
+  const diasHint = !isNaN(parsedDiasDisplay) && parsedDiasDisplay === 0 ? 'No aplica' : undefined;
+  const duracionHint = !isNaN(parsedDuracionDisplay) && parsedDuracionDisplay === 0 ? 'Permanente (sin límite de días)' : undefined;
+  const title = mode === 'create' ? 'Crear regla de suspensión' : 'Editar regla de suspensión';
 
   return (
-    <div className="fixed inset-0 z-50">
-      <button
-        type="button"
-        aria-label="Cerrar formulario de regla de suspensión"
-        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
-        onClick={onClose}
-        disabled={isSubmitting}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={mode === 'create' ? 'Crear regla de suspensión' : 'Editar regla de suspensión'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
-      >
-        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
-          <div>
-            <h2 className="font-grit-title text-lg font-semibold text-grit-text">
-              {mode === 'create' ? 'Crear regla de suspensión' : 'Editar regla de suspensión'}
-            </h2>
-            <p className="mt-1 text-xs text-grit-subtext">
-              Configura los parámetros de la regla de suspensión automática.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              close
-            </span>
-          </button>
-        </header>
-
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
-          {/* Nombre */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
-              htmlFor="rs-nombre"
-            >
-              Nombre
-            </label>
-            <input
-              id="rs-nombre"
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              disabled={isSubmitting}
-              maxLength={100}
-              placeholder="Ej: Suspensión por acumulación mensual"
-              className={[
-                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
-                fieldErrors.nombre
-                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-              ].join(' ')}
-            />
-            {fieldErrors.nombre ? (
-              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
-                {fieldErrors.nombre}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Número de inasistencias */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
-              htmlFor="rs-num-inasistencias"
-            >
-              Número de inasistencias
-            </label>
-            <input
-              id="rs-num-inasistencias"
-              type="number"
-              min={1}
-              step={1}
-              value={numInasistencias}
-              onChange={(e) => setNumInasistencias(e.target.value)}
-              disabled={isSubmitting}
-              className={[
-                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
-                fieldErrors.num_inasistencias
-                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-              ].join(' ')}
-            />
-            {fieldErrors.num_inasistencias ? (
-              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
-                {fieldErrors.num_inasistencias}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Por suscripción toggle */}
-          <div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={porSuscripcion}
-                onClick={() => setPorSuscripcion(!porSuscripcion)}
-                disabled={isSubmitting}
-                className={[
-                  'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-grit-cyan/40 focus:ring-offset-2 focus:ring-offset-grit-bg disabled:opacity-50',
-                  porSuscripcion ? 'bg-grit-cyan' : 'bg-grit-subtext/20',
-                ].join(' ')}
-              >
-                <span
-                  className={[
-                    'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200',
-                    porSuscripcion ? 'translate-x-5' : 'translate-x-0',
-                  ].join(' ')}
-                />
-              </button>
-              <span className="text-sm text-grit-subtext">
-                Contar inasistencias en la suscripción activa
-              </span>
-            </div>
-          </div>
-
-          {/* Por días atrás */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
-              htmlFor="rs-por-dias-atras"
-            >
-              En los últimos N días
-            </label>
-            <input
-              id="rs-por-dias-atras"
-              type="number"
-              min={0}
-              step={1}
-              value={porDiasAtras}
-              onChange={(e) => setPorDiasAtras(e.target.value)}
-              disabled={isSubmitting}
-              className={[
-                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
-                fieldErrors.por_dias_atras
-                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-              ].join(' ')}
-            />
-            {!isNaN(parsedDiasDisplay) && parsedDiasDisplay === 0 ? (
-              <p className="mt-1 text-xs text-grit-muted">No aplica</p>
-            ) : null}
-            {fieldErrors.por_dias_atras ? (
-              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
-                {fieldErrors.por_dias_atras}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Condición error (cross-field) */}
-          {fieldErrors.condicion ? (
-            <div
-              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-              role="alert"
-            >
-              {fieldErrors.condicion}
-            </div>
-          ) : null}
-
-          {/* Duración */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext"
-              htmlFor="rs-duracion"
-            >
-              Duración de la suspensión (días)
-            </label>
-            <input
-              id="rs-duracion"
-              type="number"
-              min={0}
-              step={1}
-              value={duracion}
-              onChange={(e) => setDuracion(e.target.value)}
-              disabled={isSubmitting}
-              className={[
-                'w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition placeholder:text-grit-muted focus:ring-2',
-                fieldErrors.duracion
-                  ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-                  : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35',
-              ].join(' ')}
-            />
-            {!isNaN(parsedDuracionDisplay) && parsedDuracionDisplay === 0 ? (
-              <p className="mt-1 text-xs text-grit-muted">Permanente (sin límite de días)</p>
-            ) : null}
-            {fieldErrors.duracion ? (
-              <p className="mt-1 text-xs font-medium text-grit-danger" role="alert">
-                {fieldErrors.duracion}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Activo toggle */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={activo}
-              onClick={() => setActivo(!activo)}
-              disabled={isSubmitting}
-              className={[
-                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-grit-cyan/40 focus:ring-offset-2 focus:ring-offset-grit-bg disabled:opacity-50',
-                activo ? 'bg-grit-cyan' : 'bg-grit-subtext/20',
-              ].join(' ')}
-            >
-              <span
-                className={[
-                  'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200',
-                  activo ? 'translate-x-5' : 'translate-x-0',
-                ].join(' ')}
-              />
-            </button>
-            <span className="text-sm text-grit-subtext">
-              {activo ? 'Regla activa' : 'Regla inactiva'}
-            </span>
-          </div>
-
-          {submitError ? (
-            <div
-              className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger"
-              role="alert"
-            >
-              {submitError}
-            </div>
-          ) : null}
-        </div>
-
-        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
-          >
+    <GritDrawer
+      open={open}
+      onClose={onClose}
+      busy={isSubmitting}
+      title={title}
+      subtitle="Configura los parámetros de la regla de suspensión automática."
+      footer={
+        <>
+          <GritButton variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleSubmit()}
+          </GritButton>
+          <GritButton icon="save" onClick={() => void handleSubmit()} loading={isSubmitting} loadingLabel="Guardando…">
+            {mode === 'create' ? 'Crear regla' : 'Guardar cambios'}
+          </GritButton>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <GritField htmlFor="rs-nombre" label="Nombre" error={fieldErrors.nombre}>
+          <input
+            id="rs-nombre"
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting
-              ? 'Guardando...'
-              : mode === 'create'
-                ? 'Crear regla'
-                : 'Guardar cambios'}
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              save
-            </span>
-          </button>
-        </footer>
-      </aside>
-    </div>
+            maxLength={100}
+            placeholder="Ej: Suspensión por acumulación mensual"
+            aria-invalid={fieldErrors.nombre ? true : undefined}
+            aria-describedby={gritDescribedBy('rs-nombre', undefined, fieldErrors.nombre)}
+            className={fieldErrors.nombre ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        <GritField htmlFor="rs-num-inasistencias" label="Número de inasistencias" error={fieldErrors.num_inasistencias}>
+          <input
+            id="rs-num-inasistencias"
+            type="number"
+            min={1}
+            step={1}
+            value={numInasistencias}
+            onChange={(e) => setNumInasistencias(e.target.value)}
+            disabled={isSubmitting}
+            aria-invalid={fieldErrors.num_inasistencias ? true : undefined}
+            aria-describedby={gritDescribedBy('rs-num-inasistencias', undefined, fieldErrors.num_inasistencias)}
+            className={fieldErrors.num_inasistencias ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        <GritSwitch
+          checked={porSuscripcion}
+          onChange={setPorSuscripcion}
+          disabled={isSubmitting}
+          label="Contar inasistencias en la suscripción activa"
+          showLabel
+        />
+
+        <GritField htmlFor="rs-por-dias-atras" label="En los últimos N días" hint={diasHint} error={fieldErrors.por_dias_atras}>
+          <input
+            id="rs-por-dias-atras"
+            type="number"
+            min={0}
+            step={1}
+            value={porDiasAtras}
+            onChange={(e) => setPorDiasAtras(e.target.value)}
+            disabled={isSubmitting}
+            aria-invalid={fieldErrors.por_dias_atras ? true : undefined}
+            aria-describedby={gritDescribedBy('rs-por-dias-atras', diasHint, fieldErrors.por_dias_atras)}
+            className={fieldErrors.por_dias_atras ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        {fieldErrors.condicion ? <GritAlert tone="danger">{fieldErrors.condicion}</GritAlert> : null}
+
+        <GritField htmlFor="rs-duracion" label="Duración de la suspensión (días)" hint={duracionHint} error={fieldErrors.duracion}>
+          <input
+            id="rs-duracion"
+            type="number"
+            min={0}
+            step={1}
+            value={duracion}
+            onChange={(e) => setDuracion(e.target.value)}
+            disabled={isSubmitting}
+            aria-invalid={fieldErrors.duracion ? true : undefined}
+            aria-describedby={gritDescribedBy('rs-duracion', duracionHint, fieldErrors.duracion)}
+            className={fieldErrors.duracion ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        <GritSwitch checked={activo} onChange={setActivo} disabled={isSubmitting} label="Regla activa" showLabel />
+
+        {submitError ? <GritAlert tone="danger">{submitError}</GritAlert> : null}
+      </div>
+    </GritDrawer>
   );
 }

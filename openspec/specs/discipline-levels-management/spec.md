@@ -1,4 +1,9 @@
-## ADDED Requirements
+# Capability: discipline-levels-management
+
+## Purpose
+Defines the ordered level catalogue (progression ladder) of each discipline and how administrators manage it.
+
+## Requirements
 
 ### Requirement: Tenant administrator can manage the level catalogue for a discipline
 The system SHALL allow authenticated users with `administrador` role to create, edit, and delete ordered levels for any discipline belonging to their tenant. Levels are scoped to `(tenant_id, disciplina_id)` and represent a progression hierarchy used for training category assignments.

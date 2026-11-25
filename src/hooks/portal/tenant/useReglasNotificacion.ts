@@ -35,6 +35,9 @@ export function useReglasNotificacion({ tenantId }: UseReglasNotificacionOptions
   const [selectedRule, setSelectedRule] = useState<ReglaNotificacion | null>(null);
   // `silent` reloads (after a save) keep the list on screen instead of the loading state
   const [reloadKey, setReloadKey] = useState({ key: 0, silent: false });
+  // Rules whose inline "activo" switch is saving (the switch is disabled meanwhile)
+  const [pendingIds, setPendingIds] = useState<ReadonlySet<string>>(new Set());
+  const [toggleError, setToggleError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -138,6 +141,39 @@ export function useReglasNotificacion({ tenantId }: UseReglasNotificacionOptions
 
   const clearSubmitError = useCallback(() => setSubmitError(null), []);
 
+  /**
+   * Inline active switch (`aYwNn` rule tile). Optimistic: the row flips at once and is restored if
+   * the update fails. The update payload needs the whole rule, so the current fields are re-sent.
+   */
+  const toggleActivo = useCallback(
+    async (rule: ReglaNotificacion, activo: boolean): Promise<void> => {
+      setToggleError(null);
+      setPendingIds((prev) => new Set(prev).add(rule.id));
+      setRules((prev) => prev.map((r) => (r.id === rule.id ? { ...r, activo } : r)));
+      try {
+        await reglasNotificacionService.updateRegla(rule.id, {
+          dias: rule.dias,
+          destinatarios: rule.destinatarios,
+          canal_in_app: rule.canal_in_app,
+          canal_email: rule.canal_email,
+          activo,
+        });
+      } catch (toggleFailure) {
+        setRules((prev) => prev.map((r) => (r.id === rule.id ? { ...r, activo: rule.activo } : r)));
+        setToggleError(mensajeError(toggleFailure, 'No se guardó el cambio. Inténtalo nuevamente.'));
+      } finally {
+        setPendingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(rule.id);
+          return next;
+        });
+      }
+    },
+    [],
+  );
+
+  const clearToggleError = useCallback(() => setToggleError(null), []);
+
   return {
     rules,
     conteoPorTipo,
@@ -156,5 +192,9 @@ export function useReglasNotificacion({ tenantId }: UseReglasNotificacionOptions
     handleCreate,
     handleUpdate,
     handleDelete,
+    pendingIds,
+    toggleActivo,
+    toggleError,
+    clearToggleError,
   };
 }

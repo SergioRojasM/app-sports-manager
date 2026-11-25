@@ -1,4 +1,9 @@
-## ADDED Requirements
+# Capability: plan-management
+
+## Purpose
+Defines the membership plans of an organization: administrator management and the read-only catalogue for athletes and trainers.
+
+## Requirements
 
 ### Requirement: Tenant administrator can access plans management route
 The system SHALL provide a tenant-scoped plans management screen at `/portal/orgs/[tenant_id]/gestion-planes` for authenticated users with `administrador` role in the requested tenant. The route page entrypoint SHALL only compose feature components and MUST NOT perform direct data-access calls.
@@ -154,8 +159,6 @@ A database migration SHALL ALTER the existing `public.planes` table to drop the 
 - **WHEN** the migration is applied
 - **THEN** constraints `planes_precio_ck` and `planes_clases_ck` SHALL no longer exist on the `planes` table
 
-## ADDED Requirements
-
 ### Requirement: Non-admin roles can view active tenant plans
 The system SHALL expose the `gestion-planes` route to `usuario` and `entrenador` roles via a unified `(shared)` route. The route SHALL render the read-only plan catalogue (`PlanesViewPage`) for these roles and MUST filter plans to `activo = true` only. The administrator route at `(administrador)/gestion-planes` SHALL be removed; the admin MUST be served the full CRUD view (`PlanesPage`) from the same shared route based on server-resolved role.
 
@@ -307,8 +310,6 @@ The system SHALL enforce that users select a payment method from the tenant's ac
 #### Scenario: Subscription cannot be submitted without payment method
 - **WHEN** `SuscripcionModal` is rendered with an empty active methods list or no selection made
 - **THEN** the Confirm action SHALL be disabled and `useSuscripcion.submit` SHALL NOT be called
-
-## ADDED Requirements
 
 ### Requirement: Plan form modal includes an inline subtype management section
 The plan form modal (`PlanFormModal`) SHALL include a visually separated "Tipos de plan / Subtipos" section below the main plan fields. The section SHALL render a list of inline subtype rows; each row SHALL display: Name (required), Price, Validity in days, Classes Included, Active toggle, and a Remove button. An "+ Agregar subtipo" button SHALL append a new empty row to the list.

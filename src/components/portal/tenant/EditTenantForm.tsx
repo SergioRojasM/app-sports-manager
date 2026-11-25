@@ -1,3 +1,12 @@
+import {
+  GritField,
+  GritIcon,
+  GritSwitch,
+  gritDescribedBy,
+  gritFileInputClass,
+  gritInputClass,
+  gritInputInvalidClass,
+} from '@/components/ui';
 import type {
   TenantEditFieldErrors,
   TenantEditFormValues,
@@ -43,80 +52,48 @@ const FIELDS: FieldConfig[] = [
   { key: 'x_url', label: 'X', type: 'url', placeholder: 'https://x.com/...' },
 ];
 
-export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpload, bannerUpload }: EditTenantFormProps) {
-  const maxSolicitudesError = errors.max_solicitudes;
-  const maxSolicitudesInputClass = `w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition-all placeholder:text-grit-muted focus:ring-2 ${
-    maxSolicitudesError
-      ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-      : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35'
-  }`;
+const IMAGE_HINT = 'JPEG, PNG o WebP. Máximo 2 MB.';
 
+export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpload, bannerUpload }: EditTenantFormProps) {
   const currentLogoSrc = logoUpload?.previewUrl ?? (values.logo_url || null);
   const currentBannerSrc = bannerUpload?.previewUrl ?? (values.banner_url || null);
   const isDisabled = isSubmitting || (logoUpload?.uploading ?? false) || (bannerUpload?.uploading ?? false);
 
   return (
-    <div className="space-y-4">
-      {/* Logo upload section */}
+    <div className="space-y-5">
       {logoUpload ? (
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
-            Logo
-          </label>
+        <GritField htmlFor="logo-upload" label="Logo" hint={IMAGE_HINT} error={logoUpload.error}>
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-grit-glass-border bg-grit-bg">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-white/[0.10] bg-white/[0.04]">
               {currentLogoSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentLogoSrc}
-                  alt="Logo preview"
-                  className="h-full w-full object-cover"
-                />
+                <img src={currentLogoSrc} alt="Vista previa del logo" className="h-full w-full object-cover" />
               ) : (
-                <span className="material-symbols-outlined text-2xl text-grit-subtext" aria-hidden="true">
-                  shield
-                </span>
+                <GritIcon name="shield" size={22} className="text-grit-muted" />
               )}
             </div>
-            <div className="flex-1">
-              <input
-                id="logo-upload"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={isDisabled}
-                onChange={logoUpload.onFileSelect}
-                className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text file:mr-3 file:rounded file:border-0 file:bg-grit-cyan/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-grit-cyan disabled:opacity-50"
-              />
-              <p className="mt-1 text-[10px] text-grit-muted">JPEG, PNG o WebP. Máximo 2 MB.</p>
-            </div>
+            <input
+              id="logo-upload"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={isDisabled}
+              onChange={logoUpload.onFileSelect}
+              aria-describedby={gritDescribedBy('logo-upload', IMAGE_HINT, logoUpload.error)}
+              className={gritFileInputClass}
+            />
           </div>
-          {logoUpload.error ? (
-            <p className="text-xs font-medium text-grit-danger" role="alert">
-              {logoUpload.error}
-            </p>
-          ) : null}
-        </div>
+        </GritField>
       ) : null}
 
-      {/* Banner upload section */}
       {bannerUpload ? (
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
-            Banner
-          </label>
-          <div className="h-20 w-full overflow-hidden rounded-grit-lg border border-grit-glass-border bg-grit-bg">
+        <GritField htmlFor="banner-upload" label="Banner" hint={IMAGE_HINT} error={bannerUpload.error}>
+          <div className="h-24 w-full overflow-hidden rounded-grit-lg border border-white/[0.10] bg-white/[0.04]">
             {currentBannerSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={currentBannerSrc}
-                alt="Banner preview"
-                className="h-full w-full object-cover"
-              />
+              <img src={currentBannerSrc} alt="Vista previa del banner" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full items-center justify-center">
-                <span className="material-symbols-outlined text-2xl text-grit-subtext" aria-hidden="true">
-                  panorama
-                </span>
+                <GritIcon name="panorama" size={22} className="text-grit-muted" />
               </div>
             )}
           </div>
@@ -126,85 +103,53 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
             accept="image/jpeg,image/png,image/webp"
             disabled={isDisabled}
             onChange={bannerUpload.onFileSelect}
-            className="w-full rounded-grit-lg border border-grit-glass-border bg-grit-bg px-4 py-3 text-sm text-grit-text file:mr-3 file:rounded file:border-0 file:bg-grit-cyan/20 file:px-2 file:py-1 file:text-xs file:font-medium file:text-grit-cyan disabled:opacity-50"
+            aria-describedby={gritDescribedBy('banner-upload', IMAGE_HINT, bannerUpload.error)}
+            className={gritFileInputClass}
           />
-          <p className="mt-1 text-[10px] text-grit-muted">JPEG, PNG o WebP. Máximo 2 MB.</p>
-          {bannerUpload.error ? (
-            <p className="text-xs font-medium text-grit-danger" role="alert">
-              {bannerUpload.error}
-            </p>
-          ) : null}
-        </div>
+        </GritField>
       ) : null}
 
       {FIELDS.map((field) => {
         const fieldError = errors[field.key];
-        const inputClassName = `w-full rounded-grit-lg border bg-grit-bg px-4 py-3 text-sm text-grit-text outline-none transition-all placeholder:text-grit-muted focus:ring-2 ${
-          fieldError
-            ? 'border-grit-danger/80 focus:border-grit-danger/40 focus:ring-grit-danger/35'
-            : 'border-grit-glass-border focus:border-grit-cyan focus:ring-grit-cyan/35'
-        }`;
+        const common = {
+          id: field.key,
+          name: field.key,
+          value: values[field.key],
+          disabled: isDisabled,
+          placeholder: field.placeholder,
+          'aria-invalid': fieldError ? true : undefined,
+          'aria-describedby': gritDescribedBy(field.key, undefined, fieldError),
+          className: fieldError ? gritInputInvalidClass : gritInputClass,
+        };
 
         return (
-          <div key={field.key} className="space-y-1.5">
-            <label htmlFor={field.key} className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
-              {field.label}
-            </label>
-
+          <GritField key={field.key} htmlFor={field.key} label={field.label} error={fieldError}>
             {field.multiline ? (
-              <textarea
-                id={field.key}
-                name={field.key}
-                rows={4}
-                value={values[field.key]}
-                onChange={(event) => onChange(field.key, event.target.value)}
-                disabled={isDisabled}
-                placeholder={field.placeholder}
-                className={inputClassName}
-              />
+              <textarea {...common} rows={4} onChange={(event) => onChange(field.key, event.target.value)} />
             ) : (
-              <input
-                id={field.key}
-                name={field.key}
-                type={field.type ?? 'text'}
-                value={values[field.key]}
-                onChange={(event) => onChange(field.key, event.target.value)}
-                disabled={isDisabled}
-                placeholder={field.placeholder}
-                className={inputClassName}
-              />
+              <input {...common} type={field.type ?? 'text'} onChange={(event) => onChange(field.key, event.target.value)} />
             )}
-
-            {fieldError ? (
-              <p className="text-xs font-medium text-grit-danger" role="alert">
-                {fieldError}
-              </p>
-            ) : null}
-          </div>
+          </GritField>
         );
       })}
 
       {/* publico — marketplace visibility (US-0133) */}
-      <div className="space-y-1.5">
-        <span id="publico-desc" className="block text-[11px] text-grit-muted">
+      <div className="flex flex-col gap-2 rounded-[16px] border border-white/[0.06] bg-white/[0.025] p-4">
+        <GritSwitch
+          id="publico"
+          checked={values.publico === 'true'}
+          onChange={(next) => onChange('publico', next ? 'true' : 'false')}
+          disabled={isSubmitting}
+          label="Organización pública"
+          showLabel
+          aria-describedby="publico-desc"
+        />
+        <p id="publico-desc" className="font-grit-body text-[11px] text-grit-muted">
           Cuando está activo, la organización aparece en «Organizaciones disponibles» y cualquier usuario puede solicitar
           acceso. Si lo desactivas, solo la verán sus miembros y no recibirá nuevas solicitudes.
-        </span>
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            id="publico"
-            name="publico"
-            type="checkbox"
-            checked={values.publico === 'true'}
-            onChange={(event) => onChange('publico', event.target.checked ? 'true' : 'false')}
-            disabled={isSubmitting}
-            aria-describedby="publico-desc"
-            className="h-4 w-4 rounded border-grit-glass-border bg-grit-bg accent-grit-cyan disabled:opacity-50"
-          />
-          <span className="text-sm font-medium text-grit-text">Organización pública</span>
-        </label>
+        </p>
         {values.publico !== 'true' ? (
-          <p className="text-xs font-medium text-amber-300" role="status">
+          <p className="font-grit-body text-xs text-grit-warning" role="status">
             Las solicitudes pendientes se conservan y puedes seguir gestionándolas. Para sumar miembros nuevos usa
             «Agregar miembro» en Gestión de equipo.
           </p>
@@ -212,10 +157,11 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
       </div>
 
       {/* max_solicitudes — numeric field */}
-      <div className="space-y-1.5">
-        <label htmlFor="max_solicitudes" className="text-xs font-semibold uppercase tracking-[0.12em] text-grit-subtext">
-          Máximo de solicitudes rechazadas antes de bloqueo
-        </label>
+      <GritField
+        htmlFor="max_solicitudes"
+        label="Máximo de solicitudes rechazadas antes de bloqueo"
+        error={errors.max_solicitudes}
+      >
         <input
           id="max_solicitudes"
           name="max_solicitudes"
@@ -227,40 +173,28 @@ export function EditTenantForm({ values, errors, isSubmitting, onChange, logoUpl
           onChange={(event) => onChange('max_solicitudes', event.target.value)}
           disabled={isSubmitting}
           placeholder="2"
-          className={maxSolicitudesInputClass}
+          aria-invalid={errors.max_solicitudes ? true : undefined}
+          aria-describedby={gritDescribedBy('max_solicitudes', undefined, errors.max_solicitudes)}
+          className={errors.max_solicitudes ? gritInputInvalidClass : gritInputClass}
         />
-        {maxSolicitudesError ? (
-          <p className="text-xs font-medium text-grit-danger" role="alert">
-            {maxSolicitudesError}
-          </p>
-        ) : null}
-      </div>
+      </GritField>
 
       {/* requiere_perfil_completo — boolean toggle */}
-      <div className="space-y-1.5">
-        <span
-          id="requiere-perfil-desc"
-          className="block text-[11px] text-grit-muted"
-        >
+      <div className="flex flex-col gap-2 rounded-[16px] border border-white/[0.06] bg-white/[0.025] p-4">
+        <GritSwitch
+          id="requiere_perfil_completo"
+          checked={values.requiere_perfil_completo === 'true'}
+          onChange={(next) => onChange('requiere_perfil_completo', next ? 'true' : 'false')}
+          disabled={isSubmitting}
+          label="Requerir perfil completo para ingresar a la organización"
+          showLabel
+          aria-describedby="requiere-perfil-desc"
+        />
+        <p id="requiere-perfil-desc" className="font-grit-body text-[11px] text-grit-muted">
           Cuando está activo, todos los miembros —incluidos los invitados y los que ya pertenecen a la organización—
           deberán completar su perfil (nombre, apellido, teléfono, fecha de nacimiento, tipo y número de
           identificación, fecha de expedición y grupo sanguíneo) para solicitar acceso e ingresar.
-        </span>
-        <label className="flex cursor-pointer items-center gap-3">
-          <input
-            id="requiere_perfil_completo"
-            name="requiere_perfil_completo"
-            type="checkbox"
-            checked={values.requiere_perfil_completo === 'true'}
-            onChange={(event) => onChange('requiere_perfil_completo', event.target.checked ? 'true' : 'false')}
-            disabled={isSubmitting}
-            aria-describedby="requiere-perfil-desc"
-            className="h-4 w-4 rounded border-grit-glass-border bg-grit-bg accent-grit-cyan disabled:opacity-50"
-          />
-          <span className="text-sm font-medium text-grit-text">
-            Requerir perfil completo para ingresar a la organización
-          </span>
-        </label>
+        </p>
       </div>
     </div>
   );

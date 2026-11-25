@@ -1,4 +1,9 @@
-## ADDED Requirements
+# Capability: disciplines-management
+
+## Purpose
+Defines how tenant administrators maintain the sports disciplines of their organization, which group plans, trainings and level ladders.
+
+## Requirements
 
 ### Requirement: Tenant administrator can access disciplines management route
 The system SHALL provide a tenant-scoped disciplines management screen at `/portal/orgs/[tenant_id]/gestion-disciplinas` for authenticated users with `administrador` role in the requested tenant. The route page entrypoint SHALL only compose feature components and MUST NOT perform direct data-access calls.
@@ -66,8 +71,6 @@ The system SHALL enforce mutation authorization for disciplines using database-l
 #### Scenario: Non-admin or out-of-scope tenant mutation attempt
 - **WHEN** an authenticated user without admin membership for the target tenant submits create/update/delete
 - **THEN** the database policy SHALL deny the mutation and no data SHALL be persisted
-
-## ADDED Requirements
 
 ### Requirement: DisciplinesTable row SHALL expose an expand toggle to reveal the levels panel
 Each row in `DisciplinesTable` SHALL render a chevron icon button that toggles the visibility of `NivelesDisciplinaPanel` inline below the row. The toggle SHALL be visible only to users with `administrador` role (matching the existing gate on the Disciplines page). Expanding a row triggers a lazy fetch of `nivel_disciplina` rows for that discipline and tenant. Once fetched, the data is cached in component state for the life of the modal/page session.

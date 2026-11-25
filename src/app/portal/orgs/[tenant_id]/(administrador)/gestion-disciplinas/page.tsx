@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { DisciplinesPage } from '@/components/portal/disciplines';
 
 type GestionDisciplinasTenantPageProps = {
@@ -9,5 +10,10 @@ export default async function GestionDisciplinasTenantPage({
 }: GestionDisciplinasTenantPageProps) {
 	const { tenant_id: tenantId } = await params;
 
-	return <DisciplinesPage tenantId={tenantId} />;
+	// DisciplinesPage reads the selected discipline from `?disciplina=` (useSearchParams)
+	return (
+		<Suspense>
+			<DisciplinesPage tenantId={tenantId} />
+		</Suspense>
+	);
 }

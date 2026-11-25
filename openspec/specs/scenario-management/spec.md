@@ -1,4 +1,9 @@
-## ADDED Requirements
+# Capability: scenario-management
+
+## Purpose
+Defines how tenant administrators list, create, edit and delete the training scenarios (venues) of their organization and their weekly schedules.
+
+## Requirements
 
 ### Requirement: Tenant administrator can view tenant scenarios in management route
 The system SHALL provide a tenant-scoped scenarios management screen at `/portal/orgs/[tenant_id]/gestion-escenarios` for authenticated users with administrator membership in the requested tenant. The route page entrypoint SHALL only compose feature components and MUST NOT perform direct data-access calls.

@@ -86,14 +86,14 @@ function mapTenantToEditFormValues(tenant: TenantRow): TenantEditFormValues {
 function mapCodeToMessage(code: TenantViewErrorCode): string {
   switch (code) {
     case 'UNAUTHENTICATED':
-      return 'No active session was found for this view.';
+      return 'No encontramos una sesión activa.';
     case 'PROFILE_NOT_FOUND':
-      return 'Unable to resolve your organization profile.';
+      return 'No tienes acceso a esta organización.';
     case 'TENANT_NOT_FOUND':
-      return 'Organization information is not available for this account.';
+      return 'La información de la organización no está disponible.';
     case 'UNKNOWN':
     default:
-      return 'Unable to load organization information right now.';
+      return 'No fue posible cargar la información de la organización.';
   }
 }
 
@@ -257,7 +257,26 @@ export const tenantService = {
         facebookUrl: tenant.facebook_url,
         xUrl: tenant.x_url,
       },
+      isPublic: tenant.publico ?? true,
     };
+  },
+
+  /**
+   * Number of members of a tenant, for the "Miembros" tile of the management identity card.
+   * Head-only count on `miembros_tenant` (readable by the tenant's administrators).
+   */
+  async countMiembros(tenantId: string): Promise<number> {
+    const supabase = createClient();
+    const { count, error } = await supabase
+      .from('miembros_tenant')
+      .select('usuario_id', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
+
+    if (error) {
+      throw new Error('No fue posible contar los miembros de la organización.');
+    }
+
+    return count ?? 0;
   },
 
   async getTenantViewData(userId: string): Promise<TenantViewData> {

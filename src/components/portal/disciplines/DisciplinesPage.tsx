@@ -1,101 +1,175 @@
 'use client';
 
+import { useRef } from 'react';
+import {
+  GritAlert,
+  GritButton,
+  GritConfirmDialog,
+  GritEmptyState,
+  GritPageHeader,
+  GritSearchField,
+} from '@/components/ui';
 import { useDisciplines } from '@/hooks/portal/disciplines/useDisciplines';
+import type { Discipline } from '@/types/portal/disciplines.types';
+import { DisciplineDetail } from './DisciplineDetail';
 import { DisciplineFormModal } from './DisciplineFormModal';
-import { DisciplinesHeaderFilters } from './DisciplinesHeaderFilters';
-import { DisciplinesTable } from './DisciplinesTable';
-import { GritPageHeader } from '@/components/ui';
+import { DisciplinesList } from './DisciplinesList';
 
 type DisciplinesPageProps = {
   tenantId: string;
 };
 
-function LoadingState() {
-  return (
-    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-      Cargando disciplinas...
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
-      No hay disciplinas registradas para esta organización.
-    </div>
-  );
-}
-
+/** Disciplines workspace (`fXuVP` Admin · Disciplinas): list of disciplines + detail with the level ladder. */
 export function DisciplinesPage({ tenantId }: DisciplinesPageProps) {
   const {
+    disciplines,
+    filteredDisciplines,
+    counts,
     loading,
     error,
-    filteredDisciplines,
     searchTerm,
     setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+    activeDiscipline,
+    selectDiscipline,
+    nivelesActivos,
+    atletas,
+    reloadConteos,
     modalOpen,
     modalMode,
     formValues,
     fieldErrors,
     submitError,
     successMessage,
+    dismissSuccess,
     isSubmitting,
     openCreateModal,
     openEditModal,
-    deleteDiscipline,
     closeModal,
     updateField,
     submit,
     refresh,
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
   } = useDisciplines({ tenantId });
 
-  return (
-    <section className="space-y-6">
-      <GritPageHeader title="Sports Disciplines" subtitle="Configure and manage athletic training categories for your organization." />
+  const detailHeadingRef = useRef<HTMLHeadingElement>(null);
 
-      <DisciplinesHeaderFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onCreateDiscipline={openCreateModal}
+  const handleSelect = (discipline: Discipline) => {
+    selectDiscipline(discipline.id);
+    // Stacked layout (below lg): bring the detail into view and announce it
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      requestAnimationFrame(() => {
+        detailHeadingRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        detailHeadingRef.current?.focus({ preventScroll: true });
+      });
+    }
+  };
+
+  return (
+    <section className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Tus"
+        titleAccent="disciplinas."
+        italic
+        actions={
+          <>
+            <GritSearchField
+              aria-label="Buscar disciplina"
+              placeholder="Buscar disciplina…"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="w-full sm:w-[240px]"
+            />
+            <GritButton icon="add" onClick={openCreateModal}>
+              Nueva disciplina
+            </GritButton>
+          </>
+        }
       />
 
       {successMessage ? (
-        <div className="rounded-grit-md border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
+        <GritAlert tone="success" onDismiss={dismissSuccess}>
           {successMessage}
-        </div>
+        </GritAlert>
       ) : null}
 
-      {submitError && !modalOpen ? (
-        <div className="rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
-          {submitError}
+      {loading ? (
+        <div role="status">
+          <GritEmptyState icon="hourglass_empty" title="Cargando disciplinas…" />
         </div>
-      ) : null}
-
-      {loading ? <LoadingState /> : null}
-
-      {!loading && error ? (
-        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
-          <p className="text-sm text-grit-danger">{error}</p>
-          <button
-            type="button"
-            className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
-            onClick={() => void refresh()}
-          >
-            Reintentar
-          </button>
-        </div>
-      ) : null}
-
-      {!loading && !error && filteredDisciplines.length === 0 ? <EmptyState /> : null}
-
-      {!loading && !error && filteredDisciplines.length > 0 ? (
-        <DisciplinesTable
-          rows={filteredDisciplines}
-          tenantId={tenantId}
-          onEdit={openEditModal}
-          onDelete={(discipline) => void deleteDiscipline(discipline)}
+      ) : error ? (
+        <GritEmptyState
+          icon="error"
+          title="No pudimos cargar las disciplinas"
+          description={error}
+          descriptionClassName="text-grit-danger"
+          action={
+            <GritButton variant="secondary" icon="refresh" onClick={() => void refresh()}>
+              Reintentar
+            </GritButton>
+          }
         />
-      ) : null}
+      ) : disciplines.length === 0 ? (
+        <GritEmptyState
+          icon="sports"
+          title="Aún no tienes disciplinas"
+          description="Crea tu primera disciplina para organizar planes, entrenamientos y niveles."
+          action={
+            <GritButton icon="add" onClick={openCreateModal}>
+              Nueva disciplina
+            </GritButton>
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[380px_minmax(0,1fr)]">
+          <DisciplinesList
+            disciplines={filteredDisciplines}
+            counts={counts}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            activeId={activeDiscipline?.id ?? null}
+            onSelect={handleSelect}
+            nivelesActivos={nivelesActivos}
+            atletasPorDisciplina={atletas?.porDisciplina ?? null}
+            emptyContent={
+              <div className="flex flex-col items-center gap-3 rounded-[16px] border border-white/[0.06] bg-white/[0.025] px-4 py-8 text-center">
+                <p className="font-grit-body text-[13px] text-grit-subtext">Ninguna disciplina coincide.</p>
+                <GritButton
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setStatusFilter('todas');
+                  }}
+                >
+                  Limpiar filtros
+                </GritButton>
+              </div>
+            }
+          />
+          {activeDiscipline ? (
+            <DisciplineDetail
+              ref={detailHeadingRef}
+              tenantId={tenantId}
+              discipline={activeDiscipline}
+              nivelesActivos={nivelesActivos ? (nivelesActivos[activeDiscipline.id] ?? 0) : null}
+              atletas={atletas ? (atletas.porDisciplina[activeDiscipline.id] ?? 0) : null}
+              atletasPorNivel={atletas?.porNivel ?? null}
+              onEdit={openEditModal}
+              onDelete={requestDelete}
+              onLevelsChanged={() => void reloadConteos()}
+            />
+          ) : (
+            <GritEmptyState icon="search_off" title="Sin disciplina seleccionada" description="Ajusta la búsqueda o el filtro." />
+          )}
+        </div>
+      )}
 
       <DisciplineFormModal
         open={modalOpen}
@@ -107,6 +181,21 @@ export function DisciplinesPage({ tenantId }: DisciplinesPageProps) {
         onClose={closeModal}
         onSubmit={submit}
         onChangeField={updateField}
+      />
+
+      <GritConfirmDialog
+        open={deleteTarget !== null}
+        title="Eliminar disciplina"
+        message={
+          <>
+            ¿Seguro que quieres eliminar <span className="font-semibold text-grit-text">{deleteTarget?.nombre}</span>? Esta
+            acción no se puede deshacer.
+          </>
+        }
+        pending={isDeleting}
+        error={deleteError}
+        onCancel={cancelDelete}
+        onConfirm={() => void confirmDelete()}
       />
     </section>
   );
