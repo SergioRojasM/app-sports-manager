@@ -17,8 +17,8 @@ const BADGE_STYLES: Record<ReservaEstado, { label: string; className: string; do
   },
   cancelada: {
     label: 'Cancelada',
-    className: 'border-slate-500/40 bg-slate-700/40 text-slate-300',
-    dotClassName: 'bg-slate-400',
+    className: 'border-grit-glass-border bg-grit-card text-grit-subtext',
+    dotClassName: 'bg-grit-subtext/20',
   },
   completada: {
     label: 'Completada',
@@ -27,7 +27,7 @@ const BADGE_STYLES: Record<ReservaEstado, { label: string; className: string; do
   },
   rechazada: {
     label: 'Rechazada',
-    className: 'border-rose-400/40 bg-rose-900/25 text-rose-200',
+    className: 'border-grit-danger/40 bg-grit-danger/10 text-grit-danger',
     dotClassName: 'bg-rose-300',
   },
 };

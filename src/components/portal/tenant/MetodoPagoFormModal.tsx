@@ -1,11 +1,29 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type {
-  MetodoPago,
-  MetodoPagoTipo,
-  CreateMetodoPagoInput,
-  UpdateMetodoPagoInput,
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  GritAlert,
+  GritButton,
+  GritDrawer,
+  GritField,
+  GritIcon,
+  GritSwitch,
+  cx,
+  gritDescribedBy,
+  gritFocusRing,
+  gritInputClass,
+  gritInputInvalidClass,
+  gritSelectClass,
+  gritSelectInvalidClass,
+} from '@/components/ui';
+import {
+  METODO_PAGO_QR_MAX_BYTES,
+  METODO_PAGO_QR_MIME_TYPES,
+  type MetodoPago,
+  type MetodoPagoTipo,
+  type CreateMetodoPagoInput,
+  type UpdateMetodoPagoInput,
+  type MetodoPagoQrChange,
 } from '@/types/portal/metodos-pago.types';
 
 type MetodoPagoFormModalProps = {
@@ -15,7 +33,12 @@ type MetodoPagoFormModalProps = {
   isSubmitting: boolean;
   submitError: string | null;
   onClose: () => void;
-  onSubmit: (data: CreateMetodoPagoInput | UpdateMetodoPagoInput) => Promise<void>;
+  /** `'evento'`: a method that only exists in an event snapshot — no "Activo" toggle (US-0130). */
+  variant?: 'tenant' | 'evento';
+  onSubmit: (
+    data: CreateMetodoPagoInput | UpdateMetodoPagoInput,
+    qr: MetodoPagoQrChange,
+  ) => Promise<void>;
 };
 
 const TIPO_OPTIONS: { value: MetodoPagoTipo; label: string }[] = [
@@ -41,51 +64,73 @@ function isValidUrl(value: string): boolean {
   }
 }
 
-export function MetodoPagoFormModal({
+/**
+ * Mounted per opening and per target (keyed), so the fields start from `editTarget` without a
+ * reset effect.
+ */
+export function MetodoPagoFormModal(props: MetodoPagoFormModalProps) {
+  if (!props.open) return null;
+  return <MetodoPagoForm key={props.editTarget?.id ?? 'nuevo'} {...props} />;
+}
+
+function MetodoPagoForm({
   open,
   tenantId,
   editTarget,
   isSubmitting,
   submitError,
   onClose,
+  variant = 'tenant',
   onSubmit,
 }: MetodoPagoFormModalProps) {
-  const [nombre, setNombre] = useState('');
-  const [tipo, setTipo] = useState<MetodoPagoTipo | ''>('');
-  const [valor, setValor] = useState('');
-  const [url, setUrl] = useState('');
-  const [comentarios, setComentarios] = useState('');
-  const [activo, setActivo] = useState(true);
+  const [nombre, setNombre] = useState(() => editTarget?.nombre ?? '');
+  const [tipo, setTipo] = useState<MetodoPagoTipo | ''>(() => editTarget?.tipo ?? '');
+  const [valor, setValor] = useState(() => editTarget?.valor ?? '');
+  const [url, setUrl] = useState(() => editTarget?.url ?? '');
+  const [comentarios, setComentarios] = useState(() => editTarget?.comentarios ?? '');
+  const [activo, setActivo] = useState(() => editTarget?.activo ?? true);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [qrFile, setQrFile] = useState<File | null>(null);
+  const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
+  const [qrRemove, setQrRemove] = useState(false);
+  const [qrError, setQrError] = useState<string | null>(null);
+  const qrInputRef = useRef<HTMLInputElement>(null);
 
+  // Revoke object URL on cleanup
   useEffect(() => {
-    if (open && editTarget) {
-      setNombre(editTarget.nombre);
-      setTipo(editTarget.tipo);
-      setValor(editTarget.valor ?? '');
-      setUrl(editTarget.url ?? '');
-      setComentarios(editTarget.comentarios ?? '');
-      setActivo(editTarget.activo);
-      setFieldErrors({});
-    } else if (open) {
-      setNombre('');
-      setTipo('');
-      setValor('');
-      setUrl('');
-      setComentarios('');
-      setActivo(true);
-      setFieldErrors({});
-    }
-  }, [open, editTarget]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isSubmitting) onClose();
+    return () => {
+      if (qrPreviewUrl) URL.revokeObjectURL(qrPreviewUrl);
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [open, isSubmitting, onClose]);
+  }, [qrPreviewUrl]);
+
+  const handleQrSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    // Allow picking the same file again after an error or "Quitar"
+    e.target.value = '';
+    if (!file) return;
+
+    if (!METODO_PAGO_QR_MIME_TYPES.includes(file.type)) {
+      setQrError('Solo se permiten imágenes JPEG, PNG o WebP.');
+      return;
+    }
+
+    if (file.size > METODO_PAGO_QR_MAX_BYTES) {
+      setQrError('El archivo no puede superar 2 MB.');
+      return;
+    }
+
+    setQrError(null);
+    setQrFile(file);
+    setQrPreviewUrl(URL.createObjectURL(file));
+    setQrRemove(false);
+  }, []);
+
+  const handleQrRemove = useCallback(() => {
+    setQrError(null);
+    setQrFile(null);
+    setQrPreviewUrl(null);
+    setQrRemove(true);
+  }, []);
 
   const validate = useCallback((): FieldErrors => {
     const errors: FieldErrors = {};
@@ -100,6 +145,8 @@ export function MetodoPagoFormModal({
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
+    const qr: MetodoPagoQrChange = { file: qrFile, remove: qrRemove };
+
     if (editTarget) {
       const payload: UpdateMetodoPagoInput = {
         nombre: nombre.trim(),
@@ -109,7 +156,7 @@ export function MetodoPagoFormModal({
         comentarios: comentarios.trim() || null,
         activo,
       };
-      await onSubmit(payload);
+      await onSubmit(payload, qr);
     } else {
       const payload: CreateMetodoPagoInput = {
         tenant_id: tenantId,
@@ -120,243 +167,166 @@ export function MetodoPagoFormModal({
         comentarios: comentarios.trim() || null,
         activo,
       };
-      await onSubmit(payload);
+      await onSubmit(payload, qr);
     }
-  }, [validate, editTarget, nombre, tipo, valor, url, comentarios, activo, tenantId, onSubmit]);
-
-  if (!open) return null;
+  }, [validate, editTarget, nombre, tipo, valor, url, comentarios, activo, tenantId, onSubmit, qrFile, qrRemove]);
 
   const mode = editTarget ? 'edit' : 'create';
+  const esEvento = variant === 'evento';
+  const title = esEvento
+    ? mode === 'create'
+      ? 'Nuevo método de pago del evento'
+      : 'Editar método de pago del evento'
+    : mode === 'create'
+      ? 'Crear método de pago'
+      : 'Editar método de pago';
+  const qrDisplayUrl = qrPreviewUrl ?? (qrRemove ? null : editTarget?.qr_url ?? null);
+  const QR_HINT = 'JPEG, PNG o WebP. Máximo 2 MB.';
 
   return (
-    <div className="fixed inset-0 z-50">
-      <button
-        type="button"
-        aria-label="Cerrar formulario de método de pago"
-        className="absolute inset-0 bg-slate-950/70"
-        onClick={onClose}
-        disabled={isSubmitting}
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label={mode === 'create' ? 'Crear método de pago' : 'Editar método de pago'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
-      >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-100">
-              {mode === 'create' ? 'Crear método de pago' : 'Editar método de pago'}
-            </h2>
-            <p className="mt-1 text-xs text-slate-400">
-              Configura los datos del método de pago para esta organización.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
+    <GritDrawer
+      open={open}
+      onClose={onClose}
+      busy={isSubmitting}
+      title={title}
+      subtitle={
+        esEvento
+          ? 'Este método solo existe en este evento. No se guarda en los métodos de pago de tu organización.'
+          : 'Configura los datos del método de pago para esta organización.'
+      }
+      footer={
+        <>
+          <GritButton variant="secondary" onClick={onClose} disabled={isSubmitting}>
+            Cancelar
+          </GritButton>
+          <GritButton icon="save" onClick={() => void handleSubmit()} loading={isSubmitting} loadingLabel="Guardando…">
+            {mode === 'create' ? 'Crear método' : 'Guardar cambios'}
+          </GritButton>
+        </>
+      }
+    >
+      <div className="space-y-5">
+        <GritField htmlFor="mp-nombre" label="Nombre" error={fieldErrors.nombre}>
+          <input
+            id="mp-nombre"
+            type="text"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            placeholder="Ej: Nequi, Bancolombia, Efectivo"
+            aria-invalid={fieldErrors.nombre ? true : undefined}
+            aria-describedby={gritDescribedBy('mp-nombre', undefined, fieldErrors.nombre)}
+            className={fieldErrors.nombre ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
+
+        <GritField htmlFor="mp-tipo" label="Tipo" error={fieldErrors.tipo}>
+          <select
+            id="mp-tipo"
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value as MetodoPagoTipo)}
+            disabled={isSubmitting}
+            aria-invalid={fieldErrors.tipo ? true : undefined}
+            aria-describedby={gritDescribedBy('mp-tipo', undefined, fieldErrors.tipo)}
+            className={cx('grit-select-chevron', fieldErrors.tipo ? gritSelectInvalidClass : gritSelectClass)}
           >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              close
-            </span>
-          </button>
-        </header>
+            <option value="">Selecciona un tipo</option>
+            {TIPO_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </GritField>
 
-        <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
-          {/* Nombre */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
-              htmlFor="mp-nombre"
-            >
-              Nombre
-            </label>
-            <input
-              id="mp-nombre"
-              type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              disabled={isSubmitting}
-              placeholder="Ej: Nequi, Bancolombia, Efectivo"
-              className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
-                fieldErrors.nombre
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-              ].join(' ')}
-            />
-            {fieldErrors.nombre ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
-                {fieldErrors.nombre}
-              </p>
-            ) : null}
-          </div>
+        <GritField htmlFor="mp-valor" label="Número" optional>
+          <input
+            id="mp-valor"
+            type="text"
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+            disabled={isSubmitting}
+            placeholder="Ej: cuenta 123-456-789, CBU, número"
+            className={gritInputClass}
+          />
+        </GritField>
 
-          {/* Tipo */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
-              htmlFor="mp-tipo"
-            >
-              Tipo
-            </label>
-            <select
-              id="mp-tipo"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value as MetodoPagoTipo)}
-              disabled={isSubmitting}
-              className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition focus:ring-2',
-                fieldErrors.tipo
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-              ].join(' ')}
-            >
-              <option value="">Selecciona un tipo</option>
-              {TIPO_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            {fieldErrors.tipo ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
-                {fieldErrors.tipo}
-              </p>
-            ) : null}
-          </div>
+        <GritField htmlFor="mp-url" label="URL" optional error={fieldErrors.url}>
+          <input
+            id="mp-url"
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            disabled={isSubmitting}
+            placeholder="https://…"
+            aria-invalid={fieldErrors.url ? true : undefined}
+            aria-describedby={gritDescribedBy('mp-url', undefined, fieldErrors.url)}
+            className={fieldErrors.url ? gritInputInvalidClass : gritInputClass}
+          />
+        </GritField>
 
-          {/* Número */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
-              htmlFor="mp-valor"
-            >
-              Número <span className="normal-case tracking-normal text-slate-500">(opcional)</span>
-            </label>
-            <input
-              id="mp-valor"
-              type="text"
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-              disabled={isSubmitting}
-              placeholder="Ej: cuenta 123-456-789, CBU, número"
-              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
-            />
-          </div>
-
-          {/* URL */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
-              htmlFor="mp-url"
-            >
-              URL <span className="normal-case tracking-normal text-slate-500">(opcional)</span>
-            </label>
-            <input
-              id="mp-url"
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              disabled={isSubmitting}
-              placeholder="https://…"
-              className={[
-                'w-full rounded-xl border bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:ring-2',
-                fieldErrors.url
-                  ? 'border-rose-400/80 focus:border-rose-300 focus:ring-rose-300/35'
-                  : 'border-slate-700 focus:border-turquoise focus:ring-turquoise/35',
-              ].join(' ')}
-            />
-            {fieldErrors.url ? (
-              <p className="mt-1 text-xs font-medium text-rose-300" role="alert">
-                {fieldErrors.url}
-              </p>
-            ) : null}
-          </div>
-
-          {/* Comentarios */}
-          <div>
-            <label
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400"
-              htmlFor="mp-comentarios"
-            >
-              Comentarios <span className="normal-case tracking-normal text-slate-500">(opcional)</span>
-            </label>
-            <textarea
-              id="mp-comentarios"
-              rows={3}
-              value={comentarios}
-              onChange={(e) => setComentarios(e.target.value)}
-              disabled={isSubmitting}
-              placeholder="Instrucciones de pago, titular de cuenta, etc."
-              className="w-full rounded-xl border border-slate-700 bg-navy-deep px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-500 focus:border-turquoise focus:ring-2 focus:ring-turquoise/35"
-            />
-          </div>
-
-          {/* Activo toggle */}
-          <div className="flex items-center gap-3">
+        <GritField htmlFor="mp-qr" label="Imagen QR" optional hint={QR_HINT} error={qrError}>
+          <input
+            ref={qrInputRef}
+            id="mp-qr"
+            type="file"
+            accept={METODO_PAGO_QR_MIME_TYPES.join(',')}
+            onChange={handleQrSelect}
+            disabled={isSubmitting}
+            aria-describedby={gritDescribedBy('mp-qr', QR_HINT, qrError)}
+            className="sr-only"
+          />
+          {qrDisplayUrl ? (
+            <div className="flex items-start gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrDisplayUrl}
+                alt={`Código QR de ${nombre.trim() || 'este método de pago'}`}
+                className="h-40 w-40 shrink-0 rounded-grit-lg bg-white object-contain p-2"
+              />
+              <div className="flex flex-col gap-2">
+                <GritButton size="sm" variant="secondary" onClick={() => qrInputRef.current?.click()} disabled={isSubmitting}>
+                  Cambiar
+                </GritButton>
+                <GritButton size="sm" variant="danger" onClick={handleQrRemove} disabled={isSubmitting}>
+                  Quitar
+                </GritButton>
+              </div>
+            </div>
+          ) : (
             <button
               type="button"
-              role="switch"
-              aria-checked={activo}
-              onClick={() => setActivo(!activo)}
+              onClick={() => qrInputRef.current?.click()}
               disabled={isSubmitting}
-              className={[
-                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-turquoise/40 focus:ring-offset-2 focus:ring-offset-navy-medium disabled:opacity-50',
-                activo ? 'bg-turquoise' : 'bg-slate-600',
-              ].join(' ')}
+              className={cx(
+                'flex w-full items-center justify-center gap-2 rounded-grit-lg border border-dashed border-white/[0.14] bg-white/[0.02] px-4 py-6 font-grit-body text-[13px] font-semibold text-grit-subtext transition hover:border-grit-cyan/45 hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60',
+                gritFocusRing,
+              )}
             >
-              <span
-                className={[
-                  'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200',
-                  activo ? 'translate-x-5' : 'translate-x-0',
-                ].join(' ')}
-              />
+              <GritIcon name="qr_code_2" size={16} />
+              Subir imagen
             </button>
-            <span className="text-sm text-slate-300">
-              {activo ? 'Activo' : 'Inactivo'}
-            </span>
-          </div>
+          )}
+        </GritField>
 
-          {submitError ? (
-            <div
-              className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200"
-              role="alert"
-            >
-              {submitError}
-            </div>
-          ) : null}
-        </div>
+        <GritField htmlFor="mp-comentarios" label="Comentarios" optional>
+          <textarea
+            id="mp-comentarios"
+            rows={3}
+            value={comentarios}
+            onChange={(e) => setComentarios(e.target.value)}
+            disabled={isSubmitting}
+            placeholder="Instrucciones de pago, titular de cuenta, etc."
+            className={gritInputClass}
+          />
+        </GritField>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleSubmit()}
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting
-              ? 'Guardando...'
-              : mode === 'create'
-                ? 'Crear método'
-                : 'Guardar cambios'}
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              save
-            </span>
-          </button>
-        </footer>
-      </aside>
-    </div>
+        {!esEvento && (
+          <GritSwitch checked={activo} onChange={setActivo} disabled={isSubmitting} label="Método activo" showLabel />
+        )}
+
+        {submitError ? <GritAlert tone="danger">{submitError}</GritAlert> : null}
+      </div>
+    </GritDrawer>
   );
 }

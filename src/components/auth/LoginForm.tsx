@@ -1,12 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/auth/useAuth";
-import { GUIDED_LOGIN_STEPS, parseGuidedParams } from "@/lib/portal/entrenamientos-publicos/guidedBooking";
-import { GuidedBookingStepper } from "@/components/ui/GuidedBookingStepper";
 
 type LoginFormProps = {
   nextPath: string;
@@ -17,7 +15,6 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   const searchParams = useSearchParams();
   const { signIn, signInWithGoogle, errorMessage } = useAuth();
 
-  const guidedTarget = useMemo(() => parseGuidedParams(nextPath), [nextPath]);
   const signupHref = `/auth/signup?next=${encodeURIComponent(nextPath)}`;
 
   const [email, setEmail] = useState("");
@@ -63,10 +60,6 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         </h2>
         <p className="text-sm text-slate-400">¡Bienvenido de nuevo! Ingresa tus datos.</p>
       </div>
-
-      {guidedTarget && (
-        <GuidedBookingStepper steps={GUIDED_LOGIN_STEPS} currentStep={1} trainingNombre={guidedTarget.nombre} />
-      )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         {resetBannerVisible && (

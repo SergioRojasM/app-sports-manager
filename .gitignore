@@ -56,3 +56,8 @@ next-env.d.ts
 seed.sql
 
 scripts
+
+# Playwright MCP videos
+/videos
+
+projectspec/designs/reference/

@@ -8,6 +8,8 @@ import {
   fetchMisMembresias,
 } from '@/services/supabase/portal/inicio.service';
 import { InicioPage } from '@/components/portal/inicio';
+import { buildAgendaVentana } from '@/lib/portal/inicio-agenda';
+import { readPortalProfileName } from '@/lib/portal/portal-profile-cookie';
 
 export default async function InicioRoute() {
   const supabase = await createClient();
@@ -19,10 +21,14 @@ export default async function InicioRoute() {
     redirect('/auth/login');
   }
 
-  const [stats, proximosEntrenamientos, suscripciones, pagosPendientes, membresias] =
+  // One 7-day Bogotá window shared by the KPI count and the agenda.
+  const ventana = buildAgendaVentana(new Date());
+
+  const [nombre, stats, proximosEntrenamientos, suscripciones, pagosPendientes, membresias] =
     await Promise.all([
-      fetchInicioStats(supabase, user.id),
-      fetchProximosEntrenamientos(supabase, user.id, 5),
+      readPortalProfileName(),
+      fetchInicioStats(supabase, user.id, ventana),
+      fetchProximosEntrenamientos(supabase, user.id, ventana),
       fetchMisSuscripciones(supabase, user.id),
       fetchPagosPendientes(supabase, user.id),
       fetchMisMembresias(supabase, user.id),
@@ -30,6 +36,8 @@ export default async function InicioRoute() {
 
   return (
     <InicioPage
+      nombre={nombre}
+      ventana={ventana}
       data={{
         stats,
         proximosEntrenamientos,

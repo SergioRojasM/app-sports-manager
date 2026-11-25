@@ -7,7 +7,7 @@ type PagoEstadoBadgeProps = {
 const BADGE_CLASSES: Record<PagoEstado, string> = {
   pendiente: 'bg-amber-900/30 text-amber-300 border border-amber-400/30',
   validado: 'bg-emerald-900/30 text-emerald-300 border border-emerald-400/30',
-  rechazado: 'bg-rose-900/30 text-rose-300 border border-rose-400/30',
+  rechazado: 'bg-grit-danger/10 text-grit-danger border border-grit-danger/30',
 };
 
 const ESTADO_LABELS: Record<PagoEstado, string> = {

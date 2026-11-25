@@ -1,226 +1,313 @@
-import type { TrainingCalendarItem, TrainingVisibility } from '@/types/portal/entrenamientos.types';
+'use client';
 
-export function VisibilidadBadge({ visibilidad }: { visibilidad: TrainingVisibility }) {
-  if (visibilidad === 'publico') {
-    return (
-      <span className="rounded-md border border-turquoise/40 bg-turquoise/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-turquoise">
-        Público
-      </span>
-    );
-  }
+import { useMemo, useState } from 'react';
+import {
+  GritButton,
+  GritChip,
+  GritIcon,
+  GritIconButton,
+  GritIconTile,
+  GritPagination,
+  GritProgress,
+  GritTag,
+  cx,
+  gritTableCellCompactClass,
+  gritTableHeadCellCompactClass,
+  gritTableHeadClass,
+  gritTableRowClass,
+} from '@/components/ui';
+import {
+  ESTADO_AGENDA_TAG,
+  TONO_CLASES,
+  diaDeInstancia,
+  esLleno,
+  findProximaId,
+  formatCupo,
+  formatDiaCorto,
+  formatHora12,
+  getDisciplinaTono,
+  getEstadoAgenda,
+  haIniciado,
+  porcentajeCupo,
+} from '@/lib/portal/entrenamientos-calendario';
+import type { DisciplinaTono, TrainingCalendarItem, TrainingInstance } from '@/types/portal/entrenamientos.types';
 
-  return (
-    <span className="rounded-md border border-slate-500/40 bg-slate-700/25 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-      Privado
-    </span>
-  );
-}
-
-function CapacityPill({ reservasActivas, cupoMaximo }: { reservasActivas: number; cupoMaximo: number }) {
-  const ratio = cupoMaximo > 0 ? reservasActivas / cupoMaximo : 0;
-  const colorClass =
-    ratio >= 1
-      ? 'border-rose-400/40 bg-rose-500/15 text-rose-200'
-      : ratio >= 0.7
-        ? 'border-amber-400/40 bg-amber-900/25 text-amber-200'
-        : 'border-emerald-400/40 bg-emerald-900/25 text-emerald-200';
-
-  return (
-    <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide ${colorClass}`}>
-      {reservasActivas}/{cupoMaximo}
-    </span>
-  );
-}
+export const LISTA_PAGE_SIZE = 20;
 
 type EntrenamientosListProps = {
+  /** Sessions of the visible week, in start order. */
   items: TrainingCalendarItem[];
-  selectedDateLabel: string | null;
+  /** "Ver detalle del día" filter; null lists the whole week. */
+  dayFilterKey: string | null;
+  onClearDayFilter: () => void;
+  tonos: Record<string, DisciplinaTono>;
   disciplineNameById: Record<string, string>;
   scenarioNameById: Record<string, string>;
+  entrenadorNameById: Record<string, string>;
+  todayKey: string;
+  now: number;
+  loading: boolean;
   canManage: boolean;
-  onOpenActions: (trainingId: string) => void;
-  onClearDateFilter: () => void;
+  onOpenTraining: (trainingId: string) => void;
+  /** Direct booking (US-0127); only rendered for non-managers on upcoming, non-cancelled trainings. */
+  onReservar: (trainingId: string) => void;
 };
 
+type Row = {
+  item: TrainingCalendarItem;
+  dia: string;
+  hora: string;
+  disciplina: string;
+  escenario: string;
+  entrenador: string;
+  estado: ReturnType<typeof getEstadoAgenda>;
+  showReservar: boolean;
+};
+
+function FormularioExterno({ instance }: { instance: TrainingInstance }) {
+  if (!instance.formulario_externo) return null;
+  return (
+    <a
+      href={instance.formulario_externo}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 font-grit-body text-[11px] font-medium text-grit-cyan hover:underline"
+    >
+      <GritIcon name="link" size={12} />
+      Formulario externo{instance.formulario_obligatorio ? ' · Obligatorio' : ''}
+    </a>
+  );
+}
+
+function Cupo({ instance }: { instance: TrainingInstance }) {
+  const pct = porcentajeCupo(instance);
+  if (pct == null) {
+    return <span className="font-grit-mono text-[11px] text-grit-subtext">{instance.reservas_activas ?? 0} reservas</span>;
+  }
+  return (
+    <span className="flex items-center gap-2">
+      <GritProgress
+        value={pct}
+        label={`Ocupación de ${instance.nombre}`}
+        showValue={false}
+        tone={esLleno(instance) ? 'warning' : 'accent'}
+        trackClassName="w-14 shrink-0"
+      />
+      <span className="font-grit-mono text-[11px] font-semibold text-grit-text">{formatCupo(instance)}</span>
+    </span>
+  );
+}
+
+function Estado({ estado }: { estado: Row['estado'] }) {
+  if (!estado) return <span className="text-grit-muted">—</span>;
+  const tag = ESTADO_AGENDA_TAG[estado];
+  return (
+    <GritTag tone={tag.tone} dot>
+      {tag.label}
+    </GritTag>
+  );
+}
+
+function Acciones({ row, onOpenTraining, onReservar }: { row: Row; onOpenTraining: (id: string) => void; onReservar: (id: string) => void }) {
+  const { instance } = row.item;
+  const lleno = esLleno(instance);
+  return (
+    <span className="flex items-center justify-end gap-2">
+      {row.showReservar && (
+        <GritButton
+          size="sm"
+          variant={lleno ? 'secondary' : 'outline-accent'}
+          disabled={lleno}
+          onClick={() => onReservar(instance.id)}
+          aria-label={lleno ? `Cupo lleno: ${instance.nombre}` : `Reservar ${instance.nombre}`}
+        >
+          {lleno ? 'Cupo lleno' : 'Reservar'}
+        </GritButton>
+      )}
+      <GritIconButton
+        icon="more_horiz"
+        label={`Opciones de ${instance.nombre}`}
+        size="sm"
+        variant="ghost"
+        onClick={() => onOpenTraining(instance.id)}
+      />
+    </span>
+  );
+}
+
+/**
+ * List view of the trainings calendar (no v3 frame; kit table, DESIGN.md §9): the week's sessions,
+ * 20 per page, optionally filtered to one day. Rows become stacked cards below `md`.
+ * Mount it with a key of week + filter so pagination resets.
+ */
 export function EntrenamientosList({
   items,
-  selectedDateLabel,
+  dayFilterKey,
+  onClearDayFilter,
+  tonos,
   disciplineNameById,
   scenarioNameById,
+  entrenadorNameById,
+  todayKey,
+  now,
+  loading,
   canManage,
-  onOpenActions,
-  onClearDateFilter,
+  onOpenTraining,
+  onReservar,
 }: EntrenamientosListProps) {
-  const currentTimestamp = new Date().getTime();
+  const [page, setPage] = useState(1);
+
+  const rows = useMemo<Row[]>(() => {
+    const filtrados = dayFilterKey ? items.filter((item) => diaDeInstancia(item.instance) === dayFilterKey) : items;
+    const proximaId = findProximaId(
+      items.filter((item) => diaDeInstancia(item.instance) === todayKey).map((item) => item.instance),
+      now,
+    );
+    return filtrados.map((item) => {
+      const { instance } = item;
+      const dia = diaDeInstancia(instance);
+      const estado = getEstadoAgenda(instance, now, proximaId);
+      return {
+        item,
+        dia: dia ? formatDiaCorto(dia) : 'Sin fecha',
+        hora: instance.fecha_hora ? formatHora12(instance.fecha_hora) : '',
+        disciplina: disciplineNameById[instance.disciplina_id] ?? 'Sin disciplina',
+        escenario: scenarioNameById[instance.escenario_id] ?? 'Sin escenario',
+        entrenador: instance.entrenador_id ? entrenadorNameById[instance.entrenador_id] ?? 'Sin entrenador' : 'Sin entrenador',
+        estado,
+        showReservar: !canManage && estado !== 'cancelado' && !haIniciado(instance, now),
+      };
+    });
+  }, [canManage, dayFilterKey, disciplineNameById, entrenadorNameById, items, now, scenarioNameById, todayKey]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / LISTA_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageRows = rows.slice((currentPage - 1) * LISTA_PAGE_SIZE, currentPage * LISTA_PAGE_SIZE);
+  const first = rows.length === 0 ? 0 : (currentPage - 1) * LISTA_PAGE_SIZE + 1;
+  const last = Math.min(currentPage * LISTA_PAGE_SIZE, rows.length);
 
   return (
-    <div className="sticky top-24">
-      <section className="glass rounded-xl border border-portal-border p-4 max-h-[78vh] overflow-y-scroll [scrollbar-gutter:stable] [scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.65)_rgba(2,6,23,0.35)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-navy-deep/35 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-500/70 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/80">
-      <header className="mb-4">
-        <h2 className="text-base font-semibold text-slate-100">Lista de entrenamientos</h2>
-        <p className="text-xs text-slate-400">
-          {selectedDateLabel ? `Entrenamientos para ${selectedDateLabel}` : 'Entrenamientos del mes seleccionado'}
-        </p>
-
-        {selectedDateLabel ? (
-          <button
-            type="button"
-            onClick={onClearDateFilter}
-            className="mt-2 rounded-lg border border-portal-border bg-navy-deep/80 px-2.5 py-1 text-xs font-semibold text-slate-200"
-          >
-            Ver todo el mes
-          </button>
-        ) : null}
-      </header>
-
-      {items.length === 0 ? (
-        <p className="text-sm text-slate-400">
-          {selectedDateLabel
-            ? 'No hay entrenamientos programados para este día.'
-            : 'No hay entrenamientos programados para este mes.'}
-        </p>
-      ) : (
-        <ul className="space-y-3">
-          {items.map((item) => {
-            const isHistorical = item.instance.fecha_hora ? new Date(item.instance.fecha_hora).getTime() < currentTimestamp : false;
-
-            return (
-              <li
-                key={item.instance.id}
-                className="rounded-xl border border-portal-border bg-navy-deep/60 p-3 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-turquoise/45 hover:bg-navy-deep/75 hover:shadow-[0_8px_24px_rgba(6,182,212,0.12)]"
-              >
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-slate-100">{item.instance.nombre}</p>
-                    <VisibilidadBadge visibilidad={item.instance.visibilidad} />
-                    {isHistorical ? (
-                      <span className="rounded-md border border-slate-500/60 bg-slate-700/35 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-300">
-                        Histórico
-                      </span>
-                    ) : null}
-                    {item.instance.cupo_maximo != null && (
-                      <CapacityPill
-                        reservasActivas={item.instance.reservas_activas ?? 0}
-                        cupoMaximo={item.instance.cupo_maximo}
-                      />
-                    )}
-                  </div>
-                  <p className="max-w-[320px] truncate text-xs text-slate-400">
-                    <span className="inline-flex items-center gap-1">
-                      <span>Serie: {item.groupName}</span>
-                    </span>{' '}
-                    ·{' '}
-                    <span className="inline-flex items-center gap-1">
-                      <span
-                        className="material-symbols-outlined leading-none text-turquoise"
-                        style={{ fontSize: '14px' }}
-                        aria-hidden="true"
-                      >
-                        directions_run
-                      </span>
-                      <span>{disciplineNameById[item.instance.disciplina_id] ?? 'Sin disciplina'}</span>
-                    </span>{' '}
-                    ·{' '}
-                    <span className="inline-flex items-center gap-1">
-                      <span
-                        className="material-symbols-outlined leading-none text-turquoise"
-                        style={{ fontSize: '14px' }}
-                        aria-hidden="true"
-                      >
-                        location_on
-                      </span>
-                      <span>{scenarioNameById[item.instance.escenario_id] ?? 'Sin escenario'}</span>
-                    </span>
-                  </p>
-                  <p className="mt-1 max-w-[320px] truncate text-xs text-slate-300">
-                    <span className="inline-flex items-center gap-1">
-                      <span
-                        className="material-symbols-outlined leading-none text-turquoise"
-                        style={{ fontSize: '14px' }}
-                        aria-hidden="true"
-                      >
-                        schedule
-                      </span>
-                      <span>{item.startsAtLabel}</span>
-                    </span>{' '}
-                    ·{' '}
-                    <span className="inline-flex items-center gap-1">
-                      <span
-                        className="material-symbols-outlined leading-none text-turquoise"
-                        style={{ fontSize: '14px' }}
-                        aria-hidden="true"
-                      >
-                        timer
-                      </span>
-                      <span>{item.durationLabel}</span>
-                    </span>
-                  </p>
-                  {item.instance.punto_encuentro ? (
-                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
-                      <span
-                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
-                        style={{ fontSize: '14px' }}
-                        aria-hidden="true"
-                      >
-                        pin_drop
-                      </span>
-                      <span className="font-medium text-slate-300">Punto de encuentro:</span>{' '}
-                      {item.instance.punto_encuentro}
-                    </p>
-                  ) : null}
-                  {item.instance.formulario_externo ? (
-                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
-                      <span
-                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
-                        style={{ fontSize: '14px' }}
-                        aria-hidden="true"
-                      >
-                        link
-                      </span>
-                      <a
-                        href={item.instance.formulario_externo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-turquoise hover:underline"
-                      >
-                        Formulario externo
-                      </a>
-                      {item.instance.formulario_obligatorio ? ' · Obligatorio' : ''}
-                    </p>
-                  ) : null}
-                  {item.instance.formulario_id ? (
-                    <p className="mt-1 max-w-[320px] truncate text-xs text-slate-400">
-                      <span
-                        className="material-symbols-outlined mr-1 leading-none text-turquoise"
-                        style={{ fontSize: '14px' }}
-                        aria-hidden="true"
-                      >
-                        description
-                      </span>
-                      <span className="font-medium text-slate-300">
-                        Formulario: {item.instance.formulario_plantilla?.nombre ?? 'Plantilla'}
-                      </span>
-                      {item.instance.formulario_obligatorio ? ' · Obligatorio' : ''}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onOpenActions(item.instance.id)}
-                    className="rounded-lg border border-portal-border bg-navy-deep px-2.5 py-1.5 text-xs font-semibold text-slate-200 transition duration-200 ease-out hover:-translate-y-0.5 hover:border-turquoise/50 hover:bg-navy-deep/80 hover:text-slate-100"
-                  >
-                    {canManage ? 'Opciones' : 'Ver'}
-                  </button>
-                </div>
-              </div>
-              </li>
-            );
-          })}
-        </ul>
+    <div className="flex flex-col gap-4" aria-busy={loading || undefined}>
+      {dayFilterKey && (
+        <div className="flex flex-wrap items-center gap-2">
+          <GritChip active icon="close" onClick={onClearDayFilter} aria-label={`Quitar filtro de día: ${formatDiaCorto(dayFilterKey)}`}>
+            {formatDiaCorto(dayFilterKey)}
+          </GritChip>
+        </div>
       )}
-      </section>
+
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 py-16 font-grit-body text-xs text-grit-subtext">
+          <GritIcon name="progress_activity" size={16} className="animate-spin text-grit-cyan" />
+          Cargando entrenamientos…
+        </div>
+      ) : rows.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-14 text-center">
+          <GritIconTile icon="event_busy" size={48} tone="accent" />
+          <p className="font-grit-title text-base font-medium text-grit-text">
+            {dayFilterKey ? 'No hay entrenamientos programados para este día' : 'No hay entrenamientos programados para esta semana'}
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* md+: table */}
+          <div className="hidden overflow-hidden rounded-[16px] border border-white/[0.06] md:block">
+            <table className="w-full table-fixed">
+              <thead className={gritTableHeadClass}>
+                <tr>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[13%]')}>Fecha</th>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[22%]')}>Entrenamiento</th>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[12%]')}>Disciplina</th>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[12%] max-xl:hidden')}>Escenario</th>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[12%] max-xl:hidden')}>Entrenador</th>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[12%]')}>Cupo</th>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[10%]')}>Estado</th>
+                  <th scope="col" className={cx(gritTableHeadCellCompactClass, 'w-[12%] text-right')}>
+                    <span className="sr-only">Acciones</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((row) => {
+                  const { instance } = row.item;
+                  const tono = TONO_CLASES[getDisciplinaTono(tonos, instance.disciplina_id)];
+                  return (
+                    <tr key={instance.id} className={gritTableRowClass}>
+                      <td className={gritTableCellCompactClass}>
+                        <span className="block">{row.dia}</span>
+                        <span className="block font-grit-mono text-[11px] text-grit-muted">{row.hora}</span>
+                      </td>
+                      <td className={gritTableCellCompactClass}>
+                        <span className={cx('block truncate font-semibold', row.estado === 'cancelado' && 'line-through')}>
+                          {instance.nombre}
+                        </span>
+                        <span className="block truncate text-[11px] text-grit-muted">Serie: {row.item.groupName}</span>
+                        <FormularioExterno instance={instance} />
+                      </td>
+                      <td className={cx(gritTableCellCompactClass, 'text-grit-subtext')}>
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span aria-hidden className={cx('h-[7px] w-[7px] shrink-0 rounded-full', tono.barra)} />
+                          <span className="truncate">{row.disciplina}</span>
+                        </span>
+                      </td>
+                      <td className={cx(gritTableCellCompactClass, 'truncate text-grit-subtext max-xl:hidden')}>{row.escenario}</td>
+                      <td className={cx(gritTableCellCompactClass, 'truncate text-grit-subtext max-xl:hidden')}>{row.entrenador}</td>
+                      <td className={gritTableCellCompactClass}>
+                        <Cupo instance={instance} />
+                      </td>
+                      <td className={gritTableCellCompactClass}>
+                        <Estado estado={row.estado} />
+                      </td>
+                      <td className={gritTableCellCompactClass}>
+                        <Acciones row={row} onOpenTraining={onOpenTraining} onReservar={onReservar} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* < md: stacked cards */}
+          <ul className="flex flex-col gap-3 md:hidden">
+            {pageRows.map((row) => {
+              const { instance } = row.item;
+              const tono = TONO_CLASES[getDisciplinaTono(tonos, instance.disciplina_id)];
+              return (
+                <li key={instance.id} className="flex flex-col gap-2.5 rounded-[16px] border border-white/[0.06] bg-white/[0.02] p-3.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span aria-hidden className={cx('h-3.5 w-[3px] shrink-0 rounded-sm', tono.barra)} />
+                      <span className={cx('truncate font-grit-body text-[13px] font-semibold text-grit-text', row.estado === 'cancelado' && 'line-through')}>
+                        {instance.nombre}
+                      </span>
+                    </div>
+                    <Estado estado={row.estado} />
+                  </div>
+                  <p className="font-grit-body text-[11px] text-grit-subtext">
+                    {row.dia} · {row.hora} · {row.disciplina}
+                  </p>
+                  <p className="font-grit-body text-[11px] text-grit-muted">
+                    {row.escenario} · {row.entrenador}
+                  </p>
+                  <FormularioExterno instance={instance} />
+                  <div className="flex items-center justify-between gap-2">
+                    <Cupo instance={instance} />
+                    <Acciones row={row} onOpenTraining={onOpenTraining} onReservar={onReservar} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          <GritPagination
+            page={currentPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            summary={`${first}–${last} de ${rows.length} entrenamientos`}
+          />
+        </>
+      )}
     </div>
   );
 }

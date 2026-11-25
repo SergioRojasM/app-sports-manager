@@ -457,6 +457,7 @@ async function validateBookingRestrictions(
           code: 'SERVICIO_REQUERIDO',
           message: `Este entrenamiento requiere una suscripción activa con unidades disponibles en el servicio: ${svcName}.`,
           ...(svcNameRaw ? { servicioNombre: svcNameRaw } : {}),
+          ofrecerPlan: true,
         };
       }
     }
@@ -629,9 +630,14 @@ async function findServiceSubscriptionsToCharge(
     const available = entries.find((e) => e.unidadesRestantes === null || e.unidadesRestantes > 0);
 
     if (available) {
-      // NULL = unlimited — include in log but no deduction needed
+      // Always record which subscription covered the service, unlimited ones
+      // included (US-0112) — the reserva_servicios ledger is what the bookings
+      // report reads to attribute a booking to a plan. This does NOT cause a
+      // deduction: book_and_deduct_service_units independently re-reads
+      // `unidades_restantes is null` from suscripcion_servicios into
+      // v_unlimited and skips the update on that basis.
       results.push({
-        suscripcionId: available.unidadesRestantes === null ? null : available.suscripcionId,
+        suscripcionId: available.suscripcionId,
         servicioId,
         exhausted: false,
       });
@@ -685,7 +691,6 @@ async function getEntrenamientoFechaHora(
 
 async function create(input: CreateReservaInput): Promise<Reserva | BookingResult> {
   let matchedRow: EntrenamientoRestriccion | null = null;
-  let pendienteSinPlan = false;
 
   // Reference date for service-entitlement eligibility — the training's date, or today if unscheduled
   const fechaHora = await getEntrenamientoFechaHora(input.entrenamiento_id, input.tenant_id);
@@ -709,29 +714,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
       input.tenant_id,
     );
     if (!restrictionResult.ok) {
-      // 1a. Skip-plan-confirmation path (US-0106): a SERVICIO_REQUERIDO/UNIDADES_AGOTADAS
-      // rejection on a public training published with omitir_confirmacion_plan = true may
-      // proceed as a 'pendiente' booking instead of blocking. Re-verified server-side —
-      // never trust input.permitir_pendiente_sin_plan alone.
-      const planFixable = restrictionResult.code === 'SERVICIO_REQUERIDO' || restrictionResult.code === 'UNIDADES_AGOTADAS';
-      if (planFixable && input.permitir_pendiente_sin_plan) {
-        const supabaseCheck = createClient();
-        const { data: publicacion } = await supabaseCheck
-          .from('entrenamientos_publicos')
-          .select('omitir_confirmacion_plan')
-          .eq('entrenamiento_id', input.entrenamiento_id)
-          .eq('tenant_id', input.tenant_id)
-          .eq('activo', true)
-          .maybeSingle();
-
-        if (publicacion?.omitir_confirmacion_plan) {
-          pendienteSinPlan = true;
-        } else {
-          return restrictionResult;
-        }
-      } else {
-        return restrictionResult;
-      }
+      return restrictionResult;
     } else {
       matchedRow = row;
     }
@@ -817,6 +800,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
         ...(exhaustedSvcName ? { servicioNombre: exhaustedSvcName } : {}),
+        ofrecerPlan: true,
       };
     }
 
@@ -896,8 +880,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
     p_deductions: deductions,
     p_formulario_plantilla_id: input.formulario_plantilla_id ?? null,
     p_formulario_respuesta: input.formulario_respuesta ?? null,
-    p_permitir_pendiente: pendienteSinPlan,
-    p_suscripcion_id: pendienteSinPlan ? input.plan_pendiente_suscripcion_id ?? null : null,
+    p_suscripcion_id: null,
   });
 
   if (error) {
@@ -906,6 +889,7 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'SERVICIO_REQUERIDO',
         message: 'La suscripción utilizada ya no está activa. No es posible completar la reserva.',
+        ofrecerPlan: true,
       };
     }
     if (error.code === 'P0001' && error.message?.includes('UNIDADES_AGOTADAS')) {
@@ -913,6 +897,23 @@ async function create(input: CreateReservaInput): Promise<Reserva | BookingResul
         ok: false,
         code: 'UNIDADES_AGOTADAS',
         message: 'No te quedan unidades disponibles de uno o más servicios requeridos para este entrenamiento.',
+        ofrecerPlan: true,
+      };
+    }
+    // US-0110: the deferred plan purchase is re-validated inside the RPC, at submit time,
+    // because minutes can pass while the athlete fills in the booking form.
+    if (error.code === 'P0001' && error.message?.includes('PLAN_NO_DISPONIBLE')) {
+      return {
+        ok: false,
+        code: 'SERVICIO_REQUERIDO',
+        message: 'El plan seleccionado ya no está disponible. Elige otro plan para continuar.',
+      };
+    }
+    if (error.code === 'P0001' && error.message?.includes('SUSCRIPCION_PENDIENTE_EXISTENTE')) {
+      return {
+        ok: false,
+        code: 'SERVICIO_REQUERIDO',
+        message: 'Ya tienes una solicitud de plan pendiente de aprobación. Espera a que sea revisada antes de continuar.',
       };
     }
     if (error.code === 'P0001' && error.message?.includes('FORMULARIO_CAMPOS_FALTANTES')) {

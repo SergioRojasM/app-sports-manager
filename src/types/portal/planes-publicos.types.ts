@@ -1,4 +1,5 @@
 import type { PlanWithDisciplinas } from './planes.types';
+import type { TenantRole } from './tenant.types';
 
 /** One service granted by a public plan subtype. `unidades: null` means unlimited. */
 export type PlanPublicoServicioItem = {
@@ -26,11 +27,20 @@ export type PlanPublicoItem = PlanWithDisciplinas & {
   beneficiosList: string[];
   disciplinaNames: string[];
   tipos: PlanPublicoTipoItem[];
+  /**
+   * True for a plan that is NOT `es_publico` — only visible here because the viewer is a
+   * member of the organization (US-0111). Drives the "Solo miembros" badge.
+   */
+  esExclusivoMiembro: boolean;
 };
 
 export type UsePlanesPublicosResult = {
   loading: boolean;
   error: string | null;
+  /** The viewer belongs to the tenant, so the catalog also lists its member-only plans. */
+  esMiembro: boolean;
+  /** The viewer's role inside the tenant, `null` for non-members. */
+  role: TenantRole | null;
   plans: PlanPublicoItem[];
   filteredPlans: PlanPublicoItem[];
   search: string;

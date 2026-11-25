@@ -1,8 +1,8 @@
 export default function LandingOrgPage() {
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-100">Bienvenido!!!</h1>
-      <p className="mt-2 text-slate-400">Módulo en construcción.</p>
+      <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Bienvenido!!!</h1>
+      <p className="mt-2 text-grit-subtext">Módulo en construcción.</p>
     </div>
   );
 }

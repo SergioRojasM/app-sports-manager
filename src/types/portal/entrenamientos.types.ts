@@ -1,13 +1,13 @@
 import type { EntrenamientoCategoriaInput, EntrenamientoGrupoCategoria, EntrenamientoCategoria } from './entrenamiento-categorias.types';
 import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccion, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 import type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido } from './entrenamiento-plantillas.types';
+import type { Scenario } from './scenarios.types';
 
 export type { EntrenamientoGrupoCategoria, EntrenamientoCategoria };
 export type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido };
 
 export type TrainingType = 'unico' | 'recurrente';
 export type TrainingScope = 'single' | 'future' | 'series';
-export type TrainingVisibility = 'publico' | 'privado';
 
 export type TrainingGroupStatus = 'activo' | 'cancelado' | 'finalizado';
 export type TrainingInstanceStatus = 'pendiente' | 'confirmado' | 'cancelado' | string;
@@ -86,8 +86,6 @@ export type TrainingInstance = {
   fecha_hora: string | null;
   duracion_minutos: number | null;
   cupo_maximo: number | null;
-  visibilidad: TrainingVisibility;
-  visible_para: string | null;
   estado: TrainingInstanceStatus;
   reserva_antelacion_horas: number | null;
   cancelacion_antelacion_horas: number | null;
@@ -96,6 +94,24 @@ export type TrainingInstance = {
   restricciones?: EntrenamientoRestriccion[];
   created_at: string;
   updated_at: string;
+};
+
+/** One training occurrence with what the event wizard needs to pre-fill a draft from it (US-0132). */
+export type EntrenamientoParaEvento = {
+  id: string;
+  nombre: string | null;
+  descripcion: string | null;
+  punto_encuentro: string | null;
+  formulario_externo: string | null;
+  formulario_id: string | null;
+  fecha_hora: string | null;
+  duracion_minutos: number | null;
+  cupo_maximo: number | null;
+  reserva_antelacion_horas: number | null;
+  cancelacion_antelacion_horas: number | null;
+  disciplina: { nombre: string } | null;
+  escenario: Pick<Scenario, 'id' | 'nombre' | 'tipo' | 'ubicacion' | 'direccion' | 'coordenadas' | 'capacidad' | 'image_url'> | null;
+  entrenador: { id: string; nombre: string | null; apellido: string | null; email: string | null } | null;
 };
 
 export type TrainingGroupWithDetails = TrainingGroup & {
@@ -115,6 +131,56 @@ export type SelectOption = {
   label: string;
 };
 
+/* ── v3 calendar page (US-0142) ── */
+
+/** View of `gestion-entrenamientos`, synced to `?vista=`. */
+export type EntrenamientosVista = 'semana' | 'mes' | 'lista';
+
+/** Visible period: a Monday–Sunday week (semana / lista) or the 42-cell month grid (mes). */
+export type EntrenamientosPeriodo = {
+  /** First Bogotá day key (`YYYY-MM-DD`) loaded. */
+  from: string;
+  /** Last Bogotá day key loaded (inclusive). */
+  to: string;
+  /** "16 – 22 nov 2026" or "Noviembre 2026". */
+  label: string;
+  /** `YYYY-MM-01` of the displayed month (mes only). */
+  monthStartDate: string | null;
+};
+
+/** One day of the week view header. */
+export type DiaSemana = {
+  key: string;
+  /** "LUN" … "DOM". */
+  dow: string;
+  dia: number;
+  /** "Viernes 20 de noviembre". */
+  nombreLargo: string;
+  esHoy: boolean;
+};
+
+/** A row of the week grid: one hour, or a collapsed run of empty hours (`desde` inclusive, `hasta` exclusive). */
+export type FilaHoraria =
+  | { tipo: 'hora'; hora: number; top: number; alto: number }
+  | { tipo: 'banda'; id: string; desde: number; hasta: number; top: number; alto: number };
+
+/** Discipline colour tone, assigned by the discipline's position in the tenant's sorted options. */
+export type DisciplinaTono = 'accent' | 'violet' | 'warning' | 'danger' | 'success' | 'teal';
+
+export type EntrenamientosKpis = {
+  sesiones: number;
+  disciplinas: number;
+  reservas: number;
+  sesionesLlenas: number;
+  /** Σ reservas / Σ cupo of the sessions that define one; null when none does. */
+  ocupacionPct: number | null;
+  cupos: number;
+  entrenadores: number;
+};
+
+/** Status tag of a session in the day agenda and the list view. */
+export type EntrenamientoAgendaEstado = 'proxima' | 'lleno' | 'cancelado' | 'finalizado';
+
 export type TrainingWizardRuleFormValue = {
   tipo_bloque: 'una_vez_dia' | 'franja_repeticion' | 'horas_especificas';
   hora_inicio: string;
@@ -132,7 +198,6 @@ export type TrainingWizardValues = {
   entrenador_id: string;
   duracion_minutos: string;
   cupo_maximo: string;
-  visibilidad: TrainingVisibility;
   tipo: TrainingType;
   fecha_inicio: string;
   fecha_fin: string;
@@ -149,7 +214,6 @@ export type TrainingField =
   | 'entrenador_id'
   | 'duracion_minutos'
   | 'cupo_maximo'
-  | 'visibilidad'
   | 'tipo'
   | 'fecha_inicio'
   | 'fecha_fin'
@@ -183,7 +247,6 @@ export type TrainingScopeSelection = {
 
 export type CreateTrainingSeriesInput = {
   tenantId: string;
-  visibilidad: TrainingVisibility;
   uniqueDateTime?: string | null;
   group: {
     tipo: TrainingType;
@@ -233,7 +296,6 @@ export type UpsertTrainingGroupRulesInput = {
 
 export type GenerateSeriesInstancesInput = {
   tenantId: string;
-  visibilidad?: TrainingVisibility;
   trainingGroup: TrainingGroup;
   rules: TrainingGroupRule[];
   fromDate?: string;
@@ -245,7 +307,6 @@ export type UpdateTrainingSeriesInput = {
   tenantId: string;
   trainingGroupId: string;
   scope: Extract<TrainingScope, 'future' | 'series'>;
-  visibilidad?: TrainingVisibility;
   effectiveFrom?: string;
   groupPatch: Partial<{
     nombre: string;
@@ -274,7 +335,6 @@ export type UpdateTrainingInstanceInput = {
   tenantId: string;
   trainingId: string;
   scope: TrainingScope;
-  visibilidad?: TrainingVisibility;
   trainingGroupId?: string;
   effectiveFrom?: string;
   patch: Partial<{

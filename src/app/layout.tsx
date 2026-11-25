@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lexend, Montserrat, Rajdhani } from "next/font/google";
+import { Exo_2, JetBrains_Mono, Lexend, Montserrat, Rajdhani } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -18,6 +18,23 @@ const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-montserrat",
+});
+
+// grit-arena-v3 (US-0141): Exo 2 for Portal titles/numerals (font-grit-title),
+// JetBrains Mono for tabular numbers (font-grit-mono). Rajdhani stays for landing/auth.
+const exo2 = Exo_2({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-exo2",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -40,7 +57,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${lexend.variable} ${rajdhani.variable} ${montserrat.variable} font-display antialiased`}
+        className={`${lexend.variable} ${rajdhani.variable} ${montserrat.variable} ${exo2.variable} ${jetbrainsMono.variable} font-display antialiased`}
       >
         {children}
         <Analytics />

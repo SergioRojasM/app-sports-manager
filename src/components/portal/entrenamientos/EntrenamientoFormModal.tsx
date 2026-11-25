@@ -169,7 +169,7 @@ export function EntrenamientoFormModal({
       <button
         type="button"
         aria-label="Cerrar formulario de entrenamiento"
-        className="absolute inset-0 bg-slate-950/70"
+        className="absolute inset-0 bg-grit-bg/70 backdrop-blur-sm"
         onClick={onClose}
         disabled={isSubmitting}
       />
@@ -178,12 +178,12 @@ export function EntrenamientoFormModal({
         role="dialog"
         aria-modal="true"
         aria-label={mode === 'create' ? 'Crear entrenamiento' : 'Editar entrenamiento'}
-        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l border-portal-border bg-navy-medium shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l border-grit-glass-border bg-grit-card shadow-[0_18px_44px_rgba(0,0,0,0.45)]"
       >
-        <header className="flex items-center justify-between border-b border-portal-border px-5 py-4">
+        <header className="flex items-center justify-between border-b border-grit-glass-border px-5 py-4">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-slate-100">
+              <h2 className="font-grit-title text-lg font-semibold text-grit-text">
                 {mode === 'create' ? 'Crear entrenamiento' : 'Editar entrenamiento'}
               </h2>
               {mode === 'create' ? (
@@ -191,7 +191,7 @@ export function EntrenamientoFormModal({
                   type="button"
                   aria-label="Ver plantillas guardadas"
                   onClick={onOpenPlantillasListModal}
-                  className="inline-flex items-center gap-1 rounded-lg border border-portal-border bg-navy-deep/70 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:border-turquoise/70"
+                  className="inline-flex items-center gap-1 rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-3 py-1.5 text-xs font-semibold text-grit-text transition hover:border-grit-cyan/70"
                 >
                   <span className="material-symbols-outlined text-sm" aria-hidden="true">
                     bookmark
@@ -200,7 +200,7 @@ export function EntrenamientoFormModal({
                 </button>
               ) : null}
             </div>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-grit-subtext">
               {isEditingSingleInstance
                 ? 'Editando solo esta instancia con datos propios del entrenamiento.'
                 : 'Configura serie, recurrencia y excepciones para los entrenamientos.'}
@@ -210,7 +210,7 @@ export function EntrenamientoFormModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/80 p-2 text-slate-300 transition hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/80 p-2 text-grit-subtext transition hover:text-grit-text disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="material-symbols-outlined text-base" aria-hidden="true">
               close
@@ -282,20 +282,20 @@ export function EntrenamientoFormModal({
           </div>
 
           {submitError ? (
-            <div className="mt-4 rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+            <div className="mt-4 rounded-grit-md border border-grit-danger/40 bg-grit-danger/10 px-4 py-3 text-sm text-grit-danger" role="alert">
               {submitError}
             </div>
           ) : null}
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-portal-border px-5 py-4">
+        <footer className="flex items-center justify-end gap-3 border-t border-grit-glass-border px-5 py-4">
           {mode === 'create' ? (
             <button
               type="button"
               aria-label="Guardar configuración como plantilla"
               onClick={onOpenGuardarPlantillaModal}
               disabled={isSubmitting || !values.disciplina_id || !values.escenario_id}
-              className="inline-flex items-center gap-2 rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-turquoise/70 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text transition hover:border-grit-cyan/70 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <span className="material-symbols-outlined text-base" aria-hidden="true">
                 bookmark_add
@@ -308,7 +308,7 @@ export function EntrenamientoFormModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg border border-portal-border bg-navy-deep/70 px-4 py-2 text-sm font-semibold text-slate-200"
+            className="rounded-grit-md border border-grit-glass-border bg-grit-bg/70 px-4 py-2 text-sm font-semibold text-grit-text"
           >
             Cancelar
           </button>
@@ -316,7 +316,7 @@ export function EntrenamientoFormModal({
             type="button"
             onClick={() => void onSubmit()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
+            className="inline-flex items-center gap-2 rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg"
           >
             {isSubmitting ? 'Guardando...' : mode === 'create' ? 'Crear entrenamiento' : 'Guardar cambios'}
             <span className="material-symbols-outlined text-base" aria-hidden="true">

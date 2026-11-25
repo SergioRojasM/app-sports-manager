@@ -21,8 +21,16 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
 
   const decision = await getCachedTenantAccess(supabase, user.id, tenantId);
 
+  if (decision.pendingActivation) {
+    redirect(`/portal/activar-cuenta/${tenantId}`);
+  }
+
   if (!decision.allowed || !decision.role) {
     redirect('/portal/orgs');
+  }
+
+  if (decision.profileIncomplete) {
+    redirect(`/portal/completar-perfil/${tenantId}`);
   }
 
   return <>{children}</>;

@@ -5,7 +5,11 @@ import type {
   InicioSuscripcion,
   InicioPagoPendiente,
   InicioMembresia,
+  InicioVentana,
 } from '@/types/portal/inicio.types';
+
+/** Defensive cap for one athlete's 7-day agenda; hitting it is logged. */
+const AGENDA_MAX_ROWS = 100;
 
 // ─────────────────────────────────────────────
 // Stats
@@ -14,6 +18,7 @@ import type {
 export async function fetchInicioStats(
   supabase: SupabaseClient,
   userId: string,
+  ventana: Pick<InicioVentana, 'desde' | 'hasta'>,
 ): Promise<InicioStats> {
   const [suscripciones, entrenamientos, pagos, organizaciones] = await Promise.all([
     supabase
@@ -27,7 +32,8 @@ export async function fetchInicioStats(
       .select('*, entrenamientos!inner(fecha_hora)', { count: 'exact', head: true })
       .eq('atleta_id', userId)
       .in('estado', ['pendiente', 'confirmada'])
-      .gte('entrenamientos.fecha_hora', new Date().toISOString()),
+      .gte('entrenamientos.fecha_hora', ventana.desde)
+      .lte('entrenamientos.fecha_hora', ventana.hasta),
 
     supabase
       .from('pagos')
@@ -51,13 +57,13 @@ export async function fetchInicioStats(
 }
 
 // ─────────────────────────────────────────────
-// Próximos entrenamientos (via reservas)
+// Próximos entrenamientos (via reservas) inside the 7-day agenda window
 // ─────────────────────────────────────────────
 
 export async function fetchProximosEntrenamientos(
   supabase: SupabaseClient,
   userId: string,
-  limit = 5,
+  ventana: Pick<InicioVentana, 'desde' | 'hasta'>,
 ): Promise<InicioEntrenamiento[]> {
   const { data, error } = await supabase
     .from('reservas')
@@ -80,13 +86,18 @@ export async function fetchProximosEntrenamientos(
     `)
     .eq('atleta_id', userId)
     .in('estado', ['pendiente', 'confirmada'])
-    .gte('entrenamientos.fecha_hora', new Date().toISOString())
+    .gte('entrenamientos.fecha_hora', ventana.desde)
+    .lte('entrenamientos.fecha_hora', ventana.hasta)
     .order('fecha_hora', { referencedTable: 'entrenamientos', ascending: true })
-    .limit(limit);
+    .limit(AGENDA_MAX_ROWS);
 
   if (error) {
     console.error('fetchProximosEntrenamientos error:', error.message);
     return [];
+  }
+
+  if ((data?.length ?? 0) >= AGENDA_MAX_ROWS) {
+    console.warn(`fetchProximosEntrenamientos: agenda capped at ${AGENDA_MAX_ROWS} rows for user ${userId}`);
   }
 
   return (data ?? []).map((row) => {

@@ -44,15 +44,6 @@ export type CreateReservaInput = {
   formulario_plantilla_id?: string | null;
   /** Collected answers keyed by each "datos" section's campo_nombre. */
   formulario_respuesta?: Record<string, string> | null;
-  /**
-   * Set when the target public training has `omitir_confirmacion_plan = true` and the
-   * athlete chose to continue booking despite lacking the required plan/service — lets
-   * `create()` insert the reservation as 'pendiente' instead of rejecting it outright.
-   * Re-verified server-side against the training's publication before being honored (US-0106).
-   */
-  permitir_pendiente_sin_plan?: boolean;
-  /** The pending suscripcion created alongside this booking, linked via reservas.suscripcion_id (US-0106). */
-  plan_pendiente_suscripcion_id?: string | null;
 };
 
 export type UpdateReservaInput = {
@@ -108,6 +99,17 @@ export type ReservaReportRow = {
   fecha_asistencia: string | null;
   observaciones_asistencia: string | null;
   validado_por_email: string | null;
+  /**
+   * Plan whose service units paid for the booking, and that subscription's
+   * validity window (US-0112). All three describe the SAME subscription,
+   * resolved by the view from the reserva_servicios ledger, falling back to
+   * reservas.suscripcion_id for deferred plan purchases. NULL when the booking
+   * consumed no plan. The dates are date-only `YYYY-MM-DD` values — never parse
+   * them with a bare `new Date(iso)` in a locally-rendered component.
+   */
+  plan_nombre: string | null;
+  plan_fecha_inicio: string | null;
+  plan_fecha_fin: string | null;
 };
 
 export type ReservasManagementAsistencia = 'asistio' | 'no_asistio' | 'sin_registrar';
@@ -130,4 +132,19 @@ export type MisReservasFilters = {
   asistencia?: ReservasManagementAsistencia;
   disciplinaNombre?: string;
   limit?: number;
+};
+
+/** Stats strip of /portal/mis-reservas (grit-arena-v3 `aVWHV`), over the filtered rows. */
+export type MisReservasStats = {
+  reservas: number;
+  asistidas: number;
+  noAsistio: number;
+  canceladas: number;
+};
+
+/** Bookings of one Bogotá month, newest first (overline "SEPTIEMBRE 2026"). */
+export type MisReservasMonthGroup = {
+  key: string;
+  label: string;
+  rows: ReservaReportRow[];
 };

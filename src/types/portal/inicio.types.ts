@@ -46,6 +46,31 @@ export interface InicioMembresia {
   rol_nombre: string;
 }
 
+/** One day of the 7-day agenda window, keyed by its Bogotá calendar date. */
+export interface InicioAgendaDia {
+  /** `YYYY-MM-DD` in America/Bogota. */
+  key: string;
+  /** Upper-case weekday abbreviation: DOM, LUN, MAR, MIÉ, JUE, VIE, SÁB. */
+  dow: string;
+  /** Day of the month. */
+  dia: number;
+  /** Accessible day name, e.g. "Jueves 19". */
+  nombreLargo: string;
+}
+
+/** 7-day agenda window starting today in Bogotá (US: grit-arena-v3 inicio). */
+export interface InicioVentana {
+  /** ISO instant: lower bound for upcoming sessions (the current time). */
+  desde: string;
+  /** ISO instant: end of the 7th day in Bogotá. */
+  hasta: string;
+  /** Key of today, decided on the server to avoid hydration mismatches. */
+  hoyKey: string;
+  dias: InicioAgendaDia[];
+  /** "15 – 21 nov" or "28 nov – 4 dic". */
+  rangoLabel: string;
+}
+
 export interface InicioDashboardData {
   stats: InicioStats;
   proximosEntrenamientos: InicioEntrenamiento[];

@@ -1,139 +1,107 @@
 'use client';
 
 import { useState } from 'react';
+import { GritCard, GritSectionHeading, GritSegmented, GritTag, type GritSegmentedOption } from '@/components/ui';
+import { formatFechaCorta } from '@/lib/portal/inicio-agenda';
 import type { InicioSuscripcion } from '@/types/portal/inicio.types';
+import { InicioPanelEmpty } from './InicioPanelEmpty';
 
 type FilterKey = 'todas' | 'activa' | 'pendiente';
 
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: 'todas', label: 'Todas' },
-  { key: 'activa', label: 'Activas' },
-  { key: 'pendiente', label: 'Pendientes' },
+const FILTERS: ReadonlyArray<GritSegmentedOption<FilterKey>> = [
+  { value: 'todas', label: 'Todas' },
+  { value: 'activa', label: 'Activas' },
+  { value: 'pendiente', label: 'Pendientes' },
 ];
 
-function statusBadge(estado: string) {
-  const map: Record<string, { bg: string; text: string; label: string }> = {
-    activa: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Activa' },
-    pendiente: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Pendiente' },
-    vencida: { bg: 'bg-slate-500/20', text: 'text-slate-400', label: 'Vencida' },
-    cancelada: { bg: 'bg-rose-500/20', text: 'text-rose-400', label: 'Cancelada' },
-  };
-  const badge = map[estado] ?? { bg: 'bg-slate-500/20', text: 'text-slate-400', label: estado };
-  return (
-    <span className={`${badge.bg} ${badge.text} text-[10px] font-bold px-2 py-0.5 rounded-md`}>
-      {badge.label}
-    </span>
-  );
+const ESTADOS: Record<string, { label: string; tone: 'accent' | 'warning' | 'neutral' | 'danger' }> = {
+  activa: { label: 'Activa', tone: 'accent' },
+  pendiente: { label: 'Pendiente', tone: 'warning' },
+  vencida: { label: 'Vencida', tone: 'neutral' },
+  cancelada: { label: 'Cancelada', tone: 'danger' },
+};
+
+const PAGOS: Record<string, { label: string; tone: 'accent' | 'warning' | 'danger' | 'neutral' }> = {
+  pendiente: { label: 'Pago pendiente', tone: 'warning' },
+  aprobado: { label: 'Pago aprobado', tone: 'accent' },
+  rechazado: { label: 'Pago rechazado', tone: 'danger' },
+};
+
+const EMPTY_FILTER_TITLE: Record<FilterKey, string> = {
+  todas: 'No tienes suscripciones activas',
+  activa: 'No tienes suscripciones activas',
+  pendiente: 'No tienes suscripciones pendientes',
+};
+
+function unidades(valor: number | null): string {
+  return valor === null ? '∞' : String(valor);
 }
 
-function paymentBadge(pagoEstado: string | null) {
-  if (!pagoEstado) return null;
-  const map: Record<string, { bg: string; text: string; label: string }> = {
-    pendiente: { bg: 'bg-amber-500/20', text: 'text-amber-400', label: 'Pago pendiente' },
-    aprobado: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Pago aprobado' },
-    rechazado: { bg: 'bg-rose-500/20', text: 'text-rose-400', label: 'Pago rechazado' },
-  };
-  const badge = map[pagoEstado] ?? {
-    bg: 'bg-slate-500/20',
-    text: 'text-slate-400',
-    label: pagoEstado,
-  };
-  return (
-    <span className={`${badge.bg} ${badge.text} text-[10px] font-bold px-2 py-0.5 rounded-md`}>
-      {badge.label}
-    </span>
-  );
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('es-CO', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-export function InicioSuscripciones({
-  suscripciones,
-}: {
-  suscripciones: InicioSuscripcion[];
-}) {
+/** "Mis suscripciones" panel of `/portal/inicio` (frame `lhbhK` › `Pn3Wh`). */
+export function InicioSuscripciones({ suscripciones }: { suscripciones: InicioSuscripcion[] }) {
   const [filter, setFilter] = useState<FilterKey>('todas');
 
-  const filtered =
-    filter === 'todas'
-      ? suscripciones
-      : suscripciones.filter((s) => s.estado === filter);
+  const filtered = filter === 'todas' ? suscripciones : suscripciones.filter((s) => s.estado === filter);
 
   return (
-    <div className="glass-card rounded-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-bold">Mis Suscripciones</h4>
-      </div>
+    <GritCard variant="card" padding="none" className="flex min-w-0 flex-col gap-3 rounded-grit-3xl p-[22px]">
+      <GritSectionHeading
+        title="Mis suscripciones"
+        size="md"
+        className="items-center"
+        action={
+          <GritSegmented
+            options={FILTERS}
+            value={filter}
+            onChange={setFilter}
+            variant="solid"
+            ariaLabel="Filtrar suscripciones"
+          />
+        }
+      />
 
-      {/* Filter chips */}
-      <div className="flex gap-2 mb-4">
-        {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${
-              filter === f.key
-                ? 'bg-secondary/20 text-secondary'
-                : 'bg-slate-800/40 text-slate-400 hover:text-slate-200'
-            }`}
-            aria-label={`Filtrar suscripciones: ${f.label}`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-6 text-center">
-          <span className="material-symbols-outlined text-3xl text-slate-600 mb-2">
-            card_membership
-          </span>
-          <p className="text-slate-400 text-sm">No tienes suscripciones activas</p>
-        </div>
+      {suscripciones.length === 0 ? (
+        <InicioPanelEmpty
+          icon="credit_card"
+          title="No tienes suscripciones activas"
+          description="Únete a un plan de tu club para empezar."
+        />
+      ) : filtered.length === 0 ? (
+        <InicioPanelEmpty icon="credit_card" title={EMPTY_FILTER_TITLE[filter]} />
       ) : (
-        <div className="space-y-3">
-          {filtered.map((s) => (
-            <div
-              key={s.id}
-              className="p-3 rounded-md bg-slate-800/20 border border-transparent hover:border-primary/20 transition-all"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-semibold text-secondary truncate">
-                  {s.plan_nombre}
-                </p>
-                {statusBadge(s.estado)}
-              </div>
-              <p className="text-xs text-slate-500 mb-2">{s.org_nombre}</p>
-
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span>
-                  {formatDate(s.fecha_inicio)} — {formatDate(s.fecha_fin)}
-                </span>
-                {paymentBadge(s.pago_estado)}
-              </div>
-
-              {s.servicios.length > 0 ? (
-                <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-400">
-                  {s.servicios.map((srv, idx) => (
-                    <span key={srv.servicio_id}>
-                      {srv.servicio_nombre}: {srv.unidades_restantes ?? '∞'}/{srv.unidades_incluidas ?? '∞'}
-                      {idx < s.servicios.length - 1 ? ' ·' : ''}
-                    </span>
-                  ))}
+        <ul className="grit-scrollbar divide-y divide-white/[0.06] xl:max-h-[300px] xl:overflow-y-auto xl:pr-1">
+          {filtered.map((s) => {
+            const estado = ESTADOS[s.estado] ?? { label: s.estado, tone: 'neutral' as const };
+            const pago = s.pago_estado ? (PAGOS[s.pago_estado] ?? { label: s.pago_estado, tone: 'neutral' as const }) : null;
+            return (
+              <li key={s.id} className="flex flex-col gap-1.5 py-3 first:pt-1 last:pb-1">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-grit-body text-[13px] font-semibold text-grit-text">{s.plan_nombre}</p>
+                    <p className="truncate font-grit-body text-[11px] text-grit-muted">{s.org_nombre}</p>
+                  </div>
+                  <GritTag tone={estado.tone} dot>
+                    {estado.label}
+                  </GritTag>
                 </div>
-              ) : null}
-
-            </div>
-          ))}
-        </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 font-grit-body text-[11px] text-grit-subtext">
+                  <span>
+                    {formatFechaCorta(s.fecha_inicio)} — {formatFechaCorta(s.fecha_fin)}
+                  </span>
+                  {pago && <GritTag tone={pago.tone}>{pago.label}</GritTag>}
+                </div>
+                {s.servicios.length > 0 && (
+                  <p className="font-grit-body text-[11px] text-grit-muted">
+                    {s.servicios
+                      .map((srv) => `${srv.servicio_nombre}: ${unidades(srv.unidades_restantes)}/${unidades(srv.unidades_incluidas)}`)
+                      .join(' · ')}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       )}
-    </div>
+    </GritCard>
   );
 }

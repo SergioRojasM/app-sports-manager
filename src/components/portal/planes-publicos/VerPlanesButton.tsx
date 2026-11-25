@@ -1,14 +1,20 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import { GritIcon, cx, gritFocusRing, gritOverlayPillClass } from '@/components/ui';
+import { BodyPortal } from '@/components/portal/gestion-eventos/EventoModalShell';
 import { PlanesPublicosModal } from './PlanesPublicosModal';
 
 type VerPlanesButtonProps = {
   tenantId: string;
   tenantNombre: string;
+  /** secondary = v3 secondary pill (default) · overlay = glass pill over a photo card (grit-arena-v3 `BrWf6`). */
+  appearance?: 'secondary' | 'overlay';
+  /** Stretches the button to its container (stacked card actions). */
+  fullWidth?: boolean;
 };
 
-export function VerPlanesButton({ tenantId, tenantNombre }: VerPlanesButtonProps) {
+export function VerPlanesButton({ tenantId, tenantNombre, appearance = 'secondary', fullWidth = false }: VerPlanesButtonProps) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -23,20 +29,28 @@ export function VerPlanesButton({ tenantId, tenantNombre }: VerPlanesButtonProps
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex w-full items-center justify-center rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-turquoise/40 hover:text-turquoise focus:outline-none focus-visible:ring-2 focus-visible:ring-turquoise focus-visible:ring-offset-2 focus-visible:ring-offset-navy-deep"
+        aria-haspopup="dialog"
+        className={cx(
+          appearance === 'overlay'
+            ? gritOverlayPillClass
+            : 'inline-flex min-h-[37px] items-center justify-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.04] px-[18px] py-2.5 font-grit-body text-xs font-semibold text-grit-text transition hover:bg-white/[0.08]',
+          appearance !== 'overlay' && gritFocusRing,
+          fullWidth && 'w-full',
+        )}
       >
-        <span className="material-symbols-outlined mr-1.5 text-sm" aria-hidden="true">
-          card_membership
-        </span>
+        {appearance === 'overlay' ? null : <GritIcon name="card_membership" size={15} className="text-grit-subtext" />}
         Ver planes
       </button>
 
-      <PlanesPublicosModal
-        open={open}
-        tenantId={tenantId}
-        tenantNombre={tenantNombre}
-        onClose={handleClose}
-      />
+      {/* On document.body: the organization card's backdrop-blur traps `fixed` children */}
+      <BodyPortal>
+        <PlanesPublicosModal
+          open={open}
+          tenantId={tenantId}
+          tenantNombre={tenantNombre}
+          onClose={handleClose}
+        />
+      </BodyPortal>
     </>
   );
 }

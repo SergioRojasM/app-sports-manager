@@ -1,5 +1,14 @@
 'use client';
 
+import {
+  GritAddTile,
+  GritAlert,
+  GritButton,
+  GritConfirmDialog,
+  GritEmptyState,
+  GritPageHeader,
+  GritSearchField,
+} from '@/components/ui';
 import { useScenarios } from '@/hooks/portal/scenarios/useScenarios';
 import { ScenarioCard } from './ScenarioCard';
 import { ScenarioFormModal } from './ScenarioFormModal';
@@ -9,29 +18,19 @@ type ScenariosPageProps = {
   tenantId: string;
 };
 
-function LoadingState() {
-  return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-      Cargando escenarios...
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-      No hay escenarios registrados para esta organización.
-    </div>
-  );
-}
-
+/** Scenarios management (`qG0T5` Admin · Escenarios). */
 export function ScenariosPage({ tenantId }: ScenariosPageProps) {
   const {
+    scenarios,
     loading,
     error,
     filteredScenarios,
     searchTerm,
     setSearchTerm,
+    tipoFilter,
+    setTipoFilter,
+    tipoOptions,
+    summary,
     modalOpen,
     modalMode,
     formValues,
@@ -39,10 +38,16 @@ export function ScenariosPage({ tenantId }: ScenariosPageProps) {
     scheduleErrors,
     submitError,
     successMessage,
+    dismissSuccess,
     isSubmitting,
     openCreateModal,
     openEditModal,
-    deleteScenario,
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
     closeModal,
     updateField,
     addSchedule,
@@ -52,56 +57,104 @@ export function ScenariosPage({ tenantId }: ScenariosPageProps) {
     refresh,
   } = useScenarios({ tenantId });
 
-  return (
-    <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Gestión de Escenarios</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Visualiza, crea y actualiza escenarios de entrenamiento para tu organización.
-        </p>
-      </header>
+  const hasFilters = searchTerm.trim() !== '' || tipoFilter !== 'todos';
 
-      <ScenariosHeaderFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onCreateScenario={openCreateModal}
+  return (
+    <section className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Tus"
+        titleAccent="escenarios."
+        italic
+        actions={
+          <>
+            <GritSearchField
+              aria-label="Buscar por nombre o ubicación"
+              placeholder="Buscar por nombre o ubicación…"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="w-full sm:w-[260px]"
+            />
+            <GritButton icon="add" onClick={openCreateModal}>
+              Crear escenario
+            </GritButton>
+          </>
+        }
       />
 
       {successMessage ? (
-        <div className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
+        <GritAlert tone="success" onDismiss={dismissSuccess}>
           {successMessage}
-        </div>
+        </GritAlert>
       ) : null}
 
-      {loading ? <LoadingState /> : null}
-
-      {!loading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
-          <button
-            type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
-            onClick={() => void refresh()}
-          >
-            Reintentar
-          </button>
+      {loading ? (
+        <div role="status">
+          <GritEmptyState icon="hourglass_empty" title="Cargando escenarios…" />
         </div>
-      ) : null}
-
-      {!loading && !error && filteredScenarios.length === 0 ? <EmptyState /> : null}
-
-      {!loading && !error && filteredScenarios.length > 0 ? (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {filteredScenarios.map((scenario) => (
-            <ScenarioCard
-              key={scenario.id}
-              scenario={scenario}
-              onEdit={openEditModal}
-              onDelete={deleteScenario}
+      ) : error ? (
+        <GritEmptyState
+          icon="error"
+          title="No pudimos cargar los escenarios"
+          description={error}
+          descriptionClassName="text-grit-danger"
+          action={
+            <GritButton variant="secondary" icon="refresh" onClick={() => void refresh()}>
+              Reintentar
+            </GritButton>
+          }
+        />
+      ) : scenarios.length === 0 ? (
+        <GritEmptyState
+          icon="stadium"
+          title="Aún no tienes escenarios"
+          description="Crea tu primer escenario para programar entrenamientos y eventos."
+          action={
+            <GritButton icon="add" onClick={openCreateModal}>
+              Crear escenario
+            </GritButton>
+          }
+        />
+      ) : (
+        <>
+          <ScenariosHeaderFilters
+            total={scenarios.length}
+            tipoOptions={tipoOptions}
+            tipoFilter={tipoFilter}
+            onTipoChange={setTipoFilter}
+            summary={summary}
+          />
+          {filteredScenarios.length === 0 && hasFilters ? (
+            <GritEmptyState
+              icon="search_off"
+              title="Sin resultados"
+              description="Ningún escenario coincide con la búsqueda o el filtro."
+              action={
+                <GritButton
+                  variant="secondary"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setTipoFilter('todos');
+                  }}
+                >
+                  Limpiar filtros
+                </GritButton>
+              }
             />
-          ))}
-        </div>
-      ) : null}
+          ) : (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredScenarios.map((scenario) => (
+                <ScenarioCard key={scenario.id} scenario={scenario} onEdit={openEditModal} onDelete={requestDelete} />
+              ))}
+              <GritAddTile
+                title="Agregar escenario"
+                subtitle="Pista, piscina, parque o circuito"
+                onClick={openCreateModal}
+                className="min-h-[300px]"
+              />
+            </div>
+          )}
+        </>
+      )}
 
       <ScenarioFormModal
         open={modalOpen}
@@ -117,6 +170,21 @@ export function ScenariosPage({ tenantId }: ScenariosPageProps) {
         onAddSchedule={addSchedule}
         onRemoveSchedule={removeSchedule}
         onChangeScheduleField={updateScheduleField}
+      />
+
+      <GritConfirmDialog
+        open={deleteTarget !== null}
+        title="Eliminar escenario"
+        message={
+          <>
+            ¿Seguro que quieres eliminar <span className="font-semibold text-grit-text">{deleteTarget?.nombre}</span>? Esta
+            acción no se puede deshacer.
+          </>
+        }
+        pending={isDeleting}
+        error={deleteError}
+        onCancel={cancelDelete}
+        onConfirm={() => void confirmDelete()}
       />
     </section>
   );

@@ -7,7 +7,7 @@
 export type TipoIdentificacion = 'CC' | 'CE' | 'TI' | 'NIT' | 'Pasaporte' | 'Otro';
 
 /** Allowed values for the usuario estado column. */
-export type MiembroEstado = 'activo' | 'mora' | 'suspendido' | 'inactivo';
+export type MiembroEstado = 'activo' | 'mora' | 'suspendido' | 'inactivo' | 'pendiente_activacion';
 
 /** Raw row returned by the equipo service join query. */
 export type MiembroRow = {
@@ -50,9 +50,9 @@ export type EquipoStats = {
 
 /** Service-level error with a typed code. */
 export class EquipoServiceError extends Error {
-  readonly code: 'forbidden' | 'unknown' | 'last_admin' | 'not_found';
+  readonly code: 'forbidden' | 'unknown' | 'last_admin' | 'not_found' | 'invalid_transition';
 
-  constructor(code: 'forbidden' | 'unknown' | 'last_admin' | 'not_found', message: string) {
+  constructor(code: 'forbidden' | 'unknown' | 'last_admin' | 'not_found' | 'invalid_transition', message: string) {
     super(message);
     this.name = 'EquipoServiceError';
     this.code = code;
@@ -136,6 +136,7 @@ export type MiembroNovedadTipo =
   | 'inasistencias_acumuladas'
   | 'suspension_manual'
   | 'reactivacion'
+  | 'activacion_cuenta'
   | 'otro';
 
 /** A single audit-log entry for a member status change. */

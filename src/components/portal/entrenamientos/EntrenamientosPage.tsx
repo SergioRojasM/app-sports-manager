@@ -1,63 +1,69 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { GritAlert, GritButton, GritCard, GritEmptyState, GritPageHeader } from '@/components/ui';
 import { useEntrenamientos } from '@/hooks/portal/entrenamientos/useEntrenamientos';
 import { useTenantAccess } from '@/hooks/portal/tenant/useTenantAccess';
-import { usePublicarEntrenamiento } from '@/hooks/portal/entrenamientos-publicos/usePublicarEntrenamiento';
-import { entrenamientosPublicosService, MEMBERSHIP_RESTRICTION_MESSAGE } from '@/services/supabase/portal/entrenamientos-publicos.service';
-import type { TrainingInstance } from '@/types/portal/entrenamientos.types';
+import type { EntrenamientosVista, TrainingCalendarItem, TrainingInstance } from '@/types/portal/entrenamientos.types';
+import { esEntrenamientoFuturo } from '@/lib/portal/entrenamiento-evento.utils';
+import {
+  buildSemana,
+  buildTonosPorDisciplina,
+  calcularKpis,
+  diaDeInstancia,
+  hoyKey,
+  isKeyInRange,
+} from '@/lib/portal/entrenamientos-calendario';
 import { EntrenamientoFormModal } from './EntrenamientoFormModal';
 import { EntrenamientoDetalleModal } from './EntrenamientoDetalleModal';
 import { EntrenamientoScopeModal } from './EntrenamientoScopeModal';
 import { EntrenamientoActionModal } from './EntrenamientoActionModal';
-import { PublicarEntrenamientoModal } from './PublicarEntrenamientoModal';
+import { EntrenamientosAgendaDia } from './EntrenamientosAgendaDia';
 import { EntrenamientosCalendar } from './EntrenamientosCalendar';
+import { EntrenamientosHeaderTools } from './EntrenamientosHeaderTools';
+import { EntrenamientosKpis } from './EntrenamientosKpis';
 import { EntrenamientosList } from './EntrenamientosList';
+import { EntrenamientosPeriodoHeader, type LeyendaDisciplina } from './EntrenamientosPeriodoHeader';
+import { EntrenamientosSemana } from './EntrenamientosSemana';
 import { ReservasPanel } from './reservas';
 
 type EntrenamientosPageProps = {
   tenantId: string;
 };
 
-function LoadingState() {
-  return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-      Cargando entrenamientos...
-    </div>
-  );
+const VISTAS: ReadonlyArray<EntrenamientosVista> = ['semana', 'mes', 'lista'];
+
+function parseVista(value: string | null): EntrenamientosVista {
+  return VISTAS.includes(value as EntrenamientosVista) ? (value as EntrenamientosVista) : 'semana';
 }
 
-function toDateKeyInBogota(value: string): string {
-  const date = new Date(value);
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Bogota',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(date);
-
-  const year = parts.find((part) => part.type === 'year')?.value;
-  const month = parts.find((part) => part.type === 'month')?.value;
-  const day = parts.find((part) => part.type === 'day')?.value;
-
-  return `${year}-${month}-${day}`;
+function toLookup(options: Array<{ id: string; label: string }>): Record<string, string> {
+  return options.reduce<Record<string, string>>((accumulator, item) => {
+    accumulator[item.id] = item.label;
+    return accumulator;
+  }, {});
 }
 
-function toSelectedDateLabel(dateKey: string): string {
-  return new Intl.DateTimeFormat('es-CO', {
-    timeZone: 'America/Bogota',
-    dateStyle: 'full',
-  }).format(new Date(`${dateKey}T12:00:00.000Z`));
-}
+/** Stable empty list: while a period loads, the views render no (stale) sessions. */
+const SIN_ITEMS: TrainingCalendarItem[] = [];
 
+const PUBLICAR_EN_EVENTOS_SOLO_FUTUROS = 'Solo los entrenamientos futuros se pueden publicar como evento.';
+
+/** "Gestiona tus entrenamientos." (grit-arena-v3 `p5Ms22`, US-0142): week / month / list calendar with the day agenda. */
 export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const currentTimestamp = new Date().getTime();
   const { role } = useTenantAccess(tenantId);
   const canManage = role === 'administrador' || role === 'entrenador';
-  const isAdmin = role === 'administrador';
   const [reservasPanelOpen, setReservasPanelOpen] = useState(false);
   const [reservasPanelInstance, setReservasPanelInstance] = useState<TrainingInstance | null>(null);
-  const publicarEntrenamiento = usePublicarEntrenamiento({ tenantId });
+  const [reservasPanelAutoReservar, setReservasPanelAutoReservar] = useState(false);
+  const [listaDiaFiltro, setListaDiaFiltro] = useState<string | null>(null);
+  const [dismissedSuccess, setDismissedSuccess] = useState<string | null>(null);
+  const [dismissedError, setDismissedError] = useState<string | null>(null);
 
   const {
     loading,
@@ -70,8 +76,9 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     disciplinas,
     escenarios,
     entrenadores,
-    monthLabel,
-    monthStartDate,
+    calendar,
+    instancesLoading,
+    instancesError,
     formOpen,
     formMode,
     isEditingSingleInstance,
@@ -82,8 +89,6 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     formValues,
     fieldErrors,
     ruleErrors,
-    goToNextMonth,
-    goToPreviousMonth,
     refresh,
     openCreateModal,
     requestEditInstance,
@@ -143,68 +148,98 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     viewLoading,
     requestViewInstance,
     closeViewModal,
-    publishedEntrenamientoIds,
-  } = useEntrenamientos({ tenantId });
+  } = useEntrenamientos({ tenantId, initialVista: parseVista(searchParams.get('vista')) });
+
+  const { vista, periodo } = calendar;
+  const todayKey = hoyKey(new Date(currentTimestamp));
+  const busy = loading || instancesLoading;
+  // The hook keeps the previous period's instances until the new ones arrive; don't show them.
+  const periodItems = busy ? SIN_ITEMS : calendarItems;
 
   const instanceMap = useMemo(() => new Map(instances.map((instance) => [instance.id, instance])), [instances]);
   const [selectedInstanceForAction, setSelectedInstanceForAction] = useState<TrainingInstance | null>(null);
-  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
 
-  const filteredItems = useMemo(() => {
-    if (!selectedDateKey) {
-      return calendarItems;
+  const disciplineNameById = useMemo(() => toLookup(disciplinas), [disciplinas]);
+  const scenarioNameById = useMemo(() => toLookup(escenarios), [escenarios]);
+  const entrenadorNameById = useMemo(() => toLookup(entrenadores), [entrenadores]);
+  const servicioNameById = useMemo(() => toLookup(servicios), [servicios]);
+  const tonos = useMemo(() => buildTonosPorDisciplina(disciplinas), [disciplinas]);
+
+  /** Sessions by Bogotá day, in start order (the service already orders by fecha_hora). */
+  const itemsPorDia = useMemo(() => {
+    const map = new Map<string, TrainingCalendarItem[]>();
+    for (const item of periodItems) {
+      const key = diaDeInstancia(item.instance);
+      if (key) map.set(key, [...(map.get(key) ?? []), item]);
     }
+    return map;
+  }, [periodItems]);
 
-    return calendarItems.filter((item) => {
-      if (!item.instance.fecha_hora) {
-        return false;
-      }
-      return toDateKeyInBogota(item.instance.fecha_hora) === selectedDateKey;
-    });
-  }, [calendarItems, selectedDateKey]);
+  // Mes loads the whole 42-cell grid; KPIs, legend and the default day only count the month itself.
+  const monthPrefix = periodo.monthStartDate?.slice(0, 7) ?? null;
+  const enPeriodo = (dateKey: string) =>
+    monthPrefix ? dateKey.startsWith(monthPrefix) : isKeyInRange(dateKey, periodo.from, periodo.to);
 
-  const selectedDateLabel = useMemo(() => {
-    if (!selectedDateKey) {
-      return null;
-    }
-    return toSelectedDateLabel(selectedDateKey);
-  }, [selectedDateKey]);
+  const monthStartDate = periodo.monthStartDate;
+  const itemsDelPeriodo = useMemo(() => {
+    if (!monthStartDate) return periodItems;
+    const prefix = monthStartDate.slice(0, 7);
+    return periodItems.filter((item) => diaDeInstancia(item.instance)?.startsWith(prefix));
+  }, [periodItems, monthStartDate]);
 
-  const disciplineNameById = useMemo(() => {
-    return disciplinas.reduce<Record<string, string>>((accumulator, item) => {
-      accumulator[item.id] = item.label;
-      return accumulator;
-    }, {});
-  }, [disciplinas]);
+  const kpis = useMemo(() => calcularKpis(itemsDelPeriodo.map((item) => item.instance)), [itemsDelPeriodo]);
 
-  const scenarioNameById = useMemo(() => {
-    return escenarios.reduce<Record<string, string>>((accumulator, item) => {
-      accumulator[item.id] = item.label;
-      return accumulator;
-    }, {});
-  }, [escenarios]);
+  const leyenda = useMemo<LeyendaDisciplina[]>(() => {
+    const ids = new Set(itemsDelPeriodo.map((item) => item.instance.disciplina_id));
+    return Array.from(ids)
+      .map((id) => ({ id, nombre: disciplineNameById[id] ?? 'Sin disciplina', tono: tonos[id] ?? 'accent' }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  }, [disciplineNameById, itemsDelPeriodo, tonos]);
 
-  const entrenadorNameById = useMemo(() => {
-    return entrenadores.reduce<Record<string, string>>((accumulator, item) => {
-      accumulator[item.id] = item.label;
-      return accumulator;
-    }, {});
-  }, [entrenadores]);
+  // Agenda day: the chosen one while it is in the period; else today, the first day with sessions, or the period start.
+  const isCurrentPeriod = enPeriodo(todayKey);
+  const primerDiaConSesiones = Array.from(itemsPorDia.keys()).filter(enPeriodo).sort()[0];
+  const selectedDateKey =
+    calendar.selectedDateKey && enPeriodo(calendar.selectedDateKey)
+      ? calendar.selectedDateKey
+      : isCurrentPeriod
+        ? todayKey
+        : (primerDiaConSesiones ?? periodo.monthStartDate ?? periodo.from);
 
-  const servicioNameById = useMemo(() => {
-    return servicios.reduce<Record<string, string>>((accumulator, item) => {
-      accumulator[item.id] = item.label;
-      return accumulator;
-    }, {});
-  }, [servicios]);
+  const dias = useMemo(() => buildSemana(periodo.from, todayKey), [periodo.from, todayKey]);
+
+  const changeVista = (next: EntrenamientosVista, anchorDay: string = selectedDateKey) => {
+    calendar.setVista(next, anchorDay);
+    if (next !== 'lista') setListaDiaFiltro(null);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('vista', next);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleVistaChange = (next: EntrenamientosVista) => {
+    setListaDiaFiltro(null);
+    changeVista(next);
+  };
+
+  const handleVerDetalleDia = (dateKey: string) => {
+    changeVista('lista', dateKey);
+    setListaDiaFiltro(dateKey);
+  };
+
+  const navigate = (action: () => void) => {
+    setListaDiaFiltro(null);
+    action();
+  };
 
   const selectedActionContext = useMemo(() => {
     if (!selectedInstanceForAction) {
       return {
         canEdit: false,
         canDelete: false,
+        canPublicarEnEventos: false,
         editDisabledReason: 'No hay entrenamiento seleccionado.',
         deleteDisabledReason: 'No hay entrenamiento seleccionado.',
+        publicarEnEventosDisabledReason: 'No hay entrenamiento seleccionado.',
       };
     }
 
@@ -212,80 +247,17 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
       ? new Date(selectedInstanceForAction.fecha_hora).getTime() < currentTimestamp
       : false;
 
+    const canPublicarEnEventos = esEntrenamientoFuturo(selectedInstanceForAction.fecha_hora, currentTimestamp);
+
     return {
       canEdit: !isHistorical,
       canDelete: !isHistorical,
-      editDisabledReason: isHistorical
-          ? 'No se pueden editar entrenamientos pasados.'
-          : undefined,
+      canPublicarEnEventos,
+      publicarEnEventosDisabledReason: canPublicarEnEventos ? undefined : PUBLICAR_EN_EVENTOS_SOLO_FUTUROS,
+      editDisabledReason: isHistorical ? 'No se pueden editar entrenamientos pasados.' : undefined,
       deleteDisabledReason: isHistorical ? 'No se pueden eliminar entrenamientos pasados.' : undefined,
     };
   }, [currentTimestamp, selectedInstanceForAction]);
-
-  // Pre-publish validation (US-0094): service-based restrictions no longer block —
-  // a non-member can buy a public plan that grants the service. Publication is blocked
-  // only when NO restriction row is satisfiable without membership. The same call also
-  // returns the required service ids, used for the publish preview. Checked on-demand
-  // for the currently selected training, not eagerly for the whole list.
-  const [blockingRestrictionById, setBlockingRestrictionById] = useState<Record<string, boolean>>({});
-  const [requiredServicioIdsById, setRequiredServicioIdsById] = useState<Record<string, string[]>>({});
-
-  useEffect(() => {
-    if (!selectedInstanceForAction) {
-      return;
-    }
-
-    let cancelled = false;
-    const trainingId = selectedInstanceForAction.id;
-
-    entrenamientosPublicosService
-      .getPublishRestrictionSummary(tenantId, trainingId)
-      .then((summary) => {
-        if (cancelled) return;
-        setBlockingRestrictionById((prev) => ({ ...prev, [trainingId]: summary.blocking }));
-        setRequiredServicioIdsById((prev) => ({ ...prev, [trainingId]: summary.servicioIds }));
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setBlockingRestrictionById((prev) => ({ ...prev, [trainingId]: false }));
-        setRequiredServicioIdsById((prev) => ({ ...prev, [trainingId]: [] }));
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [tenantId, selectedInstanceForAction]);
-
-  const hasBlockingRestriction = selectedInstanceForAction
-    ? (blockingRestrictionById[selectedInstanceForAction.id] ?? null)
-    : null;
-
-  const isSelectedInstancePublished = selectedInstanceForAction
-    ? publishedEntrenamientoIds.has(selectedInstanceForAction.id)
-    : false;
-
-  const publishActionContext = useMemo(() => {
-    if (!selectedInstanceForAction) {
-      return { canPublish: false, publishDisabledReason: 'No hay entrenamiento seleccionado.' };
-    }
-
-    if (!selectedActionContext.canEdit) {
-      return { canPublish: false, publishDisabledReason: 'No se pueden publicar entrenamientos pasados.' };
-    }
-
-    if (hasBlockingRestriction === null) {
-      return { canPublish: false, publishDisabledReason: undefined };
-    }
-
-    if (hasBlockingRestriction) {
-      return {
-        canPublish: false,
-        publishDisabledReason: MEMBERSHIP_RESTRICTION_MESSAGE,
-      };
-    }
-
-    return { canPublish: true, publishDisabledReason: undefined };
-  }, [hasBlockingRestriction, selectedActionContext.canEdit, selectedInstanceForAction]);
 
   const openActionModal = (trainingId: string) => {
     const target = instanceMap.get(trainingId);
@@ -299,115 +271,180 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
     setSelectedInstanceForAction(null);
   };
 
-  const handleSelectDate = (dateKey: string) => {
-    setSelectedDateKey((current) => (current === dateKey ? null : dateKey));
-  };
-
-  const handleGoToPreviousMonth = () => {
-    setSelectedDateKey(null);
-    goToPreviousMonth();
-  };
-
-  const handleGoToNextMonth = () => {
-    setSelectedDateKey(null);
-    goToNextMonth();
+  // US-0132: the event wizard pre-fills a new, unsaved event from this occurrence
+  const publicarEnEventos = () => {
+    const target = selectedInstanceForAction;
+    if (!target || !esEntrenamientoFuturo(target.fecha_hora, Date.now())) {
+      return;
+    }
+    closeActionModal();
+    router.push(`/portal/orgs/${tenantId}/gestion-eventos/nuevo?desdeEntrenamiento=${target.id}`);
   };
 
   const openReservasPanel = (instance: TrainingInstance) => {
     setReservasPanelInstance(instance);
+    setReservasPanelAutoReservar(false);
     setReservasPanelOpen(true);
     closeActionModal();
   };
 
-  const openPublicarModal = (instance: TrainingInstance) => {
-    void publicarEntrenamiento.open(instance);
-    closeActionModal();
+  // "Reservar" (US-0127): open the panel and let it open the booking dialog once loaded
+  const openReservaDirecta = (trainingId: string) => {
+    const target = instanceMap.get(trainingId);
+    if (!target) {
+      return;
+    }
+    setReservasPanelInstance(target);
+    setReservasPanelAutoReservar(true);
+    setReservasPanelOpen(true);
   };
 
   const closeReservasPanel = () => {
     setReservasPanelOpen(false);
     setReservasPanelInstance(null);
+    setReservasPanelAutoReservar(false);
   };
 
+  const showSuccess = successMessage && successMessage !== dismissedSuccess;
+  const showSubmitError = submitError && !formOpen && submitError !== dismissedError;
+
+  const periodoHeader = (
+    <EntrenamientosPeriodoHeader
+      vista={vista}
+      label={periodo.label}
+      isCurrentPeriod={isCurrentPeriod}
+      leyenda={leyenda}
+      onPrevious={() => navigate(calendar.goPrevious)}
+      onNext={() => navigate(calendar.goNext)}
+      onToday={() => navigate(calendar.goToday)}
+    />
+  );
+
+  const instancesErrorAlert = instancesError ? (
+    <GritAlert
+      tone="danger"
+      action={
+        <GritButton variant="secondary" size="sm" icon="refresh" onClick={() => void refresh()}>
+          Reintentar
+        </GritButton>
+      }
+    >
+      {instancesError}
+    </GritAlert>
+  ) : null;
+
   return (
-    <section className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-100">Gestión de Entrenamientos</h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Administra entrenamientos por serie, con reglas recurrentes y excepciones por instancia.
-          </p>
-        </div>
-        {canManage && (
-          <button
-            type="button"
-            onClick={openCreateModal}
-            className="inline-flex items-center gap-2 rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep"
-          >
-            Crear entrenamiento
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              add
-            </span>
-          </button>
-        )}
-      </header>
+    <section className="flex flex-col gap-5">
+      <GritPageHeader
+        title={canManage ? 'Gestiona tus' : 'Calendario de'}
+        titleAccent="entrenamientos."
+        actions={
+          <EntrenamientosHeaderTools vista={vista} onVistaChange={handleVistaChange} canManage={canManage} onCrear={openCreateModal} />
+        }
+      />
 
-      {successMessage ? (
-        <div className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
+      {showSuccess ? (
+        <GritAlert tone="success" onDismiss={() => setDismissedSuccess(successMessage)}>
           {successMessage}
-        </div>
+        </GritAlert>
       ) : null}
 
-      {submitError && !formOpen ? (
-        <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
+      {showSubmitError ? (
+        <GritAlert tone="danger" onDismiss={() => setDismissedError(submitError)}>
           {submitError}
-        </div>
+        </GritAlert>
       ) : null}
-
-      {loading ? <LoadingState /> : null}
 
       {!loading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
-          <button
-            type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
-            onClick={() => void refresh()}
-          >
-            Reintentar
-          </button>
-        </div>
-      ) : null}
+        <GritEmptyState
+          icon="error"
+          title="No pudimos cargar los entrenamientos"
+          description={error}
+          descriptionClassName="text-grit-danger"
+          action={
+            <GritButton variant="secondary" icon="refresh" onClick={() => void refresh()}>
+              Reintentar
+            </GritButton>
+          }
+        />
+      ) : (
+        <>
+          <EntrenamientosKpis kpis={kpis} vista={vista} loading={busy} />
 
-      {!loading && !error ? (
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-3 xl:items-stretch">
-          <div className="xl:col-span-2 xl:min-h-0">
-            <EntrenamientosCalendar
-              monthLabel={monthLabel}
-              monthStartDate={monthStartDate}
-              items={calendarItems}
-              disciplinas={disciplinas}
-              selectedDateKey={selectedDateKey}
-              canManage={canManage}
-              onPreviousMonth={handleGoToPreviousMonth}
-              onNextMonth={handleGoToNextMonth}
-              onSelectDate={handleSelectDate}
-            />
-          </div>
+          {vista === 'lista' ? (
+            <GritCard variant="card" padding="none" className="flex min-w-0 flex-col gap-4 px-3 py-4 sm:px-5 sm:py-5">
+              {periodoHeader}
+              {instancesErrorAlert ?? (
+                <EntrenamientosList
+                  key={`${periodo.from}-${listaDiaFiltro ?? 'semana'}`}
+                  items={periodItems}
+                  dayFilterKey={listaDiaFiltro}
+                  onClearDayFilter={() => setListaDiaFiltro(null)}
+                  tonos={tonos}
+                  disciplineNameById={disciplineNameById}
+                  scenarioNameById={scenarioNameById}
+                  entrenadorNameById={entrenadorNameById}
+                  todayKey={todayKey}
+                  now={currentTimestamp}
+                  loading={busy}
+                  canManage={canManage}
+                  onOpenTraining={openActionModal}
+                  onReservar={openReservaDirecta}
+                />
+              )}
+            </GritCard>
+          ) : (
+            <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+              <GritCard variant="card" padding="none" className="flex min-w-0 flex-col gap-4 px-3 py-4 sm:px-5 sm:py-5">
+                {periodoHeader}
+                {instancesErrorAlert ??
+                  (vista === 'semana' ? (
+                    <EntrenamientosSemana
+                      key={periodo.from}
+                      dias={dias}
+                      items={periodItems}
+                      tonos={tonos}
+                      selectedDateKey={selectedDateKey}
+                      now={currentTimestamp}
+                      loading={busy}
+                      canManage={canManage}
+                      onSelectDate={calendar.selectDate}
+                      onOpenTraining={openActionModal}
+                      onCrear={openCreateModal}
+                    />
+                  ) : (
+                    <EntrenamientosCalendar
+                      monthStartDate={periodo.monthStartDate ?? periodo.from}
+                      items={periodItems}
+                      tonos={tonos}
+                      selectedDateKey={selectedDateKey}
+                      todayKey={todayKey}
+                      loading={busy}
+                      onSelectDate={calendar.selectDate}
+                      onOpenTraining={openActionModal}
+                    />
+                  ))}
+              </GritCard>
 
-          <div className="xl:col-span-1 xl:min-h-0 xl:self-start">
-            <EntrenamientosList
-              items={filteredItems}
-              selectedDateLabel={selectedDateLabel}
-              disciplineNameById={disciplineNameById}
-              scenarioNameById={scenarioNameById}
-              canManage={canManage}
-              onOpenActions={openActionModal}
-              onClearDateFilter={() => setSelectedDateKey(null)}
-            />
-          </div>
-        </div>
-      ) : null}
+              <EntrenamientosAgendaDia
+                dateKey={selectedDateKey}
+                isToday={selectedDateKey === todayKey}
+                items={itemsPorDia.get(selectedDateKey) ?? []}
+                tonos={tonos}
+                scenarioNameById={scenarioNameById}
+                entrenadorNameById={entrenadorNameById}
+                now={currentTimestamp}
+                loading={busy}
+                canManage={canManage}
+                onOpenTraining={openActionModal}
+                onReservar={openReservaDirecta}
+                onCrear={openCreateModal}
+                onVerDetalleDia={handleVerDetalleDia}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       <EntrenamientoActionModal
         open={Boolean(selectedInstanceForAction)}
@@ -417,14 +454,6 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         canDelete={canManage && selectedActionContext.canDelete}
         editDisabledReason={selectedActionContext.editDisabledReason}
         deleteDisabledReason={selectedActionContext.deleteDisabledReason}
-        isAdmin={isAdmin}
-        isPublished={isSelectedInstancePublished}
-        canPublish={publishActionContext.canPublish}
-        publishDisabledReason={publishActionContext.publishDisabledReason}
-        onPublicar={() => {
-          if (!selectedInstanceForAction) return;
-          openPublicarModal(selectedInstanceForAction);
-        }}
         onClose={closeActionModal}
         onViewDetail={() => {
           if (!selectedInstanceForAction) {
@@ -447,11 +476,10 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
           requestDeleteInstance(selectedInstanceForAction);
           closeActionModal();
         }}
-        onViewReservas={
-          selectedInstanceForAction
-            ? () => openReservasPanel(selectedInstanceForAction)
-            : undefined
-        }
+        onViewReservas={selectedInstanceForAction ? () => openReservasPanel(selectedInstanceForAction) : undefined}
+        onPublicarEnEventos={role === 'administrador' ? publicarEnEventos : undefined}
+        canPublicarEnEventos={selectedActionContext.canPublicarEnEventos}
+        publicarEnEventosDisabledReason={selectedActionContext.publicarEnEventosDisabledReason}
       />
 
       <ReservasPanel
@@ -459,45 +487,9 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
         tenantId={tenantId}
         instance={reservasPanelInstance}
         role={role}
+        autoReservar={reservasPanelAutoReservar}
         onClose={closeReservasPanel}
         onMutationComplete={() => void refresh()}
-      />
-
-      <PublicarEntrenamientoModal
-        open={publicarEntrenamiento.isOpen}
-        isPublished={publicarEntrenamiento.isPublished}
-        isLoading={publicarEntrenamiento.isLoading}
-        training={publicarEntrenamiento.training}
-        serviciosRequeridos={(requiredServicioIdsById[publicarEntrenamiento.training?.id ?? ''] ?? [])
-          .map((id) => servicioNameById[id])
-          .filter((name): name is string => Boolean(name))
-          .sort((a, b) => a.localeCompare(b))}
-        disciplinaNombre={
-          publicarEntrenamiento.training ? (disciplineNameById[publicarEntrenamiento.training.disciplina_id] ?? 'Disciplina') : ''
-        }
-        escenarioNombre={
-          publicarEntrenamiento.training ? (scenarioNameById[publicarEntrenamiento.training.escenario_id] ?? 'Escenario') : ''
-        }
-        values={publicarEntrenamiento.values}
-        existingBannerUrl={publicarEntrenamiento.existingBannerUrl}
-        bannerPreviewUrl={publicarEntrenamiento.bannerPreviewUrl}
-        bannerError={publicarEntrenamiento.bannerError}
-        isSubmitting={publicarEntrenamiento.isSubmitting}
-        submitError={publicarEntrenamiento.submitError}
-        onChangeField={publicarEntrenamiento.updateField}
-        onChangeOmitirConfirmacionPlan={publicarEntrenamiento.setOmitirConfirmacionPlan}
-        onBannerFileSelect={publicarEntrenamiento.handleBannerFileSelect}
-        onClose={publicarEntrenamiento.close}
-        onSubmit={async () => {
-          const success = await publicarEntrenamiento.submit();
-          if (success) void refresh();
-          return success;
-        }}
-        onDespublicar={async () => {
-          const success = await publicarEntrenamiento.despublicar();
-          if (success) void refresh();
-          return success;
-        }}
       />
 
       <EntrenamientoFormModal
@@ -563,6 +555,7 @@ export function EntrenamientosPage({ tenantId }: EntrenamientosPageProps) {
 
       <EntrenamientoDetalleModal
         open={isViewModalOpen}
+        tenantId={tenantId}
         viewTarget={viewTarget}
         viewLoading={viewLoading}
         canManage={canManage}

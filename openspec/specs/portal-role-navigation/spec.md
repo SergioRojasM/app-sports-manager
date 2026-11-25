@@ -1,61 +1,80 @@
-## MODIFIED Requirements
+# portal-role-navigation Specification
 
+## Purpose
+Defines the role-aware portal sidebar menu and the default post-login and portal-root redirects to /portal/inicio.
+## Requirements
 ### Requirement: Role-based sidebar menu
-`PortalSidebar` SHALL display an "Inicio" entry as the first menu item for all authenticated users, followed by a tenant-discovery entry. The sidebar SHALL adapt tenant-scoped menu items according to the resolved role for the active tenant context. Role-specific tenant items MUST only appear after tenant access is validated. The `gestion-escenarios` tenant route entry SHALL be visible only for `administrador` role in the active tenant. The `gestion-planes` tenant route entry SHALL be visible for `administrador`, `usuario`, and `entrenador` roles. The `gestion-suscripciones` tenant route entry SHALL be visible only for `administrador` role in the active tenant. The `mis-suscripciones-y-pagos` tenant route entry SHALL be visible only for the `usuario` role in the active tenant. The "Inicio" entry SHALL always be present regardless of tenant context, enabling users to return to their personal dashboard.
+The portal navigation (rendered by `PortalNavContent` in both `PortalSidebar` and `PortalMobileDrawer`) SHALL be composed of two sections.
 
-#### Scenario: Sidebar shows Inicio as first menu item
-- **WHEN** an authenticated user enters the portal shell
-- **THEN** the sidebar SHALL include `Inicio` with `home` icon linking to `/portal/inicio` as the first menu item
+**1. "MI CUENTA" (global; labelled "MENÚ" before v3)**: this section SHALL be present for every authenticated user in every context (inside and outside a tenant). It SHALL contain exactly these items, in this order:
+- Inicio (`home`) → `/portal/inicio`
+- Organizaciones (`corporate_fare`) → `/portal/orgs`
+- Eventos (`emoji_events`) → `/portal/eventos`
+- Mis Suscripciones (`credit_card`) → `/portal/mis-suscripciones`
+- Mis Reservas (`event_available`) → `/portal/mis-reservas`
+- Mis Entradas (`confirmation_number`) → `/portal/mis-entradas`
 
-#### Scenario: Sidebar shows organizations discovery entry after Inicio
-- **WHEN** an authenticated user enters the portal shell
-- **THEN** the sidebar SHALL include `Organizaciones Disponibles` linking to `/portal/orgs` after the `Inicio` entry
+**2. "ORGANIZACIÓN" (tenant)**: this section SHALL be rendered only when the pathname is under `/portal/orgs/{tenantId}` AND tenant access has been validated with a non-null per-tenant role. Its items SHALL be resolved from `TENANT_NAV_TREE` for that role. Hrefs SHALL be `/portal/orgs/{tenantId}/{path}`. Groups with no visible child SHALL be omitted.
 
-#### Scenario: Inicio visible inside tenant context
-- **WHEN** a user is navigating within a tenant context (`/portal/orgs/[tenant_id]/...`)
-- **THEN** the sidebar SHALL still display the `Inicio` item as the first entry, before any tenant-scoped items
+| Group | Item | Path | Roles |
+|---|---|---|---|
+| Administración (`tune`) | Configuración | `gestion-organizacion` | administrador |
+| | Escenarios | `gestion-escenarios` | administrador |
+| | Disciplinas | `gestion-disciplinas` | administrador |
+| | Servicios | `gestion-servicios` | administrador |
+| | Planes | `gestion-planes` | administrador, entrenador |
+| Equipo (`group`) | Miembros | `gestion-equipo` | administrador |
+| | Atletas | `atletas` | entrenador |
+| | Suscripciones | `gestion-suscripciones` | administrador |
+| Entrenamientos (`fitness_center`) | Calendario (label "Entrenamientos disponibles" for usuario) | `gestion-entrenamientos` | administrador, entrenador, usuario |
+| | Reservas | `gestion-reservas` | administrador, entrenador |
+| | Formularios | `gestion-formularios` | administrador |
+| Eventos (`emoji_events`) | Calendario | `gestion-eventos` | administrador |
+| | Check-in | `control-ingreso` | administrador, entrenador |
+| (top-level leaf) Planes (`card_membership`) | | `gestion-planes` | usuario |
+| (top-level leaf) Analítica (`bar_chart`) | | `analitica` | administrador |
 
-#### Scenario: Tenant-scoped menu is role-aware
-- **WHEN** a user has validated access to a tenant route
-- **THEN** the sidebar SHALL render only items permitted for the resolved tenant role
+- The tenant section SHALL NOT include a "Reservas" item under Equipo.
+- The tenant section SHALL NOT include a `mis-suscripciones-y-pagos` entry; "Mis Suscripciones" in MI CUENTA covers it.
+- The navigation SHALL NOT include an "Entrenamientos Públicos" entry in any context (US-0123).
+- Hiding an entry SHALL NOT replace the server route guards.
 
-#### Scenario: Administrator sees scenario-management route entry
-- **WHEN** the resolved role for active tenant is `administrador`
-- **THEN** the sidebar SHALL include a tenant-scoped entry for `gestion-escenarios`
+#### Scenario: Global menu outside a tenant
+- **WHEN** an authenticated user is on `/portal/inicio`
+- **THEN** the navigation SHALL show exactly Inicio, Organizaciones, Eventos, Mis Suscripciones, Mis Reservas, Mis Entradas in that order
+- **AND** no "ORGANIZACIÓN" section SHALL be rendered
 
-#### Scenario: Administrator sees planes route entry
-- **WHEN** the resolved role for active tenant is `administrador`
-- **THEN** the sidebar SHALL include a tenant-scoped entry for `gestion-planes`
+#### Scenario: Global menu remains inside a tenant
+- **WHEN** a user with validated access is on `/portal/orgs/{tenantId}/gestion-equipo`
+- **THEN** the same six global items SHALL be shown under "MI CUENTA", followed by the "ORGANIZACIÓN" section
 
-#### Scenario: Usuario sees planes route entry
-- **WHEN** the resolved role for active tenant is `usuario`
-- **THEN** the sidebar SHALL include a tenant-scoped entry for `gestion-planes`
+#### Scenario: Administrator tenant tree
+- **WHEN** the resolved role for the active tenant is `administrador`
+- **THEN** the ORGANIZACIÓN section SHALL contain: Administración (Configuración, Escenarios, Disciplinas, Servicios, Planes), Equipo (Miembros, Suscripciones), Entrenamientos (Calendario, Reservas, Formularios), Eventos (Calendario, Check-in), and the leaf Analítica, in that order
 
-#### Scenario: Entrenador sees planes route entry
-- **WHEN** the resolved role for active tenant is `entrenador`
-- **THEN** the sidebar SHALL include a tenant-scoped entry for `gestion-planes`
+#### Scenario: Trainer tenant tree
+- **WHEN** the resolved role for the active tenant is `entrenador`
+- **THEN** the ORGANIZACIÓN section SHALL contain exactly: Administración (Planes), Equipo (Atletas), Entrenamientos (Calendario, Reservas), Eventos (Check-in)
 
-#### Scenario: Administrator sees subscription-management route entry
-- **WHEN** the resolved role for active tenant is `administrador`
-- **THEN** the sidebar SHALL include a tenant-scoped entry for `gestion-suscripciones`
+#### Scenario: Member tenant tree
+- **WHEN** the resolved role for the active tenant is `usuario`
+- **THEN** the ORGANIZACIÓN section SHALL contain exactly: Entrenamientos (Entrenamientos disponibles) and the leaf Planes
 
-#### Scenario: Non-administrator does not see subscription-management route entry
-- **WHEN** the resolved role for active tenant is `usuario` or `entrenador`
-- **THEN** the sidebar SHALL NOT include an entry for `gestion-suscripciones`
+#### Scenario: No Reservas under Equipo
+- **WHEN** the ORGANIZACIÓN section is rendered for any role
+- **THEN** the Equipo group SHALL NOT contain a "Reservas" item
 
-#### Scenario: Usuario sees mis-suscripciones-y-pagos route entry
-- **WHEN** the resolved role for active tenant is `usuario`
-- **THEN** the sidebar SHALL include a tenant-scoped entry for `mis-suscripciones-y-pagos` with icon `receipt_long` positioned after `gestion-planes`
+#### Scenario: Item links resolve to tenant routes
+- **WHEN** the administrator clicks Administración › Configuración in tenant `T`
+- **THEN** the app SHALL navigate to `/portal/orgs/T/gestion-organizacion`
 
-#### Scenario: Non-usuario does not see mis-suscripciones-y-pagos route entry
-- **WHEN** the resolved role for active tenant is `administrador` or `entrenador`
-- **THEN** the sidebar SHALL NOT include an entry for `mis-suscripciones-y-pagos`
+#### Scenario: Unauthorized tenant context shows no tenant section
+- **WHEN** tenant membership validation fails or the membership is pending activation
+- **THEN** the ORGANIZACIÓN section SHALL NOT be rendered, and the existing server redirects SHALL apply unchanged
 
-#### Scenario: Unauthorized tenant context shows no tenant menu
-- **WHEN** tenant membership validation fails for requested tenant
-- **THEN** tenant-scoped menu items SHALL NOT be rendered and user SHALL be redirected to `/portal/orgs`
-
-## ADDED Requirements
+#### Scenario: Tenant section while access is resolving
+- **WHEN** the per-tenant role is still loading
+- **THEN** a skeleton block SHALL be rendered in place of the ORGANIZACIÓN section, and no tenant links SHALL be rendered
 
 ### Requirement: Default post-login redirect to /portal/inicio
 The bootstrap route (`/portal/bootstrap`) SHALL redirect authenticated users to `/portal/inicio` by default when no `next` parameter is provided. The portal layout SHALL use `/portal/inicio` as the default bootstrap target when cookies are missing or invalid.
@@ -78,3 +97,78 @@ The portal root page (`/portal/page.tsx`) SHALL redirect to `/portal/inicio` ins
 #### Scenario: Visiting /portal redirects to /portal/inicio
 - **WHEN** a user navigates to `/portal`
 - **THEN** the system SHALL redirect to `/portal/inicio`
+
+### Requirement: Organization section header shows the tenant name without a logo
+When the ORGANIZACIÓN section is rendered, the navigation SHALL start with an **Org Switcher** card (v3 node `weLbQ`), placed above the "MI CUENTA" section. The card SHALL be a link to `/portal/orgs` and SHALL show:
+- a 34px tile with the first letter of the active tenant's name (Exo 2 bold italic, cyan, on a `grit-bg` tile with a cyan border), or a neutral glyph if the name is unavailable;
+- the tenant's name, read via `useTenantName` (`tenants.nombre`), truncated with an ellipsis and with the full name in `title`;
+- the caption "Organización" below the name;
+- an `unfold_more` icon.
+
+Its accessible name SHALL include "Cambiar de organización" and, when loaded, the tenant name. It SHALL NOT read `tenants.logo_url` or render any tenant image. While the name loads, a skeleton bar SHALL replace it. If the name cannot be loaded, only "Organización" SHALL be shown. The ORGANIZACIÓN section itself SHALL always be expanded; it has no collapse toggle.
+
+#### Scenario: Tenant name rendered
+- **WHEN** the user is inside tenant "Club Elite" with validated access
+- **THEN** the Org Switcher SHALL display the initial "C", the name "Club Elite" and the caption "Organización"
+
+#### Scenario: No logo request
+- **WHEN** the ORGANIZACIÓN section is rendered
+- **THEN** no network request for the tenant's `logo_url` SHALL be issued by the navigation
+
+#### Scenario: Long name truncated
+- **WHEN** the tenant name is wider than the available space
+- **THEN** it SHALL be truncated with an ellipsis and the full name SHALL be exposed through the `title` attribute
+
+#### Scenario: Switch organization
+- **WHEN** the user activates the Org Switcher
+- **THEN** the app SHALL navigate to `/portal/orgs`
+
+#### Scenario: Collapse section
+- **WHEN** the ORGANIZACIÓN section is rendered
+- **THEN** it SHALL NOT offer a section-level collapse toggle, its groups and leaves SHALL be visible, and group-level toggles SHALL keep working
+
+### Requirement: Collapsible groups
+Each group header SHALL be a button with `aria-expanded` / `aria-controls` and a chevron (`expand_more` when open, `chevron_right` when closed) that toggles its children.
+- In both the desktop sidebar and the mobile drawer, only the group containing the active link SHALL start expanded; every other group SHALL start collapsed.
+- When navigation changes the active group, that group SHALL be force-expanded. Other groups SHALL keep their state.
+- The group containing the active link SHALL render its icon in `grit-cyan`.
+
+#### Scenario: Desktop default expansion
+- **WHEN** an administrator opens `/portal/orgs/T/gestion-equipo` at ≥1024px
+- **THEN** only the Equipo group SHALL be expanded, and Administración, Entrenamientos and Eventos SHALL be collapsed
+
+#### Scenario: Drawer default expansion
+- **WHEN** an administrator on `/portal/orgs/T/gestion-equipo` opens the mobile drawer
+- **THEN** only the Equipo group SHALL be expanded
+
+#### Scenario: Toggle group
+- **WHEN** the user clicks the Entrenamientos header while it is expanded
+- **THEN** its children SHALL be hidden and its chevron SHALL switch to `chevron_right`
+
+### Requirement: Collapsible global menu section
+The "MI CUENTA" overline (formerly "MENÚ") SHALL be a toggle button (`aria-expanded`, `aria-controls`, chevron `expand_less` when open and `expand_more` when closed) that collapses or expands the six global links. The overline SHALL be styled as the v3 section label (10px/600 uppercase, 1.3px tracking, `grit-muted`). The section SHALL be expanded by default. Collapsing it SHALL NOT affect the ORGANIZACIÓN section.
+
+#### Scenario: Collapse the global menu
+- **WHEN** the user clicks the "MI CUENTA" header while it is expanded
+- **THEN** the six global links SHALL be hidden, `aria-expanded` SHALL be `false`, and the ORGANIZACIÓN section SHALL remain as it was
+
+#### Scenario: Expand the global menu
+- **WHEN** the user clicks the "MI CUENTA" header while it is collapsed
+- **THEN** the six global links SHALL be shown again
+
+### Requirement: Single active link by longest prefix
+The navigation SHALL compute the active href over all global and tenant leaf hrefs as the **longest** href where `pathname === href` or `pathname` starts with `href + '/'`. Exactly that link SHALL have `aria-current="page"` and the v3 active styling:
+- top-level items and top-level org leaves (node `cUHCL`): a fully rounded pill with a cyan 18%→4%→transparent gradient, a cyan 30% border, a cyan glow, a 32px cyan-gradient icon chip with a `grit-on-brand` icon, a `grit-text` 600 label and a trailing 6px cyan dot;
+- group children (node `LTtTI`): the same gradient pill, border and trailing dot, with a 12px `grit-text` 600 label (and a cyan icon when the leaf defines one).
+
+#### Scenario: Nested route activates the deepest match
+- **WHEN** the pathname is `/portal/orgs/T/gestion-eventos/nuevo`
+- **THEN** Eventos › Calendario SHALL be the only active link and "Organizaciones" SHALL NOT be active
+
+#### Scenario: Global route active
+- **WHEN** the pathname is `/portal/mis-entradas`
+- **THEN** "Mis Entradas" SHALL be the only link with `aria-current="page"`
+
+#### Scenario: Single active treatment
+- **WHEN** any portal route is active
+- **THEN** exactly one navigation row SHALL show the trailing cyan dot

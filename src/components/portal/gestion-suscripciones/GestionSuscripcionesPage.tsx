@@ -21,7 +21,7 @@ type GestionSuscripcionesPageProps = {
 
 function LoadingState() {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       Cargando suscripciones...
     </div>
   );
@@ -29,7 +29,7 @@ function LoadingState() {
 
 function EmptyState({ activeTab }: { activeTab: SuscripcionTab }) {
   return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
       {activeTab === 'miembros'
         ? 'No hay suscripciones de miembros para esta organización.'
         : 'No hay suscripciones de no miembros para esta organización.'}
@@ -92,8 +92,8 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
       <header>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-slate-100">Gestión de Suscripciones</h1>
-            <p className="mt-2 text-sm text-slate-400">
+            <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Gestión de Suscripciones</h1>
+            <p className="mt-2 text-sm text-grit-subtext">
               Visualiza y administra las suscripciones de tu organización. Valida pagos y aprueba o
               cancela suscripciones.
             </p>
@@ -101,7 +101,7 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
           <button
             type="button"
             onClick={openCrearModal}
-            className="shrink-0 rounded-lg border border-turquoise/40 bg-turquoise/10 px-4 py-2 text-sm font-medium text-turquoise transition-colors hover:bg-turquoise/20"
+            className="shrink-0 rounded-grit-md border border-grit-cyan/40 bg-grit-cyan/10 px-4 py-2 text-sm font-medium text-grit-cyan transition-colors hover:bg-grit-cyan/20"
           >
             + Nueva suscripción
           </button>
@@ -109,19 +109,19 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
       </header>
 
       {/* Tab bar */}
-      <nav className="flex gap-1 rounded-lg border border-portal-border bg-navy-deep/60 p-1">
+      <nav className="flex gap-1 rounded-grit-md border border-grit-glass-border bg-grit-bg/60 p-1">
         <button
           type="button"
           onClick={() => setActiveTab('miembros')}
           className={[
             'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
             activeTab === 'miembros'
-              ? 'bg-navy-soft text-slate-100'
-              : 'text-slate-400 hover:text-slate-200',
+              ? 'bg-grit-card text-grit-text'
+              : 'text-grit-subtext hover:text-grit-text',
           ].join(' ')}
         >
           Miembros
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-turquoise px-1.5 text-[11px] font-bold text-navy-deep">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-grit-cyan px-1.5 text-[11px] font-bold text-grit-bg">
             {tabCounts.miembros}
           </span>
         </button>
@@ -131,12 +131,12 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
           className={[
             'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
             activeTab === 'no_miembros'
-              ? 'bg-navy-soft text-slate-100'
-              : 'text-slate-400 hover:text-slate-200',
+              ? 'bg-grit-card text-grit-text'
+              : 'text-grit-subtext hover:text-grit-text',
           ].join(' ')}
         >
           No miembros
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-turquoise px-1.5 text-[11px] font-bold text-navy-deep">
+          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-grit-cyan px-1.5 text-[11px] font-bold text-grit-bg">
             {tabCounts.noMiembros}
           </span>
         </button>
@@ -157,11 +157,11 @@ export function GestionSuscripcionesPage({ tenantId }: GestionSuscripcionesPageP
       {loading ? <LoadingState /> : null}
 
       {!loading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
+        <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+          <p className="text-sm text-grit-danger">{error}</p>
           <button
             type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+            className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
             onClick={() => void refresh()}
           >
             Reintentar

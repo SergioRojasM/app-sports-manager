@@ -358,6 +358,12 @@ export const equipoService = {
       if (error.code === 'P0002') {
         throw new EquipoServiceError('not_found', 'El miembro no fue encontrado en esta organización.');
       }
+      if (error.code === '22023') {
+        throw new EquipoServiceError(
+          'invalid_transition',
+          'Un miembro pendiente de activación solo puede pasar a Activo o Inactivo.',
+        );
+      }
       throw new EquipoServiceError('unknown', 'No fue posible cambiar el estado del miembro.');
     }
   },

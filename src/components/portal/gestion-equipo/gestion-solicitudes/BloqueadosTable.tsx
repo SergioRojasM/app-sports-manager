@@ -27,9 +27,9 @@ export function BloqueadosTable({ rows, onDesbloquear }: BloqueadosTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-portal-border">
+    <div className="overflow-x-auto rounded-grit-md border border-grit-glass-border">
       <table className="w-full text-left text-sm">
-        <thead className="glass border-b border-portal-border text-xs uppercase tracking-wider text-slate-400">
+        <thead className="border bg-grit-glass backdrop-blur-md border-b border-grit-glass-border text-xs uppercase tracking-wider text-grit-subtext">
           <tr>
             <th scope="col" className="px-4 py-3">Usuario</th>
             <th scope="col" className="px-4 py-3">Correo</th>
@@ -38,12 +38,12 @@ export function BloqueadosTable({ rows, onDesbloquear }: BloqueadosTableProps) {
             <th scope="col" className="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-portal-border">
+        <tbody className="divide-y divide-grit-glass-border">
           {rows.map((bloqueado) => (
-            <tr key={bloqueado.id} className="text-slate-200 hover:bg-navy-soft/40">
+            <tr key={bloqueado.id} className="text-grit-text hover:bg-grit-cyan/10">
               <td className="whitespace-nowrap px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-portal-border bg-navy-soft">
+                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-grit-glass-border bg-grit-card">
                     {bloqueado.foto_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -52,7 +52,7 @@ export function BloqueadosTable({ rows, onDesbloquear }: BloqueadosTableProps) {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span className="material-symbols-outlined text-sm text-slate-400" aria-hidden="true">
+                      <span className="material-symbols-outlined text-sm text-grit-subtext" aria-hidden="true">
                         person
                       </span>
                     )}
@@ -62,13 +62,13 @@ export function BloqueadosTable({ rows, onDesbloquear }: BloqueadosTableProps) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-300">{bloqueado.email}</td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-300">{formatDate(bloqueado.bloqueado_at)}</td>
-              <td className="px-4 py-3 text-slate-300">
+              <td className="whitespace-nowrap px-4 py-3 text-grit-subtext">{bloqueado.email}</td>
+              <td className="whitespace-nowrap px-4 py-3 text-grit-subtext">{formatDate(bloqueado.bloqueado_at)}</td>
+              <td className="px-4 py-3 text-grit-subtext">
                 {bloqueado.motivo ? (
                   <span className="max-w-xs truncate">{bloqueado.motivo}</span>
                 ) : (
-                  <span className="italic text-slate-500">—</span>
+                  <span className="italic text-grit-muted">—</span>
                 )}
               </td>
               <td className="whitespace-nowrap px-4 py-3 text-right">
@@ -84,7 +84,7 @@ export function BloqueadosTable({ rows, onDesbloquear }: BloqueadosTableProps) {
                     <button
                       type="button"
                       onClick={() => setConfirmId(null)}
-                      className="rounded-md border border-portal-border px-2.5 py-1 text-xs font-semibold text-slate-300 hover:bg-navy-soft"
+                      className="rounded-md border border-grit-glass-border px-2.5 py-1 text-xs font-semibold text-grit-subtext hover:bg-grit-cyan/10"
                     >
                       Cancelar
                     </button>

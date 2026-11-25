@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/services/supabase/client';
 import type {
+  AdminTenantEntitlements,
   TenantEditFormValues,
   TenantEditPayload,
   TenantEditResult,
@@ -12,6 +13,12 @@ import type {
   TenantViewErrorCode,
 } from '@/types/portal/tenant.types';
 import type { UserRole } from '@/types/portal.types';
+import type { FormularioPerfilCampo } from '@/types/portal/formularios.types';
+import {
+  PERFIL_COMPLETO_SELECT,
+  getPerfilCamposFaltantes,
+  type PerfilCompletoRow,
+} from '@/lib/portal/perfil-completo';
 
 type TenantRow = {
   id: string;
@@ -28,6 +35,7 @@ type TenantRow = {
   x_url: string | null;
   max_solicitudes: number;
   requiere_perfil_completo: boolean;
+  publico: boolean;
   updated_at?: string | null;
 };
 
@@ -71,21 +79,60 @@ function mapTenantToEditFormValues(tenant: TenantRow): TenantEditFormValues {
     x_url: toEditableString(tenant.x_url),
     max_solicitudes: String(tenant.max_solicitudes ?? 2),
     requiere_perfil_completo: String(tenant.requiere_perfil_completo ?? false),
+    publico: String(tenant.publico ?? true),
   };
 }
 
 function mapCodeToMessage(code: TenantViewErrorCode): string {
   switch (code) {
     case 'UNAUTHENTICATED':
-      return 'No active session was found for this view.';
+      return 'No encontramos una sesión activa.';
     case 'PROFILE_NOT_FOUND':
-      return 'Unable to resolve your organization profile.';
+      return 'No tienes acceso a esta organización.';
     case 'TENANT_NOT_FOUND':
-      return 'Organization information is not available for this account.';
+      return 'La información de la organización no está disponible.';
     case 'UNKNOWN':
     default:
-      return 'Unable to load organization information right now.';
+      return 'No fue posible cargar la información de la organización.';
   }
+}
+
+/**
+ * Profile fields the member still owes a tenant that has `requiere_perfil_completo` (US-0136).
+ * Fails open: this is a data-completeness gate, so a failed read must not lock members out.
+ */
+async function resolvePerfilCamposFaltantes(
+  supabase: SupabaseClient,
+  userId: string,
+  tenantId: string,
+): Promise<FormularioPerfilCampo[]> {
+  const { data: tenant, error: tenantError } = await supabase
+    .from('tenants')
+    .select('requiere_perfil_completo')
+    .eq('id', tenantId)
+    .maybeSingle();
+
+  if (tenantError) {
+    console.error('[tenantService] No se pudo leer requiere_perfil_completo', tenantError);
+    return [];
+  }
+
+  if (!tenant?.requiere_perfil_completo) {
+    return [];
+  }
+
+  const { data: perfil, error: perfilError } = await supabase
+    .from('usuarios')
+    .select(PERFIL_COMPLETO_SELECT)
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (perfilError) {
+    console.error('[tenantService] No se pudo leer el perfil del usuario', perfilError);
+    return [];
+  }
+
+  return getPerfilCamposFaltantes(perfil as PerfilCompletoRow | null);
 }
 
 export const tenantService = {
@@ -127,7 +174,7 @@ export const tenantService = {
   async fetchTenantById(supabase: SupabaseClient, tenantId: string): Promise<TenantRow> {
     const { data, error } = await supabase
       .from('tenants')
-      .select('id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes, requiere_perfil_completo')
+      .select('id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes, requiere_perfil_completo, publico')
       .eq('id', tenantId)
       .single();
 
@@ -210,7 +257,26 @@ export const tenantService = {
         facebookUrl: tenant.facebook_url,
         xUrl: tenant.x_url,
       },
+      isPublic: tenant.publico ?? true,
     };
+  },
+
+  /**
+   * Number of members of a tenant, for the "Miembros" tile of the management identity card.
+   * Head-only count on `miembros_tenant` (readable by the tenant's administrators).
+   */
+  async countMiembros(tenantId: string): Promise<number> {
+    const supabase = createClient();
+    const { count, error } = await supabase
+      .from('miembros_tenant')
+      .select('usuario_id', { count: 'exact', head: true })
+      .eq('tenant_id', tenantId);
+
+    if (error) {
+      throw new Error('No fue posible contar los miembros de la organización.');
+    }
+
+    return count ?? 0;
   },
 
   async getTenantViewData(userId: string): Promise<TenantViewData> {
@@ -234,14 +300,23 @@ export const tenantService = {
     return (data as { max_solicitudes: number }).max_solicitudes ?? 2;
   },
 
-  async listVisibleTenantsForPortal(supabase: SupabaseClient): Promise<TenantRow[]> {
-    const { data, error } = await supabase
+  /** Public organizations plus the ones the user belongs to (US-0133). */
+  async listVisibleTenantsForPortal(
+    supabase: SupabaseClient,
+    memberTenantIds: string[],
+  ): Promise<TenantRow[]> {
+    const query = supabase
       .from('tenants')
       .select(
-        'id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes',
+        'id, nombre, descripcion, logo_url, banner_url, fecha_creacion, email, telefono, web_url, instagram_url, facebook_url, x_url, max_solicitudes, publico',
       )
-      .neq('nombre', 'public')
-      .order('fecha_creacion', { ascending: true });
+      .neq('nombre', 'public');
+
+    const { data, error } = await (
+      memberTenantIds.length > 0
+        ? query.or(`publico.eq.true,id.in.(${memberTenantIds.join(',')})`)
+        : query.eq('publico', true)
+    ).order('fecha_creacion', { ascending: true });
 
     if (error) {
       throw new Error('Tenant list not found');
@@ -272,6 +347,19 @@ export const tenantService = {
     }));
   },
 
+  async getTenantEntitlements(supabase: SupabaseClient, tenantId: string): Promise<AdminTenantEntitlements> {
+    const { data, error } = await supabase
+      .from('admin_tenants')
+      .select('aprovisionamiento_administrado_habilitado')
+      .eq('tenant_id', tenantId)
+      .maybeSingle();
+
+    return {
+      aprovisionamientoAdministradoHabilitado:
+        !error && data?.aprovisionamiento_administrado_habilitado === true,
+    };
+  },
+
   async canUserAccessTenant(
     supabase: SupabaseClient,
     userId: string,
@@ -279,7 +367,7 @@ export const tenantService = {
   ): Promise<TenantAccessDecision> {
     const { data, error } = await supabase
       .from('miembros_tenant')
-      .select('tenant_id, rol_id, roles(nombre)')
+      .select('tenant_id, rol_id, estado, roles(nombre)')
       .eq('usuario_id', userId)
       .eq('tenant_id', tenantId)
       .limit(1)
@@ -290,15 +378,34 @@ export const tenantService = {
         tenantId,
         allowed: false,
         role: null,
+        pendingActivation: false,
+        profileIncomplete: false,
+        profileMissingFields: [],
       };
     }
 
-    const row = data as MembershipWithRoleRow;
+    const row = data as MembershipWithRoleRow & { estado: string };
+
+    if (row.estado === 'pendiente_activacion') {
+      return {
+        tenantId,
+        allowed: false,
+        role: null,
+        pendingActivation: true,
+        profileIncomplete: false,
+        profileMissingFields: [],
+      };
+    }
+
+    const profileMissingFields = await resolvePerfilCamposFaltantes(supabase, userId, tenantId);
 
     return {
       tenantId,
       allowed: true,
       role: normalizeRole(toSingle(row.roles)?.nombre),
+      pendingActivation: false,
+      profileIncomplete: profileMissingFields.length > 0,
+      profileMissingFields,
     };
   },
 
@@ -321,6 +428,7 @@ export const tenantService = {
         },
         canAccess: Boolean(membership),
         userMembershipRole: membership?.role ?? null,
+        isPublic: tenant.publico,
       };
     });
   },

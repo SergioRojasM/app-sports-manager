@@ -37,9 +37,9 @@ export function SolicitudesTable({ rows, onAceptar, onRechazar, onBloquear }: So
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-portal-border">
+    <div className="overflow-x-auto rounded-grit-md border border-grit-glass-border">
       <table className="w-full text-left text-sm">
-        <thead className="glass border-b border-portal-border text-xs uppercase tracking-wider text-slate-400">
+        <thead className="border bg-grit-glass backdrop-blur-md border-b border-grit-glass-border text-xs uppercase tracking-wider text-grit-subtext">
           <tr>
             <th scope="col" className="px-4 py-3">Solicitante</th>
             <th scope="col" className="px-4 py-3">Correo</th>
@@ -48,12 +48,12 @@ export function SolicitudesTable({ rows, onAceptar, onRechazar, onBloquear }: So
             <th scope="col" className="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-portal-border">
+        <tbody className="divide-y divide-grit-glass-border">
           {rows.map((solicitud) => (
-            <tr key={solicitud.id} className="text-slate-200 hover:bg-navy-soft/40">
+            <tr key={solicitud.id} className="text-grit-text hover:bg-grit-cyan/10">
               <td className="whitespace-nowrap px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-portal-border bg-navy-soft">
+                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-grit-glass-border bg-grit-card">
                     {solicitud.foto_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -62,7 +62,7 @@ export function SolicitudesTable({ rows, onAceptar, onRechazar, onBloquear }: So
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span className="material-symbols-outlined text-sm text-slate-400" aria-hidden="true">
+                      <span className="material-symbols-outlined text-sm text-grit-subtext" aria-hidden="true">
                         person
                       </span>
                     )}
@@ -72,8 +72,8 @@ export function SolicitudesTable({ rows, onAceptar, onRechazar, onBloquear }: So
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-300">{solicitud.email}</td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-300">{formatDate(solicitud.created_at)}</td>
+              <td className="whitespace-nowrap px-4 py-3 text-grit-subtext">{solicitud.email}</td>
+              <td className="whitespace-nowrap px-4 py-3 text-grit-subtext">{formatDate(solicitud.created_at)}</td>
               <td className="whitespace-nowrap px-4 py-3">
                 <SolicitudEstadoBadge estado={solicitud.estado} />
               </td>
@@ -85,20 +85,20 @@ export function SolicitudesTable({ rows, onAceptar, onRechazar, onBloquear }: So
                       value={notaRevision}
                       onChange={(e) => setNotaRevision(e.target.value)}
                       placeholder="Nota de rechazo (opcional)"
-                      className="w-60 rounded-md border border-portal-border bg-navy-deep px-2 py-1 text-xs text-slate-200 placeholder:text-slate-500 focus:border-primary focus:outline-none"
+                      className="w-60 rounded-md border border-grit-glass-border bg-grit-bg px-2 py-1 text-xs text-grit-text placeholder:text-grit-muted focus:border-grit-cyan focus:outline-none"
                     />
                     <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={() => handleConfirmRechazar(solicitud)}
-                        className="rounded-md border border-rose-400/30 bg-rose-900/30 px-2.5 py-1 text-xs font-semibold text-rose-200 hover:bg-rose-900/50"
+                        className="rounded-md border border-grit-danger/30 bg-grit-danger/10 px-2.5 py-1 text-xs font-semibold text-grit-danger hover:bg-grit-danger/10"
                       >
                         Confirmar
                       </button>
                       <button
                         type="button"
                         onClick={handleCancelRechazar}
-                        className="rounded-md border border-portal-border px-2.5 py-1 text-xs font-semibold text-slate-300 hover:bg-navy-soft"
+                        className="rounded-md border border-grit-glass-border px-2.5 py-1 text-xs font-semibold text-grit-subtext hover:bg-grit-cyan/10"
                       >
                         Cancelar
                       </button>
@@ -116,7 +116,7 @@ export function SolicitudesTable({ rows, onAceptar, onRechazar, onBloquear }: So
                     <button
                       type="button"
                       onClick={() => setRechazandoId(solicitud.id)}
-                      className="rounded-md border border-rose-400/30 bg-rose-900/30 px-2.5 py-1 text-xs font-semibold text-rose-200 hover:bg-rose-900/50"
+                      className="rounded-md border border-grit-danger/30 bg-grit-danger/10 px-2.5 py-1 text-xs font-semibold text-grit-danger hover:bg-grit-danger/10"
                     >
                       Rechazar
                     </button>

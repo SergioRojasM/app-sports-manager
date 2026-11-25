@@ -59,7 +59,7 @@ export function VerDetallePagoModal({ row, onClose }: VerDetallePagoModalProps) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
@@ -68,62 +68,62 @@ export function VerDetallePagoModal({ row, onClose }: VerDetallePagoModalProps) 
         aria-modal="true"
         aria-label="Detalle de Pago"
         tabIndex={-1}
-        className="glass mx-4 w-full max-w-lg rounded-xl border border-portal-border p-6 shadow-2xl outline-none"
+        className="border bg-grit-glass backdrop-blur-md mx-4 w-full max-w-lg rounded-grit-2xl border-grit-glass-border p-6 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <h2 className="text-lg font-semibold text-slate-100">Detalle de Pago</h2>
-        <p className="mt-1 text-sm text-slate-400">
-          Suscripción de <strong className="text-slate-200">{row.atleta_nombre}</strong> al plan{' '}
-          <strong className="text-slate-200">{row.plan_nombre}</strong>
+        <h2 className="font-grit-title text-lg font-semibold text-grit-text">Detalle de Pago</h2>
+        <p className="mt-1 text-sm text-grit-subtext">
+          Suscripción de <strong className="text-grit-text">{row.atleta_nombre}</strong> al plan{' '}
+          <strong className="text-grit-text">{row.plan_nombre}</strong>
         </p>
 
         {/* Payment details */}
         {pago && (
-          <div className="mt-4 space-y-2 rounded-lg border border-portal-border bg-white/[0.02] p-4 text-sm">
+          <div className="mt-4 space-y-2 rounded-grit-2xl border border-grit-glass-border bg-white/[0.02] p-4 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">Monto</span>
-              <span className="font-medium text-slate-100">{formatCurrency(pago.monto)}</span>
+              <span className="text-grit-subtext">Monto</span>
+              <span className="font-medium text-grit-text">{formatCurrency(pago.monto)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Método de pago</span>
-              <span className="text-slate-200">
+              <span className="text-grit-subtext">Método de pago</span>
+              <span className="text-grit-text">
                 {pago.metodo_pago_nombre ?? pago.metodo_pago ?? '—'}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Estado</span>
+              <span className="text-grit-subtext">Estado</span>
               <PagoEstadoBadge estado={pago.estado} />
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Fecha de pago</span>
-              <span className="text-slate-200">{formatDate(pago.fecha_pago)}</span>
+              <span className="text-grit-subtext">Fecha de pago</span>
+              <span className="text-grit-text">{formatDate(pago.fecha_pago)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Validado por</span>
-              <span className="text-slate-200">{pago.validado_por_nombre ?? '—'}</span>
+              <span className="text-grit-subtext">Validado por</span>
+              <span className="text-grit-text">{pago.validado_por_nombre ?? '—'}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Fecha de validación</span>
-              <span className="text-slate-200">{formatDate(pago.fecha_validacion)}</span>
+              <span className="text-grit-subtext">Fecha de validación</span>
+              <span className="text-grit-text">{formatDate(pago.fecha_validacion)}</span>
             </div>
           </div>
         )}
 
         {/* Comprobante section */}
-        <div className="mt-3 rounded-lg border border-portal-border bg-white/[0.02] p-4">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-400">
+        <div className="mt-3 rounded-grit-2xl border border-grit-glass-border bg-white/[0.02] p-4">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-grit-subtext">
             Comprobante
           </p>
 
           {!pago?.comprobante_path ? (
-            <p className="text-sm text-slate-400">No se ha subido comprobante para este pago.</p>
+            <p className="text-sm text-grit-subtext">No se ha subido comprobante para este pago.</p>
           ) : comprobanteLoading ? (
             <div className="flex h-20 items-center justify-center">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-500 border-t-turquoise" />
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-grit-glass-border border-t-grit-cyan" />
             </div>
           ) : comprobanteError ? (
-            <p className="text-sm text-slate-400">{comprobanteError}</p>
+            <p className="text-sm text-grit-subtext">{comprobanteError}</p>
           ) : signedUrl ? (
             <div className="space-y-3">
               {/* Image preview */}
@@ -132,16 +132,16 @@ export function VerDetallePagoModal({ row, onClose }: VerDetallePagoModalProps) 
                   <img
                     src={signedUrl}
                     alt="Comprobante de pago"
-                    className="max-h-52 rounded border border-portal-border object-contain"
+                    className="max-h-52 rounded border border-grit-glass-border object-contain"
                   />
                 </a>
               )}
 
               {/* PDF indicator */}
               {isPdfPath(pago.comprobante_path) && (
-                <div className="flex items-center gap-2 text-sm text-slate-300">
+                <div className="flex items-center gap-2 text-sm text-grit-subtext">
                   <svg
-                    className="h-5 w-5 text-rose-400"
+                    className="h-5 w-5 text-grit-danger"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -164,7 +164,7 @@ export function VerDetallePagoModal({ row, onClose }: VerDetallePagoModalProps) 
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Ver comprobante de pago"
-                  className="text-sm text-turquoise underline hover:text-turquoise/80"
+                  className="text-sm text-grit-cyan underline hover:text-grit-cyan/80"
                 >
                   Ver comprobante
                 </a>
@@ -178,7 +178,7 @@ export function VerDetallePagoModal({ row, onClose }: VerDetallePagoModalProps) 
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-portal-border px-4 py-2 text-sm text-slate-300 transition-colors hover:bg-white/5"
+            className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm text-grit-subtext transition-colors hover:bg-white/5"
           >
             Cerrar
           </button>

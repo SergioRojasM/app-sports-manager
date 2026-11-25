@@ -7,15 +7,15 @@ import { entrenamientoCategoriasService } from '@/services/supabase/portal/entre
 import { nivelDisciplinaService } from '@/services/supabase/portal/nivel-disciplina.service';
 import { reservasService } from '@/services/supabase/portal/reservas.service';
 import { formulariosService } from '@/services/supabase/portal/formularios.service';
-import { entrenamientosPublicosService } from '@/services/supabase/portal/entrenamientos-publicos.service';
 import { useEntrenamientoForm } from './useEntrenamientoForm';
 import { useEntrenamientoScope } from './useEntrenamientoScope';
-import { useEntrenamientosCalendar } from './useEntrenamientosCalendar';
+import { useEntrenamientosCalendar, type EntrenamientosCalendarState } from './useEntrenamientosCalendar';
 import { useEntrenamientoCategorias } from './useEntrenamientoCategorias';
 import { useEntrenamientoPlantillas } from './useEntrenamientoPlantillas';
 import {
   TrainingServiceError,
   type CategoriasFormState,
+  type EntrenamientosVista,
   type SelectOption,
   type TrainingCalendarItem,
   type TrainingFormularioFormState,
@@ -31,7 +31,11 @@ import type { EntrenamientoCategoria } from '@/types/portal/entrenamiento-catego
 import type { EntrenamientoRestriccion, EntrenamientoRestriccionInput, EntrenamientoGrupoRestriccionInput } from '@/types/portal/entrenamiento-restricciones.types';
 import type { EntrenamientoPlantilla, EntrenamientoPlantillaContenido } from '@/types/portal/entrenamiento-plantillas.types';
 
+const LOAD_ERROR = 'No fue posible cargar los entrenamientos de la organización.';
+
 type UseEntrenamientosOptions = {
+  /** Initial calendar view, e.g. from `?vista=` (US-0142). */
+  initialVista?: EntrenamientosVista;
   tenantId: string;
 };
 
@@ -63,8 +67,11 @@ type UseEntrenamientosResult = {
   disciplinas: SelectOption[];
   escenarios: SelectOption[];
   entrenadores: SelectOption[];
-  monthLabel: string;
-  monthStartDate: string;
+  /** Period, view and selected day of the calendar (US-0142). */
+  calendar: EntrenamientosCalendarState;
+  /** Instances of the visible period are loading (catalogs already loaded). */
+  instancesLoading: boolean;
+  instancesError: string | null;
   formOpen: boolean;
   formMode: 'create' | 'edit';
   isEditingSingleInstance: boolean;
@@ -77,8 +84,6 @@ type UseEntrenamientosResult = {
   ruleErrors: ReturnType<typeof useEntrenamientoForm>['ruleErrors'];
   selectedInstanceId: string | null;
   setSelectedInstanceId: (id: string | null) => void;
-  goToNextMonth: () => void;
-  goToPreviousMonth: () => void;
   refresh: () => Promise<void>;
   openCreateModal: () => void;
   requestEditGroup: (group: TrainingGroupWithDetails) => void;
@@ -146,8 +151,6 @@ type UseEntrenamientosResult = {
   viewLoading: boolean;
   requestViewInstance: (instance: TrainingInstance) => void;
   closeViewModal: () => void;
-  // Public training marketplace publishing
-  publishedEntrenamientoIds: Set<string>;
 };
 
 const EMPTY_SUCCESS: string | null = null;
@@ -291,7 +294,6 @@ function buildPlantillaContenidoFromInstance(
     entrenador_id: instance.entrenador_id ?? '',
     duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
     cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
-    visibilidad: instance.visibilidad ?? 'privado',
     categorias: {
       enabled: categorias.length > 0,
       items: categorias.map((c) => ({ nivel_id: c.nivel_id, cupos_asignados: c.cupos_asignados })),
@@ -351,7 +353,6 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues, formula
 
     return {
       tenantId,
-      visibilidad: values.visibilidad,
       group: {
         tipo: 'unico' as const,
         nombre: values.nombre.trim() || 'Entrenamiento único',
@@ -392,7 +393,6 @@ function toCreatePayload(tenantId: string, values: TrainingWizardValues, formula
 
   return {
     tenantId,
-    visibilidad: values.visibilidad,
     group: {
       tipo: 'recurrente' as const,
       nombre: values.nombre.trim() || 'Serie de entrenamiento',
@@ -450,9 +450,12 @@ function toUpdateRules(values: TrainingWizardValues) {
     }));
 }
 
-export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEntrenamientosResult {
+export function useEntrenamientos({ tenantId, initialVista }: UseEntrenamientosOptions): UseEntrenamientosResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [instancesLoading, setInstancesLoading] = useState(true);
+  const [instancesError, setInstancesError] = useState<string | null>(null);
+  const instancesRequestRef = useRef(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(EMPTY_SUCCESS);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -464,7 +467,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const [entrenadores, setEntrenadores] = useState<SelectOption[]>([]);
   const [servicios, setServicios] = useState<SelectOption[]>([]);
   const [formulariosPlantillas, setFormulariosPlantillas] = useState<FormularioPlantillaListItem[]>([]);
-  const [publishedEntrenamientoIds, setPublishedEntrenamientoIds] = useState<Set<string>>(new Set());
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -481,7 +483,9 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const plantillaContenidoSourceRef = useRef<'form' | 'view'>('form');
   const form = useEntrenamientoForm();
   const scope = useEntrenamientoScope();
-  const calendar = useEntrenamientosCalendar();
+  const calendar = useEntrenamientosCalendar({ initialVista });
+  const periodoFrom = calendar.periodo.from;
+  const periodoTo = calendar.periodo.to;
   const instanciaCategorias = useEntrenamientoCategorias({ entrenamientoId: selectedInstanceId });
   const plantillas = useEntrenamientoPlantillas();
 
@@ -491,7 +495,8 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     return instances.map((instance) => toTrainingCalendarItem(instance, groupsById));
   }, [groupsById, instances]);
 
-  const loadAll = useCallback(async () => {
+  // Catalogs: loaded once per tenant (US-0142). Period changes only reload instances.
+  const loadCatalogos = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -504,15 +509,13 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         throw new Error('No active session');
       }
 
-      const [groupsData, instancesData, disciplinasData, escenariosData, entrenadoresData, serviciosData, formulariosPlantillasData, publishedIdsData] = await Promise.all([
+      const [groupsData, disciplinasData, escenariosData, entrenadoresData, serviciosData, formulariosPlantillasData] = await Promise.all([
         entrenamientosService.listTrainingGroupsByTenant(tenantId),
-        entrenamientosService.listTrainingInstancesByTenantAndRange(tenantId, calendar.range.from, calendar.range.to),
         entrenamientosService.listDisciplineOptions(tenantId),
         entrenamientosService.listScenarioOptions(tenantId),
         entrenamientosService.listTrainerOptions(tenantId),
         entrenamientosService.listServicioOptions(tenantId),
         formulariosService.getPlantillasByTenant(tenantId).catch(() => []),
-        entrenamientosPublicosService.listPublishedEntrenamientoIds(tenantId).catch(() => new Set<string>()),
       ]);
 
       setGroups(groupsData);
@@ -526,44 +529,69 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           .slice()
           .sort((a, b) => a.nombre.localeCompare(b.nombre)),
       );
-      setPublishedEntrenamientoIds(publishedIdsData);
-
-      // Enrich instances with reservas_activas count (batch, not N+1)
-      const capacidades = await Promise.all(
-        instancesData.map((inst) =>
-          reservasService.getCapacidad(tenantId, inst.id).catch(() => null),
-        ),
-      );
-
-      const enrichedInstances = instancesData.map((inst, index) => ({
-        ...inst,
-        reservas_activas: capacidades[index]?.reservas_activas ?? undefined,
-      }));
-
-      setInstances(enrichedInstances);
     } catch {
       setGroups([]);
-      setInstances([]);
-      setError('No fue posible cargar los entrenamientos de la organización.');
+      setError(LOAD_ERROR);
     } finally {
       setLoading(false);
     }
-  }, [calendar.range.from, calendar.range.to, supabase, tenantId]);
+  }, [supabase, tenantId]);
+
+  // Instances of the visible period, enriched with reservas_activas. Stale responses
+  // (the user moved to another period meanwhile) are dropped.
+  const loadInstancias = useCallback(async () => {
+    const requestId = ++instancesRequestRef.current;
+    setInstancesLoading(true);
+    setInstancesError(null);
+
+    try {
+      const instancesData = await entrenamientosService.listTrainingInstancesByTenantAndRange(tenantId, periodoFrom, periodoTo);
+
+      const capacidades = await Promise.all(
+        instancesData.map((inst) => reservasService.getCapacidad(tenantId, inst.id).catch(() => null)),
+      );
+
+      if (requestId !== instancesRequestRef.current) return;
+
+      setInstances(
+        instancesData.map((inst, index) => ({
+          ...inst,
+          reservas_activas: capacidades[index]?.reservas_activas ?? undefined,
+        })),
+      );
+    } catch {
+      if (requestId !== instancesRequestRef.current) return;
+      setInstances([]);
+      setInstancesError(LOAD_ERROR);
+    } finally {
+      if (requestId === instancesRequestRef.current) setInstancesLoading(false);
+    }
+  }, [periodoFrom, periodoTo, tenantId]);
+
+  /** After mutations and on "Reintentar": series (for group names) + the current period. */
+  const loadAll = useCallback(async () => {
+    const reloadGroups = error
+      ? loadCatalogos()
+      : entrenamientosService
+          .listTrainingGroupsByTenant(tenantId)
+          .then(setGroups)
+          .catch(() => undefined);
+    await Promise.all([reloadGroups, loadInstancias()]);
+  }, [error, loadCatalogos, loadInstancias, tenantId]);
 
   useEffect(() => {
-    let mounted = true;
-
     const execute = async () => {
-      if (!mounted) return;
-      await loadAll();
+      await loadCatalogos();
     };
-
     void execute();
+  }, [loadCatalogos]);
 
-    return () => {
-      mounted = false;
+  useEffect(() => {
+    const execute = async () => {
+      await loadInstancias();
     };
-  }, [loadAll]);
+    void execute();
+  }, [loadInstancias]);
 
   // Check discipline levels when disciplina_id changes
   useEffect(() => {
@@ -727,7 +755,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
   const prepareEditFromGroup = useCallback(
     (group: TrainingGroupWithDetails, selectedScope: TrainingScope) => {
       const recurringDefaults = getRecurringDefaultsFromRules(group.reglas);
-      const firstGroupInstance = instances.find((inst) => inst.entrenamiento_grupo_id === group.id);
 
       const values: TrainingWizardValues = {
         nombre: group.nombre,
@@ -739,7 +766,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenador_id: group.entrenador_id ?? '',
         duracion_minutos: group.duracion_minutos != null ? String(group.duracion_minutos) : '',
         cupo_maximo: group.cupo_maximo != null ? String(group.cupo_maximo) : '',
-        visibilidad: firstGroupInstance?.visibilidad ?? 'privado',
         tipo: group.tipo,
         fecha_inicio: group.fecha_inicio,
         fecha_fin: group.fecha_fin ?? '',
@@ -793,7 +819,7 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
       setSuccessMessage(null);
       setFormOpen(true);
     },
-    [form, instances, tenantId],
+    [form, tenantId],
   );
 
   const prepareEditFromInstance = useCallback(
@@ -815,7 +841,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           entrenador_id: instance.entrenador_id ?? '',
           duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
           cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
-          visibilidad: instance.visibilidad ?? 'privado',
           tipo: 'unico',
           fecha_inicio: dateOnly,
           fecha_fin: '',
@@ -879,7 +904,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
         entrenador_id: instance.entrenador_id ?? '',
         duracion_minutos: instance.duracion_minutos != null ? String(instance.duracion_minutos) : '',
         cupo_maximo: instance.cupo_maximo != null ? String(instance.cupo_maximo) : '',
-        visibilidad: instance.visibilidad ?? 'privado',
         tipo: relatedGroup?.tipo ?? 'unico',
         fecha_inicio: relatedGroup?.fecha_inicio ?? (instance.fecha_hora ? toDateOnlyFromIso(instance.fecha_hora) : ''),
         fecha_fin: relatedGroup?.fecha_fin ?? '',
@@ -1083,7 +1107,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
           tenantId,
           trainingGroupId: editTarget.trainingGroupId,
           scope: editTarget.scope === 'single' ? 'future' : editTarget.scope,
-          visibilidad: form.formValues.visibilidad,
           effectiveFrom: editTarget.effectiveFrom,
           groupPatch: {
             ...toUpdatePatch(form.formValues, form.formularioForm),
@@ -1106,7 +1129,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             trainingGroupId: editTarget.trainingGroupId,
             effectiveFrom: editTarget.effectiveFrom,
             scope: 'single',
-            visibilidad: form.formValues.visibilidad,
             patch: {
               ...toUpdatePatch(form.formValues, form.formularioForm),
               fecha_hora: form.formValues.fecha_hora_unico ? toBogotaIsoFromLocalInput(form.formValues.fecha_hora_unico) : null,
@@ -1137,7 +1159,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
             tenantId,
             trainingGroupId: editTarget.trainingGroupId,
             scope: editTarget.scope,
-            visibilidad: form.formValues.visibilidad,
             effectiveFrom: editTarget.effectiveFrom,
             groupPatch: {
               ...toUpdatePatch(form.formValues, form.formularioForm),
@@ -1179,8 +1200,9 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     disciplinas,
     escenarios,
     entrenadores,
-    monthLabel: calendar.range.label,
-    monthStartDate: calendar.range.from,
+    calendar,
+    instancesLoading,
+    instancesError,
     formOpen,
     formMode,
     isEditingSingleInstance: formMode === 'edit' && editTarget?.source === 'instance' && editTarget.scope === 'single',
@@ -1193,8 +1215,6 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     ruleErrors: form.ruleErrors,
     selectedInstanceId,
     setSelectedInstanceId,
-    goToNextMonth: calendar.goToNextMonth,
-    goToPreviousMonth: calendar.goToPreviousMonth,
     refresh: loadAll,
     openCreateModal,
     requestEditGroup,
@@ -1262,7 +1282,5 @@ export function useEntrenamientos({ tenantId }: UseEntrenamientosOptions): UseEn
     viewLoading,
     requestViewInstance,
     closeViewModal,
-    // Public training marketplace publishing
-    publishedEntrenamientoIds,
   };
 }

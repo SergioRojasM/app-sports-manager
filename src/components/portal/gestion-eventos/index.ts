@@ -1,0 +1,1 @@
+export { GestionEventosPage } from './GestionEventosPage';

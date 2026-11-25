@@ -43,7 +43,7 @@ export function SolicitudesTab({
 
   if (loading) {
     return (
-      <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+      <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
         Cargando solicitudes...
       </div>
     );
@@ -51,11 +51,11 @@ export function SolicitudesTab({
 
   if (error) {
     return (
-      <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-        <p className="text-sm text-rose-200">{error}</p>
+      <div className="border backdrop-blur-md rounded-grit-2xl border-grit-danger/25 bg-grit-danger/10 p-6">
+        <p className="text-sm text-grit-danger">{error}</p>
         <button
           type="button"
-          className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
+          className="mt-4 rounded-grit-md border border-grit-danger/30 px-3 py-2 text-xs font-semibold text-grit-danger"
           onClick={() => void refresh()}
         >
           Reintentar
@@ -66,7 +66,7 @@ export function SolicitudesTab({
 
   if (solicitudes.length === 0) {
     return (
-      <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+      <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
         No hay solicitudes pendientes.
       </div>
     );

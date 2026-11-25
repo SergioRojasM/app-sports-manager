@@ -59,21 +59,21 @@ export function AsistenciaFormModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label={`Verificar asistencia — ${atletaNombre}`}
     >
-      <div className="w-full max-w-md rounded-xl border border-portal-border bg-navy-medium p-6 shadow-2xl">
-        <h2 className="mb-5 text-lg font-semibold text-slate-100">
+      <div className="w-full max-w-md rounded-grit-lg border border-grit-glass-border bg-grit-card p-6 shadow-2xl">
+        <h2 className="font-grit-title mb-5 text-lg font-semibold text-grit-text">
           Verificar Asistencia —{' '}
-          <span className="text-turquoise">{atletaNombre}</span>
+          <span className="text-grit-cyan">{atletaNombre}</span>
         </h2>
 
         {confirmingDelete ? (
           /* ── Delete confirmation step ── */
           <div className="space-y-4">
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-grit-subtext">
               ¿Estás seguro de que deseas eliminar este registro de asistencia? Esta acción no se puede
               deshacer.
             </p>
@@ -82,7 +82,7 @@ export function AsistenciaFormModal({
                 type="button"
                 onClick={handleDeleteCancel}
                 disabled={saving}
-                className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40"
+                className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-medium text-grit-subtext hover:bg-grit-cyan/10"
               >
                 Cancelar
               </button>
@@ -90,7 +90,7 @@ export function AsistenciaFormModal({
                 type="button"
                 onClick={handleDeleteConfirm}
                 disabled={saving}
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-50"
+                className="rounded-grit-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-50"
               >
                 {saving ? 'Eliminando...' : 'Confirmar eliminación'}
               </button>
@@ -101,13 +101,13 @@ export function AsistenciaFormModal({
           <form onSubmit={handleSave} className="space-y-5">
             {/* Asistio toggle */}
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-slate-300">¿Asistió al entrenamiento?</legend>
+              <legend className="mb-2 text-sm font-medium text-grit-subtext">¿Asistió al entrenamiento?</legend>
               <div className="flex gap-3">
                 <label
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-grit-md border px-4 py-2.5 text-sm font-medium transition-colors ${
                     asistio
                       ? 'border-emerald-400/60 bg-emerald-900/30 text-emerald-200'
-                      : 'border-portal-border bg-navy-deep text-slate-400 hover:border-slate-500'
+                      : 'border-grit-glass-border bg-grit-bg text-grit-subtext hover:border-grit-glass-border'
                   }`}
                 >
                   <input
@@ -125,10 +125,10 @@ export function AsistenciaFormModal({
                 </label>
 
                 <label
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors ${
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-grit-md border px-4 py-2.5 text-sm font-medium transition-colors ${
                     !asistio
-                      ? 'border-rose-400/60 bg-rose-900/30 text-rose-300'
-                      : 'border-portal-border bg-navy-deep text-slate-400 hover:border-slate-500'
+                      ? 'border-grit-danger/60 bg-grit-danger/10 text-grit-danger'
+                      : 'border-grit-glass-border bg-grit-bg text-grit-subtext hover:border-grit-glass-border'
                   }`}
                 >
                   <input
@@ -149,8 +149,8 @@ export function AsistenciaFormModal({
 
             {/* Observaciones */}
             <div>
-              <label htmlFor="asistencia-observaciones" className="mb-1 block text-sm font-medium text-slate-300">
-                Observaciones <span className="text-slate-500">(opcional)</span>
+              <label htmlFor="asistencia-observaciones" className="mb-1 block text-sm font-medium text-grit-subtext">
+                Observaciones <span className="text-grit-muted">(opcional)</span>
               </label>
               <textarea
                 id="asistencia-observaciones"
@@ -159,10 +159,10 @@ export function AsistenciaFormModal({
                 disabled={saving}
                 rows={3}
                 maxLength={500}
-                className="w-full rounded-lg border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-turquoise focus:outline-none"
+                className="w-full rounded-grit-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text placeholder:text-grit-muted focus:border-grit-cyan focus:outline-none"
                 placeholder="Notas del entrenador sobre esta asistencia..."
               />
-              <p className="mt-1 text-right text-[10px] text-slate-500">{observaciones.length}/500</p>
+              <p className="mt-1 text-right text-[10px] text-grit-muted">{observaciones.length}/500</p>
             </div>
 
             {/* Footer actions */}
@@ -173,7 +173,7 @@ export function AsistenciaFormModal({
                     type="button"
                     onClick={handleDeleteClick}
                     disabled={saving}
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 disabled:opacity-50"
+                    className="rounded-grit-md px-3 py-2 text-sm font-medium text-grit-danger hover:bg-rose-500/15 hover:text-grit-danger disabled:opacity-50"
                   >
                     Eliminar registro
                   </button>
@@ -185,14 +185,14 @@ export function AsistenciaFormModal({
                   type="button"
                   onClick={onClose}
                   disabled={saving}
-                  className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40"
+                  className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-medium text-grit-subtext hover:bg-grit-cyan/10"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
+                  className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg hover:bg-grit-cyan/90 disabled:opacity-50"
                 >
                   {saving ? 'Guardando...' : 'Guardar'}
                 </button>

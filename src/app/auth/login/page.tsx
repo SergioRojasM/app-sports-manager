@@ -14,7 +14,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const nextPath = rawNext && rawNext.startsWith("/") ? rawNext : "/portal";
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-navy-deep md:flex-row">
+    <div className="flex h-screen w-full flex-col overflow-auto bg-navy-deep md:flex-row">
       <LoginBenefitsPanel />
       <LoginCard>
         <LoginForm nextPath={nextPath} />

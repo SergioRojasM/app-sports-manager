@@ -17,6 +17,36 @@
   --landing-text-muted: #7f8ea3;
   --landing-border: #213247;
   --landing-divider: #1a293a;
+  /* grit-arena-v3 design tokens (US-0141) — mirror projectspec/designs/pencil/grit-arena-v3.pen
+     (variables $canvas, $ink*, $line, $brand*, $on-brand + component board ljQp3).
+     Names are kept from v2 so every consumer picks up the new values. Portal code uses these. */
+  --grit-bg-navy: #080c10; /* $canvas */
+  --grit-accent-cyan: #14dbc4; /* $brand */
+  --grit-accent-cyan-light: #2be3d0; /* $brand-deep — hover of cyan fills */
+  --grit-accent-teal: #0fa3ab;
+  --grit-text-primary: #f3f7f8; /* $ink */
+  --grit-text-subtext: #b3bfc5; /* $ink-2 */
+  --grit-text-muted: #8593a0; /* $ink-3 */
+  --grit-glass-fill: rgba(17, 26, 33, 0.85);
+  --grit-glass-border: rgba(255, 255, 255, 0.12); /* neutral hairline (was cyan in v2) */
+  --grit-card-fill: rgba(17, 26, 33, 0.8);
+  --grit-sidebar-fill: #0b1116;
+  --grit-success: #3ddc97;
+  --grit-danger: #ff8a80;
+  --grit-on-brand: #04121a; /* $on-brand — text/icons on cyan fills */
+  --grit-line: #1f2a31; /* $line — opaque hairline */
+  --grit-surface: #111a21; /* card gradient start */
+  --grit-surface-deep: #0b1116; /* card gradient end */
+  --grit-surface-accent: #14302d; /* highlighted card gradient start */
+  --grit-warning: #ffc46b;
+  --grit-violet: #b9a3ff;
+  --grit-avatar-fill: #1e3a3f;
+  --grit-discipline-swim: #14dbc4;
+  --grit-discipline-cycle: #0fa3ab;
+  --grit-discipline-run: #f2b84b;
+  --grit-discipline-strength: #b98aff;
+  --grit-discipline-functional: #ff6b6b;
+  --grit-discipline-mobility: #6bcb77;
   color-scheme: dark;
 }
 
@@ -52,10 +82,63 @@ body {
   font-family: var(--font-montserrat), sans-serif;
 }
 
-/* Portal sidebar active nav item */
-.sidebar-item-active {
-  background: linear-gradient(90deg, rgba(0, 229, 196, 0.15) 0%, rgba(22, 30, 46, 0) 100%);
-  border-left: 3px solid #00e5c4;
+/* grit-arena-v3 shell background: $canvas + the screen frames' two radial fills —
+   cyan glow toward the bottom-right, faint white glow at the top (US-0141) */
+.grit-shell {
+  background:
+    radial-gradient(ellipse 120% 130% at 95% 95%, rgba(20, 219, 196, 0.12), transparent 60%),
+    radial-gradient(ellipse 100% 80% at 30% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
+    var(--grit-bg-navy);
+  color: var(--grit-text-primary);
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+/* Thin neutral scrollbar for the portal sidebar / drawer navigation (US-0138, v3 US-0141) */
+.grit-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.14) transparent;
+}
+
+.grit-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.grit-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.grit-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.14);
+  border-radius: 2px;
+}
+
+/* Chevron for gritPillSelectClass (v3 Dropdown Filter); stroke = --grit-text-muted (US-0141) */
+.grit-select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238593A0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 14px;
+}
+
+/* Check-in scanner line (xjlmU `Hv9G9`): sweeps the 170px QR frame; static mid-frame under reduced motion */
+@keyframes grit-scan {
+  0%,
+  100% {
+    transform: translateY(-64px);
+  }
+  50% {
+    transform: translateY(64px);
+  }
+}
+
+.grit-scan-line {
+  animation: grit-scan 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grit-scan-line {
+    animation: none;
+  }
 }
 
 .material-symbols-outlined {
@@ -146,79 +229,14 @@ body {
     color: var(--landing-primary-light);
   }
 
-  .landing-hero-overlay {
-    background:
-      radial-gradient(circle at 18% 42%, rgba(7, 17, 31, 0.56) 0%, rgba(7, 17, 31, 0.32) 24%, rgba(7, 17, 31, 0.08) 50%, rgba(7, 17, 31, 0) 70%),
-      linear-gradient(90deg, rgba(7, 17, 31, 0.38) 0%, rgba(7, 17, 31, 0.22) 34%, rgba(7, 17, 31, 0.06) 62%, rgba(7, 17, 31, 0.28) 100%),
-      linear-gradient(180deg, rgba(7, 17, 31, 0.08) 0%, rgba(7, 17, 31, 0.38) 100%);
-  }
-
-  .landing-hero-glow {
-    background: radial-gradient(circle at center, rgba(20, 219, 196, 0.22) 0%, rgba(20, 219, 196, 0) 68%);
-  }
-
   .landing-panel {
     border: 1px solid rgba(33, 50, 71, 0.9);
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(19, 32, 52, 0.82) 100%);
     backdrop-filter: blur(14px);
   }
-
-  .landing-value-item {
-    border: 1px solid rgba(33, 50, 71, 0.95);
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(22, 35, 56, 0.9) 100%);
-    backdrop-filter: blur(10px);
-  }
-
-  .landing-reveal {
-    transition:
-      opacity 700ms ease-out,
-      transform 700ms ease-out;
-  }
-
-  .landing-operation-mockup {
-    border: 1px solid rgba(33, 50, 71, 0.9);
-    border-radius: 24px;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(20, 219, 196, 0.14) 0%, rgba(20, 219, 196, 0) 55%),
-      linear-gradient(180deg, rgba(19, 32, 52, 0.8) 0%, rgba(9, 20, 35, 0.9) 100%);
-  }
-
-  .landing-operation-image-pop {
-    transform: perspective(1200px) rotateY(-8deg) rotateX(4deg) rotateZ(-2deg);
-    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 24px rgba(20, 219, 196, 0.08));
-    transition: transform 500ms ease-out;
-  }
-
-  .landing-operation-image-pop:hover {
-    transform: perspective(1200px) rotateY(-3deg) rotateX(1.5deg) rotateZ(-0.5deg);
-  }
-
-  @media (max-width: 639px) {
-    .landing-operation-image-pop,
-    .landing-operation-image-pop:hover {
-      transform: perspective(1200px) rotateY(-4deg) rotateX(2deg) rotateZ(-1deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .landing-reveal,
-    .landing-operation-image-pop {
-      transition: none;
-    }
-
-    .landing-reveal {
-      opacity: 1 !important;
-      transform: none !important;
-    }
-  }
-
-  .landing-step-connector {
-    height: 1px;
-    width: 28px;
-    background: rgba(33, 50, 71, 0.5);
-  }
 }
 
+/* @deprecated for Portal code (US-0116) — use <GritCard> from @/components/ui instead of .glass / .glass-card */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
@@ -273,3 +291,37 @@ body {
   }
 }
 
+
+/* App home events ribbon (US-0140): seamless marquee over a duplicated track */
+@keyframes home-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.home-marquee {
+  animation: home-marquee var(--home-marquee-duration, 60s) linear infinite;
+}
+
+.home-marquee-wrap:hover .home-marquee,
+.home-marquee-wrap:focus-within .home-marquee {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-marquee {
+    animation: none;
+  }
+
+  .home-marquee-copy {
+    display: none;
+  }
+
+  .home-marquee-wrap {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+}

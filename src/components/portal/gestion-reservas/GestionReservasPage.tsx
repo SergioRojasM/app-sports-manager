@@ -34,8 +34,8 @@ export function GestionReservasPage({ tenantId }: GestionReservasPageProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-white">Gestión de Reservas</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="font-grit-title text-3xl font-bold leading-tight text-grit-text sm:text-[36px]">Gestión de Reservas</h1>
+          <p className="text-sm text-grit-subtext">
             Consulta y filtra las reservas de entrenamientos de la organización.
           </p>
         </div>
@@ -43,7 +43,7 @@ export function GestionReservasPage({ tenantId }: GestionReservasPageProps) {
           type="button"
           onClick={exportCsv}
           disabled={resultCount === 0}
-          className="inline-flex items-center gap-2 rounded-lg border border-portal-border px-4 py-2 text-xs font-medium text-slate-300 transition-colors hover:border-slate-500 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 rounded-grit-md border border-grit-glass-border px-4 py-2 text-xs font-medium text-grit-subtext transition-colors hover:border-grit-glass-border hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined text-base">download</span>
           Exportar CSV
@@ -62,7 +62,7 @@ export function GestionReservasPage({ tenantId }: GestionReservasPageProps) {
 
       {/* Info banner */}
       {!loading && !error && (
-        <div className="rounded-lg border border-sky-500/30 bg-sky-950/30 px-4 py-2.5 text-xs text-sky-300">
+        <div className="rounded-grit-md border border-sky-500/30 bg-sky-950/30 px-4 py-2.5 text-xs text-sky-300">
           {hasActiveFilters
             ? `Mostrando ${resultCount} reservas encontradas.`
             : resultCount > 0
@@ -73,12 +73,12 @@ export function GestionReservasPage({ tenantId }: GestionReservasPageProps) {
 
       {/* Error state */}
       {error && (
-        <div className="glass rounded-lg border border-rose-500/30 p-6 text-sm text-rose-300">
+        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-danger/30 p-6 text-sm text-grit-danger">
           <p>{error}</p>
           <button
             type="button"
             onClick={applyFilters}
-            className="mt-3 rounded-lg border border-rose-500/40 px-3 py-1 text-xs text-rose-300 transition-colors hover:border-rose-400 hover:text-rose-200"
+            className="mt-3 rounded-grit-md border border-grit-danger/40 px-3 py-1 text-xs text-grit-danger transition-colors hover:border-grit-danger/40 hover:text-grit-danger"
           >
             Reintentar
           </button>
@@ -87,14 +87,14 @@ export function GestionReservasPage({ tenantId }: GestionReservasPageProps) {
 
       {/* Loading state */}
       {loading && (
-        <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
           Cargando reservas...
         </div>
       )}
 
       {/* Empty state (no error, not loading, no results) */}
       {!loading && !error && resultCount === 0 && (
-        <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
+        <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-6 text-sm text-grit-subtext">
           No se encontraron reservas para esta organización.
         </div>
       )}

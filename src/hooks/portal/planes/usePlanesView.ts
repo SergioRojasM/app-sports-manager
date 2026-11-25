@@ -5,7 +5,13 @@ import { createClient } from '@/services/supabase/client';
 import { planesService } from '@/services/supabase/portal/planes.service';
 import { disciplinesService } from '@/services/supabase/portal/disciplines.service';
 import type { Discipline } from '@/types/portal/disciplines.types';
-import type { PlanWithDisciplinas, PlanTableItem, PlanTipo } from '@/types/portal/planes.types';
+import {
+  PLAN_ESTADO_LABELS,
+  getPlanEstado,
+  type PlanWithDisciplinas,
+  type PlanTableItem,
+  type PlanTipo,
+} from '@/types/portal/planes.types';
 
 type UsePlanesViewOptions = {
   tenantId: string;
@@ -16,10 +22,11 @@ type UsePlanesViewResult = {
   error: string | null;
   planes: PlanTableItem[];
   disciplines: Discipline[];
+  refresh: () => Promise<void>;
 };
 
 function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): PlanTableItem {
-  const status = plan.activo ? 'Activo' : 'Inactivo';
+  const estado = getPlanEstado(plan);
 
   // Derive vigenciaLabel from active plan_tipos
   const activeTipos = (plan.plan_tipos ?? []).filter((t) => t.activo);
@@ -39,7 +46,8 @@ function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): P
 
   return {
     ...plan,
-    statusLabel: status,
+    estado,
+    statusLabel: PLAN_ESTADO_LABELS[estado],
     vigenciaLabel: vigencia,
     disciplinaNames,
   };
@@ -77,8 +85,9 @@ export function usePlanesView({ tenantId }: UsePlanesViewOptions): UsePlanesView
         disciplinesService.listDisciplinesByTenant(tenantId),
       ]);
 
-      // Filter only active plans for non-admin view
-      const activePlanes = planesData.filter((p) => p.activo);
+      // Non-admin view: only active plans visible to athletes. RLS already hides
+      // "Activo no visible" plans from athletes; trainers can read them, so filter here too.
+      const activePlanes = planesData.filter((p) => p.activo && p.visible_atletas);
       setPlanes(activePlanes);
       setDisciplines(disciplinesData);
     } catch {
@@ -115,5 +124,6 @@ export function usePlanesView({ tenantId }: UsePlanesViewOptions): UsePlanesView
     error,
     planes: tableItems,
     disciplines,
+    refresh: loadData,
   };
 }

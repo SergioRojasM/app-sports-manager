@@ -14,7 +14,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   const nextPath = rawNext && rawNext.startsWith("/") ? rawNext : "/dashboard";
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-navy-deep md:flex-row">
+    <div className="flex h-screen w-full flex-col overflow-auto bg-navy-deep md:flex-row">
       <LoginBenefitsPanel />
       <LoginCard>
         <SignupForm nextPath={nextPath} />

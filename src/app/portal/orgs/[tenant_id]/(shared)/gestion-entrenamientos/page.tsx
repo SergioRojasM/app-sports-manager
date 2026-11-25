@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { EntrenamientosPage } from '@/components/portal/entrenamientos';
 
 type GestionEntrenamientosTenantPageProps = {
@@ -9,5 +10,10 @@ export default async function GestionEntrenamientosTenantPage({
 }: GestionEntrenamientosTenantPageProps) {
   const { tenant_id: tenantId } = await params;
 
-  return <EntrenamientosPage tenantId={tenantId} />;
+  // useSearchParams (view switcher, ?vista=) requires a Suspense boundary in the App Router
+  return (
+    <Suspense>
+      <EntrenamientosPage tenantId={tenantId} />
+    </Suspense>
+  );
 }

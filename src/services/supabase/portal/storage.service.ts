@@ -6,9 +6,16 @@ import {
   buildOrgBannerPath,
   buildReceiptPath,
   buildFormularioRespuestaFilePath,
-  buildEntrenamientoPublicoBannerPath,
+  buildEventoBannerPath,
+  buildMetodoPagoQrPath,
   type StorageUploadResult,
 } from '@/types/portal/storage.types';
+
+const EVENTO_BANNER_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
 
 function getExtension(file: File): string {
   const name = file.name;
@@ -149,21 +156,79 @@ export const storageService = {
   },
 
   /**
-   * Upload (upsert) a training publication banner and return a signed URL.
-   * Path: orgs/{tenantId}/entrenamientos-publicos/{entrenamientoId}.{ext}
+   * Upload (upsert) a team event banner and return a signed URL (US-0119).
+   * Path: orgs/{tenantId}/eventos/{eventoId}.{ext}
    */
-  async uploadEntrenamientoPublicoBanner(
+  async uploadEventoBanner(
     supabase: SupabaseClient,
     tenantId: string,
-    entrenamientoId: string,
+    eventoId: string,
     file: File,
   ): Promise<StorageUploadResult> {
     const ext = getExtension(file);
-    const path = buildEntrenamientoPublicoBannerPath(tenantId, entrenamientoId, ext);
+    const path = buildEventoBannerPath(tenantId, eventoId, ext);
 
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKET)
       .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const { data: signedData, error: signError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .createSignedUrl(path, SIGNED_URL_TTL);
+
+    if (signError || !signedData?.signedUrl) {
+      throw new Error(signError?.message ?? 'No fue posible generar la URL firmada.');
+    }
+
+    return { signedUrl: signedData.signedUrl, path };
+  },
+
+  /**
+   * Gives a duplicated event its own banner object (US-0122): downloads the source image and
+   * uploads it under the new event's path, so replacing the source banner later does not change the copy.
+   */
+  async copyEventoBanner(
+    supabase: SupabaseClient,
+    tenantId: string,
+    eventoId: string,
+    sourceUrl: string,
+  ): Promise<StorageUploadResult> {
+    const response = await fetch(sourceUrl);
+    if (!response.ok) {
+      throw new Error(`No fue posible descargar la imagen original (${response.status}).`);
+    }
+
+    const blob = await response.blob();
+    const ext = EVENTO_BANNER_EXTENSIONS[blob.type];
+    if (!ext) {
+      throw new Error(`Formato de imagen no permitido: ${blob.type || 'desconocido'}.`);
+    }
+
+    const file = new File([blob], `banner.${ext}`, { type: blob.type });
+    return storageService.uploadEventoBanner(supabase, tenantId, eventoId, file);
+  },
+
+  /**
+   * Upload a payment method QR image and return a signed URL (US-0128).
+   * Path: orgs/{tenantId}/metodos-pago/{metodoId}/qr-{timestamp}.{ext}
+   * A new object per upload: event snapshots keep pointing to the image they were saved with.
+   */
+  async uploadMetodoPagoQr(
+    supabase: SupabaseClient,
+    tenantId: string,
+    metodoId: string,
+    file: File,
+  ): Promise<StorageUploadResult> {
+    const ext = getExtension(file);
+    const path = buildMetodoPagoQrPath(tenantId, metodoId, ext);
+
+    const { error: uploadError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, file, { upsert: false, contentType: file.type });
 
     if (uploadError) {
       throw new Error(uploadError.message);

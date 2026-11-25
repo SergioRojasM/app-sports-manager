@@ -7,7 +7,9 @@ import { disciplinesService } from '@/services/supabase/portal/disciplines.servi
 import { usePlanForm } from './usePlanForm';
 import type { Discipline } from '@/types/portal/disciplines.types';
 import {
+  PLAN_ESTADO_LABELS,
   PlanServiceError,
+  getPlanEstado,
   type CreatePlanInput,
   type PlanWithDisciplinas,
   type PlanTableItem,
@@ -33,9 +35,17 @@ type UsePlanesResult = PlanesViewModel & {
   openCreateModal: () => void;
   openEditModal: (plan: PlanWithDisciplinas) => Promise<void>;
   openDuplicateModal: (plan: PlanWithDisciplinas) => void;
-  deletePlan: (plan: PlanWithDisciplinas) => Promise<void>;
+  /** Delete flow driven by GritConfirmDialog. */
+  deleteTarget: PlanWithDisciplinas | null;
+  isDeleting: boolean;
+  deleteError: string | null;
+  requestDelete: (plan: PlanWithDisciplinas) => void;
+  cancelDelete: () => void;
+  confirmDelete: () => Promise<void>;
+  dismissSuccess: () => void;
   closeModal: () => void;
   updateField: ReturnType<typeof usePlanForm>['updateField'];
+  setEstado: ReturnType<typeof usePlanForm>['setEstado'];
   addTipo: ReturnType<typeof usePlanForm>['addTipo'];
   updateTipo: ReturnType<typeof usePlanForm>['updateTipo'];
   removeTipo: ReturnType<typeof usePlanForm>['removeTipo'];
@@ -45,7 +55,7 @@ type UsePlanesResult = PlanesViewModel & {
 };
 
 function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): PlanTableItem {
-  const status = plan.activo ? 'Activo' : 'Inactivo';
+  const estado = getPlanEstado(plan);
 
   // Derive vigenciaLabel from active plan_tipos
   const activeTipos = (plan.plan_tipos ?? []).filter((t) => t.activo);
@@ -65,7 +75,8 @@ function toTableItem(plan: PlanWithDisciplinas, allDisciplines: Discipline[]): P
 
   return {
     ...plan,
-    statusLabel: status,
+    estado,
+    statusLabel: PLAN_ESTADO_LABELS[estado],
     vigenciaLabel: vigencia,
     disciplinaNames,
   };
@@ -90,6 +101,9 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<PlanWithDisciplinas | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const form = usePlanForm();
 
   const supabase = useMemo(() => createClient(), []);
@@ -201,37 +215,39 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     setSubmitError(null);
   }, [isSubmitting]);
 
-  const deletePlan = useCallback(
-    async (plan: PlanWithDisciplinas) => {
-      const shouldDelete = window.confirm(
-        `¿Seguro que quieres eliminar el plan "${plan.nombre}"? Esta acción no se puede deshacer.`,
-      );
+  const requestDelete = useCallback((plan: PlanWithDisciplinas) => {
+    setDeleteError(null);
+    setSuccessMessage(null);
+    setDeleteTarget(plan);
+  }, []);
 
-      if (!shouldDelete) {
-        return;
+  const cancelDelete = useCallback(() => {
+    if (isDeleting) return;
+    setDeleteTarget(null);
+    setDeleteError(null);
+  }, [isDeleting]);
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await planesService.deletePlan(deleteTarget.id, tenantId);
+
+      if (selectedPlan?.id === deleteTarget.id) {
+        setModalOpen(false);
+        setSelectedPlan(null);
       }
 
-      setSubmitError(null);
-      setSuccessMessage(null);
-
-      try {
-        await planesService.deletePlan(plan.id, tenantId);
-
-        if (selectedPlan?.id === plan.id) {
-          setModalOpen(false);
-          setSelectedPlan(null);
-        }
-
-        await loadData();
-        setSuccessMessage('Plan eliminado correctamente.');
-      } catch (caughtError) {
-        setSubmitError(
-          mapServiceErrorToMessage(caughtError, 'No fue posible eliminar el plan. Inténtalo nuevamente.'),
-        );
-      }
-    },
-    [loadData, selectedPlan?.id, tenantId],
-  );
+      setDeleteTarget(null);
+      await loadData();
+      setSuccessMessage('Plan eliminado correctamente.');
+    } catch (caughtError) {
+      setDeleteError(mapServiceErrorToMessage(caughtError, 'No fue posible eliminar el plan. Inténtalo nuevamente.'));
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [deleteTarget, loadData, selectedPlan?.id, tenantId]);
 
   const submit = useCallback(async () => {
     setSubmitError(null);
@@ -256,6 +272,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
           esPublico: form.formValues.es_publico,
+          visibleAtletas: form.formValues.visible_atletas,
           disciplinaIds: form.formValues.disciplinaIds,
         };
 
@@ -271,6 +288,7 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
           beneficios: form.formValues.beneficios.length > 0 ? form.formValues.beneficios.join('|') : null,
           activo: form.formValues.activo,
           esPublico: form.formValues.es_publico,
+          visibleAtletas: form.formValues.visible_atletas,
           disciplinaIds: form.formValues.disciplinaIds,
         };
 
@@ -340,9 +358,16 @@ export function usePlanes({ tenantId }: UsePlanesOptions): UsePlanesResult {
     openCreateModal,
     openEditModal,
     openDuplicateModal,
-    deletePlan,
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
+    dismissSuccess: () => setSuccessMessage(null),
     closeModal,
     updateField: form.updateField,
+    setEstado: form.setEstado,
     addTipo: form.addTipo,
     updateTipo: form.updateTipo,
     removeTipo: form.removeTipo,

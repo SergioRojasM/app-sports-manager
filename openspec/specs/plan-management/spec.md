@@ -1,4 +1,9 @@
-## ADDED Requirements
+# Capability: plan-management
+
+## Purpose
+Defines the membership plans of an organization: administrator management and the read-only catalogue for athletes and trainers.
+
+## Requirements
 
 ### Requirement: Tenant administrator can access plans management route
 The system SHALL provide a tenant-scoped plans management screen at `/portal/orgs/[tenant_id]/gestion-planes` for authenticated users with `administrador` role in the requested tenant. The route page entrypoint SHALL only compose feature components and MUST NOT perform direct data-access calls.
@@ -12,15 +17,15 @@ The system SHALL provide a tenant-scoped plans management screen at `/portal/org
 - **THEN** the page entrypoint SHALL delegate orchestration to hook and service layers and SHALL NOT call Supabase directly
 
 ### Requirement: Plans list displays tenant-scoped table with operational states
-The system SHALL load and display tenant membership plans in table format with columns `Name`, `Description`, `Disciplines`, `Status`, and `Actions`, plus header and primary `New Plan` CTA. The `Price` column SHALL be removed from the table. The `Validity` column SHALL display a summary derived from the plan's active `plan_tipos`: if all active tipos share the same `vigencia_dias`, display that value (e.g., "30 días"); if they differ, display the range (e.g., "30–90 días"); if no active tipos exist, display "—". The list SHALL include loading, empty, and error states and SHALL support search/filter over plan name. The `Actions` column SHALL include "Editar", "Duplicar", and "Eliminar" buttons for each row in editable (non-read-only) view.
+The system SHALL load and display tenant membership plans as a grid of plan cards, one per plan, showing each plan's disciplines and the validity of its subtypes, with loading and empty states.
 
 #### Scenario: Plans found for tenant
 - **WHEN** tenant plans are returned from the data source
-- **THEN** the system SHALL render the plans table with columns `Name`, `Description`, `Validity` (derived from plan_tipos), `Disciplines`, `Status`, and `Actions` with row-level edit, duplicate, and delete actions
+- **THEN** the system SHALL render one card per plan with the required content and the card-level edit, duplicate, and delete actions, each with an accessible name that includes the plan name
 
 #### Scenario: No plans available
 - **WHEN** no plans exist for the tenant
-- **THEN** the system SHALL render an explicit empty state in the plans table
+- **THEN** the system SHALL render an explicit empty state with a "Nuevo plan" action
 
 #### Scenario: Plans data is loading
 - **WHEN** the plans data fetch is in progress
@@ -28,23 +33,23 @@ The system SHALL load and display tenant membership plans in table format with c
 
 #### Scenario: Disciplines column renders as badge chips
 - **WHEN** a plan has one or more associated disciplines
-- **THEN** the system SHALL render the discipline names as badge chips in the Disciplines column
+- **THEN** its card SHALL render the discipline names as chips under the plan name
 
 #### Scenario: Disciplines column is empty
 - **WHEN** a plan has no associated disciplines
-- **THEN** the system SHALL render a muted "Sin disciplinas" placeholder text in the Disciplines column
+- **THEN** its card SHALL render a muted "Sin disciplinas" text under the plan name
 
 #### Scenario: Validity column shows uniform vigencia
-- **WHEN** all active plan_tipos for a plan have the same `vigencia_dias` value
-- **THEN** the Validity column SHALL display that single value (e.g., "30 días")
+- **WHEN** all active plan_tipos of a plan have the same `vigencia_dias` (e.g. 30)
+- **THEN** the card's price line SHALL show that validity ("/ 30 d")
 
 #### Scenario: Validity column shows vigencia range
-- **WHEN** active plan_tipos for a plan have different `vigencia_dias` values
-- **THEN** the Validity column SHALL display the range (e.g., "30–90 días")
+- **WHEN** the active plan_tipos of a plan have different `vigencia_dias` values (e.g. 30 and 90)
+- **THEN** the price line SHALL show the validity of the cheapest active subtype and the subtype rows SHALL list every active subtype
 
 #### Scenario: Validity column shows dash when no active tipos
 - **WHEN** a plan has no active plan_tipos
-- **THEN** the Validity column SHALL display "—"
+- **THEN** the card SHALL show "Sin precio" instead of a price and validity
 
 ### Requirement: Create and edit plan flows use a shared right-side modal
 The system SHALL support create, edit, and duplicate plan workflows through a single right-side modal component that switches mode by state (`'create'`, `'edit'`, or `'duplicate'`). The modal SHALL close via backdrop click, close button, or `Esc` key when not submitting, and SHALL expose submit and cancel controls with disabled and loading behavior during pending requests. The modal title SHALL read "Crear plan" for `'create'` mode, "Editar plan" for `'edit'` mode, and "Duplicar plan" for `'duplicate'` mode. The submit button SHALL read "Crear plan" for `'create'` and `'duplicate'` modes, and "Guardar cambios" for `'edit'` mode.
@@ -115,7 +120,7 @@ The system SHALL persist plan data against `public.planes` with strict tenant sc
 - **THEN** the system SHALL persist the change and SHALL refresh the rendered plans list for that tenant
 
 ### Requirement: Delete plan SHALL require confirmation and remove associated records
-The system SHALL require the administrator to confirm deletion before committing. Deletion SHALL hard-delete the plan row; `public.planes_disciplina` rows SHALL be removed via cascade.
+The system SHALL require the administrator to confirm deletion in an accessible dialog that names the plan before committing. Deletion SHALL hard-delete the plan row; `public.planes_disciplina` rows SHALL be removed via cascade.
 
 #### Scenario: Administrator confirms plan deletion
 - **WHEN** the administrator confirms the delete action for a plan
@@ -123,7 +128,7 @@ The system SHALL require the administrator to confirm deletion before committing
 
 #### Scenario: Administrator cancels plan deletion
 - **WHEN** the administrator dismisses the delete confirmation
-- **THEN** the system SHALL take no action and the plan SHALL remain in the list
+- **THEN** the system SHALL take no action, the plan SHALL remain in the list, and focus SHALL return to the card's delete action
 
 ### Requirement: Plan mutations SHALL be protected by admin-only tenant RLS policies
 The system SHALL enforce mutation authorization for plans and plan-discipline associations using database-level RLS policies. Insert, update, and delete operations on `public.planes` and `public.planes_disciplina` MUST be restricted to tenants returned by `public.get_admin_tenants_for_authenticated_user()`.
@@ -154,8 +159,6 @@ A database migration SHALL ALTER the existing `public.planes` table to drop the 
 - **WHEN** the migration is applied
 - **THEN** constraints `planes_precio_ck` and `planes_clases_ck` SHALL no longer exist on the `planes` table
 
-## ADDED Requirements
-
 ### Requirement: Non-admin roles can view active tenant plans
 The system SHALL expose the `gestion-planes` route to `usuario` and `entrenador` roles via a unified `(shared)` route. The route SHALL render the read-only plan catalogue (`PlanesViewPage`) for these roles and MUST filter plans to `activo = true` only. The administrator route at `(administrador)/gestion-planes` SHALL be removed; the admin MUST be served the full CRUD view (`PlanesPage`) from the same shared route based on server-resolved role.
 
@@ -178,17 +181,19 @@ The system SHALL expose the `gestion-planes` route to `usuario` and `entrenador`
 ---
 
 ### Requirement: Usuario sees Adquirir action per plan
-`PlanesViewPage` SHALL render an "Adquirir" button for each plan row exclusively when the requesting user has role `usuario`. The button MUST NOT be rendered for `entrenador` role.
+`PlanesViewPage` SHALL render the same plan cards in read-only mode (no edit, duplicate or delete actions) and SHALL render an "Adquirir" button on each card exclusively when the requesting user has role `usuario`. The button MUST NOT be rendered for `entrenador` role.
 
 #### Scenario: Usuario sees Adquirir button on each plan row
 - **WHEN** a `usuario` views the plan catalogue
-- **THEN** each plan row SHALL display an "Adquirir" button
+- **THEN** each plan card SHALL display an "Adquirir" button
 
 #### Scenario: Entrenador does not see Adquirir button
 - **WHEN** an `entrenador` views the plan catalogue
-- **THEN** no "Adquirir" button SHALL be rendered for any plan row
+- **THEN** no "Adquirir" button SHALL be rendered for any plan card
 
----
+#### Scenario: Read-only cards
+- **WHEN** a `usuario` or `entrenador` views the plan catalogue
+- **THEN** no card SHALL render edit, duplicate or delete actions, nor the visibility pill
 
 ### Requirement: Subscription request modal
 Clicking "Adquirir" SHALL open `SuscripcionModal` displaying a summary of the selected plan (name and benefits) and SHALL require the user to select a plan_tipo before proceeding. The modal SHALL display plan_tipo details (price, validity in days, class quota or "Ilimitadas") for the selected tipo. The modal SHALL NOT reference or fall back to plan-level `precio`, `vigencia_meses`, or `clases_incluidas` fields. The modal SHALL include an optional `comentarios` textarea, a `comprobante de pago` file input (accepts JPEG, PNG, WebP, PDF; max 5 MiB; optional), and "Confirmar" and "Cancelar" buttons.
@@ -237,15 +242,11 @@ Before confirming a subscription, the system SHALL check whether the authenticat
 ---
 
 ### Requirement: Subscription request submission
-On "Confirmar", the system SHALL insert one `suscripciones` record and one linked `pagos` record using the selected `plan_tipo`'s fields. Both records MUST have `estado = 'pendiente'`. The `suscripciones` insert SHALL use `selectedTipo.clases_incluidas` for `clases_plan` and store `plan_tipo_id`. The `pagos` insert SHALL use `selectedTipo.precio` for `monto`. The system SHALL NOT fall back to plan-level `precio` or `clases_incluidas` fields. If a proof file was selected, the system SHALL upload it to `orgs/{tenantId}/users/{userId}/receipts/{pago.id}.{ext}` and patch `pagos.comprobante_path` with the resulting storage path. If no file was selected, `comprobante_path` SHALL be `null`.
+On "Confirmar", the system SHALL create one `suscripciones` record and one linked `pagos` record through a single call to the `comprar_suscripcion` RPC, using the selected `plan_tipo`. Both records MUST have `estado = 'pendiente'`. The subscription SHALL store `plan_tipo_id`. The payment's `monto` SHALL be set by the server from `plan_tipos.precio`; the system SHALL NOT fall back to plan-level `precio` or `clases_incluidas` fields. If a proof file was selected, the system SHALL upload it to `orgs/{tenantId}/users/{userId}/receipts/{pagoId}.{ext}` **before** calling the RPC, with a payment id generated in the browser, and pass the resulting path so the payment is created with `comprobante_path` set. If no file was selected, or the upload failed, `comprobante_path` SHALL be `null`.
 
 #### Scenario: Subscription created with tipo precio
 - **WHEN** a user confirms a subscription request with a selected plan_tipo
-- **THEN** the `pagos.monto` SHALL be set to `selectedTipo.precio`
-
-#### Scenario: Subscription created with tipo clases_incluidas
-- **WHEN** a user confirms a subscription request with a selected plan_tipo
-- **THEN** the `suscripciones.clases_plan` SHALL be set to `selectedTipo.clases_incluidas` (may be null for unlimited)
+- **THEN** the `pagos.monto` SHALL equal that subtype's `precio`, taken on the server
 
 #### Scenario: No fallback to plan-level fields
 - **WHEN** a subscription is submitted
@@ -253,24 +254,19 @@ On "Confirmar", the system SHALL insert one `suscripciones` record and one linke
 
 #### Scenario: Successful subscription request with proof file
 - **WHEN** a `usuario` confirms a subscription request with a valid proof file
-- **THEN** a `suscripciones` row SHALL be inserted with `estado = 'pendiente'`, `atleta_id = auth.uid()`, `plan_id = selectedPlan.id`, and `clases_plan = selectedTipo.clases_incluidas`
-- **THEN** a `pagos` row SHALL be inserted with `estado = 'pendiente'`, `suscripcion_id` referencing the new subscription, and `monto = selectedTipo.precio`
-- **THEN** the proof file SHALL be uploaded and `pagos.comprobante_path` SHALL be patched to the storage path
+- **THEN** the proof file SHALL be uploaded first
+- **THEN** a `suscripciones` row SHALL exist with `estado = 'pendiente'`, `atleta_id = auth.uid()` and `plan_id = selectedPlan.id`
+- **THEN** a `pagos` row SHALL exist with `estado = 'pendiente'`, `suscripcion_id` referencing the new subscription, `monto = selectedTipo.precio` and `comprobante_path` equal to the uploaded path
 - **THEN** the modal SHALL close and a success message SHALL be shown: _"Solicitud enviada. El administrador revisará tu suscripción."_
 
 #### Scenario: Successful subscription request without proof file
 - **WHEN** a `usuario` confirms a subscription request without selecting a file
-- **THEN** a `suscripciones` and a `pagos` row SHALL be inserted with `comprobante_path = null`
+- **THEN** a `suscripciones` and a `pagos` row SHALL exist with `comprobante_path = null`
 - **THEN** the modal SHALL close and a success message SHALL be shown
 
-#### Scenario: Subscription insert fails
-- **WHEN** the `createSuscripcion` call returns an error
-- **THEN** the modal SHALL remain open and display an inline error message without creating any records
-
-#### Scenario: Payment insert fails after subscription insert succeeds
-- **WHEN** `createSuscripcion` succeeds but `createPago` returns an error
-- **THEN** an inline error message SHALL be shown inside the modal
-- **THEN** the orphan `suscripciones` row with `estado = 'pendiente'` SHALL remain in the database
+#### Scenario: Purchase fails
+- **WHEN** the `comprarSuscripcion` call returns an error
+- **THEN** the modal SHALL remain open and display an inline error message, and no `suscripciones` or `pagos` record SHALL exist
 
 ---
 
@@ -316,8 +312,6 @@ The system SHALL enforce that users select a payment method from the tenant's ac
 #### Scenario: Subscription cannot be submitted without payment method
 - **WHEN** `SuscripcionModal` is rendered with an empty active methods list or no selection made
 - **THEN** the Confirm action SHALL be disabled and `useSuscripcion.submit` SHALL NOT be called
-
-## ADDED Requirements
 
 ### Requirement: Plan form modal includes an inline subtype management section
 The plan form modal (`PlanFormModal`) SHALL include a visually separated "Tipos de plan / Subtipos" section below the main plan fields. The section SHALL render a list of inline subtype rows; each row SHALL display: Name (required), Price, Validity in days, Classes Included, Active toggle, and a Remove button. An "+ Agregar subtipo" button SHALL append a new empty row to the list.
@@ -379,19 +373,6 @@ The system SHALL persist subtype changes using a diff against the initial subtyp
 
 ---
 
-### Requirement: Plans list table shows active subtype count per plan
-The plans table (`PlanesTable`) SHALL include a "Subtipos" column displaying the count of active subtypes (`activo = true`) for each plan. If a plan has no active subtypes, the column SHALL display "—". The count SHALL be derived from the embedded `plan_tipos` array already loaded with `getPlanes`; no additional query SHALL be issued.
-
-#### Scenario: Plan with active subtypes shows count
-- **WHEN** a plan has one or more `plan_tipos` rows with `activo = true`
-- **THEN** the "Subtipos" column SHALL display the count of active subtypes (e.g., "3")
-
-#### Scenario: Plan with no active subtypes shows dash
-- **WHEN** a plan has no `plan_tipos` rows with `activo = true`
-- **THEN** the "Subtipos" column SHALL display "—"
-
----
-
 ### Requirement: usePlanesView exposes getActiveTipos selector
 The `usePlanesView` hook SHALL expose a `getActiveTipos(plan: Plan): PlanTipo[]` function that returns only the subtype entries where `activo === true` from the plan's embedded `plan_tipos` array, sorted by `nombre`.
 
@@ -415,3 +396,61 @@ The athlete plan view (`PlanesViewPage`) SHALL NOT render the "Adquirir" button 
 #### Scenario: Adquirir visible when plan has at least one active subtype
 - **WHEN** a `usuario` views the plan catalogue and a plan has at least one active subtype
 - **THEN** the "Adquirir" button SHALL be rendered for that plan row
+
+### Requirement: Plans page header and search
+The plans page SHALL show the heading "Planes de membresía.", a search field labelled "Buscar plan" that filters the cards by plan name, and a "Nuevo plan" primary action. A search without matches SHALL show a no-results state with "Limpiar búsqueda".
+
+#### Scenario: Search without matches
+- **WHEN** the administrator searches a name that no plan has
+- **THEN** the page SHALL show the no-results state and "Limpiar búsqueda" SHALL restore every card
+
+### Requirement: Plans page load error
+When loading the plans fails, the page SHALL show an error state with a "Reintentar" action, distinct from the empty state.
+
+#### Scenario: Load error
+- **WHEN** loading the plans fails
+- **THEN** the system SHALL render an error state with a "Reintentar" action, distinct from the empty state
+
+### Requirement: Plan card status tags
+Each plan card SHALL show the modality tag (when the plan has one), the visibility pill (administrators only) and the "Activo" / "Inactivo" status tag.
+
+#### Scenario: Modality and visibility
+- **WHEN** a plan has `tipo = 'presencial'`, `es_publico = false` and `visible_atletas = true`
+- **THEN** its card SHALL show the "Presencial" tag and the "Privado" visibility pill with a lock icon
+
+#### Scenario: Public plan
+- **WHEN** a plan has `es_publico = true` and `visible_atletas = true`
+- **THEN** its card SHALL show the "Público" visibility pill with a globe icon
+
+#### Scenario: Plan without modality
+- **WHEN** a plan has `tipo = null`
+- **THEN** its card SHALL NOT render a modality tag
+
+### Requirement: Plan card price and subtypes
+Each plan card SHALL show the price of its cheapest active subtype with that subtype's validity, or "Sin precio" when no subtype is active, followed by one row per active subtype.
+
+#### Scenario: Price summary from active subtypes
+- **WHEN** a plan has active subtypes "Mensual" ($120.000, 30 días) and "Trimestral" ($330.000, 90 días)
+- **THEN** the card SHALL show "$120.000" with "/ 30 d" as the main price, and the subtype rows "Mensual · 30 d" and "Trimestral · $330.000"
+
+#### Scenario: Plan without active subtypes
+- **WHEN** a plan has no active subtypes
+- **THEN** the card SHALL show "Sin precio" instead of the price and the hint "Agrega un subtipo activo para publicarlo"
+
+### Requirement: Plan card included items
+Each plan card SHALL list under "INCLUYE" the distinct services of its active subtypes, then its benefits.
+
+#### Scenario: Included services and benefits
+- **WHEN** a plan's active subtypes include the services "Pista libre" and "Fondo largo dominical" and its `beneficios` is "10 % en eventos GRIT"
+- **THEN** the "INCLUYE" list SHALL show the two services (each once) with a check icon, then the benefit with a gift icon
+
+### Requirement: Plans page feedback
+Plan mutation results SHALL be announced in an inline alert above the grid: success as a status message that the administrator can dismiss, and errors as an alert.
+
+#### Scenario: Plan saved
+- **WHEN** the administrator saves "GRIT Running"
+- **THEN** a dismissible success alert SHALL read the success message and SHALL be announced with `role="status"`
+
+#### Scenario: Delete blocked
+- **WHEN** deleting a plan fails because subscriptions reference it
+- **THEN** the plan SHALL remain and an alert with `role="alert"` SHALL explain why

@@ -1,91 +1,20 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 type NavItem = {
   label: string;
   href: string;
-  children?: { label: string; href: string }[];
 };
 
+// Public pages header (/eventos, /equipos, /atletas). The marketing anchors moved to the external
+// landing (US-0139); the app root is now the public home with an #organizaciones section (US-0140).
 const navItems: NavItem[] = [
-  {
-    label: 'Plataforma',
-    href: '/#hero',
-    children: [
-      // "Equipos y clubes" y "Atletas" quedan ocultos hasta que esos módulos estén implementados.
-      { label: 'Calendario de Entrenamientos', href: '/entrenamientos-publicos' },
-    ],
-  },
-  { label: 'Funciones', href: '/#operacion' },
-  { label: 'Para equipos', href: '/#solucion' },
-  { label: 'Precios', href: '/#pricing' },
-  { label: 'Recursos', href: '/#footer' },
+  { label: 'Eventos', href: '/eventos' },
+  { label: 'Organizaciones', href: '/#organizaciones' },
 ];
-
-function PlataformaDropdown({ item }: { item: NavItem }) {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-haspopup="menu"
-        className="landing-nav-link font-landing-display flex items-center gap-1 text-base font-semibold tracking-[0.04em]"
-        onClick={() => setOpen((prev) => !prev)}
-      >
-        {item.label}
-        <span
-          className={`material-symbols-outlined text-[18px] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          aria-hidden="true"
-        >
-          expand_more
-        </span>
-      </button>
-
-      {open && (
-        <div
-          role="menu"
-          className="landing-panel absolute left-0 top-full z-50 mt-3 w-64 overflow-hidden rounded-2xl py-2"
-        >
-          {item.children?.map((child) => (
-            <Link
-              key={child.href}
-              href={child.href}
-              role="menuitem"
-              className="font-landing-body block px-4 py-2.5 text-sm text-landing-text-secondary transition hover:bg-white/5 hover:text-landing-primary-light"
-              onClick={() => setOpen(false)}
-            >
-              {child.label}
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -108,19 +37,15 @@ export default function Header() {
           </Link>
 
           <div className="hidden lg:flex items-center gap-8 xl:gap-10">
-            {navItems.map((item) =>
-              item.children ? (
-                <PlataformaDropdown key={item.label} item={item} />
-              ) : (
-                <a
-                  key={item.label}
-                  className="landing-nav-link font-landing-display text-base font-semibold tracking-[0.04em]"
-                  href={item.href}
-                >
-                  {item.label}
-                </a>
-              )
-            )}
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                className="landing-nav-link font-landing-display text-base font-semibold tracking-[0.04em]"
+                href={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
 
           <div className="flex items-center gap-3">
@@ -146,34 +71,16 @@ export default function Header() {
 
         {mobileOpen && (
           <div className="mt-4 flex flex-col gap-1 border-t border-white/10 pt-4 lg:hidden">
-            {navItems.map((item) =>
-              item.children ? (
-                <div key={item.label} className="flex flex-col">
-                  <span className="font-landing-display px-2 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-landing-text-muted">
-                    {item.label}
-                  </span>
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      className="font-landing-body rounded-lg px-4 py-2.5 text-base text-landing-text-secondary transition hover:bg-white/5 hover:text-landing-primary-light"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="font-landing-display rounded-lg px-2 py-2.5 text-base font-semibold text-landing-text-secondary transition hover:bg-white/5 hover:text-landing-primary-light"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  {item.label}
-                </a>
-              )
-            )}
+            {navItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="font-landing-display rounded-lg px-2 py-2.5 text-base font-semibold text-landing-text-secondary transition hover:bg-white/5 hover:text-landing-primary-light"
+                onClick={() => setMobileOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
         )}
       </div>

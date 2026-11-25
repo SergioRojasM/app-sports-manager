@@ -54,27 +54,27 @@ export function InlineProfileCompletionStep({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label="Completa tus datos"
     >
-      <div className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-portal-border bg-navy-medium p-6 shadow-2xl">
-        <h2 className="mb-1 text-lg font-semibold text-slate-100">Completa tus datos</h2>
-        <p className="mb-4 text-sm text-slate-400">
+      <div className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-grit-2xl border border-grit-glass-border bg-grit-card p-6 shadow-2xl">
+        <h2 className="font-grit-title mb-1 text-lg font-semibold text-grit-text">Completa tus datos</h2>
+        <p className="mb-4 text-sm text-grit-subtext">
           Este entrenamiento requiere algunos datos de tu perfil que aún no tienes registrados.
         </p>
 
         {headerExtra}
 
         {perfil.error && (
-          <div className="mb-4 rounded-lg border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+          <div className="mb-4 rounded-grit-md border border-grit-danger/40 bg-rose-500/15 px-4 py-3 text-sm text-grit-danger">
             {perfil.error}
           </div>
         )}
 
         {perfil.loading ? (
-          <p className="text-sm text-slate-400">Cargando tu perfil…</p>
+          <p className="text-sm text-grit-subtext">Cargando tu perfil…</p>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
             <div className="flex-1 space-y-4 overflow-y-auto pr-1">
@@ -93,19 +93,19 @@ export function InlineProfileCompletionStep({
               />
             </div>
 
-            <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-portal-border pt-4">
+            <div className="mt-4 flex flex-wrap justify-end gap-3 border-t border-grit-glass-border pt-4">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={perfil.isSubmitting}
-                className="rounded-lg border border-portal-border px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700/40"
+                className="rounded-grit-md border border-grit-glass-border px-4 py-2 text-sm font-medium text-grit-subtext hover:bg-grit-cyan/10"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={perfil.isSubmitting}
-                className="rounded-lg bg-turquoise px-4 py-2 text-sm font-semibold text-navy-deep hover:bg-turquoise/90 disabled:opacity-50"
+                className="rounded-grit-md bg-grit-cyan px-4 py-2 text-sm font-semibold text-grit-bg hover:bg-grit-cyan/90 disabled:opacity-50"
               >
                 {perfil.isSubmitting ? 'Guardando...' : 'Guardar y continuar'}
               </button>

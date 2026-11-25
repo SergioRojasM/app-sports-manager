@@ -1,33 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import {
+  GritAlert,
+  GritButton,
+  GritConfirmDialog,
+  GritEmptyState,
+  GritPageHeader,
+  GritSearchField,
+} from '@/components/ui';
 import { usePlanes } from '@/hooks/portal/planes/usePlanes';
 import { serviciosService } from '@/services/supabase/portal/servicios.service';
-import { PlanFormModal } from './PlanFormModal';
-import { PlanesHeaderFilters } from './PlanesHeaderFilters';
-import { PlanesTable } from './PlanesTable';
 import type { Servicio } from '@/types/portal/servicios.types';
+import { PlanCard } from './PlanCard';
+import { PlanFormModal } from './PlanFormModal';
 
 type PlanesPageProps = {
   tenantId: string;
 };
 
-function LoadingState() {
-  return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-      Cargando planes...
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="glass rounded-lg border border-portal-border p-6 text-sm text-slate-300">
-      No hay planes registrados para esta organización.
-    </div>
-  );
-}
-
+/** Administrator plans catalogue (`J7Lw7d` Admin · Planes): header, feedback, plan card grid. */
 export function PlanesPage({ tenantId }: PlanesPageProps) {
   const [availableServices, setAvailableServices] = useState<Servicio[]>([]);
 
@@ -39,6 +31,7 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
   }, [tenantId]);
 
   const {
+    planes,
     loading,
     error,
     filteredPlanes,
@@ -55,13 +48,20 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
     tiposServiceRows,
     submitError,
     successMessage,
+    dismissSuccess,
     isSubmitting,
     openCreateModal,
     openEditModal,
     openDuplicateModal,
-    deletePlan,
+    deleteTarget,
+    isDeleting,
+    deleteError,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
     closeModal,
     updateField,
+    setEstado,
     addTipo,
     updateTipo,
     removeTipo,
@@ -71,58 +71,88 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
   } = usePlanes({ tenantId });
 
   return (
-    <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Planes de Membresía</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Crea y administra los planes de membresía de tu organización.
-        </p>
-      </header>
-
-      <PlanesHeaderFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onCreatePlan={openCreateModal}
+    <section className="flex flex-col gap-5">
+      <GritPageHeader
+        title="Planes de"
+        titleAccent="membresía."
+        italic
+        actions={
+          <>
+            <GritSearchField
+              aria-label="Buscar plan"
+              placeholder="Buscar plan…"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="w-full sm:w-[220px]"
+            />
+            <GritButton icon="add" onClick={openCreateModal}>
+              Nuevo plan
+            </GritButton>
+          </>
+        }
       />
 
       {successMessage ? (
-        <div className="rounded-lg border border-emerald-400/40 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200" role="status">
+        <GritAlert tone="success" onDismiss={dismissSuccess}>
           {successMessage}
-        </div>
+        </GritAlert>
       ) : null}
 
-      {submitError && !modalOpen ? (
-        <div className="rounded-lg border border-rose-400/40 bg-rose-950/35 px-4 py-3 text-sm text-rose-200" role="alert">
-          {submitError}
+      {submitError && !modalOpen ? <GritAlert tone="danger">{submitError}</GritAlert> : null}
+
+      {loading ? (
+        <div role="status">
+          <GritEmptyState icon="hourglass_empty" title="Cargando planes…" />
         </div>
-      ) : null}
-
-      {loading ? <LoadingState /> : null}
-
-      {!loading && error ? (
-        <div className="glass rounded-lg border border-rose-400/25 bg-rose-900/20 p-6">
-          <p className="text-sm text-rose-200">{error}</p>
-          <button
-            type="button"
-            className="mt-4 rounded-lg border border-rose-300/30 px-3 py-2 text-xs font-semibold text-rose-100"
-            onClick={() => void refresh()}
-          >
-            Reintentar
-          </button>
-        </div>
-      ) : null}
-
-      {!loading && !error && filteredPlanes.length === 0 ? <EmptyState /> : null}
-
-      {!loading && !error && filteredPlanes.length > 0 ? (
-        <PlanesTable
-          rows={filteredPlanes}
-          onEdit={openEditModal}
-          onDuplicate={openDuplicateModal}
-          onDelete={(plan) => void deletePlan(plan)}
-          showVisibilidad
+      ) : error ? (
+        <GritEmptyState
+          icon="error"
+          title="No pudimos cargar los planes"
+          description={error}
+          descriptionClassName="text-grit-danger"
+          action={
+            <GritButton variant="secondary" icon="refresh" onClick={() => void refresh()}>
+              Reintentar
+            </GritButton>
+          }
         />
-      ) : null}
+      ) : planes.length === 0 ? (
+        <GritEmptyState
+          icon="card_membership"
+          title="Aún no tienes planes"
+          description="Crea tu primer plan de membresía para que tus atletas puedan suscribirse."
+          action={
+            <GritButton icon="add" onClick={openCreateModal}>
+              Nuevo plan
+            </GritButton>
+          }
+        />
+      ) : filteredPlanes.length === 0 ? (
+        <GritEmptyState
+          icon="search_off"
+          title="Sin resultados"
+          description="Ningún plan coincide con la búsqueda."
+          action={
+            <GritButton variant="secondary" onClick={() => setSearchTerm('')}>
+              Limpiar búsqueda
+            </GritButton>
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {filteredPlanes.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              disciplinaNames={plan.disciplinaNames}
+              mode="admin"
+              onEdit={(target) => void openEditModal(target)}
+              onDuplicate={openDuplicateModal}
+              onDelete={requestDelete}
+            />
+          ))}
+        </div>
+      )}
 
       <PlanFormModal
         open={modalOpen}
@@ -140,10 +170,26 @@ export function PlanesPage({ tenantId }: PlanesPageProps) {
         onClose={closeModal}
         onSubmit={submit}
         onChangeField={updateField}
+        onChangeEstado={setEstado}
         onAddTipo={addTipo}
         onUpdateTipo={updateTipo}
         onRemoveTipo={removeTipo}
         onUpdateTipoServiceRows={updateTipoServiceRows}
+      />
+
+      <GritConfirmDialog
+        open={deleteTarget !== null}
+        title="Eliminar plan"
+        message={
+          <>
+            ¿Seguro que quieres eliminar el plan <span className="font-semibold text-grit-text">{deleteTarget?.nombre}</span>?
+            Esta acción no se puede deshacer.
+          </>
+        }
+        pending={isDeleting}
+        error={deleteError}
+        onCancel={cancelDelete}
+        onConfirm={() => void confirmDelete()}
       />
     </section>
   );

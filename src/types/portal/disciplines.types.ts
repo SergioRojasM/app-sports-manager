@@ -10,14 +10,6 @@ export type Discipline = {
   updated_at: string;
 };
 
-export type DisciplineStatus = 'active' | 'inactive';
-
-export type DisciplineTableItem = Discipline & {
-  categoria: string;
-  statusLabel: string;
-  status: DisciplineStatus;
-};
-
 export type CreateDisciplineInput = {
   tenantId: string;
   nombre: string;
@@ -41,18 +33,6 @@ export type DisciplineFormValues = {
 export type DisciplineFormField = 'nombre' | 'descripcion';
 
 export type DisciplineFieldErrors = Partial<Record<DisciplineFormField, string>>;
-
-export type DisciplinesViewModel = {
-  disciplines: Discipline[];
-  filteredDisciplines: DisciplineTableItem[];
-  loading: boolean;
-  error: string | null;
-  modalOpen: boolean;
-  modalMode: 'create' | 'edit';
-  selectedDiscipline: Discipline | null;
-  submitError: string | null;
-  successMessage: string | null;
-};
 
 export type DisciplineServiceErrorCode =
   | 'duplicate_name'

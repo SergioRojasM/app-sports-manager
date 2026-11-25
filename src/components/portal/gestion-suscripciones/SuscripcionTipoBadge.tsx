@@ -4,8 +4,8 @@ type SuscripcionTipoBadgeProps = {
 
 export function SuscripcionTipoBadge({ esMiembro }: SuscripcionTipoBadgeProps) {
   const classes = esMiembro
-    ? 'bg-turquoise/10 text-turquoise border border-turquoise/30'
-    : 'bg-slate-800/50 text-slate-400 border border-slate-600/30';
+    ? 'bg-grit-cyan/10 text-grit-cyan border border-grit-cyan/30'
+    : 'bg-grit-card text-grit-subtext border border-grit-glass-border';
 
   return (
     <span

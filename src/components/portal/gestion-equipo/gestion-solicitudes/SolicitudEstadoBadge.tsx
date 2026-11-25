@@ -17,7 +17,7 @@ const CONFIG: Record<SolicitudEstado, { label: string; classes: string }> = {
   },
   rechazada: {
     label: 'Rechazada',
-    classes: 'bg-rose-400/15 text-rose-300 border-rose-400/25',
+    classes: 'bg-rose-400/15 text-grit-danger border-grit-danger/25',
   },
 };
 

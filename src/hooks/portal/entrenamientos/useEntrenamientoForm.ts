@@ -7,7 +7,6 @@ import type {
   TrainingFormularioFormState,
   TrainingFormularioTipo,
   TrainingRuleErrors,
-  TrainingVisibility,
   TrainingWizardRuleFormValue,
   TrainingWizardValues,
 } from '@/types/portal/entrenamientos.types';
@@ -52,7 +51,6 @@ const EMPTY_FORM: TrainingWizardValues = {
   entrenador_id: '',
   duracion_minutos: '',
   cupo_maximo: '',
-  visibilidad: 'privado' as TrainingVisibility,
   tipo: 'unico',
   fecha_inicio: '',
   fecha_fin: '',
@@ -255,10 +253,6 @@ export function useEntrenamientoForm() {
 
     if (!values.tipo.trim()) {
       nextFieldErrors.tipo = 'Debes seleccionar el tipo de entrenamiento.';
-    }
-
-    if (values.visibilidad !== 'publico' && values.visibilidad !== 'privado') {
-      nextFieldErrors.visibilidad = 'La visibilidad debe ser "publico" o "privado".';
     }
 
     if (values.duracion_minutos.trim()) {
@@ -551,7 +545,6 @@ export function useEntrenamientoForm() {
       entrenador_id: formValues.entrenador_id,
       duracion_minutos: formValues.duracion_minutos,
       cupo_maximo: formValues.cupo_maximo,
-      visibilidad: formValues.visibilidad,
       categorias: {
         enabled: categoriasForm.enabled,
         items: Object.entries(categoriasForm.items).map(([nivel_id, cupos_asignados]) => ({
@@ -595,7 +588,6 @@ export function useEntrenamientoForm() {
       entrenador_id: contenido.entrenador_id,
       duracion_minutos: contenido.duracion_minutos,
       cupo_maximo: contenido.cupo_maximo,
-      visibilidad: contenido.visibilidad,
     }));
 
     // formulario_id is intentionally never restored from a saved template (US-0086) —
@@ -620,7 +612,6 @@ export function useEntrenamientoForm() {
         'entrenador_id',
         'duracion_minutos',
         'cupo_maximo',
-        'visibilidad',
       ];
       overwrittenFields.forEach((field) => delete next[field]);
       return next;

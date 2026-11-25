@@ -1,178 +1,84 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import Link from 'next/link';
+import { GritAvatar, GritCard, GritIcon, GritMediaCard, GritTag } from '@/components/ui';
+import { useTenantBrandingImages } from '@/hooks/portal/tenant/useTenantBrandingImages';
 import type { TenantIdentityPayload } from '@/types/portal/tenant.types';
-import { createClient } from '@/services/supabase/client';
-import { storageService } from '@/services/supabase/portal/storage.service';
-import { buildOrgLogoPath, buildOrgBannerPath } from '@/types/portal/storage.types';
 
 type TenantIdentityCardProps = {
   identity: TenantIdentityPayload;
-  actionLabel?: string;
-  actionHref?: string;
-  onActionClick?: () => void;
-  actionVariant?: 'access' | 'subscribe';
-  customAction?: React.ReactNode;
-  /** Rendered under the primary action / customAction (e.g. "Ver planes" — US-0093). */
-  secondaryAction?: React.ReactNode;
+  /** `tenants.publico`; undefined hides the tag. */
+  isPublic?: boolean;
+  /** Number of members; null shows "—". */
+  miembros: number | null;
 };
 
-function formatDate(dateValue: string | null): string {
-  if (!dateValue) return '—';
+const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
+/** "Mar 2026" in Bogotá time, or "—". */
+export function formatFundada(dateValue: string | null): string {
+  if (!dateValue) return '—';
   const parsed = new Date(dateValue);
   if (Number.isNaN(parsed.getTime())) return '—';
-
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    year: 'numeric',
-  }).format(parsed);
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota', year: 'numeric', month: 'numeric' }).formatToParts(parsed);
+  const month = Number(parts.find((p) => p.type === 'month')?.value ?? '1');
+  const year = parts.find((p) => p.type === 'year')?.value ?? '';
+  return `${MONTHS[month - 1]} ${year}`;
 }
 
-function display(value: string | null): string {
-  return value && value.trim().length > 0 ? value : '—';
+function MetaTile({ icon, label, value }: { icon: string; label: string; value: string }) {
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1 rounded-[14px] border border-white/[0.06] bg-white/[0.025] px-3 py-2.5">
+      <dt className="flex items-center gap-1.5 font-grit-body text-[9px] font-semibold uppercase tracking-[1.2px] text-grit-muted">
+        <GritIcon name={icon} size={12} className="text-grit-cyan" />
+        {label}
+      </dt>
+      <dd className="truncate font-grit-body text-[13px] font-semibold text-grit-text">{value}</dd>
+    </div>
+  );
 }
 
-export function TenantIdentityCard({
-  identity,
-  actionLabel,
-  actionHref,
-  onActionClick,
-  actionVariant = 'access',
-  customAction,
-  secondaryAction,
-}: TenantIdentityCardProps) {
-  const [logoSrc, setLogoSrc] = useState(identity.logoUrl);
-  const [logoFailed, setLogoFailed] = useState(false);
-  const [bannerSrc, setBannerSrc] = useState(identity.bannerUrl);
-  const [bannerFailed, setBannerFailed] = useState(false);
-
-  const handleLogoError = useCallback(async () => {
-    if (logoFailed) return; // Only try once
-    setLogoFailed(true);
-
-    try {
-      const supabase = createClient();
-      // Try common extensions
-      for (const ext of ['png', 'jpg', 'webp']) {
-        const path = buildOrgLogoPath(identity.tenantId, ext);
-        try {
-          const url = await storageService.getSignedUrl(supabase, path);
-          setLogoSrc(url);
-          return;
-        } catch {
-          // Try next extension
-        }
-      }
-    } catch {
-      // All attempts failed — fallback to shield icon
-      setLogoSrc(null);
-    }
-  }, [identity.tenantId, logoFailed]);
-
-  const handleBannerError = useCallback(async () => {
-    if (bannerFailed) return;
-    setBannerFailed(true);
-
-    try {
-      const supabase = createClient();
-      for (const ext of ['png', 'jpg', 'webp']) {
-        const path = buildOrgBannerPath(identity.tenantId, ext);
-        try {
-          const url = await storageService.getSignedUrl(supabase, path);
-          setBannerSrc(url);
-          return;
-        } catch {
-          // Try next extension
-        }
-      }
-    } catch {
-      // All attempts failed — fallback to gradient
-    }
-    setBannerSrc(null);
-  }, [identity.tenantId, bannerFailed]);
+/** Organization identity card (`aYwNn` `MhFv0`): banner cover, logo, name, visibility tag and meta tiles. */
+export function TenantIdentityCard({ identity, isPublic, miembros }: TenantIdentityCardProps) {
+  const { logoSrc, bannerSrc, onLogoError, onBannerError } = useTenantBrandingImages(identity);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-portal-border bg-navy-medium/95 shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
-      <div className="relative h-24 bg-gradient-to-r from-primary/45 to-turquoise/35">
-        {bannerSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={bannerSrc}
-            alt={`${identity.name} banner`}
-            className="absolute inset-0 h-full w-full object-cover"
-            onError={() => void handleBannerError()}
+    <GritCard variant="card" padding="none" className="flex flex-col overflow-hidden" as="article">
+      <GritMediaCard
+        image={bannerSrc}
+        onImageError={onBannerError}
+        placeholderIcon="panorama"
+        radius="none"
+        stroke="none"
+        className="h-[104px] shrink-0"
+      />
+      <div className="flex flex-1 flex-col gap-3.5 px-[22px] pb-5">
+        <div className="flex items-end gap-3.5">
+          <GritAvatar
+            name={identity.name}
+            src={logoSrc}
+            onImageError={onLogoError}
+            tone="org"
+            shape="rounded"
+            size={56}
+            className="-mt-7 shadow-[0_10px_24px_rgba(0,0,0,0.5)]"
           />
-        ) : null}
-        <div className="absolute left-4 top-2">
-          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-portal-border bg-navy-soft shadow-lg">
-            {logoSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={logoSrc}
-                alt={`${identity.name} logo`}
-                className="h-full w-full object-cover"
-                onError={() => void handleLogoError()}
-              />
-            ) : (
-              <span className="material-symbols-outlined text-2xl text-slate-400" aria-hidden="true">
-                shield
-              </span>
+          <div className="flex min-w-0 flex-col gap-1.5 pt-2">
+            <h2 className="truncate font-grit-title text-2xl font-medium leading-tight text-grit-text">{identity.name}</h2>
+            {isPublic !== undefined && (
+              <GritTag tone={isPublic ? 'accent' : 'neutral'} icon={isPublic ? 'language' : 'lock'} className="self-start">
+                {isPublic ? 'Pública' : 'Privada'}
+              </GritTag>
             )}
           </div>
         </div>
-      </div>
-
-      <div className="space-y-4 px-4 pb-5 pt-3">
-        <div>
-          <h3 className="text-[26px] leading-tight font-bold text-slate-100">{display(identity.name)}</h3>
-          <span className="mt-2 inline-block rounded-full bg-turquoise/15 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-turquoise">
-            {display(identity.description)}
-          </span>
-        </div>
-
-        <dl className="space-y-2.5">
-          <div className="flex items-center gap-3 rounded-lg bg-navy-deep/55 px-3 py-2.5">
-            <span className="material-symbols-outlined rounded-full bg-primary/20 p-2 text-[18px] text-primary" aria-hidden="true">
-              calendar_month
-            </span>
-            <div>
-              <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">Founded</dt>
-              <dd className="text-sm font-medium text-slate-200">{formatDate(identity.foundedAt)}</dd>
-            </div>
-          </div>
-
-        </dl>
-
-        {customAction ?? null}
-
-        {actionLabel ? (
-          actionHref ? (
-            <Link
-              href={actionHref}
-              className="inline-flex w-full items-center justify-center rounded-lg bg-turquoise px-3 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90"
-            >
-              {actionLabel}
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={onActionClick}
-              className={[
-                'inline-flex w-full items-center justify-center rounded-lg px-3 py-2 text-sm font-semibold transition',
-                actionVariant === 'subscribe'
-                  ? 'border border-portal-border bg-navy-deep text-slate-200 hover:bg-navy-soft'
-                  : 'bg-turquoise text-navy-deep hover:bg-turquoise/90',
-              ].join(' ')}
-            >
-              {actionLabel}
-            </button>
-          )
+        {identity.description ? (
+          <p className="line-clamp-2 font-grit-body text-xs text-grit-subtext">{identity.description}</p>
         ) : null}
-
-        {secondaryAction ?? null}
+        <dl className="mt-auto flex gap-2.5">
+          <MetaTile icon="calendar_today" label="Fundada" value={formatFundada(identity.foundedAt)} />
+          <MetaTile icon="group" label="Miembros" value={miembros === null ? '—' : String(miembros)} />
+        </dl>
       </div>
-    </article>
+    </GritCard>
   );
 }

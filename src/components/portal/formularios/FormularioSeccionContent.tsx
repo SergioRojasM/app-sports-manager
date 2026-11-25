@@ -11,27 +11,49 @@ export function FormularioSeccionContent({ seccion }: FormularioSeccionContentPr
   if (seccion.seccion_tipo === 'titulo') {
     return (
       <div>
-        <h2 className="text-2xl font-semibold text-slate-100">{seccion.seccion_descripcion}</h2>
-        <hr className="mt-3 border-portal-border" />
+        <h2 className="font-grit-title text-2xl font-semibold text-grit-text">{seccion.seccion_descripcion}</h2>
+        <hr className="mt-3 border-grit-glass-border" />
       </div>
     );
   }
 
   if (seccion.seccion_tipo === 'subtitulo') {
-    return <h3 className="text-lg font-semibold text-slate-200">{seccion.seccion_descripcion}</h3>;
+    return <h3 className="font-grit-title text-lg font-semibold text-grit-text">{seccion.seccion_descripcion}</h3>;
   }
 
   if (seccion.seccion_tipo === 'texto') {
-    return <MultilineText className="text-sm leading-relaxed text-slate-400">{seccion.seccion_descripcion}</MultilineText>;
+    return <MultilineText className="text-sm leading-relaxed text-grit-subtext">{seccion.seccion_descripcion}</MultilineText>;
   }
 
-  return (
-    <FormularioCampoPreviewInput
-      campoTipo={seccion.campo_tipo ?? 'texto_corto'}
-      campoEtiqueta={seccion.campo_etiqueta ?? ''}
-      campoPlaceholder={seccion.campo_placeholder}
-      campoObligatorio={seccion.campo_obligatorio}
-      campoListaValores={seccion.campo_lista_valores}
-    />
-  );
+  if (seccion.seccion_tipo === 'separador') {
+    return <hr className="border-grit-glass-border" />;
+  }
+
+  if (seccion.seccion_tipo === 'datos') {
+    return (
+      <FormularioCampoPreviewInput
+        campoTipo={seccion.campo_tipo ?? 'texto_corto'}
+        campoEtiqueta={seccion.campo_etiqueta ?? ''}
+        campoPlaceholder={seccion.campo_placeholder}
+        campoObligatorio={seccion.campo_obligatorio}
+        campoListaValores={seccion.campo_lista_valores}
+      />
+    );
+  }
+
+  if (seccion.seccion_tipo === 'seccion') {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="material-symbols-outlined text-grit-cyan text-lg" aria-hidden="true">dashboard_customize</span>
+        <div>
+          <h3 className="font-grit-title text-base font-bold text-grit-text">{seccion.seccion_descripcion || 'Sección sin título'}</h3>
+          {seccion.seccion_subtitulo ? <p className="text-xs text-grit-subtext">{seccion.seccion_subtitulo}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
+  // Every 'encabezado_*' row is rendered exclusively by FormularioHeaderEditor and never reaches
+  // this generic per-row renderer in normal operation.
+  return null;
 }

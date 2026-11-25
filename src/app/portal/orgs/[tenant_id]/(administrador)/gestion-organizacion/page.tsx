@@ -1,6 +1,4 @@
-import { TenantInfoCards } from '@/components/portal/tenant/TenantInfoCards';
-import { TenantPaymentMethodsCard } from '@/components/portal/tenant/TenantPaymentMethodsCard';
-import { TenantReglasSuspensionCard } from '@/components/portal/tenant/TenantReglasSuspensionCard';
+import { GestionOrganizacionPage } from '@/components/portal/tenant/GestionOrganizacionPage';
 
 type GestionOrganizacionTenantPageProps = {
   params: Promise<{ tenant_id: string }>;
@@ -11,20 +9,5 @@ export default async function GestionOrganizacionTenantPage({
 }: GestionOrganizacionTenantPageProps) {
   const { tenant_id: tenantId } = await params;
 
-  return (
-    <section className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold text-slate-100">Organization Management</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Review and update your organization identity, contact channels, and context information.
-        </p>
-      </header>
-
-      <TenantInfoCards tenantId={tenantId} />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <TenantPaymentMethodsCard tenantId={tenantId} />
-        <TenantReglasSuspensionCard tenantId={tenantId} />
-      </div>
-    </section>
-  );
+  return <GestionOrganizacionPage tenantId={tenantId} />;
 }

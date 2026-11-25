@@ -1,6 +1,7 @@
 import { createClient } from '@/services/supabase/client';
 import {
   FormularioServiceError,
+  FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES,
   type FormularioPlantilla,
   type FormularioPlantillaConSecciones,
   type FormularioPlantillaListItem,
@@ -12,6 +13,34 @@ import {
   type CreateSeccionInput,
   type UpdateSeccionInput,
 } from '@/types/portal/formularios.types';
+
+// -----------------------------------------------------------------------
+// Batched save (US-0108) — used by useFormularioEditor's saveAll()
+// -----------------------------------------------------------------------
+
+export type EsquemaBatchCreateItem = {
+  /** Local draft id — used to resolve `orderedClientIds` back to the newly created row's real id. */
+  clientId: string;
+  input: Omit<CreateSeccionInput, 'formulario_plantilla_id' | 'orden'>;
+};
+
+export type EsquemaBatchUpdateItem = {
+  id: string;
+  input: UpdateSeccionInput;
+};
+
+export type SaveEsquemaBatchInput = {
+  toCreate: EsquemaBatchCreateItem[];
+  toUpdate: EsquemaBatchUpdateItem[];
+  toDeleteIds: string[];
+  /** Final row order, referencing persisted ids as-is and new rows by their `clientId`. */
+  orderedClientIds: string[];
+};
+
+export type SaveEsquemaBatchResult = {
+  /** Maps each `toCreate` item's `clientId` to the id it was persisted under. */
+  idMap: Record<string, string>;
+};
 
 type PostgrestError = { code?: string; message?: string };
 
@@ -57,31 +86,89 @@ function mapFormularioError(error: PostgrestError | null): FormularioServiceErro
   return new FormularioServiceError('unknown', 'No fue posible completar la operación.');
 }
 
+const LISTA_VALORES_TIPOS = new Set<string>(FORMULARIO_TIPOS_CAMPO_CON_LISTA_VALORES);
+
 /** Builds the full conditional column set for a section, based on its `seccion_tipo`. */
 function buildSeccionColumns(input: CreateSeccionInput | (UpdateSeccionInput & { seccion_tipo: NonNullable<UpdateSeccionInput['seccion_tipo']> })) {
   if (input.seccion_tipo === 'datos') {
     return {
       seccion_tipo: input.seccion_tipo,
       seccion_descripcion: null,
+      seccion_subtitulo: null,
       campo_etiqueta: input.campo_etiqueta?.trim() ?? null,
       campo_nombre: input.campo_nombre?.trim() ?? null,
       campo_tipo: input.campo_tipo ?? null,
-      campo_lista_valores: input.campo_tipo === 'lista' ? input.campo_lista_valores?.trim() || null : null,
+      campo_lista_valores: input.campo_tipo && LISTA_VALORES_TIPOS.has(input.campo_tipo) ? input.campo_lista_valores?.trim() || null : null,
       campo_obligatorio: input.campo_obligatorio ?? false,
       campo_placeholder: input.campo_placeholder?.trim() || null,
+      columna_ancho: input.columna_ancho ?? 'completo',
+    };
+  }
+
+  if (input.seccion_tipo === 'encabezado_badges') {
+    return {
+      seccion_tipo: input.seccion_tipo,
+      seccion_descripcion: null,
+      seccion_subtitulo: null,
+      campo_etiqueta: null,
+      campo_nombre: null,
+      campo_tipo: null,
+      campo_lista_valores: input.campo_lista_valores?.trim() || null,
+      campo_obligatorio: false,
+      campo_placeholder: null,
+      columna_ancho: 'completo' as const,
     };
   }
 
   return {
     seccion_tipo: input.seccion_tipo,
     seccion_descripcion: input.seccion_descripcion?.trim() || null,
+    seccion_subtitulo: input.seccion_tipo === 'seccion' ? input.seccion_subtitulo?.trim() || null : null,
     campo_etiqueta: null,
     campo_nombre: null,
     campo_tipo: null,
     campo_lista_valores: null,
     campo_obligatorio: false,
     campo_placeholder: null,
+    columna_ancho: 'completo' as const,
   };
+}
+
+/**
+ * The 4 fixed header rows (US-0108) — inserted at `orden` 0-3 for every new template, and
+ * used as the lazy-backfill draft for templates created before this change (see
+ * `useFormularioEditor.load()`).
+ */
+export function defaultHeaderSecciones(
+  plantillaId: string,
+  opts: { titulo: string; subtitulo?: string | null },
+): CreateSeccionInput[] {
+  return [
+    {
+      formulario_plantilla_id: plantillaId,
+      seccion_tipo: 'encabezado_sobretitulo',
+      seccion_descripcion: 'INSCRIPCIÓN',
+      orden: 0,
+    },
+    {
+      formulario_plantilla_id: plantillaId,
+      seccion_tipo: 'encabezado_titulo',
+      seccion_descripcion: opts.titulo,
+      orden: 1,
+    },
+    {
+      formulario_plantilla_id: plantillaId,
+      seccion_tipo: 'encabezado_subtitulo',
+      seccion_descripcion: opts.subtitulo?.trim() || opts.titulo,
+      orden: 2,
+    },
+    {
+      formulario_plantilla_id: plantillaId,
+      seccion_tipo: 'encabezado_badges',
+      campo_lista_valores: null,
+      orden: 3,
+    },
+  ];
 }
 
 export const formulariosService = {
@@ -145,7 +232,26 @@ export const formulariosService = {
       .single();
 
     if (error || !data) throw mapFormularioError(error);
-    return data as FormularioPlantilla;
+    const plantilla = data as FormularioPlantilla;
+
+    // Seed the 4 default Hero header rows (US-0108). A failure here must not roll back the
+    // already-created plantilla — the header can always be added later from the editor.
+    const headerRows = defaultHeaderSecciones(plantilla.id, {
+      titulo: plantilla.nombre,
+      subtitulo: plantilla.descripcion,
+    });
+    const { error: headerError } = await supabase.from('formulario_plantilla_esquema').insert(
+      headerRows.map((row) => ({
+        formulario_plantilla_id: row.formulario_plantilla_id,
+        orden: row.orden,
+        ...buildSeccionColumns(row),
+      })),
+    );
+    if (headerError) {
+      console.warn('No fue posible crear el encabezado por defecto de la plantilla.', headerError);
+    }
+
+    return plantilla;
   },
 
   async updatePlantilla(id: string, input: UpdatePlantillaInput): Promise<FormularioPlantilla> {
@@ -220,13 +326,15 @@ export const formulariosService = {
       if (input.campo_nombre !== undefined) payload.campo_nombre = input.campo_nombre.trim();
       if (input.campo_tipo !== undefined) {
         payload.campo_tipo = input.campo_tipo;
-        payload.campo_lista_valores = input.campo_tipo === 'lista' ? input.campo_lista_valores?.trim() || null : null;
+        payload.campo_lista_valores = LISTA_VALORES_TIPOS.has(input.campo_tipo) ? input.campo_lista_valores?.trim() || null : null;
       } else if (input.campo_lista_valores !== undefined) {
         payload.campo_lista_valores = input.campo_lista_valores?.trim() || null;
       }
       if (input.campo_obligatorio !== undefined) payload.campo_obligatorio = input.campo_obligatorio;
       if (input.campo_placeholder !== undefined) payload.campo_placeholder = input.campo_placeholder?.trim() || null;
       if (input.seccion_descripcion !== undefined) payload.seccion_descripcion = input.seccion_descripcion?.trim() || null;
+      if (input.seccion_subtitulo !== undefined) payload.seccion_subtitulo = input.seccion_subtitulo?.trim() || null;
+      if (input.columna_ancho !== undefined) payload.columna_ancho = input.columna_ancho;
     }
 
     if (input.orden !== undefined) payload.orden = input.orden;
@@ -264,6 +372,37 @@ export const formulariosService = {
 
       if (error) throw mapFormularioError(error);
     }
+  },
+
+  /**
+   * Persists every pending change to a plantilla's schema (create/update/delete/reorder) in one
+   * sequenced batch — the write side of `useFormularioEditor`'s draft/`saveAll()` model (US-0108).
+   * Idempotent by row id, so a retried call after a partial failure converges instead of
+   * double-applying: creates/updates are upserts by id, deletes are no-ops on an already-deleted
+   * id, and the final reorder pass always rewrites every row's `orden` from the full ordered list.
+   */
+  async saveEsquemaBatch(plantillaId: string, batch: SaveEsquemaBatchInput): Promise<SaveEsquemaBatchResult> {
+    const idMap: Record<string, string> = {};
+
+    for (const { clientId, input } of batch.toCreate) {
+      const created = await this.createSeccion({ formulario_plantilla_id: plantillaId, orden: 0, ...input });
+      idMap[clientId] = created.id;
+    }
+
+    for (const { id, input } of batch.toUpdate) {
+      await this.updateSeccion(id, input);
+    }
+
+    for (const id of batch.toDeleteIds) {
+      await this.deleteSeccion(id);
+    }
+
+    const resolvedOrderedIds = batch.orderedClientIds.map((cid) => idMap[cid] ?? cid);
+    if (resolvedOrderedIds.length > 0) {
+      await this.reorderSecciones(plantillaId, resolvedOrderedIds);
+    }
+
+    return { idMap };
   },
 
   // -----------------------------------------------------------------------

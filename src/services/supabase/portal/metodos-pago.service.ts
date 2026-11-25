@@ -6,7 +6,7 @@ import type {
 } from '@/types/portal/metodos-pago.types';
 
 const COLUMNS =
-  'id, tenant_id, nombre, tipo, valor, url, comentarios, activo, orden, created_at, updated_at';
+  'id, tenant_id, nombre, tipo, valor, url, comentarios, qr_url, activo, orden, created_at, updated_at';
 
 export const metodosPagoService = {
   async getMetodosPago(tenantId: string, onlyActive = false): Promise<MetodoPago[]> {
@@ -44,6 +44,7 @@ export const metodosPagoService = {
         valor: payload.valor?.trim() || null,
         url: payload.url?.trim() || null,
         comentarios: payload.comentarios?.trim() || null,
+        qr_url: payload.qr_url ?? null,
         activo: payload.activo ?? true,
         orden: payload.orden ?? 0,
       })
@@ -66,6 +67,7 @@ export const metodosPagoService = {
     if (payload.valor !== undefined) updates.valor = payload.valor?.trim() || null;
     if (payload.url !== undefined) updates.url = payload.url?.trim() || null;
     if (payload.comentarios !== undefined) updates.comentarios = payload.comentarios?.trim() || null;
+    if (payload.qr_url !== undefined) updates.qr_url = payload.qr_url;
     if (payload.activo !== undefined) updates.activo = payload.activo;
     if (payload.orden !== undefined) updates.orden = payload.orden;
 

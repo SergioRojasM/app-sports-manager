@@ -1,58 +1,59 @@
 import { createClient } from '@/services/supabase/client';
 import {
   SuscripcionServiceError,
-  type Suscripcion,
-  type SuscripcionInsert,
+  type ComprarSuscripcionPayload,
+  type ComprarSuscripcionResultado,
   type SuscripcionServicio,
 } from '@/types/portal/suscripciones.types';
 
+function mapCompraError(message: string | undefined): SuscripcionServiceError {
+  const text = message ?? '';
+  if (text.includes('PLAN_NO_DISPONIBLE') || text.includes('SUBTIPO_NO_DISPONIBLE')) {
+    return new SuscripcionServiceError(
+      'plan_unavailable',
+      'Este plan ya no está disponible. Actualiza la lista e inténtalo nuevamente.',
+    );
+  }
+  if (text.includes('SUSCRIPCION_PENDIENTE_EXISTENTE')) {
+    return new SuscripcionServiceError('pending_exists', 'Ya tienes una solicitud pendiente para este plan.');
+  }
+  if (text.includes('METODO_PAGO_INVALIDO')) {
+    return new SuscripcionServiceError(
+      'invalid_payment_method',
+      'El método de pago seleccionado ya no está disponible. Elige otro.',
+    );
+  }
+  if (text.includes('COMPROBANTE_INVALIDO')) {
+    return new SuscripcionServiceError('invalid_proof', 'No se pudo adjuntar el comprobante. Inténtalo nuevamente.');
+  }
+  return new SuscripcionServiceError('unknown', 'No fue posible crear la suscripción.');
+}
+
 export const suscripcionesService = {
-  async createSuscripcion(payload: SuscripcionInsert): Promise<Suscripcion> {
+  /**
+   * Buys a plan through the `comprar_suscripcion` RPC (US-0134): subscription, service units and
+   * payment are created in one transaction, with the amount and the athlete set by the server.
+   * The proof, if any, must already be uploaded to `comprobantePath`.
+   */
+  async comprarSuscripcion(payload: ComprarSuscripcionPayload): Promise<ComprarSuscripcionResultado> {
     const supabase = createClient();
 
-    const { data, error } = await supabase
-      .from('suscripciones')
-      .insert({
-        tenant_id: payload.tenant_id,
-        atleta_id: payload.atleta_id,
-        plan_id: payload.plan_id,
-        plan_tipo_id: payload.plan_tipo_id ?? null,
-        comentarios: payload.comentarios,
-        estado: payload.estado,
-      })
-      .select(
-        'id, tenant_id, atleta_id, plan_id, plan_tipo_id, fecha_inicio, fecha_fin, comentarios, estado, created_at',
-      )
-      .single();
+    const { data, error } = await supabase.rpc('comprar_suscripcion', {
+      p_tenant_id: payload.tenantId,
+      p_plan_id: payload.planId,
+      p_plan_tipo_id: payload.planTipoId,
+      p_metodo_pago_id: payload.metodoPagoId,
+      p_comentarios: payload.comentarios,
+      p_pago_id: payload.pagoId,
+      p_comprobante_path: payload.comprobantePath,
+    });
 
     if (error || !data) {
-      // RLS (`suscripciones_insert_own`) rejects plans that are inactive, private,
-      // or no longer public — the catalog the user is looking at is stale.
-      if (error?.code === '42501') {
-        throw new SuscripcionServiceError(
-          'plan_unavailable',
-          'Este plan ya no está disponible. Actualiza la lista e inténtalo nuevamente.',
-        );
-      }
-
-      throw new SuscripcionServiceError(
-        'unknown',
-        error?.message ?? 'No fue posible crear la suscripción.',
-      );
+      throw mapCompraError(error?.message);
     }
 
-    if (payload.plan_tipo_id) {
-      const { error: rpcError } = await supabase.rpc('populate_suscripcion_servicios', {
-        p_suscripcion_id: data.id,
-        p_plan_tipo_id: payload.plan_tipo_id,
-      });
-
-      if (rpcError) {
-        throw new Error(rpcError.message ?? 'No fue posible registrar las unidades por servicio.');
-      }
-    }
-
-    return data as Suscripcion;
+    const row = data as { suscripcion_id: string; pago_id: string };
+    return { suscripcionId: row.suscripcion_id, pagoId: row.pago_id };
   },
 
   async hasPendingSuscripcion(atletaId: string, planId: string): Promise<boolean> {

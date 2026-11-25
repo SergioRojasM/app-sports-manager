@@ -16,7 +16,7 @@ const ROW_1: StatCardDef[] = [
   { label: 'Miembros Activos', getValue: (s) => s.miembrosActivos, icon: 'check_circle', color: 'text-emerald-400' },
   { label: 'Miembros en Mora', getValue: (s) => s.miembrosEnMora, icon: 'warning', color: 'text-amber-400' },
   { label: 'Miembros Suspendidos', getValue: (s) => s.miembrosSuspendidos, icon: 'block', color: 'text-orange-400' },
-  { label: 'Miembros Inactivos', getValue: (s) => s.miembrosInactivos, icon: 'person_off', color: 'text-slate-400' },
+  { label: 'Miembros Inactivos', getValue: (s) => s.miembrosInactivos, icon: 'person_off', color: 'text-grit-subtext' },
 ];
 
 const ROW_2: StatCardDef[] = [
@@ -27,14 +27,14 @@ const ROW_2: StatCardDef[] = [
 
 function StatCard({ card, stats }: { card: StatCardDef; stats: EquipoStats }) {
   return (
-    <div className="glass rounded-lg border border-portal-border p-5">
+    <div className="border bg-grit-glass backdrop-blur-md rounded-grit-2xl border-grit-glass-border p-5">
       <div className="flex items-center gap-3">
-        <span className={`material-symbols-outlined text-2xl ${card.color ?? 'text-turquoise'}`}>
+        <span className={`material-symbols-outlined text-2xl ${card.color ?? 'text-grit-cyan'}`}>
           {card.icon}
         </span>
         <div>
-          <p className="text-sm text-slate-400">{card.label}</p>
-          <p className="text-2xl font-bold text-slate-100">
+          <p className="text-sm text-grit-subtext">{card.label}</p>
+          <p className="text-2xl font-bold text-grit-text">
             {card.getValue(stats)}
           </p>
         </div>

@@ -2,6 +2,10 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/services/supabase/server';
 import { PortalHeader } from '@/components/portal/PortalHeader';
+import { PortalSidebar } from '@/components/portal/PortalSidebar';
+import { PortalNavigationProvider } from '@/components/portal/PortalNavigationProvider';
+import { PortalBreadcrumb } from '@/components/portal/PortalBreadcrumb';
+import { GritPageContainer } from '@/components/ui';
 import type { UserRole, PortalDisplayProfile } from '@/types/portal.types';
 import { VALID_ROLES } from '@/types/portal.types';
 
@@ -23,14 +27,13 @@ export default async function PortalLayout({
   const roleCookie = cookieStore.get('portal_role')?.value;
   const profileCookie = cookieStore.get('portal_profile')?.value;
 
-  let role: UserRole;
   let displayProfile: PortalDisplayProfile;
 
   const isRoleValid = roleCookie && VALID_ROLES.includes(roleCookie as UserRole);
 
   if (isRoleValid && profileCookie) {
-    // Happy path: read everything from cookies — no DB call
-    role = roleCookie as UserRole;
+    // Happy path: read everything from cookies — no DB call. The menu resolves the
+    // per-tenant role itself (usePortalNavigation), so the role cookie only gates entry.
     try {
       displayProfile = JSON.parse(
         Buffer.from(profileCookie, 'base64').toString('utf-8'),
@@ -43,9 +46,22 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-navy-deep text-slate-100">
-      <PortalHeader profile={displayProfile} role={role} />
-      <main className="flex-1 overflow-y-auto p-6">{children}</main>
-    </div>
+    <PortalNavigationProvider>
+      {/* Two-column shell: floating sidebar ≥1024px (16px inset, v3 US-0141), mobile drawer below it (US-0138) */}
+      <div className="grit-shell flex h-screen overflow-hidden font-grit-body lg:p-4 lg:pr-0">
+        <PortalSidebar profile={displayProfile} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <PortalHeader profile={displayProfile} />
+          <main id="portal-main" className="flex-1 overflow-y-auto">
+            {/* ≥1024px the breadcrumb lives in the topbar; below it, it is the first row of the content.
+                Page padding comes from GritPageContainer so every Portal page shares it (US-0116) */}
+            <div className="lg:hidden">
+              <PortalBreadcrumb variant="inline" />
+            </div>
+            <GritPageContainer>{children}</GritPageContainer>
+          </main>
+        </div>
+      </div>
+    </PortalNavigationProvider>
   );
 }

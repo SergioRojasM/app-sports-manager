@@ -57,9 +57,9 @@ export function SuscripcionesTable({
 
   return (
     <div className="space-y-4">
-    <div className="overflow-x-auto rounded-lg border border-portal-border">
+    <div className="overflow-x-auto rounded-grit-md border border-grit-glass-border">
       <table className="w-full text-left text-sm">
-        <thead className="glass border-b border-portal-border text-xs uppercase tracking-wider text-slate-400">
+        <thead className="border bg-grit-glass backdrop-blur-md border-b border-grit-glass-border text-xs uppercase tracking-wider text-grit-subtext">
           <tr>
             <th scope="col" className="px-2 py-3">Atleta</th>
             <th scope="col" className="px-2 py-3">Tipo</th>
@@ -72,7 +72,7 @@ export function SuscripcionesTable({
             <th scope="col" className="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-portal-border">
+        <tbody className="divide-y divide-grit-glass-border">
           {rows.map((row) => {
             const sortedServicios = [...row.servicios].sort((a, b) => {
               const aFinite = a.unidades_incluidas !== null ? 0 : 1;
@@ -89,8 +89,8 @@ export function SuscripcionesTable({
             >
               {/* ATLETA — compact with truncation */}
               <td className="max-w-[180px] px-2 py-3">
-                <div className="truncate font-medium text-slate-100" title={row.atleta_nombre || undefined}>{row.atleta_nombre || '—'}</div>
-                <div className="truncate text-xs text-slate-400" title={row.atleta_email}>{row.atleta_email}</div>
+                <div className="truncate font-medium text-grit-text" title={row.atleta_nombre || undefined}>{row.atleta_nombre || '—'}</div>
+                <div className="truncate text-xs text-grit-subtext" title={row.atleta_email}>{row.atleta_email}</div>
               </td>
               {/* TIPO — membership badge */}
               <td className="px-2 py-3">
@@ -98,7 +98,7 @@ export function SuscripcionesTable({
               </td>
               {/* PLAN — compact with truncation */}
               <td className="max-w-[110px] px-2 py-3">
-                <span className="block truncate text-slate-300" title={row.plan_nombre}>{row.plan_nombre}</span>
+                <span className="block truncate text-grit-subtext" title={row.plan_nombre}>{row.plan_nombre}</span>
               </td>
               <td className="px-4 py-3">
                 <div className="flex flex-col gap-1">
@@ -108,17 +108,17 @@ export function SuscripcionesTable({
               </td>
               {/* INICIO/FIN — both text-xs, different colors */}
               <td className="px-4 py-3">
-                <div className="text-xs text-slate-300">{formatDate(row.fecha_inicio)}</div>
-                <div className="text-xs text-slate-400">{formatDate(row.fecha_fin)}</div>
+                <div className="text-xs text-grit-subtext">{formatDate(row.fecha_inicio)}</div>
+                <div className="text-xs text-grit-subtext">{formatDate(row.fecha_fin)}</div>
               </td>
               {/* SERVICIOS — wider, max 2, finite-unit first, +X more button */}
               <td className="min-w-[180px] px-4 py-3 text-xs">
                 {visibleServicios.length === 0 ? (
-                  <span className="text-slate-400">—</span>
+                  <span className="text-grit-subtext">—</span>
                 ) : (
                   <ul className="list-none m-0 space-y-0.5 p-0">
                     {visibleServicios.map((srv) => (
-                      <li key={srv.servicio_id} className="text-slate-300">
+                      <li key={srv.servicio_id} className="text-grit-subtext">
                         {srv.servicio_nombre}: {srv.unidades_restantes ?? '∞'}/{srv.unidades_incluidas ?? '∞'}
                       </li>
                     ))}
@@ -127,7 +127,7 @@ export function SuscripcionesTable({
                         <button
                           type="button"
                           onClick={() => onVerServicios(row)}
-                          className="text-turquoise/70 hover:text-turquoise transition-colors underline-offset-2 hover:underline"
+                          className="text-grit-cyan/70 hover:text-grit-cyan transition-colors underline-offset-2 hover:underline"
                         >
                           +{extraCount} más
                         </button>
@@ -136,20 +136,20 @@ export function SuscripcionesTable({
                   </ul>
                 )}
               </td>
-              <td className="px-4 py-3 text-slate-300">
+              <td className="px-4 py-3 text-grit-subtext">
                 {row.pago ? `$${row.pago.monto.toLocaleString()}` : '—'}
               </td>
               {/* VALIDACIÓN — both names text-xs */}
               <td className="px-4 py-3">
                 <div className="flex flex-col gap-0.5">
                   {row.validado_por_nombre && (
-                    <span className="text-xs text-slate-400" title="Validó suscripción">{row.validado_por_nombre}</span>
+                    <span className="text-xs text-grit-subtext" title="Validó suscripción">{row.validado_por_nombre}</span>
                   )}
                   {row.pago?.validado_por_nombre && (
-                    <span className="text-xs text-slate-400" title="Validó pago">{row.pago.validado_por_nombre}</span>
+                    <span className="text-xs text-grit-subtext" title="Validó pago">{row.pago.validado_por_nombre}</span>
                   )}
                   {!row.validado_por_nombre && !row.pago?.validado_por_nombre && (
-                    <span className="text-xs text-slate-500">—</span>
+                    <span className="text-xs text-grit-muted">—</span>
                   )}
                 </div>
               </td>
@@ -165,7 +165,7 @@ export function SuscripcionesTable({
                       onClick={() => onVerDetallePago(row)}
                       title="Ver pago"
                       aria-label={`Ver pago de ${row.atleta_nombre}`}
-                      className="rounded p-1 text-slate-300 transition-colors hover:bg-slate-700/40"
+                      className="rounded p-1 text-grit-subtext transition-colors hover:bg-grit-cyan/10"
                     >
                       <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                         <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h9A1.5 1.5 0 0 1 14 4.5v7A1.5 1.5 0 0 1 12.5 13h-9A1.5 1.5 0 0 1 2 11.5v-7Z"/>
@@ -180,7 +180,7 @@ export function SuscripcionesTable({
                       onClick={() => onValidarSuscripcion(row)}
                       title="Cancelar suscripción"
                       aria-label={`Cancelar suscripción de ${row.atleta_nombre}`}
-                      className="rounded p-1 text-rose-300 transition-colors hover:bg-rose-900/40"
+                      className="rounded p-1 text-grit-danger transition-colors hover:bg-grit-danger/10"
                     >
                       <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                         <circle cx="8" cy="8" r="6"/>
@@ -206,7 +206,7 @@ export function SuscripcionesTable({
                     onClick={() => onEliminar(row)}
                     title="Eliminar"
                     aria-label={`Eliminar suscripción de ${row.atleta_nombre}`}
-                    className="rounded p-1 text-rose-400 transition-colors hover:bg-rose-900/40"
+                    className="rounded p-1 text-grit-danger transition-colors hover:bg-grit-danger/10"
                   >
                     <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                       <path d="M2.5 4.5h11M6 4.5V3h4v1.5M5.5 4.5v8a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-8M7 7v4M9 7v4"/>
@@ -251,7 +251,7 @@ export function SuscripcionesTable({
 
     {/* Pagination bar */}
     <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-grit-subtext">
         {totalFiltered > 0
           ? `Mostrando ${start}–${end} de ${totalFiltered} suscripciones`
           : 'Sin resultados'}
@@ -259,14 +259,14 @@ export function SuscripcionesTable({
 
       <div className="flex items-center gap-3">
         {/* Page size selector */}
-        <label className="flex items-center gap-1.5 text-xs text-slate-400">
+        <label className="flex items-center gap-1.5 text-xs text-grit-subtext">
           <span>Por página:</span>
           <select
             value={pageSize}
             onChange={(e) =>
               onPageSizeChange(Number(e.target.value) as 20 | 50 | 100)
             }
-            className="rounded border border-portal-border bg-navy-deep px-2 py-1 text-xs text-slate-200 outline-none focus:border-turquoise/50"
+            className="rounded border border-grit-glass-border bg-grit-bg px-2 py-1 text-xs text-grit-text outline-none focus:border-grit-cyan/50"
           >
             {PAGE_SIZE_OPTIONS.map((opt) => (
               <option key={opt} value={opt}>
@@ -282,7 +282,7 @@ export function SuscripcionesTable({
             type="button"
             disabled={currentPage <= 1}
             onClick={() => onPageChange(currentPage - 1)}
-            className="rounded border border-portal-border px-2.5 py-1 text-xs text-slate-300 transition-colors hover:bg-white/5 disabled:pointer-events-none disabled:opacity-40"
+            className="rounded border border-grit-glass-border px-2.5 py-1 text-xs text-grit-subtext transition-colors hover:bg-white/5 disabled:pointer-events-none disabled:opacity-40"
           >
             Anterior
           </button>
@@ -290,7 +290,7 @@ export function SuscripcionesTable({
             type="button"
             disabled={currentPage >= totalPages}
             onClick={() => onPageChange(currentPage + 1)}
-            className="rounded border border-portal-border px-2.5 py-1 text-xs text-slate-300 transition-colors hover:bg-white/5 disabled:pointer-events-none disabled:opacity-40"
+            className="rounded border border-grit-glass-border px-2.5 py-1 text-xs text-grit-subtext transition-colors hover:bg-white/5 disabled:pointer-events-none disabled:opacity-40"
           >
             Siguiente
           </button>

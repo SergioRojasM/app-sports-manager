@@ -31,6 +31,23 @@ function mapPostgrestError(error: { code?: string; constraint?: string } | null)
 }
 
 export const nivelDisciplinaService = {
+  /** Every level of the tenant (all disciplines), for the "N niveles" meta of the disciplines list. */
+  async listNivelesByTenant(tenantId: string): Promise<NivelDisciplina[]> {
+    const supabase = createClient();
+
+    const { data, error } = await supabase
+      .from('nivel_disciplina')
+      .select('id, tenant_id, disciplina_id, nombre, orden, activo, created_at')
+      .eq('tenant_id', tenantId)
+      .order('orden', { ascending: true });
+
+    if (error) {
+      throw mapPostgrestError(error);
+    }
+
+    return (data ?? []) as NivelDisciplina[];
+  },
+
   async getNivelesDisciplina(tenantId: string, disciplinaId: string): Promise<NivelDisciplina[]> {
     const supabase = createClient();
 

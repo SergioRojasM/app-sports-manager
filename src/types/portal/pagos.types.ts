@@ -16,12 +16,3 @@ export type Pago = {
   motivo_rechazo: string | null;
   created_at: string;
 };
-
-export type PagoInsert = {
-  tenant_id: string;
-  suscripcion_id: string;
-  monto: number;
-  comprobante_path: null;
-  estado: 'pendiente';
-  metodo_pago_id?: string | null;
-};

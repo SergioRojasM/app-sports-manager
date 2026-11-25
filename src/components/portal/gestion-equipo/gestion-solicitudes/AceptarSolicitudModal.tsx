@@ -47,25 +47,25 @@ export function AceptarSolicitudModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true">
-      <div className="w-full max-w-md rounded-lg border border-portal-border bg-navy-medium p-6 shadow-xl">
-        <h2 className="text-lg font-semibold text-slate-100">Aceptar solicitud</h2>
-        <p className="mt-1 text-sm text-slate-400">
-          Asigna un rol a <span className="font-medium text-slate-200">{solicitud.nombre} {solicitud.apellido}</span> para confirmar su ingreso.
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-grit-bg/70 backdrop-blur-sm" role="dialog" aria-modal="true">
+      <div className="w-full max-w-md rounded-grit-2xl border border-grit-glass-border bg-grit-card p-6 shadow-xl">
+        <h2 className="font-grit-title text-lg font-semibold text-grit-text">Aceptar solicitud</h2>
+        <p className="mt-1 text-sm text-grit-subtext">
+          Asigna un rol a <span className="font-medium text-grit-text">{solicitud.nombre} {solicitud.apellido}</span> para confirmar su ingreso.
         </p>
 
         <div className="mt-4">
-          <label htmlFor="rol-select" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <label htmlFor="rol-select" className="mb-1 block text-xs font-semibold uppercase tracking-wider text-grit-subtext">
             Rol
           </label>
           {loadingRoles ? (
-            <p className="text-sm text-slate-400">Cargando roles...</p>
+            <p className="text-sm text-grit-subtext">Cargando roles...</p>
           ) : (
             <select
               id="rol-select"
               value={selectedRolId}
               onChange={(e) => setSelectedRolId(e.target.value)}
-              className="w-full rounded-md border border-portal-border bg-navy-deep px-3 py-2 text-sm text-slate-200 focus:border-primary focus:outline-none"
+              className="w-full rounded-md border border-grit-glass-border bg-grit-bg px-3 py-2 text-sm text-grit-text focus:border-grit-cyan focus:outline-none"
             >
               <option value="">Seleccionar rol</option>
               {roles.map((rol) => (
@@ -81,7 +81,7 @@ export function AceptarSolicitudModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-portal-border px-3 py-2 text-sm font-semibold text-slate-300 hover:bg-navy-soft"
+            className="rounded-md border border-grit-glass-border px-3 py-2 text-sm font-semibold text-grit-subtext hover:bg-grit-cyan/10"
           >
             Cancelar
           </button>
@@ -89,7 +89,7 @@ export function AceptarSolicitudModal({
             type="button"
             disabled={!selectedRolId}
             onClick={() => onConfirm(solicitud, selectedRolId)}
-            className="rounded-md bg-turquoise px-3 py-2 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-grit-cyan px-3 py-2 text-sm font-semibold text-grit-bg transition hover:bg-grit-cyan/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Confirmar
           </button>

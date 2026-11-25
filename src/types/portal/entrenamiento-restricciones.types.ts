@@ -101,6 +101,8 @@ export type BookingRejection = {
   message: string;
   /** Missing/exhausted service's name, set only for SERVICIO_REQUERIDO/UNIDADES_AGOTADAS (US-0101). */
   servicioNombre?: string;
+  /** True when the rejection is solved by acquiring a plan — the rejection modal then offers the plans page (US-0127). */
+  ofrecerPlan?: boolean;
 };
 
 export type BookingResult = { ok: true } | BookingRejection;

@@ -1,89 +1,102 @@
-'use client';
-
-import { MultilineText } from '@/components/ui';
+import {
+  GritCard,
+  GritIconButton,
+  GritIconTile,
+  GritSwitch,
+  cx,
+  gritTableCellClass,
+  gritTableHeadCellClass,
+  gritTableHeadClass,
+  gritTableRowClass,
+} from '@/components/ui';
+import { planesLabel } from '@/lib/portal/admin-catalogo.utils';
 import type { Servicio } from '@/types/portal/servicios.types';
 
 type ServiciosTableProps = {
   rows: Servicio[];
+  /** Distinct plans per service id; null = unknown ("—"). */
+  planCounts: Record<string, number> | null;
+  pendingIds: ReadonlySet<string>;
+  onToggle: (servicio: Servicio, activo: boolean) => void;
   onEdit: (servicio: Servicio) => void;
   onDelete: (servicio: Servicio) => void;
 };
 
-function ActiveBadge({ activo }: { activo: boolean }) {
-  return activo ? (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-900/40 px-2 py-0.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/40">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-      Activo
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-800/60 px-2 py-0.5 text-xs font-semibold text-slate-400 ring-1 ring-slate-600/40">
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
-      Inactivo
-    </span>
-  );
-}
-
-export function ServiciosTable({ rows, onEdit, onDelete }: ServiciosTableProps) {
+/** Services table (`v8mqZG` `cBqMX`): SERVICIO · PLANES · ACTIVO · actions. Scrolls inside its card below md. */
+export function ServiciosTable({ rows, planCounts, pendingIds, onToggle, onEdit, onDelete }: ServiciosTableProps) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-portal-border">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-portal-border bg-navy-deep/60">
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-              Nombre
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-              Descripción
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-              Estado
-            </th>
-            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-              Acciones
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-portal-border">
-          {rows.map((servicio) => (
-            <tr
-              key={servicio.id}
-              className="transition-colors hover:bg-navy-deep/30"
-            >
-              <td className="px-4 py-3 font-medium text-slate-200">{servicio.nombre}</td>
-              <td className="px-4 py-3 text-slate-400">
-                {servicio.descripcion ? (
-                  <MultilineText>{servicio.descripcion}</MultilineText>
-                ) : (
-                  <span className="italic text-slate-600">Sin descripción</span>
-                )}
-              </td>
-              <td className="px-4 py-3">
-                <ActiveBadge activo={servicio.activo} />
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onEdit(servicio)}
-                    className="rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-turquoise/50 hover:text-turquoise"
-                    aria-label={`Editar servicio ${servicio.nombre}`}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(servicio)}
-                    className="rounded-lg border border-portal-border bg-navy-deep/60 px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-rose-400/50 hover:text-rose-300"
-                    aria-label={`Eliminar servicio ${servicio.nombre}`}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </td>
+    <GritCard variant="card" padding="none" className="overflow-hidden">
+      <div className="grit-scrollbar relative overflow-x-auto">
+        <table className="w-full min-w-[620px] border-collapse">
+          <thead className={gritTableHeadClass}>
+            <tr>
+              <th scope="col" className={gritTableHeadCellClass}>
+                Servicio
+              </th>
+              <th scope="col" className={cx(gritTableHeadCellClass, 'w-[150px]')}>
+                Planes
+              </th>
+              <th scope="col" className={cx(gritTableHeadCellClass, 'w-[110px]')}>
+                Activo
+              </th>
+              <th scope="col" className={cx(gritTableHeadCellClass, 'w-[110px] text-right')}>
+                <span className="sr-only">Acciones</span>
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((servicio) => {
+              const planes = planCounts ? (planCounts[servicio.id] ?? 0) : null;
+              return (
+                <tr key={servicio.id} className={gritTableRowClass}>
+                  <td className={gritTableCellClass}>
+                    <div className="flex items-center gap-3">
+                      <GritIconTile icon="confirmation_number" size={34} tone={servicio.activo ? 'accent' : 'card'} />
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="font-semibold text-grit-text">{servicio.nombre}</span>
+                        {servicio.descripcion ? (
+                          <span className="line-clamp-2 text-[11px] text-grit-muted">{servicio.descripcion}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </td>
+                  <td className={gritTableCellClass}>
+                    {planes === null ? (
+                      <span className="text-grit-muted">—</span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] text-grit-subtext">
+                        <span
+                          className={cx(
+                            'inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[11px] font-bold',
+                            planes > 0 ? 'bg-grit-cyan/[0.12] text-grit-cyan' : 'bg-white/[0.06] text-grit-muted',
+                          )}
+                        >
+                          {planes}
+                        </span>
+                        {planesLabel(planes)}
+                      </span>
+                    )}
+                  </td>
+                  <td className={gritTableCellClass}>
+                    <GritSwitch
+                      checked={servicio.activo}
+                      onChange={(next) => onToggle(servicio, next)}
+                      disabled={pendingIds.has(servicio.id)}
+                      label={`Activar ${servicio.nombre}`}
+                    />
+                  </td>
+                  <td className={cx(gritTableCellClass, 'text-right')}>
+                    <span className="inline-flex items-center gap-1">
+                      <GritIconButton icon="edit" label={`Editar ${servicio.nombre}`} size="sm" variant="ghost" onClick={() => onEdit(servicio)} />
+                      <GritIconButton icon="delete" label={`Eliminar ${servicio.nombre}`} size="sm" variant="ghost" onClick={() => onDelete(servicio)} />
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </GritCard>
   );
 }

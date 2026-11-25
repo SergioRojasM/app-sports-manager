@@ -1,43 +1,51 @@
+import { GritIcon, GritPillSelect, GritSegmented } from '@/components/ui';
+import { MAX_TIPOS_SEGMENTED, type ScenarioTipoOption } from '@/lib/portal/admin-catalogo.utils';
+
 type ScenariosHeaderFiltersProps = {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  onCreateScenario: () => void;
+  total: number;
+  tipoOptions: ScenarioTipoOption[];
+  tipoFilter: string;
+  onTipoChange: (value: string) => void;
+  summary: { cupos: number; horariosActivos: number };
 };
 
-export function ScenariosHeaderFilters({
-  searchTerm,
-  onSearchChange,
-  onCreateScenario,
-}: ScenariosHeaderFiltersProps) {
+/**
+ * Filter row of the scenarios page (`qG0T5` `gsHK1`): type filter with counts (segmented up to
+ * 5 types, a pill select above) and the "cupos totales" / "horarios activos" summary.
+ */
+export function ScenariosHeaderFilters({ total, tipoOptions, tipoFilter, onTipoChange, summary }: ScenariosHeaderFiltersProps) {
   return (
-    <div className="glass rounded-lg border border-portal-border p-5">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <label className="relative block md:max-w-xl md:flex-1">
-          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-turquoise">
-            <span className="material-symbols-outlined text-base" aria-hidden="true">
-              search
-            </span>
-          </span>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Buscar escenarios por nombre, tipo o ubicación..."
-            className="w-full rounded-xl border border-portal-border bg-navy-deep px-4 py-3 pl-11 text-sm text-slate-100 outline-none transition focus:border-turquoise focus:ring-2 focus:ring-turquoise/25"
-          />
-        </label>
-
-        <button
-          type="button"
-          onClick={onCreateScenario}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-turquoise px-4 py-2.5 text-sm font-semibold text-navy-deep transition hover:bg-turquoise/90"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            add
-          </span>
-          Crear escenario
-        </button>
-      </div>
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+      {tipoOptions.length > MAX_TIPOS_SEGMENTED ? (
+        <GritPillSelect label="Tipo de escenario" icon="filter_list" value={tipoFilter} onChange={onTipoChange}>
+          <option value="todos">Tipo: Todos ({total})</option>
+          {tipoOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label} ({option.count})
+            </option>
+          ))}
+        </GritPillSelect>
+      ) : (
+        <GritSegmented
+          ariaLabel="Tipo de escenario"
+          value={tipoFilter}
+          onChange={onTipoChange}
+          options={[
+            { value: 'todos', label: 'Todos', count: total },
+            ...tipoOptions.map((option) => ({ value: option.value, label: option.label, count: option.count })),
+          ]}
+        />
+      )}
+      <p className="flex flex-wrap items-center gap-x-[18px] gap-y-1 font-grit-body text-xs text-grit-subtext">
+        <span className="inline-flex items-center gap-2">
+          <GritIcon name="group" size={14} className="text-grit-cyan" />
+          {summary.cupos} cupos totales
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <GritIcon name="alarm" size={14} className="text-grit-cyan" />
+          {summary.horariosActivos} horarios activos
+        </span>
+      </p>
     </div>
   );
 }
